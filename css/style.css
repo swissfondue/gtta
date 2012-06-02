@@ -337,3 +337,11 @@ h3 a:hover {
 .label-low-risk {
     background-color:#53a254;
 }
+
+.label-in-progress {
+    background-color:#53a254;
+}
+
+.label-finished {
+    background-color:#000;
+}

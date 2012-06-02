@@ -36,7 +36,22 @@
                                     <a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id )); ?>"><?php echo CHtml::encode($project->name); ?></a>
                                 </td>
                                 <td class="status">
-                                    <span class="label"><?php echo $statuses[$project->status]; ?></span>
+                                    <?php
+                                        switch ($project->status)
+                                        {
+                                            case Project::STATUS_OPEN:
+                                                echo '<span class="label">' . $statuses[$project->status] . '</span>';
+                                                break;
+
+                                            case Project::STATUS_IN_PROGRESS:
+                                                echo '<span class="label label-in-progress">' . $statuses[$project->status] . '</span>';
+                                                break;
+
+                                            case Project::STATUS_FINISHED:
+                                                echo '<span class="label label-finished">' . $statuses[$project->status] . '</span>';
+                                                break;
+                                        }
+                                    ?>
                                 </td>
                                 <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                     <td class="actions">
