@@ -1,0 +1,56 @@
+<div class="pull-right">
+    <button class="btn" onclick="location.href='<?php echo $this->createUrl('check/edit') ?>';"><?php echo Yii::t('app', 'New Category'); ?></button>
+</div>
+
+<h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+
+<hr>
+
+<div class="container">
+    <div class="row">
+        <div class="span8">
+            <?php if (count($categories) > 0): ?>
+                <table class="table category-list">
+                    <tbody>
+                        <tr>
+                            <th class="name"><?php echo Yii::t('app', 'Category'); ?></th>
+                            <th class="checks"><?php echo Yii::t('app', 'Checks'); ?></th>
+                            <th class="actions">&nbsp;</th>
+                        </tr>
+                        <?php foreach ($categories as $category): ?>
+                            <tr>
+                                <td class="name">
+                                    <a href="<?php echo $this->createUrl('check/view', array( 'id' => $category->id )); ?>"><?php echo CHtml::encode($category->localizedName); ?></a>
+                                </td>
+                                <td class="checks">
+                                    <?php if ($category->checkCount): ?>
+                                        <?php echo $category->checkCount ?>
+                                    <?php else: ?>
+                                        0
+                                    <?php endif; ?>
+                                </td>
+                                <td class="actions">
+                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="category.del(<?php echo $category->id; ?>);"><i class="icon icon-remove"></i></a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+
+                <div class="pagination">
+                    <ul>
+                        <li <?php if (!$p->prevPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('check/index', array( 'page' => $p->prevPage ? $p->prevPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Previous Page'); ?>">&laquo;</a></li>
+                        <?php for ($i = 1; $i <= $p->pageCount; $i++): ?>
+                            <li <?php if ($i == $p->page) echo 'class="active"'; ?>>
+                                <a href="<?php echo $this->createUrl('check/index', array( 'page' => $i )); ?>"><?php echo $i; ?></a>
+                            </li>
+                        <?php endfor; ?>
+                        <li <?php if (!$p->nextPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('check/index', array( 'page' => $p->nextPage ? $p->nextPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Next Page'); ?>">&raquo;</a></li>
+                    </ul>
+                </div>
+            <?php else: ?>
+                <?php echo Yii::t('app', 'No categories yet.'); ?>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>

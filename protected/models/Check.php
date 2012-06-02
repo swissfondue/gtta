@@ -1,0 +1,111 @@
+<?php
+
+/**
+ * This is the model class for table "checks".
+ *
+ * The followings are the available columns in table 'checks':
+ * @property integer $id
+ * @property integer $check_category_id
+ * @property string $name
+ * @property string $background_info
+ * @property string $impact_info
+ * @property string $manual_info
+ * @property boolean $advanced
+ * @property boolean $automated
+ * @property string $script
+ * @property boolean $multiple_solutions
+ */
+class Check extends CActiveRecord
+{
+	/**
+	 * Returns the static model of the specified AR class.
+	 * @param string $className active record class name.
+	 * @return Check the static model class
+	 */
+	public static function model($className=__CLASS__)
+	{
+		return parent::model($className);
+	}
+
+	/**
+	 * @return string the associated database table name
+	 */
+	public function tableName()
+	{
+		return 'checks';
+	}
+
+	/**
+	 * @return array validation rules for model attributes.
+	 */
+	public function rules()
+	{
+		return array(
+            array( 'name, check_category_id', 'required' ),
+            array( 'name, script', 'length', 'max' => 1000 ),
+            array( 'check_category_id', 'numerical', 'integerOnly' => true ),
+            array( 'advanced, automated, multiple_solutions', 'boolean' ),
+		);
+	}
+
+    /**
+	 * @return array relational rules.
+	 */
+	public function relations()
+	{
+		return array(
+            'l10n'                 => array( self::HAS_MANY,   'CheckL10n',           'check_id' ),
+            'category'             => array( self::BELONGS_TO, 'CheckCategory',       'check_category_id' ),
+            'targetChecks'         => array( self::HAS_MANY,   'TargetCheck',         'check_id' ),
+            'targetCheckInputs'    => array( self::HAS_MANY,   'TargetCheckInput',    'check_id' ),
+            'targetCheckSolutions' => array( self::HAS_MANY,   'TargetCheckSolution', 'check_id' ),
+            'results'              => array( self::HAS_MANY,   'CheckResult',         'check_id' ),
+            'solutions'            => array( self::HAS_MANY,   'CheckSolution',       'check_id' ),
+            'inputs'               => array( self::HAS_MANY,   'CheckInput',          'check_id' ),
+		);
+	}
+
+    /**
+     * @return string localized name.
+     */
+    public function getLocalizedName()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->name ? $this->l10n[0]->name : $this->name;
+
+        return $this->name;
+    }
+
+    /**
+     * @return string localized background info.
+     */
+    public function getLocalizedBackgroundInfo()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->background_info ? $this->l10n[0]->background_info : $this->background_info;
+
+        return $this->background_info;
+    }
+
+    /**
+     * @return string localized impact info.
+     */
+    public function getLocalizedImpactInfo()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->impact_info ? $this->l10n[0]->impact_info : $this->impact_info;
+
+        return $this->impact_info;
+    }
+
+    /**
+     * @return string localized manual info.
+     */
+    public function getLocalizedManualInfo()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->manual_info ? $this->l10n[0]->manual_info : $this->manual_info;
+
+        return $this->manual_info;
+    }
+}

@@ -1,0 +1,339 @@
+body {
+    padding-bottom:20px;
+}
+
+hr {
+    margin-bottom:10px;
+    margin-top:10px;
+}
+
+.table tbody tr:hover td,
+.table tbody tr:hover th {
+    background:none;
+}
+
+.navbar-inner {
+    border-radius:0;
+    -webkit-border-radius:0;
+    -moz-border-radius:0;
+}
+
+.navbar .container {
+    width:940px;
+}
+
+.navbar .nav li {
+    margin-left:0;
+    margin-right:0;
+}
+
+.loader-image {
+    margin-top:10px;
+    margin-right:20px;
+    display:none;
+}
+
+.language-selector {
+    margin-top:10px;
+}
+
+.language-selector > ul {
+    list-style:none;
+    margin:0;
+    padding:0;
+    overflow:hidden;
+}
+
+.language-selector > ul > li {
+    display:block;
+    float:left;
+    margin-left:10px;
+    opacity:0.5;
+    filter:alpha(opacity=50);
+}
+
+.language-selector > ul > li.active {
+    opacity:1;
+    filter:alpha(opacity=100);
+}
+
+.hidden-object {
+    display:none;
+}
+
+.table > tbody > tr > th {
+    border:0;
+}
+
+.client-list .projects,
+.client-list .actions {
+    width:40px;
+    text-align:right;
+}
+
+.project-list .actions {
+    width:30px;
+    text-align:right;
+}
+
+.project-list .deadline {
+    width:80px;
+}
+
+.project-list .name .client {
+    font-size:80%;
+}
+
+.project-list .name .client a {
+    color:#909090;
+}
+
+.category-list .checks {
+    width:40px;
+    text-align:right;
+}
+
+.category-list .percent,
+.category-list .stats,
+.target-list .stats,
+.target-list .percent,
+.project-list .stats,
+.project-list .percent {
+    width:70px;
+}
+
+.category-list .stats,
+.target-list .stats,
+.project-list .stats {
+    color:#999;
+}
+
+#languages-tab a img {
+    float:left;
+    margin-top:3px;
+    margin-right:10px;
+}
+
+.nav-pills > li {
+    margin-right:10px;
+}
+
+.active-header {
+    margin:0;
+    padding:0;
+    overflow:hidden;
+}
+
+.active-header .nav-pills {
+    margin:0;
+    padding:0;
+}
+
+.active-header .buttons {
+    padding-top:3px;
+    margin-right:12px;
+}
+
+.category-list .actions,
+.check-list .actions,
+.result-list .actions,
+.solution-list .actions,
+.input-list .actions,
+.user-list .actions,
+.target-list .actions,
+.detail-list .actions {
+    width:30px;
+    text-align:right;
+}
+
+.check-list .advanced,
+.check-list .automated {
+    width:60px;
+}
+
+fieldset hr {
+    margin-top:0;
+    padding-top:0;
+}
+
+.user-list .role {
+    width:60px;
+}
+
+.info-block {
+    background-color:#f0f0f0;
+    margin:5px 0 15px 0;
+    padding:10px 10px 10px 10px;
+    border-radius:10px;
+    -webkit-border-radius:10px;
+    -moz-border-radius:10px;
+    border:1px solid #ddd;
+}
+
+.client-details td,
+.client-details th {
+    border:0;
+}
+
+.client-details th {
+    width:60px;
+    text-align:right;
+    padding:2px 10px 2px 5px;
+}
+
+.client-details td {
+    padding:2px 5px 2px 0px;
+}
+
+.client-details tbody tr:hover td,
+.client-details tbody tr:hover th {
+    background:none;
+}
+
+.client-details {
+    padding:0;
+    margin:0;
+}
+
+.project-detail {
+    margin:0;
+    border-top:1px solid #ddd;
+    padding:10px 0 10px 0;
+}
+
+.project-detail.borderless {
+    border-top:none;
+    padding-top:0;
+}
+
+.project-detail .subject {
+    font-weight:bold;
+}
+
+.detail-list .detail .content {
+    font-size:80%;
+    color:#909090;
+}
+
+h3 a {
+    color:#333;
+}
+
+h3 a:hover {
+    text-decoration:none;
+    color:#333;
+}
+
+.project-list .status {
+    width:70px;
+    text-align:right;
+    padding-top:10px;
+    white-space:nowrap;
+}
+
+.project-list .status span {
+    vertical-align:top;
+}
+
+.target-check-list .rating-label {
+    width:100px;
+    text-align:right;
+    padding-top:10px;
+}
+
+.target-check-list .status {
+    width:70px;
+    text-align:right;
+    padding-top:10px;
+    white-space:nowrap;
+}
+
+.target-check-list .status span {
+    vertical-align:top;
+}
+
+.target-check-list .content {
+    border:none;
+    padding:0 0 20px 0;
+}
+
+.target-check-list .content .check-content {
+    border-radius:10px;
+    -webkit-border-radius:10px;
+    -moz-border-radius:10px;
+    background-color:#f0f0f0;
+    padding:10px;
+}
+
+.check-form th {
+    width:140px;
+    text-align:right;
+}
+
+.check-form td {
+    padding-left:10px;
+    border:none;
+}
+
+.check-form,
+.check-form tbody tr:hover td,
+.check-form tbody tr:hover th {
+    background:none;
+}
+
+.check-form {
+    padding:0;
+    margin:0;
+}
+
+.max-width {
+    width:98%;
+}
+
+.check-form textarea {
+    font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace;
+    white-space:nowrap;
+}
+
+.check-form .results,
+.check-form .solutions,
+.check-form .rating {
+    margin:0;
+    padding:0;
+    list-style:none;
+}
+
+.check-form .results li,
+.check-form .solutions li,
+.check-form .rating li {
+    margin-bottom:10px;
+}
+
+.processing {
+    opacity:0.5;
+    filter:alpha(opacity=50);
+}
+
+.high-risk {
+    color:#d63515;
+}
+
+.med-risk {
+    color:#dace2f;
+}
+
+.low-risk {
+    color:#53a254;
+}
+
+.label-high-risk {
+    background-color:#d63515;
+}
+
+.label-med-risk {
+    background-color:#dace2f;
+}
+
+.label-low-risk {
+    background-color:#53a254;
+}
