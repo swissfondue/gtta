@@ -22,27 +22,14 @@
                     <tbody>
                         <tr>
                             <th class="name"><?php echo Yii::t('app', 'Name'); ?></th>
-                            <th class="automated"><?php echo Yii::t('app', 'Automated'); ?></th>
-                            <th class="advanced"><?php echo Yii::t('app', 'Advanced'); ?></th>
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($checks as $check): ?>
                             <tr>
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('check/editcheck', array( 'id' => $category->id, 'check' => $check->id )); ?>"><?php echo CHtml::encode($check->localizedName); ?></a>
-                                </td>
-                                <td class="automated">
                                     <?php if ($check->automated): ?>
-                                        <i class="icon-ok"></i>
-                                    <?php else: ?>
-                                        <i class="icon-minus"></i>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="advanced">
-                                    <?php if ($check->advanced): ?>
-                                        <i class="icon-ok"></i>
-                                    <?php else: ?>
-                                        <i class="icon-minus"></i>
+                                        <i class="icon-cog" title="<?php echo Yii::t('app', 'Automated'); ?>"></i>
                                     <?php endif; ?>
                                 </td>
                                 <td class="actions">

@@ -26,7 +26,7 @@
                                 <td class="name">
                                     <a href="#toggle" onclick="$('tr.content[data-id=<?php echo $check->id; ?>]').toggle();"><?php echo CHtml::encode($check->localizedName); ?></a>
                                     <?php if ($check->automated): ?>
-                                        <i class="icon-cog"></i>
+                                        <i class="icon-cog" title="<?php echo Yii::t('app', 'Automated'); ?>"></i>
                                     <?php endif; ?>
                                 </td>
                                 <td class="status">

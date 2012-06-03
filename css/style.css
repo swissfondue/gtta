@@ -146,11 +146,6 @@ hr {
     text-align:right;
 }
 
-.check-list .advanced,
-.check-list .automated {
-    width:60px;
-}
-
 fieldset hr {
     margin-top:0;
     padding-top:0;
