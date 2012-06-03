@@ -21,7 +21,10 @@
                             <th class="name"><?php echo Yii::t('app', 'Check'); ?></th>
                             <th class="status">&nbsp;</th>
                         </tr>
-                        <?php foreach ($checks as $check): ?>
+                        <?php
+                            $counter = 0;
+                            foreach ($checks as $check):
+                        ?>
                             <tr class="header" data-id="<?php echo $check->id; ?>">
                                 <td class="name">
                                     <a href="#toggle" onclick="$('tr.content[data-id=<?php echo $check->id; ?>]').toggle();"><?php echo CHtml::encode($check->localizedName); ?></a>
@@ -208,7 +211,9 @@
                                                     <td>&nbsp;</td>
                                                     <td>
                                                         <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, false);"><?php echo Yii::t('app', 'Save'); ?></button>&nbsp;
-                                                        <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, true);"><?php echo Yii::t('app', 'Save & Next'); ?></button>
+                                                        <?php if ($counter < count($checks) - 1): ?>
+                                                            <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, true);"><?php echo Yii::t('app', 'Save & Next'); ?></button>
+                                                        <?php endif; ?>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -216,7 +221,10 @@
                                     </div>
                                 </td>
                             </tr>
-                        <?php endforeach; ?>
+                        <?php
+                                $counter++;
+                            endforeach;
+                        ?>
                     </tbody>
                 </table>
             <?php else: ?>
