@@ -70,17 +70,19 @@
                     </tbody>
                 </table>
 
-                <div class="pagination">
-                    <ul>
-                        <li <?php if (!$p->prevPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id, 'page' => $p->prevPage ? $p->prevPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Previous Page'); ?>">&laquo;</a></li>
-                        <?php for ($i = 1; $i <= $p->pageCount; $i++): ?>
-                            <li <?php if ($i == $p->page) echo 'class="active"'; ?>>
-                                <a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id, 'page' => $i )); ?>"><?php echo $i; ?></a>
-                            </li>
-                        <?php endfor; ?>
-                        <li <?php if (!$p->nextPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id, 'page' => $p->nextPage ? $p->nextPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Next Page'); ?>">&raquo;</a></li>
-                    </ul>
-                </div>
+                <?php if ($p->pageCount > 1): ?>
+                    <div class="pagination">
+                        <ul>
+                            <li <?php if (!$p->prevPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id, 'page' => $p->prevPage ? $p->prevPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Previous Page'); ?>">&laquo;</a></li>
+                            <?php for ($i = 1; $i <= $p->pageCount; $i++): ?>
+                                <li <?php if ($i == $p->page) echo 'class="active"'; ?>>
+                                    <a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id, 'page' => $i )); ?>"><?php echo $i; ?></a>
+                                </li>
+                            <?php endfor; ?>
+                            <li <?php if (!$p->nextPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id, 'page' => $p->nextPage ? $p->nextPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Next Page'); ?>">&raquo;</a></li>
+                        </ul>
+                    </div>
+                <?php endif; ?>
             <?php else: ?>
                 <?php echo Yii::t('app', 'No targets yet.'); ?>
             <?php endif; ?>
