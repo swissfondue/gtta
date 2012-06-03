@@ -12,9 +12,9 @@ class ProjectController extends Controller
 	{
 		return array(
 			'checkAuth',
-            'checkUser + edit, target, edittarget',
-            'ajaxOnly + savecheck',
-            'postOnly + savecheck',
+            'checkUser + edit, target, edittarget, checks, savecheck, savecategory',
+            'ajaxOnly + savecheck, savecategory',
+            'postOnly + savecheck, savecategory',
 		);
 	}
 
@@ -926,6 +926,12 @@ class ProjectController extends Controller
                     $input->file           = '1.txt';
                     $input->save();
                 }
+
+            if ($project->status == Project::STATUS_OPEN)
+            {
+                $project->status = Project::STATUS_IN_PROGRESS;
+                $project->save();
+            }
         }
         catch (Exception $e)
         {
