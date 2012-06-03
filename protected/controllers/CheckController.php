@@ -39,7 +39,6 @@ class CheckController extends Controller
         $criteria->order  = 't.name ASC';
 
         $categories = CheckCategory::model()->with(array(
-            'checkCount',
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
                 'on'       => 'language_id = :language_id',

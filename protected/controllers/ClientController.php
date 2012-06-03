@@ -31,7 +31,7 @@ class ClientController extends Controller
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
         $criteria->order  = 't.name ASC';
 
-        $clients = Client::model()->with('projectCount')->findAll($criteria);
+        $clients = Client::model()->findAll($criteria);
 
         $clientCount = Client::model()->count($criteria);
         $paginator   = new Paginator($clientCount, $page);

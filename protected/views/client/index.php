@@ -16,7 +16,6 @@
                     <tbody>
                         <tr>
                             <th class="name"><?php echo Yii::t('app', 'Name'); ?></th>
-                            <th class="projects"><?php echo Yii::t('app', 'Projects'); ?></th>
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                 <th class="actions">&nbsp;</th>
                             <?php endif; ?>
@@ -25,13 +24,6 @@
                             <tr>
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('client/view', array( 'id' => $client->id )); ?>"><?php echo CHtml::encode($client->name); ?></a>
-                                </td>
-                                <td class="projects">
-                                    <?php if ($client->projectCount): ?>
-                                        <?php echo $client->projectCount ?>
-                                    <?php else: ?>
-                                        0
-                                    <?php endif; ?>
                                 </td>
                                 <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                     <td class="actions">

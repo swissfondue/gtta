@@ -43,9 +43,8 @@ class CheckCategory extends CActiveRecord
 	public function relations()
 	{
 		return array(
-            'l10n'       => array( self::HAS_MANY, 'CheckCategoryL10n', 'check_category_id' ),
-			'checkCount' => array( self::STAT,     'Check',             'check_category_id' ),
-            'checks'     => array( self::HAS_MANY, 'Check',             'check_category_id' ),
+            'l10n'   => array( self::HAS_MANY, 'CheckCategoryL10n', 'check_category_id' ),
+            'checks' => array( self::HAS_MANY, 'Check',             'check_category_id' ),
 		);
 	}
 

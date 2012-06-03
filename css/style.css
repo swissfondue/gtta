@@ -65,17 +65,6 @@ hr {
     border:0;
 }
 
-.client-list .projects,
-.client-list .actions {
-    width:40px;
-    text-align:right;
-}
-
-.project-list .actions {
-    width:30px;
-    text-align:right;
-}
-
 .project-list .deadline {
     width:80px;
 }
@@ -86,11 +75,6 @@ hr {
 
 .project-list .name .client a {
     color:#909090;
-}
-
-.category-list .checks {
-    width:40px;
-    text-align:right;
 }
 
 .category-list .percent,
@@ -141,7 +125,9 @@ hr {
 .input-list .actions,
 .user-list .actions,
 .target-list .actions,
-.detail-list .actions {
+.detail-list .actions,
+.client-list .actions,
+.project-list .actions {
     width:30px;
     text-align:right;
 }

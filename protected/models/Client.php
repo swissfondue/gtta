@@ -50,16 +50,6 @@ class Client extends CActiveRecord
 	}
 
     /**
-	 * @return array relational rules.
-	 */
-	public function relations()
-	{
-		return array(
-			'projectCount' => array( self::STAT, 'Project', 'client_id' ),
-		);
-	}
-
-    /**
      * Check if client has details.
      */
     public function getHasDetails()
