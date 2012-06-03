@@ -25,11 +25,11 @@ class TargetCheck extends CActiveRecord
     /**
      * Result ratings.
      */
-    const RATING_HIDDEN    = 0;
-    const RATING_INFO      = 10;
-    const RATING_LOW_RISK  = 20;
-    const RATING_MED_RISK  = 30;
-    const RATING_HIGH_RISK = 40;
+    const RATING_HIDDEN    = 'hidden';
+    const RATING_INFO      = 'info';
+    const RATING_LOW_RISK  = 'low_risk';
+    const RATING_MED_RISK  = 'med_risk';
+    const RATING_HIGH_RISK = 'high_risk';
 
 	/**
 	 * Returns the static model of the specified AR class.
