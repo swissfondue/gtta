@@ -27,7 +27,7 @@
                                 </td>
                                 <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                     <td class="actions">
-                                        <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="admin.control.del(<?php echo $client->id; ?>);"><i class="icon icon-remove"></i></a>
+                                        <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $client->id; ?>);"><i class="icon icon-remove"></i></a>
                                     </td>
                                 <?php endif; ?>
                             </tr>

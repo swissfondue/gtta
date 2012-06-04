@@ -34,7 +34,7 @@
                                     <a href="<?php echo $this->createUrl('check/editinput', array( 'id' => $category->id, 'check' => $check->id, 'input' => $input->id )); ?>"><?php echo CHtml::encode($input->localizedName); ?></a>
                                 </td>
                                 <td class="actions">
-                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="admin.control.del(<?php echo $input->id; ?>);"><i class="icon icon-remove"></i></a>
+                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $input->id; ?>);"><i class="icon icon-remove"></i></a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
