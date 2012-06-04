@@ -25,7 +25,7 @@
                             <?php endif; ?>
                         </tr>
                         <?php foreach ($projects as $project): ?>
-                            <tr>
+                            <tr data-id="<?php echo $project->id; ?>" data-control-url="<?php echo $this->createUrl('project/control'); ?>">
                                 <td class="deadline">
                                     <?php echo $project->deadline; ?>
                                 </td>
@@ -65,7 +65,7 @@
                                 </td>
                                 <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                     <td class="actions">
-                                        <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="project.del(<?php echo $project->id; ?>);"><i class="icon icon-remove"></i></a>
+                                        <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="admin.control.del(<?php echo $project->id; ?>);"><i class="icon icon-remove"></i></a>
                                     </td>
                                 <?php endif; ?>
                             </tr>

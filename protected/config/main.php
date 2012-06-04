@@ -41,10 +41,12 @@ return array(
                 'project/<id:\d+>'                                                                 => 'project/view',
                 'project/<id:\d+>/edit'                                                            => 'project/edit',
                 'project/new'                                                                      => 'project/edit',
+                'project/control'                                                                  => 'project/control',
                 'project/<id:\d+>/details/<page:\d+>'                                              => 'project/details',
                 'project/<id:\d+>/details'                                                         => 'project/details',
                 'project/<id:\d+>/detail/<detail:\d+>/edit'                                        => 'project/editdetail',
                 'project/<id:\d+>/detail/new'                                                      => 'project/editdetail',
+                'project/detail/control'                                                           => 'project/controldetail',
                 'project/<id:\d+>/target/<target:\d+>/<page:\d+>'                                  => 'project/target',
                 'project/<id:\d+>/target/<target:\d+>'                                             => 'project/target',
                 'project/<id:\d+>/target/<target:\d+>/edit'                                        => 'project/edittarget',
@@ -52,6 +54,7 @@ return array(
                 'project/<id:\d+>/target/<target:\d+>/check/<category:\d+>'                        => 'project/checks',
                 'project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/save'                   => 'project/savecategory',
                 'project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/save' => 'project/savecheck',
+                'project/target/control'                                                           => 'project/controltarget',
 
                 // clients
                 'clients/<page:\d+>'   => 'client/index',

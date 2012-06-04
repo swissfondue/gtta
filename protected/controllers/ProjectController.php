@@ -13,6 +13,7 @@ class ProjectController extends Controller
 		return array(
 			'checkAuth',
             'checkUser + edit, target, edittarget',
+            'checkAdmin + control',
             'ajaxOnly + savecheck',
             'postOnly + savecheck',
 		);
@@ -1002,6 +1003,56 @@ class ProjectController extends Controller
             $category->save();
 
             $category->updateStats();
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Control function.
+     */
+    public function actionControl()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new CHttpException(403, $errorText);
+            }
+
+            $id      = $model->id;
+            $project = Project::model()->findByPk($id);
+
+            if ($project === null)
+                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $project->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
         }
         catch (Exception $e)
         {
