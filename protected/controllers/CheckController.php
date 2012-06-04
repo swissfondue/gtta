@@ -83,7 +83,7 @@ class CheckController extends Controller
         ))->findByPk($id);
 
         if (!$category)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
@@ -306,7 +306,7 @@ class CheckController extends Controller
         ))->findByPk($id);
 
         if (!$category)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
         if ($check)
         {
@@ -322,7 +322,7 @@ class CheckController extends Controller
             ));
 
             if (!$check)
-                throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+                throw new CHttpException(404, Yii::t('app', 'Check not found.'));
         }
         else
         {
@@ -531,7 +531,7 @@ class CheckController extends Controller
         ))->findByPk($id);
 
         if (!$category)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
         $check = Check::model()->with(array(
             'l10n' => array(
@@ -545,7 +545,7 @@ class CheckController extends Controller
         ));
 
         if (!$check)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
 
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
@@ -608,7 +608,7 @@ class CheckController extends Controller
         ))->findByPk($id);
 
         if (!$category)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
         $check = Check::model()->with(array(
             'l10n' => array(
@@ -622,7 +622,7 @@ class CheckController extends Controller
         ));
 
         if (!$check)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
 
         if ($result)
         {
@@ -638,7 +638,7 @@ class CheckController extends Controller
             ));
 
             if (!$result)
-                throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+                throw new CHttpException(404, Yii::t('app', 'Result not found.'));
         }
         else
         {
@@ -810,7 +810,7 @@ class CheckController extends Controller
         ))->findByPk($id);
 
         if (!$category)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
         $check = Check::model()->with(array(
             'l10n' => array(
@@ -824,7 +824,7 @@ class CheckController extends Controller
         ));
 
         if (!$check)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
 
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
@@ -887,7 +887,7 @@ class CheckController extends Controller
         ))->findByPk($id);
 
         if (!$category)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
         $check = Check::model()->with(array(
             'l10n' => array(
@@ -901,7 +901,7 @@ class CheckController extends Controller
         ));
 
         if (!$check)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
 
         if ($solution)
         {
@@ -917,7 +917,7 @@ class CheckController extends Controller
             ));
 
             if (!$solution)
-                throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+                throw new CHttpException(404, Yii::t('app', 'Solution not found.'));
         }
         else
         {
@@ -1089,7 +1089,7 @@ class CheckController extends Controller
         ))->findByPk($id);
 
         if (!$category)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
         $check = Check::model()->with(array(
             'l10n' => array(
@@ -1103,7 +1103,7 @@ class CheckController extends Controller
         ));
 
         if (!$check)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
 
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
@@ -1166,7 +1166,7 @@ class CheckController extends Controller
         ))->findByPk($id);
 
         if (!$category)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
         $check = Check::model()->with(array(
             'l10n' => array(
@@ -1180,7 +1180,7 @@ class CheckController extends Controller
         ));
 
         if (!$check)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
 
         if ($input)
         {
@@ -1196,7 +1196,7 @@ class CheckController extends Controller
             ));
 
             if (!$input)
-                throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+                throw new CHttpException(404, Yii::t('app', 'Input not found.'));
         }
         else
         {

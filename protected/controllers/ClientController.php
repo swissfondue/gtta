@@ -58,7 +58,7 @@ class ClientController extends Controller
         $client = Client::model()->findByPk($id);
 
         if (!$client)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Client not found.'));
 
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));

@@ -125,14 +125,14 @@ class ProjectController extends Controller
         ))->findByPk($id);
 
         if (!$project)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
 
         if (User::checkRole(User::ROLE_CLIENT))
         {
             $user = User::model()->findByPk(Yii::app()->user->id);
 
             if ($user->client_id != $project->client_id)
-                throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
         }
 
         if ($page < 1)
@@ -269,19 +269,19 @@ class ProjectController extends Controller
         $page = (int) $page;
 
         if (!User::checkRole(User::ROLE_ADMIN) && !User::checkRole(User::ROLE_CLIENT))
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
         $project = Project::model()->findByPk($id);
 
         if (!$project)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
 
         if (User::checkRole(User::ROLE_CLIENT))
         {
             $user = User::model()->findByPk(Yii::app()->user->id);
 
             if ($user->client_id != $project->client_id)
-                throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
         }
 
         if ($page < 1)
@@ -322,19 +322,19 @@ class ProjectController extends Controller
         $newRecord = false;
 
         if (!User::checkRole(User::ROLE_ADMIN) && !User::checkRole(User::ROLE_CLIENT))
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
         $project = Project::model()->findByPk($id);
 
         if (!$project)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
 
         if (User::checkRole(User::ROLE_CLIENT))
         {
             $user = User::model()->findByPk(Yii::app()->user->id);
 
             if ($user->client_id != $project->client_id)
-                throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
         }
 
         if ($detail)
@@ -345,7 +345,7 @@ class ProjectController extends Controller
             ));
 
             if (!$detail)
-                throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+                throw new CHttpException(404, Yii::t('app', 'Detail not found.'));
         }
         else
         {
@@ -415,7 +415,7 @@ class ProjectController extends Controller
         $project = Project::model()->findByPk($id);
 
         if (!$project)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
 
         $target = Target::model()->findByAttributes(array(
             'id'         => $target,
@@ -423,7 +423,7 @@ class ProjectController extends Controller
         ));
 
         if (!$target)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Target not found.'));
 
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
@@ -491,7 +491,7 @@ class ProjectController extends Controller
         $project = Project::model()->findByPk($id);
 
         if (!$project)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
 
         if ($target)
         {
@@ -501,7 +501,7 @@ class ProjectController extends Controller
             ));
 
             if (!$target)
-                throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+                throw new CHttpException(404, Yii::t('app', 'Target not found.'));
         }
         else
         {
@@ -654,7 +654,7 @@ class ProjectController extends Controller
         $project = Project::model()->findByPk($id);
 
         if (!$project)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
 
         $target = Target::model()->findByAttributes(array(
             'id'         => $target,
@@ -662,7 +662,7 @@ class ProjectController extends Controller
         ));
 
         if (!$target)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Target not found.'));
 
         $language = Language::model()->findByAttributes(array(
             'code' => Yii::app()->language
@@ -687,7 +687,7 @@ class ProjectController extends Controller
         ));
 
         if (!$category)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
         $params = array(
             'check_category_id' => $category->check_category_id
