@@ -12,7 +12,19 @@ $(function () {
 
         'Category successfully deleted.'                      : '<?php echo Yii::t('app', 'Category successfully deleted.'); ?>',
         'Are you sure that you want to delete this category?' : '<?php echo Yii::t('app', 'Are you sure that you want to delete this category?'); ?>',
-        'No categories yet.'                                  : '<?php echo Yii::t('app', 'No categories yet.'); ?>'
+        'No categories yet.'                                  : '<?php echo Yii::t('app', 'No categories yet.'); ?>',
+
+        'Are you sure that you want to delete this input?' : '<?php echo Yii::t('app', 'Are you sure that you want to delete this input?'); ?>',
+        'No inputs yet.'                                   : '<?php echo Yii::t('app', 'No inputs yet.'); ?>',
+        'Input successfully deleted.'                      : '<?php echo Yii::t('app', 'Input successfully deleted.'); ?>',
+
+        'Are you sure that you want to delete this solution?' : '<?php echo Yii::t('app', 'Are you sure that you want to delete this solution?'); ?>',
+        'No solutions yet.'                                   : '<?php echo Yii::t('app', 'No solutions yet.'); ?>',
+        'Solution successfully deleted.'                      : '<?php echo Yii::t('app', 'Solution successfully deleted.'); ?>',
+
+        'Are you sure that you want to delete this result?' : '<?php echo Yii::t('app', 'Are you sure that you want to delete this result?'); ?>',
+        'No results yet.'                                   : '<?php echo Yii::t('app', 'No results yet.'); ?>',
+        'Result successfully deleted.'                      : '<?php echo Yii::t('app', 'Result successfully deleted.'); ?>'
     };
 
     system.l10nMessages = _m;

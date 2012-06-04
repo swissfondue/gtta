@@ -77,18 +77,21 @@ return array(
                 'check/<id:\d+>/check/<check:\d+>/results'                  => 'check/results',
                 'check/<id:\d+>/check/<check:\d+>/result/<result:\d+>/edit' => 'check/editresult',
                 'check/<id:\d+>/check/<check:\d+>/result/new'               => 'check/editresult',
+                'check/check/result/control'                                => 'check/controlresult',
                 
                 // check solutions
                 'check/<id:\d+>/check/<check:\d+>/solutions/<page:\d+>'         => 'check/solutions',
                 'check/<id:\d+>/check/<check:\d+>/solutions'                    => 'check/solutions',
                 'check/<id:\d+>/check/<check:\d+>/solution/<solution:\d+>/edit' => 'check/editsolution',
                 'check/<id:\d+>/check/<check:\d+>/solution/new'                 => 'check/editsolution',
+                'check/check/solution/control'                                  => 'check/controlsolution',
                 
                 // check inputs
                 'check/<id:\d+>/check/<check:\d+>/inputs/<page:\d+>'      => 'check/inputs',
                 'check/<id:\d+>/check/<check:\d+>/inputs'                 => 'check/inputs',
                 'check/<id:\d+>/check/<check:\d+>/input/<input:\d+>/edit' => 'check/editinput',
                 'check/<id:\d+>/check/<check:\d+>/input/new'              => 'check/editinput',
+                'check/check/input/control'                               => 'check/controlinput',
 
                 // users
                 'users/<page:\d+>'   => 'user/index',

@@ -157,6 +157,210 @@ function Admin()
     };
 
     /**
+     * Check input object.
+     */
+    this.checkInput = new function () {
+        var _checkInputObj = this;
+
+        /**
+         * Control function.
+         */
+        this._control = function(id, operation) {
+            var url = $('tr[data-id=' + id + ']').data('control-url');
+
+            $.ajax({
+                dataType : 'json',
+                url      : url,
+                timeout  : system.ajaxTimeout,
+                type     : 'POST',
+
+                data : {
+                    'EntryControlForm[operation]' : operation,
+                    'EntryControlForm[id]'        : id,
+                    'YII_CSRF_TOKEN'              : system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $('.loader-image').hide();
+
+                    if (data.status == 'error')
+                    {
+                        system.showMessage('error', data.errorText);
+                        return;
+                    }
+
+                    if (operation == 'delete')
+                    {
+                        $('tr[data-id=' + id + ']').fadeOut('slow', undefined, function () {
+                            $('tr[data-id=' + id + ']').remove();
+                            system.showMessage('success', system.translate('Input successfully deleted.'));
+
+                            if ($('.input-list > tbody > tr').length == 1)
+                            {
+                                $('.input-list').remove();
+                                $('.span8').append(system.translate('No inputs yet.'));
+                            }
+                        });
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $('.loader-image').hide();
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $('.loader-image').show();
+                }
+            });
+        };
+
+        /**
+         * Delete.
+         */
+        this.del = function (id) {
+            if (confirm(system.translate('Are you sure that you want to delete this input?')))
+                _checkInputObj._control(id, 'delete');
+        };
+    };
+
+    /**
+     * Check solution object.
+     */
+    this.checkSolution = new function () {
+        var _checkSolutionObj = this;
+
+        /**
+         * Control function.
+         */
+        this._control = function(id, operation) {
+            var url = $('tr[data-id=' + id + ']').data('control-url');
+
+            $.ajax({
+                dataType : 'json',
+                url      : url,
+                timeout  : system.ajaxTimeout,
+                type     : 'POST',
+
+                data : {
+                    'EntryControlForm[operation]' : operation,
+                    'EntryControlForm[id]'        : id,
+                    'YII_CSRF_TOKEN'              : system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $('.loader-image').hide();
+
+                    if (data.status == 'error')
+                    {
+                        system.showMessage('error', data.errorText);
+                        return;
+                    }
+
+                    if (operation == 'delete')
+                    {
+                        $('tr[data-id=' + id + ']').fadeOut('slow', undefined, function () {
+                            $('tr[data-id=' + id + ']').remove();
+                            system.showMessage('success', system.translate('Solution successfully deleted.'));
+
+                            if ($('.solution-list > tbody > tr').length == 1)
+                            {
+                                $('.solution-list').remove();
+                                $('.span8').append(system.translate('No solutions yet.'));
+                            }
+                        });
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $('.loader-image').hide();
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $('.loader-image').show();
+                }
+            });
+        };
+
+        /**
+         * Delete.
+         */
+        this.del = function (id) {
+            if (confirm(system.translate('Are you sure that you want to delete this solution?')))
+                _checkSolutionObj._control(id, 'delete');
+        };
+    };
+
+    /**
+     * Check result object.
+     */
+    this.checkResult = new function () {
+        var _checkResultObj = this;
+
+        /**
+         * Control function.
+         */
+        this._control = function(id, operation) {
+            var url = $('tr[data-id=' + id + ']').data('control-url');
+
+            $.ajax({
+                dataType : 'json',
+                url      : url,
+                timeout  : system.ajaxTimeout,
+                type     : 'POST',
+
+                data : {
+                    'EntryControlForm[operation]' : operation,
+                    'EntryControlForm[id]'        : id,
+                    'YII_CSRF_TOKEN'              : system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $('.loader-image').hide();
+
+                    if (data.status == 'error')
+                    {
+                        system.showMessage('error', data.errorText);
+                        return;
+                    }
+
+                    if (operation == 'delete')
+                    {
+                        $('tr[data-id=' + id + ']').fadeOut('slow', undefined, function () {
+                            $('tr[data-id=' + id + ']').remove();
+                            system.showMessage('success', system.translate('Result successfully deleted.'));
+
+                            if ($('.result-list > tbody > tr').length == 1)
+                            {
+                                $('.result-list').remove();
+                                $('.span8').append(system.translate('No results yet.'));
+                            }
+                        });
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $('.loader-image').hide();
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $('.loader-image').show();
+                }
+            });
+        };
+
+        /**
+         * Delete.
+         */
+        this.del = function (id) {
+            if (confirm(system.translate('Are you sure that you want to delete this result?')))
+                _checkResultObj._control(id, 'delete');
+        };
+    };
+
+    /**
      * User object.
      */
     this.user = new function () {

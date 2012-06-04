@@ -736,6 +736,56 @@ class CheckController extends Controller
 	}
 
     /**
+     * Result control function.
+     */
+    public function actionControlResult()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new CHttpException(403, $errorText);
+            }
+
+            $id     = $model->id;
+            $result = CheckResult::model()->findByPk($id);
+
+            if ($result === null)
+                throw new CHttpException(404, Yii::t('app', 'Result not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $result->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
      * Display a list of check solutions.
      */
 	public function actionSolutions($id, $check, $page=1)
@@ -963,6 +1013,56 @@ class CheckController extends Controller
             'defaultLanguage' => $defaultLanguage
         ));
 	}
+
+    /**
+     * Solution control function.
+     */
+    public function actionControlSolution()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new CHttpException(403, $errorText);
+            }
+
+            $id       = $model->id;
+            $solution = CheckSolution::model()->findByPk($id);
+
+            if ($solution === null)
+                throw new CHttpException(404, Yii::t('app', 'Solution not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $solution->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
 
     /**
      * Display a list of check inputs.
@@ -1202,4 +1302,54 @@ class CheckController extends Controller
             'defaultLanguage' => $defaultLanguage
         ));
 	}
+
+    /**
+     * Input control function.
+     */
+    public function actionControlInput()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new CHttpException(403, $errorText);
+            }
+
+            $id    = $model->id;
+            $input = CheckInput::model()->findByPk($id);
+
+            if ($input === null)
+                throw new CHttpException(404, Yii::t('app', 'Input not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $input->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
 }

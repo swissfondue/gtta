@@ -29,12 +29,12 @@
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($results as $result): ?>
-                            <tr>
+                            <tr data-id="<?php echo $result->id; ?>" data-control-url="<?php echo $this->createUrl('check/controlresult'); ?>">
                                 <td class="result">
                                     <a href="<?php echo $this->createUrl('check/editresult', array( 'id' => $category->id, 'check' => $check->id, 'result' => $result->id )); ?>"><?php echo CHtml::encode($result->localizedResult); ?></a>
                                 </td>
                                 <td class="actions">
-                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="result.del(<?php echo $result->id; ?>);"><i class="icon icon-remove"></i></a>
+                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="admin.checkResult.del(<?php echo $result->id; ?>);"><i class="icon icon-remove"></i></a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
