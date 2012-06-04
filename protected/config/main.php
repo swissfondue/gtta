@@ -89,10 +89,11 @@ return array(
                 'check/<id:\d+>/check/<check:\d+>/input/new'              => 'check/editinput',
 
                 // users
-                'users/<page:\d+>'   => 'user/index',
-                'users'              => 'user/index',
-                'user/<id:\d+>/edit' => 'user/edit',
-                'user/new'           => 'user/edit',
+                'users/<page:\d+>'      => 'user/index',
+                'users'                 => 'user/index',
+                'user/<id:\d+>/edit'    => 'user/edit',
+                'user/new'              => 'user/edit',
+                'user/<id:\d+>/control' => 'user/control',
             ),
 		),
 

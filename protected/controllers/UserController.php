@@ -142,4 +142,49 @@ class UserController extends Controller
             ),
         ));
 	}
+
+    /**
+     * Control function.
+     */
+    public function actionControl()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = $model->getErrors();
+                $errorText = $errorText[0][0];
+
+                throw new CHttpException(403, $errorText);
+            }
+
+            $id   = $model->id;
+            $user = User::model()->findByPk($id);
+
+            if ($user === null)
+                throw new CHttpException(404, Yii::t('app', 'User not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $user->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
 }

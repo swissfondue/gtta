@@ -29,6 +29,8 @@ function Admin()
      * User object.
      */
     this.user = new function () {
+        var _userObj = this;
+
         /**
          * Display/hide client field.
          */
@@ -38,6 +40,67 @@ function Admin()
             else
                 $('#client-input').hide();
         };
+
+        /**
+         * Control function.
+         */
+        this._control = function(id, operation) {
+            var url = $('tr[data-id=' + id + ']').data('control-url');
+
+            $.ajax({
+                dataType : 'json',
+                url      : url,
+                timeout  : system.ajaxTimeout,
+                type     : 'POST',
+
+                data : {
+                    'EntryControlForm[operation]' : operation,
+                    'EntryControlForm[id]'        : id,
+                    'YII_CSRF_TOKEN'              : system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $('.loader-image').hide();
+
+                    if (data.status == 'error')
+                    {
+                        system.showMessage('error', data.errorText);
+                        return;
+                    }
+
+                    if (operation == 'delete')
+                    {
+                        $('tr[data-id=' + id + ']').fadeOut('slow', undefined, function () {
+                            $('tr[data-id=' + id + ']').remove();
+                            system.showMessage('success', system.translate('User successfully deleted.'));
+
+                            if ($('.user-list > tbody > tr').length == 1)
+                            {
+                                $('.user-list').remove();
+                                $('.span8').append(system.translate('No users yet.'));
+                            }
+                        });
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $('.loader-image').hide();
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $('.loader-image').show();
+                }
+            });
+        };
+
+        /**
+         * Delete.
+         */
+        this.del = function (id) {
+            if (confirm(system.translate('Are you sure that you want to delete this user?')))
+                _userObj._control(id, 'delete');
+        }
     };
 }
 

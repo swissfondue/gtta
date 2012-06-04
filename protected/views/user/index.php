@@ -18,7 +18,7 @@
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($users as $user): ?>
-                            <tr>
+                            <tr data-id="<?php echo $user->id; ?>" data-control-url="<?php echo $this->createUrl('user/control'); ?>">
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('user/edit', array( 'id' => $user->id )); ?>"><?php echo CHtml::encode($user->email); ?></a>
                                 </td>
@@ -26,7 +26,7 @@
                                     <?php echo $roles[$user->role]; ?>
                                 </td>
                                 <td class="actions">
-                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="user.del(<?php echo $user->id; ?>);"><i class="icon icon-remove"></i></a>
+                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="admin.user.del(<?php echo $user->id; ?>);"><i class="icon icon-remove"></i></a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
