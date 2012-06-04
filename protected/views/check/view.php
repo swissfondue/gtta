@@ -25,7 +25,7 @@
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($checks as $check): ?>
-                            <tr>
+                            <tr data-id="<?php echo $check->id; ?>" data-control-url="<?php echo $this->createUrl('check/check/control'); ?>">
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('check/editcheck', array( 'id' => $category->id, 'check' => $check->id )); ?>"><?php echo CHtml::encode($check->localizedName); ?></a>
                                     <?php if ($check->automated): ?>
@@ -33,7 +33,7 @@
                                     <?php endif; ?>
                                 </td>
                                 <td class="actions">
-                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="check.del(<?php echo $check->id; ?>);"><i class="icon icon-remove"></i></a>
+                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="admin.check.del(<?php echo $check->id; ?>);"><i class="icon icon-remove"></i></a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

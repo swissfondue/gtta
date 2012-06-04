@@ -17,12 +17,12 @@
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($categories as $category): ?>
-                            <tr>
+                            <tr data-id="<?php echo $category->id; ?>" data-control-url="<?php echo $this->createUrl('check/control'); ?>">
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('check/view', array( 'id' => $category->id )); ?>"><?php echo CHtml::encode($category->localizedName); ?></a>
                                 </td>
                                 <td class="actions">
-                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="category.del(<?php echo $category->id; ?>);"><i class="icon icon-remove"></i></a>
+                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="admin.category.del(<?php echo $category->id; ?>);"><i class="icon icon-remove"></i></a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

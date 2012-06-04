@@ -232,6 +232,56 @@ class CheckController extends Controller
 	}
 
     /**
+     * Control function.
+     */
+    public function actionControl()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new CHttpException(403, $errorText);
+            }
+
+            $id       = $model->id;
+            $category = CheckCategory::model()->findByPk($id);
+
+            if ($category === null)
+                throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $category->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
      * Check edit page.
      */
 	public function actionEditCheck($id, $check=0)
@@ -405,6 +455,56 @@ class CheckController extends Controller
             'defaultLanguage' => $defaultLanguage
         ));
 	}
+
+    /**
+     * Check control function.
+     */
+    public function actionControlCheck()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new CHttpException(403, $errorText);
+            }
+
+            $id    = $model->id;
+            $check = Check::model()->findByPk($id);
+
+            if ($check === null)
+                throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $check->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
 
     /**
      * Display a list of predefined check results.

@@ -67,8 +67,10 @@ return array(
                 'check/<id:\d+>'                        => 'check/view',
                 'check/<id:\d+>/edit'                   => 'check/edit',
                 'check/new'                             => 'check/edit',
+                'check/control'                         => 'check/control',
                 'check/<id:\d+>/check/<check:\d+>/edit' => 'check/editcheck',
                 'check/<id:\d+>/check/new'              => 'check/editcheck',
+                'check/check/control'                   => 'check/controlcheck',
 
                 // check results
                 'check/<id:\d+>/check/<check:\d+>/results/<page:\d+>'       => 'check/results',
@@ -89,11 +91,11 @@ return array(
                 'check/<id:\d+>/check/<check:\d+>/input/new'              => 'check/editinput',
 
                 // users
-                'users/<page:\d+>'      => 'user/index',
-                'users'                 => 'user/index',
-                'user/<id:\d+>/edit'    => 'user/edit',
-                'user/new'              => 'user/edit',
-                'user/<id:\d+>/control' => 'user/control',
+                'users/<page:\d+>'   => 'user/index',
+                'users'              => 'user/index',
+                'user/<id:\d+>/edit' => 'user/edit',
+                'user/new'           => 'user/edit',
+                'user/control'       => 'user/control',
             ),
 		),
 
