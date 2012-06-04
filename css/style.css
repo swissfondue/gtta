@@ -326,3 +326,7 @@ h3 a:hover {
 .label-finished {
     background-color:#000;
 }
+
+.delete-row {
+    background-color:#f2dede;
+}
