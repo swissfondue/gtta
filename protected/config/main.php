@@ -59,6 +59,7 @@ return array(
                 'client/<id:\d+>'      => 'client/view',
                 'client/<id:\d+>/edit' => 'client/edit',
                 'client/new'           => 'client/edit',
+                'client/control'       => 'client/control',
 
                 // checks
                 'checks/<page:\d+>'                     => 'check/index',

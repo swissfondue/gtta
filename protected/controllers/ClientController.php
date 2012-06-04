@@ -13,6 +13,7 @@ class ClientController extends Controller
 		return array(
 			'checkAuth',
             'checkUser',
+            'checkAdmin + control',
 		);
 	}
 
@@ -171,4 +172,54 @@ class ClientController extends Controller
             'client' => $client,
         ));
 	}
+
+    /**
+     * Control function.
+     */
+    public function actionControl()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new CHttpException(403, $errorText);
+            }
+
+            $id     = $model->id;
+            $client = Client::model()->findByPk($id);
+
+            if ($client === null)
+                throw new CHttpException(404, Yii::t('app', 'Client not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $client->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
 }
