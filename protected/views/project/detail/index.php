@@ -29,7 +29,7 @@
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($details as $detail): ?>
-                            <tr>
+                            <tr data-id="<?php echo $detail->id; ?>" data-control-url="<?php echo $this->createUrl('project/controldetail'); ?>">
                                 <td class="detail">
                                     <a href="<?php echo $this->createUrl('project/editdetail', array( 'id' => $project->id, 'detail' => $detail->id )); ?>"><?php echo CHtml::encode($detail->subject); ?></a>
                                     <div class="content">
@@ -37,7 +37,7 @@
                                     </div>
                                 </td>
                                 <td class="actions">
-                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="detail.del(<?php echo $detail->id; ?>);"><i class="icon icon-remove"></i></a>
+                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $detail->id; ?>);"><i class="icon icon-remove"></i></a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

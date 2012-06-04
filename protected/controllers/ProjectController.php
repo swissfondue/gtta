@@ -12,7 +12,7 @@ class ProjectController extends Controller
 	{
 		return array(
 			'checkAuth',
-            'checkUser + edit, target, edittarget',
+            'checkUser + edit, target, edittarget, controltarget',
             'checkAdmin + control',
             'ajaxOnly + savecheck',
             'postOnly + savecheck',
@@ -1047,6 +1047,117 @@ class ProjectController extends Controller
             {
                 case 'delete':
                     $project->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Control target function.
+     */
+    public function actionControlTarget()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new CHttpException(403, $errorText);
+            }
+
+            $id     = $model->id;
+            $target = Target::model()->findByPk($id);
+
+            if ($target === null)
+                throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $target->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Control detail function.
+     */
+    public function actionControlDetail()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            if (!User::checkRole(User::ROLE_ADMIN) && !User::checkRole(User::ROLE_CLIENT))
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new CHttpException(403, $errorText);
+            }
+
+            $id     = $model->id;
+            $detail = ProjectDetail::model()->with('project')->findByPk($id);
+
+            if ($detail === null)
+                throw new CHttpException(404, Yii::t('app', 'Detail not found.'));
+
+            if (User::checkRole(User::ROLE_CLIENT))
+            {
+                $user = User::model()->findByPk(Yii::app()->user->id);
+
+                if ($user->client_id != $detail->project->client_id)
+                    throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $detail->delete();
                     break;
 
                 default:

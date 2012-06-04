@@ -37,7 +37,7 @@
                             <?php endif; ?>
                         </tr>
                         <?php foreach ($targets as $target): ?>
-                            <tr>
+                            <tr data-id="<?php echo $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controltarget'); ?>">
                                 <td class="target">
                                     <?php if (User::checkRole(User::ROLE_USER)): ?>
                                         <a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo CHtml::encode($target->host); ?></a>
@@ -60,9 +60,9 @@
                                         echo $target->checkCount ? sprintf('%.2f', ($finished / $target->checkCount) * 100) : '0.00';
                                     ?>%
                                 </td>
-                                <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
+                                <?php if (User::checkRole(User::ROLE_USER)): ?>
                                     <td class="actions">
-                                        <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="target.del(<?php echo $target->id; ?>);"><i class="icon icon-remove"></i></a>
+                                        <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $target->id; ?>);"><i class="icon icon-remove"></i></a>
                                     </td>
                                 <?php endif; ?>
                             </tr>
