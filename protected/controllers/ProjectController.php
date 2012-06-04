@@ -12,9 +12,9 @@ class ProjectController extends Controller
 	{
 		return array(
 			'checkAuth',
-            'checkUser + edit, target, edittarget, checks, savecheck, savecategory',
-            'ajaxOnly + savecheck, savecategory',
-            'postOnly + savecheck, savecategory',
+            'checkUser + edit, target, edittarget',
+            'ajaxOnly + savecheck',
+            'postOnly + savecheck',
 		);
 	}
 
@@ -845,8 +845,13 @@ class ProjectController extends Controller
 
             if (!$model->validate())
             {
-                $errorText = $model->getErrors();
-                $errorText = $errorText[0][0];
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
 
                 throw new CHttpException(403, $errorText);
             }
@@ -982,8 +987,13 @@ class ProjectController extends Controller
 
             if (!$model->validate())
             {
-                $errorText = $model->getErrors();
-                $errorText = $errorText[0][0];
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
 
                 throw new CHttpException(403, $errorText);
             }

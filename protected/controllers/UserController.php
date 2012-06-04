@@ -157,8 +157,13 @@ class UserController extends Controller
 
             if (!$model->validate())
             {
-                $errorText = $model->getErrors();
-                $errorText = $errorText[0][0];
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
 
                 throw new CHttpException(403, $errorText);
             }
