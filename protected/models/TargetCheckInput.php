@@ -50,7 +50,8 @@ class TargetCheckInput extends CActiveRecord
 	{
 		return array(
             'target' => array( self::BELONGS_TO, 'Target',     'target_id' ),
-            'input'  => array( self::BELONGS_TO, 'CheckInput', 'check_input_id' )
+            'input'  => array( self::BELONGS_TO, 'CheckInput', 'check_input_id' ),
+            'check'  => array( self::BELONGS_TO, 'Check',      'check_id' ),
 		);
 	}
 }

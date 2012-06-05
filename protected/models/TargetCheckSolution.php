@@ -47,6 +47,7 @@ class TargetCheckSolution extends CActiveRecord
 		return array(
             'target'   => array( self::BELONGS_TO, 'Target',        'target_id' ),
             'solution' => array( self::BELONGS_TO, 'CheckSolution', 'check_solution_id' ),
+            'check'    => array( self::BELONGS_TO, 'Check',         'check_id' ),
 		);
 	}
 }
