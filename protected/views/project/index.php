@@ -1,6 +1,6 @@
 <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
     <div class="pull-right">
-        <button class="btn" onclick="location.href='<?php echo $this->createUrl('project/edit'); ?>';"><?php echo Yii::t('app', 'New Project'); ?></button>
+        <a class="btn" href="<?php echo $this->createUrl('project/edit'); ?>"><?php echo Yii::t('app', 'New Project'); ?></a>
     </div>
 <?php endif; ?>
 

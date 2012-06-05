@@ -10,7 +10,7 @@
         </ul>
     </div>
     <div class="pull-right buttons">
-        <button class="btn" onclick="location.href='<?php echo $this->createUrl('check/editinput', array( 'id' => $category->id, 'check' => $check->id )) ?>';"><?php echo Yii::t('app', 'New Input'); ?></button>
+        <a class="btn" href="<?php echo $this->createUrl('check/editinput', array( 'id' => $category->id, 'check' => $check->id )) ?>"><?php echo Yii::t('app', 'New Input'); ?></a>
     </div>
 
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
