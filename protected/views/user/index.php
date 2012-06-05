@@ -14,7 +14,7 @@
                     <tbody>
                         <tr>
                             <th class="email"><?php echo Yii::t('app', 'E-mail'); ?></th>
-                            <th class="role"><?php echo Yii::t('app', 'Role'); ?></th>
+                            <th class="role">&nbsp;</th>
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($users as $user): ?>
@@ -23,7 +23,22 @@
                                     <a href="<?php echo $this->createUrl('user/edit', array( 'id' => $user->id )); ?>"><?php echo CHtml::encode($user->email); ?></a>
                                 </td>
                                 <td class="role">
-                                    <?php echo $roles[$user->role]; ?>
+                                    <?php
+                                        switch ($user->role)
+                                        {
+                                            case User::ROLE_ADMIN:
+                                                echo '<span class="label label-admin">' . $roles[$user->role] . '</span>';
+                                                break;
+
+                                            case User::ROLE_USER:
+                                                echo '<span class="label label-user">' . $roles[$user->role] . '</span>';
+                                                break;
+
+                                            case User::ROLE_CLIENT:
+                                                echo '<span class="label label-client">' . $roles[$user->role] . '</span>';
+                                                break;
+                                        }
+                                    ?>
                                 </td>
                                 <td class="actions">
                                     <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $user->id; ?>);"><i class="icon icon-remove"></i></a>
