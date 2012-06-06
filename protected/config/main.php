@@ -35,26 +35,29 @@ return array(
                 'app/l10n.js'             => 'app/l10n',
 
                 // projects
-                'projects/<page:\d+>'                                                              => 'project/index',
-                'projects'                                                                         => 'project/index',
-                'project/<id:\d+>/<page:\d+>'                                                      => 'project/view',
-                'project/<id:\d+>'                                                                 => 'project/view',
-                'project/<id:\d+>/edit'                                                            => 'project/edit',
-                'project/new'                                                                      => 'project/edit',
-                'project/control'                                                                  => 'project/control',
-                'project/<id:\d+>/details/<page:\d+>'                                              => 'project/details',
-                'project/<id:\d+>/details'                                                         => 'project/details',
-                'project/<id:\d+>/detail/<detail:\d+>/edit'                                        => 'project/editdetail',
-                'project/<id:\d+>/detail/new'                                                      => 'project/editdetail',
-                'project/detail/control'                                                           => 'project/controldetail',
-                'project/<id:\d+>/target/<target:\d+>/<page:\d+>'                                  => 'project/target',
-                'project/<id:\d+>/target/<target:\d+>'                                             => 'project/target',
-                'project/<id:\d+>/target/<target:\d+>/edit'                                        => 'project/edittarget',
-                'project/<id:\d+>/target/new'                                                      => 'project/edittarget',
-                'project/<id:\d+>/target/<target:\d+>/check/<category:\d+>'                        => 'project/checks',
-                'project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/save'                   => 'project/savecategory',
-                'project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/save' => 'project/savecheck',
-                'project/target/control'                                                           => 'project/controltarget',
+                'projects/<page:\d+>'                                                                        => 'project/index',
+                'projects'                                                                                   => 'project/index',
+                'project/<id:\d+>/<page:\d+>'                                                                => 'project/view',
+                'project/<id:\d+>'                                                                           => 'project/view',
+                'project/<id:\d+>/edit'                                                                      => 'project/edit',
+                'project/new'                                                                                => 'project/edit',
+                'project/control'                                                                            => 'project/control',
+                'project/<id:\d+>/details/<page:\d+>'                                                        => 'project/details',
+                'project/<id:\d+>/details'                                                                   => 'project/details',
+                'project/<id:\d+>/detail/<detail:\d+>/edit'                                                  => 'project/editdetail',
+                'project/<id:\d+>/detail/new'                                                                => 'project/editdetail',
+                'project/detail/control'                                                                     => 'project/controldetail',
+                'project/<id:\d+>/target/<target:\d+>/<page:\d+>'                                            => 'project/target',
+                'project/<id:\d+>/target/<target:\d+>'                                                       => 'project/target',
+                'project/<id:\d+>/target/<target:\d+>/edit'                                                  => 'project/edittarget',
+                'project/<id:\d+>/target/new'                                                                => 'project/edittarget',
+                'project/<id:\d+>/target/<target:\d+>/check/<category:\d+>'                                  => 'project/checks',
+                'project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/save'                             => 'project/savecategory',
+                'project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/save'           => 'project/savecheck',
+                'project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/attachment/new' => 'project/uploadattachment',
+                'project/attachment/<path:[a-z\d]+>/download'                                                => 'project/attachment',
+                'project/attachment/control'                                                                 => 'project/controlattachment',
+                'project/target/control'                                                                     => 'project/controltarget',
 
                 // clients
                 'clients/<page:\d+>'   => 'client/index',
@@ -138,6 +141,10 @@ return array(
     // parameters
 	'params' => array(
         'entriesPerPage' => 10,
+        'attachments'    => array(
+            'path'    => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../uploads/attachments',
+            'maxSize' => 100 * 1024 * 1024, // 100 megabytes
+        )
     ),
 
     // default controller name

@@ -253,7 +253,7 @@ class CheckController extends Controller
                     break;
                 }
 
-                throw new CHttpException(403, $errorText);
+                throw new Exception($errorText);
             }
 
             $id       = $model->id;
@@ -478,7 +478,7 @@ class CheckController extends Controller
                     break;
                 }
 
-                throw new CHttpException(403, $errorText);
+                throw new Exception($errorText);
             }
 
             $id    = $model->id;
@@ -757,7 +757,7 @@ class CheckController extends Controller
                     break;
                 }
 
-                throw new CHttpException(403, $errorText);
+                throw new Exception($errorText);
             }
 
             $id     = $model->id;
@@ -1036,7 +1036,7 @@ class CheckController extends Controller
                     break;
                 }
 
-                throw new CHttpException(403, $errorText);
+                throw new Exception($errorText);
             }
 
             $id       = $model->id;
@@ -1325,7 +1325,7 @@ class CheckController extends Controller
                     break;
                 }
 
-                throw new CHttpException(403, $errorText);
+                throw new Exception($errorText);
             }
 
             $id    = $model->id;

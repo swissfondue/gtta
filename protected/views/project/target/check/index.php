@@ -1,3 +1,7 @@
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery.ui.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery.iframe-transport.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery.fileupload.js"></script>
+
 <div class="active-header">
     <div class="pull-right">
         <ul class="nav nav-pills">
@@ -190,6 +194,36 @@
                                                         </td>
                                                     </tr>
                                                 <?php endif; ?>
+                                                <tr>
+                                                    <th>
+                                                        <?php echo Yii::t('app', 'Attachments'); ?>
+                                                    </th>
+                                                    <td>
+                                                        <div class="file-input" id="upload-link-<?php echo $check->id; ?>">
+                                                            <a href="#"><?php echo Yii::t('app', 'New Attachment'); ?></a>
+                                                            <input type="file" name="TargetCheckAttachmentUploadForm[attachment]" data-id="<?php echo $check->id; ?>" data-upload-url="<?php echo $this->createUrl('project/uploadattachment', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>">
+                                                        </div>
+
+                                                        <div class="upload-message hidden-object" id="upload-message-<?php echo $check->id; ?>"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+
+                                                        <?php if ($check->targetCheckAttachments): ?>
+                                                            <table class="table attachment-list">
+                                                                <tbody>
+                                                                    <?php foreach ($check->targetCheckAttachments as $attachment): ?>
+                                                                        <tr data-path="<?php echo $attachment->path; ?>" data-control-url="<?php echo $this->createUrl('project/controlattachment'); ?>">
+                                                                            <td class="name">
+                                                                                <a href="<?php echo $this->createUrl('project/attachment', array( 'path' => $attachment->path )); ?>"><?php echo CHtml::encode($attachment->name); ?></a>
+                                                                            </td>
+                                                                            <td class="actions">
+                                                                                <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="user.check.delAttachment('<?php echo $attachment->path; ?>');"><i class="icon icon-remove"></i></a>
+                                                                            </td>
+                                                                        </tr>
+                                                                    <?php endforeach; ?>
+                                                                </tbody>
+                                                            </table>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                </tr>
                                                 <tr>
                                                     <th>
                                                         <?php echo Yii::t('app', 'Result Rating'); ?>
@@ -443,4 +477,8 @@
             echo implode(',', $ratingNames);
         ?>
     };
+
+    $(function () {
+        user.check.initTargetCheckAttachmentUploadForms();
+    });
 </script>

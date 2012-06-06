@@ -54,14 +54,15 @@ class Check extends CActiveRecord
 	public function relations()
 	{
 		return array(
-            'l10n'                 => array( self::HAS_MANY,   'CheckL10n',           'check_id' ),
-            'category'             => array( self::BELONGS_TO, 'CheckCategory',       'check_category_id' ),
-            'targetChecks'         => array( self::HAS_MANY,   'TargetCheck',         'check_id' ),
-            'targetCheckInputs'    => array( self::HAS_MANY,   'TargetCheckInput',    'check_id' ),
-            'targetCheckSolutions' => array( self::HAS_MANY,   'TargetCheckSolution', 'check_id' ),
-            'results'              => array( self::HAS_MANY,   'CheckResult',         'check_id' ),
-            'solutions'            => array( self::HAS_MANY,   'CheckSolution',       'check_id' ),
-            'inputs'               => array( self::HAS_MANY,   'CheckInput',          'check_id' ),
+            'l10n'                   => array( self::HAS_MANY,   'CheckL10n',             'check_id' ),
+            'category'               => array( self::BELONGS_TO, 'CheckCategory',         'check_category_id' ),
+            'targetChecks'           => array( self::HAS_MANY,   'TargetCheck',           'check_id' ),
+            'targetCheckInputs'      => array( self::HAS_MANY,   'TargetCheckInput',      'check_id' ),
+            'targetCheckSolutions'   => array( self::HAS_MANY,   'TargetCheckSolution',   'check_id' ),
+            'targetCheckAttachments' => array( self::HAS_MANY,   'TargetCheckAttachment', 'check_id' ),
+            'results'                => array( self::HAS_MANY,   'CheckResult',           'check_id' ),
+            'solutions'              => array( self::HAS_MANY,   'CheckSolution',         'check_id' ),
+            'inputs'                 => array( self::HAS_MANY,   'CheckInput',            'check_id' ),
 		);
 	}
 

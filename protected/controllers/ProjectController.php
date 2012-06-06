@@ -12,10 +12,10 @@ class ProjectController extends Controller
 	{
 		return array(
 			'checkAuth',
-            'checkUser + edit, target, edittarget, controltarget',
+            'checkUser + edit, target, edittarget, controltarget, uploadattachment, controlattachment, attachment',
             'checkAdmin + control',
-            'ajaxOnly + savecheck',
-            'postOnly + savecheck',
+            'ajaxOnly + savecheck, controlattachment',
+            'postOnly + savecheck, uploadattachment, controlattachment',
 		);
 	}
 
@@ -720,6 +720,12 @@ class ProjectController extends Controller
                 'on'       => 'tss.target_id = :target_id',
                 'params'   => array( 'target_id' => $target->id )
             ),
+            'targetCheckAttachments' => array(
+                'alias'    => 'tas',
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'tas.target_id = :target_id',
+                'params'   => array( 'target_id' => $target->id ),
+            ),
             'inputs' => array(
                 'joinType' => 'LEFT JOIN',
                 'with'     => array(
@@ -854,7 +860,7 @@ class ProjectController extends Controller
                     break;
                 }
 
-                throw new CHttpException(403, $errorText);
+                throw new Exception($errorText);
             }
 
             $targetCheck = TargetCheck::model()->findByAttributes(array(
@@ -996,7 +1002,7 @@ class ProjectController extends Controller
                     break;
                 }
 
-                throw new CHttpException(403, $errorText);
+                throw new Exception($errorText);
             }
 
             $category->advanced = $model->advanced;
@@ -1034,7 +1040,7 @@ class ProjectController extends Controller
                     break;
                 }
 
-                throw new CHttpException(403, $errorText);
+                throw new Exception($errorText);
             }
 
             $id      = $model->id;
@@ -1084,7 +1090,7 @@ class ProjectController extends Controller
                     break;
                 }
 
-                throw new CHttpException(403, $errorText);
+                throw new Exception($errorText);
             }
 
             $id     = $model->id;
@@ -1137,7 +1143,7 @@ class ProjectController extends Controller
                     break;
                 }
 
-                throw new CHttpException(403, $errorText);
+                throw new Exception($errorText);
             }
 
             $id     = $model->id;
@@ -1171,5 +1177,183 @@ class ProjectController extends Controller
         }
 
         echo $response->serialize();
+    }
+
+    /**
+     * Upload attachment function.
+     */
+    function actionUploadAttachment($id, $target, $category, $check)
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $id       = (int) $id;
+            $target   = (int) $target;
+            $category = (int) $category;
+            $check    = (int) $check;
+
+            $project = Project::model()->findByPk($id);
+
+            if (!$project)
+                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+            $target = Target::model()->findByAttributes(array(
+                'id'         => $target,
+                'project_id' => $project->id
+            ));
+
+            if (!$target)
+                throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+
+            $language = Language::model()->findByAttributes(array(
+                'code' => Yii::app()->language
+            ));
+
+            if ($language)
+                $language = $language->id;
+
+            $category = TargetCheckCategory::model()->with('category')->findByAttributes(array(
+                'target_id'         => $target->id,
+                'check_category_id' => $category
+            ));
+
+            if (!$category)
+                throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+
+            $check = Check::model()->findByAttributes(array(
+                'id'                => $check,
+                'check_category_id' => $category->check_category_id
+            ));
+
+            if (!$check)
+                throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+
+            $model = new TargetCheckAttachmentUploadForm();
+            $model->attachment = CUploadedFile::getInstanceByName('TargetCheckAttachmentUploadForm[attachment]');
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $attachment = new TargetCheckAttachment();
+            $attachment->target_id = $target->id;
+            $attachment->check_id  = $check->id;
+            $attachment->name      = $model->attachment->name;
+            $attachment->type      = $model->attachment->type;
+            $attachment->size      = $model->attachment->size;
+            $attachment->path      = hash('sha256', $attachment->name . rand() . time());
+            $attachment->save();
+
+            $model->attachment->saveAs(Yii::app()->params['attachments']['path'] . '/' . $attachment->path);
+
+            $response->addData('name',       CHtml::encode($attachment->name));
+            $response->addData('url',        $this->createUrl('project/attachment', array( 'path' => $attachment->path )));
+            $response->addData('path',       $attachment->path);
+            $response->addData('controlUrl', $this->createUrl('project/controlattachment'));
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Control attachment.
+     */
+    public function actionControlAttachment()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $model = new TargetCheckAttachmentControlForm();
+            $model->attributes = $_POST['TargetCheckAttachmentControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $path       = $model->path;
+            $attachment = TargetCheckAttachment::model()->findByAttributes(array(
+                'path' => $path
+            ));
+
+            if ($attachment === null)
+                throw new CHttpException(404, Yii::t('app', 'Attachment not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $attachment->delete();
+                    @unlink(Yii::app()->params['attachments']['path'] . '/' . $attachment->path);
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Get attachment.
+     */
+    public function actionAttachment($path)
+    {
+        $attachment = TargetCheckAttachment::model()->findByAttributes(array(
+            'path' => $path
+        ));
+
+        if ($attachment === null)
+            throw new CHttpException(404, Yii::t('app', 'Attachment not found.'));
+
+        $filePath = Yii::app()->params['attachments']['path'] . '/' . $attachment->path;
+
+        if (!file_exists($filePath))
+            throw new CHttpException(404, Yii::t('app', 'Attachment not found.'));
+
+        // give user a file
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . str_replace('"', '', $attachment->name) . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . $attachment->size);
+
+        ob_clean();
+        flush();
+
+        readfile($filePath);
+
+        exit();
     }
 }
