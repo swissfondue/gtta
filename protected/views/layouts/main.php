@@ -42,6 +42,7 @@
 
                             <?php if (User::checkRole(User::ROLE_USER)): ?>
                                 <li <?php if (Yii::app()->controller->id == 'client') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('client/index'); ?>"><?php echo Yii::t('app', 'Clients'); ?></a></li>
+                                <li <?php if (Yii::app()->controller->id == 'report') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/index'); ?>"><?php echo Yii::t('app', 'Reports'); ?></a></li>
                             <?php endif; ?>
 
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>

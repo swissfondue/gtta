@@ -67,6 +67,9 @@ return array(
                 'client/new'           => 'client/edit',
                 'client/control'       => 'client/control',
 
+                // reports
+                'reports' => 'report/index',
+
                 // checks
                 'checks/<page:\d+>'                     => 'check/index',
                 'checks'                                => 'check/index',
