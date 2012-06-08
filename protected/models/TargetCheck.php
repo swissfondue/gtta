@@ -7,11 +7,11 @@
  * @property integer $target_id
  * @property integer $check_id
  * @property string $result
- * @property integer $rating
+ * @property string $rating
  * @property string $status
  * @property string $target_file
- * @property string $percentage_file
- * @property float $percent
+ * @property string $started
+ * @property integer $pid
  */
 class TargetCheck extends CActiveRecord
 {
@@ -20,6 +20,7 @@ class TargetCheck extends CActiveRecord
      */
     const STATUS_OPEN        = 'open';
     const STATUS_IN_PROGRESS = 'in_progress';
+    const STATUS_STOP        = 'stop';
     const STATUS_FINISHED    = 'finished';
 
     /**
@@ -56,12 +57,11 @@ class TargetCheck extends CActiveRecord
 	{
 		return array(
             array( 'target_id, check_id', 'required' ),
-            array( 'target_id, check_id, rating', 'numerical', 'integerOnly' => true ),
-            array( 'target_file, percentage_file', 'length', 'max' => 1000 ),
-            array( 'percent', 'numerical', 'max' => 100.0 ),
+            array( 'target_id, check_id, pid', 'numerical', 'integerOnly' => true ),
+            array( 'target_file', 'length', 'max' => 1000 ),
             array( 'status', 'in', 'range' => array( self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_FINISHED ) ),
             array( 'rating', 'in', 'range' => array( self::RATING_HIDDEN, self::RATING_INFO, self::RATING_LOW_RISK, self::RATING_MED_RISK, self::RATING_HIGH_RISK ) ),
-            array( 'result', 'safe' ),
+            array( 'result, started', 'safe' ),
 		);
 	}
 

@@ -91,7 +91,7 @@ function System()
                     {
                         $('tr[data-id=' + id + ']').fadeOut('slow', undefined, function () {
                             $('tr[data-id=' + id + ']').remove();
-                            _system.showMessage('success', system.translate('Object successfully deleted.'));
+                            _system.showMessage('success', system.translate('Object deleted.'));
 
                             if ($('table.table > tbody > tr').length == 1)
                                 location.reload();

@@ -12,10 +12,10 @@ class ProjectController extends Controller
 	{
 		return array(
 			'checkAuth',
-            'checkUser + edit, target, edittarget, controltarget, uploadattachment, controlattachment, attachment',
+            'checkUser + edit, target, edittarget, controltarget, uploadattachment, controlattachment, attachment, controlcheck',
             'checkAdmin + control',
-            'ajaxOnly + savecheck, controlattachment',
-            'postOnly + savecheck, uploadattachment, controlattachment',
+            'ajaxOnly + savecheck, controlattachment, controlcheck',
+            'postOnly + savecheck, uploadattachment, controlattachment, controlcheck',
 		);
 	}
 
@@ -824,13 +824,6 @@ class ProjectController extends Controller
             if (!$target)
                 throw new CHttpException(404, Yii::t('app', 'Target not found.'));
 
-            $language = Language::model()->findByAttributes(array(
-                'code' => Yii::app()->language
-            ));
-
-            if ($language)
-                $language = $language->id;
-
             $category = TargetCheckCategory::model()->with('category')->findByAttributes(array(
                 'target_id'         => $target->id,
                 'check_category_id' => $category
@@ -973,13 +966,6 @@ class ProjectController extends Controller
 
             if (!$target)
                 throw new CHttpException(404, Yii::t('app', 'Target not found.'));
-
-            $language = Language::model()->findByAttributes(array(
-                'code' => Yii::app()->language
-            ));
-
-            if ($language)
-                $language = $language->id;
 
             $category = TargetCheckCategory::model()->with('category')->findByAttributes(array(
                 'target_id'         => $target->id,
@@ -1206,13 +1192,6 @@ class ProjectController extends Controller
             if (!$target)
                 throw new CHttpException(404, Yii::t('app', 'Target not found.'));
 
-            $language = Language::model()->findByAttributes(array(
-                'code' => Yii::app()->language
-            ));
-
-            if ($language)
-                $language = $language->id;
-
             $category = TargetCheckCategory::model()->with('category')->findByAttributes(array(
                 'target_id'         => $target->id,
                 'check_category_id' => $category
@@ -1355,5 +1334,132 @@ class ProjectController extends Controller
         readfile($filePath);
 
         exit();
+    }
+
+    /**
+     * Control check function.
+     */
+    public function actionControlCheck($id, $target, $category, $check)
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $id       = (int) $id;
+            $target   = (int) $target;
+            $category = (int) $category;
+            $check    = (int) $check;
+
+            $project = Project::model()->findByPk($id);
+
+            if (!$project)
+                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+            $target = Target::model()->findByAttributes(array(
+                'id'         => $target,
+                'project_id' => $project->id
+            ));
+
+            if (!$target)
+                throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+
+            $category = TargetCheckCategory::model()->with('category')->findByAttributes(array(
+                'target_id'         => $target->id,
+                'check_category_id' => $category
+            ));
+
+            if (!$category)
+                throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+
+            $check = Check::model()->with('targetChecks')->findByAttributes(array(
+                'id'                => $check,
+                'check_category_id' => $category->check_category_id
+            ));
+
+            if (!$check)
+                throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+
+            $targetCheck = TargetCheck::model()->findByAttributes(array(
+                'target_id' => $target->id,
+                'check_id'  => $check->id
+            ));
+
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            if (!$targetCheck)
+            {
+                $targetCheck = new TargetCheck();
+                $targetCheck->target_id = $target->id;
+                $targetCheck->check_id  = $check->id;
+            }
+
+            switch ($model->operation)
+            {
+                case 'start':
+                    if (!in_array($targetCheck->status, array( TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED )))
+                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
+                    $targetCheck->result  = null;
+                    $targetCheck->rating  = null;
+                    $targetCheck->status  = TargetCheck::STATUS_IN_PROGRESS;
+                    $targetCheck->started = new CDbExpression('NOW()');
+                    $targetCheck->pid     = null;
+                    $targetCheck->save();
+
+                    break;
+
+                case 'reset':
+                    if ($targetCheck->status != TargetCheck::STATUS_FINISHED)
+                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
+                    // delete solutions
+                    TargetCheckSolution::model()->deleteAllByAttributes(array(
+                        'target_id' => $target->id,
+                        'check_id'  => $check->id
+                    ));
+
+                    // delete inputs
+                    TargetCheckInput::model()->deleteAllByAttributes(array(
+                        'target_id' => $target->id,
+                        'check_id'  => $check->id
+                    ));
+
+                    // delete files
+                    TargetCheckAttachment::model()->deleteAllByAttributes(array(
+                        'target_id' => $target->id,
+                        'check_id'  => $check->id
+                    ));
+
+                    $targetCheck->delete();
+
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+
+            $category->updateStats();
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
     }
 }

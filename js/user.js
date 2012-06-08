@@ -254,6 +254,73 @@ function User()
             if (confirm(system.translate('Are you sure that you want to delete this object?')))
                 _check._controlAttachment(path, 'delete');
         };
+
+        /**
+         * Control check function.
+         */
+        this._control = function(id, operation) {
+            var url = $('tr.header[data-id=' + id + ']').data('control-url');
+
+            $.ajax({
+                dataType : 'json',
+                url      : url,
+                timeout  : system.ajaxTimeout,
+                type     : 'POST',
+
+                data : {
+                    'EntryControlForm[operation]' : operation,
+                    'EntryControlForm[id]'        : id,
+                    'YII_CSRF_TOKEN'              : system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $('.loader-image').hide();
+
+                    if (data.status == 'error')
+                    {
+                        system.showMessage('error', data.errorText);
+                        return;
+                    }
+
+                    data = data.data;
+
+                    if (operation == 'start')
+                    {
+                        system.showMessage('success', system.translate('Check started.'));
+                        location.reload();
+                    }
+                    else if (operation == 'reset')
+                    {
+                        system.showMessage('success', system.translate('Check reset.'));
+                        location.reload();
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $('.loader-image').hide();
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $('.loader-image').show();
+                }
+            });
+        };
+
+        /**
+         * Start check.
+         */
+        this.start = function (id) {
+            _check._control(id, 'start');
+        };
+
+        /**
+         * Reset check.
+         */
+        this.reset = function (id) {
+            if (confirm(system.translate('Are you sure that you want to reset this check?')))
+                _check._control(id, 'reset');
+        };
     };
 }
 

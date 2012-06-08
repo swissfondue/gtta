@@ -29,7 +29,7 @@
                             $counter = 0;
                             foreach ($checks as $check):
                         ?>
-                            <tr class="header" data-id="<?php echo $check->id; ?>">
+                            <tr class="header <?php if ($check->automated && $check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'in-progress'; ?>" data-id="<?php echo $check->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlcheck', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>">
                                 <td class="name">
                                     <a href="#toggle" onclick="$('tr.content[data-id=<?php echo $check->id; ?>]').toggle();"><?php echo CHtml::encode($check->localizedName); ?></a>
                                     <?php if ($check->automated): ?>
@@ -66,9 +66,25 @@
                                         &nbsp;
                                     <?php endif; ?>
                                 </td>
+                                <td class="actions">
+                                    <?php if ($check->automated): ?>
+                                        <?php if (!$check->targetChecks || $check->targetChecks && in_array($check->targetChecks[0]->status, array( TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED ))): ?>
+                                            <a href="#start" title="<?php echo Yii::t('app', 'Start'); ?>" onclick="user.check.start(<?php echo $check->id; ?>);"><i class="icon icon-play"></i></a>
+                                        <?php else: ?>
+                                            <span class="disabled"><i class="icon icon-play" title="<?php echo Yii::t('app', 'Start'); ?>"></i></span>
+                                        <?php endif; ?>
+                                        &nbsp;
+                                    <?php endif; ?>
+
+                                    <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED): ?>
+                                        <a href="#reset" title="<?php echo Yii::t('app', 'Reset'); ?>" onclick="user.check.reset(<?php echo $check->id; ?>);"><i class="icon icon-refresh"></i></a>
+                                    <?php else: ?>
+                                        <span class="disabled"><i class="icon icon-refresh" title="<?php echo Yii::t('app', 'Reset'); ?>"></i></span>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                             <tr class="content hidden-object" data-id="<?php echo $check->id; ?>" data-save-url="<?php echo $this->createUrl('project/savecheck', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>">
-                                <td class="content" colspan="2">
+                                <td class="content" colspan="3">
                                     <div class="check-content">
                                         <table class="table check-form">
                                             <tbody>
