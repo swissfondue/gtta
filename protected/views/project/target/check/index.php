@@ -143,7 +143,7 @@
                                                                 <?php echo CHtml::encode($input->localizedName); ?>
                                                             </th>
                                                             <td>
-                                                                <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" rows="2" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'readonly'; ?>><?php
+                                                                <textarea wrap="off" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" rows="2" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'readonly'; ?>><?php
                                                                     $value = '';
 
                                                                     if ($check->targetCheckInputs)
@@ -174,7 +174,7 @@
                                                         <?php echo Yii::t('app', 'Result'); ?>
                                                     </th>
                                                     <td>
-                                                        <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'readonly'; ?>><?php if ($check->targetChecks) echo $check->targetChecks[0]->result; ?></textarea>
+                                                        <textarea wrap="off" name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'readonly'; ?>><?php if ($check->targetChecks) echo $check->targetChecks[0]->result; ?></textarea>
                                                     </td>
                                                 </tr>
                                                 <?php if ($check->results): ?>
