@@ -121,6 +121,14 @@
                                                 <?php if ($check->automated): ?>
                                                     <tr>
                                                         <th>
+                                                            <?php echo Yii::t('app', 'Override Target'); ?>
+                                                        </th>
+                                                        <td>
+                                                            <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[overrideTarget]" id="TargetCheckEditForm_<?php echo $check->id; ?>_overrideTarget" value="<?php if ($check->targetChecks) echo CHtml::encode($check->targetChecks[0]->override_target); ?>">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>
                                                             <?php echo Yii::t('app', 'Protocol'); ?>
                                                         </th>
                                                         <td>
@@ -182,7 +190,7 @@
                                                         <th>
                                                             <?php echo Yii::t('app', 'Insert Result'); ?>
                                                         </th>
-                                                        <td>
+                                                        <td class="text">
                                                             <ul class="results">
                                                                 <?php foreach ($check->results as $result): ?>
                                                                     <li>
@@ -202,7 +210,7 @@
                                                         <th>
                                                             <?php echo Yii::t('app', 'Solution'); ?>
                                                         </th>
-                                                        <td>
+                                                        <td class="text">
                                                             <ul class="solutions">
                                                                 <?php foreach ($check->solutions as $solution): ?>
                                                                     <li>
@@ -236,7 +244,7 @@
                                                     <th>
                                                         <?php echo Yii::t('app', 'Attachments'); ?>
                                                     </th>
-                                                    <td>
+                                                    <td class="text">
                                                         <div class="file-input" id="upload-link-<?php echo $check->id; ?>">
                                                             <a href="#"><?php echo Yii::t('app', 'New Attachment'); ?></a>
                                                             <input type="file" name="TargetCheckAttachmentUploadForm[attachment]" data-id="<?php echo $check->id; ?>" data-upload-url="<?php echo $this->createUrl('project/uploadattachment', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>">
@@ -266,7 +274,7 @@
                                                     <th>
                                                         <?php echo Yii::t('app', 'Result Rating'); ?>
                                                     </th>
-                                                    <td>
+                                                    <td class="text">
                                                         <ul class="rating">
                                                             <?php foreach(array( TargetCheck::RATING_HIDDEN, TargetCheck::RATING_INFO, TargetCheck::RATING_LOW_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_HIGH_RISK ) as $rating): ?>
                                                                 <li>

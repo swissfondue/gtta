@@ -877,12 +877,13 @@ class ProjectController extends Controller
                     'default' => true
                 ));
 
-            $targetCheck->language_id = $language->id;
-            $targetCheck->protocol    = $model->protocol;
-            $targetCheck->port        = $model->port;
-            $targetCheck->result      = $model->result;
-            $targetCheck->status      = $model->rating ? TargetCheck::STATUS_FINISHED : $targetCheck->status;
-            $targetCheck->rating      = $model->rating;
+            $targetCheck->language_id     = $language->id;
+            $targetCheck->override_target = $model->overrideTarget;
+            $targetCheck->protocol        = $model->protocol;
+            $targetCheck->port            = $model->port;
+            $targetCheck->result          = $model->result;
+            $targetCheck->status          = $model->rating ? TargetCheck::STATUS_FINISHED : $targetCheck->status;
+            $targetCheck->rating          = $model->rating;
             $targetCheck->save();
 
             $category->updateStats();

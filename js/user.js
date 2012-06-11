@@ -13,7 +13,7 @@ function User()
          * Save the check.
          */
         this.save = function (id, goToNext) {
-            var row, inputs, protocol, port, result, solutions, rating, data, url, nextRow;
+            var row, inputs, override, protocol, port, result, solutions, rating, data, url, nextRow;
 
             row = $('tr.content[data-id="' + id + '"]');
             url = row.attr('data-save-url');
@@ -27,6 +27,7 @@ function User()
                 }
             ).get();
 
+            override = $('input[name="TargetCheckEditForm_' + id + '[overrideTarget]"]', row).val();
             protocol = $('input[name="TargetCheckEditForm_' + id + '[protocol]"]', row).val();
             port     = $('input[name="TargetCheckEditForm_' + id + '[port]"]', row).val();
             result   = $('textarea[name="TargetCheckEditForm_' + id + '[result]"]', row).val();
@@ -47,10 +48,11 @@ function User()
 
             data = {};
 
-            data['TargetCheckEditForm_' + id + '[protocol]'] = protocol;
-            data['TargetCheckEditForm_' + id + '[port]']     = port;
-            data['TargetCheckEditForm_' + id + '[result]']   = result;
-            data['TargetCheckEditForm_' + id + '[rating]']   = rating;
+            data['TargetCheckEditForm_' + id + '[overrideTarget]'] = override;
+            data['TargetCheckEditForm_' + id + '[protocol]']       = protocol;
+            data['TargetCheckEditForm_' + id + '[port]']           = port;
+            data['TargetCheckEditForm_' + id + '[result]']         = result;
+            data['TargetCheckEditForm_' + id + '[rating]']         = rating;
 
             for (i = 0; i < inputs.length; i++)
                 data[inputs[i].name] = inputs[i].value;

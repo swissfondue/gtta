@@ -259,8 +259,12 @@ h3 a:hover {
 }
 
 .check-form td {
-    padding:8px 10px 8px 10px;
+    padding:4px 10px 4px 10px;
     border:none;
+}
+
+.check-form td.text {
+    padding:8px 10px 8px 10px;
 }
 
 .check-form,
