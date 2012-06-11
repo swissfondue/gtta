@@ -34,7 +34,7 @@
         <div class="navbar">
             <div class="navbar-inner">
                 <div class="container">
-                    <a class="brand" href="<?php echo Yii::app()->request->baseUrl; ?>"><?php echo Yii::app()->name; ?></a>
+                    <a class="brand" href="<?php echo Yii::app()->request->baseUrl; ?>/"><?php echo Yii::app()->name; ?></a>
 
                     <?php if (!Yii::app()->user->isGuest): ?>
                         <ul class="nav">
@@ -64,8 +64,8 @@
 
                                 $active = 'en';
 
-                                if (isset(Yii::app()->request->cookies['language']))
-                                    $active = Yii::app()->request->cookies['language']->value;
+                                if (isset(Yii::app()->language))
+                                    $active = Yii::app()->language;
 
                                 foreach ($languages as $code => $name):
                             ?>

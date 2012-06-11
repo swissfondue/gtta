@@ -146,9 +146,9 @@ return array(
 	'params' => array(
         'entriesPerPage' => 10,
         'attachments'    => array(
-            'path'    => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../uploads/attachments',
+            'path'    => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../files/attachments',
             'maxSize' => 100 * 1024 * 1024, // 100 megabytes
-        )
+        ),
     ),
 
     // default controller name

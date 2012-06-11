@@ -10,8 +10,12 @@
  * @property string $rating
  * @property string $status
  * @property string $target_file
+ * @property string $result_file
  * @property string $started
  * @property integer $pid
+ * @property integer $language_id
+ * @property string $protocol
+ * @property integer $port
  */
 class TargetCheck extends CActiveRecord
 {
@@ -57,8 +61,8 @@ class TargetCheck extends CActiveRecord
 	{
 		return array(
             array( 'target_id, check_id', 'required' ),
-            array( 'target_id, check_id, pid', 'numerical', 'integerOnly' => true ),
-            array( 'target_file', 'length', 'max' => 1000 ),
+            array( 'target_id, check_id, pid, port', 'numerical', 'integerOnly' => true ),
+            array( 'target_file, result_file, protocol', 'length', 'max' => 1000 ),
             array( 'status', 'in', 'range' => array( self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_FINISHED ) ),
             array( 'rating', 'in', 'range' => array( self::RATING_HIDDEN, self::RATING_INFO, self::RATING_LOW_RISK, self::RATING_MED_RISK, self::RATING_HIGH_RISK ) ),
             array( 'result, started', 'safe' ),
@@ -71,8 +75,19 @@ class TargetCheck extends CActiveRecord
 	public function relations()
 	{
 		return array(
-            'target' => array( self::BELONGS_TO, 'Target', 'target_id' ),
-            'check'  => array( self::BELONGS_TO, 'Check',  'check_id' ),
+            'target'   => array( self::BELONGS_TO, 'Target',   'target_id' ),
+            'check'    => array( self::BELONGS_TO, 'Check',    'check_id' ),
+            'language' => array( self::BELONGS_TO, 'Language', 'language_id' ),
 		);
 	}
+
+    /**
+     * Set automation error.
+     */
+    public function automationError($error)
+    {
+        $this->result = $error;
+        $this->status = TargetCheck::STATUS_FINISHED;
+        $this->save();
+    }
 }

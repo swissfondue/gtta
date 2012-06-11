@@ -868,9 +868,21 @@ class ProjectController extends Controller
                 $targetCheck->check_id  = $check->id;
             }
 
-            $targetCheck->result = $model->result;
-            $targetCheck->status = TargetCheck::STATUS_FINISHED;
-            $targetCheck->rating = $model->rating;
+            $language = Language::model()->findByAttributes(array(
+                'code' => Yii::app()->language
+            ));
+
+            if (!$language)
+                $language = Language::model()->findByAttributes(array(
+                    'default' => true
+                ));
+
+            $targetCheck->language_id = $language->id;
+            $targetCheck->protocol    = $model->protocol;
+            $targetCheck->port        = $model->port;
+            $targetCheck->result      = $model->result;
+            $targetCheck->status      = $model->rating ? TargetCheck::STATUS_FINISHED : $targetCheck->status;
+            $targetCheck->rating      = $model->rating;
             $targetCheck->save();
 
             $category->updateStats();
@@ -923,7 +935,6 @@ class ProjectController extends Controller
                     $input->check_input_id = $inputId;
                     $input->check_id       = $check->id;
                     $input->value          = $inputValue;
-                    $input->file           = '1.txt';
                     $input->save();
                 }
 
@@ -1405,6 +1416,17 @@ class ProjectController extends Controller
                 $targetCheck = new TargetCheck();
                 $targetCheck->target_id = $target->id;
                 $targetCheck->check_id  = $check->id;
+
+                $language = Language::model()->findByAttributes(array(
+                    'code' => Yii::app()->language
+                ));
+
+                if (!$language)
+                    $language = Language::model()->findByAttributes(array(
+                        'default' => true
+                    ));
+
+                $targetCheck->language_id = $language->id;
             }
 
             switch ($model->operation)
@@ -1413,17 +1435,23 @@ class ProjectController extends Controller
                     if (!in_array($targetCheck->status, array( TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED )))
                         throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
+                    // delete solutions
+                    TargetCheckSolution::model()->deleteAllByAttributes(array(
+                        'target_id' => $target->id,
+                        'check_id'  => $check->id
+                    ));
+
+                    $targetCheck->status  = TargetCheck::STATUS_IN_PROGRESS;
                     $targetCheck->result  = null;
                     $targetCheck->rating  = null;
-                    $targetCheck->status  = TargetCheck::STATUS_IN_PROGRESS;
-                    $targetCheck->started = new CDbExpression('NOW()');
+                    $targetCheck->started = null;
                     $targetCheck->pid     = null;
                     $targetCheck->save();
 
                     break;
 
                 case 'reset':
-                    if ($targetCheck->status != TargetCheck::STATUS_FINISHED)
+                    if (!in_array($targetCheck->status, array( TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED )))
                         throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
                     // delete solutions

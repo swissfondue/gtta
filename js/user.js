@@ -13,7 +13,7 @@ function User()
          * Save the check.
          */
         this.save = function (id, goToNext) {
-            var row, inputs, result, solutions, rating, data, url, nextRow;
+            var row, inputs, protocol, port, result, solutions, rating, data, url, nextRow;
 
             row = $('tr.content[data-id="' + id + '"]');
             url = row.attr('data-save-url');
@@ -27,7 +27,9 @@ function User()
                 }
             ).get();
 
-            result = $('textarea[name="TargetCheckEditForm_' + id + '[result]"]', row).val(),
+            protocol = $('input[name="TargetCheckEditForm_' + id + '[protocol]"]', row).val();
+            port     = $('input[name="TargetCheckEditForm_' + id + '[port]"]', row).val();
+            result   = $('textarea[name="TargetCheckEditForm_' + id + '[result]"]', row).val();
 
             solutions = $('input[name^="TargetCheckEditForm_' + id + '[solutions]"]:checked', row).map(
                 function () {
@@ -40,10 +42,15 @@ function User()
 
             rating = $('input[name="TargetCheckEditForm_' + id + '[rating]"]:checked', row).val();
 
+            if (!rating)
+                rating = undefined;
+
             data = {};
 
-            data['TargetCheckEditForm_' + id + '[result]'] = result;
-            data['TargetCheckEditForm_' + id + '[rating]'] = rating;
+            data['TargetCheckEditForm_' + id + '[protocol]'] = protocol;
+            data['TargetCheckEditForm_' + id + '[port]']     = port;
+            data['TargetCheckEditForm_' + id + '[result]']   = result;
+            data['TargetCheckEditForm_' + id + '[rating]']   = rating;
 
             for (i = 0; i < inputs.length; i++)
                 data[inputs[i].name] = inputs[i].value;
@@ -70,7 +77,8 @@ function User()
                         return;
                     }
 
-                    $('tr.header[data-id="' + id + '"] > td.status').html('<span class="label ' + (ratings[rating].class ? ratings[rating].class : '') + '">' + ratings[rating].text + '</span>');
+                    if (rating)
+                        $('tr.header[data-id="' + id + '"] > td.status').html('<span class="label ' + (ratings[rating].class ? ratings[rating].class : '') + '">' + ratings[rating].text + '</span>');
 
                     row.hide();
 

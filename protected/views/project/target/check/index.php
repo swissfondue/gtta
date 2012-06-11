@@ -76,7 +76,7 @@
                                         &nbsp;
                                     <?php endif; ?>
 
-                                    <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED): ?>
+                                    <?php if ($check->targetChecks && in_array($check->targetChecks[0]->status, array( TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED ))): ?>
                                         <a href="#reset" title="<?php echo Yii::t('app', 'Reset'); ?>" onclick="user.check.reset(<?php echo $check->id; ?>);"><i class="icon icon-refresh"></i></a>
                                     <?php else: ?>
                                         <span class="disabled"><i class="icon icon-refresh" title="<?php echo Yii::t('app', 'Reset'); ?>"></i></span>
@@ -118,6 +118,24 @@
                                                         </td>
                                                     </tr>
                                                 <?php endif; ?>
+                                                <?php if ($check->automated): ?>
+                                                    <tr>
+                                                        <th>
+                                                            <?php echo Yii::t('app', 'Protocol'); ?>
+                                                        </th>
+                                                        <td>
+                                                            <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[protocol]" id="TargetCheckEditForm_<?php echo $check->id; ?>_protocol" value="<?php if ($check->targetChecks) echo CHtml::encode($check->targetChecks[0]->protocol); ?>">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>
+                                                            <?php echo Yii::t('app', 'Port'); ?>
+                                                        </th>
+                                                        <td>
+                                                            <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[port]" id="TargetCheckEditForm_<?php echo $check->id; ?>_port" value="<?php if ($check->targetChecks) echo CHtml::encode($check->targetChecks[0]->port); ?>">
+                                                        </td>
+                                                    </tr>
+                                                <?php endif; ?>
                                                 <?php if ($check->inputs && $check->automated): ?>
                                                     <?php foreach ($check->inputs as $input): ?>
                                                         <tr>
@@ -125,7 +143,7 @@
                                                                 <?php echo CHtml::encode($input->localizedName); ?>
                                                             </th>
                                                             <td>
-                                                                <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" rows="2" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>"><?php
+                                                                <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" rows="2" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'readonly'; ?>><?php
                                                                     $value = '';
 
                                                                     if ($check->targetCheckInputs)
@@ -156,7 +174,7 @@
                                                         <?php echo Yii::t('app', 'Result'); ?>
                                                     </th>
                                                     <td>
-                                                        <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result"><?php if ($check->targetChecks) echo $check->targetChecks[0]->result; ?></textarea>
+                                                        <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'readonly'; ?>><?php if ($check->targetChecks) echo $check->targetChecks[0]->result; ?></textarea>
                                                     </td>
                                                 </tr>
                                                 <?php if ($check->results): ?>
@@ -168,7 +186,11 @@
                                                             <ul class="results">
                                                                 <?php foreach ($check->results as $result): ?>
                                                                     <li>
-                                                                        <a href="#insert" onclick="$('#TargetCheckEditForm_<?php echo $check->id; ?>_result').val($('#TargetCheckEditForm_<?php echo $check->id; ?>_result').val() + this.innerHTML + '\n');"><?php echo CHtml::encode($result->localizedResult); ?></a>
+                                                                        <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS): ?>
+                                                                            <a href="#insert"><?php echo CHtml::encode($result->localizedResult); ?></a>
+                                                                        <?php else: ?>
+                                                                            <a href="#insert" onclick="$('#TargetCheckEditForm_<?php echo $check->id; ?>_result').val($('#TargetCheckEditForm_<?php echo $check->id; ?>_result').val() + this.innerHTML + '\n');"><?php echo CHtml::encode($result->localizedResult); ?></a>
+                                                                        <?php endif; ?>
                                                                     </li>
                                                                 <?php endforeach; ?>
                                                             </ul>
@@ -257,15 +279,17 @@
                                                         </ul>
                                                     </td>
                                                 </tr>
-                                                <tr>
-                                                    <td>&nbsp;</td>
-                                                    <td>
-                                                        <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, false);"><?php echo Yii::t('app', 'Save'); ?></button>&nbsp;
-                                                        <?php if ($counter < count($checks) - 1): ?>
-                                                            <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, true);"><?php echo Yii::t('app', 'Save & Next'); ?></button>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                </tr>
+                                                <?php if (!$check->targetChecks || $check->targetChecks && $check->targetChecks[0]->status != TargetCheck::STATUS_IN_PROGRESS): ?>
+                                                    <tr>
+                                                        <td>&nbsp;</td>
+                                                        <td>
+                                                            <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, false);"><?php echo Yii::t('app', 'Save'); ?></button>&nbsp;
+                                                            <?php if ($counter < count($checks) - 1): ?>
+                                                                <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, true);"><?php echo Yii::t('app', 'Save & Next'); ?></button>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                    </tr>
+                                                <?php endif; ?>
                                             </tbody>
                                         </table>
                                     </div>
