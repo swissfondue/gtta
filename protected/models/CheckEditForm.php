@@ -60,6 +60,7 @@ class CheckEditForm extends CFormModel
             array( 'name, script', 'length', 'max' => 1000 ),
             array( 'advanced, automated, multipleSolutions', 'boolean' ),
             array( 'localizedItems, backgroundInfo, manualInfo, impactInfo, script', 'safe' ),
+            array( 'automated', 'checkScript' ),
 		);
 	}
     
@@ -78,4 +79,18 @@ class CheckEditForm extends CFormModel
             'automated'      => Yii::t('app', 'Automated'),
 		);
 	}
+
+    /**
+     * Check if script value is set.
+     */
+    public function checkScript($attribute, $params)
+    {
+        if ($this->automated && !$this->script)
+        {
+            $this->addError('script', Yii::t('app', 'Script cannot be blank.'));
+            return false;
+        }
+
+        return true;
+    }
 }

@@ -110,10 +110,13 @@
             </div>
         </div>
 
-        <div class="control-group <?php if (!$model->automated) echo 'hidden-object'; ?>" id="script-input">
-            <label class="control-label" for="CheckEditForm_script"><?php echo Yii::t('app', 'Script File Name'); ?></label>
+        <div class="control-group <?php if (!$model->automated) echo 'hidden-object'; ?> <?php if ($model->getError('script')) echo 'error'; ?>" id="script-input">
+            <label class="control-label" for="CheckEditForm_script"><?php echo Yii::t('app', 'Script'); ?></label>
             <div class="controls">
                 <input type="text" class="input-xlarge" id="CheckEditForm_script" name="CheckEditForm[script]" value="<?php echo CHtml::encode($model->script); ?>">
+                <?php if ($model->getError('script')): ?>
+                    <p class="help-block"><?php echo $model->getError('script'); ?></p>
+                <?php endif; ?>
             </div>
         </div>
 
