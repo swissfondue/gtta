@@ -102,6 +102,26 @@
         <div>
             <hr>
         </div>
+        
+        <div class="control-group <?php if ($model->getError('protocol')) echo 'error'; ?>" id="protocol-input">
+            <label class="control-label" for="CheckEditForm_protocol"><?php echo Yii::t('app', 'Protocol'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="CheckEditForm_protocol" name="CheckEditForm[protocol]" value="<?php echo CHtml::encode($model->protocol); ?>">
+                <?php if ($model->getError('protocol')): ?>
+                    <p class="help-block"><?php echo $model->getError('protocol'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <div class="control-group <?php if ($model->getError('port')) echo 'error'; ?>" id="port-input">
+            <label class="control-label" for="CheckEditForm_port"><?php echo Yii::t('app', 'Port'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="CheckEditForm_port" name="CheckEditForm[port]" value="<?php echo $model->port; ?>">
+                <?php if ($model->getError('port')): ?>
+                    <p class="help-block"><?php echo $model->getError('port'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
 
         <div class="control-group">
             <label class="control-label" for="CheckEditForm_automated"><?php echo Yii::t('app', 'Automated'); ?></label>

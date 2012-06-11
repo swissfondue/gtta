@@ -26,6 +26,16 @@ class CheckEditForm extends CFormModel
     public $manualInfo;
 
     /**
+     * @var string protocol.
+     */
+    public $protocol;
+
+    /**
+     * @var integer port.
+     */
+    public $port;
+
+    /**
      * @var string script.
      */
     public $script;
@@ -57,7 +67,8 @@ class CheckEditForm extends CFormModel
 	{
 		return array(
 			array( 'name', 'required' ),
-            array( 'name, script', 'length', 'max' => 1000 ),
+            array( 'name, script, protocol', 'length', 'max' => 1000 ),
+            array( 'port', 'numerical', 'integerOnly' => true, 'min' => 0, 'max' => 1000 ),
             array( 'advanced, automated, multipleSolutions', 'boolean' ),
             array( 'localizedItems, backgroundInfo, manualInfo, impactInfo, script', 'safe' ),
             array( 'automated', 'checkScript' ),
@@ -77,6 +88,8 @@ class CheckEditForm extends CFormModel
             'script'         => Yii::t('app', 'Script'),
             'advanced'       => Yii::t('app', 'Advanced'),
             'automated'      => Yii::t('app', 'Automated'),
+            'protocol'       => Yii::t('app', 'Protocol'),
+            'port'           => Yii::t('app', 'Port'),
 		);
 	}
 

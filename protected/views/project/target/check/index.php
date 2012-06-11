@@ -127,22 +127,26 @@
                                                             <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[overrideTarget]" id="TargetCheckEditForm_<?php echo $check->id; ?>_overrideTarget" value="<?php if ($check->targetChecks) echo CHtml::encode($check->targetChecks[0]->override_target); ?>">
                                                         </td>
                                                     </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <?php echo Yii::t('app', 'Protocol'); ?>
-                                                        </th>
-                                                        <td>
-                                                            <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[protocol]" id="TargetCheckEditForm_<?php echo $check->id; ?>_protocol" value="<?php if ($check->targetChecks) echo CHtml::encode($check->targetChecks[0]->protocol); ?>">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <?php echo Yii::t('app', 'Port'); ?>
-                                                        </th>
-                                                        <td>
-                                                            <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[port]" id="TargetCheckEditForm_<?php echo $check->id; ?>_port" value="<?php if ($check->targetChecks) echo CHtml::encode($check->targetChecks[0]->port); ?>">
-                                                        </td>
-                                                    </tr>
+                                                    <?php if ($check->protocol): ?>
+                                                        <tr>
+                                                            <th>
+                                                                <?php echo Yii::t('app', 'Protocol'); ?>
+                                                            </th>
+                                                            <td>
+                                                                <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[protocol]" id="TargetCheckEditForm_<?php echo $check->id; ?>_protocol" value="<?php echo CHtml::encode($check->targetChecks ? $check->targetChecks[0]->protocol : $check->protocol); ?>">
+                                                            </td>
+                                                        </tr>
+                                                    <?php endif; ?>
+                                                    <?php if ($check->port): ?>
+                                                        <tr>
+                                                            <th>
+                                                                <?php echo Yii::t('app', 'Port'); ?>
+                                                            </th>
+                                                            <td>
+                                                                <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[port]" id="TargetCheckEditForm_<?php echo $check->id; ?>_port" value="<?php echo $check->targetChecks ? $check->targetChecks[0]->port : $check->port; ?>">
+                                                            </td>
+                                                        </tr>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
                                                 <?php if ($check->inputs && $check->automated): ?>
                                                     <?php foreach ($check->inputs as $input): ?>

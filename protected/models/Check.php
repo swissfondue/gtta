@@ -14,6 +14,8 @@
  * @property boolean $automated
  * @property string $script
  * @property boolean $multiple_solutions
+ * @property string $protocol
+ * @property integer $port
  */
 class Check extends CActiveRecord
 {
@@ -42,8 +44,8 @@ class Check extends CActiveRecord
 	{
 		return array(
             array( 'name, check_category_id', 'required' ),
-            array( 'name, script', 'length', 'max' => 1000 ),
-            array( 'check_category_id', 'numerical', 'integerOnly' => true ),
+            array( 'name, script, protocol', 'length', 'max' => 1000 ),
+            array( 'check_category_id, port', 'numerical', 'integerOnly' => true ),
             array( 'advanced, automated, multiple_solutions', 'boolean' ),
 		);
 	}

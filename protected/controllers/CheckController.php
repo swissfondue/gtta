@@ -351,6 +351,8 @@ class CheckController extends Controller
             $model->script            = $check->script;
             $model->advanced          = $check->advanced;
             $model->automated         = $check->automated;
+            $model->protocol          = $check->protocol;
+            $model->port              = $check->port;
             $model->multipleSolutions = $check->multiple_solutions;
 
             $checkL10n = CheckL10n::model()->findAllByAttributes(array(
@@ -395,6 +397,8 @@ class CheckController extends Controller
                 $check->advanced           = $model->advanced;
                 $check->automated          = $model->automated;
                 $check->multiple_solutions = $model->multipleSolutions;
+                $check->protocol           = $model->protocol;
+                $check->port               = $model->port;
 
                 $check->save();
 
