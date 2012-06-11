@@ -174,7 +174,7 @@
                                                         <?php echo Yii::t('app', 'Result'); ?>
                                                     </th>
                                                     <td>
-                                                        <textarea wrap="off" name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'readonly'; ?>><?php if ($check->targetChecks) echo $check->targetChecks[0]->result; ?></textarea>
+                                                        <textarea wrap="off" name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'readonly'; ?>><?php if ($check->targetChecks) echo $check->targetChecks[0]->result; ?></textarea>
                                                     </td>
                                                 </tr>
                                                 <?php if ($check->results): ?>

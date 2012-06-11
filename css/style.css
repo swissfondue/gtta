@@ -278,7 +278,7 @@ h3 a:hover {
     width:98%;
 }
 
-.check-form textarea {
+.check-form textarea.result {
     font-family:monospace;
 }
 
