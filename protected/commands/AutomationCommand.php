@@ -24,10 +24,7 @@ class AutomationCommand extends CConsoleCommand
         ));
 
         foreach ($checks as $check)
-        {
-            echo Yii::app()->params['yiicPath'] . '/yiic automation ' . $check->target_id . ' ' . $check->check_id . ' &' . "\n";
             exec(Yii::app()->params['yiicPath'] . '/yiic automation ' . $check->target_id . ' ' . $check->check_id . ' &');
-        }
     }
 
     /**
@@ -182,8 +179,6 @@ class AutomationCommand extends CConsoleCommand
                 $command[] = $tempPath . '/' . $input;
 
             $command = implode(' ', $command);
-
-            echo $command . "\n";
 
             $output = array();
             exec($command, $output);
