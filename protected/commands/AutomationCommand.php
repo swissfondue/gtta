@@ -124,7 +124,7 @@ class AutomationCommand extends CConsoleCommand
             $targetFile = fopen($tempPath . '/' . $check->target_file, 'w');
 
             // base data
-            fwrite($targetFile, $target->host          . "\n");
+            fwrite($targetFile, $check->override_target ? $check->override_target : $target->host . "\n");
             fwrite($targetFile, $check->protocol       . "\n");
             fwrite($targetFile, $check->port           . "\n");
             fwrite($targetFile, $check->language->code . "\n");
