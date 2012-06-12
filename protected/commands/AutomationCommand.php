@@ -24,7 +24,7 @@ class AutomationCommand extends CConsoleCommand
         ));
 
         foreach ($checks as $check)
-            exec(Yii::app()->params['yiicPath'] . '/yiic automation ' . $check->target_id . ' ' . $check->check_id . ' &');
+            exec(Yii::app()->params['yiicPath'] . '/yiic automation ' . $check->target_id . ' ' . $check->check_id . ' > /dev/null 2>&1 &');
     }
 
     /**
