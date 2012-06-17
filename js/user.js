@@ -43,24 +43,36 @@ function User()
 
             rating = $('input[name="TargetCheckEditForm_' + id + '[rating]"]:checked', row).val();
 
+            if (!override)
+                override = '';
+
+            if (!protocol)
+                protocol = '';
+
+            if (!port)
+                port = '';
+
+            if (!result)
+                result = '';
+
             if (!rating)
-                rating = undefined;
+                rating = '';
 
-            data = {};
+            data = [];
 
-            data['TargetCheckEditForm_' + id + '[overrideTarget]'] = override;
-            data['TargetCheckEditForm_' + id + '[protocol]']       = protocol;
-            data['TargetCheckEditForm_' + id + '[port]']           = port;
-            data['TargetCheckEditForm_' + id + '[result]']         = result;
-            data['TargetCheckEditForm_' + id + '[rating]']         = rating;
+            data.push({ name : 'TargetCheckEditForm_' + id + '[overrideTarget]', value : override });
+            data.push({ name : 'TargetCheckEditForm_' + id + '[protocol]',       value : protocol });
+            data.push({ name : 'TargetCheckEditForm_' + id + '[port]',           value : port     });
+            data.push({ name : 'TargetCheckEditForm_' + id + '[result]',         value : result   });
+            data.push({ name : 'TargetCheckEditForm_' + id + '[rating]',         value : rating   });
 
             for (i = 0; i < inputs.length; i++)
-                data[inputs[i].name] = inputs[i].value;
+                data.push(inputs[i]);
 
             for (i = 0; i < solutions.length; i++)
-                data[solutions[i].name] = solutions[i].value;
+                data.push(solutions[i]);
 
-            data['YII_CSRF_TOKEN'] = system.csrf;
+            data.push({ name : 'YII_CSRF_TOKEN', value : system.csrf });
 
             $.ajax({
                 dataType : 'json',
@@ -330,6 +342,79 @@ function User()
         this.reset = function (id) {
             if (confirm(system.translate('Are you sure that you want to reset this check?')))
                 _check._control(id, 'reset');
+        };
+    };
+
+    /**
+     * Project object.
+     */
+    this.project = new function () {
+        var _project = this;
+
+        /**
+         * Report dialog.
+         */
+        this.reportDialog = new function () {
+            var _reportDialog = this;
+
+            /**
+             * Show dialog.
+             */
+            this.show = function () {
+                $('ul.report-target-list > li > label > input').attr('checked', true);
+                $('#project-report > .modal-body > .alert').hide();
+                $('#project-report').modal('show');
+            };
+
+            /**
+             * Generate button handler.
+             */
+            this.generate = function () {
+                var checked = $('ul.report-target-list > li > label > input:checked');
+
+                if (checked && checked.length > 0)
+                {
+                    $('#project-report > .modal-body > .alert').hide();
+                    $('#project-report').modal('hide');
+
+                    $('#project-report > .modal-body > form').submit();
+                }
+                else
+                    $('#project-report > .modal-body > .alert').show();
+            };
+        };
+
+        /**
+         * Comparison report dialog.
+         */
+        this.comparisonReportDialog = new function () {
+            var _comparisonReportDialog = this;
+
+            /**
+             * Show dialog.
+             */
+            this.show = function () {
+                $('#ProjectComparisonForm_projectId').val(0);
+                $('#project-comparison-report > .modal-body > .alert').hide();
+                $('#project-comparison-report').modal('show');
+            };
+
+            /**
+             * Generate button handler.
+             */
+            this.generate = function () {
+                var selected = $('#ProjectComparisonForm_projectId').val();
+
+                if (selected != 0)
+                {
+                    $('#project-comparison-report > .modal-body > .alert').hide();
+                    $('#project-comparison-report').modal('hide');
+
+                    $('#project-comparison-report > .modal-body > form').submit();
+                }
+                else
+                    $('#project-comparison-report > .modal-body > .alert').show();
+            };
         };
     };
 }

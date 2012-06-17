@@ -13,6 +13,8 @@ return array(
 	'import' => array(
 		'application.models.*',
 		'application.components.*',
+        'application.extensions.PHPRtfLite.*',
+        'application.extensions.PHPRtfLite.PHPRtfLite.*',
 	),
 
 	// application components
@@ -42,6 +44,8 @@ return array(
                 'project/<id:\d+>/edit'                                                                      => 'project/edit',
                 'project/new'                                                                                => 'project/edit',
                 'project/control'                                                                            => 'project/control',
+                'project/<id:\d+>/report'                                                                    => 'project/report',
+                'project/<id:\d+>/compare'                                                                   => 'project/comparisonreport',
                 'project/<id:\d+>/details/<page:\d+>'                                                        => 'project/details',
                 'project/<id:\d+>/details'                                                                   => 'project/details',
                 'project/<id:\d+>/detail/<detail:\d+>/edit'                                                  => 'project/editdetail',
@@ -67,9 +71,6 @@ return array(
                 'client/<id:\d+>/edit' => 'client/edit',
                 'client/new'           => 'client/edit',
                 'client/control'       => 'client/control',
-
-                // reports
-                'reports' => 'report/index',
 
                 // checks
                 'checks/<page:\d+>'                     => 'check/index',
@@ -149,6 +150,8 @@ return array(
             'path'    => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../files/attachments',
             'maxSize' => 100 * 1024 * 1024, // 100 megabytes
         ),
+
+        'tmpPath' => '/tmp',
     ),
 
     // default controller name

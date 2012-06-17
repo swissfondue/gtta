@@ -12,6 +12,13 @@
     </div>
 
     <?php if (User::checkRole(User::ROLE_USER)): ?>
+        <div class="btn-group pull-right buttons">
+            <a class="btn dropdown-toggle" href="#report" <?php if (count($targets) == 0) echo 'disabled'; else echo 'data-toggle="dropdown"'; ?>><?php echo Yii::t('app', 'Report'); ?> <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="#project-report" onclick="user.project.reportDialog.show();"><?php echo Yii::t('app', 'Project Report...'); ?></a></li>
+                <li><a href="#project-comparison-report" onclick="user.project.comparisonReportDialog.show();"><?php echo Yii::t('app', 'Comparison Report...'); ?></a></li>
+            </ul>
+        </div>
         <div class="pull-right buttons">
             <a class="btn" href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'New Target'); ?></a>
         </div>
@@ -265,3 +272,76 @@
         </div>
     </div>
 </div>
+
+<?php if (User::checkRole(User::ROLE_USER)): ?>
+    <div class="modal fade hidden-object" id="project-report">
+        <div class="modal-header">
+            <a href="#close" class="close" data-dismiss="modal">×</a>
+            <h3><?php echo Yii::t('app', 'Project Report'); ?></h3>
+        </div>
+
+        <div class="modal-body">
+            <div class="alert alert-error hidden-object">
+                <?php echo Yii::t('app', 'Please select at least 1 target.'); ?>
+            </div>
+
+            <p>
+                <?php echo Yii::t('app', 'Please select targets you want to see in the report.'); ?>
+            </p>
+
+            <form action="<?php echo $this->createUrl('project/report', array( 'id' => $project->id )); ?>" method="post">
+                <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
+
+                <ul class="report-target-list">
+                    <?php foreach ($targets as $target): ?>
+                        <li>
+                            <label class="checkbox">
+                                <input type="checkbox" id="ProjectReportForm_targetIds_<?php echo $target->id; ?>" name="ProjectReportForm[targetIds][]" value="<?php echo $target->id; ?>" checked>
+                                <?php echo $target->host; ?>
+                            </label>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+            <a href="#generate" class="btn" onclick="user.project.reportDialog.generate();"><?php echo Yii::t('app', 'Generate'); ?></a>
+            <a href="#cancel" class="btn" data-dismiss="modal"><?php echo Yii::t('app', 'Cancel'); ?></a>
+        </div>
+    </div>
+
+    <div class="modal fade hidden-object" id="project-comparison-report">
+        <div class="modal-header">
+            <a href="#close" class="close" data-dismiss="modal">×</a>
+            <h3><?php echo Yii::t('app', 'Project Comparison Report'); ?></h3>
+        </div>
+
+        <div class="modal-body">
+            <div class="alert alert-error hidden-object">
+                <?php echo Yii::t('app', 'Please select a project.'); ?>
+            </div>
+
+            <p>
+                <?php echo Yii::t('app', 'Please select a project you want to compare with the current project.'); ?>
+            </p>
+
+            <form action="<?php echo $this->createUrl('project/comparisonreport', array( 'id' => $project->id )); ?>" method="post">
+                <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
+
+                <select name="ProjectComparisonForm[projectId]" id="ProjectComparisonForm_projectId">
+                    <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
+
+                    <?php foreach ($clientProjects as $clientProject): ?>
+                        <option value="<?php echo $clientProject->id; ?>"><?php echo $clientProject->name; ?> (<?php echo $clientProject->year; ?>)</option>
+                    <?php endforeach; ?>
+                </select>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+            <a href="#generate" class="btn" onclick="user.project.comparisonReportDialog.generate();"><?php echo Yii::t('app', 'Generate'); ?></a>
+            <a href="#cancel" class="btn" data-dismiss="modal"><?php echo Yii::t('app', 'Cancel'); ?></a>
+        </div>
+    </div>
+<?php endif; ?>

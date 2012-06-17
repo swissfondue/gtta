@@ -23,7 +23,7 @@ function System()
             html    : '<a class="close" data-dismiss="alert">×</a>' + message
         }).appendTo('.message-container');
 
-        $('html, body').animate({scrollTop:0}, 'fast', function () {
+        $('html, body').animate({ scrollTop : 0 }, 'fast', function () {
             $('.message-container > div').fadeIn('slow');
 
             if (_system._messageTimeout)

@@ -104,7 +104,7 @@ hr {
 .active-header {
     margin:0;
     padding:0;
-    overflow:hidden;
+    overflow:visible;
 }
 
 .active-header .nav-pills {
@@ -381,4 +381,8 @@ h3 a:hover {
 .disabled {
     opacity:0.5;
     filter:alpha(opacity=50);
+}
+
+.report-target-list {
+    list-style:none;
 }
