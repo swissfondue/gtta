@@ -885,6 +885,21 @@ class ProjectController extends Controller
                     'default' => true
                 ));
 
+            if (!$model->overrideTarget)
+                $model->overrideTarget = NULL;
+
+            if (!$model->protocol)
+                $model->protocol = NULL;
+
+            if (!$model->port)
+                $model->port = NULL;
+
+            if (!$model->result)
+                $model->result = NULL;
+
+            if (!$model->rating)
+                $model->rating = NULL;
+
             $targetCheck->language_id     = $language->id;
             $targetCheck->override_target = $model->overrideTarget;
             $targetCheck->protocol        = $model->protocol;
