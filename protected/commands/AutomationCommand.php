@@ -47,8 +47,6 @@ class AutomationCommand extends CConsoleCommand
 
         foreach ($checks as $check)
         {
-            echo "exec\n";
-
             $this->_exec(
                 Yii::app()->params['yiicPath'] . '/' .
                 ( $this->_isWindows() ? 'yiic.bat' : 'yiic' ) .
