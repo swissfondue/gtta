@@ -14,6 +14,28 @@ class AutomationCommand extends CConsoleCommand
     }
 
     /**
+     * Check OS.
+     */
+    private function _isWindows()
+    {
+        return substr(php_uname(), 0, 7) == 'Windows';
+    }
+
+    /**
+     * Run a command.
+     */
+    private function _exec($cmd)
+    {
+        if ($this->_isWindows())
+        {
+            $shell = new COM('WScript.Shell');
+            $shell->Run($cmd, 0, false);
+        }
+        else
+            exec($cmd . ' > /dev/null 2>&1 &');
+    }
+
+    /**
      * Process starting checks.
      */
     private function _processStarting()
@@ -24,7 +46,15 @@ class AutomationCommand extends CConsoleCommand
         ));
 
         foreach ($checks as $check)
-            exec(Yii::app()->params['yiicPath'] . '/yiic automation ' . $check->target_id . ' ' . $check->check_id . ' > /dev/null 2>&1 &');
+        {
+            echo "exec\n";
+
+            $this->_exec(
+                Yii::app()->params['yiicPath'] . '/' .
+                ( $this->_isWindows() ? 'yiic.bat' : 'yiic' ) .
+                ' automation ' . $check->target_id . ' ' . $check->check_id
+            );
+        }
     }
 
     /**
@@ -225,7 +255,12 @@ class AutomationCommand extends CConsoleCommand
         
         if (flock($fp, LOCK_EX | LOCK_NB))
         {
-            $this->_automation();
+            for ($i = 0; $i < 10; $i++)
+            {
+                $this->_automation();
+                sleep(5);
+            }
+
             flock($fp, LOCK_UN);
         }
         
