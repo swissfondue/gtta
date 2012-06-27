@@ -152,7 +152,7 @@ class AutomationCommand extends CConsoleCommand
             $targetFile = fopen($tempPath . '/' . $check->target_file, 'w');
 
             // base data
-            fwrite($targetFile, $check->override_target ? $check->override_target : $target->host . "\n");
+            fwrite($targetFile, ($check->override_target ? $check->override_target : $target->host) . "\n");
             fwrite($targetFile, $check->protocol       . "\n");
             fwrite($targetFile, $check->port           . "\n");
             fwrite($targetFile, $check->language->code . "\n");
@@ -209,7 +209,7 @@ class AutomationCommand extends CConsoleCommand
             $command = implode(' ', $command);
 
             $output = array();
-            exec($command, $output);
+            exec($command . ' 2>&1', $output);
 
             $fileOutput = file_get_contents($tempPath . '/' . $check->result_file);
 
