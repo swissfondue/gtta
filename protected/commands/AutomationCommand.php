@@ -214,6 +214,10 @@ class AutomationCommand extends CConsoleCommand
             $fileOutput = file_get_contents($tempPath . '/' . $check->result_file);
 
             $check->result = $fileOutput ? $fileOutput : implode("\n", $output);
+
+            if (!$check->result)
+                $check->result = 'No output.';
+
             $check->status = TargetCheck::STATUS_FINISHED;
             $check->save();
         }
