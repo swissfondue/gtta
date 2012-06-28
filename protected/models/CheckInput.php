@@ -10,9 +10,15 @@
  * @property string $description
  * @property string $value
  * @property integer $sort_order
+ * @property integer $max_sort_order
  */
 class CheckInput extends CActiveRecord
-{   
+{
+    /**
+     * @var integer max sort order.
+     */
+    public $max_sort_order;
+
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.

@@ -689,6 +689,18 @@ class CheckController extends Controller
             foreach ($checkResultL10n as $crl)
                 $model->localizedItems[$crl->language_id]['result'] = $crl->result;
         }
+        else
+        {
+            // increment last sort_order, if any
+            $criteria = new CDbCriteria();
+            $criteria->select = 'MAX(sort_order) as max_sort_order';
+            $criteria->addColumnCondition(array( 'check_id' => $check->id ));
+
+            $maxOrder = CheckResult::model()->find($criteria);
+
+            if ($maxOrder && $maxOrder->max_sort_order !== NULL)
+                $model->sortOrder = $maxOrder->max_sort_order + 1;
+        }
 
 		// collect user input data
 		if (isset($_POST['CheckResultEditForm']))
@@ -970,6 +982,18 @@ class CheckController extends Controller
 
             foreach ($checkSolutionL10n as $csl)
                 $model->localizedItems[$csl->language_id]['solution'] = $csl->solution;
+        }
+        else
+        {
+            // increment last sort_order, if any
+            $criteria = new CDbCriteria();
+            $criteria->select = 'MAX(sort_order) as max_sort_order';
+            $criteria->addColumnCondition(array( 'check_id' => $check->id ));
+
+            $maxOrder = CheckSolution::model()->find($criteria);
+
+            if ($maxOrder && $maxOrder->max_sort_order !== NULL)
+                $model->sortOrder = $maxOrder->max_sort_order + 1;
         }
 
 		// collect user input data
@@ -1258,6 +1282,18 @@ class CheckController extends Controller
                 $model->localizedItems[$cil->language_id]['description'] = $cil->description;
                 $model->localizedItems[$cil->language_id]['value']       = $cil->value;
             }
+        }
+        else
+        {
+            // increment last sort_order, if any
+            $criteria = new CDbCriteria();
+            $criteria->select = 'MAX(sort_order) as max_sort_order';
+            $criteria->addColumnCondition(array( 'check_id' => $check->id ));
+
+            $maxOrder = CheckInput::model()->find($criteria);
+
+            if ($maxOrder && $maxOrder->max_sort_order !== NULL)
+                $model->sortOrder = $maxOrder->max_sort_order + 1;
         }
 
 		// collect user input data
