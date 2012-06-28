@@ -57,7 +57,7 @@ class CheckResult extends CActiveRecord
     public function getLocalizedResult()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->result ? $this->l10n[0]->result : $this->result;
+            return $this->l10n[0]->result == NULL ? $this->l10n[0]->result : $this->result;
 
         return $this->result;
     }

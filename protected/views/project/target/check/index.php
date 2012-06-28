@@ -93,7 +93,7 @@
                                                         <th>
                                                             <?php echo Yii::t('app', 'Background Info'); ?>
                                                         </th>
-                                                        <td>
+                                                        <td class="text">
                                                             <?php echo CHtml::encode($check->localizedBackgroundInfo); ?>
                                                         </td>
                                                     </tr>
@@ -103,7 +103,7 @@
                                                         <th>
                                                             <?php echo Yii::t('app', 'Impact Info'); ?>
                                                         </th>
-                                                        <td>
+                                                        <td class="text">
                                                             <?php echo CHtml::encode($check->localizedImpactInfo); ?>
                                                         </td>
                                                     </tr>
@@ -113,7 +113,7 @@
                                                         <th>
                                                             <?php echo Yii::t('app', 'Manual Info'); ?>
                                                         </th>
-                                                        <td>
+                                                        <td class="text">
                                                             <?php echo CHtml::encode($check->localizedManualInfo); ?>
                                                         </td>
                                                     </tr>
@@ -156,7 +156,7 @@
                                                             </th>
                                                             <td>
                                                                 <textarea wrap="off" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" rows="2" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'readonly'; ?>><?php
-                                                                    $value = '';
+                                                                    $value = NULL;
 
                                                                     if ($check->targetCheckInputs)
                                                                         foreach ($check->targetCheckInputs as $inputValue)
@@ -166,10 +166,10 @@
                                                                                 break;
                                                                             }
 
-                                                                    if (!$value && $input->localizedValue)
+                                                                    if ($value == NULL && $input->localizedValue != NULL)
                                                                         $value = $input->localizedValue;
 
-                                                                    if ($value)
+                                                                    if ($value != NULL)
                                                                         echo CHtml::encode($value);
                                                                 ?></textarea>
                                                                 <?php if ($input->localizedDescription): ?>

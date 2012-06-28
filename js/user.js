@@ -13,10 +13,11 @@ function User()
          * Save the check.
          */
         this.save = function (id, goToNext) {
-            var row, inputs, override, protocol, port, result, solutions, rating, data, url, nextRow;
+            var row, headerRow, inputs, override, protocol, port, result, solutions, rating, data, url, nextRow;
 
-            row = $('tr.content[data-id="' + id + '"]');
-            url = row.attr('data-save-url');
+            headerRow = $('tr.header[data-id="' + id + '"]');
+            row       = $('tr.content[data-id="' + id + '"]');
+            url       = row.attr('data-save-url');
 
             inputs = $('textarea[name^="TargetCheckEditForm_' + id + '[inputs]"]', row).map(
                 function () {
@@ -43,19 +44,19 @@ function User()
 
             rating = $('input[name="TargetCheckEditForm_' + id + '[rating]"]:checked', row).val();
 
-            if (!override)
+            if (override == undefined)
                 override = '';
 
-            if (!protocol)
+            if (protocol == undefined)
                 protocol = '';
 
-            if (!port)
+            if (port == undefined)
                 port = '';
 
-            if (!result)
+            if (result == undefined)
                 result = '';
 
-            if (!rating)
+            if (rating == undefined)
                 rating = '';
 
             data = [];
@@ -84,6 +85,7 @@ function User()
                 success : function (data, textStatus) {
                     $('.loader-image').hide();
                     row.removeClass('processing');
+                    $('button', row).removeAttr('disabled');
 
                     if (data.status == 'error')
                     {
@@ -92,7 +94,13 @@ function User()
                     }
 
                     if (rating)
-                        $('tr.header[data-id="' + id + '"] > td.status').html('<span class="label ' + (ratings[rating].class ? ratings[rating].class : '') + '">' + ratings[rating].text + '</span>');
+                        $('td.status', headerRow).html('<span class="label ' + (ratings[rating].class ? ratings[rating].class : '') + '">' + ratings[rating].text + '</span>');
+
+                    $('i.icon-refresh', headerRow).parent().remove();
+                    $('td.actions', headerRow).append(
+                        '<a href="#reset" title="' + system.translate('Reset') + '" onclick="user.check.reset(' + id +
+                        ');"><i class="icon icon-refresh"></i></a>'
+                    );
 
                     row.hide();
 
@@ -108,12 +116,14 @@ function User()
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
                     row.removeClass('processing');
+                    $('button', row).removeAttr('disabled');
                     system.showMessage('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend : function (jqXHR, settings) {
                     $('.loader-image').show();
                     row.addClass('processing');
+                    $('button', row).attr('disabled', 'disabled');
                 }
             });
         };

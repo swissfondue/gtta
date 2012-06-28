@@ -54,7 +54,7 @@ class CheckCategory extends CActiveRecord
     public function getLocalizedName()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->name ? $this->l10n[0]->name : $this->name;
+            return $this->l10n[0]->name == NULL ? $this->l10n[0]->name : $this->name;
 
         return $this->name;
     }

@@ -74,7 +74,7 @@ class Check extends CActiveRecord
     public function getLocalizedName()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->name ? $this->l10n[0]->name : $this->name;
+            return $this->l10n[0]->name == NULL ? $this->l10n[0]->name : $this->name;
 
         return $this->name;
     }
@@ -85,7 +85,7 @@ class Check extends CActiveRecord
     public function getLocalizedBackgroundInfo()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->background_info ? $this->l10n[0]->background_info : $this->background_info;
+            return $this->l10n[0]->background_info == NULL ? $this->l10n[0]->background_info : $this->background_info;
 
         return $this->background_info;
     }
@@ -96,7 +96,7 @@ class Check extends CActiveRecord
     public function getLocalizedImpactInfo()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->impact_info ? $this->l10n[0]->impact_info : $this->impact_info;
+            return $this->l10n[0]->impact_info == NULL ? $this->l10n[0]->impact_info : $this->impact_info;
 
         return $this->impact_info;
     }
@@ -107,7 +107,7 @@ class Check extends CActiveRecord
     public function getLocalizedManualInfo()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->manual_info ? $this->l10n[0]->manual_info : $this->manual_info;
+            return $this->l10n[0]->manual_info == NULL ? $this->l10n[0]->manual_info : $this->manual_info;
 
         return $this->manual_info;
     }

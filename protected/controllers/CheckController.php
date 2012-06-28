@@ -196,6 +196,9 @@ class CheckController extends Controller
                         $categoryL10n->language_id       = $languageId;
                     }
 
+                    if ($value['name'] == '')
+                        $value['name'] = NULL;
+
                     $categoryL10n->name = $value['name'];
                     $categoryL10n->save();
                 }
@@ -415,6 +418,18 @@ class CheckController extends Controller
                         $checkL10n->check_id    = $check->id;
                         $checkL10n->language_id = $languageId;
                     }
+
+                    if ($value['name'] == '')
+                        $value['name'] = NULL;
+
+                    if ($value['backgroundInfo'] == '')
+                        $value['backgroundInfo'] = NULL;
+
+                    if ($value['impactInfo'] == '')
+                        $value['impactInfo'] = NULL;
+
+                    if ($value['manualInfo'] == '')
+                        $value['manualInfo'] = NULL;
 
                     $checkL10n->name            = $value['name'];
                     $checkL10n->background_info = $value['backgroundInfo'];
@@ -702,6 +717,9 @@ class CheckController extends Controller
                         $checkResultL10n->language_id     = $languageId;
                     }
 
+                    if ($value['result'] == '')
+                        $value['result'] = NULL;
+
                     $checkResultL10n->result = $value['result'];
                     $checkResultL10n->save();
                 }
@@ -980,6 +998,9 @@ class CheckController extends Controller
                         $checkSolutionL10n->check_solution_id = $solution->id;
                         $checkSolutionL10n->language_id       = $languageId;
                     }
+
+                    if ($value['solution'] == '')
+                        $value['solution'] = NULL;
 
                     $checkSolutionL10n->solution = $value['solution'];
                     $checkSolutionL10n->save();
@@ -1267,6 +1288,15 @@ class CheckController extends Controller
                         $checkInputL10n->check_input_id = $input->id;
                         $checkInputL10n->language_id    = $languageId;
                     }
+
+                    if ($value['name'] == '')
+                        $value['name'] = NULL;
+
+                    if ($value['description'] == '')
+                        $value['description'] = NULL;
+
+                    if ($value['value'] == '')
+                        $value['value'] = NULL;
 
                     $checkInputL10n->name        = $value['name'];
                     $checkInputL10n->description = $value['description'];

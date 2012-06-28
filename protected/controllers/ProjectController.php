@@ -513,7 +513,7 @@ class ProjectController extends Controller
         }
         else
         {
-            $target   = new Target();
+            $target    = new Target();
             $newRecord = true;
         }
 
@@ -894,10 +894,10 @@ class ProjectController extends Controller
             if (!$model->port)
                 $model->port = NULL;
 
-            if (!$model->result)
+            if ($model->result == '')
                 $model->result = NULL;
 
-            if (!$model->rating)
+            if ($model->rating == '')
                 $model->rating = NULL;
 
             $targetCheck->language_id     = $language->id;
@@ -953,6 +953,9 @@ class ProjectController extends Controller
 
                     if (!$input)
                         throw new CHttpException(404, Yii::t('app', 'Input not found.'));
+
+                    if ($inputValue == '')
+                        $inputValue = NULL;
 
                     $input = new TargetCheckInput();
                     $input->target_id      = $target->id;
@@ -1933,7 +1936,7 @@ class ProjectController extends Controller
                         $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
                         $table->getCell($row, 2)->setBorder($thinBorder);
 
-                        $table->writeToCell($row, 1, Yii::t('app', 'Manual Check Info'));
+                        $table->writeToCell($row, 1, Yii::t('app', 'Manual Info'));
                         $table->writeToCell($row, 2, $check['manual']);
 
                         $row++;
