@@ -1707,7 +1707,8 @@ class ProjectController extends Controller
                         'result'     => $check->targetChecks[0]->result,
                         'rating'     => 0,
                         'ratingName' => $ratings[$check->targetChecks[0]->rating],
-                        'solutions'  => array()
+                        'solutions'  => array(),
+                        'images'     => array(),
                     );
 
                     switch ($check->targetChecks[0]->rating)
@@ -1736,6 +1737,11 @@ class ProjectController extends Controller
                     if ($check->targetCheckSolutions)
                         foreach ($check->targetCheckSolutions as $solution)
                             $checkData['solutions'][] = $solution->solution->localizedSolution;
+
+                    if ($check->targetCheckAttachments)
+                        foreach ($check->targetCheckAttachments as $attachment)
+                            if (in_array($attachment->type, array( 'image/jpeg', 'image/png', 'image/gif' )))
+                                $checkData['images'][] = Yii::app()->params['attachments']['path'] . '/' . $attachment->path;
 
                     $categoryData['checks'][] = $checkData;
                     $categoryData['rating']  += $checkData['rating'];
@@ -1974,6 +1980,35 @@ class ProjectController extends Controller
                             $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
                             $table->getCell($row, 2)->setBorder($thinBorder);
                             $table->writeToCell($row, 2, $solution);
+
+                            $row++;
+                        }
+                    }
+
+                    if ($check['images'])
+                    {
+                        $table->addRows(count($check['images']));
+
+                        $table->mergeCellRange($row, 1, $row + count($check['images']) - 1, 1);
+
+                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                        $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                        $table->getCell($row, 1)->setBorder($thinBorder);
+                        $table->writeToCell($row, 1, Yii::t('app', 'Attachments'));
+
+                        foreach ($check['images'] as $image)
+                        {
+                            $table->getCell($row, 1)->setBorder($thinBorder);
+                            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 2)->setBorder($thinBorder);
+
+                            list($imageWidth, $imageHeight) = getimagesize($image);
+
+                            $ratio       = $imageWidth / $imageHeight;
+                            $imageWidth  = 12; // cm
+                            $imageHeight = $imageWidth / $ratio;
+
+                            $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $imageWidth, $imageHeight);
 
                             $row++;
                         }
