@@ -1504,6 +1504,9 @@ class ProjectController extends Controller
                     $targetCheck->delete();
 
                     $response->addData('automated', $check->automated);
+                    $response->addData('protocol',  $check->protocol);
+                    $response->addData('port',      $check->port);
+
                     $inputValues = array();
 
                     // get default input values

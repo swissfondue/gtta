@@ -600,6 +600,13 @@ function User()
                         $('textarea', row).val('');
                         $('table.attachment-list', row).remove();
 
+                        // port & protocol values
+                        if (data.protocol != null && data.protocol != undefined)
+                            $('#TargetCheckEditForm_' + id + '_protocol').val(data.protocol);
+
+                        if (data.port != null && data.port != undefined)
+                            $('#TargetCheckEditForm_' + id + '_port').val(data.port);
+
                         // input values
                         for (var i = 0; i < data.inputs.length; i++)
                         {
