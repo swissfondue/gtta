@@ -67,7 +67,7 @@ class CheckInput extends CActiveRecord
     public function getLocalizedName()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->name == NULL ? $this->l10n[0]->name : $this->name;
+            return $this->l10n[0]->name != NULL ? $this->l10n[0]->name : $this->name;
 
         return $this->name;
     }
@@ -78,7 +78,7 @@ class CheckInput extends CActiveRecord
     public function getLocalizedDescription()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->description == NULL ? $this->l10n[0]->description : $this->description;
+            return $this->l10n[0]->description != NULL ? $this->l10n[0]->description : $this->description;
 
         return $this->description;
     }
@@ -89,7 +89,7 @@ class CheckInput extends CActiveRecord
     public function getLocalizedValue()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->value == NULL ? $this->l10n[0]->value : $this->value;
+            return $this->l10n[0]->value != NULL ? $this->l10n[0]->value : $this->value;
 
         return $this->value;
     }

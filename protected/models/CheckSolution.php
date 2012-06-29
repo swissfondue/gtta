@@ -63,7 +63,7 @@ class CheckSolution extends CActiveRecord
     public function getLocalizedSolution()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->solution == NULL ? $this->l10n[0]->solution : $this->solution;
+            return $this->l10n[0]->solution != NULL ? $this->l10n[0]->solution : $this->solution;
 
         return $this->solution;
     }
