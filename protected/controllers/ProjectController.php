@@ -965,6 +965,8 @@ class ProjectController extends Controller
                     $input->save();
                 }
 
+            $response->addData('rating', $targetCheck->rating === NULL ? 'undefined' : $targetCheck->rating);
+
             if ($project->status == Project::STATUS_OPEN)
             {
                 $project->status = Project::STATUS_IN_PROGRESS;
@@ -1438,20 +1440,20 @@ class ProjectController extends Controller
                 throw new Exception($errorText);
             }
 
+            $language = Language::model()->findByAttributes(array(
+                'code' => Yii::app()->language
+            ));
+
+            if (!$language)
+                $language = Language::model()->findByAttributes(array(
+                    'default' => true
+                ));
+
             if (!$targetCheck)
             {
                 $targetCheck = new TargetCheck();
                 $targetCheck->target_id = $target->id;
                 $targetCheck->check_id  = $check->id;
-
-                $language = Language::model()->findByAttributes(array(
-                    'code' => Yii::app()->language
-                ));
-
-                if (!$language)
-                    $language = Language::model()->findByAttributes(array(
-                        'default' => true
-                    ));
 
                 $targetCheck->language_id = $language->id;
             }
@@ -1500,6 +1502,32 @@ class ProjectController extends Controller
                     ));
 
                     $targetCheck->delete();
+
+                    $response->addData('automated', $check->automated);
+                    $inputValues = array();
+
+                    // get default input values
+                    if ($check->automated)
+                    {
+                        $inputs = CheckInput::model()->with(array(
+                            'l10n' => array(
+                                'alias'    => 'l10n_i',
+                                'joinType' => 'LEFT JOIN',
+                                'on'       => 'l10n_i.language_id = :language_id',
+                                'params'   => array( 'language_id' => $language->id )
+                            )
+                        ))->findAllByAttributes(array(
+                            'check_id' => $check->id
+                        ));
+
+                        foreach ($inputs as $input)
+                            $inputValues[] = array(
+                                'id'    => 'TargetCheckEditForm_' . $check->id . '_inputs_' . $input->id,
+                                'value' => $input->localizedValue
+                            );
+                    }
+
+                    $response->addData('inputs', $inputValues);
 
                     break;
 

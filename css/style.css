@@ -223,34 +223,39 @@ h3 a:hover {
     vertical-align:top;
 }
 
-.target-check-list .rating-label {
-    width:100px;
-    text-align:right;
-    padding-top:10px;
-}
-
-.target-check-list .status {
+table.check-header .status {
     width:70px;
     text-align:right;
     padding-top:10px;
     white-space:nowrap;
 }
 
-.target-check-list .status span {
+div.check-header {
+    padding:0;
+    border-top:1px solid #ddd;
+}
+
+div.check-header:first-child {
+    border-top:none;
+}
+
+table.check-header {
+    width:100%;
+}
+
+table.check-header td {
+    padding:8px;
+}
+
+table.check-header .status span {
     vertical-align:top;
 }
 
-.target-check-list .content {
-    border:none;
-    padding:0 0 20px 0;
-}
-
-.target-check-list .content .check-content {
-    border-radius:10px;
-    -webkit-border-radius:10px;
-    -moz-border-radius:10px;
+div.check-form {
     background-color:#f0f0f0;
     padding:10px;
+    margin:0;
+    border-top:1px dashed #ddd;
 }
 
 .check-form th {
@@ -298,11 +303,6 @@ h3 a:hover {
 .check-form .solutions li,
 .check-form .rating li {
     margin-bottom:10px;
-}
-
-.processing {
-    opacity:0.5;
-    filter:alpha(opacity=50);
 }
 
 .high-risk {
@@ -373,7 +373,7 @@ h3 a:hover {
     margin-bottom:10px;
 }
 
-.target-check-list .actions {
+table.check-header .actions {
     width:50px;
     text-align:right;
 }
@@ -385,4 +385,13 @@ h3 a:hover {
 
 .report-target-list {
     list-style:none;
+}
+
+.progress {
+    margin:0;
+    height:15px;
+}
+
+.in-progress {
+    background-color: #e9f4f9;
 }

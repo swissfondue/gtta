@@ -7,8 +7,6 @@ $(function () {
         'Start'                                             : '<?php echo Yii::t('app', 'Start'); ?>',
         'Reset'                                             : '<?php echo Yii::t('app', 'Reset'); ?>',
         'Are you sure that you want to reset this check?'   : '<?php echo Yii::t('app', 'Are you sure that you want to reset this check?'); ?>',
-        'Check reset.'                                      : '<?php echo Yii::t('app', 'Check reset.'); ?>',
-        'Check started.'                                    : '<?php echo Yii::t('app', 'Check started.'); ?>'
     };
 
     system.l10nMessages = _messages;
