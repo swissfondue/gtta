@@ -13,10 +13,21 @@ function User()
         this.updateIteration = 0;
 
         /**
+         * Start all automated checks.
+         */
+        this.startAll = function () {
+            $('div.check-header[data-type="automated"]').each(function () {
+                var id = $(this).data('id');
+
+                if (!_check.isRunning(id))
+                    _check.start(id);
+            });
+        };
+
+        /**
          * Update status of running checks.
          */
-        this.update = function (url)
-        {
+        this.update = function (url) {
             var i;
 
             if (this.runningChecks.length > 0)
@@ -152,8 +163,7 @@ function User()
         /**
          * Check if check is running.
          */
-        this.isRunning = function (id)
-        {
+        this.isRunning = function (id) {
             for (var i = 0; i < _check.runningChecks.length; i++)
                 if (_check.runningChecks[i].id == id)
                     return true;
@@ -164,24 +174,21 @@ function User()
         /**
          * Expand.
          */
-        this.expand = function (id)
-        {
+        this.expand = function (id) {
             $('div.check-form[data-id=' + id + ']').slideDown('slow');
         };
 
         /**
          * Shrink.
          */
-        this.shrink = function (id)
-        {
+        this.shrink = function (id) {
             $('div.check-form[data-id=' + id + ']').slideUp('slow');
         };
 
         /**
          * Toggle.
          */
-        this.toggle = function (id)
-        {
+        this.toggle = function (id) {
             if ($('div.check-form[data-id=' + id + ']').is(':visible'))
                 _check.shrink(id);
             else
@@ -191,8 +198,7 @@ function User()
         /**
          * Insert predefined result.
          */
-        this.insertResult = function (id, result)
-        {
+        this.insertResult = function (id, result) {
             if (_check.isRunning(id))
                 return;
 
@@ -203,8 +209,7 @@ function User()
         /**
          * Set loading.
          */
-        this.setLoading = function (id)
-        {
+        this.setLoading = function (id) {
             row = $('div.check-form[data-id="' + id + '"]');
 
             $('.loader-image').show();
@@ -218,8 +223,7 @@ function User()
         /**
          * Set loaded.
          */
-        this.setLoaded = function (id)
-        {
+        this.setLoaded = function (id) {
             row = $('div.check-form[data-id="' + id + '"]');
 
             $('.loader-image').hide();
@@ -233,8 +237,7 @@ function User()
         /**
          * Get check data in array.
          */
-        this.getData = function (id)
-        {
+        this.getData = function (id) {
             var row, inputs, override, protocol, port, result, solutions, rating, data;
 
             row = $('div.check-form[data-id="' + id + '"]');
@@ -404,8 +407,7 @@ function User()
         /**
          * Initialize attachments form.
          */
-        this.initTargetCheckAttachmentUploadForms = function ()
-        {
+        this.initTargetCheckAttachmentUploadForms = function () {
             $('input[name^="TargetCheckAttachmentUploadForm"]').each(function () {
                 var url  = $(this).data('upload-url'),
                     id   = $(this).data('id'),

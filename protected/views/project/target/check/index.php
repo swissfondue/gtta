@@ -10,6 +10,23 @@
         </ul>
     </div>
 
+    <?php
+        $hasAutomated = false;
+
+        foreach ($checks as $check)
+            if ($check->automated)
+            {
+                $hasAutomated = true;
+                break;
+            }
+
+        if ($hasAutomated):
+    ?>
+        <div class="pull-right buttons">
+            <a class="btn" href="#start-all" onclick="user.check.startAll();"><?php echo Yii::t('app', 'Start All'); ?></a>
+        </div>
+    <?php endif; ?>
+
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 </div>
 
@@ -23,7 +40,7 @@
                     $counter = 0;
                     foreach ($checks as $check):
                 ?>
-                    <div class="check-header <?php if ($check->automated && $check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'in-progress'; ?>" data-id="<?php echo $check->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlcheck', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>">
+                    <div class="check-header <?php if ($check->automated && $check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'in-progress'; ?>" data-id="<?php echo $check->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlcheck', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>" data-type="<?php echo $check->automated ? 'automated' : 'manual'; ?>">
                         <table class="check-header">
                             <tbody>
                                 <tr>
