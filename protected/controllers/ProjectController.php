@@ -2411,7 +2411,7 @@ class ProjectController extends Controller
             $row++;
         }
 
-        $fileName = $project->name . ' (' . $project->year . ') - ' . date('Y-m-d') . '.rtf';
+        $fileName = Yii::t('app', 'Project Comparison') . ' - ' . date('Y-m-d') . '.rtf';
         $hashName = hash('sha256', rand() . time() . $fileName);
         $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
 
