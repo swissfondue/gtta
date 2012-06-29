@@ -79,6 +79,7 @@
                                         <?php elseif ($check->automated && $check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS): ?>
                                             <?php
                                                 $seconds = $check->targetChecks[0]->started;
+                                                date_default_timezone_set(Yii::app()->params['timeZone']);
 
                                                 if ($seconds)
                                                 {
@@ -560,6 +561,7 @@
 
         user.check.runningChecks = [
             <?php
+                date_default_timezone_set(Yii::app()->params['timeZone']);
                 $runningChecks = array();
 
                 foreach ($checks as $check)

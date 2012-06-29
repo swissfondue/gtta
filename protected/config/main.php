@@ -153,6 +153,8 @@ return array(
         ),
 
         'tmpPath' => '/tmp',
+
+        'timeZone' => 'Europe/Moscow',
     ),
 
     // default controller name

@@ -1620,6 +1620,7 @@ class ProjectController extends Controller
             ))->findAll($criteria);
 
             $checkData = array();
+            date_default_timezone_set(Yii::app()->params['timeZone']);
 
             foreach ($checks as $check)
             {
