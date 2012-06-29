@@ -59,6 +59,26 @@
                                                         break;
                                                 }
                                             ?>
+                                        <?php elseif ($check->automated && $check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS): ?>
+                                            <?php
+                                                $seconds = $check->targetChecks[0]->started;
+
+                                                if ($seconds)
+                                                {
+                                                    $seconds = time() - strtotime($seconds);
+                                                    $minutes = 0;
+
+                                                    if ($seconds > 59)
+                                                    {
+                                                        $minutes = floor($seconds / 60);
+                                                        $seconds = $seconds - ($minutes * 60);
+                                                    }
+
+                                                    printf('%02d:%02d', $minutes, $seconds);
+                                                }
+                                                else
+                                                    echo '00:00';
+                                            ?>
                                         <?php else: ?>
                                             &nbsp;
                                         <?php endif; ?>
@@ -529,14 +549,17 @@
                     if ($check->automated && $check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS)
                     {
                         $runningChecks[] = json_encode(array(
-                            'id'     => $check->id,
-                            'result' => $check->targetChecks[0]->result,
-                            'time'   => 0
+                            'id'   => $check->id,
+                            'time' => $check->targetChecks[0]->started != NULL ? time() - strtotime($check->targetChecks[0]->started) : -1,
                         ));
                     }
 
                 echo implode(',', $runningChecks);
             ?>
         ];
+
+        setTimeout(function () {
+            user.check.update('<?php echo $this->createUrl('project/updatechecks', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>');
+        }, 1000);
     });
 </script>

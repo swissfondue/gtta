@@ -387,11 +387,6 @@ table.check-header .actions {
     list-style:none;
 }
 
-.progress {
-    margin:0;
-    height:15px;
-}
-
 .in-progress {
-    background-color: #e9f4f9;
+    background-color: #f4f4ff;
 }

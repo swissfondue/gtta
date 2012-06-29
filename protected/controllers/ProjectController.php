@@ -12,10 +12,10 @@ class ProjectController extends Controller
 	{
 		return array(
 			'checkAuth',
-            'checkUser + edit, target, edittarget, controltarget, uploadattachment, controlattachment, attachment, controlcheck, report, comparisonreport',
+            'checkUser + edit, target, edittarget, controltarget, uploadattachment, controlattachment, attachment, controlcheck, report, comparisonreport, updatechecks',
             'checkAdmin + control',
-            'ajaxOnly + savecheck, controlattachment, controlcheck',
-            'postOnly + savecheck, uploadattachment, controlattachment, controlcheck, report, comparisonreport',
+            'ajaxOnly + savecheck, controlattachment, controlcheck, updatechecks',
+            'postOnly + savecheck, uploadattachment, controlattachment, controlcheck, report, comparisonreport, updatechecks',
 		);
 	}
 
@@ -965,7 +965,7 @@ class ProjectController extends Controller
                     $input->save();
                 }
 
-            $response->addData('rating', $targetCheck->rating === NULL ? 'undefined' : $targetCheck->rating);
+            $response->addData('rating', $targetCheck->rating);
 
             if ($project->status == Project::STATUS_OPEN)
             {
@@ -1537,6 +1537,105 @@ class ProjectController extends Controller
             }
 
             $category->updateStats();
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Update checks function.
+     */
+    public function actionUpdateChecks($id, $target, $category)
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $id       = (int) $id;
+            $target   = (int) $target;
+            $category = (int) $category;
+
+            $project = Project::model()->findByPk($id);
+
+            if (!$project)
+                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+            $target = Target::model()->findByAttributes(array(
+                'id'         => $target,
+                'project_id' => $project->id
+            ));
+
+            if (!$target)
+                throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+
+            $category = TargetCheckCategory::model()->with('category')->findByAttributes(array(
+                'target_id'         => $target->id,
+                'check_category_id' => $category
+            ));
+
+            if (!$category)
+                throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+
+            $model = new TargetCheckUpdateForm();
+            $model->attributes = $_POST['TargetCheckUpdateForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $checkIds = explode(',', $model->checks);
+
+            $criteria = new CDbCriteria();
+            $criteria->addCondition('t.check_category_id = :category_id');
+            $criteria->params = array(
+                'category_id' => $category->check_category_id,
+                'target_id'   => $target->id
+            );
+
+            $criteria->addInCondition('id', $checkIds);
+
+            $checks = Check::model()->with(array(
+                'targetChecks' => array(
+                    'alias'    => 'tcs',
+                    'joinType' => 'INNER JOIN',
+                    'on'       => 'tcs.target_id = :target_id',
+                    'params'   => array( 'target_id' => $target->id )
+                ),
+            ))->findAll($criteria);
+
+            $checkData = array();
+
+            foreach ($checks as $check)
+            {
+                $time = $check->targetChecks[0]->started;
+
+                if ($time)
+                    $time = time() - strtotime($time);
+                else
+                    $time = -1;
+
+                $checkData[] = array(
+                    'id'       => $check->id,
+                    'result'   => $check->targetChecks[0]->result,
+                    'finished' => $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED,
+                    'time'     => $time
+                );
+            }
+
+            $response->addData('checks', $checkData);
         }
         catch (Exception $e)
         {

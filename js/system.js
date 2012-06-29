@@ -125,3 +125,16 @@ function System()
 }
 
 var system = new System();
+
+/**
+ * Number zero padding.
+ */
+Number.prototype.zeroPad = function (size)
+{
+    var s = this + '';
+
+    while (s.length < size)
+        s = '0' + s;
+
+    return s;
+};

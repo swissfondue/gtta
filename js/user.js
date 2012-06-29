@@ -9,7 +9,145 @@ function User()
     this.check = new function () {
         var _check = this;
 
-        this.runningChecks = [];
+        this.runningChecks   = [];
+        this.updateIteration = 0;
+
+        /**
+         * Update status of running checks.
+         */
+        this.update = function (url)
+        {
+            var i;
+
+            if (this.runningChecks.length > 0)
+                _check.updateIteration++;
+
+            for (i = 0; i < _check.runningChecks.length; i++)
+            {
+                var check, headingRow, minutes, seconds, time;
+
+                check      = _check.runningChecks[i];
+                headingRow = $('div.check-header[data-id=' + check.id + ']');
+
+                if (check.time > -1)
+                {
+                    check.time++;
+
+                    minutes = 0;
+                    seconds = check.time;
+                }
+                else
+                {
+                    minutes = 0;
+                    seconds = 0;
+                }
+
+                if (seconds > 59)
+                {
+                    minutes = Math.floor(seconds / 60);
+                    seconds = seconds - (minutes * 60);
+                }
+
+                $('td.status', headingRow).html(minutes.zeroPad(2) + ':' + seconds.zeroPad(2));
+            }
+
+            if (_check.updateIteration < 5)
+                setTimeout(function () {
+                    _check.update(url);
+                }, 1000);
+            else
+            {
+                var checkIds = [];
+
+                _check.updateIteration = 0;
+
+                for (i = 0; i < _check.runningChecks.length; i++)
+                    checkIds.push(_check.runningChecks[i].id);
+
+                data = [];
+                data.push({ name : 'TargetCheckUpdateForm[checks]', value : checkIds.join(',') })
+                data.push({ name : 'YII_CSRF_TOKEN',                value : system.csrf });
+
+                $.ajax({
+                    dataType : 'json',
+                    url      : url,
+                    timeout  : system.ajaxTimeout,
+                    type     : 'POST',
+                    data     : data,
+
+                    success : function (data, textStatus) {
+                        $('.loader-image').hide();
+
+                        if (data.status == 'error')
+                        {
+                            system.showMessage('error', data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        if (data.checks)
+                        {
+                            for (i = 0; i < data.checks.length; i++)
+                            {
+                                var check, checkIdx;
+
+                                check = data.checks[i];
+
+                                $('#TargetCheckEditForm_' + check.id + '_result').val(check.result);
+
+                                for (var k = 0; k < _check.runningChecks.length; k++)
+                                {
+                                    var innerCheck = _check.runningChecks[k];
+
+                                    if (innerCheck.id == check.id)
+                                    {
+                                        checkIdx        = k;
+                                        innerCheck.time = check.time;
+
+                                        break;
+                                    }
+                                }
+
+                                if (check.finished)
+                                {
+                                    _check.runningChecks.splice(checkIdx, 1);
+
+                                    var headerRow = $('div.check-header[data-id=' + check.id + ']');
+
+                                    headerRow.removeClass('in-progress');
+                                    $('td.status', headerRow).html('&nbsp;');
+
+                                    _check.setLoaded(check.id);
+
+                                    $('td.actions', headerRow).html('');
+                                    $('td.actions', headerRow).append(
+                                        '<a href="#start" title="' + system.translate('Start') + '" onclick="user.check.start(' + check.id +
+                                        ');"><i class="icon icon-play"></i></a> &nbsp; ' +
+                                        '<a href="#reset" title="' + system.translate('Reset') + '" onclick="user.check.reset(' + check.id +
+                                        ');"><i class="icon icon-refresh"></i></a>'
+                                    );
+                                }
+                            }
+                        }
+
+                        setTimeout(function () {
+                            _check.update(url);
+                        }, 1000);
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $('.loader-image').hide();
+                        system.showMessage('error', system.translate('Request failed, please try again.'));
+                    },
+
+                    beforeSend : function (jqXHR, settings) {
+                        $('.loader-image').show();
+                    }
+                });
+
+            }
+        };
 
         /**
          * Check if check is running.
@@ -189,7 +327,7 @@ function User()
 
                     data = data.data;
 
-                    if (data.rating != undefined && data.rating != 'undefined')
+                    if (data.rating != undefined && data.rating != null)
                         $('td.status', headerRow).html(
                             '<span class="label ' +
                             (ratings[data.rating].class ? ratings[data.rating].class : '') + '">' +
@@ -418,29 +556,23 @@ function User()
 
                     if (operation == 'start')
                     {
-                        $('i.icon-play', headerRow).parent().remove();
-                        $('i.icon-refresh', headerRow).parent().remove();
-
-                        /*$('td.status', headerRow).html(
-                            '<div class="progress"><div class="bar"></div></div>'
-                        );*/
-
+                        $('td.status', headerRow).html('00:00');
+                        $('td.actions', headerRow).html('');
                         $('td.actions', headerRow).append(
                             '<span class="disabled"><i class="icon icon-play" title="' +
-                            system.translate('Start') + '"></i></a> &nbsp; '
-                        );
-
-                        $('td.actions', headerRow).append(
+                            system.translate('Start') + '"></i></a> &nbsp; ' +
                             '<span class="disabled"><i class="icon icon-refresh" title="' +
                             system.translate('Reset') + '"></i></a>'
                         );
+
+                        $('#TargetCheckEditForm_' + id + '_result').val('');
 
                         _check.setLoading(id);
                         $('.loader-image').hide();
 
                         _check.runningChecks.push({
                             id     : id,
-                            time   : 0,
+                            time   : -1,
                             result : ''
                         });
 
@@ -448,9 +580,7 @@ function User()
                     }
                     else if (operation == 'reset')
                     {
-                        $('i.icon-play', headerRow).parent().remove();
-                        $('i.icon-refresh', headerRow).parent().remove();
-
+                        $('td.actions', headerRow).html('');
                         $('td.status', headerRow).html('&nbsp;');
 
                         if (data.automated)

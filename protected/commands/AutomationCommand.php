@@ -6,11 +6,63 @@
 class AutomationCommand extends CConsoleCommand
 {
     /**
-     * Process finished checks.
+     * Process running checks.
      */
-    private function _processFinished()
+    private function _processRunning()
     {
+        $criteria = new CDbCriteria();
+        $criteria->addCondition('status = :status AND pid IS NOT NULL');
+        $criteria->params = array( 'status' => TargetCheck::STATUS_IN_PROGRESS );
 
+        $checks = TargetCheck::model()->findAll($criteria);
+
+        foreach ($checks as $check)
+        {
+            $fileOutput    = file_get_contents(Yii::app()->params['automation']['tempPath'] . '/' . $check->result_file);
+            $check->result = $fileOutput;
+
+            // if task died for some reason
+            if (!$this->_isRunning($check->pid))
+            {
+                $check->pid = NULL;
+
+                if (!$check->result)
+                    $check->result = 'No output.';
+
+                $check->status = TargetCheck::STATUS_FINISHED;
+            }
+
+            $check->save();
+        }
+    }
+
+    /**
+     * Check if process with given PID is running.
+     */
+    private function _isRunning($pid)
+    {
+        if ($this->_isWindows())
+        {
+            $output = array();
+            exec('tasklist.exe', $output);
+
+            foreach ($output as $line)
+            {
+                if (strpos('Image Name', $line) === 0 || strpos('===', $line) === 0)
+                    continue;
+
+                $matches = false;
+
+                preg_match('/(.*)\s+(\d+).*$/', $line);
+
+                if ($matches[2] == $pid)
+                    return true;
+            }
+
+            return false;
+        }
+        else
+            return file_exists('/proc/' . $pid);
     }
 
     /**
@@ -61,7 +113,7 @@ class AutomationCommand extends CConsoleCommand
     private function _automation()
     {
         $this->_processStarting();
-        $this->_processFinished();
+        $this->_processRunning();
     }
 
     /**
@@ -213,6 +265,7 @@ class AutomationCommand extends CConsoleCommand
 
             $fileOutput = file_get_contents($tempPath . '/' . $check->result_file);
 
+            $check->pid    = NULL;
             $check->result = $fileOutput ? $fileOutput : implode("\n", $output);
 
             if (!$check->result)
