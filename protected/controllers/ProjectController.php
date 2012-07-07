@@ -1835,6 +1835,8 @@ class ProjectController extends Controller
                         'background' => $check->localizedBackgroundInfo,
                         'impact'     => $check->localizedImpactInfo,
                         'manual'     => $check->localizedManualInfo,
+                        'reference'  => $check->localizedReference,
+                        'question'   => $check->localizedQuestion,
                         'result'     => $check->targetChecks[0]->result,
                         'rating'     => 0,
                         'ratingName' => $ratings[$check->targetChecks[0]->rating],
@@ -1884,10 +1886,8 @@ class ProjectController extends Controller
                 $targetData['rating']      += $categoryData['rating'];
             }
 
-            if (!$targetData['categories'])
-                continue;
-
-            $targetData['rating'] /= count($targetData['categories']);
+            if ($targetData['categories'])
+                $targetData['rating'] /= count($targetData['categories']);
 
             $data[]         = $targetData;
             $overallRating += $targetData['rating'];
@@ -2003,6 +2003,12 @@ class ProjectController extends Controller
         {
             $section->writeText(Yii::t('app', 'Target') . ': ' . $target['host'] . '<br>', $boldFont, $noPar);
 
+            if (!count($target['categories']))
+            {
+                $section->writeText(Yii::t('app', 'No finished checks.') . '<br>', $textFont, $noPar);
+                continue;
+            }
+
             $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
             $table->addColumnsList(array( 5, 13 ));
 
@@ -2075,6 +2081,36 @@ class ProjectController extends Controller
 
                         $table->writeToCell($row, 1, Yii::t('app', 'Manual Info'));
                         $table->writeToCell($row, 2, $check['manual']);
+
+                        $row++;
+                    }
+                    
+                    if ($check['reference'])
+                    {
+                        $table->addRow();
+                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                        $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                        $table->getCell($row, 1)->setBorder($thinBorder);
+                        $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                        $table->getCell($row, 2)->setBorder($thinBorder);
+
+                        $table->writeToCell($row, 1, Yii::t('app', 'Reference'));
+                        $table->writeToCell($row, 2, $check['reference']);
+
+                        $row++;
+                    }
+                    
+                    if ($check['question'])
+                    {
+                        $table->addRow();
+                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                        $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                        $table->getCell($row, 1)->setBorder($thinBorder);
+                        $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                        $table->getCell($row, 2)->setBorder($thinBorder);
+
+                        $table->writeToCell($row, 1, Yii::t('app', 'Question'));
+                        $table->writeToCell($row, 2, $check['question']);
 
                         $row++;
                     }

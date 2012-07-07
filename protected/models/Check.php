@@ -10,6 +10,8 @@
  * @property string $background_info
  * @property string $impact_info
  * @property string $manual_info
+ * @property string $reference
+ * @property string $question
  * @property boolean $advanced
  * @property boolean $automated
  * @property string $script
@@ -110,5 +112,27 @@ class Check extends CActiveRecord
             return $this->l10n[0]->manual_info != NULL ? $this->l10n[0]->manual_info : $this->manual_info;
 
         return $this->manual_info;
+    }
+    
+    /**
+     * @return string localized reference.
+     */
+    public function getLocalizedReference()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->reference != NULL ? $this->l10n[0]->reference : $this->reference;
+
+        return $this->reference;
+    }
+    
+    /**
+     * @return string localized question.
+     */
+    public function getLocalizedQuestion()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->question != NULL ? $this->l10n[0]->question : $this->question;
+
+        return $this->question;
     }
 }

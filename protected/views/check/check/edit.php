@@ -65,6 +65,20 @@
                         <input type="text" class="input-xlarge" id="CheckEditForm_manualInfo" name="CheckEditForm[manualInfo]" onkeyup="admin.check.updateTiedField('CheckEditForm_manualInfo', 'CheckEditForm_localizedItems_<?php echo $defaultLanguage; ?>_manualInfo');" value="<?php echo CHtml::encode($model->manualInfo); ?>">
                     </div>
                 </div>
+                
+                <div class="control-group">
+                    <label class="control-label" for="CheckEditForm_reference"><?php echo Yii::t('app', 'Reference'); ?></label>
+                    <div class="controls">
+                        <input type="text" class="input-xlarge" id="CheckEditForm_reference" name="CheckEditForm[reference]" onkeyup="admin.check.updateTiedField('CheckEditForm_reference', 'CheckEditForm_localizedItems_<?php echo $defaultLanguage; ?>_reference');" value="<?php echo CHtml::encode($model->reference); ?>">
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label" for="CheckEditForm_question"><?php echo Yii::t('app', 'Question'); ?></label>
+                    <div class="controls">
+                        <input type="text" class="input-xlarge" id="CheckEditForm_question" name="CheckEditForm[question]" onkeyup="admin.check.updateTiedField('CheckEditForm_question', 'CheckEditForm_localizedItems_<?php echo $defaultLanguage; ?>_question');" value="<?php echo CHtml::encode($model->question); ?>">
+                    </div>
+                </div>
             </div>
             <?php foreach ($languages as $language): ?>
                 <div class="tab-pane" id="<?php echo CHtml::encode($language->code); ?>">
@@ -93,6 +107,20 @@
                         <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_manualInfo"><?php echo Yii::t('app', 'Manual Info'); ?></label>
                         <div class="controls">
                             <input type="text" class="input-xlarge" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_manualInfo" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][manualInfo]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['manualInfo']) : ''; ?>">
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_reference"><?php echo Yii::t('app', 'Reference'); ?></label>
+                        <div class="controls">
+                            <input type="text" class="input-xlarge" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_reference" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][reference]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['reference']) : ''; ?>">
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_question"><?php echo Yii::t('app', 'Question'); ?></label>
+                        <div class="controls">
+                            <input type="text" class="input-xlarge" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_question" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][question]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['question']) : ''; ?>">
                         </div>
                     </div>
                 </div>
