@@ -19,7 +19,7 @@
  * @version $Id: $
  */
 return array (
-  'Start All' => '',
+  'Start All' => 'Alles Starten',
   'Access denied.' => 'Zugriff verboten',
   'Address' => 'Adresse',
   'Admin' => 'Administrator',
