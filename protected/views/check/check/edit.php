@@ -53,9 +53,9 @@
                 </div>
 
                 <div class="control-group">
-                    <label class="control-label" for="CheckEditForm_manualInfo"><?php echo Yii::t('app', 'Manual Info'); ?></label>
+                    <label class="control-label" for="CheckEditForm_hints"><?php echo Yii::t('app', 'Hints'); ?></label>
                     <div class="controls">
-                        <input type="text" class="input-xlarge" id="CheckEditForm_manualInfo" name="CheckEditForm[manualInfo]" onkeyup="admin.check.updateTiedField('CheckEditForm_manualInfo', 'CheckEditForm_localizedItems_<?php echo $defaultLanguage; ?>_manualInfo');" value="<?php echo CHtml::encode($model->manualInfo); ?>">
+                        <input type="text" class="input-xlarge" id="CheckEditForm_hints" name="CheckEditForm[hints]" onkeyup="admin.check.updateTiedField('CheckEditForm_hints', 'CheckEditForm_localizedItems_<?php echo $defaultLanguage; ?>_hints');" value="<?php echo CHtml::encode($model->hints); ?>">
                     </div>
                 </div>
                 
@@ -90,9 +90,9 @@
                     </div>
 
                     <div class="control-group">
-                        <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_manualInfo"><?php echo Yii::t('app', 'Manual Info'); ?></label>
+                        <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_hints"><?php echo Yii::t('app', 'Hints'); ?></label>
                         <div class="controls">
-                            <input type="text" class="input-xlarge" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_manualInfo" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][manualInfo]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['manualInfo']) : ''; ?>">
+                            <input type="text" class="input-xlarge" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_hints" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][hints]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['hints']) : ''; ?>">
                         </div>
                     </div>
                     

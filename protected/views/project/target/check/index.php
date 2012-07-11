@@ -134,13 +134,13 @@
                                         </td>
                                     </tr>
                                 <?php endif; ?>
-                                <?php if ($check->localizedManualInfo): ?>
+                                <?php if ($check->localizedHints): ?>
                                     <tr>
                                         <th>
-                                            <?php echo Yii::t('app', 'Manual Info'); ?>
+                                            <?php echo Yii::t('app', 'Hints'); ?>
                                         </th>
                                         <td class="text">
-                                            <?php echo CHtml::encode($check->localizedManualInfo); ?>
+                                            <?php echo CHtml::encode($check->localizedHints); ?>
                                         </td>
                                     </tr>
                                 <?php endif; ?>

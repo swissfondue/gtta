@@ -16,9 +16,9 @@ class CheckEditForm extends CFormModel
     public $backgroundInfo;
 
     /**
-     * @var string manual info.
+     * @var string hints.
      */
-    public $manualInfo;
+    public $hints;
 
     /**
      * @var string reference.
@@ -75,7 +75,7 @@ class CheckEditForm extends CFormModel
             array( 'name, script, protocol', 'length', 'max' => 1000 ),
             array( 'port', 'numerical', 'integerOnly' => true, 'min' => 0, 'max' => 1000 ),
             array( 'advanced, automated, multipleSolutions', 'boolean' ),
-            array( 'localizedItems, backgroundInfo, manualInfo, reference, question, script', 'safe' ),
+            array( 'localizedItems, backgroundInfo, hints, reference, question, script', 'safe' ),
             array( 'automated', 'checkScript' ),
 		);
 	}
@@ -88,7 +88,7 @@ class CheckEditForm extends CFormModel
 		return array(
 			'name'           => Yii::t('app', 'Name'),
             'backgroundInfo' => Yii::t('app', 'Background Info'),
-            'manualInfo'     => Yii::t('app', 'Manual Info'),
+            'hints     '     => Yii::t('app', 'Hints'),
             'reference'      => Yii::t('app', 'Reference'),
             'question'       => Yii::t('app', 'Question'),
             'script'         => Yii::t('app', 'Script'),

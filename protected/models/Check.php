@@ -8,7 +8,7 @@
  * @property integer $check_category_id
  * @property string $name
  * @property string $background_info
- * @property string $manual_info
+ * @property string $hints
  * @property string $reference
  * @property string $question
  * @property boolean $advanced
@@ -92,14 +92,14 @@ class Check extends CActiveRecord
     }
 
     /**
-     * @return string localized manual info.
+     * @return string localized hints.
      */
-    public function getLocalizedManualInfo()
+    public function getLocalizedHints()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->manual_info != NULL ? $this->l10n[0]->manual_info : $this->manual_info;
+            return $this->l10n[0]->hints != NULL ? $this->l10n[0]->hints : $this->hints;
 
-        return $this->manual_info;
+        return $this->hints;
     }
     
     /**
