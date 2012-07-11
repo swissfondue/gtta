@@ -1833,7 +1833,6 @@ class ProjectController extends Controller
                     $checkData = array(
                         'name'       => $check->localizedName,
                         'background' => $check->localizedBackgroundInfo,
-                        'impact'     => $check->localizedImpactInfo,
                         'manual'     => $check->localizedManualInfo,
                         'reference'  => $check->localizedReference,
                         'question'   => $check->localizedQuestion,
@@ -2051,21 +2050,6 @@ class ProjectController extends Controller
 
                         $table->writeToCell($row, 1, Yii::t('app', 'Background Info'));
                         $table->writeToCell($row, 2, $check['background']);
-
-                        $row++;
-                    }
-
-                    if ($check['impact'])
-                    {
-                        $table->addRow();
-                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                        $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                        $table->getCell($row, 1)->setBorder($thinBorder);
-                        $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                        $table->getCell($row, 2)->setBorder($thinBorder);
-
-                        $table->writeToCell($row, 1, Yii::t('app', 'Impact Info'));
-                        $table->writeToCell($row, 2, $check['impact']);
 
                         $row++;
                     }

@@ -8,7 +8,6 @@
  * @property integer $check_category_id
  * @property string $name
  * @property string $background_info
- * @property string $impact_info
  * @property string $manual_info
  * @property string $reference
  * @property string $question
@@ -90,17 +89,6 @@ class Check extends CActiveRecord
             return $this->l10n[0]->background_info != NULL ? $this->l10n[0]->background_info : $this->background_info;
 
         return $this->background_info;
-    }
-
-    /**
-     * @return string localized impact info.
-     */
-    public function getLocalizedImpactInfo()
-    {
-        if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->impact_info != NULL ? $this->l10n[0]->impact_info : $this->impact_info;
-
-        return $this->impact_info;
     }
 
     /**

@@ -51,13 +51,6 @@
                         <input type="text" class="input-xlarge" id="CheckEditForm_backgroundInfo" name="CheckEditForm[backgroundInfo]" onkeyup="admin.check.updateTiedField('CheckEditForm_backgroundInfo', 'CheckEditForm_localizedItems_<?php echo $defaultLanguage; ?>_backgroundInfo');" value="<?php echo CHtml::encode($model->backgroundInfo); ?>">
                     </div>
                 </div>
-                
-                <div class="control-group">
-                    <label class="control-label" for="CheckEditForm_impactInfo"><?php echo Yii::t('app', 'Impact Info'); ?></label>
-                    <div class="controls">
-                        <input type="text" class="input-xlarge" id="CheckEditForm_impactInfo" name="CheckEditForm[impactInfo]" onkeyup="admin.check.updateTiedField('CheckEditForm_impactInfo', 'CheckEditForm_localizedItems_<?php echo $defaultLanguage; ?>_impactInfo');" value="<?php echo CHtml::encode($model->impactInfo); ?>">
-                    </div>
-                </div>
 
                 <div class="control-group">
                     <label class="control-label" for="CheckEditForm_manualInfo"><?php echo Yii::t('app', 'Manual Info'); ?></label>
@@ -93,13 +86,6 @@
                         <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_backgroundInfo"><?php echo Yii::t('app', 'Background Info'); ?></label>
                         <div class="controls">
                             <input type="text" class="input-xlarge" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_backgroundInfo" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][backgroundInfo]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['backgroundInfo']) : ''; ?>">
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_impactInfo"><?php echo Yii::t('app', 'Impact Info'); ?></label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_impactInfo" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][impactInfo]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['impactInfo']) : ''; ?>">
                         </div>
                     </div>
 

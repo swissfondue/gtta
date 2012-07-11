@@ -134,16 +134,6 @@
                                         </td>
                                     </tr>
                                 <?php endif; ?>
-                                <?php if ($check->localizedImpactInfo): ?>
-                                    <tr>
-                                        <th>
-                                            <?php echo Yii::t('app', 'Impact Info'); ?>
-                                        </th>
-                                        <td class="text">
-                                            <?php echo CHtml::encode($check->localizedImpactInfo); ?>
-                                        </td>
-                                    </tr>
-                                <?php endif; ?>
                                 <?php if ($check->localizedManualInfo): ?>
                                     <tr>
                                         <th>

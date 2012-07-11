@@ -349,7 +349,6 @@ class CheckController extends Controller
         {
             $model->name              = $check->name;
             $model->backgroundInfo    = $check->background_info;
-            $model->impactInfo        = $check->impact_info;
             $model->manualInfo        = $check->manual_info;
             $model->reference         = $check->reference;
             $model->question          = $check->question;
@@ -370,7 +369,6 @@ class CheckController extends Controller
 
                 $i['name']           = $cl->name;
                 $i['backgroundInfo'] = $cl->background_info;
-                $i['impactInfo']     = $cl->impact_info;
                 $i['manualInfo']     = $cl->manual_info;
                 $i['reference']      = $cl->reference;
                 $i['question']       = $cl->question;
@@ -398,7 +396,6 @@ class CheckController extends Controller
                 $check->check_category_id  = $category->id;
                 $check->name               = $model->name;
                 $check->background_info    = $model->backgroundInfo;
-                $check->impact_info        = $model->impactInfo;
                 $check->manual_info        = $model->manualInfo;
                 $check->reference          = $model->reference;
                 $check->question           = $model->question;
@@ -431,9 +428,6 @@ class CheckController extends Controller
                     if ($value['backgroundInfo'] == '')
                         $value['backgroundInfo'] = NULL;
 
-                    if ($value['impactInfo'] == '')
-                        $value['impactInfo'] = NULL;
-
                     if ($value['manualInfo'] == '')
                         $value['manualInfo'] = NULL;
 
@@ -445,7 +439,6 @@ class CheckController extends Controller
 
                     $checkL10n->name            = $value['name'];
                     $checkL10n->background_info = $value['backgroundInfo'];
-                    $checkL10n->impact_info     = $value['impactInfo'];
                     $checkL10n->manual_info     = $value['manualInfo'];
                     $checkL10n->reference       = $value['reference'];
                     $checkL10n->question        = $value['question'];

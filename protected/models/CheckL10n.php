@@ -8,7 +8,6 @@
  * @property integer $language_id
  * @property string $name
  * @property string $background_info
- * @property string $impact_info
  * @property string $manual_info
  * @property string $reference
  * @property string $question
