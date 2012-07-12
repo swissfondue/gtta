@@ -563,7 +563,7 @@ class ReportController extends Controller
     }
 
     /**
-     * Generate project report.
+     * Show project report form.
      */
     public function actionProject()
     {
@@ -597,25 +597,29 @@ class ReportController extends Controller
     /**
      * Generate comparison report.
      */
-    public function actionCompare($id)
+    private function _generateComparisonReport($clientId, $projectId1, $projectId2)
     {
-        $id = (int) $id;
+        $project1 = Project::model()->findByAttributes(array(
+            'client_id' => $clientId,
+            'id'        => $projectId1
+        ));
 
-        $project = Project::model()->findByPk($id);
+        if ($project1 === null)
+        {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'First project doesn\\\'t exist.'));
+            return;
+        }
 
-        if (!$project)
-            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+        $project2 = Project::model()->findByAttributes(array(
+            'client_id' => $clientId,
+            'id'        => $projectId2
+        ));
 
-        $model = new ProjectComparisonForm();
-        $model->attributes = $_POST['ProjectComparisonForm'];
-
-        if (!$model->validate())
-            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
-
-        $otherProject = Project::model()->findByPk($model->projectId);
-
-        if (!$otherProject)
-            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+        if ($project2 === null)
+        {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Second project doesn\\\'t exist.'));
+            return;
+        }
 
         $language = Language::model()->findByAttributes(array(
             'code' => Yii::app()->language
@@ -624,24 +628,24 @@ class ReportController extends Controller
         if ($language)
             $language = $language->id;
 
-        $targets = Target::model()->findAllByAttributes(array(
-            'project_id' => $project->id
+        $targets1 = Target::model()->findAllByAttributes(array(
+            'project_id' => $project1->id
         ));
 
-        $otherTargets = Target::model()->findAllByAttributes(array(
-            'project_id' => $otherProject->id
+        $targets2 = Target::model()->findAllByAttributes(array(
+            'project_id' => $project2->id
         ));
 
         // find corresponding targets
         $data = array();
 
-        foreach ($targets as $target)
-            foreach ($otherTargets as $otherTarget)
-                if ($otherTarget->host == $target->host)
+        foreach ($targets1 as $target1)
+            foreach ($targets2 as $target2)
+                if ($target2->host == $target1->host)
                 {
                     $data[] = array(
-                        $target,
-                        $otherTarget
+                        $target1,
+                        $target2
                     );
 
                     break;
@@ -781,7 +785,7 @@ class ReportController extends Controller
         // title
         $section = $rtf->addSection();
         $section->writeText(Yii::t('app', 'Project Comparison'), $h1Font, $titlePar);
-        $section->writeText($project->name . ' (' . $project->year . ')<br>' . $otherProject->name . ' (' . $otherProject->year . ')', $h2Font, $projectPar);
+        $section->writeText($project1->name . ' (' . $project1->year . ')<br>' . $project2->name . ' (' . $project2->year . ')', $h2Font, $projectPar);
 
         // detailed summary
         $section->writeText(Yii::t('app', 'Target Comparison') . '<br>', $h3Font, $noPar);
@@ -804,8 +808,8 @@ class ReportController extends Controller
             }
 
         $table->writeToCell(1, 1, Yii::t('app', 'Target'));
-        $table->writeToCell(1, 2, $project->name . ' (' . $project->year . ')');
-        $table->writeToCell(1, 3, $otherProject->name . ' (' . $otherProject->year . ')');
+        $table->writeToCell(1, 2, $project1->name . ' (' . $project1->year . ')');
+        $table->writeToCell(1, 3, $project2->name . ' (' . $project2->year . ')');
 
         $row = 2;
 
@@ -843,6 +847,38 @@ class ReportController extends Controller
         readfile($filePath);
 
         exit();
+    }
+
+    /**
+     * Show comparison report form.
+     */
+    public function actionComparison()
+    {
+        $model = new ProjectComparisonForm();
+
+        if (isset($_POST['ProjectComparisonForm']))
+        {
+            $model->attributes = $_POST['ProjectComparisonForm'];
+
+            if ($model->validate())
+                $this->_generateComparisonReport($model->clientId, $model->projectId1, $model->projectId2);
+            else
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+        }
+
+        $clients = Client::model()->findAllByAttributes(
+            array(),
+            array( 'order' => 't.name ASC' )
+        );
+
+        $this->breadcrumbs[Yii::t('app', 'Projects Comparison')] = '';
+
+        // display the report generation form
+        $this->pageTitle = Yii::t('app', 'Projects Comparison');
+		$this->render('comparison', array(
+            'model'   => $model,
+            'clients' => $clients
+        ));
     }
 
     /**

@@ -48,7 +48,7 @@
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li><a href="<?php echo $this->createUrl('report/project'); ?>"><?php echo Yii::t('app', 'Project Report'); ?></a></li>
-                                        <li><a href="<?php echo $this->createUrl('report/compare'); ?>"><?php echo Yii::t('app', 'Compare Projects'); ?></a></li>
+                                        <li><a href="<?php echo $this->createUrl('report/comparison'); ?>"><?php echo Yii::t('app', 'Projects Comparison'); ?></a></li>
                                     </ul>
                                 </li>
                                 <li <?php if (Yii::app()->controller->id == 'client') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('client/index'); ?>"><?php echo Yii::t('app', 'Clients'); ?></a></li>

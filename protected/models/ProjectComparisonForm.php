@@ -6,9 +6,19 @@
 class ProjectComparisonForm extends CFormModel
 {
     /**
-     * @var array project id.
+     * @var integer client id.
      */
-    public $projectId;
+    public $clientId;
+
+    /**
+     * @var integer first project id.
+     */
+    public $projectId1;
+
+    /**
+     * @var integer second project id.
+     */
+    public $projectId2;
 
 	/**
 	 * @return array validation rules for model attributes.
@@ -16,7 +26,7 @@ class ProjectComparisonForm extends CFormModel
 	public function rules()
 	{
 		return array(
-            array( 'projectId', 'numerical', 'integerOnly' => true ),
+            array( 'clientId, projectId1, projectId2', 'safe' ),
 		);
 	}
 }

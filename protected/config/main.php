@@ -65,7 +65,7 @@ return array(
 
                 // reports
                 'report/project'     => 'report/project',
-                'report/compare'     => 'report/compare',
+                'report/comparison'  => 'report/comparison',
                 'report/projectlist' => 'report/projectlist',
                 'report/targetlist'  => 'report/targetlist',
 

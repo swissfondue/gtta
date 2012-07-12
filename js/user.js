@@ -861,6 +861,61 @@ function User()
                     $('.form-actions > button[type="submit"]').prop('disabled', false);
             }
         };
+
+        /**
+         * Comparison form has been changed.
+         */
+        this.comparisonFormChange = function (e) {
+            var val, val1, val2;
+
+            if (e.id == 'ProjectComparisonForm_clientId')
+            {
+                val = $('#ProjectComparisonForm_clientId').val();
+
+                $('#project-list-1').hide();
+                $('#project-list-2').hide();
+                $('.form-actions > button[type="submit"]').prop('disabled', true);
+
+                if (val != 0)
+                {
+                    $('#ProjectComparisonForm_clientId').prop('disabled', true);
+
+                    _report._loadProjects(val, function (data) {
+                        $('#ProjectComparisonForm_clientId').prop('disabled', false);
+                        $('#ProjectComparisonForm_projectId1 > option:not(:first)').remove();
+                        $('#ProjectComparisonForm_projectId2 > option:not(:first)').remove();
+                        $('#project-list-1').show();
+                        $('#project-list-2').show();
+
+                        if (data)
+                        {
+                            for (var i = 0; i < data.projects.length; i++)
+                            {
+                                $('<option>')
+                                    .val(data.projects[i].id)
+                                    .html(data.projects[i].name)
+                                    .appendTo('#ProjectComparisonForm_projectId1');
+
+                                $('<option>')
+                                    .val(data.projects[i].id)
+                                    .html(data.projects[i].name)
+                                    .appendTo('#ProjectComparisonForm_projectId2');
+                            }
+                        }
+                    });
+                }
+            }
+            else if (e.id == 'ProjectComparisonForm_projectId1' || e.id == 'ProjectComparisonForm_projectId2')
+            {
+                val1 = $('#ProjectComparisonForm_projectId1').val();
+                val2 = $('#ProjectComparisonForm_projectId2').val();
+
+                $('.form-actions > button[type="submit"]').prop('disabled', true);
+
+                if (val1 != 0 && val2 != 0 && val1 != val2)
+                    $('.form-actions > button[type="submit"]').prop('disabled', false);
+            }
+        };
     };
 }
 
