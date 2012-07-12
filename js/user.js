@@ -680,75 +680,186 @@ function User()
     };
 
     /**
-     * Project object.
+     * Report object.
      */
-    this.project = new function () {
-        var _project = this;
+    this.report = new function () {
+        var _report = this;
 
         /**
-         * Report dialog.
+         * Load a list of projects.
          */
-        this.reportDialog = new function () {
-            var _reportDialog = this;
+        this._loadProjects = function (clientId, callback) {
+            var url = $('#project-report-form').data('project-url');
 
-            /**
-             * Show dialog.
-             */
-            this.show = function () {
-                $('ul.report-target-list > li > label > input').prop('checked', true);
-                $('#project-report > .modal-body > .alert').hide();
-                $('#project-report').modal('show');
-            };
+            $.ajax({
+                dataType : 'json',
+                url      : url,
+                timeout  : system.ajaxTimeout,
+                type     : 'POST',
 
-            /**
-             * Generate button handler.
-             */
-            this.generate = function () {
-                var checked = $('ul.report-target-list > li > label > input:checked');
+                data : {
+                    'EntryControlForm[id]'        : clientId,
+                    'EntryControlForm[operation]' : 'project-list',
+                    'YII_CSRF_TOKEN'              : system.csrf
+                },
 
-                if (checked && checked.length > 0)
-                {
-                    $('#project-report > .modal-body > .alert').hide();
-                    $('#project-report').modal('hide');
+                success : function (data, textStatus) {
+                    $('.loader-image').hide();
 
-                    $('#project-report > .modal-body > form').submit();
+                    if (data.status == 'error')
+                    {
+                        system.showMessage('error', data.errorText);
+                        callback();
+
+                        return;
+                    }
+
+                    callback(data.data);
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $('.loader-image').hide();
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    callback();
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $('.loader-image').show();
                 }
-                else
-                    $('#project-report > .modal-body > .alert').show();
-            };
+            });
         };
 
         /**
-         * Comparison report dialog.
+         * Load a list of targets.
          */
-        this.comparisonReportDialog = new function () {
-            var _comparisonReportDialog = this;
+        this._loadTargets = function (projectId, callback) {
+            var url = $('#project-report-form').data('target-url');
 
-            /**
-             * Show dialog.
-             */
-            this.show = function () {
-                $('#ProjectComparisonForm_projectId').val(0);
-                $('#project-comparison-report > .modal-body > .alert').hide();
-                $('#project-comparison-report').modal('show');
-            };
+            $.ajax({
+                dataType : 'json',
+                url      : url,
+                timeout  : system.ajaxTimeout,
+                type     : 'POST',
 
-            /**
-             * Generate button handler.
-             */
-            this.generate = function () {
-                var selected = $('#ProjectComparisonForm_projectId').val();
+                data : {
+                    'EntryControlForm[id]'        : projectId,
+                    'EntryControlForm[operation]' : 'target-list',
+                    'YII_CSRF_TOKEN'              : system.csrf
+                },
 
-                if (selected != 0)
-                {
-                    $('#project-comparison-report > .modal-body > .alert').hide();
-                    $('#project-comparison-report').modal('hide');
+                success : function (data, textStatus) {
+                    $('.loader-image').hide();
 
-                    $('#project-comparison-report > .modal-body > form').submit();
+                    if (data.status == 'error')
+                    {
+                        system.showMessage('error', data.errorText);
+                        callback();
+
+                        return;
+                    }
+
+                    callback(data.data);
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $('.loader-image').hide();
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    callback();
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $('.loader-image').show();
                 }
+            });
+        };
+
+        /**
+         * Project form has been changed.
+         */
+        this.projectFormChange = function (e) {
+            var val;
+
+            if (e.id == 'ProjectReportForm_clientId')
+            {
+                val = $('#ProjectReportForm_clientId').val();
+
+                $('#project-list').hide();
+                $('#target-list').hide();
+                $('.form-actions > button[type="submit"]').prop('disabled', true);
+
+                if (val != 0)
+                {
+                    $('#ProjectReportForm_clientId').prop('disabled', true);
+
+                    _report._loadProjects(val, function (data) {
+                        $('#ProjectReportForm_clientId').prop('disabled', false);
+                        $('#ProjectReportForm_projectId > option:not(:first)').remove();
+                        $('#project-list').show();
+
+                        if (data)
+                        {
+                            for (var i = 0; i < data.projects.length; i++)
+                                $('<option>')
+                                    .val(data.projects[i].id)
+                                    .html(data.projects[i].name)
+                                    .appendTo('#ProjectReportForm_projectId');
+                        }
+                    });
+                }
+            }
+            else if (e.id == 'ProjectReportForm_projectId')
+            {
+                val = $('#ProjectReportForm_projectId').val();
+
+                $('#target-list').hide();
+                $('.form-actions > button[type="submit"]').prop('disabled', true);
+
+                if (val != 0)
+                {
+                    $('#ProjectReportForm_projectId').prop('disabled', true);
+
+                    _report._loadTargets(val, function (data) {
+                        $('#ProjectReportForm_projectId').prop('disabled', false);
+                        $('#target-list > .controls > .report-target-list > li').remove();
+
+                        if (data)
+                        {
+                            for (var i = 0; i < data.targets.length; i++)
+                            {
+                                var li    = $('<li>'),
+                                    label = $('<label>'),
+                                    input = $('<input>');
+
+                                input
+                                    .attr('type', 'checkbox')
+                                    .prop('checked', true)
+                                    .attr('name', 'ProjectReportForm[targetIds][]')
+                                    .val(data.targets[i].id)
+                                    .click(function () {
+                                        user.report.projectFormChange(this);
+                                    })
+                                    .appendTo(label);
+
+                                label
+                                    .append(' ' + data.targets[i].host)
+                                    .appendTo(li);
+
+                                $('#target-list > .controls > .report-target-list').append(li);
+                            }
+
+                            $('#target-list').show();
+                            $('.form-actions > button[type="submit"]').prop('disabled', false);
+                        }
+                    });
+                }
+            }
+            else
+            {
+                if ($('.report-target-list input:checked').length == 0)
+                    $('.form-actions > button[type="submit"]').prop('disabled', true);
                 else
-                    $('#project-comparison-report > .modal-body > .alert').show();
-            };
+                    $('.form-actions > button[type="submit"]').prop('disabled', false);
+            }
         };
     };
 }

@@ -44,8 +44,6 @@ return array(
                 'project/<id:\d+>/edit'                                                                      => 'project/edit',
                 'project/new'                                                                                => 'project/edit',
                 'project/control'                                                                            => 'project/control',
-                'project/<id:\d+>/report'                                                                    => 'project/report',
-                'project/<id:\d+>/compare'                                                                   => 'project/comparisonreport',
                 'project/<id:\d+>/details/<page:\d+>'                                                        => 'project/details',
                 'project/<id:\d+>/details'                                                                   => 'project/details',
                 'project/<id:\d+>/detail/<detail:\d+>/edit'                                                  => 'project/editdetail',
@@ -64,6 +62,12 @@ return array(
                 'project/attachment/<path:[a-z\d]+>/download'                                                => 'project/attachment',
                 'project/attachment/control'                                                                 => 'project/controlattachment',
                 'project/target/control'                                                                     => 'project/controltarget',
+
+                // reports
+                'report/project'     => 'report/project',
+                'report/compare'     => 'report/compare',
+                'report/projectlist' => 'report/projectlist',
+                'report/targetlist'  => 'report/targetlist',
 
                 // clients
                 'clients/<page:\d+>'   => 'client/index',

@@ -4,7 +4,7 @@
 
 -- Dumped from database version 8.4.12
 -- Dumped by pg_dump version 9.1.3
--- Started on 2012-07-07 16:54:23 MSK
+-- Started on 2012-07-12 06:22:19 MSK
 
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -120,6 +120,16 @@ ALTER TABLE public.check_categories_id_seq OWNER TO gtta;
 
 ALTER SEQUENCE check_categories_id_seq OWNED BY check_categories.id;
 
+
+--
+-- TOC entry 2031 (class 0 OID 0)
+-- Dependencies: 141
+-- Name: check_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('check_categories_id_seq', 19, true);
+
+
 --
 -- TOC entry 142 (class 1259 OID 16417)
 -- Dependencies: 6
@@ -176,6 +186,16 @@ ALTER TABLE public.check_inputs_id_seq OWNER TO gtta;
 --
 
 ALTER SEQUENCE check_inputs_id_seq OWNED BY check_inputs.id;
+
+
+--
+-- TOC entry 2033 (class 0 OID 0)
+-- Dependencies: 144
+-- Name: check_inputs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('check_inputs_id_seq', 52, true);
+
 
 --
 -- TOC entry 145 (class 1259 OID 16432)
@@ -234,6 +254,16 @@ ALTER TABLE public.check_results_id_seq OWNER TO gtta;
 
 ALTER SEQUENCE check_results_id_seq OWNED BY check_results.id;
 
+
+--
+-- TOC entry 2035 (class 0 OID 0)
+-- Dependencies: 147
+-- Name: check_results_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('check_results_id_seq', 10, true);
+
+
 --
 -- TOC entry 148 (class 1259 OID 16447)
 -- Dependencies: 6
@@ -289,6 +319,16 @@ ALTER TABLE public.check_solutions_id_seq OWNER TO gtta;
 
 ALTER SEQUENCE check_solutions_id_seq OWNED BY check_solutions.id;
 
+
+--
+-- TOC entry 2037 (class 0 OID 0)
+-- Dependencies: 150
+-- Name: check_solutions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('check_solutions_id_seq', 19, true);
+
+
 --
 -- TOC entry 151 (class 1259 OID 16462)
 -- Dependencies: 6
@@ -315,8 +355,7 @@ CREATE TABLE checks (
     check_category_id bigint NOT NULL,
     name character varying(1000) NOT NULL,
     background_info character varying,
-    impact_info character varying,
-    manual_info character varying,
+    hints character varying,
     advanced boolean NOT NULL,
     automated boolean NOT NULL,
     script character varying(1000),
@@ -354,6 +393,16 @@ ALTER TABLE public.checks_id_seq OWNER TO gtta;
 
 ALTER SEQUENCE checks_id_seq OWNED BY checks.id;
 
+
+--
+-- TOC entry 2039 (class 0 OID 0)
+-- Dependencies: 153
+-- Name: checks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('checks_id_seq', 64, true);
+
+
 --
 -- TOC entry 154 (class 1259 OID 16476)
 -- Dependencies: 6
@@ -365,8 +414,7 @@ CREATE TABLE checks_l10n (
     language_id bigint NOT NULL,
     name character varying(1000),
     background_info character varying,
-    impact_info character varying,
-    manual_info character varying,
+    hints character varying,
     reference character varying,
     question character varying
 );
@@ -421,6 +469,16 @@ ALTER TABLE public.clients_id_seq OWNER TO gtta;
 
 ALTER SEQUENCE clients_id_seq OWNED BY clients.id;
 
+
+--
+-- TOC entry 2041 (class 0 OID 0)
+-- Dependencies: 156
+-- Name: clients_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('clients_id_seq', 15, true);
+
+
 --
 -- TOC entry 157 (class 1259 OID 16490)
 -- Dependencies: 6
@@ -461,6 +519,16 @@ ALTER TABLE public.languages_id_seq OWNER TO gtta;
 
 ALTER SEQUENCE languages_id_seq OWNED BY languages.id;
 
+
+--
+-- TOC entry 2043 (class 0 OID 0)
+-- Dependencies: 158
+-- Name: languages_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('languages_id_seq', 4, true);
+
+
 --
 -- TOC entry 159 (class 1259 OID 16498)
 -- Dependencies: 6
@@ -500,6 +568,16 @@ ALTER TABLE public.project_details_id_seq OWNER TO gtta;
 --
 
 ALTER SEQUENCE project_details_id_seq OWNED BY project_details.id;
+
+
+--
+-- TOC entry 2045 (class 0 OID 0)
+-- Dependencies: 160
+-- Name: project_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('project_details_id_seq', 5, true);
+
 
 --
 -- TOC entry 161 (class 1259 OID 16506)
@@ -542,6 +620,16 @@ ALTER TABLE public.projects_id_seq OWNER TO gtta;
 --
 
 ALTER SEQUENCE projects_id_seq OWNED BY projects.id;
+
+
+--
+-- TOC entry 2047 (class 0 OID 0)
+-- Dependencies: 162
+-- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('projects_id_seq', 13, true);
+
 
 --
 -- TOC entry 163 (class 1259 OID 16515)
@@ -677,6 +765,16 @@ ALTER TABLE public.targets_id_seq OWNER TO gtta;
 
 ALTER SEQUENCE targets_id_seq OWNED BY targets.id;
 
+
+--
+-- TOC entry 2049 (class 0 OID 0)
+-- Dependencies: 169
+-- Name: targets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('targets_id_seq', 18, true);
+
+
 --
 -- TOC entry 170 (class 1259 OID 16554)
 -- Dependencies: 1923 6 476
@@ -718,6 +816,16 @@ ALTER TABLE public.users_id_seq OWNER TO gtta;
 --
 
 ALTER SEQUENCE users_id_seq OWNED BY users.id;
+
+
+--
+-- TOC entry 2051 (class 0 OID 0)
+-- Dependencies: 171
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('users_id_seq', 16, true);
+
 
 --
 -- TOC entry 1902 (class 2604 OID 16563)
@@ -824,12 +932,14 @@ ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regcl
 -- Data for Name: check_categories; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-INSERT INTO check_categories VALUES (3, 'DNS');
-INSERT INTO check_categories VALUES (14, 'SMTP');
-INSERT INTO check_categories VALUES (15, 'TCP');
-INSERT INTO check_categories VALUES (16, 'Web');
-INSERT INTO check_categories VALUES (17, 'FTP');
-INSERT INTO check_categories VALUES (18, 'SSH');
+COPY check_categories (id, name) FROM stdin;
+3	DNS
+14	SMTP
+15	TCP
+16	Web
+17	FTP
+18	SSH
+\.
 
 
 --
@@ -838,18 +948,20 @@ INSERT INTO check_categories VALUES (18, 'SSH');
 -- Data for Name: check_categories_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-INSERT INTO check_categories_l10n VALUES (3, 3, 'DNS');
-INSERT INTO check_categories_l10n VALUES (3, 4, 'DNS');
-INSERT INTO check_categories_l10n VALUES (14, 3, 'SMTP');
-INSERT INTO check_categories_l10n VALUES (14, 4, '');
-INSERT INTO check_categories_l10n VALUES (15, 3, 'TCP');
-INSERT INTO check_categories_l10n VALUES (15, 4, '');
-INSERT INTO check_categories_l10n VALUES (16, 3, 'Web');
-INSERT INTO check_categories_l10n VALUES (16, 4, '');
-INSERT INTO check_categories_l10n VALUES (17, 3, 'FTP');
-INSERT INTO check_categories_l10n VALUES (17, 4, '');
-INSERT INTO check_categories_l10n VALUES (18, 3, 'SSH');
-INSERT INTO check_categories_l10n VALUES (18, 4, '');
+COPY check_categories_l10n (check_category_id, language_id, name) FROM stdin;
+3	3	DNS
+3	4	DNS
+14	3	SMTP
+14	4	
+15	3	TCP
+15	4	
+16	3	Web
+16	4	
+17	3	FTP
+17	4	
+18	3	SSH
+18	4	
+\.
 
 
 --
@@ -858,47 +970,48 @@ INSERT INTO check_categories_l10n VALUES (18, 4, '');
 -- Data for Name: check_inputs; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-INSERT INTO check_inputs VALUES (11, 28, 'Recipient', '', 0, '');
-INSERT INTO check_inputs VALUES (12, 28, 'Server', '', 1, '');
-INSERT INTO check_inputs VALUES (13, 28, 'Login', '', 2, '');
-INSERT INTO check_inputs VALUES (14, 28, 'Password', '', 3, '');
-INSERT INTO check_inputs VALUES (15, 28, 'Sender', '', 4, '');
-INSERT INTO check_inputs VALUES (16, 28, 'Folder', '', 5, '');
-INSERT INTO check_inputs VALUES (19, 31, 'Page Type', '', 2, 'php');
-INSERT INTO check_inputs VALUES (20, 31, 'Cookies', '', 2, '');
-INSERT INTO check_inputs VALUES (21, 31, 'URL Limit', '', 3, '100');
-INSERT INTO check_inputs VALUES (23, 22, 'Hostname', '', 0, '');
-INSERT INTO check_inputs VALUES (25, 24, 'Hostname', '', 0, '');
-INSERT INTO check_inputs VALUES (26, 25, 'Hostname', '', 0, '');
-INSERT INTO check_inputs VALUES (8, 23, 'Show All', '', 0, '0');
-INSERT INTO check_inputs VALUES (27, 32, 'Range Count', '', 0, '10');
-INSERT INTO check_inputs VALUES (28, 34, 'Timeout', '', 0, '120');
-INSERT INTO check_inputs VALUES (29, 34, 'Debug', '', 1, '0');
-INSERT INTO check_inputs VALUES (30, 35, 'Timeout', '', 0, '120');
-INSERT INTO check_inputs VALUES (31, 35, 'Debug', '', 1, '0');
-INSERT INTO check_inputs VALUES (33, 40, 'Users', '', 0, '');
-INSERT INTO check_inputs VALUES (34, 40, 'Passwords', '', 1, '');
-INSERT INTO check_inputs VALUES (35, 46, 'Code', 'Possible values: php, cfm, asp', 0, 'php');
-INSERT INTO check_inputs VALUES (36, 47, 'Timeout', 'DNS timeout.', 0, '10');
-INSERT INTO check_inputs VALUES (37, 47, 'Max Results', 'Maximum number of results', 1, '100');
-INSERT INTO check_inputs VALUES (38, 47, 'Mode', 'Operation mode: 0 - output generated list only, 1 - resolve IP check', 2, '0');
-INSERT INTO check_inputs VALUES (39, 51, 'Port Range', '2 lines: start and end of the range.', 0, '1
-80');
-INSERT INTO check_inputs VALUES (40, 52, 'Port Range', 'Port range that will be passed to nmap. Please use nmap syntax for -p command line argument (for example, 22; 1-65535; U:53,111,137,T:21-25,80,139,8080)', 0, '');
-INSERT INTO check_inputs VALUES (41, 52, 'Timeout', 'Timeout in milliseconds.', 1, '1000');
-INSERT INTO check_inputs VALUES (42, 53, 'Timeout', 'SMTP server connection timeout', 0, '10');
-INSERT INTO check_inputs VALUES (44, 53, 'Destination E-mail', '', 2, 'destination@gmail.com');
-INSERT INTO check_inputs VALUES (43, 53, 'Source E-mail', '', 1, 'source@gmail.com');
-INSERT INTO check_inputs VALUES (45, 54, 'Users', '', 0, '');
-INSERT INTO check_inputs VALUES (46, 54, 'Passwords', '', 1, '');
-INSERT INTO check_inputs VALUES (32, 39, 'Long List', '0 - use small list, 1 - use long list.', 0, '0');
-INSERT INTO check_inputs VALUES (47, 55, 'Long List', '0 - use small list, 1 - use long list.', 0, '');
-INSERT INTO check_inputs VALUES (48, 56, 'URLs', 'List of URLs.', 0, '');
-INSERT INTO check_inputs VALUES (49, 60, 'Timeout', '', 0, '10');
-INSERT INTO check_inputs VALUES (50, 61, 'Paths', '', 0, '');
-INSERT INTO check_inputs VALUES (51, 62, 'Paths', '', 0, '');
-INSERT INTO check_inputs VALUES (52, 63, 'Paths', '', 0, '');
-INSERT INTO check_inputs VALUES (22, 1, 'Hostname', '', 0, '0');
+COPY check_inputs (id, check_id, name, description, sort_order, value) FROM stdin;
+11	28	Recipient		0	
+12	28	Server		1	
+13	28	Login		2	
+14	28	Password		3	
+15	28	Sender		4	
+16	28	Folder		5	
+19	31	Page Type		2	php
+20	31	Cookies		2	
+21	31	URL Limit		3	100
+23	22	Hostname		0	
+25	24	Hostname		0	
+26	25	Hostname		0	
+8	23	Show All		0	0
+27	32	Range Count		0	10
+28	34	Timeout		0	120
+29	34	Debug		1	0
+30	35	Timeout		0	120
+31	35	Debug		1	0
+33	40	Users		0	
+34	40	Passwords		1	
+35	46	Code	Possible values: php, cfm, asp	0	php
+36	47	Timeout	DNS timeout.	0	10
+37	47	Max Results	Maximum number of results	1	100
+38	47	Mode	Operation mode: 0 - output generated list only, 1 - resolve IP check	2	0
+39	51	Port Range	2 lines: start and end of the range.	0	1\r\n80
+40	52	Port Range	Port range that will be passed to nmap. Please use nmap syntax for -p command line argument (for example, 22; 1-65535; U:53,111,137,T:21-25,80,139,8080)	0	
+41	52	Timeout	Timeout in milliseconds.	1	1000
+42	53	Timeout	SMTP server connection timeout	0	10
+44	53	Destination E-mail		2	destination@gmail.com
+43	53	Source E-mail		1	source@gmail.com
+45	54	Users		0	
+46	54	Passwords		1	
+32	39	Long List	0 - use small list, 1 - use long list.	0	0
+47	55	Long List	0 - use small list, 1 - use long list.	0	
+48	56	URLs	List of URLs.	0	
+49	60	Timeout		0	10
+50	61	Paths		0	
+51	62	Paths		0	
+52	63	Paths		0	
+22	1	Hostname		0	0
+\.
 
 
 --
@@ -907,87 +1020,147 @@ INSERT INTO check_inputs VALUES (22, 1, 'Hostname', '', 0, '0');
 -- Data for Name: check_inputs_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-INSERT INTO check_inputs_l10n VALUES (50, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (51, 3, 'Paths', '', '');
-INSERT INTO check_inputs_l10n VALUES (11, 3, 'Recipient', '', '');
-INSERT INTO check_inputs_l10n VALUES (11, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (12, 3, 'Server', '', '');
-INSERT INTO check_inputs_l10n VALUES (12, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (13, 3, 'Login', '', '');
-INSERT INTO check_inputs_l10n VALUES (13, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (14, 3, 'Password', '', '');
-INSERT INTO check_inputs_l10n VALUES (14, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (15, 3, 'Sender', '', '');
-INSERT INTO check_inputs_l10n VALUES (15, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (16, 3, 'Folder', '', '');
-INSERT INTO check_inputs_l10n VALUES (16, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (19, 3, 'Page Type', '', 'php');
-INSERT INTO check_inputs_l10n VALUES (19, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (20, 3, 'Cookies', '', '');
-INSERT INTO check_inputs_l10n VALUES (20, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (21, 3, 'URL Limit', '', '100');
-INSERT INTO check_inputs_l10n VALUES (21, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (23, 3, 'Hostname', '', '');
-INSERT INTO check_inputs_l10n VALUES (23, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (25, 3, 'Hostname', '', '');
-INSERT INTO check_inputs_l10n VALUES (25, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (26, 3, 'Hostname', '', '');
-INSERT INTO check_inputs_l10n VALUES (26, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (8, 3, 'Show All', '', '0');
-INSERT INTO check_inputs_l10n VALUES (8, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (27, 3, 'Range Count', '', '10');
-INSERT INTO check_inputs_l10n VALUES (27, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (28, 3, 'Timeout', '', '120');
-INSERT INTO check_inputs_l10n VALUES (28, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (29, 3, 'Debug', '', '0');
-INSERT INTO check_inputs_l10n VALUES (29, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (30, 3, 'Timeout', '', '120');
-INSERT INTO check_inputs_l10n VALUES (30, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (31, 3, 'Debug', '', '0');
-INSERT INTO check_inputs_l10n VALUES (31, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (33, 3, 'Users', '', '');
-INSERT INTO check_inputs_l10n VALUES (33, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (34, 3, 'Passwords', '', '');
-INSERT INTO check_inputs_l10n VALUES (34, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (35, 3, 'Code', 'Possible values: php, cfm, asp', 'php');
-INSERT INTO check_inputs_l10n VALUES (35, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (36, 3, 'Timeout', 'DNS timeout.', '10');
-INSERT INTO check_inputs_l10n VALUES (36, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (37, 3, 'Max Results', 'Maximum number of results', '100');
-INSERT INTO check_inputs_l10n VALUES (37, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (38, 3, 'Mode', 'Operation mode: 0 - output generated list only, 1 - resolve IP check', '0');
-INSERT INTO check_inputs_l10n VALUES (38, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (39, 3, 'Port Range', '2 lines: start and end of the range.', '1
-80');
-INSERT INTO check_inputs_l10n VALUES (39, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (40, 3, 'Port Range', 'Port range that will be passed to nmap. Please use nmap syntax for -p command line argument (for example, 22; 1-65535; U:53,111,137,T:21-25,80,139,8080)', '');
-INSERT INTO check_inputs_l10n VALUES (40, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (41, 3, 'Timeout', 'Timeout in milliseconds.', '1000');
-INSERT INTO check_inputs_l10n VALUES (41, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (42, 3, 'Timeout', 'SMTP server connection timeout', '10');
-INSERT INTO check_inputs_l10n VALUES (42, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (44, 3, 'Destination E-mail', '', 'destination@gmail.com');
-INSERT INTO check_inputs_l10n VALUES (44, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (43, 3, 'Source E-mail', '', 'source@gmail.com');
-INSERT INTO check_inputs_l10n VALUES (43, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (45, 3, 'Users', '', '');
-INSERT INTO check_inputs_l10n VALUES (45, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (46, 3, 'Passwords', '', '');
-INSERT INTO check_inputs_l10n VALUES (46, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (32, 3, 'Long List', '0 - use small list, 1 - use long list.', '0');
-INSERT INTO check_inputs_l10n VALUES (32, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (47, 3, 'Long List', '0 - use small list, 1 - use long list.', '');
-INSERT INTO check_inputs_l10n VALUES (47, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (48, 3, 'URLs', 'List of URLs.', '');
-INSERT INTO check_inputs_l10n VALUES (48, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (49, 3, 'Timeout', '', '10');
-INSERT INTO check_inputs_l10n VALUES (49, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (50, 3, 'Paths', '', '');
-INSERT INTO check_inputs_l10n VALUES (51, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (52, 3, 'Paths', '', '');
-INSERT INTO check_inputs_l10n VALUES (52, 4, '', '', '');
-INSERT INTO check_inputs_l10n VALUES (22, 3, 'Hostname', '', '0');
-INSERT INTO check_inputs_l10n VALUES (22, 4, '', '', '');
+COPY check_inputs_l10n (check_input_id, language_id, name, description, value) FROM stdin;
+50	4			
+51	3	Paths		
+11	3	Recipient		
+11	4			
+12	3	Server		
+12	4			
+13	3	Login		
+13	4			
+14	3	Password		
+14	4			
+15	3	Sender		
+15	4			
+16	3	Folder		
+16	4			
+19	3	Page Type		php
+19	4			
+20	3	Cookies		
+20	4			
+21	3	URL Limit		100
+21	4			
+23	3	Hostname		
+23	4			
+25	3	Hostname		
+25	4			
+26	3	Hostname		
+26	4			
+8	3	Show All		0
+8	4			
+27	3	Range Count		10
+27	4			
+28	3	Timeout		120
+28	4			
+29	3	Debug		0
+29	4			
+30	3	Timeout		120
+30	4			
+31	3	Debug		0
+31	4			
+33	3	Users		
+33	4			
+34	3	Passwords		
+34	4			
+35	3	Code	Possible values: php, cfm, asp	php
+35	4			
+36	3	Timeout	DNS timeout.	10
+36	4			
+37	3	Max Results	Maximum number of results	100
+37	4			
+38	3	Mode	Operation mode: 0 - output generated list only, 1 - resolve IP check	0
+38	4			
+39	3	Port Range	2 lines: start and end of the range.	1\r\n80
+39	4			
+40	3	Port Range	Port range that will be passed to nmap. Please use nmap syntax for -p command line argument (for example, 22; 1-65535; U:53,111,137,T:21-25,80,139,8080)	
+40	4			
+41	3	Timeout	Timeout in milliseconds.	1000
+41	4			
+42	3	Timeout	SMTP server connection timeout	10
+42	4			
+44	3	Destination E-mail		destination@gmail.com
+44	4			
+43	3	Source E-mail		source@gmail.com
+43	4			
+45	3	Users		
+45	4			
+46	3	Passwords		
+46	4			
+32	3	Long List	0 - use small list, 1 - use long list.	0
+32	4			
+47	3	Long List	0 - use small list, 1 - use long list.	
+47	4			
+48	3	URLs	List of URLs.	
+48	4			
+49	3	Timeout		10
+49	4			
+50	3	Paths		
+51	4			
+52	3	Paths		
+52	4			
+22	3	Hostname		0
+22	4			
+\.
+
+
+--
+-- TOC entry 2008 (class 0 OID 16438)
+-- Dependencies: 146
+-- Data for Name: check_results; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY check_results (id, check_id, result, sort_order) FROM stdin;
+9	1	Hello, world!	0
+10	1	Yay	1
+\.
+
+
+--
+-- TOC entry 2009 (class 0 OID 16447)
+-- Dependencies: 148
+-- Data for Name: check_results_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY check_results_l10n (check_result_id, language_id, result) FROM stdin;
+9	3	Hello, world!
+9	4	\N
+10	3	Yay
+10	4	\N
+\.
+
+
+--
+-- TOC entry 2010 (class 0 OID 16453)
+-- Dependencies: 149
+-- Data for Name: check_solutions; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY check_solutions (id, check_id, solution, sort_order) FROM stdin;
+13	22	Solution A	0
+14	22	Solution B	0
+15	25	Hello, world	0
+16	25	Take away the color!	0
+\.
+
+
+--
+-- TOC entry 2011 (class 0 OID 16462)
+-- Dependencies: 151
+-- Data for Name: check_solutions_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY check_solutions_l10n (check_solution_id, language_id, solution) FROM stdin;
+13	3	Solution A
+13	4	
+14	3	Solution B
+14	4	
+15	3	Hello, world
+15	4	
+16	3	Take away the color!
+16	4	
+\.
+
 
 --
 -- TOC entry 2012 (class 0 OID 16468)
@@ -995,49 +1168,51 @@ INSERT INTO check_inputs_l10n VALUES (22, 4, '', '', '');
 -- Data for Name: checks; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-INSERT INTO checks VALUES (33, 3, 'DNS AFXR', '', '', '', false, true, 'dns_afxr.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (34, 3, 'DNS DOM MX', '', '', '', false, true, 'dns_dom_mx.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (35, 3, 'DNS Find NS', '', '', '', false, true, 'dns_find_ns.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (23, 3, 'DNS Hosting', '', '', '', false, true, 'dns_hosting.py', false, NULL, NULL, NULL, NULL);
-INSERT INTO checks VALUES (24, 3, 'DNS SOA', '', '', '', false, true, 'dns_soa.py', false, NULL, NULL, NULL, NULL);
-INSERT INTO checks VALUES (25, 3, 'DNS SPF', '', '', '', false, true, 'dns_spf.py', false, NULL, NULL, NULL, NULL);
-INSERT INTO checks VALUES (26, 14, 'SMTP Banner', '', '', '', false, true, 'smtp_banner.py', false, NULL, NULL, NULL, NULL);
-INSERT INTO checks VALUES (27, 14, 'SMTP DNSBL', '', '', '', false, true, 'smtp_dnsbl.py', false, NULL, NULL, NULL, NULL);
-INSERT INTO checks VALUES (28, 14, 'SMTP Filter', '', '', '', false, true, 'smtp_filter.py', false, NULL, NULL, NULL, NULL);
-INSERT INTO checks VALUES (30, 16, 'Web HTTP Methods', '', '', '', false, true, 'web_http_methods.py', false, NULL, NULL, NULL, NULL);
-INSERT INTO checks VALUES (31, 16, 'Web SQL XSS', '', '', '', false, true, 'web_sql_xss.py', false, NULL, NULL, NULL, NULL);
-INSERT INTO checks VALUES (36, 3, 'DNS IP Range', '', '', '', false, true, 'dns_ip_range.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (47, 3, 'DNS NIC Typosquatting', '', '', '', false, true, 'nic_typosquatting.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (48, 3, 'DNS NIC Whois', '', '', '', false, true, 'nic_whois.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (29, 15, 'TCP Traceroute', '', '', '', false, true, 'tcp_traceroute.py', false, '', 80, NULL, NULL);
-INSERT INTO checks VALUES (50, 3, 'DNS NS Version', '', '', '', false, true, 'ns_version.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (37, 3, 'DNS Resolve IP', '', '', '', false, true, 'dns_resolve_ip.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (22, 3, 'DNS A (Non-Recursive)', '', '', '', false, true, 'dns_a_nr.py', true, '', NULL, NULL, NULL);
-INSERT INTO checks VALUES (40, 17, 'FTP Bruteforce', '', '', '', false, true, 'ftp_bruteforce.pl', false, '', NULL, NULL, NULL);
-INSERT INTO checks VALUES (54, 18, 'SSH Bruteforce', '', '', '', false, true, 'ssh_bruteforce.pl', false, '', NULL, NULL, NULL);
-INSERT INTO checks VALUES (38, 3, 'DNS SPF (Perl)', '', '', '', false, true, 'dns_spf.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (55, 3, 'DNS Subdomain Bruteforce', '', '', '', false, true, 'subdomain_bruteforce.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (39, 3, 'DNS Top TLDs', '', '', '', false, true, 'dns_top_tlds.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (53, 14, 'SMTP Relay', '', '', '', false, true, 'smtp_relay.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (1, 3, 'DNS A', '', '', '', false, true, 'dns_a.py', false, '', NULL, '', '');
-INSERT INTO checks VALUES (52, 15, 'Nmap Port Scan', '', '', '', false, true, 'pscan.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (51, 15, 'TCP Port Scan', '', '', '', false, true, 'portscan.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (32, 16, 'Apache DoS', '', '', '', false, true, 'apache_dos.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (41, 16, 'Fuzz Check', '', '', '', false, true, 'fuzz_check.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (42, 16, 'Google URL', '', '', '', false, true, 'google_url.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (43, 16, 'Grep URL', '', '', '', false, true, 'grep_url.pl', false, 'http', NULL, '', '');
-INSERT INTO checks VALUES (44, 16, 'HTTP Banner', '', '', '', false, true, 'http_banner.pl', false, 'http', NULL, '', '');
-INSERT INTO checks VALUES (45, 16, 'Joomla Scan', '', '', '', false, true, 'joomla_scan.pl', false, 'http', NULL, '', '');
-INSERT INTO checks VALUES (46, 16, 'Login Pages', '', '', '', false, true, 'login_pages.pl', false, 'http', NULL, '', '');
-INSERT INTO checks VALUES (49, 16, 'Nikto', '', '', '', false, true, 'nikto.pl', false, 'http', 80, '', '');
-INSERT INTO checks VALUES (56, 16, 'URL Scan', '', '', '', false, true, 'urlscan.pl', false, 'http', NULL, '', '');
-INSERT INTO checks VALUES (61, 16, 'Web Auth Scanner', '', '', '', false, true, 'www_auth_scanner.pl', false, 'http', 80, '', '');
-INSERT INTO checks VALUES (62, 16, 'Web Directory Scanner', '', '', '', false, true, 'www_dir_scanner.pl', false, 'http', 80, '', '');
-INSERT INTO checks VALUES (63, 16, 'Web File Scanner', '', '', '', false, true, 'www_file_scanner.pl', false, 'http', 80, '', '');
-INSERT INTO checks VALUES (57, 16, 'Web Server CMS', '', '', '', false, true, 'webserver_cms.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (58, 16, 'Web Server Error Message', '', '', '', false, true, 'webserver_error_msg.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (60, 16, 'Web Server SSL', '', '', '', false, true, 'webserver_ssl.pl', false, '', NULL, '', '');
-INSERT INTO checks VALUES (59, 16, 'Web Server Files', '', '', '', false, true, 'webserver_files.pl', false, '', NULL, '', '');
+COPY checks (id, check_category_id, name, background_info, hints, advanced, automated, script, multiple_solutions, protocol, port, reference, question) FROM stdin;
+33	3	DNS AFXR			t	t	dns_afxr.pl	f		\N		
+34	3	DNS DOM MX			f	t	dns_dom_mx.pl	f		\N		
+35	3	DNS Find NS			f	t	dns_find_ns.pl	f		\N		
+23	3	DNS Hosting			f	t	dns_hosting.py	f	\N	\N	\N	\N
+24	3	DNS SOA			f	t	dns_soa.py	f	\N	\N	\N	\N
+25	3	DNS SPF			f	t	dns_spf.py	f	\N	\N	\N	\N
+26	14	SMTP Banner			f	t	smtp_banner.py	f	\N	\N	\N	\N
+27	14	SMTP DNSBL			f	t	smtp_dnsbl.py	f	\N	\N	\N	\N
+28	14	SMTP Filter			f	t	smtp_filter.py	f	\N	\N	\N	\N
+30	16	Web HTTP Methods			f	t	web_http_methods.py	f	\N	\N	\N	\N
+31	16	Web SQL XSS			f	t	web_sql_xss.py	f	\N	\N	\N	\N
+36	3	DNS IP Range			f	t	dns_ip_range.pl	f		\N		
+47	3	DNS NIC Typosquatting			f	t	nic_typosquatting.pl	f		\N		
+48	3	DNS NIC Whois			f	t	nic_whois.pl	f		\N		
+29	15	TCP Traceroute			f	t	tcp_traceroute.py	f		80	\N	\N
+50	3	DNS NS Version			f	t	ns_version.pl	f		\N		
+37	3	DNS Resolve IP			f	t	dns_resolve_ip.pl	f		\N		
+22	3	DNS A (Non-Recursive)			f	t	dns_a_nr.py	t		\N	\N	\N
+1	3	DNS A	X	YZ	f	t	dns_a.py	f		\N		
+40	17	FTP Bruteforce			f	t	ftp_bruteforce.pl	f		\N	\N	\N
+54	18	SSH Bruteforce			f	t	ssh_bruteforce.pl	f		\N	\N	\N
+38	3	DNS SPF (Perl)			f	t	dns_spf.pl	f		\N		
+55	3	DNS Subdomain Bruteforce			f	t	subdomain_bruteforce.pl	f		\N		
+39	3	DNS Top TLDs			f	t	dns_top_tlds.pl	f		\N		
+53	14	SMTP Relay			f	t	smtp_relay.pl	f		\N		
+52	15	Nmap Port Scan			f	t	pscan.pl	f		\N		
+51	15	TCP Port Scan			f	t	portscan.pl	f		\N		
+32	16	Apache DoS			f	t	apache_dos.pl	f		\N		
+41	16	Fuzz Check			f	t	fuzz_check.pl	f		\N		
+42	16	Google URL			f	t	google_url.pl	f		\N		
+43	16	Grep URL			f	t	grep_url.pl	f	http	\N		
+44	16	HTTP Banner			f	t	http_banner.pl	f	http	\N		
+45	16	Joomla Scan			f	t	joomla_scan.pl	f	http	\N		
+46	16	Login Pages			f	t	login_pages.pl	f	http	\N		
+49	16	Nikto			f	t	nikto.pl	f	http	80		
+56	16	URL Scan			f	t	urlscan.pl	f	http	\N		
+61	16	Web Auth Scanner			f	t	www_auth_scanner.pl	f	http	80		
+62	16	Web Directory Scanner			f	t	www_dir_scanner.pl	f	http	80		
+63	16	Web File Scanner			f	t	www_file_scanner.pl	f	http	80		
+57	16	Web Server CMS			f	t	webserver_cms.pl	f		\N		
+58	16	Web Server Error Message			f	t	webserver_error_msg.pl	f		\N		
+60	16	Web Server SSL			f	t	webserver_ssl.pl	f		\N		
+59	16	Web Server Files			f	t	webserver_files.pl	f		\N		
+\.
 
 
 --
@@ -1046,92 +1221,94 @@ INSERT INTO checks VALUES (59, 16, 'Web Server Files', '', '', '', false, true, 
 -- Data for Name: checks_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-INSERT INTO checks_l10n VALUES (54, 3, 'SSH Bruteforce', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (54, 4, '', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (23, 3, 'DNS Hosting', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (23, 4, '', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (24, 3, 'DNS SOA', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (24, 4, '', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (25, 3, 'DNS SPF', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (25, 4, '', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (26, 3, 'SMTP Banner', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (26, 4, '', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (27, 3, 'SMTP DNSBL', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (27, 4, '', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (28, 3, 'SMTP Filter', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (28, 4, '', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (30, 3, 'Web HTTP Methods', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (30, 4, '', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (31, 3, 'Web SQL XSS', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (31, 4, '', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (29, 3, 'TCP Traceroute', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (29, 4, '', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (47, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (48, 3, 'DNS NIC Whois', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (22, 3, 'DNS A (Non-Recursive)', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (22, 4, '', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (48, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (50, 3, 'DNS NS Version', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (49, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (56, 3, 'URL Scan', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (56, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (61, 3, 'Web Auth Scanner', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (40, 3, 'FTP Bruteforce', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (40, 4, '', '', '', '', NULL, NULL);
-INSERT INTO checks_l10n VALUES (61, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (62, 3, 'Web Directory Scanner', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (62, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (63, 3, 'Web File Scanner', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (50, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (63, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (57, 3, 'Web Server CMS', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (57, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (58, 3, 'Web Server Error Message', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (58, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (60, 3, 'Web Server SSL', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (60, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (59, 3, 'Web Server Files', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (37, 3, 'DNS Resolve IP', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (37, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (59, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (38, 3, 'DNS SPF (Perl)', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (38, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (55, 3, 'DNS Subdomain Bruteforce', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (55, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (39, 3, 'DNS Top TLDs', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (39, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (53, 3, 'SMTP Relay', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (53, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (33, 3, 'DNS AFXR', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (33, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (34, 3, 'DNS DOM MX', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (34, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (35, 3, 'DNS Find NS', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (35, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (36, 3, 'DNS IP Range', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (36, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (47, 3, 'DNS NIC Typosquatting', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (1, 3, 'DNS A', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (1, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (52, 3, 'Nmap Port Scan', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (52, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (51, 3, 'TCP Port Scan', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (51, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (32, 3, 'Apache DoS', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (32, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (41, 3, 'Fuzz Check', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (41, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (42, 3, 'Google URL', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (42, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (43, 3, 'Grep URL', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (43, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (44, 3, 'HTTP Banner', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (44, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (45, 3, 'Joomla Scan', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (45, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (46, 3, 'Login Pages', NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (46, 4, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO checks_l10n VALUES (49, 3, 'Nikto', NULL, NULL, NULL, NULL, NULL);
+COPY checks_l10n (check_id, language_id, name, background_info, hints, reference, question) FROM stdin;
+54	3	SSH Bruteforce			\N	\N
+54	4				\N	\N
+23	3	DNS Hosting			\N	\N
+23	4				\N	\N
+24	3	DNS SOA			\N	\N
+24	4				\N	\N
+25	3	DNS SPF			\N	\N
+25	4				\N	\N
+26	3	SMTP Banner			\N	\N
+26	4				\N	\N
+27	3	SMTP DNSBL			\N	\N
+27	4				\N	\N
+28	3	SMTP Filter			\N	\N
+28	4				\N	\N
+30	3	Web HTTP Methods			\N	\N
+30	4				\N	\N
+31	3	Web SQL XSS			\N	\N
+31	4				\N	\N
+29	3	TCP Traceroute			\N	\N
+29	4				\N	\N
+47	4	\N	\N	\N	\N	\N
+48	3	DNS NIC Whois	\N	\N	\N	\N
+22	3	DNS A (Non-Recursive)			\N	\N
+22	4				\N	\N
+48	4	\N	\N	\N	\N	\N
+50	3	DNS NS Version	\N	\N	\N	\N
+49	4	\N	\N	\N	\N	\N
+56	3	URL Scan	\N	\N	\N	\N
+56	4	\N	\N	\N	\N	\N
+61	3	Web Auth Scanner	\N	\N	\N	\N
+40	3	FTP Bruteforce			\N	\N
+40	4				\N	\N
+61	4	\N	\N	\N	\N	\N
+62	3	Web Directory Scanner	\N	\N	\N	\N
+62	4	\N	\N	\N	\N	\N
+63	3	Web File Scanner	\N	\N	\N	\N
+50	4	\N	\N	\N	\N	\N
+63	4	\N	\N	\N	\N	\N
+57	3	Web Server CMS	\N	\N	\N	\N
+57	4	\N	\N	\N	\N	\N
+58	3	Web Server Error Message	\N	\N	\N	\N
+58	4	\N	\N	\N	\N	\N
+60	3	Web Server SSL	\N	\N	\N	\N
+60	4	\N	\N	\N	\N	\N
+59	3	Web Server Files	\N	\N	\N	\N
+37	3	DNS Resolve IP	\N	\N	\N	\N
+37	4	\N	\N	\N	\N	\N
+59	4	\N	\N	\N	\N	\N
+33	3	DNS AFXR	\N	\N	\N	\N
+38	3	DNS SPF (Perl)	\N	\N	\N	\N
+38	4	\N	\N	\N	\N	\N
+55	3	DNS Subdomain Bruteforce	\N	\N	\N	\N
+55	4	\N	\N	\N	\N	\N
+39	3	DNS Top TLDs	\N	\N	\N	\N
+39	4	\N	\N	\N	\N	\N
+53	3	SMTP Relay	\N	\N	\N	\N
+53	4	\N	\N	\N	\N	\N
+33	4	\N	\N	\N	\N	\N
+34	3	DNS DOM MX	\N	\N	\N	\N
+34	4	\N	\N	\N	\N	\N
+35	3	DNS Find NS	\N	\N	\N	\N
+35	4	\N	\N	\N	\N	\N
+36	3	DNS IP Range	\N	\N	\N	\N
+36	4	\N	\N	\N	\N	\N
+47	3	DNS NIC Typosquatting	\N	\N	\N	\N
+52	3	Nmap Port Scan	\N	\N	\N	\N
+52	4	\N	\N	\N	\N	\N
+51	3	TCP Port Scan	\N	\N	\N	\N
+51	4	\N	\N	\N	\N	\N
+32	3	Apache DoS	\N	\N	\N	\N
+32	4	\N	\N	\N	\N	\N
+41	3	Fuzz Check	\N	\N	\N	\N
+41	4	\N	\N	\N	\N	\N
+42	3	Google URL	\N	\N	\N	\N
+42	4	\N	\N	\N	\N	\N
+43	3	Grep URL	\N	\N	\N	\N
+43	4	\N	\N	\N	\N	\N
+44	3	HTTP Banner	\N	\N	\N	\N
+44	4	\N	\N	\N	\N	\N
+45	3	Joomla Scan	\N	\N	\N	\N
+45	4	\N	\N	\N	\N	\N
+46	3	Login Pages	\N	\N	\N	\N
+46	4	\N	\N	\N	\N	\N
+49	3	Nikto	\N	\N	\N	\N
+1	3	DNS A	X	YZD	\N	\N
+1	4	\N	\N	\N	\N	\N
+\.
 
 
 --
@@ -1140,6 +1317,9 @@ INSERT INTO checks_l10n VALUES (49, 3, 'Nikto', NULL, NULL, NULL, NULL, NULL);
 -- Data for Name: clients; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
+COPY clients (id, name, country, state, city, address, postcode, website, contact_name, contact_phone, contact_email) FROM stdin;
+15	Keke									
+\.
 
 
 --
@@ -1148,8 +1328,10 @@ INSERT INTO checks_l10n VALUES (49, 3, 'Nikto', NULL, NULL, NULL, NULL, NULL);
 -- Data for Name: languages; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-INSERT INTO languages VALUES (3, 'English', 'en', true);
-INSERT INTO languages VALUES (4, 'Deutsch', 'de', false);
+COPY languages (id, name, code, "default") FROM stdin;
+3	English	en	t
+4	Deutsch	de	f
+\.
 
 
 --
@@ -1158,6 +1340,8 @@ INSERT INTO languages VALUES (4, 'Deutsch', 'de', false);
 -- Data for Name: project_details; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
+COPY project_details (id, project_id, subject, content) FROM stdin;
+\.
 
 
 --
@@ -1166,6 +1350,9 @@ INSERT INTO languages VALUES (4, 'Deutsch', 'de', false);
 -- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
+COPY projects (id, client_id, year, deadline, name, status) FROM stdin;
+13	15	2012	2012-07-08	Yay	in_progress
+\.
 
 
 --
@@ -1174,6 +1361,8 @@ INSERT INTO languages VALUES (4, 'Deutsch', 'de', false);
 -- Data for Name: target_check_attachments; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
+COPY target_check_attachments (target_id, check_id, name, type, path, size) FROM stdin;
+\.
 
 
 --
@@ -1182,6 +1371,9 @@ INSERT INTO languages VALUES (4, 'Deutsch', 'de', false);
 -- Data for Name: target_check_categories; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
+COPY target_check_categories (target_id, check_category_id, advanced, check_count, finished_count, low_risk_count, med_risk_count, high_risk_count) FROM stdin;
+18	3	t	16	2	1	0	1
+\.
 
 
 --
@@ -1190,6 +1382,9 @@ INSERT INTO languages VALUES (4, 'Deutsch', 'de', false);
 -- Data for Name: target_check_inputs; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
+COPY target_check_inputs (target_id, check_input_id, value, file, check_id) FROM stdin;
+18	22	0	\N	1
+\.
 
 
 --
@@ -1198,6 +1393,8 @@ INSERT INTO languages VALUES (4, 'Deutsch', 'de', false);
 -- Data for Name: target_check_solutions; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
+COPY target_check_solutions (target_id, check_solution_id, check_id) FROM stdin;
+\.
 
 
 --
@@ -1206,6 +1403,10 @@ INSERT INTO languages VALUES (4, 'Deutsch', 'de', false);
 -- Data for Name: target_checks; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
+COPY target_checks (target_id, check_id, result, target_file, rating, started, pid, status, result_file, language_id, protocol, port, override_target) FROM stdin;
+18	1	Fuck it ;)	\N	low_risk	\N	\N	finished	\N	3	\N	\N	\N
+18	33	Hi Risk - Advanced ;)	\N	high_risk	\N	\N	finished	\N	3	\N	\N	\N
+\.
 
 
 --
@@ -1214,6 +1415,9 @@ INSERT INTO languages VALUES (4, 'Deutsch', 'de', false);
 -- Data for Name: targets; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
+COPY targets (id, project_id, host) FROM stdin;
+18	13	onexchanger.com
+\.
 
 
 --
@@ -1222,8 +1426,11 @@ INSERT INTO languages VALUES (4, 'Deutsch', 'de', false);
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-INSERT INTO users VALUES (1, 'test@admin.com', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', '', NULL, 'admin');
-INSERT INTO users VALUES (2, 'test@user.com', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', '', NULL, 'user');
+COPY users (id, email, password, name, client_id, role) FROM stdin;
+1	test@admin.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		\N	admin
+2	test@user.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		\N	user
+16	test@client.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		\N	admin
+\.
 
 
 --
@@ -1577,7 +1784,7 @@ ALTER TABLE ONLY check_solutions_l10n
 
 
 --
--- TOC entry 1984 (class 2606 OID 16820)
+-- TOC entry 1984 (class 2606 OID 16851)
 -- Dependencies: 1925 140 152
 -- Name: checks_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
@@ -1587,7 +1794,7 @@ ALTER TABLE ONLY checks
 
 
 --
--- TOC entry 1985 (class 2606 OID 16825)
+-- TOC entry 1985 (class 2606 OID 16856)
 -- Dependencies: 152 1941 154
 -- Name: checks_l10n_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
@@ -1597,7 +1804,7 @@ ALTER TABLE ONLY checks_l10n
 
 
 --
--- TOC entry 1986 (class 2606 OID 16830)
+-- TOC entry 1986 (class 2606 OID 16861)
 -- Dependencies: 154 1951 157
 -- Name: checks_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
@@ -1788,7 +1995,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2012-07-07 16:54:23 MSK
+-- Completed on 2012-07-12 06:22:20 MSK
 
 --
 -- PostgreSQL database dump complete

@@ -385,6 +385,8 @@ table.check-header .actions {
 
 .report-target-list {
     list-style:none;
+    padding-left:0;
+    margin-left:0;
 }
 
 .in-progress {

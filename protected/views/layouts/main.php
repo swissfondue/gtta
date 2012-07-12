@@ -41,6 +41,16 @@
                             <li <?php if (Yii::app()->controller->id == 'project') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('project/index'); ?>"><?php echo Yii::t('app', 'Projects'); ?></a></li>
 
                             <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                <li class="dropdown <?php if (Yii::app()->controller->id == 'report') echo 'class="active"'; ?>">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                        <?php echo Yii::t('app', 'Reports'); ?>
+                                        <b class="caret"></b>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="<?php echo $this->createUrl('report/project'); ?>"><?php echo Yii::t('app', 'Project Report'); ?></a></li>
+                                        <li><a href="<?php echo $this->createUrl('report/compare'); ?>"><?php echo Yii::t('app', 'Compare Projects'); ?></a></li>
+                                    </ul>
+                                </li>
                                 <li <?php if (Yii::app()->controller->id == 'client') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('client/index'); ?>"><?php echo Yii::t('app', 'Clients'); ?></a></li>
                             <?php endif; ?>
 
