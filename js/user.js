@@ -13,6 +13,20 @@ function User()
         this.updateIteration = 0;
 
         /**
+         * Expand all checks.
+         */
+        this.expandAll = function () {
+            $('div.check-form').slideDown('slow');
+        };
+
+        /**
+         * Collapse all checks.
+         */
+        this.collapseAll = function () {
+            $('div.check-form').slideUp('slow');
+        };
+
+        /**
          * Start all automated checks.
          */
         this.startAll = function () {

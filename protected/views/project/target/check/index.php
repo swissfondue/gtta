@@ -23,6 +23,8 @@
         if ($hasAutomated):
     ?>
         <div class="pull-right buttons">
+            <a class="btn" href="#expand-all" onclick="user.check.expandAll();"><?php echo Yii::t('app', 'Expand All'); ?></a>&nbsp;
+            <a class="btn" href="#collapse-all" onclick="user.check.collapseAll();"><?php echo Yii::t('app', 'Collapse All'); ?></a>&nbsp;
             <a class="btn" href="#start-all" onclick="user.check.startAll();"><?php echo Yii::t('app', 'Start All'); ?></a>
         </div>
     <?php endif; ?>
