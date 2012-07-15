@@ -123,4 +123,12 @@ class Check extends CActiveRecord
 
         return $this->question;
     }
+
+    /**
+     * @return boolean is running.
+     */
+    public function getIsRunning()
+    {
+        return $this->automated && $this->targetChecks && in_array($this->targetChecks[0]->status, array( TargetCheck::STATUS_IN_PROGRESS, TargetCheck::STATUS_STOP ));
+    }
 }

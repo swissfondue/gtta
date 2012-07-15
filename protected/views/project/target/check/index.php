@@ -42,7 +42,7 @@
                     $counter = 0;
                     foreach ($checks as $check):
                 ?>
-                    <div class="check-header <?php if ($check->automated && $check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'in-progress'; ?>" data-id="<?php echo $check->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlcheck', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>" data-type="<?php echo $check->automated ? 'automated' : 'manual'; ?>">
+                    <div class="check-header <?php if ($check->isRunning) echo 'in-progress'; ?>" data-id="<?php echo $check->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlcheck', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>" data-type="<?php echo $check->automated ? 'automated' : 'manual'; ?>">
                         <table class="check-header">
                             <tbody>
                                 <tr>
@@ -78,7 +78,7 @@
                                                         break;
                                                 }
                                             ?>
-                                        <?php elseif ($check->automated && $check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS): ?>
+                                        <?php elseif ($check->isRunning): ?>
                                             <?php
                                                 $seconds = $check->targetChecks[0]->started;
                                                 date_default_timezone_set(Yii::app()->params['timeZone']);
@@ -107,8 +107,10 @@
                                         <?php if ($check->automated): ?>
                                             <?php if (!$check->targetChecks || $check->targetChecks && in_array($check->targetChecks[0]->status, array( TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED ))): ?>
                                                 <a href="#start" title="<?php echo Yii::t('app', 'Start'); ?>" onclick="user.check.start(<?php echo $check->id; ?>);"><i class="icon icon-play"></i></a>
+                                            <?php elseif ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS): ?>
+                                                <a href="#stop" title="<?php echo Yii::t('app', 'Stop'); ?>" onclick="user.check.stop(<?php echo $check->id; ?>);"><i class="icon icon-stop"></i></a>
                                             <?php else: ?>
-                                                <span class="disabled"><i class="icon icon-play" title="<?php echo Yii::t('app', 'Start'); ?>"></i></span>
+                                                <span class="disabled"><i class="icon icon-stop" title="<?php echo Yii::t('app', 'Stop'); ?>"></i></span>
                                             <?php endif; ?>
                                             &nbsp;
                                         <?php endif; ?>
@@ -172,7 +174,7 @@
                                             <?php echo Yii::t('app', 'Override Target'); ?>
                                         </th>
                                         <td>
-                                            <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[overrideTarget]" id="TargetCheckEditForm_<?php echo $check->id; ?>_overrideTarget" value="<?php if ($check->targetChecks) echo CHtml::encode($check->targetChecks[0]->override_target); ?>" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'readonly'; ?>>
+                                            <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[overrideTarget]" id="TargetCheckEditForm_<?php echo $check->id; ?>_overrideTarget" value="<?php if ($check->targetChecks) echo CHtml::encode($check->targetChecks[0]->override_target); ?>" <?php if ($check->isRunning) echo 'readonly'; ?>>
                                         </td>
                                     </tr>
                                     <?php if ($check->protocol): ?>
@@ -181,7 +183,7 @@
                                                 <?php echo Yii::t('app', 'Protocol'); ?>
                                             </th>
                                             <td>
-                                                <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[protocol]" id="TargetCheckEditForm_<?php echo $check->id; ?>_protocol" value="<?php echo CHtml::encode($check->targetChecks ? $check->targetChecks[0]->protocol : $check->protocol); ?>" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'readonly'; ?>>
+                                                <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[protocol]" id="TargetCheckEditForm_<?php echo $check->id; ?>_protocol" value="<?php echo CHtml::encode($check->targetChecks ? $check->targetChecks[0]->protocol : $check->protocol); ?>" <?php if ($check->isRunning) echo 'readonly'; ?>>
                                             </td>
                                         </tr>
                                     <?php endif; ?>
@@ -191,7 +193,7 @@
                                                 <?php echo Yii::t('app', 'Port'); ?>
                                             </th>
                                             <td>
-                                                <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[port]" id="TargetCheckEditForm_<?php echo $check->id; ?>_port" value="<?php echo $check->targetChecks ? $check->targetChecks[0]->port : $check->port; ?>" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'readonly'; ?>>
+                                                <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[port]" id="TargetCheckEditForm_<?php echo $check->id; ?>_port" value="<?php echo $check->targetChecks ? $check->targetChecks[0]->port : $check->port; ?>" <?php if ($check->isRunning) echo 'readonly'; ?>>
                                             </td>
                                         </tr>
                                     <?php endif; ?>
@@ -203,7 +205,7 @@
                                                 <?php echo CHtml::encode($input->localizedName); ?>
                                             </th>
                                             <td>
-                                                <textarea wrap="off" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" rows="2" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'readonly'; ?>><?php
+                                                <textarea wrap="off" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" rows="2" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?>><?php
                                                     $value = NULL;
 
                                                     if ($check->targetCheckInputs)
@@ -234,7 +236,7 @@
                                         <?php echo Yii::t('app', 'Result'); ?>
                                     </th>
                                     <td>
-                                        <textarea wrap="off" name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'readonly'; ?>><?php if ($check->targetChecks) echo $check->targetChecks[0]->result; ?></textarea>
+                                        <textarea wrap="off" name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->isRunning) echo 'readonly'; ?>><?php if ($check->targetChecks) echo $check->targetChecks[0]->result; ?></textarea>
                                     </td>
                                 </tr>
                                 <?php if ($check->results): ?>
@@ -275,10 +277,10 @@
                                                         ?>
                                                         <?php if ($check->multiple_solutions): ?>
                                                             <label class="checkbox">
-                                                                <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="checkbox" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'disabled'; ?>>
+                                                                <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="checkbox" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning) echo 'disabled'; ?>>
                                                         <?php else: ?>
                                                             <label class="radio">
-                                                                <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="radio" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'disabled'; ?>>
+                                                                <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="radio" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning) echo 'disabled'; ?>>
                                                         <?php endif; ?>
                                                             <?php echo CHtml::encode($solution->localizedSolution); ?>
                                                         </label>
@@ -327,7 +329,7 @@
                                             <?php foreach(array( TargetCheck::RATING_HIDDEN, TargetCheck::RATING_INFO, TargetCheck::RATING_LOW_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_HIGH_RISK ) as $rating): ?>
                                                 <li>
                                                     <label class="radio">
-                                                        <input type="radio" name="TargetCheckEditForm_<?php echo $check->id; ?>[rating]" value="<?php echo $rating; ?>" <?php if ($check->targetChecks && $check->targetChecks[0]->rating == $rating) echo 'checked'; ?> <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'disabled'; ?>>
+                                                        <input type="radio" name="TargetCheckEditForm_<?php echo $check->id; ?>[rating]" value="<?php echo $rating; ?>" <?php if ($check->targetChecks && $check->targetChecks[0]->rating == $rating) echo 'checked'; ?> <?php if ($check->isRunning) echo 'disabled'; ?>>
                                                         <?php echo $ratings[$rating]; ?>
                                                     </label>
                                                 </li>
@@ -338,9 +340,9 @@
                                 <tr>
                                     <td>&nbsp;</td>
                                     <td>
-                                        <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, false);" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'disabled'; ?>><?php echo Yii::t('app', 'Save'); ?></button>&nbsp;
+                                        <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, false);" <?php if ($check->isRunning) echo 'disabled'; ?>><?php echo Yii::t('app', 'Save'); ?></button>&nbsp;
                                         <?php if ($counter < count($checks) - 1): ?>
-                                            <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, true);" <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) echo 'disabled'; ?>><?php echo Yii::t('app', 'Save & Next'); ?></button>
+                                            <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, true);" <?php if ($check->isRunning) echo 'disabled'; ?>><?php echo Yii::t('app', 'Save & Next'); ?></button>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -577,7 +579,7 @@
                 $runningChecks = array();
 
                 foreach ($checks as $check)
-                    if ($check->automated && $check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS)
+                    if ($check->isRunning)
                     {
                         $runningChecks[] = json_encode(array(
                             'id'   => $check->id,

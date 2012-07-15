@@ -1471,6 +1471,15 @@ class ProjectController extends Controller
 
                     break;
 
+                case 'stop':
+                    if ($targetCheck->status != TargetCheck::STATUS_IN_PROGRESS)
+                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
+                    $targetCheck->status = TargetCheck::STATUS_STOP;
+                    $targetCheck->save();
+
+                    break;
+
                 case 'reset':
                     if (!in_array($targetCheck->status, array( TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED )))
                         throw new CHttpException(403, Yii::t('app', 'Access denied.'));

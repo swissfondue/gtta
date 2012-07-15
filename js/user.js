@@ -572,13 +572,13 @@ function User()
 
                     if (operation == 'start')
                     {
-                        $('td.status', headerRow).html('00:00');
+                        $('td.status',  headerRow).html('00:00');
                         $('td.actions', headerRow).html('');
                         $('td.actions', headerRow).append(
-                            '<span class="disabled"><i class="icon icon-play" title="' +
-                            system.translate('Start') + '"></i></a> &nbsp; ' +
+                            '<a href="#stop" title="' + system.translate('Stop') + '" onclick="user.check.stop(' + id +
+                            ');"><i class="icon icon-stop"></i></a> &nbsp; ' +
                             '<span class="disabled"><i class="icon icon-refresh" title="' +
-                            system.translate('Reset') + '"></i></a>'
+                            system.translate('Reset') + '"></i></span>'
                         );
 
                         $('#TargetCheckEditForm_' + id + '_result').val('');
@@ -607,7 +607,7 @@ function User()
 
                         $('td.actions', headerRow).append(
                             '<span class="disabled"><i class="icon icon-refresh" title="' +
-                            system.translate('Reset') + '"></i></a>'
+                            system.translate('Reset') + '"></i></span>'
                         );
 
                         $('input[type="text"]', row).val('');
@@ -629,6 +629,19 @@ function User()
                             var input = data.inputs[i];
                             $('#' + input.id).val(input.value);
                         }
+                    }
+                    else if (operation == 'stop')
+                    {
+                        $('td.actions', headerRow).html('');
+                        $('td.actions', headerRow).append(
+                            '<span class="disabled"><i class="icon icon-stop" title="' +
+                            system.translate('Stop') + '"></i></span> &nbsp; ' +
+                            '<span class="disabled"><i class="icon icon-refresh" title="' +
+                            system.translate('Reset') + '"></i></span>'
+                        );
+
+                        _check.setLoading(id);
+                        $('.loader-image').hide();
                     }
                 },
 
@@ -682,6 +695,13 @@ function User()
                     system.showMessage('error', system.translate('Request failed, please try again.'));
                 }
             });
+        };
+
+        /**
+         * Stop check.
+         */
+        this.stop = function (id) {
+            _check._control(id, 'stop');
         };
 
         /**

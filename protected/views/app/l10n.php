@@ -5,6 +5,7 @@ $(function () {
         'Object deleted.'                                   : '<?php echo Yii::t('app', 'Object deleted.'); ?>',
         'Delete'                                            : '<?php echo Yii::t('app', 'Delete'); ?>',
         'Start'                                             : '<?php echo Yii::t('app', 'Start'); ?>',
+        'Stop'                                              : '<?php echo Yii::t('app', 'Stop'); ?>',
         'Reset'                                             : '<?php echo Yii::t('app', 'Reset'); ?>',
         'Are you sure that you want to reset this check?'   : '<?php echo Yii::t('app', 'Are you sure that you want to reset this check?'); ?>',
     };

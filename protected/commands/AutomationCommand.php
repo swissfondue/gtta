@@ -6,9 +6,58 @@
 class AutomationCommand extends CConsoleCommand
 {
     /**
+     * Process starting checks.
+     */
+    private function _processStartingChecks()
+    {
+        $checks = TargetCheck::model()->findAllByAttributes(array(
+            'status' => TargetCheck::STATUS_IN_PROGRESS,
+            'pid'    => null
+        ));
+
+        foreach ($checks as $check)
+        {
+            $this->_backgroundExec(
+                Yii::app()->params['yiicPath'] . '/' .
+                ( $this->_isWindows() ? 'yiic.bat' : 'yiic' ) .
+                ' automation ' . $check->target_id . ' ' . $check->check_id
+            );
+        }
+    }
+
+    /**
+     * Process stopping checks.
+     */
+    private function _processStoppingChecks()
+    {
+        $criteria = new CDbCriteria();
+        $criteria->addCondition('status = :status');
+        $criteria->params = array( 'status' => TargetCheck::STATUS_STOP );
+
+        $checks = TargetCheck::model()->findAll($criteria);
+
+        foreach ($checks as $check)
+        {
+            $fileOutput = NULL;
+
+            if ($check->pid)
+            {
+                $this->_killProcess($check->pid);
+                $fileOutput = file_get_contents(Yii::app()->params['automation']['tempPath'] . '/' . $check->result_file);
+            }
+
+            $check->result = $fileOutput ? $fileOutput : 'No output.';
+            $check->status = TargetCheck::STATUS_FINISHED;
+            $check->pid    = NULL;
+
+            $check->save();
+        }
+    }
+
+    /**
      * Process running checks.
      */
-    private function _processRunning()
+    private function _processRunningChecks()
     {
         $criteria = new CDbCriteria();
         $criteria->addCondition('status = :status AND pid IS NOT NULL');
@@ -66,6 +115,15 @@ class AutomationCommand extends CConsoleCommand
     }
 
     /**
+     * Kill process.
+     */
+    private function _killProcess($pid)
+    {
+        exec(($this->_isWindows() ? 'taskkill /pid ' : 'kill -9 ') . $pid);
+        return $this->_isRunning($pid);
+    }
+
+    /**
      * Check OS.
      */
     private function _isWindows()
@@ -74,9 +132,9 @@ class AutomationCommand extends CConsoleCommand
     }
 
     /**
-     * Run a command.
+     * Run a background command.
      */
-    private function _exec($cmd)
+    private function _backgroundExec($cmd)
     {
         if ($this->_isWindows())
         {
@@ -88,36 +146,7 @@ class AutomationCommand extends CConsoleCommand
     }
 
     /**
-     * Process starting checks.
-     */
-    private function _processStarting()
-    {
-        $checks = TargetCheck::model()->findAllByAttributes(array(
-            'status' => TargetCheck::STATUS_IN_PROGRESS,
-            'pid'    => null
-        ));
-
-        foreach ($checks as $check)
-        {
-            $this->_exec(
-                Yii::app()->params['yiicPath'] . '/' .
-                ( $this->_isWindows() ? 'yiic.bat' : 'yiic' ) .
-                ' automation ' . $check->target_id . ' ' . $check->check_id
-            );
-        }
-    }
-
-    /**
-     * Works with background automation checks.
-     */
-    private function _automation()
-    {
-        $this->_processStarting();
-        $this->_processRunning();
-    }
-
-    /**
-     * Generate file name for automated checks.
+     * Generate a file name for automated checks.
      */
     private function _generateFileName()
     {
@@ -286,6 +315,7 @@ class AutomationCommand extends CConsoleCommand
      */
     public function run($args)
     {
+        // start checks
         if (count($args) > 0)
         {
             if (count($args) != 2)
@@ -312,7 +342,10 @@ class AutomationCommand extends CConsoleCommand
         {
             for ($i = 0; $i < 10; $i++)
             {
-                $this->_automation();
+                $this->_processStartingChecks();
+                $this->_processStoppingChecks();
+                $this->_processRunningChecks();
+
                 sleep(5);
             }
 
