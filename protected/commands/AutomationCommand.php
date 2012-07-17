@@ -3,7 +3,7 @@
 /**
  * Automation class.
  */
-class AutomationCommand extends CConsoleCommand
+class AutomationCommand extends ConsoleCommand
 {
     /**
      * Process starting checks.
@@ -294,14 +294,53 @@ class AutomationCommand extends CConsoleCommand
 
             $fileOutput = file_get_contents($tempPath . '/' . $check->result_file);
 
+            $check = TargetCheck::model()->findByAttributes(array(
+                'target_id' => $targetId,
+                'check_id'  => $checkId
+            ));
+
             $check->pid    = NULL;
             $check->result = $fileOutput ? $fileOutput : implode("\n", $output);
 
             if (!$check->result)
-                $check->result = 'No output.';
+                $check->result = Yii::t('app', 'No output.');
 
             $check->status = TargetCheck::STATUS_FINISHED;
             $check->save();
+
+            date_default_timezone_set(Yii::app()->params['timeZone']);
+
+            $started  = new DateTime($check->started);
+            $interval = time() - $started->getTimestamp();
+
+            if ($interval > Yii::app()->params['automation']['minNotificationInterval'])
+            {
+                $user = User::model()->findByPk($check->user_id);
+
+                $email = new Email();
+                $email->user_id = $user->id;
+
+                $email->subject = Yii::t('app', '{checkName} check has been finished', array(
+                    '{checkName}' => $check->check->localizedName
+                ));
+
+                $email->content = $this->render(
+                    'application.views.email.check',
+
+                    array(
+                        'userName'   => $user->name ? CHtml::encode($user->name) : $user->email,
+                        'projectId'  => $target->project_id,
+                        'targetId'   => $target->id,
+                        'categoryId' => $check->check->check_category_id,
+                        'checkName'  => $check->check->localizedName,
+                        'targetHost' => $target->host
+                    ),
+
+                    true
+                );
+
+                $email->save();
+            }
         }
         catch (Exception $e)
         {

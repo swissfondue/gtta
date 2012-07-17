@@ -29,6 +29,7 @@ return array(
 		),
 
 		'urlManager' => array(
+            'baseUrl'        => 'http://gtta.local',
 			'urlFormat'      => 'path',
             'showScriptName' => false,
             'rules'          => array(

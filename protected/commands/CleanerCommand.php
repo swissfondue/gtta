@@ -3,7 +3,7 @@
 /**
  * File cleaner class.
  */
-class CleanerCommand extends CConsoleCommand
+class CleanerCommand extends ConsoleCommand
 {
     /**
      * Tmp

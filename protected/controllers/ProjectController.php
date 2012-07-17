@@ -892,6 +892,7 @@ class ProjectController extends Controller
             if ($model->rating == '')
                 $model->rating = NULL;
 
+            $targetCheck->user_id         = Yii::app()->user->id;
             $targetCheck->language_id     = $language->id;
             $targetCheck->override_target = $model->overrideTarget;
             $targetCheck->protocol        = $model->protocol;
@@ -1444,9 +1445,9 @@ class ProjectController extends Controller
             if (!$targetCheck)
             {
                 $targetCheck = new TargetCheck();
-                $targetCheck->target_id = $target->id;
-                $targetCheck->check_id  = $check->id;
-
+                $targetCheck->target_id   = $target->id;
+                $targetCheck->check_id    = $check->id;
+                $targetCheck->user_id     = Yii::app()->user->id;
                 $targetCheck->language_id = $language->id;
             }
 
