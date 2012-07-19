@@ -6,7 +6,7 @@
         </ul>
     </div>
     <div class="pull-right buttons">
-        <a class="btn" href="<?php echo $this->createUrl('check/editcheck', array( 'id' => $category->id )) ?>"><?php echo Yii::t('app', 'New Check'); ?></a>
+        <a class="btn" href="<?php echo $this->createUrl('check/editcontrol', array( 'id' => $category->id )) ?>"><?php echo Yii::t('app', 'New Control'); ?></a>
     </div>
 
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
@@ -17,23 +17,20 @@
 <div class="container">
     <div class="row">
         <div class="span8">
-            <?php if (count($checks) > 0): ?>
+            <?php if (count($controls) > 0): ?>
                 <table class="table check-list">
                     <tbody>
                         <tr>
-                            <th class="name"><?php echo Yii::t('app', 'Name'); ?></th>
+                            <th class="name"><?php echo Yii::t('app', 'Control'); ?></th>
                             <th class="actions">&nbsp;</th>
                         </tr>
-                        <?php foreach ($checks as $check): ?>
-                            <tr data-id="<?php echo $check->id; ?>" data-control-url="<?php echo $this->createUrl('check/check/control'); ?>">
+                        <?php foreach ($controls as $control): ?>
+                            <tr data-id="<?php echo $control->id; ?>" data-control-url="<?php echo $this->createUrl('check/control/control'); ?>">
                                 <td class="name">
-                                    <a href="<?php echo $this->createUrl('check/editcheck', array( 'id' => $category->id, 'check' => $check->id )); ?>"><?php echo CHtml::encode($check->localizedName); ?></a>
-                                    <?php if ($check->automated): ?>
-                                        <i class="icon-cog" title="<?php echo Yii::t('app', 'Automated'); ?>"></i>
-                                    <?php endif; ?>
+                                    <a href="<?php echo $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )); ?>"><?php echo CHtml::encode($control->localizedName); ?></a>
                                 </td>
                                 <td class="actions">
-                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $check->id; ?>);"><i class="icon icon-remove"></i></a>
+                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $control->id; ?>);"><i class="icon icon-remove"></i></a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -54,7 +51,7 @@
                     </div>
                 <?php endif; ?>
             <?php else: ?>
-                <?php echo Yii::t('app', 'No checks yet.'); ?>
+                <?php echo Yii::t('app', 'No controls yet.'); ?>
             <?php endif; ?>
         </div>
     </div>

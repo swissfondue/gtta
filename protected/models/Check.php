@@ -5,7 +5,7 @@
  *
  * The followings are the available columns in table 'checks':
  * @property integer $id
- * @property integer $check_category_id
+ * @property integer $check_control_id
  * @property string $name
  * @property string $background_info
  * @property string $hints
@@ -44,9 +44,9 @@ class Check extends CActiveRecord
 	public function rules()
 	{
 		return array(
-            array( 'name, check_category_id', 'required' ),
+            array( 'name, check_control_id', 'required' ),
             array( 'name, script, protocol', 'length', 'max' => 1000 ),
-            array( 'check_category_id, port', 'numerical', 'integerOnly' => true ),
+            array( 'check_control_id, port', 'numerical', 'integerOnly' => true ),
             array( 'advanced, automated, multiple_solutions', 'boolean' ),
 		);
 	}
@@ -58,7 +58,7 @@ class Check extends CActiveRecord
 	{
 		return array(
             'l10n'                   => array( self::HAS_MANY,   'CheckL10n',             'check_id' ),
-            'category'               => array( self::BELONGS_TO, 'CheckCategory',         'check_category_id' ),
+            'control'                => array( self::BELONGS_TO, 'CheckControl',          'check_control_id' ),
             'targetChecks'           => array( self::HAS_MANY,   'TargetCheck',           'check_id' ),
             'targetCheckInputs'      => array( self::HAS_MANY,   'TargetCheckInput',      'check_id' ),
             'targetCheckSolutions'   => array( self::HAS_MANY,   'TargetCheckSolution',   'check_id' ),

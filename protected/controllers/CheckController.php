@@ -60,7 +60,7 @@ class CheckController extends Controller
 	}
 
     /**
-     * Display a list of checks.
+     * Display a list of check controls.
      */
 	public function actionView($id, $page=1)
 	{
@@ -94,7 +94,7 @@ class CheckController extends Controller
         $criteria->order  = 't.name ASC';
         $criteria->addColumnCondition(array( 'check_category_id' => $category->id ));
 
-        $checks = Check::model()->with(array(
+        $controls = CheckControl::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
                 'on'       => 'language_id = :language_id',
@@ -102,8 +102,8 @@ class CheckController extends Controller
             )
         ))->findAll($criteria);
 
-        $checkCount = Check::model()->count($criteria);
-        $paginator  = new Paginator($checkCount, $page);
+        $controlCount = CheckControl::model()->count($criteria);
+        $paginator    = new Paginator($controlCount, $page);
 
         $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
         $this->breadcrumbs[$category->localizedName] = '';
@@ -111,7 +111,7 @@ class CheckController extends Controller
         // display the page
         $this->pageTitle = $category->localizedName;
 		$this->render('view', array(
-            'checks'   => $checks,
+            'controls' => $controls,
             'p'        => $paginator,
             'category' => $category
         ));
@@ -235,7 +235,7 @@ class CheckController extends Controller
 	}
 
     /**
-     * Control function.
+     * Check category control function.
      */
     public function actionControl()
     {
@@ -285,11 +285,277 @@ class CheckController extends Controller
     }
 
     /**
-     * Check edit page.
+     * Check control edit page.
      */
-	public function actionEditCheck($id, $check=0)
+	public function actionEditControl($id, $control=0)
 	{
         $id        = (int) $id;
+        $control   = (int) $control;
+        $newRecord = false;
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
+        $category = CheckCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByPk($id);
+
+        if (!$category)
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+
+        if ($control)
+        {
+            $control = CheckControl::model()->with(array(
+                'l10n' => array(
+                    'joinType' => 'LEFT JOIN',
+                    'on'       => 'language_id = :language_id',
+                    'params'   => array( 'language_id' => $language )
+                )
+            ))->findByAttributes(array(
+                'id'                => $control,
+                'check_category_id' => $category->id
+            ));
+
+            if (!$control)
+                throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+        }
+        else
+        {
+            $control   = new CheckControl();
+            $newRecord = true;
+        }
+
+        $languages       = Language::model()->findAll();
+        $defaultLanguage = Language::model()->findByAttributes(
+            array( 'default' => true ),
+            array( 'order'   => '"default" DESC' )
+        );
+
+        if ($defaultLanguage)
+            $defaultLanguage = $defaultLanguage->id;
+
+		$model = new CheckControlEditForm();
+        $model->localizedItems = array();
+
+        if (!$newRecord)
+        {
+            $model->name = $control->name;
+
+            $controlL10n = CheckControlL10n::model()->findAllByAttributes(array(
+                'check_control_id' => $control->id
+            ));
+
+            foreach ($controlL10n as $cl)
+            {
+                $i = array();
+
+                $i['name']  = $cl->name;
+                $model->localizedItems[$cl->language_id] = $i;
+            }
+        }
+
+		// collect user input data
+		if (isset($_POST['CheckControlEditForm']))
+		{
+			$model->attributes = $_POST['CheckControlEditForm'];
+
+			if ($model->validate())
+            {
+                $control->check_category_id  = $category->id;
+                $control->name               = $model->name;
+                $control->save();
+
+                foreach ($model->localizedItems as $languageId => $value)
+                {
+                    $controlL10n = CheckControlL10n::model()->findByAttributes(array(
+                        'check_control_id' => $control->id,
+                        'language_id'      => $languageId
+                    ));
+
+                    if (!$controlL10n)
+                    {
+                        $controlL10n = new CheckControlL10n();
+                        $controlL10n->check_control_id = $control->id;
+                        $controlL10n->language_id      = $languageId;
+                    }
+
+                    if ($value['name'] == '')
+                        $value['name'] = NULL;
+
+                    $controlL10n->name = $value['name'];
+                    $controlL10n->save();
+                }
+
+                Yii::app()->user->setFlash('success', Yii::t('app', 'Control saved.'));
+
+                $control->refresh();
+
+                if ($newRecord)
+                    $this->redirect(array( 'check/editcontrol', 'id' => $category->id, 'control' => $control->id ));
+            }
+            else
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+		}
+
+        $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
+        $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
+
+        if ($newRecord)
+            $this->breadcrumbs[Yii::t('app', 'New Control')] = '';
+        else
+            $this->breadcrumbs[$control->localizedName] = '';
+
+		// display the page
+        $this->pageTitle = $newRecord ? Yii::t('app', 'New Control') : $control->localizedName;
+		$this->render('control/edit', array(
+            'model'           => $model,
+            'category'        => $category,
+            'control'         => $control,
+            'languages'       => $languages,
+            'defaultLanguage' => $defaultLanguage
+        ));
+	}
+
+    /**
+     * Check control control function.
+     */
+    public function actionControlControl()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $id      = $model->id;
+            $control = CheckControl::model()->findByPk($id);
+
+            if ($control === null)
+                throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $control->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Display a list of checks.
+     */
+	public function actionViewControl($id, $control, $page=1)
+	{
+        $id      = (int) $id;
+        $control = (int) $control;
+        $page    = (int) $page;
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
+        $category = CheckCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByPk($id);
+
+        if (!$category)
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+
+        $control = CheckControl::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByAttributes(array(
+            'id'                => $control,
+            'check_category_id' => $category->id
+        ));
+
+        if (!$control)
+            throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+
+        if ($page < 1)
+            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+
+        $criteria = new CDbCriteria();
+        $criteria->limit  = Yii::app()->params['entriesPerPage'];
+        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->order  = 't.name ASC';
+        $criteria->addColumnCondition(array( 'check_control_id' => $control->id ));
+
+        $checks = Check::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findAll($criteria);
+
+        $checkCount = Check::model()->count($criteria);
+        $paginator  = new Paginator($checkCount, $page);
+
+        $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
+        $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
+        $this->breadcrumbs[$control->localizedName]  = '';
+
+        // display the page
+        $this->pageTitle = $control->localizedName;
+		$this->render('control/index', array(
+            'checks'   => $checks,
+            'p'        => $paginator,
+            'category' => $category,
+            'control'  => $control
+        ));
+	}
+
+    /**
+     * Check edit page.
+     */
+	public function actionEditCheck($id, $control, $check=0)
+	{
+        $id        = (int) $id;
+        $control   = (int) $control;
         $check     = (int) $check;
         $newRecord = false;
 
@@ -311,6 +577,20 @@ class CheckController extends Controller
         if (!$category)
             throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
+        $control = CheckControl::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByAttributes(array(
+            'id'                => $control,
+            'check_category_id' => $category->id
+        ));
+
+        if (!$control)
+            throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+
         if ($check)
         {
             $check = Check::model()->with(array(
@@ -320,8 +600,8 @@ class CheckController extends Controller
                     'params'   => array( 'language_id' => $language )
                 )
             ))->findByAttributes(array(
-                'id'                => $check,
-                'check_category_id' => $category->id
+                'id'               => $check,
+                'check_control_id' => $control->id
             ));
 
             if (!$check)
@@ -393,7 +673,7 @@ class CheckController extends Controller
 
 			if ($model->validate())
             {
-                $check->check_category_id  = $category->id;
+                $check->check_control_id   = $control->id;
                 $check->name               = $model->name;
                 $check->background_info    = $model->backgroundInfo;
                 $check->hints              = $model->hints;
@@ -457,7 +737,7 @@ class CheckController extends Controller
                 $check->refresh();
 
                 if ($newRecord)
-                    $this->redirect(array( 'check/editcheck', 'id' => $category->id, 'check' => $check->id ));
+                    $this->redirect(array( 'check/editcheck', 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
             }
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
@@ -465,6 +745,7 @@ class CheckController extends Controller
 
         $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
         $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
+        $this->breadcrumbs[$control->localizedName]  = $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id ));
 
         if ($newRecord)
             $this->breadcrumbs[Yii::t('app', 'New Check')] = '';
@@ -473,9 +754,10 @@ class CheckController extends Controller
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Check') : $check->localizedName;
-		$this->render('check/edit', array(
+		$this->render('control/check/edit', array(
             'model'           => $model,
             'category'        => $category,
+            'control'         => $control,
             'check'           => $check,
             'languages'       => $languages,
             'defaultLanguage' => $defaultLanguage
@@ -535,11 +817,12 @@ class CheckController extends Controller
     /**
      * Display a list of predefined check results.
      */
-	public function actionResults($id, $check, $page=1)
+	public function actionResults($id, $control, $check, $page=1)
 	{
-        $id    = (int) $id;
-        $check = (int) $check;
-        $page  = (int) $page;
+        $id      = (int) $id;
+        $control = (int) $control;
+        $check   = (int) $check;
+        $page    = (int) $page;
 
         $language = Language::model()->findByAttributes(array(
             'code' => Yii::app()->language
@@ -559,6 +842,20 @@ class CheckController extends Controller
         if (!$category)
             throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
+        $control = CheckControl::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByAttributes(array(
+            'id'                => $control,
+            'check_category_id' => $category->id
+        ));
+
+        if (!$control)
+            throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+
         $check = Check::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
@@ -566,8 +863,8 @@ class CheckController extends Controller
                 'params'   => array( 'language_id' => $language )
             )
         ))->findByAttributes(array(
-            'id'                => $check,
-            'check_category_id' => $category->id
+            'id'               => $check,
+            'check_control_id' => $control->id
         ));
 
         if (!$check)
@@ -595,25 +892,28 @@ class CheckController extends Controller
 
         $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
         $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
-        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'check' => $check->id ));
+        $this->breadcrumbs[$control->localizedName]  = $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id ));
+        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
         $this->breadcrumbs[Yii::t('app', 'Results')] = '';
 
         // display the page
         $this->pageTitle = $check->localizedName;
-		$this->render('check/result/index', array(
+		$this->render('control/check/result/index', array(
             'results'  => $check_results,
             'p'        => $paginator,
             'check'    => $check,
-            'category' => $category
+            'category' => $category,
+            'control'  => $control,
         ));
 	}
 
     /**
      * Check result edit page.
      */
-	public function actionEditResult($id, $check, $result=0)
+	public function actionEditResult($id, $control, $check, $result=0)
 	{
         $id        = (int) $id;
+        $control   = (int) $control;
         $check     = (int) $check;
         $result    = (int) $result;
         $newRecord = false;
@@ -636,6 +936,20 @@ class CheckController extends Controller
         if (!$category)
             throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
+        $control = CheckControl::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByAttributes(array(
+            'id'                => $control,
+            'check_category_id' => $category->id
+        ));
+
+        if (!$control)
+            throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+
         $check = Check::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
@@ -643,8 +957,8 @@ class CheckController extends Controller
                 'params'   => array( 'language_id' => $language )
             )
         ))->findByAttributes(array(
-            'id'                => $check,
-            'check_category_id' => $category->id
+            'id'               => $check,
+            'check_control_id' => $control->id
         ));
 
         if (!$check)
@@ -748,7 +1062,7 @@ class CheckController extends Controller
                 $result->refresh();
 
                 if ($newRecord)
-                    $this->redirect(array( 'check/editresult', 'id' => $category->id, 'check' => $check->id, 'result' => $result->id ));
+                    $this->redirect(array( 'check/editresult', 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'result' => $result->id ));
             }
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
@@ -756,8 +1070,9 @@ class CheckController extends Controller
 
         $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
         $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
-        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'check' => $check->id ));
-        $this->breadcrumbs[Yii::t('app', 'Results')] = $this->createUrl('check/results', array( 'id' => $category->id, 'check' => $check->id ));
+        $this->breadcrumbs[$control->localizedName]  = $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id ));
+        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
+        $this->breadcrumbs[Yii::t('app', 'Results')] = $this->createUrl('check/results', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
 
         if ($newRecord)
             $this->breadcrumbs[Yii::t('app', 'New Result')] = '';
@@ -766,9 +1081,10 @@ class CheckController extends Controller
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Result') : $result->localizedResult;
-		$this->render('check/result/edit', array(
+		$this->render('control/check/result/edit', array(
             'model'           => $model,
             'category'        => $category,
+            'control'         => $control,
             'check'           => $check,
             'result'          => $result,
             'languages'       => $languages,
@@ -829,11 +1145,12 @@ class CheckController extends Controller
     /**
      * Display a list of check solutions.
      */
-	public function actionSolutions($id, $check, $page=1)
+	public function actionSolutions($id, $control, $check, $page=1)
 	{
-        $id    = (int) $id;
-        $check = (int) $check;
-        $page  = (int) $page;
+        $id      = (int) $id;
+        $control = (int) $control;
+        $check   = (int) $check;
+        $page    = (int) $page;
 
         $language = Language::model()->findByAttributes(array(
             'code' => Yii::app()->language
@@ -853,6 +1170,20 @@ class CheckController extends Controller
         if (!$category)
             throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
+        $control = CheckControl::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByAttributes(array(
+            'id'                => $control,
+            'check_category_id' => $category->id
+        ));
+
+        if (!$control)
+            throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+
         $check = Check::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
@@ -860,8 +1191,8 @@ class CheckController extends Controller
                 'params'   => array( 'language_id' => $language )
             )
         ))->findByAttributes(array(
-            'id'                => $check,
-            'check_category_id' => $category->id
+            'id'               => $check,
+            'check_control_id' => $control->id
         ));
 
         if (!$check)
@@ -889,25 +1220,28 @@ class CheckController extends Controller
 
         $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
         $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
-        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'check' => $check->id ));
+        $this->breadcrumbs[$control->localizedName]  = $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id ));
+        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
         $this->breadcrumbs[Yii::t('app', 'Solutions')] = '';
 
         // display the page
         $this->pageTitle = $check->localizedName;
-		$this->render('check/solution/index', array(
+		$this->render('control/check/solution/index', array(
             'solutions' => $check_solutions,
             'p'         => $paginator,
             'check'     => $check,
-            'category'  => $category
+            'category'  => $category,
+            'control'   => $control
         ));
 	}
 
     /**
      * Check solution edit page.
      */
-	public function actionEditSolution($id, $check, $solution=0)
+	public function actionEditSolution($id, $control, $check, $solution=0)
 	{
         $id        = (int) $id;
+        $control   = (int) $control;
         $check     = (int) $check;
         $solution  = (int) $solution;
         $newRecord = false;
@@ -930,6 +1264,20 @@ class CheckController extends Controller
         if (!$category)
             throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
+        $control = CheckControl::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByAttributes(array(
+            'id'                => $control,
+            'check_category_id' => $category->id
+        ));
+
+        if (!$control)
+            throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+
         $check = Check::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
@@ -937,8 +1285,8 @@ class CheckController extends Controller
                 'params'   => array( 'language_id' => $language )
             )
         ))->findByAttributes(array(
-            'id'                => $check,
-            'check_category_id' => $category->id
+            'id'               => $check,
+            'check_control_id' => $control->id
         ));
 
         if (!$check)
@@ -1042,7 +1390,7 @@ class CheckController extends Controller
                 $solution->refresh();
 
                 if ($newRecord)
-                    $this->redirect(array( 'check/editsolution', 'id' => $category->id, 'check' => $check->id, 'solution' => $solution->id ));
+                    $this->redirect(array( 'check/editsolution', 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'solution' => $solution->id ));
             }
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
@@ -1050,8 +1398,9 @@ class CheckController extends Controller
 
         $this->breadcrumbs[Yii::t('app', 'Checks')]    = $this->createUrl('check/index');
         $this->breadcrumbs[$category->localizedName]   = $this->createUrl('check/view', array( 'id' => $category->id ));
-        $this->breadcrumbs[$check->localizedName]      = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'check' => $check->id ));
-        $this->breadcrumbs[Yii::t('app', 'Solutions')] = $this->createUrl('check/solutions', array( 'id' => $category->id, 'check' => $check->id ));
+        $this->breadcrumbs[$control->localizedName]  = $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id ));
+        $this->breadcrumbs[$check->localizedName]      = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
+        $this->breadcrumbs[Yii::t('app', 'Solutions')] = $this->createUrl('check/solutions', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
 
         if ($newRecord)
             $this->breadcrumbs[Yii::t('app', 'New Solution')] = '';
@@ -1060,9 +1409,10 @@ class CheckController extends Controller
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Solution') : $solution->localizedSolution;
-		$this->render('check/solution/edit', array(
+		$this->render('control/check/solution/edit', array(
             'model'           => $model,
             'category'        => $category,
+            'control'         => $control,
             'check'           => $check,
             'solution'        => $solution,
             'languages'       => $languages,
@@ -1123,11 +1473,12 @@ class CheckController extends Controller
     /**
      * Display a list of check inputs.
      */
-	public function actionInputs($id, $check, $page=1)
+	public function actionInputs($id, $control, $check, $page=1)
 	{
-        $id    = (int) $id;
-        $check = (int) $check;
-        $page  = (int) $page;
+        $id      = (int) $id;
+        $control = (int) $control;
+        $check   = (int) $check;
+        $page    = (int) $page;
 
         $language = Language::model()->findByAttributes(array(
             'code' => Yii::app()->language
@@ -1147,6 +1498,20 @@ class CheckController extends Controller
         if (!$category)
             throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
+        $control = CheckControl::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByAttributes(array(
+            'id'                => $control,
+            'check_category_id' => $category->id
+        ));
+
+        if (!$control)
+            throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+
         $check = Check::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
@@ -1154,8 +1519,8 @@ class CheckController extends Controller
                 'params'   => array( 'language_id' => $language )
             )
         ))->findByAttributes(array(
-            'id'                => $check,
-            'check_category_id' => $category->id
+            'id'               => $check,
+            'check_control_id' => $control->id
         ));
 
         if (!$check)
@@ -1183,25 +1548,28 @@ class CheckController extends Controller
 
         $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
         $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
-        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'check' => $check->id ));
+        $this->breadcrumbs[$control->localizedName]  = $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id ));
+        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
         $this->breadcrumbs[Yii::t('app', 'Inputs')] = '';
 
         // display the page
         $this->pageTitle = $check->localizedName;
-		$this->render('check/input/index', array(
+		$this->render('control/check/input/index', array(
             'inputs'   => $check_inputs,
             'p'        => $paginator,
             'check'    => $check,
-            'category' => $category
+            'category' => $category,
+            'control'  => $control,
         ));
 	}
 
     /**
      * Check input edit page.
      */
-	public function actionEditInput($id, $check, $input=0)
+	public function actionEditInput($id, $control, $check, $input=0)
 	{
         $id        = (int) $id;
+        $control   = (int) $control;
         $check     = (int) $check;
         $input     = (int) $input;
         $newRecord = false;
@@ -1224,6 +1592,20 @@ class CheckController extends Controller
         if (!$category)
             throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
+        $control = CheckControl::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByAttributes(array(
+            'id'                => $control,
+            'check_category_id' => $category->id
+        ));
+
+        if (!$control)
+            throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+
         $check = Check::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
@@ -1231,8 +1613,8 @@ class CheckController extends Controller
                 'params'   => array( 'language_id' => $language )
             )
         ))->findByAttributes(array(
-            'id'                => $check,
-            'check_category_id' => $category->id
+            'id'               => $check,
+            'check_control_id' => $control->id
         ));
 
         if (!$check)
@@ -1352,7 +1734,7 @@ class CheckController extends Controller
                 $input->refresh();
 
                 if ($newRecord)
-                    $this->redirect(array( 'check/editinput', 'id' => $category->id, 'check' => $check->id, 'input' => $input->id ));
+                    $this->redirect(array( 'check/editinput', 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'input' => $input->id ));
             }
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
@@ -1360,8 +1742,9 @@ class CheckController extends Controller
 
         $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
         $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
-        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'check' => $check->id ));
-        $this->breadcrumbs[Yii::t('app', 'Inputs')]  = $this->createUrl('check/inputs', array( 'id' => $category->id, 'check' => $check->id ));
+        $this->breadcrumbs[$control->localizedName]  = $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id ));
+        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
+        $this->breadcrumbs[Yii::t('app', 'Inputs')]  = $this->createUrl('check/inputs', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
 
         if ($newRecord)
             $this->breadcrumbs[Yii::t('app', 'New Input')] = '';
@@ -1370,9 +1753,10 @@ class CheckController extends Controller
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Input') : $input->localizedName;
-		$this->render('check/input/edit', array(
+		$this->render('control/check/input/edit', array(
             'model'           => $model,
             'category'        => $category,
+            'control'         => $control,
             'check'           => $check,
             'input'           => $input,
             'languages'       => $languages,

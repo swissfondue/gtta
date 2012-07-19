@@ -98,6 +98,7 @@ class ReportController extends Controller
         $criteria = new CDbCriteria();
         $criteria->addInCondition('id', $targetIds);
         $criteria->addColumnCondition(array( 'project_id' => $project->id ));
+        $criteria->order = 't.host ASC';
         $targets = Target::model()->findAll($criteria);
 
         $data     = array();
@@ -136,149 +137,188 @@ class ReportController extends Controller
                         )
                     )
                 )
-            ))->findAllByAttributes(array(
-                'target_id' => $target->id
-            ));
-
-            if (!$categories)
-                continue;
+            ))->findAllByAttributes(
+                array( 'target_id' => $target->id  ),
+                array( 'order'     => 't.name ASC' )
+            );
 
             foreach ($categories as $category)
             {
                 $categoryData = array(
-                    'name'   => $category->category->localizedName,
-                    'rating' => 0.0,
-                    'checks' => array()
+                    'name'       => $category->category->localizedName,
+                    'rating'     => 0.0,
+                    'controls'   => array()
                 );
 
                 $infoCategoryData = array(
-                    'name'   => $category->category->localizedName,
-                    'checks' => array()
+                    'name'     => $category->category->localizedName,
+                    'controls' => array()
                 );
 
-                $params = array(
-                    'check_category_id' => $category->check_category_id
-                );
-
-                if (!$category->advanced)
-                    $params['advanced'] = 'FALSE';
-
-                $checks = Check::model()->with(array(
+                // get all controls
+                $controls = CheckControl::model()->with(array(
                     'l10n' => array(
                         'joinType' => 'LEFT JOIN',
-                        'on'       => 'l10n.language_id = :language_id',
+                        'on'       => 'language_id = :language_id',
                         'params'   => array( 'language_id' => $language )
-                    ),
-                    'targetChecks' => array(
-                        'alias'    => 'tcs',
-                        'joinType' => 'INNER JOIN',
-                        'on'       => 'tcs.target_id = :target_id AND tcs.status = :status AND tcs.rating != :hidden',
-                        'params'   => array(
-                            'target_id' => $target->id,
-                            'status'    => TargetCheck::STATUS_FINISHED,
-                            'hidden'    => TargetCheck::RATING_HIDDEN,
+                    )
+                ))->findAllByAttributes(
+                    array( 'check_category_id' => $category->check_category_id ),
+                    array( 'order'             => 't.name ASC' )
+                );
+
+                if (!$controls)
+                    continue;
+
+                foreach ($controls as $control)
+                {
+                    $controlData = array(
+                        'name'   => $control->localizedName,
+                        'rating' => 0.0,
+                        'checks' => array()
+                    );
+
+                    $infoControlData = array(
+                        'name'   => $control->localizedName,
+                        'checks' => array()
+                    );
+
+                    $params = array(
+                        'check_control_id' => $control->id
+                    );
+
+                    if (!$category->advanced)
+                        $params['advanced'] = 'FALSE';
+
+                    $checks = Check::model()->with(array(
+                        'l10n' => array(
+                            'joinType' => 'LEFT JOIN',
+                            'on'       => 'l10n.language_id = :language_id',
+                            'params'   => array( 'language_id' => $language )
                         ),
-                    ),
-                    'targetCheckSolutions' => array(
-                        'alias'    => 'tss',
-                        'joinType' => 'LEFT JOIN',
-                        'on'       => 'tss.target_id = :target_id',
-                        'params'   => array( 'target_id' => $target->id ),
-                        'with'     => array(
-                            'solution' => array(
-                                'alias'    => 'tss_s',
-                                'joinType' => 'LEFT JOIN',
-                                'with'     => array(
-                                    'l10n' => array(
-                                        'alias'  => 'tss_s_l10n',
-                                        'on'     => 'tss_s_l10n.language_id = :language_id',
-                                        'params' => array( 'language_id' => $language )
+                        'targetChecks' => array(
+                            'alias'    => 'tcs',
+                            'joinType' => 'INNER JOIN',
+                            'on'       => 'tcs.target_id = :target_id AND tcs.status = :status AND tcs.rating != :hidden',
+                            'params'   => array(
+                                'target_id' => $target->id,
+                                'status'    => TargetCheck::STATUS_FINISHED,
+                                'hidden'    => TargetCheck::RATING_HIDDEN,
+                            ),
+                        ),
+                        'targetCheckSolutions' => array(
+                            'alias'    => 'tss',
+                            'joinType' => 'LEFT JOIN',
+                            'on'       => 'tss.target_id = :target_id',
+                            'params'   => array( 'target_id' => $target->id ),
+                            'with'     => array(
+                                'solution' => array(
+                                    'alias'    => 'tss_s',
+                                    'joinType' => 'LEFT JOIN',
+                                    'with'     => array(
+                                        'l10n' => array(
+                                            'alias'  => 'tss_s_l10n',
+                                            'on'     => 'tss_s_l10n.language_id = :language_id',
+                                            'params' => array( 'language_id' => $language )
+                                        )
                                     )
                                 )
                             )
+                        ),
+                        'targetCheckAttachments' => array(
+                            'alias'    => 'tas',
+                            'joinType' => 'LEFT JOIN',
+                            'on'       => 'tas.target_id = :target_id',
+                            'params'   => array( 'target_id' => $target->id )
                         )
-                    ),
-                    'targetCheckAttachments' => array(
-                        'alias'    => 'tas',
-                        'joinType' => 'LEFT JOIN',
-                        'on'       => 'tas.target_id = :target_id',
-                        'params'   => array( 'target_id' => $target->id )
-                    )
-                ))->findAllByAttributes(
-                    $params,
-                    array( 'order' => 't.name ASC' )
-                );
-
-                if (!$checks)
-                    continue;
-
-                foreach ($checks as $check)
-                {
-                    $checkData = array(
-                        'name'        => $check->localizedName,
-                        'background'  => $check->localizedBackgroundInfo,
-                        'reference'   => $check->localizedReference,
-                        'question'    => $check->localizedQuestion,
-                        'result'      => $check->targetChecks[0]->result,
-                        'rating'      => 0,
-                        'ratingName'  => $ratings[$check->targetChecks[0]->rating],
-                        'ratingColor' => '#999999',
-                        'solutions'   => array(),
-                        'images'      => array(),
+                    ))->findAllByAttributes(
+                        $params,
+                        array( 'order' => 't.name ASC' )
                     );
 
-                    switch ($check->targetChecks[0]->rating)
+                    if (!$checks)
+                        continue;
+
+                    foreach ($checks as $check)
                     {
-                        case TargetCheck::RATING_HIDDEN:
-                            $checkData['rating']      = 0;
-                            $checkData['ratingColor'] = '#999999';
-                            break;
+                        $checkData = array(
+                            'name'        => $check->localizedName,
+                            'background'  => $check->localizedBackgroundInfo,
+                            'reference'   => $check->localizedReference,
+                            'question'    => $check->localizedQuestion,
+                            'result'      => $check->targetChecks[0]->result,
+                            'rating'      => 0,
+                            'ratingName'  => $ratings[$check->targetChecks[0]->rating],
+                            'ratingColor' => '#999999',
+                            'solutions'   => array(),
+                            'images'      => array(),
+                        );
 
-                        case TargetCheck::RATING_INFO:
-                            $checkData['rating'] = 1;
-                            $checkData['ratingColor'] = '#3A87AD';
-                            break;
+                        switch ($check->targetChecks[0]->rating)
+                        {
+                            case TargetCheck::RATING_HIDDEN:
+                                $checkData['rating']      = 0;
+                                $checkData['ratingColor'] = '#999999';
+                                break;
 
-                        case TargetCheck::RATING_LOW_RISK:
-                            $checkData['rating'] = 2;
-                            $checkData['ratingColor'] = '#53A254';
-                            break;
+                            case TargetCheck::RATING_INFO:
+                                $checkData['rating'] = 1;
+                                $checkData['ratingColor'] = '#3A87AD';
+                                break;
 
-                        case TargetCheck::RATING_MED_RISK:
-                            $checkData['rating'] = 3;
-                            $checkData['ratingColor'] = '#DACE2F';
-                            break;
+                            case TargetCheck::RATING_LOW_RISK:
+                                $checkData['rating'] = 2;
+                                $checkData['ratingColor'] = '#53A254';
+                                break;
 
-                        case TargetCheck::RATING_HIGH_RISK:
-                            $checkData['rating'] = 4;
-                            $checkData['ratingColor'] = '#D63515';
-                            break;
+                            case TargetCheck::RATING_MED_RISK:
+                                $checkData['rating'] = 3;
+                                $checkData['ratingColor'] = '#DACE2F';
+                                break;
+
+                            case TargetCheck::RATING_HIGH_RISK:
+                                $checkData['rating'] = 4;
+                                $checkData['ratingColor'] = '#D63515';
+                                break;
+                        }
+
+                        if ($check->targetCheckSolutions)
+                            foreach ($check->targetCheckSolutions as $solution)
+                                $checkData['solutions'][] = $solution->solution->localizedSolution;
+
+                        if ($check->targetCheckAttachments)
+                            foreach ($check->targetCheckAttachments as $attachment)
+                                if (in_array($attachment->type, array( 'image/jpeg', 'image/png', 'image/gif' )))
+                                    $checkData['images'][] = Yii::app()->params['attachments']['path'] . '/' . $attachment->path;
+
+                        $controlData['rating'] += $checkData['rating'];
+
+                        // put checks with RATING_INFO rating to a separate category
+                        if ($check->targetChecks[0]->rating == TargetCheck::RATING_INFO)
+                            $infoControlData['checks'][] = $checkData;
+                        else
+                            $controlData['checks'][] = $checkData;
                     }
 
-                    if ($check->targetCheckSolutions)
-                        foreach ($check->targetCheckSolutions as $solution)
-                            $checkData['solutions'][] = $solution->solution->localizedSolution;
+                    $controlData['rating'] /= count($checks);
 
-                    if ($check->targetCheckAttachments)
-                        foreach ($check->targetCheckAttachments as $attachment)
-                            if (in_array($attachment->type, array( 'image/jpeg', 'image/png', 'image/gif' )))
-                                $checkData['images'][] = Yii::app()->params['attachments']['path'] . '/' . $attachment->path;
+                    if ($controlData['checks'])
+                    {
+                        $categoryData['controls'][]  = $controlData;
+                        $categoryData['rating']     += $controlData['rating'];
+                    }
 
-                    $categoryData['rating'] += $checkData['rating'];
-
-                    // put checks with RATING_INFO rating to a separate category
-                    if ($check->targetChecks[0]->rating == TargetCheck::RATING_INFO)
-                        $infoCategoryData['checks'][] = $checkData;
-                    else
-                        $categoryData['checks'][] = $checkData;
+                    if ($infoControlData['checks'])
+                        $infoCategoryData['controls'][] = $infoControlData;
                 }
 
-                $categoryData['rating'] /= count($checks);
-
-                if ($categoryData['checks'])
+                if ($categoryData['controls'])
+                {
+                    $categoryData['rating'] /= count($categoryData['controls']);
                     $targetData['categories'][] = $categoryData;
+                }
 
-                if ($infoCategoryData['checks'])
+                if ($infoCategoryData['controls'])
                     $infoTargetData['categories'][] = $infoCategoryData;
 
                 $targetData['rating'] += $categoryData['rating'];
@@ -424,12 +464,12 @@ class ReportController extends Controller
                 $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
                 $table->getCell($row, 1)->setBorder($thinBorder);
                 $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
-                $table->setBackgroundForCellRange('#E0E0E0', $row, 1, $row, 1);
+                $table->setBackgroundForCellRange('#B0B0B0', $row, 1, $row, 1);
                 $table->writeToCell($row, 1, $category['name']);
 
                 $row++;
 
-                foreach ($category['checks'] as $check)
+                foreach ($category['controls'] as $control)
                 {
                     $table->addRow();
                     $table->mergeCellRange($row, 1, $row, 2);
@@ -437,167 +477,12 @@ class ReportController extends Controller
                     $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
                     $table->getCell($row, 1)->setBorder($thinBorder);
                     $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
-                    $table->setBackgroundForCellRange('#F0F0F0', $row, 1, $row, 1);
-                    $table->writeToCell($row, 1, $check['name']);
+                    $table->setBackgroundForCellRange('#D0D0D0', $row, 1, $row, 1);
+                    $table->writeToCell($row, 1, $control['name']);
 
                     $row++;
 
-                    if ($check['background'])
-                    {
-                        $table->addRow();
-                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                        $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                        $table->getCell($row, 1)->setBorder($thinBorder);
-                        $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                        $table->getCell($row, 2)->setBorder($thinBorder);
-
-                        $table->writeToCell($row, 1, Yii::t('app', 'Background Info'));
-                        $table->writeToCell($row, 2, $check['background']);
-
-                        $row++;
-                    }
-
-                    if ($check['reference'])
-                    {
-                        $table->addRow();
-                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                        $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                        $table->getCell($row, 1)->setBorder($thinBorder);
-                        $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                        $table->getCell($row, 2)->setBorder($thinBorder);
-
-                        $table->writeToCell($row, 1, Yii::t('app', 'Reference'));
-                        $table->writeToCell($row, 2, $check['reference']);
-
-                        $row++;
-                    }
-
-                    if ($check['question'])
-                    {
-                        $table->addRow();
-                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                        $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                        $table->getCell($row, 1)->setBorder($thinBorder);
-                        $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                        $table->getCell($row, 2)->setBorder($thinBorder);
-
-                        $table->writeToCell($row, 1, Yii::t('app', 'Question'));
-                        $table->writeToCell($row, 2, $check['question']);
-
-                        $row++;
-                    }
-
-                    if ($check['result'])
-                    {
-                        $table->addRow();
-                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                        $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                        $table->getCell($row, 1)->setBorder($thinBorder);
-                        $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                        $table->getCell($row, 2)->setBorder($thinBorder);
-
-                        $table->writeToCell($row, 1, Yii::t('app', 'Result'));
-                        $table->writeToCell($row, 2, $check['result']);
-
-                        $row++;
-                    }
-
-                    if ($check['solutions'])
-                    {
-                        $table->addRows(count($check['solutions']));
-
-                        $table->mergeCellRange($row, 1, $row + count($check['solutions']) - 1, 1);
-
-                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                        $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                        $table->getCell($row, 1)->setBorder($thinBorder);
-                        $table->writeToCell($row, 1, Yii::t('app', 'Solutions'));
-
-                        foreach ($check['solutions'] as $solution)
-                        {
-                            $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                            $table->getCell($row, 2)->setBorder($thinBorder);
-                            $table->writeToCell($row, 2, $solution);
-
-                            $row++;
-                        }
-                    }
-
-                    if ($check['images'])
-                    {
-                        $table->addRows(count($check['images']));
-
-                        $table->mergeCellRange($row, 1, $row + count($check['images']) - 1, 1);
-
-                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                        $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                        $table->getCell($row, 1)->setBorder($thinBorder);
-                        $table->writeToCell($row, 1, Yii::t('app', 'Attachments'));
-
-                        foreach ($check['images'] as $image)
-                        {
-                            $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                            $table->getCell($row, 2)->setBorder($thinBorder);
-
-                            list($imageWidth, $imageHeight) = getimagesize($image);
-
-                            $ratio       = $imageWidth / $imageHeight;
-                            $imageWidth  = 12; // cm
-                            $imageHeight = $imageWidth / $ratio;
-
-                            $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $imageWidth, $imageHeight);
-
-                            $row++;
-                        }
-                    }
-
-                    $table->addRow();
-
-                    // rating
-                    $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                    $table->getCell($row, 1)->setBorder($thinBorder);
-                    $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                    $table->getCell($row, 2)->setBorder($thinBorder);
-
-                    $table->writeToCell($row, 1, Yii::t('app', 'Rating'));
-                    $table->writeToCell($row, 2, '■ ', new PHPRtfLite_Font(12, null, $check['ratingColor']));
-                    $table->writeToCell($row, 2, $check['ratingName'] . ' (' . $check['rating'] . ')');
-
-                    $row++;
-                }
-            }
-        }
-
-        // list of checks with information
-        if ($infoData)
-        {
-            $section->writeText(Yii::t('app', 'Additional Information'), $h3Font, $h3Par);
-
-            foreach ($infoData as $target)
-            {
-                $section->writeText(Yii::t('app', 'Target') . ': ' . $target['host'] . '<br>', $boldFont, $noPar);
-
-                $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-                $table->addColumnsList(array( 5, 13 ));
-
-                $row = 1;
-
-                foreach ($target['categories'] as $category)
-                {
-                    $table->addRow();
-                    $table->mergeCellRange($row, 1, $row, 2);
-
-                    $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                    $table->getCell($row, 1)->setBorder($thinBorder);
-                    $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
-                    $table->setBackgroundForCellRange('#E0E0E0', $row, 1, $row, 1);
-                    $table->writeToCell($row, 1, $category['name']);
-
-                    $row++;
-
-                    foreach ($category['checks'] as $check)
+                    foreach ($control['checks'] as $check)
                     {
                         $table->addRow();
                         $table->mergeCellRange($row, 1, $row, 2);
@@ -655,18 +540,20 @@ class ReportController extends Controller
                             $row++;
                         }
 
-                        // result
-                        $table->addRow();
-                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                        $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                        $table->getCell($row, 1)->setBorder($thinBorder);
-                        $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                        $table->getCell($row, 2)->setBorder($thinBorder);
+                        if ($check['result'])
+                        {
+                            $table->addRow();
+                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                            $table->getCell($row, 1)->setBorder($thinBorder);
+                            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 2)->setBorder($thinBorder);
 
-                        $table->writeToCell($row, 1, Yii::t('app', 'Result'));
-                        $table->writeToCell($row, 2, $check['result']);
+                            $table->writeToCell($row, 1, Yii::t('app', 'Result'));
+                            $table->writeToCell($row, 2, $check['result']);
 
-                        $row++;
+                            $row++;
+                        }
 
                         if ($check['solutions'])
                         {
@@ -732,6 +619,187 @@ class ReportController extends Controller
                         $table->writeToCell($row, 2, $check['ratingName'] . ' (' . $check['rating'] . ')');
 
                         $row++;
+                    }
+                }
+            }
+        }
+
+        // list of checks with information
+        if ($infoData)
+        {
+            $section->writeText(Yii::t('app', 'Additional Information'), $h3Font, $h3Par);
+
+            foreach ($infoData as $target)
+            {
+                $section->writeText(Yii::t('app', 'Target') . ': ' . $target['host'] . '<br>', $boldFont, $noPar);
+
+                $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+                $table->addColumnsList(array( 5, 13 ));
+
+                $row = 1;
+
+                foreach ($target['categories'] as $category)
+                {
+                    $table->addRow();
+                    $table->mergeCellRange($row, 1, $row, 2);
+
+                    $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                    $table->getCell($row, 1)->setBorder($thinBorder);
+                    $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
+                    $table->setBackgroundForCellRange('#B0B0B0', $row, 1, $row, 1);
+                    $table->writeToCell($row, 1, $category['name']);
+
+                    $row++;
+
+                    foreach ($category['controls'] as $control)
+                    {
+                        $table->addRow();
+                        $table->mergeCellRange($row, 1, $row, 2);
+
+                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                        $table->getCell($row, 1)->setBorder($thinBorder);
+                        $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
+                        $table->setBackgroundForCellRange('#D0D0D0', $row, 1, $row, 1);
+                        $table->writeToCell($row, 1, $control['name']);
+
+                        $row++;
+
+                        foreach ($control['checks'] as $check)
+                        {
+                            $table->addRow();
+                            $table->mergeCellRange($row, 1, $row, 2);
+
+                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 1)->setBorder($thinBorder);
+                            $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
+                            $table->setBackgroundForCellRange('#F0F0F0', $row, 1, $row, 1);
+                            $table->writeToCell($row, 1, $check['name']);
+
+                            $row++;
+
+                            if ($check['background'])
+                            {
+                                $table->addRow();
+                                $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($thinBorder);
+                                $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 2)->setBorder($thinBorder);
+
+                                $table->writeToCell($row, 1, Yii::t('app', 'Background Info'));
+                                $table->writeToCell($row, 2, $check['background']);
+
+                                $row++;
+                            }
+
+                            if ($check['reference'])
+                            {
+                                $table->addRow();
+                                $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($thinBorder);
+                                $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 2)->setBorder($thinBorder);
+
+                                $table->writeToCell($row, 1, Yii::t('app', 'Reference'));
+                                $table->writeToCell($row, 2, $check['reference']);
+
+                                $row++;
+                            }
+
+                            if ($check['question'])
+                            {
+                                $table->addRow();
+                                $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($thinBorder);
+                                $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 2)->setBorder($thinBorder);
+
+                                $table->writeToCell($row, 1, Yii::t('app', 'Question'));
+                                $table->writeToCell($row, 2, $check['question']);
+
+                                $row++;
+                            }
+
+                            // result
+                            $table->addRow();
+                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                            $table->getCell($row, 1)->setBorder($thinBorder);
+                            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 2)->setBorder($thinBorder);
+
+                            $table->writeToCell($row, 1, Yii::t('app', 'Result'));
+                            $table->writeToCell($row, 2, $check['result']);
+
+                            $row++;
+
+                            if ($check['solutions'])
+                            {
+                                $table->addRows(count($check['solutions']));
+
+                                $table->mergeCellRange($row, 1, $row + count($check['solutions']) - 1, 1);
+
+                                $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($thinBorder);
+                                $table->writeToCell($row, 1, Yii::t('app', 'Solutions'));
+
+                                foreach ($check['solutions'] as $solution)
+                                {
+                                    $table->getCell($row, 1)->setBorder($thinBorder);
+                                    $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                    $table->getCell($row, 2)->setBorder($thinBorder);
+                                    $table->writeToCell($row, 2, $solution);
+
+                                    $row++;
+                                }
+                            }
+
+                            if ($check['images'])
+                            {
+                                $table->addRows(count($check['images']));
+
+                                $table->mergeCellRange($row, 1, $row + count($check['images']) - 1, 1);
+
+                                $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($thinBorder);
+                                $table->writeToCell($row, 1, Yii::t('app', 'Attachments'));
+
+                                foreach ($check['images'] as $image)
+                                {
+                                    $table->getCell($row, 1)->setBorder($thinBorder);
+                                    $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                    $table->getCell($row, 2)->setBorder($thinBorder);
+
+                                    list($imageWidth, $imageHeight) = getimagesize($image);
+
+                                    $ratio       = $imageWidth / $imageHeight;
+                                    $imageWidth  = 12; // cm
+                                    $imageHeight = $imageWidth / $ratio;
+
+                                    $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $imageWidth, $imageHeight);
+
+                                    $row++;
+                                }
+                            }
+
+                            $table->addRow();
+
+                            // rating
+                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 1)->setBorder($thinBorder);
+                            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 2)->setBorder($thinBorder);
+
+                            $table->writeToCell($row, 1, Yii::t('app', 'Rating'));
+                            $table->writeToCell($row, 2, '■ ', new PHPRtfLite_Font(12, null, $check['ratingColor']));
+                            $table->writeToCell($row, 2, $check['ratingName'] . ' (' . $check['rating'] . ')');
+
+                            $row++;
+                        }
                     }
                 }
             }
@@ -827,13 +895,15 @@ class ReportController extends Controller
         if ($language)
             $language = $language->id;
 
-        $targets1 = Target::model()->findAllByAttributes(array(
-            'project_id' => $project1->id
-        ));
+        $targets1 = Target::model()->findAllByAttributes(
+            array( 'project_id' => $project1->id ),
+            array( 'order'      => 't.name ASC'  )
+        );
 
-        $targets2 = Target::model()->findAllByAttributes(array(
-            'project_id' => $project2->id
-        ));
+        $targets2 = Target::model()->findAllByAttributes(
+            array( 'project_id' => $project2->id ),
+            array( 'order'      => 't.name ASC'  )
+        );
 
         // find corresponding targets
         $data = array();
@@ -872,17 +942,22 @@ class ReportController extends Controller
                     'target_id' => $target->id
                 ));
 
-                if (!$categories)
-                    continue;
-
                 foreach ($categories as $category)
                 {
-                    $params = array(
+                    $controls = CheckControl::model()->findAllByAttributes(array(
                         'check_category_id' => $category->check_category_id
-                    );
+                    ));
+
+                    $controlIds = array();
+
+                    foreach ($controls as $control)
+                        $controlIds[] = $control->id;
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addInCondition('check_control_id', $controlIds);
 
                     if (!$category->advanced)
-                        $params['advanced'] = 'FALSE';
+                        $criteria->addCondition('advanced = FALSE');
 
                     $checks = Check::model()->with(array(
                         'targetChecks' => array(
@@ -895,9 +970,7 @@ class ReportController extends Controller
                                 'hidden'    => TargetCheck::RATING_HIDDEN,
                             ),
                         ),
-                    ))->findAllByAttributes(
-                        $params
-                    );
+                    ))->findAll($criteria);
 
                     if (!$checks)
                         continue;

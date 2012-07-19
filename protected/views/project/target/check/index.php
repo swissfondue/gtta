@@ -39,9 +39,28 @@
         <div class="span8">
             <?php if (count($checks) > 0): ?>
                 <?php
-                    $counter = 0;
+                    $counter     = 0;
+                    $prevControl = 0;
+
+                    $collapseControls = count($checks) >= Yii::app()->params['collapseCheckCount'];
+
                     foreach ($checks as $check):
                 ?>
+                    <?php if ($check->control->id != $prevControl): ?>
+                        <?php if ($prevControl != 0): ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="control-header" data-id="<?php echo $check->control->id; ?>">
+                            <a href="#toggle" onclick="user.check.toggleControl(<?php echo $check->control->id; ?>);"><?php echo CHtml::encode($check->control->localizedName); ?></a>
+                        </div>
+
+                        <div class="control-body<?php if ($collapseControls) echo ' hide'; ?>" data-id="<?php echo $check->control->id; ?>">
+                    <?php
+                        endif;
+
+                        $prevControl = $check->control->id;
+                    ?>
                     <div class="check-header <?php if ($check->isRunning) echo 'in-progress'; ?>" data-id="<?php echo $check->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlcheck', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>" data-type="<?php echo $check->automated ? 'automated' : 'manual'; ?>">
                         <table class="check-header">
                             <tbody>
@@ -353,6 +372,7 @@
                         $counter++;
                     endforeach;
                 ?>
+                </div>
             <?php else: ?>
                 <?php echo Yii::t('app', 'No checks in this category.'); ?>
             <?php endif; ?>

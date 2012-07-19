@@ -527,7 +527,8 @@ class ProjectController extends Controller
 		// collect user input data
 		if (isset($_POST['TargetEditForm']))
 		{
-			$model->attributes = $_POST['TargetEditForm'];
+            $model->categoryIds = array();
+			$model->attributes  = $_POST['TargetEditForm'];
 
 			if ($model->validate())
             {
@@ -561,7 +562,16 @@ class ProjectController extends Controller
                     $categoryCriteria = new CDbCriteria();
                     $categoryCriteria->addInCondition('check_category_id', $delIds);
 
-                    $checks   = Check::model()->findAll($categoryCriteria);
+                    $controls   = CheckControl::model()->findAll($categoryCriteria);
+                    $controlIds = array();
+
+                    foreach ($controls as $control)
+                        $controlIds[] = $control->id;
+
+                    $controlCriteria = new CDbCriteria();
+                    $controlCriteria->addInCondition('check_control_id', $controlIds);
+
+                    $checks   = Check::model()->findAll($controlCriteria);
                     $checkIds = array();
 
                     foreach ($checks as $check)
@@ -689,12 +699,21 @@ class ProjectController extends Controller
         if (!$category)
             throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
-        $params = array(
+        $controls = CheckControl::model()->findAllByAttributes(array(
             'check_category_id' => $category->check_category_id
-        );
+        ));
+
+        $controlIds = array();
+
+        foreach ($controls as $control)
+            $controlIds[] = $control->id;
+
+        $criteria = new CDbCriteria();
+        $criteria->addInCondition('t.check_control_id', $controlIds);
+        $criteria->order = 'control.name ASC, t.name ASC';
 
         if (!$category->advanced)
-            $params['advanced'] = 'FALSE';
+            $criteria->addCondition('t.advanced = FALSE');
 
         $checks = Check::model()->with(array(
             'l10n' => array(
@@ -762,10 +781,18 @@ class ProjectController extends Controller
                 ),
                 'order' => 'solutions.sort_order ASC'
             ),
-        ))->findAllByAttributes(
-            $params,
-            array( 'order' => 't.name ASC' )
-        );
+            'control' => array(
+                'joinType' => 'LEFT JOIN',
+                'with'     => array(
+                    'l10n' => array(
+                        'alias'    => 'l10n_c',
+                        'joinType' => 'LEFT JOIN',
+                        'on'       => 'l10n_c.language_id = :language_id',
+                        'params'   => array( 'language_id' => $language )
+                    )
+                )
+            )
+        ))->findAll($criteria);
 
         $client = Client::model()->findByPk($project->client_id);
 
@@ -832,10 +859,22 @@ class ProjectController extends Controller
             if (!$category)
                 throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
-            $check = Check::model()->findByAttributes(array(
-                'id'                => $check,
+            $controls = CheckControl::model()->findAllByAttributes(array(
                 'check_category_id' => $category->check_category_id
             ));
+
+            $controlIds = array();
+
+            foreach ($controls as $control)
+                $controlIds[] = $control->id;
+
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition('check_control_id', $controlIds);
+            $criteria->addColumnCondition(array(
+                'id' => $check
+            ));
+
+            $check = Check::model()->find($criteria);
 
             if (!$check)
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
@@ -1404,10 +1443,22 @@ class ProjectController extends Controller
             if (!$category)
                 throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
-            $check = Check::model()->with('targetChecks')->findByAttributes(array(
-                'id'                => $check,
+            $controls = CheckControl::model()->findAllByAttributes(array(
                 'check_category_id' => $category->check_category_id
             ));
+
+            $controlIds = array();
+
+            foreach ($controls as $control)
+                $controlIds[] = $control->id;
+
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition('check_control_id', $controlIds);
+            $criteria->addColumnCondition(array(
+                'id' => $check
+            ));
+
+            $check = Check::model()->with('targetChecks')->find($criteria);
 
             if (!$check)
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
@@ -1585,6 +1636,15 @@ class ProjectController extends Controller
             if (!$category)
                 throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
+            $controls = CheckControl::model()->findAllByAttributes(array(
+                'check_category_id' => $category->check_category_id
+            ));
+
+            $controlIds = array();
+
+            foreach ($controls as $control)
+                $controlIds[] = $control->id;
+
             $model = new TargetCheckUpdateForm();
             $model->attributes = $_POST['TargetCheckUpdateForm'];
 
@@ -1604,12 +1664,11 @@ class ProjectController extends Controller
             $checkIds = explode(',', $model->checks);
 
             $criteria = new CDbCriteria();
-            $criteria->addCondition('t.check_category_id = :category_id');
             $criteria->params = array(
-                'category_id' => $category->check_category_id,
                 'target_id'   => $target->id
             );
 
+            $criteria->addInCondition('check_control_id', $controlIds);
             $criteria->addInCondition('id', $checkIds);
 
             $checks = Check::model()->with(array(

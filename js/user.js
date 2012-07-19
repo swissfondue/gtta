@@ -16,14 +16,18 @@ function User()
          * Expand all checks.
          */
         this.expandAll = function () {
-            $('div.check-form').slideDown('slow');
+            $('div.control-body').slideDown('fast', undefined, function () {
+                $('div.check-form').slideDown('slow');
+            });
         };
 
         /**
          * Collapse all checks.
          */
         this.collapseAll = function () {
-            $('div.check-form').slideUp('slow');
+            $('div.check-form').slideUp('fast', undefined, function () {
+                $('div.control-body').slideUp('slow');
+            });
         };
 
         /**
@@ -207,6 +211,30 @@ function User()
                 _check.shrink(id);
             else
                 _check.expand(id);
+        };
+
+        /**
+         * Expand control.
+         */
+        this.expandControl = function (id) {
+            $('div.control-body[data-id=' + id + ']').slideDown('slow');
+        };
+
+        /**
+         * Shrink control.
+         */
+        this.shrinkControl = function (id) {
+            $('div.control-body[data-id=' + id + ']').slideUp('slow');
+        };
+
+        /**
+         * Toggle control.
+         */
+        this.toggleControl = function (id) {
+            if ($('div.control-body[data-id=' + id + ']').is(':visible'))
+                _check.shrinkControl(id);
+            else
+                _check.expandControl(id);
         };
 
         /**

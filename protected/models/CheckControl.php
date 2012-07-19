@@ -1,18 +1,19 @@
 <?php
 
 /**
- * This is the model class for table "check_categories".
+ * This is the model class for table "check_controls".
  *
- * The followings are the available columns in table 'check_categories':
+ * The followings are the available columns in table 'check_controls':
  * @property integer $id
+ * @property integer $check_category_id
  * @property string $name
  */
-class CheckCategory extends CActiveRecord
+class CheckControl extends CActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
-	 * @return CheckCategory the static model class
+	 * @return CheckControl the static model class
 	 */
 	public static function model($className=__CLASS__)
 	{
@@ -24,7 +25,7 @@ class CheckCategory extends CActiveRecord
 	 */
 	public function tableName()
 	{
-		return 'check_categories';
+		return 'check_controls';
 	}
 
 	/**
@@ -33,7 +34,8 @@ class CheckCategory extends CActiveRecord
 	public function rules()
 	{
 		return array(
-            array( 'name', 'required' ),
+            array( 'name, check_category_id', 'required' ),
+            array( 'check_category_id', 'numerical', 'integerOnly' => true ),
 		);
 	}
 
@@ -43,8 +45,9 @@ class CheckCategory extends CActiveRecord
 	public function relations()
 	{
 		return array(
-            'l10n'     => array( self::HAS_MANY, 'CheckCategoryL10n', 'check_category_id' ),
-            'controls' => array( self::HAS_MANY, 'CheckControl',      'check_category_id' ),
+            'l10n'     => array( self::HAS_MANY,   'CheckControlL10n', 'check_control_id'  ),
+            'checks'   => array( self::HAS_MANY,   'Check',            'check_control_id'  ),
+            'category' => array( self::BELONGS_TO, 'CheckCategory',    'check_category_id' ),
 		);
 	}
 

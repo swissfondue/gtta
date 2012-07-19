@@ -2,12 +2,12 @@
     <?php if (!$check->isNewRecord): ?>
         <div class="pull-right">
             <ul class="nav nav-pills">
-                <li class="active"><a href="<?php echo $this->createUrl('check/editcheck', array( 'id' => $category->id, 'check' => $check->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+                <li class="active"><a href="<?php echo $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
                 <?php if ($check->automated): ?>
-                    <li><a href="<?php echo $this->createUrl('check/inputs', array( 'id' => $category->id, 'check' => $check->id )); ?>"><?php echo Yii::t('app', 'Inputs'); ?></a></li>
+                    <li><a href="<?php echo $this->createUrl('check/inputs', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )); ?>"><?php echo Yii::t('app', 'Inputs'); ?></a></li>
                 <?php endif; ?>
-                <li><a href="<?php echo $this->createUrl('check/results', array( 'id' => $category->id, 'check' => $check->id )); ?>"><?php echo Yii::t('app', 'Results'); ?></a></li>
-                <li><a href="<?php echo $this->createUrl('check/solutions', array( 'id' => $category->id, 'check' => $check->id )); ?>"><?php echo Yii::t('app', 'Solutions'); ?></a></li>
+                <li><a href="<?php echo $this->createUrl('check/results', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )); ?>"><?php echo Yii::t('app', 'Results'); ?></a></li>
+                <li><a href="<?php echo $this->createUrl('check/solutions', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )); ?>"><?php echo Yii::t('app', 'Solutions'); ?></a></li>
             </ul>
         </div>
     <?php endif; ?>

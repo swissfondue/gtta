@@ -88,7 +88,7 @@ hr {
 .category-list .stats,
 .target-list .stats,
 .project-list .stats {
-    color:#999;
+    color:#909090;
 }
 
 #languages-tab a img {
@@ -228,6 +228,26 @@ table.check-header .status {
     text-align:right;
     padding-top:10px;
     white-space:nowrap;
+}
+
+div.control-header {
+    border-top:1px solid #ddd;
+    padding:8px;
+    font-weight:bold;
+}
+
+div.control-header a {
+    color:#333;
+    text-decoration:none;
+}
+
+div.control-header:first-child {
+    border-top:none;
+}
+
+div.control-body {
+    padding-left:20px;
+    border-top:1px solid #ddd;
 }
 
 div.check-header {

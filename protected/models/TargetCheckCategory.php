@@ -67,8 +67,17 @@ class TargetCheckCategory extends CActiveRecord
         $medCount      = 0;
         $highCount     = 0;
 
+        $controls = CheckControl::model()->findAllByAttributes(array(
+             'check_category_id' => $this->check_category_id
+        ));
+
+        $controlIds = array();
+
+        foreach ($controls as $control)
+            $controlIds[] = $control->id;
+
         $criteria = new CDbCriteria();
-        $criteria->addColumnCondition(array( 'check_category_id' => $this->check_category_id ));
+        $criteria->addInCondition('check_control_id', $controlIds);
 
         if (!$this->advanced)
             $criteria->addCondition('t.advanced = FALSE');
@@ -82,7 +91,12 @@ class TargetCheckCategory extends CActiveRecord
             $checkIds[] = $check->id;
 
         $criteria = new CDbCriteria();
-        $criteria->addColumnCondition(array( 'target_id' => $this->target_id, 'status' => TargetCheck::STATUS_FINISHED ));
+
+        $criteria->addColumnCondition(array(
+            'target_id' => $this->target_id,
+            'status'    => TargetCheck::STATUS_FINISHED
+        ));
+
         $criteria->addInCondition('check_id', $checkIds);
 
         $finishedCount = TargetCheck::model()->count($criteria);

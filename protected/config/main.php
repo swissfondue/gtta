@@ -79,37 +79,46 @@ return array(
                 'client/control'       => 'client/control',
 
                 // checks
-                'checks/<page:\d+>'                     => 'check/index',
-                'checks'                                => 'check/index',
-                'check/<id:\d+>/<page:\d+>'             => 'check/view',
-                'check/<id:\d+>'                        => 'check/view',
-                'check/<id:\d+>/edit'                   => 'check/edit',
-                'check/new'                             => 'check/edit',
-                'check/control'                         => 'check/control',
-                'check/<id:\d+>/check/<check:\d+>/edit' => 'check/editcheck',
-                'check/<id:\d+>/check/new'              => 'check/editcheck',
-                'check/check/control'                   => 'check/controlcheck',
+                'checks/<page:\d+>'         => 'check/index',
+                'checks'                    => 'check/index',
+                'check/<id:\d+>/<page:\d+>' => 'check/view',
+                'check/<id:\d+>'            => 'check/view',
+                'check/<id:\d+>/edit'       => 'check/edit',
+                'check/new'                 => 'check/edit',
+                'check/control'             => 'check/control',
+
+                // check controls
+                'check/<id:\d+>/control/<control:\d+>/<page:\d+>' => 'check/viewcontrol',
+                'check/<id:\d+>/control/<control:\d+>'            => 'check/viewcontrol',
+                'check/<id:\d+>/control/<control:\d+>/edit'       => 'check/editcontrol',
+                'check/<id:\d+>/control/new'                      => 'check/editcontrol',
+                'check/control/control'                           => 'check/controlcontrol',
+
+                // checks
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/edit' => 'check/editcheck',
+                'check/<id:\d+>/control/<control:\d+>/check/new'              => 'check/editcheck',
+                'check/control/check/control'                                 => 'check/controlcheck',
 
                 // check results
-                'check/<id:\d+>/check/<check:\d+>/results/<page:\d+>'       => 'check/results',
-                'check/<id:\d+>/check/<check:\d+>/results'                  => 'check/results',
-                'check/<id:\d+>/check/<check:\d+>/result/<result:\d+>/edit' => 'check/editresult',
-                'check/<id:\d+>/check/<check:\d+>/result/new'               => 'check/editresult',
-                'check/check/result/control'                                => 'check/controlresult',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/results/<page:\d+>'       => 'check/results',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/results'                  => 'check/results',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/result/<result:\d+>/edit' => 'check/editresult',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/result/new'               => 'check/editresult',
+                'check/control/check/result/control'                                              => 'check/controlresult',
                 
                 // check solutions
-                'check/<id:\d+>/check/<check:\d+>/solutions/<page:\d+>'         => 'check/solutions',
-                'check/<id:\d+>/check/<check:\d+>/solutions'                    => 'check/solutions',
-                'check/<id:\d+>/check/<check:\d+>/solution/<solution:\d+>/edit' => 'check/editsolution',
-                'check/<id:\d+>/check/<check:\d+>/solution/new'                 => 'check/editsolution',
-                'check/check/solution/control'                                  => 'check/controlsolution',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/solutions/<page:\d+>'         => 'check/solutions',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/solutions'                    => 'check/solutions',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/solution/<solution:\d+>/edit' => 'check/editsolution',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/solution/new'                 => 'check/editsolution',
+                'check/control/check/solution/control'                                                => 'check/controlsolution',
                 
                 // check inputs
-                'check/<id:\d+>/check/<check:\d+>/inputs/<page:\d+>'      => 'check/inputs',
-                'check/<id:\d+>/check/<check:\d+>/inputs'                 => 'check/inputs',
-                'check/<id:\d+>/check/<check:\d+>/input/<input:\d+>/edit' => 'check/editinput',
-                'check/<id:\d+>/check/<check:\d+>/input/new'              => 'check/editinput',
-                'check/check/input/control'                               => 'check/controlinput',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/inputs/<page:\d+>'      => 'check/inputs',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/inputs'                 => 'check/inputs',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/input/<input:\d+>/edit' => 'check/editinput',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/input/new'              => 'check/editinput',
+                'check/control/check/input/control'                                             => 'check/controlinput',
 
                 // users
                 'users/<page:\d+>'   => 'user/index',
@@ -160,6 +169,8 @@ return array(
         'tmpPath' => '/tmp',
 
         'timeZone' => 'Europe/Moscow',
+
+        'collapseCheckCount' => 20,
     ),
 
     // default controller name
