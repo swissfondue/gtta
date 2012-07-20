@@ -117,7 +117,47 @@
             <hr>
         </div>
         
-        <div class="control-group <?php if ($model->getError('protocol')) echo 'error'; ?>" id="protocol-input">
+        <div class="control-group <?php if ($model->getError('referenceId')) echo 'error'; ?>">
+            <label class="control-label" for="CheckEditForm_referenceId"><?php echo Yii::t('app', 'Reference'); ?></label>
+            <div class="controls">
+                <select class="input-xlarge" id="CheckEditForm_referenceId" name="CheckEditForm[referenceId]">
+                    <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
+                    <?php foreach ($references as $reference): ?>
+                        <option value="<?php echo $reference->id; ?>" <?php if ($reference->id == $model->referenceId) echo 'selected'; ?>><?php echo CHtml::encode($reference->name); ?></option>
+                    <?php endforeach; ?>
+                </select>
+
+                <?php if ($model->getError('referenceId')): ?>
+                    <p class="help-block"><?php echo $model->getError('referenceId'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <div class="control-group <?php if ($model->getError('referenceCode')) echo 'error'; ?>">
+            <label class="control-label" for="CheckEditForm_referenceCode"><?php echo Yii::t('app', 'Reference Code'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="CheckEditForm_referenceCode" name="CheckEditForm[referenceCode]" value="<?php echo CHtml::encode($model->referenceCode); ?>">
+                <?php if ($model->getError('referenceCode')): ?>
+                    <p class="help-block"><?php echo $model->getError('referenceCode'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <div class="control-group <?php if ($model->getError('referenceUrl')) echo 'error'; ?>">
+            <label class="control-label" for="CheckEditForm_referenceUrl"><?php echo Yii::t('app', 'ReferenceUrl'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="CheckEditForm_referenceUrl" name="CheckEditForm[referenceUrl]" value="<?php echo CHtml::encode($model->referenceUrl); ?>">
+                <?php if ($model->getError('referenceUrl')): ?>
+                    <p class="help-block"><?php echo $model->getError('referenceUrl'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div>
+            <hr>
+        </div>
+        
+        <div class="control-group <?php if ($model->getError('protocol')) echo 'error'; ?>">
             <label class="control-label" for="CheckEditForm_protocol"><?php echo Yii::t('app', 'Protocol'); ?></label>
             <div class="controls">
                 <input type="text" class="input-xlarge" id="CheckEditForm_protocol" name="CheckEditForm[protocol]" value="<?php echo CHtml::encode($model->protocol); ?>">
@@ -127,7 +167,7 @@
             </div>
         </div>
         
-        <div class="control-group <?php if ($model->getError('port')) echo 'error'; ?>" id="port-input">
+        <div class="control-group <?php if ($model->getError('port')) echo 'error'; ?>">
             <label class="control-label" for="CheckEditForm_port"><?php echo Yii::t('app', 'Port'); ?></label>
             <div class="controls">
                 <input type="text" class="input-xlarge" id="CheckEditForm_port" name="CheckEditForm[port]" value="<?php echo $model->port; ?>">

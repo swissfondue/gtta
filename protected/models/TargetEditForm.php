@@ -15,6 +15,11 @@ class TargetEditForm extends CFormModel
      */
     public $categoryIds;
 
+    /**
+     * @var array reference ids.
+     */
+    public $referenceIds;
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
@@ -23,7 +28,7 @@ class TargetEditForm extends CFormModel
 		return array(
 			array( 'host', 'required' ),
             array( 'host', 'length', 'max' => 1000 ),
-            array( 'categoryIds', 'safe' ),
+            array( 'categoryIds, referenceIds', 'safe' ),
 		);
 	}
     

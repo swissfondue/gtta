@@ -31,6 +31,21 @@ class CheckEditForm extends CFormModel
     public $question;
 
     /**
+     * @var integer reference id.
+     */
+    public $referenceId;
+
+    /**
+     * @var string reference code.
+     */
+    public $referenceCode;
+
+    /**
+     * @var string reference url.
+     */
+    public $referenceUrl;
+
+    /**
      * @var string protocol.
      */
     public $protocol;
@@ -71,12 +86,15 @@ class CheckEditForm extends CFormModel
 	public function rules()
 	{
 		return array(
-			array( 'name', 'required' ),
-            array( 'name, script, protocol', 'length', 'max' => 1000 ),
+			array( 'name, referenceId', 'required' ),
+            array( 'name, script, protocol, referenceCode, referenceUrl', 'length', 'max' => 1000 ),
             array( 'port', 'numerical', 'integerOnly' => true, 'min' => 0, 'max' => 1000 ),
             array( 'advanced, automated, multipleSolutions', 'boolean' ),
             array( 'localizedItems, backgroundInfo, hints, reference, question, script', 'safe' ),
             array( 'automated', 'checkScript' ),
+            array( 'referenceUrl', 'url', 'defaultScheme' => 'http' ),
+            array( 'referenceId', 'numerical', 'integerOnly' => true ),
+            array( 'referenceId', 'checkReference' ),
 		);
 	}
     
@@ -89,13 +107,15 @@ class CheckEditForm extends CFormModel
 			'name'           => Yii::t('app', 'Name'),
             'backgroundInfo' => Yii::t('app', 'Background Info'),
             'hints     '     => Yii::t('app', 'Hints'),
-            'reference'      => Yii::t('app', 'Reference'),
             'question'       => Yii::t('app', 'Question'),
             'script'         => Yii::t('app', 'Script'),
             'advanced'       => Yii::t('app', 'Advanced'),
             'automated'      => Yii::t('app', 'Automated'),
             'protocol'       => Yii::t('app', 'Protocol'),
             'port'           => Yii::t('app', 'Port'),
+            'referenceId'    => Yii::t('app', 'Reference'),
+            'referenceCode'  => Yii::t('app', 'Reference Code'),
+            'referenceUrl'   => Yii::t('app', 'Reference URL'),
 		);
 	}
 
@@ -112,4 +132,20 @@ class CheckEditForm extends CFormModel
 
         return true;
     }
+
+    /**
+	 * Checks if reference exists.
+	 */
+	public function checkReference($attribute, $params)
+	{
+		$reference = Reference::model()->findByPk($this->referenceId);
+
+        if (!$reference)
+        {
+            $this->addError('referenceId', Yii::t('app', 'Reference doesn\'t exist.'));
+            return false;
+        }
+
+        return true;
+	}
 }

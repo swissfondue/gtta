@@ -510,7 +510,9 @@ class ProjectController extends Controller
         }
 
 		$model = new TargetEditForm();
-        $model->categoryIds = array();
+
+        $model->categoryIds  = array();
+        $model->referenceIds = array();
 
         if (!$newRecord)
         {
@@ -522,13 +524,22 @@ class ProjectController extends Controller
 
             foreach ($categories as $category)
                 $model->categoryIds[] = $category->check_category_id;
+
+            $references = TargetReference::model()->findAllByAttributes(array(
+                'target_id' => $target->id
+            ));
+
+            foreach ($references as $reference)
+                $model->referenceIds[] = $reference->reference_id;
         }
 
 		// collect user input data
 		if (isset($_POST['TargetEditForm']))
 		{
-            $model->categoryIds = array();
-			$model->attributes  = $_POST['TargetEditForm'];
+            $model->categoryIds  = array();
+            $model->referenceIds = array();
+
+			$model->attributes = $_POST['TargetEditForm'];
 
 			if ($model->validate())
             {
@@ -537,61 +548,70 @@ class ProjectController extends Controller
 
                 $target->save();
 
+                $addCategories = array();
+                $delCategories = array();
+
+                $addReferences = array();
+                $delReferences = array();
+
                 if (!$newRecord)
                 {
-                    $oldIds = array();
-                    $delIds = array();
-                    $newIds = array();
+                    $oldCategories = array();
+                    $oldReferences = array();
 
-                    $oldCategories = TargetCheckCategory::model()->findAllByAttributes(array(
+                    // fill in addCategories & delCategories arrays
+                    $categories = TargetCheckCategory::model()->findAllByAttributes(array(
                         'target_id' => $target->id
                     ));
 
-                    foreach ($oldCategories as $category)
-                        $oldIds[] = $category->check_category_id;
+                    foreach ($categories as $category)
+                        $oldCategories[] = $category->check_category_id;
 
-                    foreach ($oldIds as $category)
+                    foreach ($oldCategories as $category)
                         if (!in_array($category, $model->categoryIds))
-                            $delIds[] = $category;
+                            $delCategories[] = $category;
 
                     foreach ($model->categoryIds as $category)
-                        if (!in_array($category, $oldIds))
-                            $newIds[] = $category;
+                        if (!in_array($category, $oldCategories))
+                            $addCategories[] = $category;
 
-                    // delete unused categories & results
-                    $categoryCriteria = new CDbCriteria();
-                    $categoryCriteria->addInCondition('check_category_id', $delIds);
+                    // fill in addReferences & delReferences arrays
+                    $references = TargetReference::model()->findAllByAttributes(array(
+                        'target_id' => $target->id
+                    ));
 
-                    $controls   = CheckControl::model()->findAll($categoryCriteria);
-                    $controlIds = array();
+                    foreach ($references as $reference)
+                        $oldReferences[] = $reference->reference_id;
 
-                    foreach ($controls as $control)
-                        $controlIds[] = $control->id;
+                    foreach ($oldReferences as $reference)
+                        if (!in_array($reference, $model->referenceIds))
+                            $delReferences[] = $reference;
 
-                    $controlCriteria = new CDbCriteria();
-                    $controlCriteria->addInCondition('check_control_id', $controlIds);
-
-                    $checks   = Check::model()->findAll($controlCriteria);
-                    $checkIds = array();
-
-                    foreach ($checks as $check)
-                        $checkIds[] = $check->id;
-
-                    $criteria = new CDbCriteria();
-                    $criteria->addInCondition('check_id', $checkIds);
-                    $criteria->addColumnCondition(array( 'target_id' => $target->id ));
-
-                    // delete checks
-                    TargetCheck::model()->deleteAll($criteria);
-
-                    // delete categories
-                    $categoryCriteria->addColumnCondition(array( 'target_id' => $target->id ));
-                    TargetCheckCategory::model()->deleteAll($categoryCriteria);
+                    foreach ($model->referenceIds as $reference)
+                        if (!in_array($reference, $oldReferences))
+                            $addReferences[] = $reference;
                 }
                 else
-                    $newIds = $model->categoryIds;
+                {
+                    $addCategories = $model->categoryIds;
+                    $addReferences = $model->referenceIds;
+                }
 
-                foreach ($newIds as $category)
+                // delete categories
+                if ($delCategories)
+                {
+                    $criteria = new CDbCriteria();
+
+                    $criteria->addInCondition('check_category_id', $delCategories);
+                    $criteria->addColumnCondition(array(
+                        'target_id' => $target->id
+                    ));
+
+                    TargetCheckCategory::model()->deleteAll($criteria);
+                }
+
+                // add categories
+                foreach ($addCategories as $category)
                 {
                     $targetCategory = new TargetCheckCategory();
                     $targetCategory->target_id         = $target->id;
@@ -600,6 +620,34 @@ class ProjectController extends Controller
 
                     $targetCategory->save();
                     $targetCategory->updateStats();
+                }
+
+                // delete references
+                if ($delReferences)
+                {
+                    $criteria = new CDbCriteria();
+                    $criteria->addInCondition('reference_id', $delReferences);
+
+                    TargetReference::model()->deleteAll($criteria);
+                }
+
+                // add references
+                foreach ($addReferences as $reference)
+                {
+                    $targetReference = new TargetReference();
+                    $targetReference->target_id    = $target->id;
+                    $targetReference->reference_id = $reference;
+                    $targetReference->save();
+                }
+
+                if ($addReferences || $delReferences)
+                {
+                    $categories = TargetCheckCategory::model()->findAllByAttributes(array(
+                        'target_id' => $target->id
+                    ));
+
+                    foreach ($categories as $category)
+                        $category->updateStats();
                 }
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Target saved.'));
@@ -642,13 +690,19 @@ class ProjectController extends Controller
             array( 'order' => 't.name ASC' )
         );
 
+        $references = Reference::model()->findAllByAttributes(
+            array(),
+            array( 'order' => 't.name ASC' )
+        );
+
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Target') : $target->host;
 		$this->render('target/edit', array(
             'model'      => $model,
             'project'    => $project,
             'target'     => $target,
-            'categories' => $categories
+            'categories' => $categories,
+            'references' => $references
         ));
 	}
 
@@ -699,17 +753,27 @@ class ProjectController extends Controller
         if (!$category)
             throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
+        $controlIds   = array();
+        $referenceIds = array();
+
         $controls = CheckControl::model()->findAllByAttributes(array(
             'check_category_id' => $category->check_category_id
         ));
 
-        $controlIds = array();
-
         foreach ($controls as $control)
             $controlIds[] = $control->id;
 
+        $references = TargetReference::model()->findAllByAttributes(array(
+            'target_id' => $target->id
+        ));
+
+        foreach ($references as $reference)
+            $referenceIds[] = $reference->reference_id;
+
         $criteria = new CDbCriteria();
+
         $criteria->addInCondition('t.check_control_id', $controlIds);
+        $criteria->addInCondition('t.reference_id', $referenceIds);
         $criteria->order = 'control.name ASC, t.name ASC';
 
         if (!$category->advanced)
@@ -1458,7 +1522,7 @@ class ProjectController extends Controller
                 'id' => $check
             ));
 
-            $check = Check::model()->with('targetChecks')->find($criteria);
+            $check = Check::model()->find($criteria);
 
             if (!$check)
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));

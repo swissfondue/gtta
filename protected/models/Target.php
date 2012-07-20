@@ -47,12 +47,14 @@ class Target extends CActiveRecord
 	{
 		return array(
             'project'       => array( self::BELONGS_TO, 'Project',             'project_id' ),
-            '_categories'   => array( self::HAS_MANY,   'TargetCheckCategory', 'target_id' ),
+            '_categories'   => array( self::HAS_MANY,   'TargetCheckCategory', 'target_id'  ),
             'categories'    => array( self::MANY_MANY,  'CheckCategory',       'target_check_categories(target_id, check_category_id)' ),
-            'checkCount'    => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(check_count)' ),
-            'finishedCount' => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(finished_count)' ),
-            'lowRiskCount'  => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(low_risk_count)' ),
-            'medRiskCount'  => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(med_risk_count)' ),
+            '_references'   => array( self::HAS_MANY,   'TargetReference',     'target_id'  ),
+            'references'    => array( self::MANY_MANY,  'Reference',           'target_references(target_id, reference_id)'    ),
+            'checkCount'    => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(check_count)'     ),
+            'finishedCount' => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(finished_count)'  ),
+            'lowRiskCount'  => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(low_risk_count)'  ),
+            'medRiskCount'  => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(med_risk_count)'  ),
             'highRiskCount' => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(high_risk_count)' ),
 		);
 	}

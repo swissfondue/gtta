@@ -120,6 +120,13 @@ return array(
                 'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/input/new'              => 'check/editinput',
                 'check/control/check/input/control'                                             => 'check/controlinput',
 
+                // references
+                'references/<page:\d+>'   => 'reference/index',
+                'references'              => 'reference/index',
+                'reference/<id:\d+>/edit' => 'reference/edit',
+                'reference/new'           => 'reference/edit',
+                'reference/control'       => 'reference/control',
+
                 // users
                 'users/<page:\d+>'   => 'user/index',
                 'users'              => 'user/index',

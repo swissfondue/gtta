@@ -67,17 +67,26 @@ class TargetCheckCategory extends CActiveRecord
         $medCount      = 0;
         $highCount     = 0;
 
+        $controlIds   = array();
+        $referenceIds = array();
+
         $controls = CheckControl::model()->findAllByAttributes(array(
              'check_category_id' => $this->check_category_id
         ));
 
-        $controlIds = array();
-
         foreach ($controls as $control)
             $controlIds[] = $control->id;
 
+        $references = TargetReference::model()->findAllByAttributes(array(
+            'target_id' => $this->target_id
+        ));
+
+        foreach ($references as $reference)
+            $referenceIds[] = $reference->reference_id;
+
         $criteria = new CDbCriteria();
         $criteria->addInCondition('check_control_id', $controlIds);
+        $criteria->addInCondition('reference_id', $referenceIds);
 
         if (!$this->advanced)
             $criteria->addCondition('t.advanced = FALSE');

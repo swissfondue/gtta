@@ -9,7 +9,6 @@
  * @property string $name
  * @property string $background_info
  * @property string $hints
- * @property string $reference
  * @property string $question
  * @property boolean $advanced
  * @property boolean $automated
@@ -17,6 +16,9 @@
  * @property boolean $multiple_solutions
  * @property string $protocol
  * @property integer $port
+ * @property integer $reference_id
+ * @property string $reference_code
+ * @property string $reference_url
  */
 class Check extends CActiveRecord
 {
@@ -45,8 +47,8 @@ class Check extends CActiveRecord
 	{
 		return array(
             array( 'name, check_control_id', 'required' ),
-            array( 'name, script, protocol', 'length', 'max' => 1000 ),
-            array( 'check_control_id, port', 'numerical', 'integerOnly' => true ),
+            array( 'name, script, protocol, reference_code, reference_url', 'length', 'max' => 1000 ),
+            array( 'check_control_id, reference_id, port', 'numerical', 'integerOnly' => true ),
             array( 'advanced, automated, multiple_solutions', 'boolean' ),
 		);
 	}
@@ -59,6 +61,7 @@ class Check extends CActiveRecord
 		return array(
             'l10n'                   => array( self::HAS_MANY,   'CheckL10n',             'check_id' ),
             'control'                => array( self::BELONGS_TO, 'CheckControl',          'check_control_id' ),
+            '_reference'             => array( self::BELONGS_TO, 'Reference',             'reference_id'     ),
             'targetChecks'           => array( self::HAS_MANY,   'TargetCheck',           'check_id' ),
             'targetCheckInputs'      => array( self::HAS_MANY,   'TargetCheckInput',      'check_id' ),
             'targetCheckSolutions'   => array( self::HAS_MANY,   'TargetCheckSolution',   'check_id' ),
@@ -100,17 +103,6 @@ class Check extends CActiveRecord
             return $this->l10n[0]->hints != NULL ? $this->l10n[0]->hints : $this->hints;
 
         return $this->hints;
-    }
-    
-    /**
-     * @return string localized reference.
-     */
-    public function getLocalizedReference()
-    {
-        if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->reference != NULL ? $this->l10n[0]->reference : $this->reference;
-
-        return $this->reference;
     }
     
     /**

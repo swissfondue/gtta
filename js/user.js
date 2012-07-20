@@ -389,9 +389,12 @@ function User()
                     {
                         _check.shrink(id);
 
-                        nextRow = $('div.check-form[data-id="' + id + '"] + div + div');
+                        nextRow = $('div.check-form[data-id="' + id + '"] + div + div.check-form');
 
-                        if (nextRow)
+                        if (!nextRow.length)
+                            nextRow = $('div.check-form[data-id="' + id + '"]').parent().next().next().find('div.check-form:first');
+
+                        if (nextRow.length)
                             _check.expand(nextRow.data('id'));
                     }
                 },

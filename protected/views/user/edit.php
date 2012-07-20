@@ -35,7 +35,7 @@
                 <?php endif; ?>
             </div>
         </div>
-        
+
         <div class="control-group <?php if ($model->getError('name')) echo 'error'; ?>">
             <label class="control-label" for="UserEditForm_name"><?php echo Yii::t('app', 'Name'); ?></label>
             <div class="controls">
@@ -45,11 +45,12 @@
                 <?php endif; ?>
             </div>
         </div>
-        
+
         <div class="control-group <?php if ($model->getError('role')) echo 'error'; ?>">
             <label class="control-label" for="UserEditForm_role"><?php echo Yii::t('app', 'Role'); ?></label>
             <div class="controls">
                 <select class="input-xlarge" id="UserEditForm_role" name="UserEditForm[role]" onchange="admin.user.toggleClientField();">
+                    <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                     <?php foreach ($roles as $k => $v): ?>
                         <option value="<?php echo $k; ?>" <?php if ($k == $model->role) echo 'selected'; ?>><?php echo CHtml::encode($v); ?></option>
                     <?php endforeach; ?>
@@ -59,7 +60,7 @@
                 <?php endif; ?>
             </div>
         </div>
-        
+
         <div class="control-group <?php if ($model->getError('clientId')) echo 'error'; ?> <?php if ($model->role != User::ROLE_CLIENT) echo 'hidden-object'; ?>" id="client-input">
             <label class="control-label" for="UserEditForm_clientId"><?php echo Yii::t('app', 'Client'); ?></label>
             <div class="controls">
@@ -73,7 +74,7 @@
                     <p class="help-block"><?php echo $model->getError('clientId'); ?></p>
                 <?php endif; ?>
             </div>
-        </div>        
+        </div>
 
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>

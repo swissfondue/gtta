@@ -167,16 +167,6 @@
                                         </td>
                                     </tr>
                                 <?php endif; ?>
-                                <?php if ($check->localizedReference): ?>
-                                    <tr>
-                                        <th>
-                                            <?php echo Yii::t('app', 'Reference'); ?>
-                                        </th>
-                                        <td class="text">
-                                            <?php echo CHtml::encode($check->localizedReference); ?>
-                                        </td>
-                                    </tr>
-                                <?php endif; ?>
                                 <?php if ($check->localizedQuestion): ?>
                                     <tr>
                                         <th>

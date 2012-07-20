@@ -638,6 +638,9 @@ class CheckController extends Controller
             $model->protocol          = $check->protocol;
             $model->port              = $check->port;
             $model->multipleSolutions = $check->multiple_solutions;
+            $model->referenceId       = $check->reference_id;
+            $model->referenceCode     = $check->reference_code;
+            $model->referenceUrl      = $check->reference_url;
 
             $checkL10n = CheckL10n::model()->findAllByAttributes(array(
                 'check_id' => $check->id
@@ -685,6 +688,9 @@ class CheckController extends Controller
                 $check->multiple_solutions = $model->multipleSolutions;
                 $check->protocol           = $model->protocol;
                 $check->port               = $model->port;
+                $check->reference_id       = $model->referenceId;
+                $check->reference_code     = $model->referenceCode;
+                $check->reference_url      = $model->referenceUrl;
 
                 $check->save();
 
@@ -752,6 +758,11 @@ class CheckController extends Controller
         else
             $this->breadcrumbs[$check->localizedName] = '';
 
+        $references = Reference::model()->findAllByAttributes(
+            array(),
+            array( 'order' => 't.name ASC' )
+        );
+
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Check') : $check->localizedName;
 		$this->render('control/check/edit', array(
@@ -760,7 +771,8 @@ class CheckController extends Controller
             'control'         => $control,
             'check'           => $check,
             'languages'       => $languages,
-            'defaultLanguage' => $defaultLanguage
+            'defaultLanguage' => $defaultLanguage,
+            'references'      => $references
         ));
 	}
 

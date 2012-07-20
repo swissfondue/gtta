@@ -103,7 +103,9 @@ class ReportController extends Controller
 
         $data     = array();
         $infoData = array();
-        $overallRating = 0.0;
+
+        $totalRating     = 0.0;
+        $totalCheckCount = 0;
 
         $ratings = array(
             TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
@@ -118,6 +120,7 @@ class ReportController extends Controller
             $targetData = array(
                 'host'       => $target->host,
                 'rating'     => 0.0,
+                'checkCount' => 0,
                 'categories' => array(),
             );
 
@@ -125,6 +128,16 @@ class ReportController extends Controller
                 'host'       => $target->host,
                 'categories' => array()
             );
+
+            // get all references (they are the same across all target categories)
+            $referenceIds = array();
+
+            $references = TargetReference::model()->findAllByAttributes(array(
+                'target_id' => $target->id
+            ));
+
+            foreach ($references as $reference)
+                $referenceIds[] = $reference->reference_id;
 
             // get all categories
             $categories = TargetCheckCategory::model()->with(array(
@@ -147,6 +160,7 @@ class ReportController extends Controller
                 $categoryData = array(
                     'name'       => $category->category->localizedName,
                     'rating'     => 0.0,
+                    'checkCount' => 0,
                     'controls'   => array()
                 );
 
@@ -173,9 +187,10 @@ class ReportController extends Controller
                 foreach ($controls as $control)
                 {
                     $controlData = array(
-                        'name'   => $control->localizedName,
-                        'rating' => 0.0,
-                        'checks' => array()
+                        'name'       => $control->localizedName,
+                        'rating'     => 0.0,
+                        'checkCount' => 0,
+                        'checks'     => array()
                     );
 
                     $infoControlData = array(
@@ -183,12 +198,16 @@ class ReportController extends Controller
                         'checks' => array()
                     );
 
-                    $params = array(
-                        'check_control_id' => $control->id
-                    );
+                    $criteria = new CDbCriteria();
+
+                    $criteria->order = 't.name ASC';
+                    $criteria->addInCondition('t.reference_id', $referenceIds);
+                    $criteria->addColumnCondition(array(
+                        't.check_control_id' => $control->id
+                    ));
 
                     if (!$category->advanced)
-                        $params['advanced'] = 'FALSE';
+                        $criteria->addCondition('t.advanced = FALSE');
 
                     $checks = Check::model()->with(array(
                         'l10n' => array(
@@ -230,11 +249,9 @@ class ReportController extends Controller
                             'joinType' => 'LEFT JOIN',
                             'on'       => 'tas.target_id = :target_id',
                             'params'   => array( 'target_id' => $target->id )
-                        )
-                    ))->findAllByAttributes(
-                        $params,
-                        array( 'order' => 't.name ASC' )
-                    );
+                        ),
+                        '_reference'
+                    ))->findAll($criteria);
 
                     if (!$checks)
                         continue;
@@ -242,16 +259,18 @@ class ReportController extends Controller
                     foreach ($checks as $check)
                     {
                         $checkData = array(
-                            'name'        => $check->localizedName,
-                            'background'  => $check->localizedBackgroundInfo,
-                            'reference'   => $check->localizedReference,
-                            'question'    => $check->localizedQuestion,
-                            'result'      => $check->targetChecks[0]->result,
-                            'rating'      => 0,
-                            'ratingName'  => $ratings[$check->targetChecks[0]->rating],
-                            'ratingColor' => '#999999',
-                            'solutions'   => array(),
-                            'images'      => array(),
+                            'name'          => $check->localizedName,
+                            'background'    => $check->localizedBackgroundInfo,
+                            'question'      => $check->localizedQuestion,
+                            'result'        => $check->targetChecks[0]->result,
+                            'rating'        => 0,
+                            'ratingName'    => $ratings[$check->targetChecks[0]->rating],
+                            'ratingColor'   => '#999999',
+                            'solutions'     => array(),
+                            'images'        => array(),
+                            'reference'     => $check->_reference->name,
+                            'referenceCode' => $check->reference_code,
+                            'referenceUrl'  => $check->reference_url,
                         );
 
                         switch ($check->targetChecks[0]->rating)
@@ -291,7 +310,10 @@ class ReportController extends Controller
                                 if (in_array($attachment->type, array( 'image/jpeg', 'image/png', 'image/gif' )))
                                     $checkData['images'][] = Yii::app()->params['attachments']['path'] . '/' . $attachment->path;
 
-                        $controlData['rating'] += $checkData['rating'];
+                        $controlData['rating']  += $checkData['rating'];
+                        $categoryData['rating'] += $checkData['rating'];
+                        $targetData['rating']   += $checkData['rating'];
+                        $totalRating            += $checkData['rating'];
 
                         // put checks with RATING_INFO rating to a separate category
                         if ($check->targetChecks[0]->rating == TargetCheck::RATING_INFO)
@@ -300,13 +322,15 @@ class ReportController extends Controller
                             $controlData['checks'][] = $checkData;
                     }
 
-                    $controlData['rating'] /= count($checks);
+                    $controlData['checkCount'] = count($checks);
+                    $controlData['rating']    /= $controlData['checkCount'];
+
+                    $categoryData['checkCount'] += $controlData['checkCount'];
+                    $targetData['checkCount']   += $controlData['checkCount'];
+                    $totalCheckCount            += $controlData['checkCount'];
 
                     if ($controlData['checks'])
-                    {
                         $categoryData['controls'][]  = $controlData;
-                        $categoryData['rating']     += $controlData['rating'];
-                    }
 
                     if ($infoControlData['checks'])
                         $infoCategoryData['controls'][] = $infoControlData;
@@ -314,29 +338,25 @@ class ReportController extends Controller
 
                 if ($categoryData['controls'])
                 {
-                    $categoryData['rating'] /= count($categoryData['controls']);
+                    $categoryData['rating'] /= $categoryData['checkCount'];
                     $targetData['categories'][] = $categoryData;
                 }
 
                 if ($infoCategoryData['controls'])
                     $infoTargetData['categories'][] = $infoCategoryData;
-
-                $targetData['rating'] += $categoryData['rating'];
             }
 
             if ($targetData['categories'])
-                $targetData['rating'] /= count($targetData['categories']);
+                $targetData['rating'] /= $targetData['checkCount'];
 
             $data[] = $targetData;
 
             if ($infoTargetData['categories'])
                 $infoData[] = $infoTargetData;
-
-            $overallRating += $targetData['rating'];
         }
 
-        if ($data)
-            $overallRating /= count($data);
+        if ($totalCheckCount)
+            $totalRating /= $totalCheckCount;
 
         // include all PHPRtfLite libraries
         Yii::setPathOfAlias('rtf', Yii::app()->basePath . '/extensions/PHPRtfLite/PHPRtfLite');
@@ -372,6 +392,9 @@ class ReportController extends Controller
         $boldFont = new PHPRtfLite_Font(12, 'Helvetica');
         $boldFont->setBold();
 
+        $linkFont = new PHPRtfLite_Font(12, 'Helvetica', '#0088CC');
+        $linkFont->setUnderline();
+
         // paragraphs
         $titlePar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
         $titlePar->setSpaceBefore(0);
@@ -399,7 +422,7 @@ class ReportController extends Controller
 
         // overall summary
         $section->writeText(Yii::t('app', 'Overall Summary'), $h3Font, $h3Par);
-        $image = $section->addImage($this->_generateRatingImage($overallRating), $centerPar);
+        $image = $section->addImage($this->_generateRatingImage($totalRating), $centerPar);
 
         // detailed summary
         $section->writeText(Yii::t('app', 'Detailed Summary') . '<br>', $h3Font, $noPar);
@@ -495,6 +518,25 @@ class ReportController extends Controller
 
                         $row++;
 
+                        // reference info
+                        $table->addRow();
+                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                        $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                        $table->getCell($row, 1)->setBorder($thinBorder);
+                        $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                        $table->getCell($row, 2)->setBorder($thinBorder);
+
+                        $table->writeToCell($row, 1, Yii::t('app', 'Reference'));
+
+                        $reference = $check['reference'] . ( $check['referenceCode'] ? '-' . $check['referenceCode'] : '' );
+
+                        if ($check['referenceUrl'])
+                            $table->getCell($row, 2)->writeHyperLink($check['referenceUrl'], $reference, $linkFont);
+                        else
+                            $table->writeToCell($row, 2, $reference);
+
+                        $row++;
+
                         if ($check['background'])
                         {
                             $table->addRow();
@@ -506,21 +548,6 @@ class ReportController extends Controller
 
                             $table->writeToCell($row, 1, Yii::t('app', 'Background Info'));
                             $table->writeToCell($row, 2, $check['background']);
-
-                            $row++;
-                        }
-
-                        if ($check['reference'])
-                        {
-                            $table->addRow();
-                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                            $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                            $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                            $table->getCell($row, 2)->setBorder($thinBorder);
-
-                            $table->writeToCell($row, 1, Yii::t('app', 'Reference'));
-                            $table->writeToCell($row, 2, $check['reference']);
 
                             $row++;
                         }
@@ -688,21 +715,6 @@ class ReportController extends Controller
 
                                 $table->writeToCell($row, 1, Yii::t('app', 'Background Info'));
                                 $table->writeToCell($row, 2, $check['background']);
-
-                                $row++;
-                            }
-
-                            if ($check['reference'])
-                            {
-                                $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
-                                $table->getCell($row, 2)->setBorder($thinBorder);
-
-                                $table->writeToCell($row, 1, Yii::t('app', 'Reference'));
-                                $table->writeToCell($row, 2, $check['reference']);
 
                                 $row++;
                             }
@@ -942,6 +954,16 @@ class ReportController extends Controller
                     'target_id' => $target->id
                 ));
 
+                // get all references (they are the same across all target categories)
+                $referenceIds = array();
+
+                $references = TargetReference::model()->findAllByAttributes(array(
+                    'target_id' => $target->id
+                ));
+
+                foreach ($references as $reference)
+                    $referenceIds[] = $reference->reference_id;
+
                 foreach ($categories as $category)
                 {
                     $controls = CheckControl::model()->findAllByAttributes(array(
@@ -954,6 +976,8 @@ class ReportController extends Controller
                         $controlIds[] = $control->id;
 
                     $criteria = new CDbCriteria();
+
+                    $criteria->addInCondition('reference_id', $referenceIds);
                     $criteria->addInCondition('check_control_id', $controlIds);
 
                     if (!$category->advanced)

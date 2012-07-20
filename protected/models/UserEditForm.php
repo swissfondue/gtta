@@ -65,7 +65,7 @@ class UserEditForm extends CFormModel
 	{
 		return array(
 			'name'                 => Yii::t('app', 'Name'),
-            'email '               => Yii::t('app', 'E-mail'),
+            'email'                => Yii::t('app', 'E-mail'),
             'password'             => Yii::t('app', 'Password'),
             'passwordConfirmation' => Yii::t('app', 'Password Confirmation'),
             'role'                 => Yii::t('app', 'Role'),

@@ -127,7 +127,8 @@ hr {
 .detail-list .actions,
 .client-list .actions,
 .project-list .actions,
-.attachment-list .actions {
+.attachment-list .actions,
+.reference-list .actions {
     width:30px;
     text-align:right;
 }

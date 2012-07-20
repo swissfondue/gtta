@@ -29,17 +29,33 @@
             </div>
         </div>
 
-        <div class="control-group">
-            <label class="control-label"><?php echo Yii::t('app', 'Check Categories'); ?></label>
-            <div class="controls">
-                <?php foreach ($categories as $category): ?>
-                    <label class="checkbox">
-                        <input type="checkbox" id="TargetEditForm_categoryIds_<?php echo $category->id; ?>" name="TargetEditForm[categoryIds][]" value="<?php echo $category->id; ?>" <?php if (in_array($category->id, $model->categoryIds)) echo 'checked'; ?>>
-                        <?php echo CHtml::encode($category->localizedName); ?>
-                    </label>
-                <?php endforeach; ?>
+        <?php if (count($categories)): ?>
+            <div class="control-group">
+                <label class="control-label"><?php echo Yii::t('app', 'Check Categories'); ?></label>
+                <div class="controls">
+                    <?php foreach ($categories as $category): ?>
+                        <label class="checkbox">
+                            <input type="checkbox" id="TargetEditForm_categoryIds_<?php echo $category->id; ?>" name="TargetEditForm[categoryIds][]" value="<?php echo $category->id; ?>" <?php if (in_array($category->id, $model->categoryIds)) echo 'checked'; ?>>
+                            <?php echo CHtml::encode($category->localizedName); ?>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
             </div>
-        </div>
+        <?php endif; ?>
+
+        <?php if (count($references)): ?>
+            <div class="control-group">
+                <label class="control-label"><?php echo Yii::t('app', 'References'); ?></label>
+                <div class="controls">
+                    <?php foreach ($references as $reference): ?>
+                        <label class="checkbox">
+                            <input type="checkbox" id="TargetEditForm_referenceIds_<?php echo $reference->id; ?>" name="TargetEditForm[referenceIds][]" value="<?php echo $reference->id; ?>" <?php if ($target->isNewRecord || in_array($reference->id, $model->referenceIds)) echo 'checked'; ?>>
+                            <?php echo CHtml::encode($reference->name); ?>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>
