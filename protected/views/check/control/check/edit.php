@@ -205,13 +205,11 @@
         <div class="control-group <?php if ($model->getError('effort')) echo 'error'; ?>">
             <label class="control-label" for="CheckEditForm_effort"><?php echo Yii::t('app', 'Effort'); ?></label>
             <div class="controls">
-                <select class="input-small" id="CheckEditForm_effort" name="CheckEditForm[effort]">
+                <select class="input-xlarge" id="CheckEditForm_effort" name="CheckEditForm[effort]">
                     <?php foreach ($efforts as $effort): ?>
-                        <option value="<?php echo $effort; ?>" <?php if ($effort == $model->effort) echo 'selected'; ?>><?php echo $effort; ?></option>
+                        <option value="<?php echo $effort; ?>" <?php if ($effort == $model->effort) echo 'selected'; ?>><?php echo $effort; ?> <?php echo Yii::t('app', 'minutes'); ?></option>
                     <?php endforeach; ?>
                 </select>
-
-                &nbsp;<?php echo Yii::t('app', 'minutes'); ?>
 
                 <?php if ($model->getError('effort')): ?>
                     <p class="help-block"><?php echo $model->getError('effort'); ?></p>
