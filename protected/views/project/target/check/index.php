@@ -147,6 +147,29 @@
                     <div class="check-form hidden-object" data-id="<?php echo $check->id; ?>" data-save-url="<?php echo $this->createUrl('project/savecheck', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>">
                         <table class="table check-form">
                             <tbody>
+                                <tr>
+                                    <th>
+                                        <?php echo Yii::t('app', 'Reference'); ?>
+                                    </th>
+                                    <td class="text">
+                                        <?php
+                                            $reference    = $check->_reference->name . ( $check->reference_code ? '-' . $check->reference_code : '' );
+                                            $referenceUrl = '';
+
+                                            if ($check->reference_code && $check->reference_url)
+                                                $referenceUrl = $check->reference_url;
+                                            else if ($check->_reference->url)
+                                                $referenceUrl = $check->_reference->url;
+
+                                            if ($referenceUrl)
+                                                $reference = '<a href="' . $referenceUrl . '" target="_blank">' . CHtml::encode($reference) . '</a>';
+                                            else
+                                                $reference = CHtml::encode($reference);
+
+                                            echo $reference;
+                                        ?>
+                                    </td>
+                                </tr>
                                 <?php if ($check->localizedBackgroundInfo): ?>
                                     <tr>
                                         <th>

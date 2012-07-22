@@ -855,7 +855,8 @@ class ProjectController extends Controller
                         'params'   => array( 'language_id' => $language )
                     )
                 )
-            )
+            ),
+            '_reference'
         ))->findAll($criteria);
 
         $client = Client::model()->findByPk($project->client_id);

@@ -259,18 +259,19 @@ class ReportController extends Controller
                     foreach ($checks as $check)
                     {
                         $checkData = array(
-                            'name'          => $check->localizedName,
-                            'background'    => $check->localizedBackgroundInfo,
-                            'question'      => $check->localizedQuestion,
-                            'result'        => $check->targetChecks[0]->result,
-                            'rating'        => 0,
-                            'ratingName'    => $ratings[$check->targetChecks[0]->rating],
-                            'ratingColor'   => '#999999',
-                            'solutions'     => array(),
-                            'images'        => array(),
-                            'reference'     => $check->_reference->name,
-                            'referenceCode' => $check->reference_code,
-                            'referenceUrl'  => $check->reference_url,
+                            'name'             => $check->localizedName,
+                            'background'       => $check->localizedBackgroundInfo,
+                            'question'         => $check->localizedQuestion,
+                            'result'           => $check->targetChecks[0]->result,
+                            'rating'           => 0,
+                            'ratingName'       => $ratings[$check->targetChecks[0]->rating],
+                            'ratingColor'      => '#999999',
+                            'solutions'        => array(),
+                            'images'           => array(),
+                            'reference'        => $check->_reference->name,
+                            'referenceUrl'     => $check->_reference->url,
+                            'referenceCode'    => $check->reference_code,
+                            'referenceCodeUrl' => $check->reference_url,
                         );
 
                         switch ($check->targetChecks[0]->rating)
@@ -528,10 +529,16 @@ class ReportController extends Controller
 
                         $table->writeToCell($row, 1, Yii::t('app', 'Reference'));
 
-                        $reference = $check['reference'] . ( $check['referenceCode'] ? '-' . $check['referenceCode'] : '' );
+                        $reference    = $check['reference'] . ( $check['referenceCode'] ? '-' . $check['referenceCode'] : '' );
+                        $referenceUrl = '';
 
-                        if ($check['referenceUrl'])
-                            $table->getCell($row, 2)->writeHyperLink($check['referenceUrl'], $reference, $linkFont);
+                        if ($check['referenceCode'] && $check['referenceCodeUrl'])
+                            $referenceUrl = $check['referenceCodeUrl'];
+                        else if ($check['referenceUrl'])
+                            $referenceUrl = $check['referenceUrl'];
+
+                        if ($referenceUrl)
+                            $table->getCell($row, 2)->writeHyperLink($referenceUrl, $reference, $linkFont);
                         else
                             $table->writeToCell($row, 2, $reference);
 
@@ -703,6 +710,29 @@ class ReportController extends Controller
                             $table->writeToCell($row, 1, $check['name']);
 
                             $row++;
+
+                            // reference info
+                            $table->addRow();
+                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                            $table->getCell($row, 1)->setBorder($thinBorder);
+                            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 2)->setBorder($thinBorder);
+
+                            $table->writeToCell($row, 1, Yii::t('app', 'Reference'));
+
+                            $reference    = $check['reference'] . ( $check['referenceCode'] ? '-' . $check['referenceCode'] : '' );
+                            $referenceUrl = '';
+
+                            if ($check['referenceCode'] && $check['referenceCodeUrl'])
+                                $referenceUrl = $check['referenceCodeUrl'];
+                            else if ($check['referenceUrl'])
+                                $referenceUrl = $check['referenceUrl'];
+
+                            if ($referenceUrl)
+                                $table->getCell($row, 2)->writeHyperLink($referenceUrl, $reference, $linkFont);
+                            else
+                                $table->writeToCell($row, 2, $reference);
 
                             if ($check['background'])
                             {

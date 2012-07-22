@@ -12,6 +12,10 @@ hr {
     background:none;
 }
 
+.navbar .brand {
+    color:#fff;
+}
+
 .navbar-inner {
     border-radius:0;
     -webkit-border-radius:0;
