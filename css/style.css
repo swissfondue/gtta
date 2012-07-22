@@ -12,6 +12,10 @@ hr {
     background:none;
 }
 
+.btn-group {
+    display:inline;
+}
+
 .navbar .brand {
     color:#fff;
 }
@@ -112,13 +116,13 @@ hr {
 }
 
 .active-header .nav-pills {
-    margin:0;
+    margin:0 0 0 12px;
     padding:0;
 }
 
 .active-header .buttons {
     padding-top:3px;
-    margin-right:12px;
+    margin:0 0 0 8px;
 }
 
 .category-list .actions,
