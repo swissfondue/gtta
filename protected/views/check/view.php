@@ -6,7 +6,7 @@
         </ul>
     </div>
     <div class="pull-right buttons">
-        <a class="btn" href="<?php echo $this->createUrl('check/editcontrol', array( 'id' => $category->id )) ?>"><?php echo Yii::t('app', 'New Control'); ?></a>
+        <a class="btn" href="<?php echo $this->createUrl('check/editcontrol', array( 'id' => $category->id )) ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New Control'); ?></a>
     </div>
 
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>

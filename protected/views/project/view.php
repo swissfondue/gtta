@@ -13,7 +13,7 @@
 
     <?php if (User::checkRole(User::ROLE_USER)): ?>
         <div class="pull-right buttons">
-            <a class="btn" href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'New Target'); ?></a>
+            <a class="btn" href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id )); ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New Target'); ?></a>
         </div>
     <?php endif; ?>
 

@@ -1,6 +1,6 @@
 <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
     <div class="pull-right">
-        <a class="btn" href="<?php echo $this->createUrl('client/edit') ?>"><?php echo Yii::t('app', 'New Client'); ?></a>
+        <a class="btn" href="<?php echo $this->createUrl('client/edit') ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New Client'); ?></a>
     </div>
 <?php endif; ?>
 

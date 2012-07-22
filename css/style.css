@@ -120,9 +120,12 @@ hr {
     padding:0;
 }
 
+.buttons {
+    margin:0 0 0 8px;
+}
+
 .active-header .buttons {
     padding-top:3px;
-    margin:0 0 0 8px;
 }
 
 .category-list .actions,

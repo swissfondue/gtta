@@ -2,35 +2,33 @@
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery.iframe-transport.js"></script>
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery.fileupload.js"></script>
 
-<div class="active-header">
-    <div class="pull-right buttons">
-        <div class="btn-group" data-toggle="buttons-radio">
-            <button class="btn <?php if (!$category->advanced) echo 'active'; ?>" onclick="user.check.setAdvanced('<?php echo $this->createUrl('project/savecategory', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>', 0);"><?php echo Yii::t('app', 'Basic'); ?></button>
-            <button class="btn <?php if ($category->advanced)  echo 'active'; ?>" onclick="user.check.setAdvanced('<?php echo $this->createUrl('project/savecategory', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>', 1);"><?php echo Yii::t('app', 'Advanced'); ?></button>
-        </div>
+<div class="pull-right buttons">
+    <div class="btn-group" data-toggle="buttons-radio">
+        <button class="btn <?php if (!$category->advanced) echo 'active'; ?>" onclick="user.check.setAdvanced('<?php echo $this->createUrl('project/savecategory', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>', 0);"><?php echo Yii::t('app', 'Basic'); ?></button>
+        <button class="btn <?php if ($category->advanced)  echo 'active'; ?>" onclick="user.check.setAdvanced('<?php echo $this->createUrl('project/savecategory', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>', 1);"><?php echo Yii::t('app', 'Advanced'); ?></button>
     </div>
-
-    <?php
-        $hasAutomated = false;
-
-        foreach ($checks as $check)
-            if ($check->automated)
-            {
-                $hasAutomated = true;
-                break;
-            }
-
-        if ($hasAutomated):
-    ?>
-        <div class="pull-right buttons">
-            <a class="btn" href="#expand-all" onclick="user.check.expandAll();"><?php echo Yii::t('app', 'Expand All'); ?></a>&nbsp;
-            <a class="btn" href="#collapse-all" onclick="user.check.collapseAll();"><?php echo Yii::t('app', 'Collapse All'); ?></a>&nbsp;
-            <a class="btn" href="#start-all" onclick="user.check.startAll();"><?php echo Yii::t('app', 'Start All'); ?></a>
-        </div>
-    <?php endif; ?>
-
-    <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 </div>
+
+<?php
+    $hasAutomated = false;
+
+    foreach ($checks as $check)
+        if ($check->automated)
+        {
+            $hasAutomated = true;
+            break;
+        }
+
+    if ($hasAutomated):
+?>
+    <div class="pull-right buttons">
+        <a class="btn" href="#expand-all" onclick="user.check.expandAll();"><i class="icon icon-arrow-down"></i> <?php echo Yii::t('app', 'Expand'); ?></a>&nbsp;
+        <a class="btn" href="#collapse-all" onclick="user.check.collapseAll();"><i class="icon icon-arrow-up"></i> <?php echo Yii::t('app', 'Collapse'); ?></a>&nbsp;
+        <a class="btn" href="#start-all" onclick="user.check.startAll();"><i class="icon icon-play"></i> <?php echo Yii::t('app', 'Start'); ?></a>
+    </div>
+<?php endif; ?>
+
+<h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 
 <hr>
 

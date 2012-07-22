@@ -10,7 +10,7 @@
     </div>
 
     <div class="pull-right buttons">
-        <a class="btn" href="<?php echo $this->createUrl('project/editdetail', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'New Detail'); ?></a>
+        <a class="btn" href="<?php echo $this->createUrl('project/editdetail', array( 'id' => $project->id )); ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New Detail'); ?></a>
     </div>
 
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>

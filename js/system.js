@@ -172,7 +172,7 @@ function System()
                     break;
                 }
 
-            $('#checks').html(checks);
+            $('#checks').html(checks * targets);
             $('#estimated-effort').html(effort * targets);
             $('#EffortEstimateForm_effort').val(effort * targets);
 

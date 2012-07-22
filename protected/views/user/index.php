@@ -1,5 +1,5 @@
 <div class="pull-right">
-    <a class="btn" href="<?php echo $this->createUrl('user/edit') ?>"><?php echo Yii::t('app', 'New User'); ?></a>
+    <a class="btn" href="<?php echo $this->createUrl('user/edit') ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New User'); ?></a>
 </div>
 
 <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>

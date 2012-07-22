@@ -1,10 +1,8 @@
-<div class="active-header">
-    <div class="pull-right buttons">
-        <a class="btn hide" href="#print" id="print-button" onclick="system.effort.print();"><?php echo Yii::t('app', 'Print'); ?></a>
-    </div>
-
-    <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+<div class="pull-right buttons hide" id="print-button">
+    <a class="btn" href="#print" onclick="system.effort.print();"><i class="icon icon-print"></i> <?php echo Yii::t('app', 'Print'); ?></a>
 </div>
+
+<h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 
 <hr>
 
