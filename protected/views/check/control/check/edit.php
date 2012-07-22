@@ -120,12 +120,16 @@
         <div class="control-group <?php if ($model->getError('referenceId')) echo 'error'; ?>">
             <label class="control-label" for="CheckEditForm_referenceId"><?php echo Yii::t('app', 'Reference'); ?></label>
             <div class="controls">
-                <select class="input-xlarge" id="CheckEditForm_referenceId" name="CheckEditForm[referenceId]">
+                <select class="input-medium" id="CheckEditForm_referenceId" name="CheckEditForm[referenceId]">
                     <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                     <?php foreach ($references as $reference): ?>
                         <option value="<?php echo $reference->id; ?>" <?php if ($reference->id == $model->referenceId) echo 'selected'; ?>><?php echo CHtml::encode($reference->name); ?></option>
                     <?php endforeach; ?>
                 </select>
+
+                &nbsp;-&nbsp;
+
+                <input type="text" class="input-small" id="CheckEditForm_referenceCode" name="CheckEditForm[referenceCode]" value="<?php echo CHtml::encode($model->referenceCode); ?>">
 
                 <?php if ($model->getError('referenceId')): ?>
                     <p class="help-block"><?php echo $model->getError('referenceId'); ?></p>
@@ -133,18 +137,8 @@
             </div>
         </div>
         
-        <div class="control-group <?php if ($model->getError('referenceCode')) echo 'error'; ?>">
-            <label class="control-label" for="CheckEditForm_referenceCode"><?php echo Yii::t('app', 'Reference Code'); ?></label>
-            <div class="controls">
-                <input type="text" class="input-xlarge" id="CheckEditForm_referenceCode" name="CheckEditForm[referenceCode]" value="<?php echo CHtml::encode($model->referenceCode); ?>">
-                <?php if ($model->getError('referenceCode')): ?>
-                    <p class="help-block"><?php echo $model->getError('referenceCode'); ?></p>
-                <?php endif; ?>
-            </div>
-        </div>
-        
         <div class="control-group <?php if ($model->getError('referenceUrl')) echo 'error'; ?>">
-            <label class="control-label" for="CheckEditForm_referenceUrl"><?php echo Yii::t('app', 'ReferenceUrl'); ?></label>
+            <label class="control-label" for="CheckEditForm_referenceUrl"><?php echo Yii::t('app', 'Reference URL'); ?></label>
             <div class="controls">
                 <input type="text" class="input-xlarge" id="CheckEditForm_referenceUrl" name="CheckEditForm[referenceUrl]" value="<?php echo CHtml::encode($model->referenceUrl); ?>">
                 <?php if ($model->getError('referenceUrl')): ?>
@@ -205,6 +199,23 @@
             <label class="control-label" for="CheckEditForm_multipleSolutions"><?php echo Yii::t('app', 'Multiple Solutions'); ?></label>
             <div class="controls">
                 <input type="checkbox" id="CheckEditForm_multipleSolutions" name="CheckEditForm[multipleSolutions]" value="1" <?php if ($model->multipleSolutions) echo 'checked="checked"'; ?>>
+            </div>
+        </div>
+        
+        <div class="control-group <?php if ($model->getError('effort')) echo 'error'; ?>">
+            <label class="control-label" for="CheckEditForm_effort"><?php echo Yii::t('app', 'Effort'); ?></label>
+            <div class="controls">
+                <select class="input-small" id="CheckEditForm_effort" name="CheckEditForm[effort]">
+                    <?php foreach ($efforts as $effort): ?>
+                        <option value="<?php echo $effort; ?>" <?php if ($effort == $model->effort) echo 'selected'; ?>><?php echo $effort; ?></option>
+                    <?php endforeach; ?>
+                </select>
+
+                &nbsp;<?php echo Yii::t('app', 'minutes'); ?>
+
+                <?php if ($model->getError('effort')): ?>
+                    <p class="help-block"><?php echo $model->getError('effort'); ?></p>
+                <?php endif; ?>
             </div>
         </div>
 

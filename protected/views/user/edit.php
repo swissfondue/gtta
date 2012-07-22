@@ -50,7 +50,6 @@
             <label class="control-label" for="UserEditForm_role"><?php echo Yii::t('app', 'Role'); ?></label>
             <div class="controls">
                 <select class="input-xlarge" id="UserEditForm_role" name="UserEditForm[role]" onchange="admin.user.toggleClientField();">
-                    <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                     <?php foreach ($roles as $k => $v): ?>
                         <option value="<?php echo $k; ?>" <?php if ($k == $model->role) echo 'selected'; ?>><?php echo CHtml::encode($v); ?></option>
                     <?php endforeach; ?>

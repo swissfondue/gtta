@@ -641,6 +641,7 @@ class CheckController extends Controller
             $model->referenceId       = $check->reference_id;
             $model->referenceCode     = $check->reference_code;
             $model->referenceUrl      = $check->reference_url;
+            $model->effort            = $check->effort;
 
             $checkL10n = CheckL10n::model()->findAllByAttributes(array(
                 'check_id' => $check->id
@@ -691,6 +692,7 @@ class CheckController extends Controller
                 $check->reference_id       = $model->referenceId;
                 $check->reference_code     = $model->referenceCode;
                 $check->reference_url      = $model->referenceUrl;
+                $check->effort             = $model->effort;
 
                 $check->save();
 
@@ -772,7 +774,8 @@ class CheckController extends Controller
             'check'           => $check,
             'languages'       => $languages,
             'defaultLanguage' => $defaultLanguage,
-            'references'      => $references
+            'references'      => $references,
+            'efforts'         => array( 2, 5, 20, 40, 60, 120 ),
         ));
 	}
 

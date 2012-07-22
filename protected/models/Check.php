@@ -19,6 +19,7 @@
  * @property integer $reference_id
  * @property string $reference_code
  * @property string $reference_url
+ * @property integer $effort
  */
 class Check extends CActiveRecord
 {
@@ -48,7 +49,7 @@ class Check extends CActiveRecord
 		return array(
             array( 'name, check_control_id', 'required' ),
             array( 'name, script, protocol, reference_code, reference_url', 'length', 'max' => 1000 ),
-            array( 'check_control_id, reference_id, port', 'numerical', 'integerOnly' => true ),
+            array( 'check_control_id, reference_id, port, effort', 'numerical', 'integerOnly' => true ),
             array( 'advanced, automated, multiple_solutions', 'boolean' ),
 		);
 	}

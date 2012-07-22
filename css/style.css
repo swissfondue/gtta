@@ -128,7 +128,8 @@ hr {
 .client-list .actions,
 .project-list .actions,
 .attachment-list .actions,
-.reference-list .actions {
+.reference-list .actions,
+.effort-list .actions {
     width:30px;
     text-align:right;
 }
@@ -412,4 +413,16 @@ table.check-header .actions {
 
 .in-progress {
     background-color: #f4f4ff;
+}
+
+.form-text {
+    padding-top:5px;
+}
+
+.effort-list .targets, .effort-list .effort {
+    width:70px;
+}
+
+.form-header {
+    margin-bottom:10px;
 }

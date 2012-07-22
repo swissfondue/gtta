@@ -76,6 +76,11 @@ class CheckEditForm extends CFormModel
     public $multipleSolutions;
 
     /**
+     * @var integer effort.
+     */
+    public $effort;
+
+    /**
      * @var array localized items.
      */
     public $localizedItems;
@@ -93,8 +98,9 @@ class CheckEditForm extends CFormModel
             array( 'localizedItems, backgroundInfo, hints, reference, question, script', 'safe' ),
             array( 'automated', 'checkScript' ),
             array( 'referenceUrl', 'url', 'defaultScheme' => 'http' ),
-            array( 'referenceId', 'numerical', 'integerOnly' => true ),
+            array( 'referenceId, effort', 'numerical', 'integerOnly' => true ),
             array( 'referenceId', 'checkReference' ),
+            array( 'effort', 'in', 'range' => array( 2, 5, 20, 40, 60, 120 ) ),
 		);
 	}
     
@@ -116,6 +122,7 @@ class CheckEditForm extends CFormModel
             'referenceId'    => Yii::t('app', 'Reference'),
             'referenceCode'  => Yii::t('app', 'Reference Code'),
             'referenceUrl'   => Yii::t('app', 'Reference URL'),
+            'effort'         => Yii::t('app', 'Effort'),
 		);
 	}
 

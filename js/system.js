@@ -121,7 +121,215 @@ function System()
             else
                 $('tr[data-id=' + id + ']').removeClass('delete-row');
         };
-    };    
+    };
+
+    /**
+     * Effort object.
+     */
+    this.effort = new function () {
+        var _effort = this;
+
+        this.list = [];
+
+        /**
+         * Calculate effort.
+         */
+        this._calculateEffort = function () {
+            var effort, checks, category, check, advanced, targets, references;
+
+            category   = $('#EffortEstimateForm_categoryId').val();
+            targets    = $('#EffortEstimateForm_targets').val();
+            references = $('input[name="EffortEstimateForm[referenceIds][]"]:checked').map(
+                function () {
+                    return parseInt($(this).val());
+                }
+            ).get();
+
+            advanced = $('#EffortEstimateForm_advanced').is(':checked');
+
+            checks = 0;
+            effort = 0;
+
+            for (var i = 0; i < checkList.length; i++)
+                if (checkList[i].id == category)
+                {
+                    category = checkList[i];
+
+                    for (var c = 0; c < category.checks.length; c++)
+                    {
+                        check = category.checks[c];
+
+                        if ($.inArray(check.reference, references) != -1)
+                        {
+                            if (!advanced && check.advanced)
+                                continue;
+
+                            effort += check.effort;
+                            checks++;
+                        }
+                    }
+
+                    break;
+                }
+
+            $('#checks').html(checks);
+            $('#estimated-effort').html(effort * targets);
+            $('#EffortEstimateForm_effort').val(effort * targets);
+
+            if (checks == 0)
+                $('.form-actions > button[type="submit"]').prop('disabled', true);
+        };
+
+        /**
+         * Form has been changed.
+         */
+        this.formChange = function (e) {
+            var category, targets, valid;
+
+            valid = false;
+
+            category = $('#EffortEstimateForm_categoryId').val();
+            targets  = parseInt($('#EffortEstimateForm_targets').val());
+
+            if (category > 0 && targets > 0)
+                valid = true;
+
+            if (valid)
+            {
+                $('.form-actions > button[type="submit"]').prop('disabled', false);
+                _effort._calculateEffort();
+            }
+            else
+            {
+                $('.form-actions > button[type="submit"]').prop('disabled', true);
+                $('#checks').html('0');
+                $('#estimated-effort').html('0');
+                $('#EffortEstimateForm_effort').val(0);
+            }
+        };
+
+        this._drawTable = function () {
+            var item, tr, totalEffort, totalTargets;
+
+            totalEffort  = 0;
+            totalTargets = 0;
+
+            $('table.effort-list > tbody').find('tr:gt(0)').remove();
+            console.log(_effort.list.length);
+
+            for (var i = 0; i < _effort.list.length; i++)
+            {
+                item = _effort.list[i];
+
+                tr = '<tr data-id="' + item.id + '"><td class="name">' + item.name + '</td>' +
+                    '<td class="targets">' + item.targets + '</td>' + '<td class="effort">' + item.effort + '</td>' +
+                    '<td class="actions"><a href="#del" title="' + system.translate('Delete') +
+                    '" onclick="system.effort.del(' + item.id + ')"><i class="icon icon-remove"></i></a></td</tr>'
+
+                $('table.effort-list > tbody').append(tr);
+
+                totalTargets += item.targets;
+                totalEffort  += item.effort;
+            }
+
+            if (_effort.list.length > 0)
+            {
+                tr = '<tr><td class="name">' + system.translate('Total') + '</td><td class="targets">'  +
+                    totalTargets + '</td><td class="effort" colspan="2">' + totalEffort + ' ' +
+                    system.translate('minutes') + '</td></tr>';
+
+                $('table.effort-list > tbody').append(tr);
+
+                if (!$('.effort-list-container').is(':visible'))
+                    $('.effort-list-container').slideDown('slow');
+
+                $('.form-header').slideDown('slow');
+                $('#print-button').show();
+            }
+            else
+            {
+                $('.effort-list-container').slideUp('slow');
+                $('.form-header').slideUp('slow');
+                $('#print-button').hide();
+            }
+        };
+
+        /**
+         * Add effort to the table.
+         */
+        this.add = function () {
+            _effort.list.push({
+                id      : $('#EffortEstimateForm_categoryId').val(),
+                name    : $('#EffortEstimateForm_categoryId option:selected').text(),
+                targets : parseInt($('#EffortEstimateForm_targets').val()),
+                effort  : parseInt($('#EffortEstimateForm_effort').val())
+            });
+
+            _effort._drawTable();
+
+            $('#EffortEstimateForm_categoryId option:selected').prop('disabled', true);
+
+            // refresh the form
+            $('#EffortEstimateForm_categoryId').val(0);
+            $('#EffortEstimateForm_advanced').prop('checked', true);
+            $('input[name="EffortEstimateForm[referenceIds][]"]').prop('checked', true);
+            $('#EffortEstimateForm_targets').val(1);
+
+            $('#checks').html('0');
+            $('#estimated-effort').html('0');
+            $('#EffortEstimateForm_effort').val(0);
+
+            $('.form-actions > button[type="submit"]').prop('disabled', true);
+        };
+
+        /**
+         * Delete effort from the table.
+         */
+        this.del = function (id) {
+            for (var i = 0; i < _effort.list.length; i++)
+                if (_effort.list[i].id == id)
+                {
+                    _effort.list.splice(i, 1);
+                    break;
+                }
+
+            console.log(id);
+
+            $('#EffortEstimateForm_categoryId option[value=' + id + ']').prop('disabled', false);
+
+            $('tr[data-id=' + id + ']').addClass('delete-row');
+            $('tr[data-id=' + id + ']').fadeOut('slow', undefined, function () {
+                _effort._drawTable();
+            });
+        };
+
+        /**
+         * Print effort.
+         */
+        this.print = function () {
+            var content, win;
+
+            content = $('.effort-list-container > .row > .span8').html();
+            content = content.replace(/<i class="icon icon-remove"><\/i>/g, '');
+
+            win = window.open('', 'printWindow', 'location=0,status=0,width=620,height=500');
+
+            win.document.writeln(
+                '<!DOCTYPE html>' +
+                '<html><head>' +
+                '<title>' + system.translate('Estimated Effort') + '</title>' +
+                '<meta charset="utf-8">' +
+                '<link rel="stylesheet" type="text/css" href="/css/bootstrap.css">' +
+                '<link rel="stylesheet" type="text/css" href="/css/style.css">' +
+                '</head>'
+            );
+
+            win.document.writeln('<body>' + content + '</body>');
+            win.document.writeln('</html>');
+            win.print();
+            win.close();
+        };
+    };
 }
 
 var system = new System();

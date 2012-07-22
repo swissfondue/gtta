@@ -7,6 +7,9 @@ $(function () {
         'Start'                                             : '<?php echo Yii::t('app', 'Start'); ?>',
         'Stop'                                              : '<?php echo Yii::t('app', 'Stop'); ?>',
         'Reset'                                             : '<?php echo Yii::t('app', 'Reset'); ?>',
+        'Total'                                             : '<?php echo Yii::t('app', 'Total'); ?>',
+        'minutes'                                           : '<?php echo Yii::t('app', 'minutes'); ?>',
+        'Estimated Effort'                                  : '<?php echo Yii::t('app', 'Estimated Effort'); ?>',
         'Are you sure that you want to reset this check?'   : '<?php echo Yii::t('app', 'Are you sure that you want to reset this check?'); ?>',
     };
 
