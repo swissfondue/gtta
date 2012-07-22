@@ -245,7 +245,7 @@ function User()
                 return;
 
             var textarea = $('#TargetCheckEditForm_' + id + '_result');
-            textarea.val(textarea.val() + result + '\n');
+            textarea.val(result + '\n' + textarea.val());
         };
 
         /**
