@@ -3,11 +3,11 @@
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery.fileupload.js"></script>
 
 <div class="active-header">
-    <div class="pull-right">
-        <ul class="nav nav-pills">
-            <li <?php if (!$category->advanced) echo 'class="active"'; ?>><a href="#basic" onclick="user.check.setAdvanced('<?php echo $this->createUrl('project/savecategory', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>', 0);"><?php echo Yii::t('app', 'Basic'); ?></a></li>
-            <li <?php if ($category->advanced) echo 'class="active"'; ?>><a href="#advanced" onclick="user.check.setAdvanced('<?php echo $this->createUrl('project/savecategory', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>', 1);"><?php echo Yii::t('app', 'Advanced'); ?></a></li>
-        </ul>
+    <div class="pull-right buttons">
+        <div class="btn-group" data-toggle="buttons-radio">
+            <button class="btn <?php if (!$category->advanced) echo 'active'; ?>" onclick="user.check.setAdvanced('<?php echo $this->createUrl('project/savecategory', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>', 0);"><?php echo Yii::t('app', 'Basic'); ?></button>
+            <button class="btn <?php if ($category->advanced)  echo 'active'; ?>" onclick="user.check.setAdvanced('<?php echo $this->createUrl('project/savecategory', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>', 1);"><?php echo Yii::t('app', 'Advanced'); ?></button>
+        </div>
     </div>
 
     <?php
