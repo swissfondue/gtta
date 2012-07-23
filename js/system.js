@@ -169,6 +169,13 @@ function System()
         this.list = [];
 
         /**
+         * Show form.
+         */
+        this.form = function () {
+            $('#effort-modal').modal();
+        };
+
+        /**
          * Calculate effort.
          */
         this._calculateEffort = function () {
@@ -214,7 +221,7 @@ function System()
             $('#EffortEstimateForm_effort').val(effort * targets);
 
             if (checks == 0)
-                $('.form-actions > button[type="submit"]').prop('disabled', true);
+                $('#add-button').prop('disabled', true);
         };
 
         /**
@@ -233,18 +240,28 @@ function System()
 
             if (valid)
             {
-                $('.form-actions > button[type="submit"]').prop('disabled', false);
+                $('#add-button').prop('disabled', false);
                 _effort._calculateEffort();
             }
             else
             {
-                $('.form-actions > button[type="submit"]').prop('disabled', true);
+                $('#add-button').prop('disabled', true);
                 $('#checks').html('0');
                 $('#estimated-effort').html('0');
                 $('#EffortEstimateForm_effort').val(0);
             }
         };
 
+        /**
+         * Form submit.
+         */
+        this.formSubmit = function () {
+            $('#EffortEstimateForm').submit();
+        };
+
+        /**
+         * Draw effort table.
+         */
         this._drawTable = function () {
             var item, tr, totalEffort, totalTargets;
 
@@ -280,14 +297,14 @@ function System()
                 if (!$('.effort-list-container').is(':visible'))
                     $('.effort-list-container').slideDown('slow');
 
-                $('.form-header').slideDown('slow');
                 $('#print-button').show();
+                $('#placeholder-text').hide();
             }
             else
             {
                 $('.effort-list-container').slideUp('slow');
-                $('.form-header').slideUp('slow');
                 $('#print-button').hide();
+                $('#placeholder-text').show();
             }
         };
 
@@ -295,6 +312,8 @@ function System()
          * Add effort to the table.
          */
         this.add = function () {
+            $('#effort-modal').modal('hide');
+
             _effort.list.push({
                 id      : $('#EffortEstimateForm_categoryId').val(),
                 name    : $('#EffortEstimateForm_categoryId option:selected').text(),
@@ -316,7 +335,7 @@ function System()
             $('#estimated-effort').html('0');
             $('#EffortEstimateForm_effort').val(0);
 
-            $('.form-actions > button[type="submit"]').prop('disabled', true);
+            $('#add-button').prop('disabled', true);
         };
 
         /**
