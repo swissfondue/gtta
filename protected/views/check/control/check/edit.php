@@ -60,13 +60,6 @@
                 </div>
                 
                 <div class="control-group">
-                    <label class="control-label" for="CheckEditForm_reference"><?php echo Yii::t('app', 'Reference'); ?></label>
-                    <div class="controls">
-                        <input type="text" class="input-xlarge" id="CheckEditForm_reference" name="CheckEditForm[reference]" onkeyup="admin.check.updateTiedField('CheckEditForm_reference', 'CheckEditForm_localizedItems_<?php echo $defaultLanguage; ?>_reference');" value="<?php echo CHtml::encode($model->reference); ?>">
-                    </div>
-                </div>
-                
-                <div class="control-group">
                     <label class="control-label" for="CheckEditForm_question"><?php echo Yii::t('app', 'Question'); ?></label>
                     <div class="controls">
                         <input type="text" class="input-xlarge" id="CheckEditForm_question" name="CheckEditForm[question]" onkeyup="admin.check.updateTiedField('CheckEditForm_question', 'CheckEditForm_localizedItems_<?php echo $defaultLanguage; ?>_question');" value="<?php echo CHtml::encode($model->question); ?>">

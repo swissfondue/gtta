@@ -111,6 +111,247 @@ class ProjectController extends Controller
 	}
 
     /**
+     * Export vulnerabilities.
+     */
+    private function _exportVulns($project)
+    {
+        $model = new ProjectVulnExportForm();
+        $model->attributes = $_POST['ProjectVulnExportForm'];
+
+        $model->header = isset($_POST['ProjectVulnExportForm']['header']);
+
+        if (!$model->validate())
+        {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Error exporting vulnerabilities.'));
+            return;
+        }
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
+        $targets = Target::model()->findAllByAttributes(
+            array( 'project_id' => $project->id ),
+            array( 'order'      => 't.host ASC' )
+        );
+
+        $data = array();
+
+        if ($model->header)
+        {
+            $row = array();
+
+            if (in_array(TargetCheck::COLUMN_TARGET, $model->columns))
+                $row[] = Yii::t('app', 'Target');
+
+            if (in_array(TargetCheck::COLUMN_NAME, $model->columns))
+                $row[] = Yii::t('app', 'Name');
+
+            if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns))
+                $row[] = Yii::t('app', 'Reference');
+
+            if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns))
+                $row[] = Yii::t('app', 'Background Info');
+
+            if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns))
+                $row[] = Yii::t('app', 'Question');
+
+            if (in_array(TargetCheck::COLUMN_RESULT, $model->columns))
+                $row[] = Yii::t('app', 'Result');
+
+            if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns))
+                $row[] = Yii::t('app', 'Solution');
+
+            if (in_array(TargetCheck::COLUMN_RATING, $model->columns))
+                $row[] = Yii::t('app', 'Rating');
+
+            $data[] = $row;
+        }
+
+        $ratings = array(
+            TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
+            TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
+            TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
+            TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
+            TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
+        );
+
+        foreach ($targets as $target)
+        {
+            // get all references (they are the same across all target categories)
+            $referenceIds = array();
+
+            $references = TargetReference::model()->findAllByAttributes(array(
+                'target_id' => $target->id
+            ));
+
+            if (!$references)
+                continue;
+
+            foreach ($references as $reference)
+                $referenceIds[] = $reference->reference_id;
+
+            // get all categories
+            $categories = TargetCheckCategory::model()->findAllByAttributes(
+                array( 'target_id' => $target->id  ),
+                array( 'order'     => 't.name ASC' )
+            );
+
+            if (!$categories)
+                continue;
+
+            foreach ($categories as $category)
+            {
+                // get all controls
+                $controls = CheckControl::model()->findAllByAttributes(
+                    array( 'check_category_id' => $category->check_category_id ),
+                    array( 'order'             => 't.name ASC' )
+                );
+
+                if (!$controls)
+                    continue;
+
+                foreach ($controls as $control)
+                {
+                    $criteria = new CDbCriteria();
+
+                    $criteria->order = 't.name ASC';
+                    $criteria->addInCondition('t.reference_id', $referenceIds);
+                    $criteria->addColumnCondition(array(
+                        't.check_control_id' => $control->id
+                    ));
+
+                    if (!$category->advanced)
+                        $criteria->addCondition('t.advanced = FALSE');
+
+                    $checks = Check::model()->with(array(
+                        'l10n' => array(
+                            'joinType' => 'LEFT JOIN',
+                            'on'       => 'l10n.language_id = :language_id',
+                            'params'   => array( 'language_id' => $language )
+                        ),
+                        'targetChecks' => array(
+                            'alias'    => 'tcs',
+                            'joinType' => 'INNER JOIN',
+                            'on'       => 'tcs.target_id = :target_id AND tcs.status = :status AND tcs.rating != :hidden',
+                            'params'   => array(
+                                'target_id' => $target->id,
+                                'status'    => TargetCheck::STATUS_FINISHED,
+                                'hidden'    => TargetCheck::RATING_HIDDEN,
+                            ),
+                        ),
+                        'targetCheckSolutions' => array(
+                            'alias'    => 'tss',
+                            'joinType' => 'LEFT JOIN',
+                            'on'       => 'tss.target_id = :target_id',
+                            'params'   => array( 'target_id' => $target->id ),
+                            'with'     => array(
+                                'solution' => array(
+                                    'alias'    => 'tss_s',
+                                    'joinType' => 'LEFT JOIN',
+                                    'with'     => array(
+                                        'l10n' => array(
+                                            'alias'  => 'tss_s_l10n',
+                                            'on'     => 'tss_s_l10n.language_id = :language_id',
+                                            'params' => array( 'language_id' => $language )
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        '_reference'
+                    ))->findAll($criteria);
+
+                    if (!$checks)
+                        continue;
+
+                    foreach ($checks as $check)
+                    {
+                        if (!in_array($check->targetChecks[0]->rating, $model->ratings))
+                            continue;
+
+                        $row = array();
+
+                        if (in_array(TargetCheck::COLUMN_TARGET, $model->columns))
+                            $row[] = $target->host;
+
+                        if (in_array(TargetCheck::COLUMN_NAME, $model->columns))
+                            $row[] = $check->localizedName;
+
+                        if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns))
+                            $row[] = $check->_reference->name . ( $check->reference_code ? '-' . $check->reference_code : '' );
+
+                        if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns))
+                            $row[] = $check->localizedBackgroundInfo;
+
+                        if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns))
+                            $row[] = $check->localizedQuestion;
+
+                        if (in_array(TargetCheck::COLUMN_RESULT, $model->columns))
+                            $row[] = $check->targetChecks[0]->result;
+
+                        if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns))
+                        {
+                            $solutions = array();
+
+                            foreach ($check->targetCheckSolutions as $solution)
+                                $solutions[] = $solution->solution->localizedSolution;
+
+                            $row[] = implode("\n", $solutions);
+                        }
+
+                        if (in_array(TargetCheck::COLUMN_RATING, $model->columns))
+                            $row[] = $ratings[$check->targetChecks[0]->rating];
+
+                        $data[] = $row;
+                    }
+                }
+            }
+        }
+
+        $csv = array();
+
+        foreach ($data as $row)
+        {
+            $columns = array();
+
+            foreach ($row as $column)
+            {
+                $column    = str_replace(array( "\r\n", "\r", "\n" ), "\r", $column);
+                $columns[] = '"' . str_replace('"', '\"', $column) . '"';
+            }
+
+            $csv[] = implode(',', $columns);
+        }
+
+        $csv = implode("\n", $csv);
+
+        $fileName = Yii::t('app', '{project} Vulnerabilities', array(
+            '{project}' => $project->name . ' (' . $project->year . ')'
+        )) . ' - ' . date('Y-m-d') .  '.csv';
+
+        // give user a file
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . strlen($csv));
+
+        ob_clean();
+        flush();
+
+        echo $csv;
+
+        exit();
+    }
+
+    /**
      * Display a list of targets.
      */
 	public function actionView($id, $page=1)
@@ -138,6 +379,9 @@ class ProjectController extends Controller
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
+        if (isset($_POST['ProjectVulnExportForm']))
+            $this->_exportVulns($project);
+
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
@@ -164,14 +408,30 @@ class ProjectController extends Controller
         // display the page
         $this->pageTitle = $project->name;
 		$this->render('view', array(
-            'project'        => $project,
-            'client'         => $client,
-            'targets'        => $targets,
-            'p'              => $paginator,
+            'project'  => $project,
+            'client'   => $client,
+            'targets'  => $targets,
+            'p'        => $paginator,
             'statuses' => array(
                 Project::STATUS_OPEN        => Yii::t('app', 'Open'),
                 Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
                 Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
+            ),
+            'ratings' => array(
+                TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
+                TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
+                TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
+                TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
+            ),
+            'columns' => array(
+                TargetCheck::COLUMN_TARGET          => Yii::t('app', 'Target'),
+                TargetCheck::COLUMN_NAME            => Yii::t('app', 'Name'),
+                TargetCheck::COLUMN_REFERENCE       => Yii::t('app', 'Reference'),
+                TargetCheck::COLUMN_BACKGROUND_INFO => Yii::t('app', 'Background Info'),
+                TargetCheck::COLUMN_QUESTION        => Yii::t('app', 'Question'),
+                TargetCheck::COLUMN_RESULT          => Yii::t('app', 'Result'),
+                TargetCheck::COLUMN_SOLUTION        => Yii::t('app', 'Solution'),
+                TargetCheck::COLUMN_RATING          => Yii::t('app', 'Rating'),
             )
         ));
 	}

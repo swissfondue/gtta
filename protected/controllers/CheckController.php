@@ -630,7 +630,6 @@ class CheckController extends Controller
             $model->name              = $check->name;
             $model->backgroundInfo    = $check->background_info;
             $model->hints             = $check->hints;
-            $model->reference         = $check->reference;
             $model->question          = $check->question;
             $model->script            = $check->script;
             $model->advanced          = $check->advanced;
@@ -681,7 +680,6 @@ class CheckController extends Controller
                 $check->name               = $model->name;
                 $check->background_info    = $model->backgroundInfo;
                 $check->hints              = $model->hints;
-                $check->reference          = $model->reference;
                 $check->question           = $model->question;
                 $check->script             = $model->script;
                 $check->advanced           = $model->advanced;

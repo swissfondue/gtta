@@ -21,11 +21,6 @@ class CheckEditForm extends CFormModel
     public $hints;
 
     /**
-     * @var string reference.
-     */
-    public $reference;
-
-    /**
      * @var string question.
      */
     public $question;
@@ -95,7 +90,7 @@ class CheckEditForm extends CFormModel
             array( 'name, script, protocol, referenceCode, referenceUrl', 'length', 'max' => 1000 ),
             array( 'port', 'numerical', 'integerOnly' => true, 'min' => 0, 'max' => 1000 ),
             array( 'advanced, automated, multipleSolutions', 'boolean' ),
-            array( 'localizedItems, backgroundInfo, hints, reference, question, script', 'safe' ),
+            array( 'localizedItems, backgroundInfo, hints, question, script', 'safe' ),
             array( 'automated', 'checkScript' ),
             array( 'referenceUrl', 'url', 'defaultScheme' => 'http' ),
             array( 'referenceId, effort', 'numerical', 'integerOnly' => true ),

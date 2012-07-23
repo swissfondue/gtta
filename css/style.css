@@ -426,6 +426,10 @@ table.check-header .actions {
     background-color: #f4f4ff;
 }
 
+.controls {
+    padding-top:2px;
+}
+
 .form-text {
     padding-top:5px;
 }
@@ -435,5 +439,9 @@ table.check-header .actions {
 }
 
 .form-header {
+    margin-bottom:10px;
+}
+
+.modal-text {
     margin-bottom:10px;
 }

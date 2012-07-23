@@ -124,6 +124,43 @@ function System()
     };
 
     /**
+     * Project object.
+     */
+    this.project = new function () {
+        var _project = this;
+
+        /**
+         * Show export vulnerabilities form.
+         */
+        this.exportVulnForm = function () {
+            $('input[name="ProjectVulnExportForm[header]"]').prop('checked', true);
+            $('input[name="ProjectVulnExportForm[ratings][]"]').prop('checked', true);
+            $('input[name="ProjectVulnExportForm[columns][]"]').prop('checked', true);
+
+            $('#export-modal').modal();
+        };
+
+        /**
+         * Export vulnerabilities form change.
+         */
+        this.exportVulnFormChange = function (e) {
+            if ($('input[name="ProjectVulnExportForm[ratings][]"]:checked').length > 0 &&
+                $('input[name="ProjectVulnExportForm[columns][]"]:checked').length > 0)
+                $('#export-button').prop('disabled', false);
+            else
+                $('#export-button').prop('disabled', true);
+        };
+
+        /**
+         * Export vulnerabilities form submit.
+         */
+        this.exportVulnFormSubmit = function () {
+            $('#export-modal').modal('hide');
+            $('#ProjectVulnExportForm').submit();
+        };
+    };
+
+    /**
      * Effort object.
      */
     this.effort = new function () {

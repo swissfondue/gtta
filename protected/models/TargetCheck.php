@@ -38,6 +38,18 @@ class TargetCheck extends CActiveRecord
     const RATING_MED_RISK  = 'med_risk';
     const RATING_HIGH_RISK = 'high_risk';
 
+    /**
+     * Export columns.
+     */
+    const COLUMN_TARGET          = 'target';
+    const COLUMN_NAME            = 'name';
+    const COLUMN_REFERENCE       = 'reference';
+    const COLUMN_BACKGROUND_INFO = 'background';
+    const COLUMN_QUESTION        = 'question';
+    const COLUMN_RESULT          = 'result';
+    const COLUMN_SOLUTION        = 'solution';
+    const COLUMN_RATING          = 'rating';
+
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
