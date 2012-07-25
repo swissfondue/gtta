@@ -59,7 +59,7 @@ return array(
 
         // checks automation
         'automation' => array(
-            'minNotificationInterval' => 1, // 5 minutes
+            'minNotificationInterval' => 5 * 60, // 5 minutes
 
             'lockFile'    => GTTA_PRODUCTION ? dirname(__FILE__).DIRECTORY_SEPARATOR.'../../../tmp/gtta.automation' : '/tmp/gtta.automation',
             'tempPath'    => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../files/automation',
