@@ -331,7 +331,7 @@ class AutomationCommand extends ConsoleCommand
                         'userName'   => $user->name ? CHtml::encode($user->name) : $user->email,
                         'projectId'  => $target->project_id,
                         'targetId'   => $target->id,
-                        'categoryId' => $check->check->check_category_id,
+                        'categoryId' => $check->check->control->check_category_id,
                         'checkName'  => $check->check->localizedName,
                         'targetHost' => $target->host
                     ),

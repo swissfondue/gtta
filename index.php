@@ -1,5 +1,7 @@
 <?php
 
+defined('GTTA_PRODUCTION') or define('GTTA_PRODUCTION', false);
+
 // change the following paths if necessary
 $yii=dirname(__FILE__).'/protected/framework/yii.php';
 $config=dirname(__FILE__).'/protected/config/main.php';

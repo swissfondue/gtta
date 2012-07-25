@@ -29,7 +29,7 @@ return array(
 		),
 
 		'urlManager' => array(
-            'baseUrl'        => 'http://gtta.local',
+            'baseUrl'        => GTTA_PRODUCTION ? 'http://212.41.205.98' : 'http://gtta.local',
 			'urlFormat'      => 'path',
             'showScriptName' => false,
             'rules'          => array(
@@ -186,8 +186,8 @@ return array(
             'maxSize' => 100 * 1024 * 1024, // 100 megabytes
         ),
 
-        'tmpPath'            => '/tmp',
-        'timeZone'           => 'Europe/Moscow',
+        'tmpPath'            => GTTA_PRODUCTION ? 'C:\GTTA\tmp' : '/tmp',
+        'timeZone'           => GTTA_PRODUCTION ? 'Europe/Zurich' : 'Europe/Moscow',
         'collapseCheckCount' => 20,
     ),
 

@@ -29,13 +29,20 @@ return array(
             'viewPath'      => 'application.views.mail',
             'logging'       => false,
             'dryRun'        => false,
-            'transportOptions' => array(
-                'host'         => 'smtp.yandex.ru',
-                'port'         => 465,
-                'username'     => 'gtta.test@yandex.ru',
-                'password'     => '123321',
-                'encryption'   => 'ssl',
-            ),
+            'transportOptions' => GTTA_PRODUCTION ? array(
+                    'host'         => 'mail.netprotect.ch',
+                    'port'         => 25,
+                    'username'     => 'web365p2',
+                    'password'     => '6ghJZdGn',
+                    'encryption'   => '',
+                ) :
+                array(
+                    'host'         => 'smtp.yandex.ru',
+                    'port'         => 465,
+                    'username'     => 'gtta.test@yandex.ru',
+                    'password'     => '123321',
+                    'encryption'   => 'ssl',
+                ),
         ),
 
         'urlManager' => $mainConfig['components']['urlManager'],
@@ -45,8 +52,8 @@ return array(
     'params' => array(
         // email sender
         'email' => array(
-            'lockFile'    => '/tmp/gtta.email',
-            'systemEmail' => 'gtta.test@yandex.ru',
+            'lockFile'    => GTTA_PRODUCTION ? dirname(__FILE__).DIRECTORY_SEPARATOR.'../../../tmp/gtta.email' : '/tmp/gtta.email',
+            'systemEmail' => GTTA_PRODUCTION ? 'gtta@netprotect.ch' : 'gtta.test@yandex.ru',
             'maxAttempts' => 3,
         ),
 
@@ -54,25 +61,25 @@ return array(
         'automation' => array(
             'minNotificationInterval' => 1, // 5 minutes
 
-            'lockFile'    => '/tmp/gtta.automation',
+            'lockFile'    => GTTA_PRODUCTION ? dirname(__FILE__).DIRECTORY_SEPARATOR.'../../../tmp/gtta.automation' : '/tmp/gtta.automation',
             'tempPath'    => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../files/automation',
             'scriptsPath' => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../../scripts',
 
             'interpreters' => array(
                 'py' => array(
-                    'path'     => '/usr/bin/python',
-                    'basePath' => '/usr/bin'
+                    'path'     => GTTA_PRODUCTION ? 'C:\Python27\python.exe' : '/usr/bin/python',
+                    'basePath' => GTTA_PRODUCTION ? 'C:\Python27' : '/usr/bin'
                 ),
                 'pl' => array(
-                    'path'     => '/usr/bin/perl',
-                    'basePath' => '/usr/bin'
+                    'path'     => GTTA_PRODUCTION ? 'C:\Perl64\bin\perl.exe' : '/usr/bin/perl',
+                    'basePath' => GTTA_PRODUCTION ? 'C:\Perl64' : '/usr/bin'
                 )
             )
         ),
 
         // file cleaner
         'cleaner' => array(
-            'lockFile' => '/tmp/gtta.cleaner',
+            'lockFile' => GTTA_PRODUCTION ? dirname(__FILE__).DIRECTORY_SEPARATOR.'../../../tmp/gtta.cleaner' : '/tmp/gtta.cleaner',
         ),
 
         'yiicPath' => dirname(__FILE__).'/../',
