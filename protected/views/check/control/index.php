@@ -46,7 +46,7 @@
                             <li <?php if (!$p->prevPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id, 'page' => $p->prevPage ? $p->prevPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Previous Page'); ?>">&laquo;</a></li>
                             <?php for ($i = 1; $i <= $p->pageCount; $i++): ?>
                                 <li <?php if ($i == $p->page) echo 'class="active"'; ?>>
-                                    <a href="<?php echo $this->createUrl('check/view', array( 'id' => $category->id, 'control' => $control->id, 'page' => $i )); ?>"><?php echo $i; ?></a>
+                                    <a href="<?php echo $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id, 'page' => $i )); ?>"><?php echo $i; ?></a>
                                 </li>
                             <?php endfor; ?>
                             <li <?php if (!$p->nextPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('check/view', array( 'id' => $category->id, 'control' => $control->id, 'page' => $p->nextPage ? $p->nextPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Next Page'); ?>">&raquo;</a></li>
