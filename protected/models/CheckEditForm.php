@@ -80,13 +80,18 @@ class CheckEditForm extends CFormModel
      */
     public $localizedItems;
 
+    /**
+     * @var integer control id.
+     */
+    public $controlId;
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules()
 	{
 		return array(
-			array( 'name, referenceId', 'required' ),
+			array( 'name, referenceId, controlId', 'required' ),
             array( 'name, script, protocol, referenceCode, referenceUrl', 'length', 'max' => 1000 ),
             array( 'port', 'numerical', 'integerOnly' => true, 'min' => 0, 'max' => 1000 ),
             array( 'advanced, automated, multipleSolutions', 'boolean' ),
@@ -95,6 +100,7 @@ class CheckEditForm extends CFormModel
             array( 'referenceUrl', 'url', 'defaultScheme' => 'http' ),
             array( 'referenceId, effort', 'numerical', 'integerOnly' => true ),
             array( 'referenceId', 'checkReference' ),
+            array( 'controlId', 'checkControl' ),
             array( 'effort', 'in', 'range' => array( 2, 5, 20, 40, 60, 120 ) ),
 		);
 	}
@@ -145,6 +151,22 @@ class CheckEditForm extends CFormModel
         if (!$reference)
         {
             $this->addError('referenceId', Yii::t('app', 'Reference doesn\'t exist.'));
+            return false;
+        }
+
+        return true;
+	}
+
+    /**
+	 * Checks if control exists.
+	 */
+	public function checkControl($attribute, $params)
+	{
+		$control = CheckControl::model()->findByPk($this->controlId);
+
+        if (!$control)
+        {
+            $this->addError('controlId', Yii::t('app', 'Control doesn\'t exist.'));
             return false;
         }
 

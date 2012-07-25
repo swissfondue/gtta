@@ -28,7 +28,7 @@ class Controller extends CController
 
         $app->language = $lang;
 
-        $this->breadcrumbs[Yii::t('app', 'Home')] = $this->createUrl('app/index');
+        $this->breadcrumbs[] = array(Yii::t('app', 'Home'), $this->createUrl('app/index'));
     }
 
     /**

@@ -47,7 +47,7 @@ class ProjectController extends Controller
         $projectCount = Project::model()->count($criteria);
         $paginator    = new Paginator($projectCount, $page);
 
-        $this->breadcrumbs[Yii::t('app', 'Projects')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), '');
 
         $projectStats = array();
 
@@ -402,8 +402,8 @@ class ProjectController extends Controller
         $targetCount = Target::model()->count($criteria);
         $paginator   = new Paginator($targetCount, $page);
 
-        $this->breadcrumbs[Yii::t('app', 'Projects')] = $this->createUrl('project/index');
-        $this->breadcrumbs[$project->name] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array($project->name, '');
 
         // display the page
         $this->pageTitle = $project->name;
@@ -491,14 +491,14 @@ class ProjectController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[Yii::t('app', 'Projects')]  = $this->createUrl('project/index');
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
 
         if ($newRecord)
-            $this->breadcrumbs[Yii::t('app', 'New Project')] = '';
+            $this->breadcrumbs[] = array(Yii::t('app', 'New Project'), '');
         else
         {
-            $this->breadcrumbs[$project->name] = $this->createUrl('project/view', array( 'id' => $project->id ));
-            $this->breadcrumbs[Yii::t('app', 'Edit')] = '';
+            $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+            $this->breadcrumbs[] = array(Yii::t('app', 'Edit'), '');
         }
 
         $clients = Client::model()->findAllByAttributes(
@@ -559,9 +559,9 @@ class ProjectController extends Controller
         $detailCount = ProjectDetail::model()->count($criteria);
         $paginator   = new Paginator($detailCount, $page);
 
-        $this->breadcrumbs[Yii::t('app', 'Projects')] = $this->createUrl('project/index');
-        $this->breadcrumbs[$project->name]            = $this->createUrl('project/view', array( 'id' => $project->id ));
-        $this->breadcrumbs[Yii::t('app', 'Details')]  = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Details'), '');
 
         // display the page
         $this->pageTitle = $project->name;
@@ -645,14 +645,14 @@ class ProjectController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[Yii::t('app', 'Projects')] = $this->createUrl('project/index');
-        $this->breadcrumbs[$project->name]            = $this->createUrl('project/view', array( 'id' => $project->id ));
-        $this->breadcrumbs[Yii::t('app', 'Details')]  = $this->createUrl('project/details', array( 'id' => $project->id ));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Details'), $this->createUrl('project/details', array( 'id' => $project->id )));
 
         if ($newRecord)
-            $this->breadcrumbs[Yii::t('app', 'New Detail')] = '';
+            $this->breadcrumbs[] = array(Yii::t('app', 'New Detail'), '');
         else
-            $this->breadcrumbs[$detail->subject] = '';
+            $this->breadcrumbs[] = array($detail->subject, '');
 
 		// display the page
         $this->pageTitle = $detail->isNewRecord ? Yii::t('app', 'New Detail') : $detail->subject;
@@ -719,9 +719,9 @@ class ProjectController extends Controller
 
         $client = Client::model()->findByPk($project->client_id);
 
-        $this->breadcrumbs[Yii::t('app', 'Projects')] = $this->createUrl('project/index');
-        $this->breadcrumbs[$project->name]            = $this->createUrl('project/view', array( 'id' => $project->id ));
-        $this->breadcrumbs[$target->host]             = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array($target->host, '');
 
         // display the page
         $this->pageTitle = $target->host;
@@ -921,15 +921,15 @@ class ProjectController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[Yii::t('app', 'Projects')] = $this->createUrl('project/index');
-        $this->breadcrumbs[$project->name]            = $this->createUrl('project/view', array( 'id' => $project->id ));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
 
         if ($newRecord)
-            $this->breadcrumbs[Yii::t('app', 'New Target')] = '';
+            $this->breadcrumbs[] = array(Yii::t('app', 'New Target'), '');
         else
         {
-            $this->breadcrumbs[$target->host]         = $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id ));
-            $this->breadcrumbs[Yii::t('app', 'Edit')] = '';
+            $this->breadcrumbs[] = array($target->host, $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )));
+            $this->breadcrumbs[] = array(Yii::t('app', 'Edit'), '');
         }
 
         $language = Language::model()->findByAttributes(array(
@@ -1121,10 +1121,10 @@ class ProjectController extends Controller
 
         $client = Client::model()->findByPk($project->client_id);
 
-        $this->breadcrumbs[Yii::t('app', 'Projects')] = $this->createUrl('project/index');
-        $this->breadcrumbs[$project->name]            = $this->createUrl('project/view', array( 'id' => $project->id ));
-        $this->breadcrumbs[$target->host]             = $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id ));
-        $this->breadcrumbs[$category->category->localizedName] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array($target->host, $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )));
+        $this->breadcrumbs[] = array($category->category->localizedName, '');
 
         // display the page
         $this->pageTitle = $category->category->localizedName;

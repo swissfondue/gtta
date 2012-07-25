@@ -36,7 +36,7 @@ class ReferenceController extends Controller
         $referenceCount = Reference::model()->count($criteria);
         $paginator      = new Paginator($referenceCount, $page);
 
-        $this->breadcrumbs[Yii::t('app', 'References')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'References'), '');
 
         // display the page
         $this->pageTitle = Yii::t('app', 'References');
@@ -93,12 +93,12 @@ class ReferenceController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[Yii::t('app', 'References')]  = $this->createUrl('reference/index');
+        $this->breadcrumbs[] = array(Yii::t('app', 'References'), $this->createUrl('reference/index'));
 
         if ($newRecord)
-            $this->breadcrumbs[Yii::t('app', 'New Reference')] = '';
+            $this->breadcrumbs[] = array(Yii::t('app', 'New Reference'), '');
         else
-            $this->breadcrumbs[$reference->name] = '';
+            $this->breadcrumbs[] = array($reference->name, '');
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Reference') : $reference->name;

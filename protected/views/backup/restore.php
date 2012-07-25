@@ -8,15 +8,15 @@
     </div>
 <?php endif; ?>
 
-<form id="SystemRestoreForm" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post" enctype="multipart/form-data">
+<form id="RestoreForm" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post" enctype="multipart/form-data">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
-    <input type="hidden" value="1" name="SystemRestoreForm[proceed]">
+    <input type="hidden" value="1" name="RestoreForm[proceed]">
 
     <fieldset>
         <div class="control-group <?php if ($model->getError('backup')) echo 'error'; ?>">
-            <label class="control-label" for="SystemRestoreForm_backup"><?php echo Yii::t('app', 'Backup File'); ?></label>
+            <label class="control-label" for="RestoreForm_backup"><?php echo Yii::t('app', 'Backup File'); ?></label>
             <div class="controls">
-                <input type="file" id="SystemRestoreForm_backup" name="SystemRestoreForm[backup]">
+                <input type="file" id="RestoreForm_backup" name="RestoreForm[backup]">
                 <?php if ($model->getError('backup')): ?>
                     <p class="help-block"><?php echo $model->getError('backup'); ?></p>
                 <?php endif; ?>

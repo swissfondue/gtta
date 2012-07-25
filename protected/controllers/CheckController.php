@@ -49,7 +49,7 @@ class CheckController extends Controller
         $categoryCount = CheckCategory::model()->count($criteria);
         $paginator     = new Paginator($categoryCount, $page);
 
-        $this->breadcrumbs[Yii::t('app', 'Checks')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), '');
 
         // display the page
         $this->pageTitle = Yii::t('app', 'Checks');
@@ -105,8 +105,8 @@ class CheckController extends Controller
         $controlCount = CheckControl::model()->count($criteria);
         $paginator    = new Paginator($controlCount, $page);
 
-        $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
-        $this->breadcrumbs[$category->localizedName] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
+        $this->breadcrumbs[] = array($category->localizedName, '');
 
         // display the page
         $this->pageTitle = $category->localizedName;
@@ -214,14 +214,14 @@ class CheckController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
 
         if ($newRecord)
-            $this->breadcrumbs[Yii::t('app', 'New Category')] = '';
+            $this->breadcrumbs[] = array(Yii::t('app', 'New Category'), '');
         else
         {
-            $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
-            $this->breadcrumbs[Yii::t('app', 'Edit')]    = '';
+            $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
+            $this->breadcrumbs[] = array(Yii::t('app', 'Edit'), '');
         }
 
 		// display the page
@@ -405,13 +405,13 @@ class CheckController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
-        $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
 
         if ($newRecord)
-            $this->breadcrumbs[Yii::t('app', 'New Control')] = '';
+            $this->breadcrumbs[] = array(Yii::t('app', 'New Control'), '');
         else
-            $this->breadcrumbs[$control->localizedName] = '';
+            $this->breadcrumbs[] = array($control->localizedName, '');
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Control') : $control->localizedName;
@@ -535,9 +535,9 @@ class CheckController extends Controller
         $checkCount = Check::model()->count($criteria);
         $paginator  = new Paginator($checkCount, $page);
 
-        $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
-        $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
-        $this->breadcrumbs[$control->localizedName]  = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
+        $this->breadcrumbs[] = array($control->localizedName, '');
 
         // display the page
         $this->pageTitle = $control->localizedName;
@@ -660,6 +660,8 @@ class CheckController extends Controller
             }
         }
 
+        $model->controlId = $control->id;
+
 		// collect user input data
 		if (isset($_POST['CheckEditForm']))
 		{
@@ -676,6 +678,11 @@ class CheckController extends Controller
 
 			if ($model->validate())
             {
+                $redirect = false;
+
+                if ($model->controlId != $check->check_control_id || $newRecord)
+                    $redirect = true;
+
                 $check->check_control_id   = $control->id;
                 $check->name               = $model->name;
                 $check->background_info    = $model->backgroundInfo;
@@ -687,6 +694,7 @@ class CheckController extends Controller
                 $check->multiple_solutions = $model->multipleSolutions;
                 $check->protocol           = $model->protocol;
                 $check->port               = $model->port;
+                $check->check_control_id   = $model->controlId;
                 $check->reference_id       = $model->referenceId;
                 $check->reference_code     = $model->referenceCode;
                 $check->reference_url      = $model->referenceUrl;
@@ -742,26 +750,36 @@ class CheckController extends Controller
 
                 $check->refresh();
 
-                if ($newRecord)
-                    $this->redirect(array( 'check/editcheck', 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
+                if ($redirect)
+                    $this->redirect(array( 'check/editcheck', 'id' => $category->id, 'control' => $check->check_control_id, 'check' => $check->id ));
             }
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
-        $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
-        $this->breadcrumbs[$control->localizedName]  = $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id ));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
+        $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
 
         if ($newRecord)
-            $this->breadcrumbs[Yii::t('app', 'New Check')] = '';
+            $this->breadcrumbs[] = array(Yii::t('app', 'New Check'), '');
         else
-            $this->breadcrumbs[$check->localizedName] = '';
+            $this->breadcrumbs[] = array($check->localizedName, '');
 
         $references = Reference::model()->findAllByAttributes(
             array(),
             array( 'order' => 't.name ASC' )
         );
+
+        $controls = CheckControl::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findAllByAttributes(array(
+            'check_category_id' => $category->id
+        ));
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Check') : $check->localizedName;
@@ -773,6 +791,7 @@ class CheckController extends Controller
             'languages'       => $languages,
             'defaultLanguage' => $defaultLanguage,
             'references'      => $references,
+            'controls'        => $controls,
             'efforts'         => array( 2, 5, 20, 40, 60, 120 ),
         ));
 	}
@@ -903,11 +922,11 @@ class CheckController extends Controller
         $resultCount = CheckResult::model()->count($criteria);
         $paginator   = new Paginator($resultCount, $page);
 
-        $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
-        $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
-        $this->breadcrumbs[$control->localizedName]  = $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id ));
-        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
-        $this->breadcrumbs[Yii::t('app', 'Results')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
+        $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
+        $this->breadcrumbs[] = array($check->localizedName, $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Results'), '');
 
         // display the page
         $this->pageTitle = $check->localizedName;
@@ -1081,16 +1100,16 @@ class CheckController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
-        $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
-        $this->breadcrumbs[$control->localizedName]  = $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id ));
-        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
-        $this->breadcrumbs[Yii::t('app', 'Results')] = $this->createUrl('check/results', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
+        $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
+        $this->breadcrumbs[] = array($check->localizedName, $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Results'), $this->createUrl('check/results', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
 
         if ($newRecord)
-            $this->breadcrumbs[Yii::t('app', 'New Result')] = '';
+            $this->breadcrumbs[] = array(Yii::t('app', 'New Result'), '');
         else
-            $this->breadcrumbs[$result->localizedResult] = '';
+            $this->breadcrumbs[] = array($result->localizedResult, '');
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Result') : $result->localizedResult;
@@ -1231,11 +1250,11 @@ class CheckController extends Controller
         $solutionCount = CheckSolution::model()->count($criteria);
         $paginator     = new Paginator($solutionCount, $page);
 
-        $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
-        $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
-        $this->breadcrumbs[$control->localizedName]  = $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id ));
-        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
-        $this->breadcrumbs[Yii::t('app', 'Solutions')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
+        $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
+        $this->breadcrumbs[] = array($check->localizedName, $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Solutions'), '');
 
         // display the page
         $this->pageTitle = $check->localizedName;
@@ -1409,16 +1428,16 @@ class CheckController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[Yii::t('app', 'Checks')]    = $this->createUrl('check/index');
-        $this->breadcrumbs[$category->localizedName]   = $this->createUrl('check/view', array( 'id' => $category->id ));
-        $this->breadcrumbs[$control->localizedName]  = $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id ));
-        $this->breadcrumbs[$check->localizedName]      = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
-        $this->breadcrumbs[Yii::t('app', 'Solutions')] = $this->createUrl('check/solutions', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
+        $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
+        $this->breadcrumbs[] = array($check->localizedName, $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Solutions'), $this->createUrl('check/solutions', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
 
         if ($newRecord)
-            $this->breadcrumbs[Yii::t('app', 'New Solution')] = '';
+            $this->breadcrumbs[] = array(Yii::t('app', 'New Solution'), '');
         else
-            $this->breadcrumbs[$solution->localizedSolution] = '';
+            $this->breadcrumbs[] = array($solution->localizedSolution, '');
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Solution') : $solution->localizedSolution;
@@ -1559,11 +1578,11 @@ class CheckController extends Controller
         $inputCount = CheckInput::model()->count($criteria);
         $paginator  = new Paginator($inputCount, $page);
 
-        $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
-        $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
-        $this->breadcrumbs[$control->localizedName]  = $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id ));
-        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
-        $this->breadcrumbs[Yii::t('app', 'Inputs')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
+        $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
+        $this->breadcrumbs[] = array($check->localizedName, $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Inputs'), '');
 
         // display the page
         $this->pageTitle = $check->localizedName;
@@ -1753,16 +1772,16 @@ class CheckController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[Yii::t('app', 'Checks')]  = $this->createUrl('check/index');
-        $this->breadcrumbs[$category->localizedName] = $this->createUrl('check/view', array( 'id' => $category->id ));
-        $this->breadcrumbs[$control->localizedName]  = $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id ));
-        $this->breadcrumbs[$check->localizedName]    = $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
-        $this->breadcrumbs[Yii::t('app', 'Inputs')]  = $this->createUrl('check/inputs', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id ));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
+        $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
+        $this->breadcrumbs[] = array($check->localizedName, $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Inputs'), $this->createUrl('check/inputs', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
 
         if ($newRecord)
-            $this->breadcrumbs[Yii::t('app', 'New Input')] = '';
+            $this->breadcrumbs[] = array(Yii::t('app', 'New Input'), '');
         else
-            $this->breadcrumbs[$input->localizedName] = '';
+            $this->breadcrumbs[] = array($input->localizedName, '');
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Input') : $input->localizedName;

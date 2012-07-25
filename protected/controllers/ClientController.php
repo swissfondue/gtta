@@ -37,7 +37,7 @@ class ClientController extends Controller
         $clientCount = Client::model()->count($criteria);
         $paginator   = new Paginator($clientCount, $page);
 
-        $this->breadcrumbs[Yii::t('app', 'Clients')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Clients'), '');
 
         // display the page
         $this->pageTitle = Yii::t('app', 'Clients');
@@ -75,8 +75,8 @@ class ClientController extends Controller
         $projectCount = Project::model()->count($criteria);
         $paginator    = new Paginator($projectCount, $page);
 
-        $this->breadcrumbs[Yii::t('app', 'Clients')] = $this->createUrl('client/index');
-        $this->breadcrumbs[$client->name]            = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Clients'), $this->createUrl('client/index'));
+        $this->breadcrumbs[] = array($client->name, '');
 
         // display the page
         $this->pageTitle = $client->name;
@@ -155,14 +155,14 @@ class ClientController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[Yii::t('app', 'Clients')] = $this->createUrl('client/index');
+        $this->breadcrumbs[] = array(Yii::t('app', 'Clients'), $this->createUrl('client/index'));
 
         if ($newRecord)
-            $this->breadcrumbs[Yii::t('app', 'New Client')] = '';
+            $this->breadcrumbs[] = array(Yii::t('app', 'New Client'), '');
         else
         {
-            $this->breadcrumbs[$client->name]         = $this->createUrl('client/view', array( 'id' => $client->id ));
-            $this->breadcrumbs[Yii::t('app', 'Edit')] = '';
+            $this->breadcrumbs[] = array($client->name, $this->createUrl('client/view', array( 'id' => $client->id )));
+            $this->breadcrumbs[] = array(Yii::t('app', 'Edit'), '');
         }
 
 		// display the page

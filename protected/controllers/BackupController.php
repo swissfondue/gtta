@@ -236,7 +236,7 @@ class BackupController extends Controller
         else
             $backedUp = Yii::t('app', 'Never');
 
-        $this->breadcrumbs[Yii::t('app', 'Backup')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Backup'), '');
 
         // display the page
         $this->pageTitle = Yii::t('app', 'Backup');
@@ -379,7 +379,7 @@ class BackupController extends Controller
 
         }
 
-        $this->breadcrumbs[Yii::t('app', 'Restore')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Restore'), '');
 
         // display the page
         $this->pageTitle = Yii::t('app', 'Restore');

@@ -109,6 +109,21 @@
         <div>
             <hr>
         </div>
+
+        <div class="control-group <?php if ($model->getError('controlId')) echo 'error'; ?>">
+            <label class="control-label" for="CheckEditForm_controlId"><?php echo Yii::t('app', 'Control'); ?></label>
+            <div class="controls">
+                <select class="input-xlarge" id="CheckEditForm_controlId" name="CheckEditForm[controlId]">
+                    <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
+                    <?php foreach ($controls as $ctrl): ?>
+                        <option value="<?php echo $ctrl->id; ?>" <?php if ($ctrl->id == $model->controlId) echo 'selected'; ?>><?php echo CHtml::encode($ctrl->localizedName); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if ($model->getError('controlId')): ?>
+                    <p class="help-block"><?php echo $model->getError('controlId'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
         
         <div class="control-group <?php if ($model->getError('referenceId')) echo 'error'; ?>">
             <label class="control-label" for="CheckEditForm_referenceId"><?php echo Yii::t('app', 'Reference'); ?></label>

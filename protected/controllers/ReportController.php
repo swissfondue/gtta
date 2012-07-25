@@ -893,7 +893,7 @@ class ReportController extends Controller
             array( 'order' => 't.name ASC' )
         );
 
-        $this->breadcrumbs[Yii::t('app', 'Project Report')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Project Report'), '');
 
         // display the report generation form
         $this->pageTitle = Yii::t('app', 'Project Report');
@@ -1197,7 +1197,7 @@ class ReportController extends Controller
             array( 'order' => 't.name ASC' )
         );
 
-        $this->breadcrumbs[Yii::t('app', 'Projects Comparison')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects Comparison'), '');
 
         // display the report generation form
         $this->pageTitle = Yii::t('app', 'Projects Comparison');

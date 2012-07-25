@@ -36,7 +36,7 @@ class UserController extends Controller
         $userCount = User::model()->count($criteria);
         $paginator = new Paginator($userCount, $page);
 
-        $this->breadcrumbs[Yii::t('app', 'Users')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Users'), '');
 
         // display the page
         $this->pageTitle = Yii::t('app', 'Users');
@@ -117,12 +117,12 @@ class UserController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[Yii::t('app', 'Users')]  = $this->createUrl('user/index');
+        $this->breadcrumbs[] = array(Yii::t('app', 'Users'), $this->createUrl('user/index'));
 
         if ($newRecord)
-            $this->breadcrumbs[Yii::t('app', 'New User')] = '';
+            $this->breadcrumbs[] = array(Yii::t('app', 'New User'), '');
         else
-            $this->breadcrumbs[$user->email] = '';
+            $this->breadcrumbs[] = array($user->email, '');
 
         $clients = Client::model()->findAllByAttributes(
             array(),

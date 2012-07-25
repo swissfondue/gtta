@@ -83,7 +83,7 @@ class EffortController extends Controller
             $checkArray[] = $checkCategory;
         }
 
-        $this->breadcrumbs[Yii::t('app', 'Effort Estimation')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Effort Estimation'), '');
 
         // display the page
         $this->pageTitle = Yii::t('app', 'Effort Estimation');

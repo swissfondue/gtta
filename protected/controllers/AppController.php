@@ -70,7 +70,7 @@ class AppController extends Controller
 	public function actionError()
 	{
 	    $error = Yii::app()->errorHandler->error;
-        $this->breadcrumbs[Yii::t('app', 'Error')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Error'), '');
 
         if ($error)
 	    {
@@ -89,7 +89,7 @@ class AppController extends Controller
 	 */
 	public function actionMaintenance()
 	{
-        $this->breadcrumbs[Yii::t('app', 'Maintenance')] = '';
+        $this->breadcrumbs[] = array(Yii::t('app', 'Maintenance'), '');
         $this->pageTitle = Yii::t('app', 'Maintenance');
         $this->render('maintenance');
 	}

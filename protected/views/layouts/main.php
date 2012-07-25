@@ -106,12 +106,12 @@
         <div class="container">
             <?php if (!Yii::app()->user->isGuest): ?>
                 <ul class="breadcrumb">
-                    <?php foreach ($this->breadcrumbs as $text => $link): ?>
-                        <li<?php if (!$link) echo ' class="active"'; ?>>
-                            <?php if (!$link): ?>
-                                <?php echo CHtml::encode($text); ?>
+                    <?php foreach ($this->breadcrumbs as $link): ?>
+                        <li<?php if (!$link[1]) echo ' class="active"'; ?>>
+                            <?php if (!$link[1]): ?>
+                                <?php echo CHtml::encode($link[0]); ?>
                             <?php else: ?>
-                                <a href="<?php echo $link; ?>"><?php echo CHtml::encode($text); ?></a> <span class="divider">/</span>
+                                <a href="<?php echo $link[1]; ?>"><?php echo CHtml::encode($link[0]); ?></a> <span class="divider">/</span>
                             <?php endif; ?>
                         </li>
                     <?php endforeach; ?>

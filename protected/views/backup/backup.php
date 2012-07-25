@@ -8,9 +8,9 @@
     </div>
 <?php endif; ?>
 
-<form id="SystemBackupForm" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
+<form id="BackupForm" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
-    <input type="hidden" value="1" name="SystemBackupForm[proceed]">
+    <input type="hidden" value="1" name="BackupForm[proceed]">
 
     <fieldset>
         <div class="control-group">
