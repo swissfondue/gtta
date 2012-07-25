@@ -1,9 +1,9 @@
 <?php
 
 /**
- * This is the model class for system restore form.
+ * This is the model class for restore form.
  */
-class SystemRestoreForm extends CFormModel
+class RestoreForm extends CFormModel
 {
 	/**
      * @var CUploadedFile uploaded file.

@@ -1,11 +1,11 @@
 <?php
 
 /**
- * System controller.
+ * Backup controller.
  */
-class SystemController extends Controller
+class BackupController extends Controller
 {
-    private $_databaseTables = array(
+    private $_tables = array(
         'languages',
         'clients',
         'users',
@@ -140,7 +140,7 @@ class SystemController extends Controller
         $dump     = fopen($dumpPath, 'w');
 
         // backup tables
-        foreach ($this->_databaseTables as $table)
+        foreach ($this->_tables as $table)
             fwrite($dump, $this->_backupTable($table));
 
         // backup sequences
@@ -217,12 +217,12 @@ class SystemController extends Controller
 
         $runningChecks = TargetCheck::model()->count($criteria);
 
-        if (isset($_POST['SystemBackupForm']))
+        if (isset($_POST['BackupForm']))
         {
             if (!$runningChecks)
                 $this->_backup();
             else
-                Yii::app()->user->setFlash('error', Yii::t('app', 'System backup canceled.'));
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Backup canceled.'));
         }
 
         $system   = System::model()->findAll();
@@ -236,10 +236,10 @@ class SystemController extends Controller
         else
             $backedUp = Yii::t('app', 'Never');
 
-        $this->breadcrumbs[Yii::t('app', 'System Backup')] = '';
+        $this->breadcrumbs[Yii::t('app', 'Backup')] = '';
 
         // display the page
-        $this->pageTitle = Yii::t('app', 'System Backup');
+        $this->pageTitle = Yii::t('app', 'Backup');
 		$this->render('backup', array(
             'runningChecks' => $runningChecks,
             'backedUp'      => $backedUp
@@ -273,7 +273,7 @@ class SystemController extends Controller
         $transaction = $db->beginTransaction();
 
         // truncate all tables
-        foreach (array_reverse($this->_databaseTables) as $table)
+        foreach (array_reverse($this->_tables) as $table)
             $db->createCommand('TRUNCATE TABLE ' . $db->quoteTableName($table) . ' CASCADE;')->execute();
 
         // insert content
@@ -357,12 +357,12 @@ class SystemController extends Controller
         ));
 
         $runningChecks = TargetCheck::model()->count($criteria);
-        $model         = new SystemRestoreForm();
+        $model         = new RestoreForm();
 
-        if (isset($_POST['SystemRestoreForm']))
+        if (isset($_POST['RestoreForm']))
         {
-            $model->attributes = $_POST['SystemRestoreForm'];
-            $model->backup     = CUploadedFile::getInstanceByName('SystemRestoreForm[backup]');
+            $model->attributes = $_POST['RestoreForm'];
+            $model->backup     = CUploadedFile::getInstanceByName('RestoreForm[backup]');
 
             if (!$runningChecks)
             {
@@ -375,14 +375,14 @@ class SystemController extends Controller
                     Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
             }
             else
-                Yii::app()->user->setFlash('error', Yii::t('app', 'System restore canceled.'));
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Restore canceled.'));
 
         }
 
-        $this->breadcrumbs[Yii::t('app', 'System Restore')] = '';
+        $this->breadcrumbs[Yii::t('app', 'Restore')] = '';
 
         // display the page
-        $this->pageTitle = Yii::t('app', 'System Restore');
+        $this->pageTitle = Yii::t('app', 'Restore');
 		$this->render('restore', array(
             'runningChecks' => $runningChecks,
             'model'         => $model

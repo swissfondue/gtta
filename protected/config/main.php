@@ -78,6 +78,9 @@ return array(
                 'client/new'           => 'client/edit',
                 'client/control'       => 'client/control',
 
+                // effort
+                'effort' => 'effort/index',
+
                 // checks
                 'checks/<page:\d+>'         => 'check/index',
                 'checks'                    => 'check/index',
@@ -134,9 +137,9 @@ return array(
                 'user/new'           => 'user/edit',
                 'user/control'       => 'user/control',
 
-                // system
-                'system/backup'  => 'system/backup',
-                'system/restore' => 'system/restore',
+                // backup
+                'backup'  => 'backup/backup',
+                'restore' => 'backup/restore',
 
             ),
 		),
