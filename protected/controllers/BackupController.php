@@ -126,7 +126,7 @@ class BackupController extends Controller
             return '';
 
         $value = $row['last_value'];
-        $dump  = 'SELECT setval(' . $pdo->quote($sequence) . ', ' . $pdo->quote($value) . ');';
+        $dump  = 'SELECT setval(' . $pdo->quote($sequence) . ', ' . $pdo->quote($value) . ', false);';
 
         return $dump . "\n";
     }
