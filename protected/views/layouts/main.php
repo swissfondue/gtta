@@ -41,7 +41,7 @@
                             <li <?php if (Yii::app()->controller->id == 'project') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('project/index'); ?>"><?php echo Yii::t('app', 'Projects'); ?></a></li>
 
                             <?php if (User::checkRole(User::ROLE_USER)): ?>
-                                <li class="dropdown <?php if (Yii::app()->controller->id == 'report') echo 'class="active"'; ?>">
+                                <li class="dropdown <?php if (Yii::app()->controller->id == 'report') echo 'active'; ?>">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                         <?php echo Yii::t('app', 'Reports'); ?>
                                         <b class="caret"></b>
@@ -61,6 +61,16 @@
                                 <li <?php if (Yii::app()->controller->id == 'check') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('check/index'); ?>"><?php echo Yii::t('app', 'Checks'); ?></a></li>
                                 <li <?php if (Yii::app()->controller->id == 'reference') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('reference/index'); ?>"><?php echo Yii::t('app', 'References'); ?></a></li>
                                 <li <?php if (Yii::app()->controller->id == 'user') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('user/index'); ?>"><?php echo Yii::t('app', 'Users'); ?></a></li>
+                                <li class="dropdown <?php if (Yii::app()->controller->id == 'system') echo 'active'; ?>">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                        <?php echo Yii::t('app', 'System'); ?>
+                                        <b class="caret"></b>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="<?php echo $this->createUrl('system/backup'); ?>"><?php echo Yii::t('app', 'Backup'); ?></a></li>
+                                        <li><a href="<?php echo $this->createUrl('system/restore'); ?>"><?php echo Yii::t('app', 'Restore'); ?></a></li>
+                                    </ul>
+                                </li>
                                 <li class="divider-vertical"></li>
                             <?php endif; ?>
 

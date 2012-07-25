@@ -1597,10 +1597,22 @@ class ProjectController extends Controller
             if (!$category)
                 throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
-            $check = Check::model()->findByAttributes(array(
-                'id'                => $check,
+            $controls = CheckControl::model()->findAllByAttributes(array(
                 'check_category_id' => $category->check_category_id
             ));
+
+            $controlIds = array();
+
+            foreach ($controls as $control)
+                $controlIds[] = $control->id;
+
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition('check_control_id', $controlIds);
+            $criteria->addColumnCondition(array(
+                'id' => $check
+            ));
+
+            $check = Check::model()->find($criteria);
 
             if (!$check)
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));

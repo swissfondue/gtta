@@ -133,6 +133,11 @@ return array(
                 'user/<id:\d+>/edit' => 'user/edit',
                 'user/new'           => 'user/edit',
                 'user/control'       => 'user/control',
+
+                // system
+                'system/backup'  => 'system/backup',
+                'system/restore' => 'system/restore',
+
             ),
 		),
 
@@ -168,15 +173,18 @@ return array(
     // parameters
 	'params' => array(
         'entriesPerPage' => 10,
-        'attachments'    => array(
+
+        'attachments' => array(
             'path'    => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../files/attachments',
             'maxSize' => 100 * 1024 * 1024, // 100 megabytes
         ),
 
-        'tmpPath' => '/tmp',
+        'backups' => array(
+            'maxSize' => 100 * 1024 * 1024, // 100 megabytes
+        ),
 
-        'timeZone' => 'Europe/Moscow',
-
+        'tmpPath'            => '/tmp',
+        'timeZone'           => 'Europe/Moscow',
         'collapseCheckCount' => 20,
     ),
 
