@@ -109,6 +109,6 @@
 <script>
     var referenceList, checkList;
 
-    referenceList = <?php echo json_encode($references); ?>;
-    checkList     = <?php echo json_encode($checks); ?>;
+    referenceList = <?php echo json_encode($references, JSON_NUMERIC_CHECK); ?>;
+    checkList     = <?php echo json_encode($checks, JSON_NUMERIC_CHECK); ?>;
 </script>
