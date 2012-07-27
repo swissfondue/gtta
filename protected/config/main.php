@@ -65,10 +65,12 @@ return array(
                 'project/target/control'                                                                     => 'project/controltarget',
 
                 // reports
-                'report/project'     => 'report/project',
-                'report/comparison'  => 'report/comparison',
-                'report/projectlist' => 'report/projectlist',
-                'report/targetlist'  => 'report/targetlist',
+                'reports/project'      => 'report/project',
+                'reports/comparison'   => 'report/comparison',
+                'reports/project-list' => 'report/projectlist',
+                'reports/target-list'  => 'report/targetlist',
+                'reports/fulfillment'  => 'report/fulfillment',
+                'reports/risk-matrix'  => 'report/riskmatrix',
 
                 // clients
                 'clients/<page:\d+>'   => 'client/index',

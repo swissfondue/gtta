@@ -981,6 +981,95 @@ function User()
                     $('.form-actions > button[type="submit"]').prop('disabled', false);
             }
         };
+
+        /**
+         * Degree of Fulfillment form has been changed.
+         */
+        this.fulfillmentFormChange = function (e) {
+            var val;
+
+            if (e.id == 'FulfillmentDegreeForm_clientId')
+            {
+                val = $('#FulfillmentDegreeForm_clientId').val();
+
+                $('#project-list').hide();
+                $('#target-list').hide();
+                $('.form-actions > button[type="submit"]').prop('disabled', true);
+
+                if (val != 0)
+                {
+                    $('#FulfillmentDegreeForm_clientId').prop('disabled', true);
+
+                    _report._loadProjects(val, function (data) {
+                        $('#FulfillmentDegreeForm_clientId').prop('disabled', false);
+                        $('#FulfillmentDegreeForm_projectId > option:not(:first)').remove();
+                        $('#project-list').show();
+
+                        if (data)
+                        {
+                            for (var i = 0; i < data.projects.length; i++)
+                                $('<option>')
+                                    .val(data.projects[i].id)
+                                    .html(data.projects[i].name)
+                                    .appendTo('#FulfillmentDegreeForm_projectId');
+                        }
+                    });
+                }
+            }
+            else if (e.id == 'FulfillmentDegreeForm_projectId')
+            {
+                val = $('#FulfillmentDegreeForm_projectId').val();
+
+                $('#target-list').hide();
+                $('.form-actions > button[type="submit"]').prop('disabled', true);
+
+                if (val != 0)
+                {
+                    $('#FulfillmentDegreeForm_projectId').prop('disabled', true);
+
+                    _report._loadTargets(val, function (data) {
+                        $('#FulfillmentDegreeForm_projectId').prop('disabled', false);
+                        $('#target-list > .controls > .report-target-list > li').remove();
+
+                        if (data)
+                        {
+                            for (var i = 0; i < data.targets.length; i++)
+                            {
+                                var li    = $('<li>'),
+                                    label = $('<label>'),
+                                    input = $('<input>');
+
+                                input
+                                    .attr('type', 'checkbox')
+                                    .prop('checked', true)
+                                    .attr('name', 'FulfillmentDegreeForm[targetIds][]')
+                                    .val(data.targets[i].id)
+                                    .click(function () {
+                                        user.report.projectFormChange(this);
+                                    })
+                                    .appendTo(label);
+
+                                label
+                                    .append(' ' + data.targets[i].host)
+                                    .appendTo(li);
+
+                                $('#target-list > .controls > .report-target-list').append(li);
+                            }
+
+                            $('#target-list').show();
+                            $('.form-actions > button[type="submit"]').prop('disabled', false);
+                        }
+                    });
+                }
+            }
+            else
+            {
+                if ($('.report-target-list input:checked').length == 0)
+                    $('.form-actions > button[type="submit"]').prop('disabled', true);
+                else
+                    $('.form-actions > button[type="submit"]').prop('disabled', false);
+            }
+        };
     };
 }
 

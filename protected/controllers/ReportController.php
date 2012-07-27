@@ -36,7 +36,7 @@ class ReportController extends Controller
      */
     private function _generateRatingImage($rating)
     {
-        $image     = imagecreatefrompng(Yii::app()->basePath . '/../images/gradient.png');
+        $image     = imagecreatefrompng(Yii::app()->basePath . '/../images/rating-stripe.png');
         $lineCoord = round($rating * 40);
         $color     = imagecolorallocate($image, 0, 0, 0);
 
@@ -467,7 +467,7 @@ class ReportController extends Controller
 
         foreach ($data as $target)
         {
-            $section->writeText(Yii::t('app', 'Target') . ': ' . $target['host'] . '<br>', $boldFont, $noPar);
+            $section->writeText($target['host'] . '<br>', $boldFont, $noPar);
 
             if (!count($target['categories']))
             {
@@ -665,7 +665,7 @@ class ReportController extends Controller
 
             foreach ($infoData as $target)
             {
-                $section->writeText(Yii::t('app', 'Target') . ': ' . $target['host'] . '<br>', $boldFont, $noPar);
+                $section->writeText($target['host'] . '<br>', $boldFont, $noPar);
 
                 $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
                 $table->addColumnsList(array( 5, 13 ));
@@ -733,6 +733,8 @@ class ReportController extends Controller
                                 $table->getCell($row, 2)->writeHyperLink($referenceUrl, $reference, $linkFont);
                             else
                                 $table->writeToCell($row, 2, $reference);
+
+                            $row++;
 
                             if ($check['background'])
                             {
@@ -847,7 +849,7 @@ class ReportController extends Controller
             }
         }
 
-        $fileName = $project->name . ' (' . $project->year . ') - ' . date('Y-m-d') . '.rtf';
+        $fileName = Yii::t('app', 'Project Report') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
         $hashName = hash('sha256', rand() . time() . $fileName);
         $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
 
@@ -1110,7 +1112,7 @@ class ReportController extends Controller
 
         // title
         $section = $rtf->addSection();
-        $section->writeText(Yii::t('app', 'Project Comparison'), $h1Font, $titlePar);
+        $section->writeText(Yii::t('app', 'Projects Comparison'), $h1Font, $titlePar);
         $section->writeText($project1->name . ' (' . $project1->year . ')<br>' . $project2->name . ' (' . $project2->year . ')', $h2Font, $projectPar);
 
         // detailed summary
@@ -1151,7 +1153,7 @@ class ReportController extends Controller
             $row++;
         }
 
-        $fileName = Yii::t('app', 'Project Comparison') . ' - ' . date('Y-m-d') . '.rtf';
+        $fileName = Yii::t('app', 'Projects Comparison') . '.rtf';
         $hashName = hash('sha256', rand() . time() . $fileName);
         $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
 
@@ -1311,5 +1313,371 @@ class ReportController extends Controller
         }
 
         echo $response->serialize();
+    }
+
+    /**
+     * Fulfillment degree image.
+     */
+    private function _generateFulfillmentImage($degree)
+    {
+        $scale = imagecreatefrompng(Yii::app()->basePath . '/../images/fulfillment-stripe.png');
+        imagealphablending($scale, false);
+        imagesavealpha($scale, true);
+        $image = imagecreatetruecolor(301, 30);
+        //imagealphablending($image, false);
+        //imagesavealpha($image, true);
+
+        $lineCoord = $degree * 3;
+        $white     = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);
+        $color     = imagecolorallocate($image, 0x3A, 0x87, 0xAD);
+
+        imagefilledrectangle($image, 0, 0, 301, 30, $white);
+        imagefilledrectangle($image, 0, 6, $lineCoord, 24, $color);
+        imagecopyresampled($image, $scale, 0, 0, 0, 0, 301, 30, 301, 30);
+
+        $hashName = hash('sha256', rand() . time() . rand());
+        $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName . '.png';
+
+        imagepng($image, $filePath, 0);
+        imagedestroy($image);
+
+        return $filePath;
+    }
+
+    /**
+     * Sort controls.
+     */
+    public static function sortControls($a, $b)
+    {
+        return $a['degree'] > $b['degree'];
+    }
+
+    /**
+     * Generate a Degree of Fulfillment report
+     */
+    private function _generateFulfillmentDegreeReport($clientId, $projectId, $targetIds)
+    {
+        $project = Project::model()->findByAttributes(array(
+            'client_id' => $clientId,
+            'id'        => $projectId
+        ));
+
+        if ($project === null)
+        {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Project doesn\\\'t exist.'));
+            return;
+        }
+
+        if (!$targetIds || !count($targetIds))
+        {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
+            return;
+        }
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
+        $criteria = new CDbCriteria();
+        $criteria->addInCondition('id', $targetIds);
+        $criteria->addColumnCondition(array( 'project_id' => $project->id ));
+        $criteria->order = 't.host ASC';
+        $targets = Target::model()->findAll($criteria);
+
+        $data = array();
+
+        foreach ($targets as $target)
+        {
+            $targetData = array(
+                'host'     => $target->host,
+                'controls' => array(),
+            );
+
+            // get all references (they are the same across all target categories)
+            $referenceIds = array();
+
+            $references = TargetReference::model()->findAllByAttributes(array(
+                'target_id' => $target->id
+            ));
+
+            foreach ($references as $reference)
+                $referenceIds[] = $reference->reference_id;
+
+            // get all categories
+            $categories = TargetCheckCategory::model()->with(array(
+                'category' => array(
+                    'with' => array(
+                        'l10n' => array(
+                            'joinType' => 'LEFT JOIN',
+                            'on'       => 'language_id = :language_id',
+                            'params'   => array( 'language_id' => $language )
+                        )
+                    )
+                )
+            ))->findAllByAttributes(
+                array( 'target_id' => $target->id  ),
+                array( 'order'     => 't.name ASC' )
+            );
+
+            foreach ($categories as $category)
+            {
+                // get all controls
+                $controls = CheckControl::model()->with(array(
+                    'l10n' => array(
+                        'joinType' => 'LEFT JOIN',
+                        'on'       => 'language_id = :language_id',
+                        'params'   => array( 'language_id' => $language )
+                    )
+                ))->findAllByAttributes(
+                    array( 'check_category_id' => $category->check_category_id ),
+                    array( 'order'             => 't.name ASC' )
+                );
+
+                if (!$controls)
+                    continue;
+
+                foreach ($controls as $control)
+                {
+                    $controlData = array(
+                        'name'   => $category->category->localizedName . ' / ' . $control->localizedName,
+                        'degree' => 0.0,
+                    );
+
+                    $criteria = new CDbCriteria();
+
+                    $criteria->addInCondition('t.reference_id', $referenceIds);
+                    $criteria->addColumnCondition(array(
+                        't.check_control_id' => $control->id
+                    ));
+
+                    if (!$category->advanced)
+                        $criteria->addCondition('t.advanced = FALSE');
+
+                    $checks = Check::model()->with(array(
+                        'targetChecks' => array(
+                            'alias'    => 'tcs',
+                            'joinType' => 'INNER JOIN',
+                            'on'       => 'tcs.target_id = :target_id AND tcs.status = :status',
+                            'params'   => array(
+                                'target_id' => $target->id,
+                                'status'    => TargetCheck::STATUS_FINISHED,
+                            ),
+                        ),
+                    ))->findAll($criteria);
+
+                    if (!$checks)
+                        continue;
+
+                    foreach ($checks as $check)
+                    {
+                        switch ($check->targetChecks[0]->rating)
+                        {
+                            case TargetCheck::RATING_HIDDEN:
+                            case TargetCheck::RATING_INFO:
+                                $controlData['degree'] += 0;
+                                break;
+
+                            case TargetCheck::RATING_LOW_RISK:
+                                $controlData['degree'] += 1;
+                                break;
+
+                            case TargetCheck::RATING_MED_RISK:
+                                $controlData['degree'] += 2;
+                                break;
+
+                            case TargetCheck::RATING_HIGH_RISK:
+                                $controlData['degree'] += 3;
+                                break;
+                        }
+                    }
+
+                    $maxDegree             = count($checks) * 3;
+                    $controlData['degree'] = round(100 - $controlData['degree'] / $maxDegree * 100);
+
+                    $targetData['controls'][] = $controlData;
+                }
+            }
+
+            $data[] = $targetData;
+        }
+
+        // include all PHPRtfLite libraries
+        Yii::setPathOfAlias('rtf', Yii::app()->basePath . '/extensions/PHPRtfLite/PHPRtfLite');
+        Yii::import('rtf.Autoloader', true);
+        PHPRtfLite_Autoloader::setBaseDir(Yii::app()->basePath . '/extensions/PHPRtfLite');
+        Yii::registerAutoloader(array( 'PHPRtfLite_Autoloader', 'autoload' ), true);
+
+        $rtf = new PHPRtfLite();
+        $rtf->setCharset('UTF-8');
+        $rtf->setMargins(1.5, 1, 1.5, 1);
+
+        // borders
+        $thinBorder = new PHPRtfLite_Border(
+            $rtf,
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090')
+        );
+
+        // fonts
+        $h1Font = new PHPRtfLite_Font(24, 'Helvetica');
+        $h1Font->setBold();
+
+        $h2Font = new PHPRtfLite_Font(20, 'Helvetica');
+        $h2Font->setBold();
+
+        $h3Font = new PHPRtfLite_Font(16, 'Helvetica');
+        $h3Font->setBold();
+
+        $textFont = new PHPRtfLite_Font(12, 'Helvetica');
+
+        $boldFont = new PHPRtfLite_Font(12, 'Helvetica');
+        $boldFont->setBold();
+
+        $linkFont = new PHPRtfLite_Font(12, 'Helvetica', '#0088CC');
+        $linkFont->setUnderline();
+
+        // paragraphs
+        $titlePar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
+        $titlePar->setSpaceBefore(0);
+
+        $projectPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
+        $projectPar->setSpaceAfter(20);
+
+        $h3Par = new PHPRtfLite_ParFormat();
+
+        $centerPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
+        $centerPar->setSpaceAfter(20);
+
+        $leftPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_LEFT);
+        $leftPar->setSpaceAfter(20);
+
+        $noPar = new PHPRtfLite_ParFormat();
+        $noPar->setSpaceBefore(0);
+        $noPar->setSpaceAfter(0);
+
+        // title
+        $section = $rtf->addSection();
+        $section->writeText(Yii::t('app', 'Degree of Fulfillment'), $h1Font, $titlePar);
+        $section->writeText($project->name . ' (' . $project->year . ')', $h2Font, $projectPar);
+
+        foreach ($data as $target)
+        {
+            $section->writeText($target['host'] . '<br>', $h3Font, $h3Par);
+
+            if (!count($target['controls']))
+            {
+                $section->writeText(Yii::t('app', 'No checks.') . '<br>', $textFont, $noPar);
+                continue;
+            }
+
+            $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+            $table->addColumnsList(array( 5, 10, 3 ));
+
+            $row = 1;
+
+            $table->addRow();
+            $table->mergeCellRange(1, 2, 1, 3);
+
+            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+            $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+
+            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+            $table->getCell($row, 2)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+
+            $table->setFontForCellRange($boldFont, 1, 1, 1, 3);
+            $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
+            $table->setBorderForCellRange($thinBorder, 1, 1, 1, 3);
+            $table->setFirstRowAsHeader();
+
+            $table->writeToCell($row, 1, Yii::t('app', 'Control'));
+            $table->writeToCell($row, 2, Yii::t('app', 'Degree of Fulfillment'));
+
+            $row++;
+
+            usort($target['controls'], array('ReportController', 'sortControls'));
+
+            foreach ($target['controls'] as $control)
+            {
+                $table->addRow();
+                $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                $table->getCell($row, 1)->setBorder($thinBorder);
+
+                $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                $table->getCell($row, 2)->setBorder($thinBorder);
+                $table->getCell($row, 2)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
+
+                $table->getCell($row, 3)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                $table->getCell($row, 3)->setBorder($thinBorder);
+
+                $table->writeToCell($row, 1, $control['name'], $textFont);
+                $table->addImageToCell($row, 2, $this->_generateFulfillmentImage($control['degree']));
+                $table->writeToCell($row, 3, $control['degree'] . '%');
+
+                $row++;
+            }
+
+            $table->setFontForCellRange($textFont, 1, 1, count($target['controls']) + 1, 2);
+        }
+
+        $fileName = Yii::t('app', 'Degree of Fulfillment') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
+        $hashName = hash('sha256', rand() . time() . $fileName);
+        $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
+
+        $rtf->save($filePath);
+
+        // give user a file
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filePath));
+
+        ob_clean();
+        flush();
+
+        readfile($filePath);
+
+        exit();
+    }
+
+    /**
+     * Show degree of fulfillment report form.
+     */
+    public function actionFulfillment()
+    {
+        $model = new FulfillmentDegreeForm();
+
+        if (isset($_POST['FulfillmentDegreeForm']))
+        {
+            $model->attributes = $_POST['FulfillmentDegreeForm'];
+
+            if ($model->validate())
+                $this->_generateFulfillmentDegreeReport($model->clientId, $model->projectId, $model->targetIds);
+            else
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+        }
+
+        $clients = Client::model()->findAllByAttributes(
+            array(),
+            array( 'order' => 't.name ASC' )
+        );
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Degree of Fulfillment'), '');
+
+        // display the report generation form
+        $this->pageTitle = Yii::t('app', 'Degree of Fulfillment');
+		$this->render('fulfillment', array(
+            'model'   => $model,
+            'clients' => $clients
+        ));
     }
 }
