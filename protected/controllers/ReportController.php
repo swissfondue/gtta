@@ -1210,9 +1210,9 @@ class ReportController extends Controller
     }
 
     /**
-     * Project list.
+     * Object list.
      */
-    public function actionProjectList()
+    public function actionObjectList()
     {
         $response = new AjaxResponse();
 
@@ -1234,78 +1234,145 @@ class ReportController extends Controller
                 throw new Exception($errorText);
             }
 
-            $client = Client::model()->findByPk($model->id);
+            $language = Language::model()->findByAttributes(array(
+                'code' => Yii::app()->language
+            ));
 
-            if (!$client)
-                throw new CHttpException(404, Yii::t('app', 'Client not found.'));
+            if ($language)
+                $language = $language->id;
 
-            $projects = Project::model()->findAllByAttributes(
-                array( 'client_id' => $client->id ),
-                array( 'order'     => 't.name ASC, t.year ASC' )
-            );
+            $objects = array();
 
-            $projectList = array();
-
-            foreach ($projects as $project)
-                $projectList[] = array(
-                    'id'   => $project->id,
-                    'name' => CHtml::encode($project->name) . ' (' . $project->year . ')',
-                );
-
-            $response->addData('projects', $projectList);
-        }
-        catch (Exception $e)
-        {
-            $response->setError($e->getMessage());
-        }
-
-        echo $response->serialize();
-    }
-
-    /**
-     * Target list.
-     */
-    public function actionTargetList()
-    {
-        $response = new AjaxResponse();
-
-        try
-        {
-            $model = new EntryControlForm();
-            $model->attributes = $_POST['EntryControlForm'];
-
-            if (!$model->validate())
+            switch ($model->operation)
             {
-                $errorText = '';
+                case 'project-list':
+                    $client = Client::model()->findByPk($model->id);
 
-                foreach ($model->getErrors() as $error)
-                {
-                    $errorText = $error[0];
+                    if (!$client)
+                        throw new CHttpException(404, Yii::t('app', 'Client not found.'));
+
+                    $projects = Project::model()->findAllByAttributes(
+                        array( 'client_id' => $client->id ),
+                        array( 'order'     => 't.name ASC, t.year ASC' )
+                    );
+
+                    foreach ($projects as $project)
+                        $objects[] = array(
+                            'id'   => $project->id,
+                            'name' => CHtml::encode($project->name) . ' (' . $project->year . ')',
+                        );
+
                     break;
-                }
 
-                throw new Exception($errorText);
+                case 'target-list':
+                    $project = Project::model()->findByPk($model->id);
+
+                    if (!$project)
+                        throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+                    $targets = Target::model()->findAllByAttributes(
+                        array( 'project_id' => $project->id ),
+                        array( 'order'      => 't.host ASC' )
+                    );
+
+                    foreach ($targets as $target)
+                        $objects[] = array(
+                            'id'   => $target->id,
+                            'host' => $target->host,
+                        );
+
+                    break;
+
+                case 'check-list':
+                    $target = Target::model()->findByPk($model->id);
+
+                    if (!$target)
+                        throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+
+                    $referenceIds = array();
+
+                    $references = TargetReference::model()->findAllByAttributes(array(
+                        'target_id' => $target->id
+                    ));
+
+                    foreach ($references as $reference)
+                        $referenceIds[] = $reference->reference_id;
+
+                    $categories = TargetCheckCategory::model()->findAllByAttributes(
+                        array( 'target_id' => $target->id  )
+                    );
+
+                    $ratings = array(
+                        TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
+                        TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
+                        TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
+                        TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
+                        TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
+                    );
+
+                    foreach ($categories as $category)
+                    {
+                        $controlIds = array();
+
+                        $controls = CheckControl::model()->findAllByAttributes(array(
+                            'check_category_id' => $category->check_category_id
+                        ));
+
+                        foreach ($controls as $control)
+                            $controlIds[] = $control->id;
+
+                        $criteria = new CDbCriteria();
+
+                        $criteria->order = 't.name ASC';
+                        $criteria->addInCondition('t.reference_id', $referenceIds);
+                        $criteria->addInCondition('t.check_control_id', $controlIds);
+
+                        if (!$category->advanced)
+                            $criteria->addCondition('t.advanced = FALSE');
+
+                        $checks = Check::model()->with(array(
+                            'l10n' => array(
+                                'joinType' => 'LEFT JOIN',
+                                'on'       => 'l10n.language_id = :language_id',
+                                'params'   => array( 'language_id' => $language )
+                            ),
+                            'targetChecks' => array(
+                                'alias'    => 'tcs',
+                                'joinType' => 'INNER JOIN',
+                                'on'       => 'tcs.target_id = :target_id AND tcs.status = :status AND (tcs.rating = :high_risk OR tcs.rating = :med_risk)',
+                                'params'   => array(
+                                    'target_id' => $target->id,
+                                    'status'    => TargetCheck::STATUS_FINISHED,
+                                    'high_risk' => TargetCheck::RATING_HIGH_RISK,
+                                    'med_risk'  => TargetCheck::RATING_MED_RISK,
+                                ),
+                            ),
+                        ))->findAll($criteria);
+
+                        foreach ($checks as $check)
+                            $objects[] = array(
+                                'id'         => $check->id,
+                                'ratingName' => $ratings[$check->targetChecks[0]->rating],
+                                'rating'     => $check->targetChecks[0]->rating,
+                                'name'       => CHtml::encode($check->localizedName),
+                            );
+                    }
+
+                    $response->addData('target', array(
+                        'id'   => $target->id,
+                        'host' => $target->host,
+                    ));
+
+                    $response->addData('objects', $objects);
+
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
             }
 
-            $project = Project::model()->findByPk($model->id);
-
-            if (!$project)
-                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
-
-            $targets = Target::model()->findAllByAttributes(
-                array( 'project_id' => $project->id ),
-                array( 'order'      => 't.host ASC' )
-            );
-
-            $targetList = array();
-
-            foreach ($targets as $target)
-                $targetList[] = array(
-                    'id'   => $target->id,
-                    'host' => $target->host,
-                );
-
-            $response->addData('targets', $targetList);
+            $response->addData('objects', $objects);
         }
         catch (Exception $e)
         {
@@ -1323,9 +1390,8 @@ class ReportController extends Controller
         $scale = imagecreatefrompng(Yii::app()->basePath . '/../images/fulfillment-stripe.png');
         imagealphablending($scale, false);
         imagesavealpha($scale, true);
+
         $image = imagecreatetruecolor(301, 30);
-        //imagealphablending($image, false);
-        //imagesavealpha($image, true);
 
         $lineCoord = $degree * 3;
         $white     = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);
@@ -1538,9 +1604,6 @@ class ReportController extends Controller
         $boldFont = new PHPRtfLite_Font(12, 'Helvetica');
         $boldFont->setBold();
 
-        $linkFont = new PHPRtfLite_Font(12, 'Helvetica', '#0088CC');
-        $linkFont->setUnderline();
-
         // paragraphs
         $titlePar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
         $titlePar->setSpaceBefore(0);
@@ -1549,12 +1612,6 @@ class ReportController extends Controller
         $projectPar->setSpaceAfter(20);
 
         $h3Par = new PHPRtfLite_ParFormat();
-
-        $centerPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
-        $centerPar->setSpaceAfter(20);
-
-        $leftPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_LEFT);
-        $leftPar->setSpaceAfter(20);
 
         $noPar = new PHPRtfLite_ParFormat();
         $noPar->setSpaceBefore(0);
@@ -1678,6 +1735,406 @@ class ReportController extends Controller
 		$this->render('fulfillment', array(
             'model'   => $model,
             'clients' => $clients
+        ));
+    }
+
+    /**
+     * Generate risk matrix report.
+     */
+    private function _generateRiskMatrixReport($clientId, $projectId, $targetIds, $matrix)
+    {
+        $project = Project::model()->findByAttributes(array(
+            'client_id' => $clientId,
+            'id'        => $projectId
+        ));
+
+        if ($project === null)
+        {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Project doesn\\\'t exist.'));
+            return;
+        }
+
+        if (!$targetIds || !count($targetIds))
+        {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
+            return;
+        }
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
+        $criteria = new CDbCriteria();
+        $criteria->addInCondition('id', $targetIds);
+        $criteria->addColumnCondition(array( 'project_id' => $project->id ));
+        $criteria->order = 't.host ASC';
+        $targets = Target::model()->findAll($criteria);
+
+        $risks = RiskCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findAllByAttributes(
+            array(),
+            array( 'order' => 't.name ASC' )
+        );
+
+        $data = array();
+
+        foreach ($targets as $target)
+        {
+            $mtrx         = array();
+            $referenceIds = array();
+
+            $references = TargetReference::model()->findAllByAttributes(array(
+                'target_id' => $target->id
+            ));
+
+            foreach ($references as $reference)
+                $referenceIds[] = $reference->reference_id;
+
+            $categories = TargetCheckCategory::model()->findAllByAttributes(
+                array( 'target_id' => $target->id  )
+            );
+
+            $ratings = array(
+                TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
+                TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
+                TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
+                TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
+                TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
+            );
+
+            foreach ($categories as $category)
+            {
+                $controlIds = array();
+
+                $controls = CheckControl::model()->findAllByAttributes(array(
+                    'check_category_id' => $category->check_category_id
+                ));
+
+                foreach ($controls as $control)
+                    $controlIds[] = $control->id;
+
+                $criteria = new CDbCriteria();
+
+                $criteria->order = 't.name ASC';
+                $criteria->addInCondition('t.reference_id', $referenceIds);
+                $criteria->addInCondition('t.check_control_id', $controlIds);
+
+                if (!$category->advanced)
+                    $criteria->addCondition('t.advanced = FALSE');
+
+                $checks = Check::model()->with(array(
+                    'l10n' => array(
+                        'joinType' => 'LEFT JOIN',
+                        'on'       => 'l10n.language_id = :language_id',
+                        'params'   => array( 'language_id' => $language )
+                    ),
+                    'targetChecks' => array(
+                        'alias'    => 'tcs',
+                        'joinType' => 'INNER JOIN',
+                        'on'       => 'tcs.target_id = :target_id AND tcs.status = :status AND (tcs.rating = :high_risk OR tcs.rating = :med_risk)',
+                        'params'   => array(
+                            'target_id' => $target->id,
+                            'status'    => TargetCheck::STATUS_FINISHED,
+                            'high_risk' => TargetCheck::RATING_HIGH_RISK,
+                            'med_risk'  => TargetCheck::RATING_MED_RISK,
+                        ),
+                    ),
+                ))->findAll($criteria);
+
+                foreach ($checks as $check)
+                {
+                    if (!isset($matrix[$target->id][$check->id]))
+                        continue;
+
+                    $ctr = 0;
+
+                    foreach ($risks as $risk)
+                    {
+                        $ctr++;
+
+                        if (!isset($matrix[$target->id][$check->id][$risk->id]))
+                            continue;
+
+                        $riskName = 'R' . $ctr;
+
+                        $damage     = $matrix[$target->id][$check->id][$risk->id]['damage']     - 1;
+                        $likelihood = $matrix[$target->id][$check->id][$risk->id]['likelihood'] - 1;
+
+                        if (!isset($mtrx[$damage]))
+                            $mtrx[$damage] = array();
+
+                        if (!isset($mtrx[$damage][$likelihood]))
+                            $mtrx[$damage][$likelihood] = array();
+
+                        if (!in_array($riskName, $mtrx[$damage][$likelihood]))
+                            $mtrx[$damage][$likelihood][] = $riskName;
+                    }
+                }
+            }
+
+            $data[] = array(
+                'host'   => $target->host,
+                'matrix' => $mtrx
+            );
+        }
+
+        // include all PHPRtfLite libraries
+        Yii::setPathOfAlias('rtf', Yii::app()->basePath . '/extensions/PHPRtfLite/PHPRtfLite');
+        Yii::import('rtf.Autoloader', true);
+        PHPRtfLite_Autoloader::setBaseDir(Yii::app()->basePath . '/extensions/PHPRtfLite');
+        Yii::registerAutoloader(array( 'PHPRtfLite_Autoloader', 'autoload' ), true);
+
+        $rtf = new PHPRtfLite();
+        $rtf->setCharset('UTF-8');
+        $rtf->setMargins(1.5, 1, 1.5, 1);
+
+        // borders
+        $thinBorder = new PHPRtfLite_Border(
+            $rtf,
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090')
+        );
+
+        $thinBorderTL = new PHPRtfLite_Border(
+            $rtf,
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(0, '#909090'),
+            new PHPRtfLite_Border_Format(0, '#909090')
+        );
+
+        $thinBorderBR = new PHPRtfLite_Border(
+            $rtf,
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(0, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090')
+        );
+
+        // fonts
+        $h1Font = new PHPRtfLite_Font(24, 'Helvetica');
+        $h1Font->setBold();
+
+        $h2Font = new PHPRtfLite_Font(20, 'Helvetica');
+        $h2Font->setBold();
+
+        $h3Font = new PHPRtfLite_Font(16, 'Helvetica');
+        $h3Font->setBold();
+
+        $textFont = new PHPRtfLite_Font(12, 'Helvetica');
+
+        $boldFont = new PHPRtfLite_Font(12, 'Helvetica');
+        $boldFont->setBold();
+
+        $smallBoldFont = new PHPRtfLite_Font(10, 'Helvetica');
+        $smallBoldFont->setBold();
+
+        // paragraphs
+        $titlePar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
+        $titlePar->setSpaceBefore(0);
+
+        $projectPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
+        $projectPar->setSpaceAfter(20);
+
+        $h3Par = new PHPRtfLite_ParFormat();
+        $h3Par->setSpaceAfter(10);
+
+        $noPar = new PHPRtfLite_ParFormat();
+        $noPar->setSpaceBefore(0);
+        $noPar->setSpaceAfter(0);
+
+        // title
+        $section = $rtf->addSection();
+        $section->writeText(Yii::t('app', 'Risk Matrix'), $h1Font, $titlePar);
+        $section->writeText($project->name . ' (' . $project->year . ')', $h2Font, $projectPar);
+
+        $section->writeText(Yii::t('app', 'Risk Categories') . '<br>', $h3Font, $noPar);
+
+        $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+        $table->addRows(count($risks) + 1);
+        $table->addColumnsList(array( 2, 16 ));
+        $table->setFontForCellRange($boldFont, 1, 1, 1, 2);
+        $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 2);
+        $table->setFontForCellRange($textFont, 2, 1, count($risks), 2);
+        $table->setBorderForCellRange($thinBorder, 1, 1, count($risks) + 1, 2);
+
+        // set paddings
+        for ($row = 1; $row <= count($risks) + 1; $row++)
+            for ($col = 1; $col <= 2; $col++)
+            {
+                $table->getCell($row, $col)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+            }
+
+        $row = 1;
+
+        $table->writeToCell($row, 1, Yii::t('app', 'Code'));
+        $table->writeToCell($row, 2, Yii::t('app', 'Risk Category'));
+
+        $row++;
+        $ctr = 0;
+
+        foreach ($risks as $risk)
+        {
+            $ctr++;
+
+            $table->writeToCell($row, 1, 'R' . $ctr);
+            $table->writeToCell($row, 2, $risk->localizedName);
+
+            $row++;
+        }
+
+        $section->writeText(Yii::t('app', 'Targets'), $h3Font, $h3Par);
+
+        foreach ($data as $target)
+        {
+            $section->writeText($target['host'] . '<br>', $boldFont, $noPar);
+
+            if (!$target['matrix'])
+            {
+                $section->writeText(Yii::t('app', 'No checks.') . '<br>', $textFont, $noPar);
+                continue;
+            }
+
+            $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+
+            $table->addRows(5);
+            $table->addColumnsList(array( 2, 4, 4, 4, 4 ));
+
+            $table->mergeCellRange(1, 1, 4, 1);
+            $table->mergeCellRange(5, 1, 5, 5);
+
+            $table->setFontForCellRange($smallBoldFont, 1, 1, 5, 1);
+            $table->setFontForCellRange($smallBoldFont, 5, 1, 5, 1);
+            $table->setBorderForCellRange($thinBorderTL, 1, 1, 5, 1);
+            $table->setBorderForCellRange($thinBorderBR, 5, 1, 5, 5);
+
+            $table->setFontForCellRange($textFont, 1, 2, 4, 5);
+            $table->setBorderForCellRange($thinBorder, 1, 2, 4, 5);
+
+            $table->writeToCell(1, 1, '&uarr;<br>' . Yii::t('app', 'Damage'));
+            $table->writeToCell(5, 1, Yii::t('app', 'Likelihood') . ' &rarr;');
+
+            // set paddings
+            for ($row = 1; $row <= 5; $row++)
+                for ($col = 1; $col <= 5; $col++)
+                {
+                    $table->getCell($row, $col)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+
+                    if ($col == 1 || $row == 5)
+                    {
+                        $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+                        $table->getCell($row, $col)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
+
+                        continue;
+                    }
+
+                    $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                    $table->getCell($row, $col)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
+
+                    $bgColor = '#CCFFBB';
+
+                    if (($row == 1 && $col >= 3) || ($row == 2 && $col >= 4) || ($row == 3 && $col >= 5))
+                        $bgColor = '#FFBBBB';
+
+                    $table->getCell($row, $col)->setBackgroundColor($bgColor);
+                }
+
+            $matrix = $target['matrix'];
+
+            for ($damage = 0; $damage < 4; $damage++)
+                for ($likelihood = 0; $likelihood < 4; $likelihood++)
+                {
+                    if (!isset($matrix[$damage][$likelihood]))
+                        continue;
+
+                    $text = implode(', ', $matrix[$damage][$likelihood]);
+                    $table->writeToCell(4 - $damage, $likelihood + 2, $text);
+                }
+        }
+
+        $fileName = Yii::t('app', 'Risk Matrix') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
+        $hashName = hash('sha256', rand() . time() . $fileName);
+        $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
+
+        $rtf->save($filePath);
+
+        // give user a file
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filePath));
+
+        ob_clean();
+        flush();
+
+        readfile($filePath);
+
+        exit();
+    }
+
+    /**
+     * Show risk matrix report form.
+     */
+    public function actionRiskMatrix()
+    {
+        $model = new RiskMatrixForm();
+
+        if (isset($_POST['RiskMatrixForm']))
+        {
+            $model->attributes = $_POST['RiskMatrixForm'];
+
+            if ($model->validate())
+                $this->_generateRiskMatrixReport($model->clientId, $model->projectId, $model->targetIds, $model->matrix);
+            else
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+        }
+
+        $clients = Client::model()->findAllByAttributes(
+            array(),
+            array( 'order' => 't.name ASC' )
+        );
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Risk Matrix'), '');
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
+        $risks = RiskCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findAllByAttributes(
+            array(),
+            array( 'order' => 't.name ASC' )
+        );
+
+        // display the report generation form
+        $this->pageTitle = Yii::t('app', 'Risk Matrix');
+		$this->render('risk-matrix', array(
+            'model'   => $model,
+            'clients' => $clients,
+            'risks'   => $risks
         ));
     }
 }

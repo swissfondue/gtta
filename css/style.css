@@ -140,7 +140,8 @@ hr {
 .project-list .actions,
 .attachment-list .actions,
 .reference-list .actions,
-.effort-list .actions {
+.effort-list .actions,
+.risk-list .actions {
     width:30px;
     text-align:right;
 }
@@ -440,4 +441,64 @@ table.check-header .actions {
 
 .modal-text, .form-description {
     margin-bottom:10px;
+}
+
+.report-target-header {
+    border-top:1px solid #ddd;
+    padding:8px;
+    font-weight:bold;
+}
+
+.report-target-header:first-child {
+    border-top:none;
+}
+
+.report-target-content {
+    padding-left:20px;
+    border-top:1px solid #ddd;
+}
+
+div.report-check-header {
+    padding:0;
+    margin:0;
+    border-top:1px solid #ddd;
+}
+
+div.report-check-header:first-child {
+    border-top:none;
+}
+
+table.report-check {
+    width:100%;
+}
+
+table.report-check td {
+    padding:8px;
+}
+
+table.report-check .status span {
+    vertical-align:top;
+}
+
+table.report-check .status {
+    width:70px;
+    text-align:right;
+    padding-top:10px;
+    white-space:nowrap;
+}
+
+.report-target-header a {
+    color:#333;
+    text-decoration:none;
+}
+
+div.report-check-content {
+    background-color:#f0f0f0;
+    padding:10px;
+    margin:0;
+    border-top:1px dashed #ddd;
+}
+
+.report-risk-category-name {
+    font-weight:bold;
 }

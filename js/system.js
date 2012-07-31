@@ -12,6 +12,10 @@ function System()
     this.l10nMessages    = {};
     this._messageTimeout = null;
 
+    // constants
+    this.RATING_HIGH_RISK = 'high_risk';
+    this.RATING_MED_RISK  = 'med_risk';
+
     /**
      * Shows a message.
      */

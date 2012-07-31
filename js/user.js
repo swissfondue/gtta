@@ -750,55 +750,29 @@ function User()
     this.report = new function () {
         var _report = this;
 
+        this._riskMatrixTargets = [];
+
         /**
-         * Load a list of projects.
+         * Disable inputs and select boxes.
          */
-        this._loadProjects = function (clientId, callback) {
-            var url = $('#project-report-form').data('project-url');
-
-            $.ajax({
-                dataType : 'json',
-                url      : url,
-                timeout  : system.ajaxTimeout,
-                type     : 'POST',
-
-                data : {
-                    'EntryControlForm[id]'        : clientId,
-                    'EntryControlForm[operation]' : 'project-list',
-                    'YII_CSRF_TOKEN'              : system.csrf
-                },
-
-                success : function (data, textStatus) {
-                    $('.loader-image').hide();
-
-                    if (data.status == 'error')
-                    {
-                        system.showMessage('error', data.errorText);
-                        callback();
-
-                        return;
-                    }
-
-                    callback(data.data);
-                },
-
-                error : function(jqXHR, textStatus, e) {
-                    $('.loader-image').hide();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
-                    callback();
-                },
-
-                beforeSend : function (jqXHR, settings) {
-                    $('.loader-image').show();
-                }
-            });
+        this._setLoading = function () {
+            $('#project-report-form input').prop('disabled', true);
+            $('#project-report-form select').prop('disabled', true);
         };
 
         /**
-         * Load a list of targets.
+         * Enable inputs and select boxes.
          */
-        this._loadTargets = function (projectId, callback) {
-            var url = $('#project-report-form').data('target-url');
+        this._setLoaded = function () {
+            $('#project-report-form input').prop('disabled', false);
+            $('#project-report-form select').prop('disabled', false);
+        };
+
+        /**
+         * Load a list of objects.
+         */
+        this._loadObjects = function (parentId, operation, callback) {
+            var url = $('#project-report-form').data('object-list-url');
 
             $.ajax({
                 dataType : 'json',
@@ -807,13 +781,14 @@ function User()
                 type     : 'POST',
 
                 data : {
-                    'EntryControlForm[id]'        : projectId,
-                    'EntryControlForm[operation]' : 'target-list',
+                    'EntryControlForm[id]'        : parentId,
+                    'EntryControlForm[operation]' : operation,
                     'YII_CSRF_TOKEN'              : system.csrf
                 },
 
                 success : function (data, textStatus) {
                     $('.loader-image').hide();
+                    _report._setLoaded();
 
                     if (data.status == 'error')
                     {
@@ -828,12 +803,14 @@ function User()
 
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
+                    _report._setLoaded();
                     system.showMessage('error', system.translate('Request failed, please try again.'));
                     callback();
                 },
 
                 beforeSend : function (jqXHR, settings) {
                     $('.loader-image').show();
+                    _report._setLoading();
                 }
             });
         };
@@ -843,6 +820,11 @@ function User()
          */
         this.projectFormChange = function (e) {
             var val;
+
+            $('#client-list').removeClass('error');
+            $('#project-list').removeClass('error');
+            $('#project-list > div > .help-block').hide();
+            $('#client-list > div > .help-block').hide();
 
             if (e.id == 'ProjectReportForm_clientId')
             {
@@ -854,20 +836,24 @@ function User()
 
                 if (val != 0)
                 {
-                    $('#ProjectReportForm_clientId').prop('disabled', true);
-
-                    _report._loadProjects(val, function (data) {
+                    _report._loadObjects(val, 'project-list', function (data) {
                         $('#ProjectReportForm_clientId').prop('disabled', false);
                         $('#ProjectReportForm_projectId > option:not(:first)').remove();
-                        $('#project-list').show();
 
-                        if (data)
+                        if (data && data.objects.length)
                         {
-                            for (var i = 0; i < data.projects.length; i++)
+                            for (var i = 0; i < data.objects.length; i++)
                                 $('<option>')
-                                    .val(data.projects[i].id)
-                                    .html(data.projects[i].name)
+                                    .val(data.objects[i].id)
+                                    .html(data.objects[i].name)
                                     .appendTo('#ProjectReportForm_projectId');
+
+                            $('#project-list').show();
+                        }
+                        else
+                        {
+                            $('#client-list').addClass('error');
+                            $('#client-list > div > .help-block').show();
                         }
                     });
                 }
@@ -881,15 +867,12 @@ function User()
 
                 if (val != 0)
                 {
-                    $('#ProjectReportForm_projectId').prop('disabled', true);
-
-                    _report._loadTargets(val, function (data) {
-                        $('#ProjectReportForm_projectId').prop('disabled', false);
+                    _report._loadObjects(val, 'target-list', function (data) {
                         $('#target-list > .controls > .report-target-list > li').remove();
 
-                        if (data)
+                        if (data && data.objects.length)
                         {
-                            for (var i = 0; i < data.targets.length; i++)
+                            for (var i = 0; i < data.objects.length; i++)
                             {
                                 var li    = $('<li>'),
                                     label = $('<label>'),
@@ -899,14 +882,14 @@ function User()
                                     .attr('type', 'checkbox')
                                     .prop('checked', true)
                                     .attr('name', 'ProjectReportForm[targetIds][]')
-                                    .val(data.targets[i].id)
+                                    .val(data.objects[i].id)
                                     .click(function () {
                                         user.report.projectFormChange(this);
                                     })
                                     .appendTo(label);
 
                                 label
-                                    .append(' ' + data.targets[i].host)
+                                    .append(' ' + data.objects[i].host)
                                     .appendTo(li);
 
                                 $('#target-list > .controls > .report-target-list').append(li);
@@ -914,6 +897,11 @@ function User()
 
                             $('#target-list').show();
                             $('.form-actions > button[type="submit"]').prop('disabled', false);
+                        }
+                        else
+                        {
+                            $('#project-list').addClass('error');
+                            $('#project-list > div > .help-block').show();
                         }
                     });
                 }
@@ -933,6 +921,9 @@ function User()
         this.comparisonFormChange = function (e) {
             var val, val1, val2;
 
+            $('#client-list').removeClass('error');
+            $('#client-list > div > .help-block').hide();
+
             if (e.id == 'ProjectComparisonForm_clientId')
             {
                 val = $('#ProjectComparisonForm_clientId').val();
@@ -943,29 +934,32 @@ function User()
 
                 if (val != 0)
                 {
-                    $('#ProjectComparisonForm_clientId').prop('disabled', true);
-
-                    _report._loadProjects(val, function (data) {
-                        $('#ProjectComparisonForm_clientId').prop('disabled', false);
+                    _report._loadObjects(val, 'project-list', function (data) {
                         $('#ProjectComparisonForm_projectId1 > option:not(:first)').remove();
                         $('#ProjectComparisonForm_projectId2 > option:not(:first)').remove();
-                        $('#project-list-1').show();
-                        $('#project-list-2').show();
 
-                        if (data)
+                        if (data && data.objects.length)
                         {
-                            for (var i = 0; i < data.projects.length; i++)
+                            for (var i = 0; i < data.objects.length; i++)
                             {
                                 $('<option>')
-                                    .val(data.projects[i].id)
-                                    .html(data.projects[i].name)
+                                    .val(data.objects[i].id)
+                                    .html(data.objects[i].name)
                                     .appendTo('#ProjectComparisonForm_projectId1');
 
                                 $('<option>')
-                                    .val(data.projects[i].id)
-                                    .html(data.projects[i].name)
+                                    .val(data.objects[i].id)
+                                    .html(data.objects[i].name)
                                     .appendTo('#ProjectComparisonForm_projectId2');
                             }
+
+                            $('#project-list-1').show();
+                            $('#project-list-2').show();
+                        }
+                        else
+                        {
+                            $('#client-list').addClass('error');
+                            $('#client-list > div > .help-block').show();
                         }
                     });
                 }
@@ -988,6 +982,11 @@ function User()
         this.fulfillmentFormChange = function (e) {
             var val;
 
+            $('#client-list').removeClass('error');
+            $('#project-list').removeClass('error');
+            $('#project-list > div > .help-block').hide();
+            $('#client-list > div > .help-block').hide();
+
             if (e.id == 'FulfillmentDegreeForm_clientId')
             {
                 val = $('#FulfillmentDegreeForm_clientId').val();
@@ -998,20 +997,23 @@ function User()
 
                 if (val != 0)
                 {
-                    $('#FulfillmentDegreeForm_clientId').prop('disabled', true);
-
-                    _report._loadProjects(val, function (data) {
-                        $('#FulfillmentDegreeForm_clientId').prop('disabled', false);
+                    _report._loadObjects(val, 'project-list', function (data) {
                         $('#FulfillmentDegreeForm_projectId > option:not(:first)').remove();
-                        $('#project-list').show();
 
-                        if (data)
+                        if (data && data.objects.length)
                         {
-                            for (var i = 0; i < data.projects.length; i++)
+                            for (var i = 0; i < data.objects.length; i++)
                                 $('<option>')
-                                    .val(data.projects[i].id)
-                                    .html(data.projects[i].name)
+                                    .val(data.objects[i].id)
+                                    .html(data.objects[i].name)
                                     .appendTo('#FulfillmentDegreeForm_projectId');
+
+                            $('#project-list').show();
+                        }
+                        else
+                        {
+                            $('#client-list').addClass('error');
+                            $('#client-list > div > .help-block').show();
                         }
                     });
                 }
@@ -1025,15 +1027,12 @@ function User()
 
                 if (val != 0)
                 {
-                    $('#FulfillmentDegreeForm_projectId').prop('disabled', true);
-
-                    _report._loadTargets(val, function (data) {
-                        $('#FulfillmentDegreeForm_projectId').prop('disabled', false);
+                    _report._loadObjects(val, 'target-list', function (data) {
                         $('#target-list > .controls > .report-target-list > li').remove();
 
-                        if (data)
+                        if (data && data.objects.length)
                         {
-                            for (var i = 0; i < data.targets.length; i++)
+                            for (var i = 0; i < data.objects.length; i++)
                             {
                                 var li    = $('<li>'),
                                     label = $('<label>'),
@@ -1043,14 +1042,14 @@ function User()
                                     .attr('type', 'checkbox')
                                     .prop('checked', true)
                                     .attr('name', 'FulfillmentDegreeForm[targetIds][]')
-                                    .val(data.targets[i].id)
+                                    .val(data.objects[i].id)
                                     .click(function () {
-                                        user.report.projectFormChange(this);
+                                        user.report.fulfillmentFormChange(this);
                                     })
                                     .appendTo(label);
 
                                 label
-                                    .append(' ' + data.targets[i].host)
+                                    .append(' ' + data.objects[i].host)
                                     .appendTo(li);
 
                                 $('#target-list > .controls > .report-target-list').append(li);
@@ -1058,6 +1057,11 @@ function User()
 
                             $('#target-list').show();
                             $('.form-actions > button[type="submit"]').prop('disabled', false);
+                        }
+                        else
+                        {
+                            $('#project-list').addClass('error');
+                            $('#project-list > div > .help-block').show();
                         }
                     });
                 }
@@ -1069,6 +1073,286 @@ function User()
                 else
                     $('.form-actions > button[type="submit"]').prop('disabled', false);
             }
+        };
+
+        /**
+         * Refresh check list.
+         */
+        this._refreshChecks = function () {
+            var targets, delTargets, addTargets, i, k, id;
+
+            $('.form-actions > button[type="submit"]').prop('disabled', true);
+
+            targets = $('.report-target-list input:checked').map(function () {
+                return parseInt($(this).val());
+            }).get();
+
+            addTargets = [];
+            delTargets = [];
+
+            for (i = 0; i < targets.length; i++)
+                if ($.inArray(targets[i], _report._riskMatrixTargets) == -1)
+                    addTargets.push(targets[i]);
+
+            for (i = 0; i < _report._riskMatrixTargets.length; i++)
+                if ($.inArray(_report._riskMatrixTargets[i], targets) == -1)
+                    delTargets.push(_report._riskMatrixTargets[i]);
+
+            console.log('targets=', targets, ', add=', addTargets, ',del=', delTargets);
+
+            for (i = 0; i < delTargets.length; i++)
+            {
+                for (k = 0; k < _report._riskMatrixTargets.length; k++)
+                    if (_report._riskMatrixTargets[k] == delTargets[i])
+                    {
+                        _report._riskMatrixTargets.splice(k, 1);
+                        break;
+                    }
+
+                id = delTargets[i];
+
+                $('.report-target-content[data-id=' + id + ']').slideUp('slow', undefined, function () {
+                    $('.report-target-header[data-id=' + id + ']').slideUp('fast', undefined, function () {
+                        $('.report-target-header[data-id=' + id + ']').remove();
+                        $('.report-target-content[data-id=' + id + ']').remove();
+
+                        if (_report._riskMatrixTargets.length == 0)
+                            $('#check-list').slideUp('fast');
+                    });
+                });
+            }
+
+            for (i = 0; i < addTargets.length; i++)
+            {
+                _report._loadObjects(addTargets[i], 'check-list', function (data) {
+                    var targetHeader, targetDiv, category, categoryDiv, check, checkDiv, i, k, j, rating, risk, field;
+
+                    if (data && data.objects.length)
+                    {
+                        targetHeader = $('<div>')
+                            .attr('data-id', data.target.id)
+                            .addClass('report-target-header')
+                            .addClass('hide')
+                            .html('<a href="#toggle" onclick="user.report.riskMatrixTargetToggle(' + data.target.id + ');">' + data.target.host + '</a>');
+
+                        targetDiv = $('<div>')
+                            .attr('data-id', data.target.id)
+                            .addClass('report-target-content')
+                            .addClass('hide');
+
+                        for (k = 0; k < data.objects.length; k++)
+                        {
+                            check = data.objects[k];
+
+                            if (check.rating == system.RATING_HIGH_RISK)
+                                rating = '<span class="label label-high-risk">' + check.ratingName + '</span>';
+                            else
+                                rating = '<span class="label label-med-risk">' + check.ratingName + '</span>';
+
+                            $('<div>')
+                                .attr('data-id', check.id)
+                                .addClass('report-check-header')
+                                .html(
+                                    '<table class="report-check"><tbody><tr><td class="name">' +
+                                    '<a href="#toggle" onclick="user.report.riskMatrixCheckToggle(' + check.id +
+                                    ');">' + check.name + '</a></td>' +
+                                    '<td class="status">' + rating +  '</td></tr></tbody></table>'
+                                )
+                                .appendTo(targetDiv);
+
+                            checkDiv = $('<div>')
+                                .attr('data-id', check.id)
+                                .addClass('report-check-content');
+
+                            for (j = 0; j < riskCategories.length; j++)
+                            {
+                                risk = riskCategories[j];
+
+                                $('<div>')
+                                    .addClass('report-risk-category-name')
+                                    .html(risk.name + ' (R' + (j + 1).toString() + ')')
+                                    .appendTo(checkDiv);
+
+                                $('<div>')
+                                    .addClass('control-group')
+                                    .html(
+                                        '<label class="control-label">' + system.translate('Damage') + '</label>' +
+                                        '<div class="controls">' +
+                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][damage]" value="1" checked>&nbsp;&nbsp;' +
+                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][damage]" value="2">&nbsp;&nbsp;' +
+                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][damage]" value="3">&nbsp;&nbsp;' +
+                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][damage]" value="4">&nbsp;&nbsp;' +
+                                        '</div>'
+                                    )
+                                    .appendTo(checkDiv);
+
+                                $('<div>')
+                                    .addClass('control-group')
+                                    .html(
+                                        '<label class="control-label">' + system.translate('Likelihood') + '</label>' +
+                                        '<div class="controls">' +
+                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="1" checked>&nbsp;&nbsp;' +
+                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="2">&nbsp;&nbsp;' +
+                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="3">&nbsp;&nbsp;' +
+                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="4">&nbsp;&nbsp;' +
+                                        '</div>'
+                                    )
+                                    .appendTo(checkDiv);
+                            }
+
+                            checkDiv.appendTo(targetDiv);
+                        }
+
+                        $('#check-list .span8')
+                            .append(targetHeader)
+                            .append(targetDiv);
+
+                        _report._riskMatrixTargets.push(data.target.id);
+
+                        $('.report-target-header[data-id=' + data.target.id + ']').slideDown('fast', undefined, function () {
+                            $('.report-target-content[data-id=' + data.target.id + ']').slideDown('slow');
+                        });
+
+                        if (!$('#check-list').is(':visible'))
+                            $('#check-list').slideDown('fast');
+                    }
+
+                    if (_report._riskMatrixTargets.length > 0)
+                        $('.form-actions > button[type="submit"]').prop('disabled', false);
+                });
+            }
+
+            if (addTargets.length == 0)
+                $('.form-actions > button[type="submit"]').prop('disabled', false);
+        };
+
+        /**
+         * Risk Matrix form has been changed.
+         */
+        this.riskMatrixFormChange = function (e) {
+            var val;
+
+            $('#client-list').removeClass('error');
+            $('#project-list').removeClass('error');
+            $('#client-list > div > .help-block').hide();
+            $('#project-list > div > .help-block').hide();
+
+            if (e.id == 'RiskMatrixForm_clientId')
+            {
+                val = $('#RiskMatrixForm_clientId').val();
+
+                $('#project-list').hide();
+                $('#target-list').hide();
+                $('.form-actions > button[type="submit"]').prop('disabled', true);
+
+                _report._riskMatrixTargets = [];
+
+                $('.report-target-header').remove();
+                $('.report-target-content').remove();
+                $('#check-list').hide();
+
+                if (val != 0)
+                {
+                    _report._loadObjects(val, 'project-list', function (data) {
+                        $('#RiskMatrixForm_projectId > option:not(:first)').remove();
+
+                        if (data && data.objects.length)
+                        {
+                            for (var i = 0; i < data.objects.length; i++)
+                                $('<option>')
+                                    .val(data.objects[i].id)
+                                    .html(data.objects[i].name)
+                                    .appendTo('#RiskMatrixForm_projectId');
+
+                            $('#project-list').show();
+                        }
+                        else
+                        {
+                            $('#client-list').addClass('error');
+                            $('#client-list > div > .help-block').show();
+                        }
+                    });
+                }
+            }
+            else if (e.id == 'RiskMatrixForm_projectId')
+            {
+                val = $('#RiskMatrixForm_projectId').val();
+
+                $('#target-list').hide();
+                $('.form-actions > button[type="submit"]').prop('disabled', true);
+
+                _report._riskMatrixTargets = [];
+
+                $('.report-target-header').remove();
+                $('.report-target-content').remove();
+                $('#check-list').hide();
+
+                if (val != 0)
+                {
+                    _report._loadObjects(val, 'target-list', function (data) {
+                        $('#target-list > .controls > .report-target-list > li').remove();
+
+                        if (data && data.objects.length)
+                        {
+                            for (var i = 0; i < data.objects.length; i++)
+                            {
+                                var li    = $('<li>'),
+                                    label = $('<label>'),
+                                    input = $('<input>');
+
+                                input
+                                    .attr('type', 'checkbox')
+                                    .prop('checked', true)
+                                    .attr('id', 'RiskMatrixForm_targetIds_' + data.objects[i].id)
+                                    .attr('name', 'RiskMatrixForm[targetIds][]')
+                                    .val(data.objects[i].id)
+                                    .click(function () {
+                                        user.report.riskMatrixFormChange(this);
+                                    })
+                                    .appendTo(label);
+
+                                label
+                                    .append(' ' + data.objects[i].host)
+                                    .appendTo(li);
+
+                                $('#target-list > .controls > .report-target-list').append(li);
+                            }
+
+                            $('#target-list').show();
+                            _report._refreshChecks();
+                        }
+                        else
+                        {
+                            $('#project-list').addClass('error');
+                            $('#project-list > div > .help-block').show();
+                        }
+                    });
+                }
+            }
+            else if (e.id.match(/^RiskMatrixForm_targetIds_/i))
+            {
+                _report._refreshChecks();
+            }
+        };
+
+        /**
+         * Toggle risk matrix check.
+         */
+        this.riskMatrixCheckToggle = function (id) {
+            if ($('div.report-check-content[data-id=' + id + ']').is(':visible'))
+                $('div.report-check-content[data-id=' + id + ']').slideUp('slow');
+            else
+                $('div.report-check-content[data-id=' + id + ']').slideDown('slow');
+        };
+
+        /**
+         * Toggle risk matrix target.
+         */
+        this.riskMatrixTargetToggle = function (id) {
+            if ($('div.report-target-content[data-id=' + id + ']').is(':visible'))
+                $('div.report-target-content[data-id=' + id + ']').slideUp('slow');
+            else
+                $('div.report-target-content[data-id=' + id + ']').slideDown('slow');
         };
     };
 }

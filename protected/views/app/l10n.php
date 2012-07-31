@@ -11,6 +11,8 @@ $(function () {
         'minutes'                                           : '<?php echo Yii::t('app', 'minutes'); ?>',
         'Estimated Effort'                                  : '<?php echo Yii::t('app', 'Estimated Effort'); ?>',
         'Are you sure that you want to reset this check?'   : '<?php echo Yii::t('app', 'Are you sure that you want to reset this check?'); ?>',
+        'Damage'                                            : '<?php echo Yii::t('app', 'Damage'); ?>',
+        'Likelihood'                                        : '<?php echo Yii::t('app', 'Likelihood'); ?>',
     };
 
     system.l10nMessages = _messages;

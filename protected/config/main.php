@@ -67,10 +67,9 @@ return array(
                 // reports
                 'reports/project'      => 'report/project',
                 'reports/comparison'   => 'report/comparison',
-                'reports/project-list' => 'report/projectlist',
-                'reports/target-list'  => 'report/targetlist',
                 'reports/fulfillment'  => 'report/fulfillment',
                 'reports/risk-matrix'  => 'report/riskmatrix',
+                'reports/object-list'  => 'report/objectlist',
 
                 // clients
                 'clients/<page:\d+>'   => 'client/index',
@@ -132,6 +131,13 @@ return array(
                 'reference/new'           => 'reference/edit',
                 'reference/control'       => 'reference/control',
 
+                // risk classification categories
+                'risks/<page:\d+>'   => 'risk/index',
+                'risks'              => 'risk/index',
+                'risk/<id:\d+>/edit' => 'risk/edit',
+                'risk/new'           => 'risk/edit',
+                'risk/control'       => 'risk/control',
+
                 // users
                 'users/<page:\d+>'   => 'user/index',
                 'users'              => 'user/index',
@@ -142,7 +148,6 @@ return array(
                 // backup
                 'backup'  => 'backup/backup',
                 'restore' => 'backup/restore',
-
             ),
 		),
 

@@ -4,11 +4,11 @@
 
 <hr>
 
-<form id="project-report-form" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post" data-project-url="<?php echo $this->createUrl('report/projectlist'); ?>" data-target-url="<?php echo $this->createUrl('report/targetlist'); ?>">
+<form id="project-report-form" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post" data-object-list-url="<?php echo $this->createUrl('report/objectlist'); ?>">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
     <fieldset>
-        <div class="control-group">
+        <div class="control-group" id="client-list">
             <label class="control-label" for="FulfillmentDegreeForm_clientId"><?php echo Yii::t('app', 'Client'); ?></label>
             <div class="controls">
                 <select class="input-xlarge" id="FulfillmentDegreeForm_clientId" name="FulfillmentDegreeForm[clientId]" onchange="user.report.fulfillmentFormChange(this);">
@@ -17,6 +17,7 @@
                         <option value="<?php echo $client->id; ?>"><?php echo CHtml::encode($client->name); ?></option>
                     <?php endforeach; ?>
                 </select>
+                <p class="help-block hide"><?php echo Yii::t('app', 'This client has no projects.'); ?></p>
             </div>
         </div>
 
@@ -26,6 +27,7 @@
                 <select class="input-xlarge" id="FulfillmentDegreeForm_projectId" name="FulfillmentDegreeForm[projectId]" onchange="user.report.fulfillmentFormChange(this);">
                     <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                 </select>
+                <p class="help-block hide"><?php echo Yii::t('app', 'This project has no targets.'); ?></p>
             </div>
         </div>
 
