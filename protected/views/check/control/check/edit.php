@@ -90,13 +90,6 @@
                     </div>
                     
                     <div class="control-group">
-                        <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_reference"><?php echo Yii::t('app', 'Reference'); ?></label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_reference" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][reference]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['reference']) : ''; ?>">
-                        </div>
-                    </div>
-                    
-                    <div class="control-group">
                         <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_question"><?php echo Yii::t('app', 'Question'); ?></label>
                         <div class="controls">
                             <input type="text" class="input-xlarge" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_question" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][question]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['question']) : ''; ?>">
