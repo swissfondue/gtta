@@ -22,7 +22,7 @@
                                     <a href="<?php echo $this->createUrl('reference/edit', array( 'id' => $reference->id )); ?>"><?php echo CHtml::encode($reference->name); ?></a>
                                 </td>
                                 <td class="actions">
-                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $reference->id; ?>);"><i class="icon icon-remove"></i></a>
+                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $reference->id; ?>, '<?php echo Yii::t('app', 'WARNING! ALL CHECKS RELATED TO THIS REFERENCE WILL BE DELETED!'); ?>');"><i class="icon icon-remove"></i></a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

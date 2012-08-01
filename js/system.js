@@ -117,10 +117,13 @@ function System()
         /**
          * Delete object.
          */
-        this.del = function (id) {
+        this.del = function (id, message) {
             $('tr[data-id=' + id + ']').addClass('delete-row');
 
-            if (confirm(_system.translate('Are you sure that you want to delete this object?')))
+            if (
+                confirm(_system.translate('Are you sure that you want to delete this object?')) &&
+                (message == undefined || (message != undefined && confirm(message + '\n\n' + _system.translate('PROCEED AT YOUR OWN RISK!'))))
+            )
                 _system_control._control(id, 'delete');
             else
                 $('tr[data-id=' + id + ']').removeClass('delete-row');

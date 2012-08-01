@@ -13,6 +13,7 @@ $(function () {
         'Are you sure that you want to reset this check?'   : '<?php echo Yii::t('app', 'Are you sure that you want to reset this check?'); ?>',
         'Damage'                                            : '<?php echo Yii::t('app', 'Damage'); ?>',
         'Likelihood'                                        : '<?php echo Yii::t('app', 'Likelihood'); ?>',
+        'PROCEED AT YOUR OWN RISK!'                         : '<?php echo Yii::t('app', 'PROCEED AT YOUR OWN RISK!'); ?>'
     };
 
     system.l10nMessages = _messages;

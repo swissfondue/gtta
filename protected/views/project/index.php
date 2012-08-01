@@ -65,7 +65,7 @@
                                 </td>
                                 <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                     <td class="actions">
-                                        <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $project->id; ?>);"><i class="icon icon-remove"></i></a>
+                                        <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $project->id; ?>, '<?php echo Yii::t('app', 'WARNING! ALL INFORMATION WITHIN THIS PROJECT WILL BE DELETED!'); ?>');"><i class="icon icon-remove"></i></a>
                                     </td>
                                 <?php endif; ?>
                             </tr>
