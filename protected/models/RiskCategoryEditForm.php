@@ -3,17 +3,12 @@
 /**
  * This is the model class for risk category edit form.
  */
-class RiskCategoryEditForm extends CFormModel
+class RiskCategoryEditForm extends LocalizedFormModel
 {
 	/**
      * @var string name.
      */
     public $name;
-
-    /**
-     * @var array localized items.
-     */
-    public $localizedItems;
 
 	/**
 	 * @return array validation rules for model attributes.

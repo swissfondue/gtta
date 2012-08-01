@@ -18,9 +18,8 @@
 
     <fieldset>
         <ul class="nav nav-tabs" id="languages-tab">
-            <li class="active"><a href="#default"><?php echo Yii::t('app', 'Default'); ?></a></li>
             <?php foreach ($languages as $language): ?>
-                <li>
+                <li<?php if ($language->default) echo ' class="active"'; ?>>
                     <a href="#<?php echo CHtml::encode($language->code); ?>">
                         <img src="<?php echo Yii::app()->baseUrl; ?>/images/languages/<?php echo CHtml::encode($language->code); ?>.png" alt="<?php echo CHtml::encode($language->name); ?>">
                         <?php echo CHtml::encode($language->name); ?>
@@ -30,23 +29,15 @@
         </ul>
 
         <div class="tab-content">
-            <div class="tab-pane active" id="default">
-                <div class="control-group <?php if ($model->getError('name')) echo 'error'; ?>">
-                    <label class="control-label" for="CheckControlEditForm_name"><?php echo Yii::t('app', 'Name'); ?></label>
-                    <div class="controls">
-                        <input type="text" class="input-xlarge" id="CheckControlEditForm_name" name="CheckControlEditForm[name]" value="<?php echo CHtml::encode($model->name); ?>" onkeyup="admin.check.updateTiedField('CheckControlEditForm_name', 'CheckControlEditForm_localizedItems_<?php echo $defaultLanguage; ?>_name');">
-                        <?php if ($model->getError('name')): ?>
-                            <p class="help-block"><?php echo $model->getError('name'); ?></p>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
             <?php foreach ($languages as $language): ?>
-                <div class="tab-pane" id="<?php echo CHtml::encode($language->code); ?>">
-                    <div class="control-group">
+                <div class="tab-pane<?php if ($language->default) echo ' active'; ?>" id="<?php echo CHtml::encode($language->code); ?>">
+                    <div class="control-group <?php if ($model->getError('name')) echo 'error'; ?>">
                         <label class="control-label" for="CheckControlEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_name"><?php echo Yii::t('app', 'Name'); ?></label>
                         <div class="controls">
                             <input type="text" class="input-xlarge" id="CheckControlEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_name" name="CheckControlEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][name]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['name']) : ''; ?>">
+                            <?php if ($model->getError('name')): ?>
+                                <p class="help-block"><?php echo $model->getError('name'); ?></p>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

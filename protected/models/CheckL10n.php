@@ -9,7 +9,6 @@
  * @property string $name
  * @property string $background_info
  * @property string $hints
- * @property string $reference
  * @property string $question
  */
 class CheckL10n extends CActiveRecord

@@ -148,14 +148,7 @@ class CheckController extends Controller
             $newRecord = true;
         }
 
-        $languages       = Language::model()->findAll();
-        $defaultLanguage = Language::model()->findByAttributes(
-            array( 'default' => true ),
-            array( 'order'   => '"default" DESC' )
-        );
-
-        if ($defaultLanguage)
-            $defaultLanguage = $defaultLanguage->id;
+        $languages = Language::model()->findAll();
 
 		$model = new CheckCategoryEditForm();
         $model->localizedItems = array();
@@ -176,6 +169,7 @@ class CheckController extends Controller
 		if (isset($_POST['CheckCategoryEditForm']))
 		{
 			$model->attributes = $_POST['CheckCategoryEditForm'];
+            $model->name = $model->defaultL10n($languages, 'name');
 
 			if ($model->validate())
             {
@@ -227,10 +221,9 @@ class CheckController extends Controller
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Category') : $category->localizedName;
 		$this->render('edit', array(
-            'model'           => $model,
-            'category'        => $category,
-            'languages'       => $languages,
-            'defaultLanguage' => $defaultLanguage
+            'model'     => $model,
+            'category'  => $category,
+            'languages' => $languages,
         ));
 	}
 
@@ -333,14 +326,7 @@ class CheckController extends Controller
             $newRecord = true;
         }
 
-        $languages       = Language::model()->findAll();
-        $defaultLanguage = Language::model()->findByAttributes(
-            array( 'default' => true ),
-            array( 'order'   => '"default" DESC' )
-        );
-
-        if ($defaultLanguage)
-            $defaultLanguage = $defaultLanguage->id;
+        $languages = Language::model()->findAll();
 
 		$model = new CheckControlEditForm();
         $model->localizedItems = array();
@@ -357,7 +343,7 @@ class CheckController extends Controller
             {
                 $i = array();
 
-                $i['name']  = $cl->name;
+                $i['name'] = $cl->name;
                 $model->localizedItems[$cl->language_id] = $i;
             }
         }
@@ -366,11 +352,12 @@ class CheckController extends Controller
 		if (isset($_POST['CheckControlEditForm']))
 		{
 			$model->attributes = $_POST['CheckControlEditForm'];
+            $model->name = $model->defaultL10n($languages, 'name');
 
 			if ($model->validate())
             {
-                $control->check_category_id  = $category->id;
-                $control->name               = $model->name;
+                $control->check_category_id = $category->id;
+                $control->name              = $model->name;
                 $control->save();
 
                 foreach ($model->localizedItems as $languageId => $value)
@@ -416,11 +403,10 @@ class CheckController extends Controller
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Control') : $control->localizedName;
 		$this->render('control/edit', array(
-            'model'           => $model,
-            'category'        => $category,
-            'control'         => $control,
-            'languages'       => $languages,
-            'defaultLanguage' => $defaultLanguage
+            'model'     => $model,
+            'category'  => $category,
+            'control'   => $control,
+            'languages' => $languages
         ));
 	}
 
@@ -613,14 +599,7 @@ class CheckController extends Controller
             $newRecord = true;
         }
 
-        $languages       = Language::model()->findAll();
-        $defaultLanguage = Language::model()->findByAttributes(
-            array( 'default' => true ),
-            array( 'order'   => '"default" DESC' )
-        );
-
-        if ($defaultLanguage)
-            $defaultLanguage = $defaultLanguage->id;
+        $languages = Language::model()->findAll();
 
 		$model = new CheckEditForm();
         $model->localizedItems = array();
@@ -653,7 +632,6 @@ class CheckController extends Controller
                 $i['name']           = $cl->name;
                 $i['backgroundInfo'] = $cl->background_info;
                 $i['hints']          = $cl->hints;
-                $i['reference']      = $cl->reference;
                 $i['question']       = $cl->question;
 
                 $model->localizedItems[$cl->language_id] = $i;
@@ -666,6 +644,11 @@ class CheckController extends Controller
 		if (isset($_POST['CheckEditForm']))
 		{
 			$model->attributes = $_POST['CheckEditForm'];
+
+            $model->name           = $model->defaultL10n($languages, 'name');
+            $model->backgroundInfo = $model->defaultL10n($languages, 'backgroundInfo');
+            $model->hints          = $model->defaultL10n($languages, 'hints');
+            $model->question       = $model->defaultL10n($languages, 'question');
 
             if (!isset($_POST['CheckEditForm']['advanced']))
                 $model->advanced = false;
@@ -725,16 +708,12 @@ class CheckController extends Controller
                     if ($value['hints'] == '')
                         $value['hints'] = NULL;
 
-                    if ($value['reference'] == '')
-                        $value['reference'] = NULL;
-
                     if ($value['question'] == '')
                         $value['question'] = NULL;
 
                     $checkL10n->name            = $value['name'];
                     $checkL10n->background_info = $value['backgroundInfo'];
                     $checkL10n->hints           = $value['hints'];
-                    $checkL10n->reference       = $value['reference'];
                     $checkL10n->question        = $value['question'];
                     $checkL10n->save();
                 }
@@ -784,15 +763,14 @@ class CheckController extends Controller
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Check') : $check->localizedName;
 		$this->render('control/check/edit', array(
-            'model'           => $model,
-            'category'        => $category,
-            'control'         => $control,
-            'check'           => $check,
-            'languages'       => $languages,
-            'defaultLanguage' => $defaultLanguage,
-            'references'      => $references,
-            'controls'        => $controls,
-            'efforts'         => array( 2, 5, 20, 40, 60, 120 ),
+            'model'      => $model,
+            'category'   => $category,
+            'control'    => $control,
+            'check'      => $check,
+            'languages'  => $languages,
+            'references' => $references,
+            'controls'   => $controls,
+            'efforts'    => array( 2, 5, 20, 40, 60, 120 ),
         ));
 	}
 
@@ -1018,14 +996,7 @@ class CheckController extends Controller
             $newRecord = true;
         }
 
-        $languages       = Language::model()->findAll();
-        $defaultLanguage = Language::model()->findByAttributes(
-            array( 'default' => true ),
-            array( 'order'   => '"default" DESC' )
-        );
-
-        if ($defaultLanguage)
-            $defaultLanguage = $defaultLanguage->id;
+        $languages = Language::model()->findAll();
 
 		$model = new CheckResultEditForm();
         $model->localizedItems = array();
@@ -1059,6 +1030,7 @@ class CheckController extends Controller
 		if (isset($_POST['CheckResultEditForm']))
 		{
 			$model->attributes = $_POST['CheckResultEditForm'];
+            $model->result = $model->defaultL10n($languages, 'result');
 
 			if ($model->validate())
             {
@@ -1114,13 +1086,12 @@ class CheckController extends Controller
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Result') : $result->localizedResult;
 		$this->render('control/check/result/edit', array(
-            'model'           => $model,
-            'category'        => $category,
-            'control'         => $control,
-            'check'           => $check,
-            'result'          => $result,
-            'languages'       => $languages,
-            'defaultLanguage' => $defaultLanguage
+            'model'     => $model,
+            'category'  => $category,
+            'control'   => $control,
+            'check'     => $check,
+            'result'    => $result,
+            'languages' => $languages,
         ));
 	}
 
@@ -1346,14 +1317,7 @@ class CheckController extends Controller
             $newRecord = true;
         }
 
-        $languages       = Language::model()->findAll();
-        $defaultLanguage = Language::model()->findByAttributes(
-            array( 'default' => true ),
-            array( 'order'   => '"default" DESC' )
-        );
-
-        if ($defaultLanguage)
-            $defaultLanguage = $defaultLanguage->id;
+        $languages = Language::model()->findAll();
 
 		$model = new CheckSolutionEditForm();
         $model->localizedItems = array();
@@ -1387,6 +1351,7 @@ class CheckController extends Controller
 		if (isset($_POST['CheckSolutionEditForm']))
 		{
 			$model->attributes = $_POST['CheckSolutionEditForm'];
+            $model->solution = $model->defaultL10n($languages, 'solution');
 
 			if ($model->validate())
             {
@@ -1442,13 +1407,12 @@ class CheckController extends Controller
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Solution') : $solution->localizedSolution;
 		$this->render('control/check/solution/edit', array(
-            'model'           => $model,
-            'category'        => $category,
-            'control'         => $control,
-            'check'           => $check,
-            'solution'        => $solution,
-            'languages'       => $languages,
-            'defaultLanguage' => $defaultLanguage
+            'model'     => $model,
+            'category'  => $category,
+            'control'   => $control,
+            'check'     => $check,
+            'solution'  => $solution,
+            'languages' => $languages,
         ));
 	}
 
@@ -1674,14 +1638,7 @@ class CheckController extends Controller
             $newRecord = true;
         }
 
-        $languages       = Language::model()->findAll();
-        $defaultLanguage = Language::model()->findByAttributes(
-            array( 'default' => true ),
-            array( 'order'   => '"default" DESC' )
-        );
-
-        if ($defaultLanguage)
-            $defaultLanguage = $defaultLanguage->id;
+        $languages = Language::model()->findAll();
 
 		$model = new CheckInputEditForm();
         $model->localizedItems = array();
@@ -1721,6 +1678,9 @@ class CheckController extends Controller
 		if (isset($_POST['CheckInputEditForm']))
 		{
 			$model->attributes = $_POST['CheckInputEditForm'];
+            $model->name        = $model->defaultL10n($languages, 'name');
+            $model->description = $model->defaultL10n($languages, 'description');
+            $model->value       = $model->defaultL10n($languages, 'value');
 
 			if ($model->validate())
             {
@@ -1786,13 +1746,12 @@ class CheckController extends Controller
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Input') : $input->localizedName;
 		$this->render('control/check/input/edit', array(
-            'model'           => $model,
-            'category'        => $category,
-            'control'         => $control,
-            'check'           => $check,
-            'input'           => $input,
-            'languages'       => $languages,
-            'defaultLanguage' => $defaultLanguage
+            'model'     => $model,
+            'category'  => $category,
+            'control'   => $control,
+            'check'     => $check,
+            'input'     => $input,
+            'languages' => $languages,
         ));
 	}
 

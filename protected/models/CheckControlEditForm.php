@@ -3,17 +3,12 @@
 /**
  * This is the model class for check control edit form.
  */
-class CheckControlEditForm extends CFormModel
+class CheckControlEditForm extends LocalizedFormModel
 {
 	/**
      * @var string name.
      */
     public $name;
-
-    /**
-     * @var array localized items.
-     */
-    public $localizedItems;
 
 	/**
 	 * @return array validation rules for model attributes.

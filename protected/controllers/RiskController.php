@@ -90,14 +90,7 @@ class RiskController extends Controller
             $newRecord = true;
         }
 
-        $languages       = Language::model()->findAll();
-        $defaultLanguage = Language::model()->findByAttributes(
-            array( 'default' => true ),
-            array( 'order'   => '"default" DESC' )
-        );
-
-        if ($defaultLanguage)
-            $defaultLanguage = $defaultLanguage->id;
+        $languages = Language::model()->findAll();
 
 		$model = new RiskCategoryEditForm();
         $model->localizedItems = array();
@@ -118,6 +111,7 @@ class RiskController extends Controller
 		if (isset($_POST['RiskCategoryEditForm']))
 		{
 			$model->attributes = $_POST['RiskCategoryEditForm'];
+            $model->name = $model->defaultL10n($languages, 'name');
 
 			if ($model->validate())
             {
@@ -166,10 +160,9 @@ class RiskController extends Controller
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Risk Category') : $risk->localizedName;
 		$this->render('edit', array(
-            'model'           => $model,
-            'risk'            => $risk,
-            'languages'       => $languages,
-            'defaultLanguage' => $defaultLanguage
+            'model'     => $model,
+            'risk'      => $risk,
+            'languages' => $languages,
         ));
 	}
 

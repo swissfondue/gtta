@@ -3,7 +3,7 @@
 /**
  * This is the model class for check input edit form.
  */
-class CheckInputEditForm extends CFormModel
+class CheckInputEditForm extends LocalizedFormModel
 {
 	/**
      * @var string name.
@@ -24,11 +24,6 @@ class CheckInputEditForm extends CFormModel
      * @var integer sort order.
      */
     public $sortOrder;
-
-    /**
-     * @var array localized items.
-     */
-    public $localizedItems;
 
 	/**
 	 * @return array validation rules for model attributes.

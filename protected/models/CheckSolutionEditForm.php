@@ -3,7 +3,7 @@
 /**
  * This is the model class for check solution edit form.
  */
-class CheckSolutionEditForm extends CFormModel
+class CheckSolutionEditForm extends LocalizedFormModel
 {
 	/**
      * @var string solution.
@@ -14,11 +14,6 @@ class CheckSolutionEditForm extends CFormModel
      * @var integer sort order.
      */
     public $sortOrder;
-
-    /**
-     * @var array localized items.
-     */
-    public $localizedItems;
 
 	/**
 	 * @return array validation rules for model attributes.

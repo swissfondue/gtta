@@ -3,7 +3,7 @@
 /**
  * This is the model class for check edit form.
  */
-class CheckEditForm extends CFormModel
+class CheckEditForm extends LocalizedFormModel
 {
 	/**
      * @var string name.
@@ -74,11 +74,6 @@ class CheckEditForm extends CFormModel
      * @var integer effort.
      */
     public $effort;
-
-    /**
-     * @var array localized items.
-     */
-    public $localizedItems;
 
     /**
      * @var integer control id.

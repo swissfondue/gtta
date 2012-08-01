@@ -3,17 +3,12 @@
 /**
  * This is the model class for check category edit form.
  */
-class CheckCategoryEditForm extends CFormModel
+class CheckCategoryEditForm extends LocalizedFormModel
 {
 	/**
      * @var string name.
      */
     public $name;
-
-    /**
-     * @var array localized items.
-     */
-    public $localizedItems;
 
 	/**
 	 * @return array validation rules for model attributes.

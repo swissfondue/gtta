@@ -3,7 +3,7 @@
 /**
  * This is the model class for check result edit form.
  */
-class CheckResultEditForm extends CFormModel
+class CheckResultEditForm extends LocalizedFormModel
 {
 	/**
      * @var string result.
@@ -14,11 +14,6 @@ class CheckResultEditForm extends CFormModel
      * @var integer sort order.
      */
     public $sortOrder;
-
-    /**
-     * @var array localized items.
-     */
-    public $localizedItems;
 
 	/**
 	 * @return array validation rules for model attributes.
