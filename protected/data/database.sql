@@ -4,7 +4,7 @@
 
 -- Dumped from database version 8.4.12
 -- Dumped by pg_dump version 9.1.3
--- Started on 2012-08-02 14:54:20 MSK
+-- Started on 2012-08-02 17:27:14 MSK
 
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -127,7 +127,7 @@ ALTER SEQUENCE check_categories_id_seq OWNED BY check_categories.id;
 -- Name: check_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_categories_id_seq', 9, true);
+SELECT pg_catalog.setval('check_categories_id_seq', 9, false);
 
 
 --
@@ -191,7 +191,7 @@ ALTER SEQUENCE check_controls_id_seq OWNED BY check_controls.id;
 -- Name: check_controls_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_controls_id_seq', 10, true);
+SELECT pg_catalog.setval('check_controls_id_seq', 10, false);
 
 
 --
@@ -258,7 +258,7 @@ ALTER SEQUENCE check_inputs_id_seq OWNED BY check_inputs.id;
 -- Name: check_inputs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_inputs_id_seq', 41, true);
+SELECT pg_catalog.setval('check_inputs_id_seq', 41, false);
 
 
 --
@@ -326,7 +326,7 @@ ALTER SEQUENCE check_results_id_seq OWNED BY check_results.id;
 -- Name: check_results_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_results_id_seq', 3, true);
+SELECT pg_catalog.setval('check_results_id_seq', 3, false);
 
 
 --
@@ -393,7 +393,7 @@ ALTER SEQUENCE check_solutions_id_seq OWNED BY check_solutions.id;
 -- Name: check_solutions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_solutions_id_seq', 5, true);
+SELECT pg_catalog.setval('check_solutions_id_seq', 5, false);
 
 
 --
@@ -471,7 +471,7 @@ ALTER SEQUENCE checks_id_seq OWNED BY checks.id;
 -- Name: checks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('checks_id_seq', 44, true);
+SELECT pg_catalog.setval('checks_id_seq', 44, false);
 
 
 --
@@ -547,7 +547,7 @@ ALTER SEQUENCE clients_id_seq OWNED BY clients.id;
 -- Name: clients_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('clients_id_seq', 2, true);
+SELECT pg_catalog.setval('clients_id_seq', 2, false);
 
 
 --
@@ -751,7 +751,7 @@ ALTER SEQUENCE projects_id_seq OWNED BY projects.id;
 -- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('projects_id_seq', 2, true);
+SELECT pg_catalog.setval('projects_id_seq', 2, false);
 
 
 --
@@ -800,7 +800,7 @@ ALTER SEQUENCE references_id_seq OWNED BY "references".id;
 -- Name: references_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('references_id_seq', 1, true);
+SELECT pg_catalog.setval('references_id_seq', 1, false);
 
 
 --
@@ -848,7 +848,7 @@ ALTER SEQUENCE risk_categories_id_seq OWNED BY risk_categories.id;
 -- Name: risk_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('risk_categories_id_seq', 9, true);
+SELECT pg_catalog.setval('risk_categories_id_seq', 9, false);
 
 
 --
@@ -911,7 +911,7 @@ ALTER SEQUENCE system_id_seq OWNED BY system.id;
 -- Name: system_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('system_id_seq', 1, true);
+SELECT pg_catalog.setval('system_id_seq', 1, false);
 
 
 --
@@ -1070,7 +1070,7 @@ ALTER SEQUENCE targets_id_seq OWNED BY targets.id;
 -- Name: targets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('targets_id_seq', 3, true);
+SELECT pg_catalog.setval('targets_id_seq', 3, false);
 
 
 --
@@ -1370,47 +1370,6 @@ COPY check_controls_l10n (check_control_id, language_id, name) FROM stdin;
 --
 
 COPY check_inputs (id, check_id, name, description, sort_order, value) FROM stdin;
-1	1	Hostname		0	
-2	2	Hostname		0	
-3	4	Timeout		0	120
-4	4	Debug		1	1
-5	5	Timeout		0	120
-6	5	Debug		1	1
-7	6	Show All		0	0
-8	8	Timeout		0	10
-9	8	Max Results		1	100
-10	8	Mode	Operation mode: 0 - output generated list only, 1 - resolve IP check	2	1
-11	12	Hostname		0	
-12	13	Hostname		0	
-13	15	Long List		0	0
-14	16	Long List		0	0
-15	17	Users		0	
-16	17	Passwords		1	
-17	20	Recipient		0	
-18	20	Server		1	
-19	20	Login		2	
-20	20	Password		3	
-21	20	Sender		4	
-22	20	Folder		5	
-23	21	Timeout		0	10
-24	21	Source E-mail		1	source@gmail.com
-25	21	Destination E-mail		2	destination@gmail.com
-26	22	Users		0	
-27	22	Passwords		1	
-28	23	Port Range	Port range that will be passed to nmap. Please use nmap syntax for -p command line argument (for example, 22; 1-65535; U:53,111,137,T:21-25,80,139,8080)	0	
-29	23	Timeout	Timeout in milliseconds.	1	1000
-30	24	Port Range	2 lines: start and end of the range.	0	1\r\n80
-31	26	Range Count		0	10
-32	32	Code	Possible values: php, cfm, asp.	0	php
-34	35	Paths		0	
-33	34	URLs		0	
-35	36	Paths		0	
-36	37	Paths		0	
-37	42	Timeout		0	10
-38	43	Page Type	Possible values: php, asp.	0	php
-39	43	Cookies		1	
-40	43	URL Limit		2	100
-41	44	nom		0	
 \.
 
 
@@ -1421,88 +1380,6 @@ COPY check_inputs (id, check_id, name, description, sort_order, value) FROM stdi
 --
 
 COPY check_inputs_l10n (check_input_id, language_id, name, description, value) FROM stdin;
-1	1	Hostname	\N	\N
-1	2	\N	\N	\N
-2	1	Hostname	\N	\N
-2	2	\N	\N	\N
-3	1	Timeout	\N	120
-3	2	\N	\N	\N
-4	1	Debug	\N	1
-4	2	\N	\N	\N
-5	1	Timeout	\N	120
-5	2	\N	\N	\N
-6	1	Debug	\N	1
-6	2	\N	\N	\N
-7	1	Show All	\N	0
-7	2	\N	\N	\N
-8	1	Timeout	\N	10
-8	2	\N	\N	\N
-9	1	Max Results	\N	100
-9	2	\N	\N	\N
-10	1	Mode	Operation mode: 0 - output generated list only, 1 - resolve IP check	1
-10	2	\N	\N	\N
-11	1	Hostname	\N	\N
-11	2	\N	\N	\N
-12	1	Hostname	\N	\N
-12	2	\N	\N	\N
-13	1	Long List	\N	0
-13	2	\N	\N	\N
-14	1	Long List	\N	0
-14	2	\N	\N	\N
-15	1	Users	\N	\N
-15	2	\N	\N	\N
-16	1	Passwords	\N	\N
-16	2	\N	\N	\N
-17	1	Recipient	\N	\N
-17	2	\N	\N	\N
-18	1	Server	\N	\N
-18	2	\N	\N	\N
-19	1	Login	\N	\N
-19	2	\N	\N	\N
-20	1	Password	\N	\N
-20	2	\N	\N	\N
-21	1	Sender	\N	\N
-21	2	\N	\N	\N
-22	1	Folder	\N	\N
-22	2	\N	\N	\N
-23	1	Timeout	\N	10
-23	2	\N	\N	\N
-24	1	Source E-mail	\N	source@gmail.com
-24	2	\N	\N	\N
-25	1	Destination E-mail	\N	destination@gmail.com
-25	2	\N	\N	\N
-26	1	Users	\N	\N
-26	2	\N	\N	\N
-27	1	Passwords	\N	\N
-27	2	\N	\N	\N
-28	1	Port Range	Port range that will be passed to nmap. Please use nmap syntax for -p command line argument (for example, 22; 1-65535; U:53,111,137,T:21-25,80,139,8080)	\N
-28	2	\N	\N	\N
-29	1	Timeout	Timeout in milliseconds.	1000
-29	2	\N	\N	\N
-30	1	Port Range	2 lines: start and end of the range.	1\r\n80
-30	2	\N	\N	\N
-31	1	Range Count	\N	10
-31	2	\N	\N	\N
-32	1	Code	Possible values: php, cfm, asp.	php
-32	2	\N	\N	\N
-34	1	Paths	\N	\N
-34	2	\N	\N	\N
-33	1	URLs	\N	\N
-33	2	\N	\N	\N
-35	1	Paths	\N	\N
-35	2	\N	\N	\N
-36	1	Paths	\N	\N
-36	2	\N	\N	\N
-37	1	Timeout	\N	10
-37	2	\N	\N	\N
-38	1	Page Type	Possible values: php, asp.	php
-38	2	\N	\N	\N
-39	1	Cookie	\N	\N
-39	2	\N	\N	\N
-40	1	URL Limit	\N	100
-40	2	\N	\N	\N
-41	1	\N	\N	\N
-41	2	nom	\N	\N
 \.
 
 
@@ -1513,9 +1390,6 @@ COPY check_inputs_l10n (check_input_id, language_id, name, description, value) F
 --
 
 COPY check_results (id, check_id, result, sort_order, title) FROM stdin;
-1	44	pi	0	pi
-3	3	Resulten	1	Test Deutsche
-2	3	Here is no formatting at all - because this field is plain text. Please humble with that.\r\n\r\nLine span.	0	Test English
 \.
 
 
@@ -1526,12 +1400,6 @@ COPY check_results (id, check_id, result, sort_order, title) FROM stdin;
 --
 
 COPY check_results_l10n (check_result_id, language_id, result, title) FROM stdin;
-1	1	\N	\N
-1	2	pi	pi
-3	1	\N	\N
-3	2	Resulten	Test Deutsche
-2	1	Here is no formatting at all - because this field is plain text. Please humble with that.\r\n\r\nLine span.	Test English
-2	2	Result ' Pizda Dzhigurda (de)	Zuzuz
 \.
 
 
@@ -1542,10 +1410,6 @@ COPY check_results_l10n (check_result_id, language_id, result, title) FROM stdin
 --
 
 COPY check_solutions (id, check_id, solution, sort_order, title) FROM stdin;
-1	44	gxz	0	gxz
-2	44	zf	1	zf
-5	3	i love you too	1	tears of prophecy
-4	3	<i>zoo</i><br><i>gooooo<br><br></i>pom pom<br><i><br></i><b>black</b>	0	aduljadei
 \.
 
 
@@ -1556,14 +1420,6 @@ COPY check_solutions (id, check_id, solution, sort_order, title) FROM stdin;
 --
 
 COPY check_solutions_l10n (check_solution_id, language_id, solution, title) FROM stdin;
-1	1	gxz	gxz
-1	2	\N	\N
-2	1	\N	\N
-2	2	zf	zf
-5	1	i love you too	tears of prophecy
-5	2	ich liebe dir	\N
-4	1	<i>zoo</i><br><i>gooooo<br><br></i>pom pom<br><i><br></i><b>black</b>	aduljadei
-4	2	\N	\N
 \.
 
 
@@ -1574,50 +1430,6 @@ COPY check_solutions_l10n (check_solution_id, language_id, solution, title) FROM
 --
 
 COPY checks (id, check_control_id, name, background_info, hints, advanced, automated, script, multiple_solutions, protocol, port, question, reference_id, reference_code, reference_url, effort) FROM stdin;
-2	1	DNS A (Non-Recursive)			f	t	dns_a_nr.py	f		\N		1			2
-4	1	DNS DOM MX			f	t	dns_dom_mx.pl	f		\N		1			2
-6	1	DNS Hosting			f	t	dns_hosting.py	f		\N		1			2
-7	1	DNS IP Range			f	t	dns_ip_range.pl	f		\N		1			2
-9	1	DNS NIC Whois			f	t	nic_whois.pl	f		\N		1			2
-10	1	DNS NS Version			f	t	ns_version.pl	f		\N		1			2
-12	1	DNS SOA			f	t	dns_soa.py	f		\N		1			2
-13	1	DNS SPF			f	t	dns_spf.py	f		\N		1			2
-15	1	DNS Subdomain Bruteforce			f	t	subdomain_bruteforce.pl	f		\N		1			2
-16	1	DNS Top TLDs			f	t	dns_top_tlds.pl	f		\N		1			2
-17	2	FTP Bruteforce			f	t	ftp_bruteforce.pl	f		\N		1			2
-18	3	SMTP Banner			f	t	smtp_banner.py	f		\N		1			2
-19	3	SMTP DNSBL			f	t	smtp_dnsbl.py	f		\N		1			2
-20	3	SMTP Filter			f	t	smtp_filter.py	f		\N		1			2
-21	3	SMTP Relay			f	t	smtp_relay.pl	f		\N		1			2
-22	4	SSH Bruteforce			f	t	ssh_bruteforce.pl	f		\N		1			2
-23	5	Nmap Port Scan			f	t	pscan.pl	f		\N		1			2
-24	5	TCP Port Scan			f	t	portscan.pl	f		\N		1			2
-25	5	TCP Traceroute			f	t	tcp_traceroute.py	f		80		1			2
-26	6	Apache DoS			f	t	apache_dos.pl	f		\N		1			2
-27	6	Fuzz Check			f	t	fuzz_check.pl	f		\N		1			2
-28	6	Google URL			f	t	google_url.pl	f		\N		1			2
-29	6	Grep URL			f	t	grep_url.pl	f	http	\N		1			2
-30	6	HTTP Banner			f	t	http_banner.pl	f	http	\N		1			2
-31	6	Joomla Scan			f	t	joomla_scan.pl	f	http	\N		1			2
-32	6	Login Pages			f	t	login_pages.pl	f	http	\N		1			2
-33	6	Nikto			f	t	nikto.pl	f	http	80		1			2
-34	6	URL Scan			f	t	urlscan.pl	f	http	\N		1			2
-35	6	Web Auth Scanner			f	t	www_auth_scanner.pl	f	http	80		1			2
-36	6	Web Directory Scanner			f	t	www_dir_scanner.pl	f	http	80		1			2
-37	6	Web File Scanner			f	t	www_file_scanner.pl	f	http	80		1			2
-38	6	Web HTTP Methods			f	t	web_http_methods.py	f		\N		1			2
-39	6	Web Server CMS			f	t	webserver_cms.pl	f		\N		1			2
-40	6	Web Server Error Message			f	t	webserver_error_msg.pl	f		\N		1			2
-41	6	Web Server Files			f	t	webserver_files.pl	f		\N		1			2
-42	6	Web Server SSL			f	t	webserver_ssl.pl	f		\N		1			2
-43	6	Web SQL XSS			f	t	web_sql_xss.py	f		\N		1			2
-1	7	DNS A			f	t	dns_a.py	f		\N		1			2
-5	7	DNS Find NS			f	t	dns_find_ns.pl	f		\N		1			2
-8	8	DNS NIC Typosquatting			f	t	nic_typosquatting.pl	f		\N		1			2
-11	8	DNS Resolve IP			f	t	dns_resolve_ip.pl	f		\N		1			2
-14	9	DNS SPF (Perl)			f	t	dns_spf.pl	f		\N		1			2
-44	10	yay			f	t	j	f		\N		1			2
-3	1	DNS AFXR	hey <b>fuck</b><br><b>How are you?<br></b><br><b></b>1. this is some kind of list<br>2. lololo upup up<br><br>	jjj<br>what the fuck did you do?	f	t	dns_afxr.pl	f		\N	No more no more	1			2
 \.
 
 
@@ -1628,94 +1440,6 @@ COPY checks (id, check_control_id, name, background_info, hints, advanced, autom
 --
 
 COPY checks_l10n (check_id, language_id, name, background_info, hints, reference, question) FROM stdin;
-2	1	DNS A (Non-Recursive)	\N	\N	\N	\N
-2	2	\N	\N	\N	\N	\N
-4	1	DNS DOM MX	\N	\N	\N	\N
-4	2	\N	\N	\N	\N	\N
-6	1	DNS Hosting	\N	\N	\N	\N
-6	2	\N	\N	\N	\N	\N
-7	1	DNS IP Range	\N	\N	\N	\N
-7	2	\N	\N	\N	\N	\N
-9	1	DNS NIC Whois	\N	\N	\N	\N
-9	2	\N	\N	\N	\N	\N
-10	1	DNS NS Version	\N	\N	\N	\N
-10	2	\N	\N	\N	\N	\N
-12	1	DNS SOA	\N	\N	\N	\N
-12	2	\N	\N	\N	\N	\N
-13	1	DNS SPF	\N	\N	\N	\N
-13	2	\N	\N	\N	\N	\N
-15	1	DNS Subdomain Bruteforce	\N	\N	\N	\N
-15	2	\N	\N	\N	\N	\N
-16	1	DNS Top TLDs	\N	\N	\N	\N
-16	2	\N	\N	\N	\N	\N
-17	1	FTP Bruteforce	\N	\N	\N	\N
-17	2	\N	\N	\N	\N	\N
-18	1	SMTP Banner	\N	\N	\N	\N
-18	2	\N	\N	\N	\N	\N
-19	1	SMTP DNSBL	\N	\N	\N	\N
-19	2	\N	\N	\N	\N	\N
-20	1	SMTP Filter	\N	\N	\N	\N
-20	2	\N	\N	\N	\N	\N
-21	1	SMTP Relay	\N	\N	\N	\N
-21	2	\N	\N	\N	\N	\N
-22	1	SSH Bruteforce	\N	\N	\N	\N
-22	2	\N	\N	\N	\N	\N
-23	1	Nmap Port Scan	\N	\N	\N	\N
-23	2	\N	\N	\N	\N	\N
-24	1	TCP Port Scan	\N	\N	\N	\N
-24	2	\N	\N	\N	\N	\N
-25	1	TCP Traceroute	\N	\N	\N	\N
-25	2	\N	\N	\N	\N	\N
-26	1	Apache DoS	\N	\N	\N	\N
-26	2	\N	\N	\N	\N	\N
-27	1	Fuzz Check	\N	\N	\N	\N
-27	2	\N	\N	\N	\N	\N
-28	1	Google URL	\N	\N	\N	\N
-28	2	\N	\N	\N	\N	\N
-29	1	Grep URL	\N	\N	\N	\N
-29	2	\N	\N	\N	\N	\N
-30	1	HTTP Banner	\N	\N	\N	\N
-30	2	\N	\N	\N	\N	\N
-31	1	Joomla Scan	\N	\N	\N	\N
-31	2	\N	\N	\N	\N	\N
-32	1	Login Pages	\N	\N	\N	\N
-32	2	\N	\N	\N	\N	\N
-33	1	Nikto	\N	\N	\N	\N
-33	2	\N	\N	\N	\N	\N
-34	1	URL Scan	\N	\N	\N	\N
-34	2	\N	\N	\N	\N	\N
-35	1	Web Auth Scanner	\N	\N	\N	\N
-35	2	\N	\N	\N	\N	\N
-36	1	Web Directory Scanner	\N	\N	\N	\N
-36	2	\N	\N	\N	\N	\N
-37	1	Web File Scanner	\N	\N	\N	\N
-37	2	\N	\N	\N	\N	\N
-38	1	Web HTTP Methods	\N	\N	\N	\N
-38	2	\N	\N	\N	\N	\N
-39	1	Web Server CMS	\N	\N	\N	\N
-39	2	\N	\N	\N	\N	\N
-40	1	Web Server Error Message	\N	\N	\N	\N
-40	2	\N	\N	\N	\N	\N
-41	1	Web Server Files	\N	\N	\N	\N
-41	2	\N	\N	\N	\N	\N
-42	1	Web Server SSL	\N	\N	\N	\N
-42	2	\N	\N	\N	\N	\N
-43	1	Web SQL XSS	\N	\N	\N	\N
-43	2	\N	\N	\N	\N	\N
-1	1	DNS A	\N	\N	\N	\N
-1	2	\N	\N	\N	\N	\N
-5	1	DNS Find NS	\N	\N	\N	\N
-5	2	\N	\N	\N	\N	\N
-8	1	DNS NIC Typosquatting	\N	\N	\N	\N
-8	2	\N	\N	\N	\N	\N
-11	1	DNS Resolve IP	\N	\N	\N	\N
-11	2	\N	\N	\N	\N	\N
-14	1	DNS SPF (Perl)	\N	\N	\N	\N
-14	2	\N	\N	\N	\N	\N
-3	2	\N	meow	piu<i> poiu</i>	\N	\N
-44	1	yay	\N	\N	\N	\N
-44	2	dum	\N	\N	\N	\N
-3	1	DNS AFXR	hey <b>fuck</b><br><b>How are you?<br></b><br><b></b>1. this is some kind of list<br>2. lololo upup up<br><br>	jjj<br>what the fuck did you do?	\N	No more no more
 \.
 
 
@@ -1782,7 +1506,6 @@ COPY projects (id, client_id, year, deadline, name, status) FROM stdin;
 --
 
 COPY "references" (id, name, url) FROM stdin;
-1	CUSTOM	
 \.
 
 
@@ -1793,9 +1516,6 @@ COPY "references" (id, name, url) FROM stdin;
 --
 
 COPY risk_categories (id, name) FROM stdin;
-4	Category A
-6	Category B
-7	Category C
 8	nowai
 9	pumipon
 \.
@@ -1808,12 +1528,6 @@ COPY risk_categories (id, name) FROM stdin;
 --
 
 COPY risk_categories_l10n (risk_category_id, language_id, name) FROM stdin;
-4	1	Category A
-4	2	\N
-6	1	Category B
-6	2	\N
-7	1	Category C
-7	2	\N
 8	1	nowai
 8	2	\N
 9	1	\N
@@ -1828,7 +1542,7 @@ COPY risk_categories_l10n (risk_category_id, language_id, name) FROM stdin;
 --
 
 COPY system (id, backup) FROM stdin;
-1	2012-07-27 02:02:38.61638
+1	2012-08-02 17:23:52.013701
 \.
 
 
@@ -1863,27 +1577,6 @@ COPY target_check_categories (target_id, check_category_id, advanced, check_coun
 --
 
 COPY target_check_inputs (target_id, check_input_id, value, file, check_id) FROM stdin;
-1	2	\N	\N	2
-1	3	120	\N	4
-1	4	1	\N	4
-1	7	0	\N	6
-1	8	10	\N	8
-1	9	100	\N	8
-1	10	1	\N	8
-1	1	\N	\N	1
-1	5	120	\N	5
-1	6	1	\N	5
-2	15	\N	\N	17
-2	16	\N	\N	17
-2	17	\N	\N	20
-2	18	\N	\N	20
-2	19	\N	\N	20
-2	20	\N	\N	20
-2	21	\N	\N	20
-2	22	\N	\N	20
-2	23	10	\N	21
-2	24	source@gmail.com	\N	21
-2	25	destination@gmail.com	\N	21
 \.
 
 
@@ -1894,7 +1587,6 @@ COPY target_check_inputs (target_id, check_input_id, value, file, check_id) FROM
 --
 
 COPY target_check_solutions (target_id, check_solution_id, check_id) FROM stdin;
-1	4	3
 \.
 
 
@@ -1905,23 +1597,6 @@ COPY target_check_solutions (target_id, check_solution_id, check_id) FROM stdin;
 --
 
 COPY target_checks (target_id, check_id, result, target_file, rating, started, pid, status, result_file, language_id, protocol, port, override_target, user_id) FROM stdin;
-1	2	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-1	4	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-1	6	\N	\N	hidden	\N	\N	finished	\N	1	\N	\N	\N	1
-1	8	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-1	11	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-1	14	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1
-1	1	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-1	5	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-2	17	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-2	18	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-2	19	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1
-2	20	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-2	21	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1
-2	29	\N	\N	high_risk	\N	\N	finished	\N	1	http	\N	\N	1
-2	30	\N	\N	med_risk	\N	\N	finished	\N	1	http	\N	\N	1
-2	31	\N	\N	high_risk	\N	\N	finished	\N	1	http	\N	\N	1
-1	3	\N	\N	high_risk	\N	\N	finished	\N	1	\N	\N	\N	1
 \.
 
 
@@ -1932,9 +1607,6 @@ COPY target_checks (target_id, check_id, result, target_file, rating, started, p
 --
 
 COPY target_references (target_id, reference_id) FROM stdin;
-1	1
-2	1
-3	1
 \.
 
 
@@ -2384,7 +2056,7 @@ ALTER TABLE ONLY check_results_l10n
 
 --
 -- TOC entry 2055 (class 2606 OID 22110)
--- Dependencies: 2013 162 151
+-- Dependencies: 151 2013 162
 -- Name: check_results_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2394,7 +2066,7 @@ ALTER TABLE ONLY check_results_l10n
 
 --
 -- TOC entry 2056 (class 2606 OID 22130)
--- Dependencies: 155 152 2001
+-- Dependencies: 155 2001 152
 -- Name: check_solutions_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2404,7 +2076,7 @@ ALTER TABLE ONLY check_solutions
 
 --
 -- TOC entry 2057 (class 2606 OID 22120)
--- Dependencies: 154 1997 152
+-- Dependencies: 1997 152 154
 -- Name: check_solutions_l10n_check_solution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2424,7 +2096,7 @@ ALTER TABLE ONLY check_solutions_l10n
 
 --
 -- TOC entry 2059 (class 2606 OID 22140)
--- Dependencies: 155 143 1985
+-- Dependencies: 155 1985 143
 -- Name: checks_check_control_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2434,7 +2106,7 @@ ALTER TABLE ONLY checks
 
 --
 -- TOC entry 2061 (class 2606 OID 22150)
--- Dependencies: 155 2001 157
+-- Dependencies: 157 2001 155
 -- Name: checks_l10n_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2454,7 +2126,7 @@ ALTER TABLE ONLY checks_l10n
 
 --
 -- TOC entry 2060 (class 2606 OID 22145)
--- Dependencies: 2019 155 168
+-- Dependencies: 2019 168 155
 -- Name: checks_reference_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2474,7 +2146,7 @@ ALTER TABLE ONLY emails
 
 --
 -- TOC entry 2064 (class 2606 OID 21970)
--- Dependencies: 2017 166 164
+-- Dependencies: 166 164 2017
 -- Name: project_details_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2484,7 +2156,7 @@ ALTER TABLE ONLY project_details
 
 --
 -- TOC entry 2065 (class 2606 OID 21975)
--- Dependencies: 2005 158 166
+-- Dependencies: 2005 166 158
 -- Name: projects_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2494,7 +2166,7 @@ ALTER TABLE ONLY projects
 
 --
 -- TOC entry 2085 (class 2606 OID 22095)
--- Dependencies: 184 162 2013
+-- Dependencies: 184 2013 162
 -- Name: risk_categories_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2504,7 +2176,7 @@ ALTER TABLE ONLY risk_categories_l10n
 
 --
 -- TOC entry 2084 (class 2606 OID 22090)
--- Dependencies: 2041 184 183
+-- Dependencies: 184 2041 183
 -- Name: risk_categories_l10n_risk_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2514,7 +2186,7 @@ ALTER TABLE ONLY risk_categories_l10n
 
 --
 -- TOC entry 2066 (class 2606 OID 21980)
--- Dependencies: 172 155 2001
+-- Dependencies: 155 172 2001
 -- Name: target_check_attachments_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2524,7 +2196,7 @@ ALTER TABLE ONLY target_check_attachments
 
 --
 -- TOC entry 2067 (class 2606 OID 21985)
--- Dependencies: 2035 172 178
+-- Dependencies: 178 172 2035
 -- Name: target_check_attachments_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2534,7 +2206,7 @@ ALTER TABLE ONLY target_check_attachments
 
 --
 -- TOC entry 2068 (class 2606 OID 21990)
--- Dependencies: 1981 173 140
+-- Dependencies: 140 173 1981
 -- Name: target_check_categories_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2544,7 +2216,7 @@ ALTER TABLE ONLY target_check_categories
 
 --
 -- TOC entry 2069 (class 2606 OID 21995)
--- Dependencies: 173 178 2035
+-- Dependencies: 178 173 2035
 -- Name: target_check_categories_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2554,7 +2226,7 @@ ALTER TABLE ONLY target_check_categories
 
 --
 -- TOC entry 2070 (class 2606 OID 22000)
--- Dependencies: 2001 155 174
+-- Dependencies: 155 174 2001
 -- Name: target_check_inputs_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2564,7 +2236,7 @@ ALTER TABLE ONLY target_check_inputs
 
 --
 -- TOC entry 2071 (class 2606 OID 22005)
--- Dependencies: 174 146 1989
+-- Dependencies: 1989 174 146
 -- Name: target_check_inputs_check_input_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2574,7 +2246,7 @@ ALTER TABLE ONLY target_check_inputs
 
 --
 -- TOC entry 2072 (class 2606 OID 22010)
--- Dependencies: 2035 174 178
+-- Dependencies: 174 178 2035
 -- Name: target_check_inputs_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2583,18 +2255,18 @@ ALTER TABLE ONLY target_check_inputs
 
 
 --
--- TOC entry 2073 (class 2606 OID 22015)
--- Dependencies: 2001 175 155
+-- TOC entry 2075 (class 2606 OID 24440)
+-- Dependencies: 155 175 2001
 -- Name: target_check_solutions_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
 ALTER TABLE ONLY target_check_solutions
-    ADD CONSTRAINT target_check_solutions_check_id_fkey FOREIGN KEY (check_id) REFERENCES checks(id);
+    ADD CONSTRAINT target_check_solutions_check_id_fkey FOREIGN KEY (check_id) REFERENCES checks(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 2074 (class 2606 OID 22020)
--- Dependencies: 1997 152 175
+-- TOC entry 2073 (class 2606 OID 24430)
+-- Dependencies: 152 175 1997
 -- Name: target_check_solutions_check_solution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2603,7 +2275,7 @@ ALTER TABLE ONLY target_check_solutions
 
 
 --
--- TOC entry 2075 (class 2606 OID 22025)
+-- TOC entry 2074 (class 2606 OID 24435)
 -- Dependencies: 2035 178 175
 -- Name: target_check_solutions_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
@@ -2614,7 +2286,7 @@ ALTER TABLE ONLY target_check_solutions
 
 --
 -- TOC entry 2076 (class 2606 OID 22030)
--- Dependencies: 176 2001 155
+-- Dependencies: 155 2001 176
 -- Name: target_checks_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2624,7 +2296,7 @@ ALTER TABLE ONLY target_checks
 
 --
 -- TOC entry 2077 (class 2606 OID 22035)
--- Dependencies: 176 162 2013
+-- Dependencies: 162 2013 176
 -- Name: target_checks_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2634,7 +2306,7 @@ ALTER TABLE ONLY target_checks
 
 --
 -- TOC entry 2078 (class 2606 OID 22040)
--- Dependencies: 178 2035 176
+-- Dependencies: 2035 176 178
 -- Name: target_checks_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2644,7 +2316,7 @@ ALTER TABLE ONLY target_checks
 
 --
 -- TOC entry 2079 (class 2606 OID 22045)
--- Dependencies: 176 2039 180
+-- Dependencies: 2039 176 180
 -- Name: target_checks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2654,7 +2326,7 @@ ALTER TABLE ONLY target_checks
 
 --
 -- TOC entry 2080 (class 2606 OID 22050)
--- Dependencies: 168 177 2019
+-- Dependencies: 2019 177 168
 -- Name: target_references_reference_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2664,7 +2336,7 @@ ALTER TABLE ONLY target_references
 
 --
 -- TOC entry 2081 (class 2606 OID 22055)
--- Dependencies: 177 178 2035
+-- Dependencies: 178 177 2035
 -- Name: target_references_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2674,7 +2346,7 @@ ALTER TABLE ONLY target_references
 
 --
 -- TOC entry 2082 (class 2606 OID 22060)
--- Dependencies: 178 166 2017
+-- Dependencies: 178 2017 166
 -- Name: targets_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2684,7 +2356,7 @@ ALTER TABLE ONLY targets
 
 --
 -- TOC entry 2083 (class 2606 OID 22065)
--- Dependencies: 2005 180 158
+-- Dependencies: 158 2005 180
 -- Name: users_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2704,7 +2376,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2012-08-02 14:54:21 MSK
+-- Completed on 2012-08-02 17:27:14 MSK
 
 --
 -- PostgreSQL database dump complete

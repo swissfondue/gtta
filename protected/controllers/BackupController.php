@@ -111,9 +111,9 @@ class BackupController extends Controller
 			$values[] = '(' . implode(',', $row) . ')';
 		}
 
-        $dump[] = 'INSERT INTO ' . $db->quoteTableName($table) . '(' . implode(',', $columns) . ') VALUES' . implode(',', $values) . ';';
+        $dump[] = '<gtta:sql>INSERT INTO ' . $db->quoteTableName($table) . '(' . implode(',', $columns) . ') VALUES' . implode(',', $values) . ';</gtta:sql>';
 
-        return implode("\n", $dump) . "\n";
+        return implode("", $dump) . "";
 	}
 
     /**
@@ -129,9 +129,9 @@ class BackupController extends Controller
             return '';
 
         $value = $row['last_value'];
-        $dump  = 'SELECT setval(' . $pdo->quote($sequence) . ', ' . $pdo->quote($value) . ', false);';
+        $dump  = '<gtta:sql>SELECT setval(' . $pdo->quote($sequence) . ', ' . $pdo->quote($value) . ', false);</gtta:sql>';
 
-        return $dump . "\n";
+        return $dump;
     }
 
     /**
@@ -152,7 +152,7 @@ class BackupController extends Controller
 
         fclose($dump);
 
-        $zip->addFile($dumpPath, $dbPath . '/database.sql');
+        $zip->addFile($dumpPath, $dbPath . '/database.xml');
     }
 
     /**
@@ -280,10 +280,20 @@ class BackupController extends Controller
             $db->createCommand('TRUNCATE TABLE ' . $db->quoteTableName($table) . ' CASCADE;')->execute();
 
         // insert content
-        $commands = explode("\n", $dbDump);
+        $commands = explode('</gtta:sql><gtta:sql>', $dbDump);
 
         foreach ($commands as $command)
         {
+            $tagPosition = strpos($command, '<gtta:sql>');
+
+            if ($tagPosition !== false)
+                $command = substr($command, $tagPosition + strlen('<gtta:sql>'));
+
+            $tagPosition = strpos($command, '</gtta:sql>');
+
+            if ($tagPosition !== false)
+                $command = substr($command, 0, $tagPosition);
+
             if (!$command)
                 continue;
 
@@ -317,7 +327,7 @@ class BackupController extends Controller
             $path = explode('/', $stat['name']);
             $name = $path[count($path) - 1];
 
-            if ($name == 'database.sql')
+            if ($name == 'database.xml')
             {
                 $dbDump = $i;
                 continue;
