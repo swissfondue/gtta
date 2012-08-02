@@ -1,6 +1,6 @@
-<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery.ui.js"></script>
-<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery.iframe-transport.js"></script>
-<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery.fileupload.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.ui.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.iframe-transport.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.fileupload.js"></script>
 
 <div class="pull-right buttons">
     <div class="btn-group" data-toggle="buttons-radio">
@@ -174,7 +174,7 @@
                                             <?php echo Yii::t('app', 'Background Info'); ?>
                                         </th>
                                         <td class="text">
-                                            <?php echo CHtml::encode($check->localizedBackgroundInfo); ?>
+                                            <?php echo $check->localizedBackgroundInfo; ?>
                                         </td>
                                     </tr>
                                 <?php endif; ?>
@@ -184,7 +184,7 @@
                                             <?php echo Yii::t('app', 'Hints'); ?>
                                         </th>
                                         <td class="text">
-                                            <?php echo CHtml::encode($check->localizedHints); ?>
+                                            <?php echo $check->localizedHints; ?>
                                         </td>
                                     </tr>
                                 <?php endif; ?>
@@ -194,7 +194,7 @@
                                             <?php echo Yii::t('app', 'Question'); ?>
                                         </th>
                                         <td class="text">
-                                            <?php echo CHtml::encode($check->localizedQuestion); ?>
+                                            <?php echo $check->localizedQuestion; ?>
                                         </td>
                                     </tr>
                                 <?php endif; ?>
@@ -280,7 +280,7 @@
                                                     <li>
                                                         <a href="#insert" onclick="user.check.insertResult(<?php echo $check->id; ?>, $('.result-content[data-id=<?php echo $check->id; ?>-<?php echo $result->id; ?>]').html());"><?php echo CHtml::encode($result->localizedTitle); ?></a>
 
-                                                        <div class="result-content" data-id="<?php echo $check->id; ?>-<?php echo $result->id; ?>"><?php echo $result->localizedResult; ?></div>
+                                                        <div class="result-content" data-id="<?php echo $check->id; ?>-<?php echo $result->id; ?>"><?php echo str_replace("\n", '<br>', CHtml::encode($result->localizedResult)); ?></div>
                                                     </li>
                                                 <?php endforeach; ?>
                                             </ul>

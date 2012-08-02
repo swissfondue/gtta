@@ -245,6 +245,9 @@ function User()
                 return;
 
             var textarea = $('#TargetCheckEditForm_' + id + '_result');
+
+            result = result.replace(/\n<br>/g, '\n');
+            result = result.replace(/<br>/g, '\n');
             textarea.val(result + '\n' + textarea.val());
         };
 

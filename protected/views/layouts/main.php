@@ -3,16 +3,16 @@
     <head>
         <title><?php echo Yii::app()->name; ?> - <?php echo CHtml::encode($this->pageTitle); ?></title>
         <meta charset="utf-8">
-        <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap.css">
-        <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap.datepicker.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/bootstrap.datepicker.css">
         <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/style.css">
         <!--[if lt IE 9]>
             <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/html5.js"></script>
         <![endif]-->
-        <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery.js"></script>
-        <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery.cookie.js"></script>
-        <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap.js"></script>
-        <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap.datepicker.js"></script>
+        <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.js"></script>
+        <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.cookie.js"></script>
+        <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap/bootstrap.js"></script>
+        <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap/bootstrap.datepicker.js"></script>
         <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/system.js"></script>
         <script src="<?php echo $this->createUrl('app/l10n') . '?' . rand(); ?>"></script>
         <script>

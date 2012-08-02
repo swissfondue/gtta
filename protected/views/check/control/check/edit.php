@@ -1,3 +1,7 @@
+<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/bootstrap-wysihtml5.css">
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/wysihtml5.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap/bootstrap-wysihtml5.js"></script>
+
 <div class="active-header">
     <?php if (!$check->isNewRecord): ?>
         <div class="pull-right">
@@ -48,21 +52,21 @@
                     <div class="control-group">
                         <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_backgroundInfo"><?php echo Yii::t('app', 'Background Info'); ?></label>
                         <div class="controls">
-                            <input type="text" class="input-xlarge" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_backgroundInfo" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][backgroundInfo]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['backgroundInfo']) : ''; ?>">
+                            <textarea class="input-xxlarge" rows="10" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_backgroundInfo" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][backgroundInfo]"><?php echo isset($model->localizedItems[$language->id]) ? $model->localizedItems[$language->id]['backgroundInfo'] : ''; ?></textarea>
                         </div>
                     </div>
 
                     <div class="control-group">
                         <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_hints"><?php echo Yii::t('app', 'Hints'); ?></label>
                         <div class="controls">
-                            <input type="text" class="input-xlarge" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_hints" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][hints]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['hints']) : ''; ?>">
+                            <textarea class="input-xxlarge" rows="10" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_hints" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][hints]"><?php echo isset($model->localizedItems[$language->id]) ? $model->localizedItems[$language->id]['hints'] : ''; ?></textarea>
                         </div>
                     </div>
                     
                     <div class="control-group">
                         <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_question"><?php echo Yii::t('app', 'Question'); ?></label>
                         <div class="controls">
-                            <input type="text" class="input-xlarge" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_question" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][question]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['question']) : ''; ?>">
+                            <textarea class="input-xxlarge" rows="10" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_question" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][question]"><?php echo isset($model->localizedItems[$language->id]) ? $model->localizedItems[$language->id]['question'] : ''; ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -199,4 +203,14 @@
         e.preventDefault();
         $(this).tab('show');
     })
+
+    $(function () {
+        $('textarea').wysihtml5({
+            'font-styles' : false,
+            'image'       : false,
+            'link'        : false,
+            'html'        : false,
+            'lists'       : false
+        });
+    });
 </script>

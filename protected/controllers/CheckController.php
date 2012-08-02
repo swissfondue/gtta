@@ -1091,7 +1091,7 @@ class CheckController extends Controller
         if ($newRecord)
             $this->breadcrumbs[] = array(Yii::t('app', 'New Result'), '');
         else
-            $this->breadcrumbs[] = array($result->localizedResult, '');
+            $this->breadcrumbs[] = array($result->localizedTitle, '');
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Result') : $result->localizedTitle;
@@ -1422,7 +1422,7 @@ class CheckController extends Controller
         if ($newRecord)
             $this->breadcrumbs[] = array(Yii::t('app', 'New Solution'), '');
         else
-            $this->breadcrumbs[] = array($solution->localizedSolution, '');
+            $this->breadcrumbs[] = array($solution->localizedTitle, '');
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Solution') : $solution->localizedTitle;

@@ -333,6 +333,16 @@ div.check-form {
     list-style:none;
 }
 
+.check-form .results li, .check-form .solutions li {
+    border-top:1px solid #ddd;
+    padding-top:10px;
+}
+
+.check-form .results li:first-child, .check-form .solutions li:first-child {
+    border-top:none;
+    padding-top:0;
+}
+
 .check-form .results li,
 .check-form .solutions li,
 .check-form .rating li {

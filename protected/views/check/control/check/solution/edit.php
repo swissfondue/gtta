@@ -1,3 +1,7 @@
+<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/bootstrap-wysihtml5.css">
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/wysihtml5.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap/bootstrap-wysihtml5.js"></script>
+
 <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 
 <hr>
@@ -33,7 +37,7 @@
                     <div class="control-group <?php if ($model->getError('solution')) echo 'error'; ?>">
                         <label class="control-label" for="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_solution"><?php echo Yii::t('app', 'Solution'); ?></label>
                         <div class="controls">
-                            <input type="text" class="input-xlarge" id="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_solution" name="CheckSolutionEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][solution]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['solution']) : ''; ?>">
+                            <textarea rows="10" class="input-xxlarge" id="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_solution" name="CheckSolutionEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][solution]"><?php echo isset($model->localizedItems[$language->id]) ? $model->localizedItems[$language->id]['solution'] : ''; ?></textarea>
                             <?php if ($model->getError('solution')): ?>
                                 <p class="help-block"><?php echo $model->getError('solution'); ?></p>
                             <?php endif; ?>
@@ -68,4 +72,14 @@
         e.preventDefault();
         $(this).tab('show');
     })
+
+    $(function () {
+        $('textarea').wysihtml5({
+            'font-styles' : false,
+            'image'       : false,
+            'link'        : false,
+            'html'        : false,
+            'lists'       : false
+        });
+    });
 </script>
