@@ -32,6 +32,8 @@ class BackupController extends Controller
         'target_check_attachments',
         'target_check_inputs',
         'target_check_solutions',
+        'risk_categories',
+        'risk_categories_l10n',
     );
 
     private $_sequences = array(
@@ -50,6 +52,7 @@ class BackupController extends Controller
         'system_id_seq',
         'targets_id_seq',
         'users_id_seq',
+        'risk_categories_id_seq',
     );
 
     /**
