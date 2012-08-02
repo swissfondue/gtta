@@ -40,7 +40,7 @@
                     <div class="control-group">
                         <label class="control-label" for="CheckInputEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_value"><?php echo Yii::t('app', 'Value'); ?></label>
                         <div class="controls">
-                            <textarea rows="4" class="input-xlarge" id="CheckInputEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_value" name="CheckInputEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][value]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['value']) : ''; ?></textarea>
+                            <textarea class="wysiwyg" id="CheckInputEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_value" name="CheckInputEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][value]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['value']) : ''; ?></textarea>
                         </div>
                     </div>
                 </div>

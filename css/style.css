@@ -512,3 +512,8 @@ div.report-check-content {
 .report-risk-category-name {
     font-weight:bold;
 }
+
+textarea.wysiwyg {
+    width:530px;
+    height:200px;
+}

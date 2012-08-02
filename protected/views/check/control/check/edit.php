@@ -52,21 +52,21 @@
                     <div class="control-group">
                         <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_backgroundInfo"><?php echo Yii::t('app', 'Background Info'); ?></label>
                         <div class="controls">
-                            <textarea class="input-xxlarge" rows="10" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_backgroundInfo" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][backgroundInfo]"><?php echo isset($model->localizedItems[$language->id]) ? $model->localizedItems[$language->id]['backgroundInfo'] : ''; ?></textarea>
+                            <textarea class="wysiwyg" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_backgroundInfo" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][backgroundInfo]"><?php echo isset($model->localizedItems[$language->id]) ? $model->localizedItems[$language->id]['backgroundInfo'] : ''; ?></textarea>
                         </div>
                     </div>
 
                     <div class="control-group">
                         <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_hints"><?php echo Yii::t('app', 'Hints'); ?></label>
                         <div class="controls">
-                            <textarea class="input-xxlarge" rows="10" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_hints" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][hints]"><?php echo isset($model->localizedItems[$language->id]) ? $model->localizedItems[$language->id]['hints'] : ''; ?></textarea>
+                            <textarea class="wysiwyg" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_hints" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][hints]"><?php echo isset($model->localizedItems[$language->id]) ? $model->localizedItems[$language->id]['hints'] : ''; ?></textarea>
                         </div>
                     </div>
                     
                     <div class="control-group">
                         <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_question"><?php echo Yii::t('app', 'Question'); ?></label>
                         <div class="controls">
-                            <textarea class="input-xxlarge" rows="10" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_question" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][question]"><?php echo isset($model->localizedItems[$language->id]) ? $model->localizedItems[$language->id]['question'] : ''; ?></textarea>
+                            <textarea class="wysiwyg" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_question" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][question]"><?php echo isset($model->localizedItems[$language->id]) ? $model->localizedItems[$language->id]['question'] : ''; ?></textarea>
                         </div>
                     </div>
                 </div>
