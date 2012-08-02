@@ -1003,6 +1003,7 @@ class CheckController extends Controller
 
         if (!$newRecord)
         {
+            $model->title     = $result->title;
             $model->result    = $result->result;
             $model->sortOrder = $result->sort_order;
 
@@ -1011,7 +1012,10 @@ class CheckController extends Controller
             ));
 
             foreach ($checkResultL10n as $crl)
+            {
+                $model->localizedItems[$crl->language_id]['title']  = $crl->title;
                 $model->localizedItems[$crl->language_id]['result'] = $crl->result;
+            }
         }
         else
         {
@@ -1030,11 +1034,13 @@ class CheckController extends Controller
 		if (isset($_POST['CheckResultEditForm']))
 		{
 			$model->attributes = $_POST['CheckResultEditForm'];
+            $model->title  = $model->defaultL10n($languages, 'title');
             $model->result = $model->defaultL10n($languages, 'result');
 
 			if ($model->validate())
             {
                 $result->check_id   = $check->id;
+                $result->title      = $model->title;
                 $result->result     = $model->result;
                 $result->sort_order = $model->sortOrder;
 
@@ -1054,9 +1060,13 @@ class CheckController extends Controller
                         $checkResultL10n->language_id     = $languageId;
                     }
 
+                    if ($value['title'] == '')
+                        $value['title'] = NULL;
+
                     if ($value['result'] == '')
                         $value['result'] = NULL;
 
+                    $checkResultL10n->title  = $value['title'];
                     $checkResultL10n->result = $value['result'];
                     $checkResultL10n->save();
                 }
@@ -1084,7 +1094,7 @@ class CheckController extends Controller
             $this->breadcrumbs[] = array($result->localizedResult, '');
 
 		// display the page
-        $this->pageTitle = $newRecord ? Yii::t('app', 'New Result') : $result->localizedResult;
+        $this->pageTitle = $newRecord ? Yii::t('app', 'New Result') : $result->localizedTitle;
 		$this->render('control/check/result/edit', array(
             'model'     => $model,
             'category'  => $category,
@@ -1324,6 +1334,7 @@ class CheckController extends Controller
 
         if (!$newRecord)
         {
+            $model->title     = $solution->title;
             $model->solution  = $solution->solution;
             $model->sortOrder = $solution->sort_order;
 
@@ -1332,7 +1343,10 @@ class CheckController extends Controller
             ));
 
             foreach ($checkSolutionL10n as $csl)
+            {
+                $model->localizedItems[$csl->language_id]['title']    = $csl->title;
                 $model->localizedItems[$csl->language_id]['solution'] = $csl->solution;
+            }
         }
         else
         {
@@ -1351,11 +1365,13 @@ class CheckController extends Controller
 		if (isset($_POST['CheckSolutionEditForm']))
 		{
 			$model->attributes = $_POST['CheckSolutionEditForm'];
+            $model->title    = $model->defaultL10n($languages, 'title');
             $model->solution = $model->defaultL10n($languages, 'solution');
 
 			if ($model->validate())
             {
                 $solution->check_id   = $check->id;
+                $solution->title      = $model->title;
                 $solution->solution   = $model->solution;
                 $solution->sort_order = $model->sortOrder;
 
@@ -1378,6 +1394,10 @@ class CheckController extends Controller
                     if ($value['solution'] == '')
                         $value['solution'] = NULL;
 
+                    if ($value['title'] == '')
+                        $value['title'] = NULL;
+
+                    $checkSolutionL10n->title    = $value['title'];
                     $checkSolutionL10n->solution = $value['solution'];
                     $checkSolutionL10n->save();
                 }
@@ -1405,7 +1425,7 @@ class CheckController extends Controller
             $this->breadcrumbs[] = array($solution->localizedSolution, '');
 
 		// display the page
-        $this->pageTitle = $newRecord ? Yii::t('app', 'New Solution') : $solution->localizedSolution;
+        $this->pageTitle = $newRecord ? Yii::t('app', 'New Solution') : $solution->localizedTitle;
 		$this->render('control/check/solution/edit', array(
             'model'     => $model,
             'category'  => $category,

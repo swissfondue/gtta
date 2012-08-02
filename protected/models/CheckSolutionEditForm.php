@@ -5,6 +5,11 @@
  */
 class CheckSolutionEditForm extends LocalizedFormModel
 {
+    /**
+     * @var string title.
+     */
+    public $title;
+
 	/**
      * @var string solution.
      */
@@ -21,7 +26,8 @@ class CheckSolutionEditForm extends LocalizedFormModel
 	public function rules()
 	{
 		return array(
-			array( 'solution, sortOrder', 'required' ),
+			array( 'title, solution, sortOrder', 'required' ),
+            array( 'title', 'length', 'max' => 1000 ),
             array( 'sortOrder', 'numerical', 'integerOnly' => true, 'min' => 0 ),
             array( 'localizedItems', 'safe' ),
 		);
@@ -33,6 +39,7 @@ class CheckSolutionEditForm extends LocalizedFormModel
 	public function attributeLabels()
 	{
 		return array(
+            'title'     => Yii::t('app', 'Title'),
 			'solution'  => Yii::t('app', 'Solution'),
             'sortOrder' => Yii::t('app', 'Sort Order'),
 		);

@@ -5,6 +5,11 @@
  */
 class CheckResultEditForm extends LocalizedFormModel
 {
+    /**
+     * @var string title.
+     */
+    public $title;
+
 	/**
      * @var string result.
      */
@@ -21,7 +26,8 @@ class CheckResultEditForm extends LocalizedFormModel
 	public function rules()
 	{
 		return array(
-			array( 'result, sortOrder', 'required' ),
+			array( 'title, result, sortOrder', 'required' ),
+            array( 'title', 'length', 'max' => 1000 ),
             array( 'sortOrder', 'numerical', 'integerOnly' => true, 'min' => 0 ),
             array( 'localizedItems', 'safe' ),
 		);
@@ -33,6 +39,7 @@ class CheckResultEditForm extends LocalizedFormModel
 	public function attributeLabels()
 	{
 		return array(
+            'title'     => Yii::t('app', 'Title'),
 			'result'    => Yii::t('app', 'Result'),
             'sortOrder' => Yii::t('app', 'Sort Order'),
 		);

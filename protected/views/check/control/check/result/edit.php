@@ -20,6 +20,16 @@
         <div class="tab-content">
             <?php foreach ($languages as $language): ?>
                 <div class="tab-pane<?php if ($language->default) echo ' active'; ?>" id="<?php echo CHtml::encode($language->code); ?>">
+                    <div class="control-group <?php if ($model->getError('title')) echo 'error'; ?>">
+                        <label class="control-label" for="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_title"><?php echo Yii::t('app', 'Title'); ?></label>
+                        <div class="controls">
+                            <input type="text" class="input-xlarge" id="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_title" name="CheckResultEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][title]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['title']) : ''; ?>">
+                            <?php if ($model->getError('title')): ?>
+                                <p class="help-block"><?php echo $model->getError('title'); ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
                     <div class="control-group <?php if ($model->getError('result')) echo 'error'; ?>">
                         <label class="control-label" for="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result"><?php echo Yii::t('app', 'Result'); ?></label>
                         <div class="controls">

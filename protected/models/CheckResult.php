@@ -6,6 +6,7 @@
  * The followings are the available columns in table 'check_results':
  * @property integer $id
  * @property integer $check_id
+ * @property string $title
  * @property string $result
  * @property integer $sort_order
  * @property integer $max_sort_order
@@ -41,7 +42,7 @@ class CheckResult extends CActiveRecord
 	public function rules()
 	{
 		return array(
-            array( 'result, check_id', 'required' ),
+            array( 'title, result, check_id', 'required' ),
             array( 'sort_order', 'numerical', 'integerOnly' => true, 'min' => 0 ),
 		);
 	}
@@ -56,6 +57,17 @@ class CheckResult extends CActiveRecord
             'check' => array( self::BELONGS_TO, 'Check',           'check_id' ),
 		);
 	}
+
+    /**
+     * @return string localized title.
+     */
+    public function getLocalizedTitle()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->title != NULL ? $this->l10n[0]->title : $this->title;
+
+        return $this->title;
+    }
 
     /**
      * @return string localized result.

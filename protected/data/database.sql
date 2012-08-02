@@ -4,7 +4,7 @@
 
 -- Dumped from database version 8.4.12
 -- Dumped by pg_dump version 9.1.3
--- Started on 2012-07-31 15:54:23 MSK
+-- Started on 2012-08-02 05:22:44 MSK
 
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -127,7 +127,7 @@ ALTER SEQUENCE check_categories_id_seq OWNED BY check_categories.id;
 -- Name: check_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_categories_id_seq', 6, true);
+SELECT pg_catalog.setval('check_categories_id_seq', 9, true);
 
 
 --
@@ -191,7 +191,7 @@ ALTER SEQUENCE check_controls_id_seq OWNED BY check_controls.id;
 -- Name: check_controls_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_controls_id_seq', 9, true);
+SELECT pg_catalog.setval('check_controls_id_seq', 10, true);
 
 
 --
@@ -258,7 +258,7 @@ ALTER SEQUENCE check_inputs_id_seq OWNED BY check_inputs.id;
 -- Name: check_inputs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_inputs_id_seq', 40, true);
+SELECT pg_catalog.setval('check_inputs_id_seq', 41, true);
 
 
 --
@@ -288,7 +288,8 @@ CREATE TABLE check_results (
     id bigint NOT NULL,
     check_id bigint NOT NULL,
     result character varying NOT NULL,
-    sort_order integer DEFAULT 0 NOT NULL
+    sort_order integer DEFAULT 0 NOT NULL,
+    title character varying(1000) NOT NULL
 );
 
 
@@ -325,7 +326,7 @@ ALTER SEQUENCE check_results_id_seq OWNED BY check_results.id;
 -- Name: check_results_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_results_id_seq', 1, false);
+SELECT pg_catalog.setval('check_results_id_seq', 3, true);
 
 
 --
@@ -337,7 +338,8 @@ SELECT pg_catalog.setval('check_results_id_seq', 1, false);
 CREATE TABLE check_results_l10n (
     check_result_id bigint NOT NULL,
     language_id bigint NOT NULL,
-    result character varying
+    result character varying,
+    title character varying(1000)
 );
 
 
@@ -353,7 +355,8 @@ CREATE TABLE check_solutions (
     id bigint NOT NULL,
     check_id bigint NOT NULL,
     solution character varying NOT NULL,
-    sort_order integer DEFAULT 0 NOT NULL
+    sort_order integer DEFAULT 0 NOT NULL,
+    title character varying(1000) NOT NULL
 );
 
 
@@ -390,7 +393,7 @@ ALTER SEQUENCE check_solutions_id_seq OWNED BY check_solutions.id;
 -- Name: check_solutions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_solutions_id_seq', 1, false);
+SELECT pg_catalog.setval('check_solutions_id_seq', 5, true);
 
 
 --
@@ -402,7 +405,8 @@ SELECT pg_catalog.setval('check_solutions_id_seq', 1, false);
 CREATE TABLE check_solutions_l10n (
     check_solution_id bigint NOT NULL,
     language_id bigint NOT NULL,
-    solution character varying
+    solution character varying,
+    title character varying(1000)
 );
 
 
@@ -468,7 +472,7 @@ ALTER SEQUENCE checks_id_seq OWNED BY checks.id;
 -- Name: checks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('checks_id_seq', 43, true);
+SELECT pg_catalog.setval('checks_id_seq', 44, true);
 
 
 --
@@ -845,7 +849,7 @@ ALTER SEQUENCE risk_categories_id_seq OWNED BY risk_categories.id;
 -- Name: risk_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('risk_categories_id_seq', 7, true);
+SELECT pg_catalog.setval('risk_categories_id_seq', 9, true);
 
 
 --
@@ -1273,12 +1277,14 @@ ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regcl
 --
 
 COPY check_categories (id, name) FROM stdin;
-1	DNS
 2	FTP
 3	SMTP
 4	SSH
 5	TCP
 6	Web Anonymous
+1	DNS
+8	Eine Kleine
+9	pay [a
 \.
 
 
@@ -1289,8 +1295,6 @@ COPY check_categories (id, name) FROM stdin;
 --
 
 COPY check_categories_l10n (check_category_id, language_id, name) FROM stdin;
-1	1	DNS
-1	2	\N
 2	1	FTP
 2	2	\N
 3	1	SMTP
@@ -1301,6 +1305,12 @@ COPY check_categories_l10n (check_category_id, language_id, name) FROM stdin;
 5	2	\N
 6	1	Web Anonymous
 6	2	\N
+1	1	DNS
+1	2	\N
+8	1	\N
+8	2	Eine Kleine
+9	1	pay [a
+9	2	Piuyyy
 \.
 
 
@@ -1320,6 +1330,7 @@ COPY check_controls (id, check_category_id, name) FROM stdin;
 7	1	This is a long name of the control
 8	1	Session Handling
 9	1	Some other important stuff
+10	9	jjj
 \.
 
 
@@ -1348,6 +1359,8 @@ COPY check_controls_l10n (check_control_id, language_id, name) FROM stdin;
 8	2	\N
 9	1	Some other important stuff
 9	2	\N
+10	1	jjj
+10	2	\N
 \.
 
 
@@ -1398,6 +1411,7 @@ COPY check_inputs (id, check_id, name, description, sort_order, value) FROM stdi
 38	43	Page Type	Possible values: php, asp.	0	php
 39	43	Cookies		1	
 40	43	URL Limit		2	100
+41	44	nom		0	
 \.
 
 
@@ -1488,6 +1502,8 @@ COPY check_inputs_l10n (check_input_id, language_id, name, description, value) F
 39	2	\N	\N	\N
 40	1	URL Limit	\N	100
 40	2	\N	\N	\N
+41	1	\N	\N	\N
+41	2	nom	\N	\N
 \.
 
 
@@ -1497,7 +1513,10 @@ COPY check_inputs_l10n (check_input_id, language_id, name, description, value) F
 -- Data for Name: check_results; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY check_results (id, check_id, result, sort_order) FROM stdin;
+COPY check_results (id, check_id, result, sort_order, title) FROM stdin;
+1	44	pi	0	pi
+3	3	Resulten	1	Test Deutsche
+2	3	Result ' Pizda Dzhigurda	0	Test English
 \.
 
 
@@ -1507,7 +1526,13 @@ COPY check_results (id, check_id, result, sort_order) FROM stdin;
 -- Data for Name: check_results_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY check_results_l10n (check_result_id, language_id, result) FROM stdin;
+COPY check_results_l10n (check_result_id, language_id, result, title) FROM stdin;
+1	1	\N	\N
+1	2	pi	pi
+3	1	\N	\N
+3	2	Resulten	Test Deutsche
+2	1	Result ' Pizda Dzhigurda	Test English
+2	2	Result ' Pizda Dzhigurda (de)	Zuzuz
 \.
 
 
@@ -1517,7 +1542,11 @@ COPY check_results_l10n (check_result_id, language_id, result) FROM stdin;
 -- Data for Name: check_solutions; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY check_solutions (id, check_id, solution, sort_order) FROM stdin;
+COPY check_solutions (id, check_id, solution, sort_order, title) FROM stdin;
+1	44	gxz	0	gxz
+2	44	zf	1	zf
+4	3	zoo	0	aduljadei
+5	3	i love you too	1	tears of prophecy
 \.
 
 
@@ -1527,7 +1556,15 @@ COPY check_solutions (id, check_id, solution, sort_order) FROM stdin;
 -- Data for Name: check_solutions_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY check_solutions_l10n (check_solution_id, language_id, solution) FROM stdin;
+COPY check_solutions_l10n (check_solution_id, language_id, solution, title) FROM stdin;
+1	1	gxz	gxz
+1	2	\N	\N
+2	1	\N	\N
+2	2	zf	zf
+4	1	zoo	aduljadei
+4	2	\N	\N
+5	1	i love you too	tears of prophecy
+5	2	ich liebe dir	\N
 \.
 
 
@@ -1581,6 +1618,7 @@ COPY checks (id, check_control_id, name, background_info, hints, advanced, autom
 8	8	DNS NIC Typosquatting			f	t	nic_typosquatting.pl	f		\N	\N		1			2
 11	8	DNS Resolve IP			f	t	dns_resolve_ip.pl	f		\N	\N		1			2
 14	9	DNS SPF (Perl)			f	t	dns_spf.pl	f		\N	\N		1			2
+44	10	yay			f	t	j	f		\N	\N		1			2
 \.
 
 
@@ -1677,6 +1715,8 @@ COPY checks_l10n (check_id, language_id, name, background_info, hints, reference
 11	2	\N	\N	\N	\N	\N
 14	1	DNS SPF (Perl)	\N	\N	\N	\N
 14	2	\N	\N	\N	\N	\N
+44	1	yay	\N	\N	\N	\N
+44	2	dum	\N	\N	\N	\N
 \.
 
 
@@ -1757,6 +1797,8 @@ COPY risk_categories (id, name) FROM stdin;
 4	Category A
 6	Category B
 7	Category C
+8	nowai
+9	pumipon
 \.
 
 
@@ -1773,6 +1815,10 @@ COPY risk_categories_l10n (risk_category_id, language_id, name) FROM stdin;
 6	2	\N
 7	1	Category C
 7	2	\N
+8	1	nowai
+8	2	\N
+9	1	\N
+9	2	pumipon
 \.
 
 
@@ -2317,8 +2363,8 @@ ALTER TABLE ONLY check_inputs_l10n
 
 
 --
--- TOC entry 2053 (class 2606 OID 21915)
--- Dependencies: 155 149 2001
+-- TOC entry 2053 (class 2606 OID 22135)
+-- Dependencies: 149 155 2001
 -- Name: check_results_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2327,8 +2373,8 @@ ALTER TABLE ONLY check_results
 
 
 --
--- TOC entry 2054 (class 2606 OID 21920)
--- Dependencies: 151 1993 149
+-- TOC entry 2054 (class 2606 OID 22105)
+-- Dependencies: 1993 151 149
 -- Name: check_results_l10n_check_result_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2337,8 +2383,8 @@ ALTER TABLE ONLY check_results_l10n
 
 
 --
--- TOC entry 2055 (class 2606 OID 21925)
--- Dependencies: 151 162 2013
+-- TOC entry 2055 (class 2606 OID 22110)
+-- Dependencies: 162 2013 151
 -- Name: check_results_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2347,8 +2393,8 @@ ALTER TABLE ONLY check_results_l10n
 
 
 --
--- TOC entry 2056 (class 2606 OID 21930)
--- Dependencies: 155 2001 152
+-- TOC entry 2056 (class 2606 OID 22130)
+-- Dependencies: 152 2001 155
 -- Name: check_solutions_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2357,8 +2403,8 @@ ALTER TABLE ONLY check_solutions
 
 
 --
--- TOC entry 2057 (class 2606 OID 21935)
--- Dependencies: 1997 154 152
+-- TOC entry 2057 (class 2606 OID 22120)
+-- Dependencies: 1997 152 154
 -- Name: check_solutions_l10n_check_solution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2367,7 +2413,7 @@ ALTER TABLE ONLY check_solutions_l10n
 
 
 --
--- TOC entry 2058 (class 2606 OID 21940)
+-- TOC entry 2058 (class 2606 OID 22125)
 -- Dependencies: 154 2013 162
 -- Name: check_solutions_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
@@ -2378,7 +2424,7 @@ ALTER TABLE ONLY check_solutions_l10n
 
 --
 -- TOC entry 2059 (class 2606 OID 21945)
--- Dependencies: 1985 155 143
+-- Dependencies: 143 155 1985
 -- Name: checks_check_control_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2388,7 +2434,7 @@ ALTER TABLE ONLY checks
 
 --
 -- TOC entry 2061 (class 2606 OID 21950)
--- Dependencies: 157 155 2001
+-- Dependencies: 2001 157 155
 -- Name: checks_l10n_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2408,7 +2454,7 @@ ALTER TABLE ONLY checks_l10n
 
 --
 -- TOC entry 2060 (class 2606 OID 21960)
--- Dependencies: 155 168 2019
+-- Dependencies: 2019 168 155
 -- Name: checks_reference_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2418,7 +2464,7 @@ ALTER TABLE ONLY checks
 
 --
 -- TOC entry 2063 (class 2606 OID 21965)
--- Dependencies: 180 2039 160
+-- Dependencies: 2039 160 180
 -- Name: emails_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2428,7 +2474,7 @@ ALTER TABLE ONLY emails
 
 --
 -- TOC entry 2064 (class 2606 OID 21970)
--- Dependencies: 166 164 2017
+-- Dependencies: 166 2017 164
 -- Name: project_details_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2438,7 +2484,7 @@ ALTER TABLE ONLY project_details
 
 --
 -- TOC entry 2065 (class 2606 OID 21975)
--- Dependencies: 158 2005 166
+-- Dependencies: 2005 158 166
 -- Name: projects_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2458,7 +2504,7 @@ ALTER TABLE ONLY risk_categories_l10n
 
 --
 -- TOC entry 2084 (class 2606 OID 22090)
--- Dependencies: 2041 184 183
+-- Dependencies: 2041 183 184
 -- Name: risk_categories_l10n_risk_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2468,7 +2514,7 @@ ALTER TABLE ONLY risk_categories_l10n
 
 --
 -- TOC entry 2066 (class 2606 OID 21980)
--- Dependencies: 2001 172 155
+-- Dependencies: 172 2001 155
 -- Name: target_check_attachments_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2478,7 +2524,7 @@ ALTER TABLE ONLY target_check_attachments
 
 --
 -- TOC entry 2067 (class 2606 OID 21985)
--- Dependencies: 178 172 2035
+-- Dependencies: 172 2035 178
 -- Name: target_check_attachments_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2488,7 +2534,7 @@ ALTER TABLE ONLY target_check_attachments
 
 --
 -- TOC entry 2068 (class 2606 OID 21990)
--- Dependencies: 1981 140 173
+-- Dependencies: 140 1981 173
 -- Name: target_check_categories_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2498,7 +2544,7 @@ ALTER TABLE ONLY target_check_categories
 
 --
 -- TOC entry 2069 (class 2606 OID 21995)
--- Dependencies: 178 2035 173
+-- Dependencies: 178 173 2035
 -- Name: target_check_categories_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2508,7 +2554,7 @@ ALTER TABLE ONLY target_check_categories
 
 --
 -- TOC entry 2070 (class 2606 OID 22000)
--- Dependencies: 2001 174 155
+-- Dependencies: 155 174 2001
 -- Name: target_check_inputs_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2518,7 +2564,7 @@ ALTER TABLE ONLY target_check_inputs
 
 --
 -- TOC entry 2071 (class 2606 OID 22005)
--- Dependencies: 1989 174 146
+-- Dependencies: 146 174 1989
 -- Name: target_check_inputs_check_input_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2528,7 +2574,7 @@ ALTER TABLE ONLY target_check_inputs
 
 --
 -- TOC entry 2072 (class 2606 OID 22010)
--- Dependencies: 174 178 2035
+-- Dependencies: 174 2035 178
 -- Name: target_check_inputs_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2538,7 +2584,7 @@ ALTER TABLE ONLY target_check_inputs
 
 --
 -- TOC entry 2073 (class 2606 OID 22015)
--- Dependencies: 175 155 2001
+-- Dependencies: 175 2001 155
 -- Name: target_check_solutions_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2548,7 +2594,7 @@ ALTER TABLE ONLY target_check_solutions
 
 --
 -- TOC entry 2074 (class 2606 OID 22020)
--- Dependencies: 1997 175 152
+-- Dependencies: 1997 152 175
 -- Name: target_check_solutions_check_solution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2558,7 +2604,7 @@ ALTER TABLE ONLY target_check_solutions
 
 --
 -- TOC entry 2075 (class 2606 OID 22025)
--- Dependencies: 2035 178 175
+-- Dependencies: 175 2035 178
 -- Name: target_check_solutions_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2568,7 +2614,7 @@ ALTER TABLE ONLY target_check_solutions
 
 --
 -- TOC entry 2076 (class 2606 OID 22030)
--- Dependencies: 2001 155 176
+-- Dependencies: 155 2001 176
 -- Name: target_checks_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2578,7 +2624,7 @@ ALTER TABLE ONLY target_checks
 
 --
 -- TOC entry 2077 (class 2606 OID 22035)
--- Dependencies: 2013 162 176
+-- Dependencies: 176 2013 162
 -- Name: target_checks_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2598,7 +2644,7 @@ ALTER TABLE ONLY target_checks
 
 --
 -- TOC entry 2079 (class 2606 OID 22045)
--- Dependencies: 180 176 2039
+-- Dependencies: 176 2039 180
 -- Name: target_checks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2608,7 +2654,7 @@ ALTER TABLE ONLY target_checks
 
 --
 -- TOC entry 2080 (class 2606 OID 22050)
--- Dependencies: 177 168 2019
+-- Dependencies: 177 2019 168
 -- Name: target_references_reference_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2638,7 +2684,7 @@ ALTER TABLE ONLY targets
 
 --
 -- TOC entry 2083 (class 2606 OID 22065)
--- Dependencies: 180 158 2005
+-- Dependencies: 158 2005 180
 -- Name: users_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2658,7 +2704,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2012-07-31 15:54:23 MSK
+-- Completed on 2012-08-02 05:22:44 MSK
 
 --
 -- PostgreSQL database dump complete

@@ -6,6 +6,7 @@
  * The followings are the available columns in table 'check_solutions_l10n':
  * @property integer $check_solution_id
  * @property integer $language_id
+ * @property string $title
  * @property string $solution
  */
 class CheckSolutionL10n extends CActiveRecord
@@ -36,7 +37,7 @@ class CheckSolutionL10n extends CActiveRecord
 		return array(
             array( 'check_solution_id, language_id', 'required' ),
             array( 'check_solution_id, language_id', 'numerical', 'integerOnly' => true ),
-            array( 'solution', 'safe' ),
+            array( 'title, solution', 'safe' ),
 		);
 	}
 

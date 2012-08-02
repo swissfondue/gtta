@@ -278,7 +278,9 @@
                                             <ul class="results">
                                                 <?php foreach ($check->results as $result): ?>
                                                     <li>
-                                                        <a href="#insert" onclick="user.check.insertResult(<?php echo $check->id; ?>, this.innerHTML);"><?php echo CHtml::encode($result->localizedResult); ?></a>
+                                                        <a href="#insert" onclick="user.check.insertResult(<?php echo $check->id; ?>, $('.result-content[data-id=<?php echo $check->id; ?>-<?php echo $result->id; ?>]').html());"><?php echo CHtml::encode($result->localizedTitle); ?></a>
+
+                                                        <div class="result-content" data-id="<?php echo $check->id; ?>-<?php echo $result->id; ?>"><?php echo $result->localizedResult; ?></div>
                                                     </li>
                                                 <?php endforeach; ?>
                                             </ul>
@@ -312,8 +314,12 @@
                                                             <label class="radio">
                                                                 <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="radio" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning) echo 'disabled'; ?>>
                                                         <?php endif; ?>
-                                                            <?php echo CHtml::encode($solution->localizedSolution); ?>
+                                                            <?php echo CHtml::encode($solution->localizedTitle); ?>
                                                         </label>
+
+                                                        <div class="solution-content">
+                                                            <?php echo $solution->localizedSolution; ?>
+                                                        </div>
                                                     </li>
                                                 <?php endforeach; ?>
                                             </ul>
