@@ -67,7 +67,7 @@ return array (
   'No risk categories yet.' => 'Noch keine Risikokategorien',
   'No vulnerabilities found.' => 'Keine Schwachstelle gefunden',
   'Notification System' => 'Informationssystem',
-  'Ordered List' => 'Bestellte Liste',
+  'Ordered List' => 'Geordnete Liste',
   'Outdent' => 'Einzug',
   'PROCEED AT YOUR OWN RISK!' => 'AUF EIGENES RISIKO FORTSETZEN',
   'Please select a category that should be included into the estimation.' => 'Bitte wählen Sie die Kategorie, welche in der Schätzung berücksichtigt werden soll',
