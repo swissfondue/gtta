@@ -140,7 +140,7 @@
             <hr>
             
             <footer>
-                <?php echo Yii::t('app', 'Copyright'); ?> &copy; <?php echo date('Y'); ?> <a href="<?php echo Yii::app()->homeUrl; ?>"><?php echo Yii::app()->name; ?></a><br>
+                <?php echo Yii::t('app', 'Copyright'); ?> &copy; <?php echo date('Y'); ?> <a href="http://netprotect.ch">Netprotect AG</a><br>
                 <?php echo Yii::t('app', 'All Rights Reserved'); ?><br>
             </footer>
         </div>
