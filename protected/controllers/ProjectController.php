@@ -321,7 +321,7 @@ class ProjectController extends Controller
             foreach ($row as $column)
             {
                 $column    = str_replace(array( "\r\n", "\r", "\n" ), "\r", $column);
-                $columns[] = '"' . str_replace('"', '\"', $column) . '"';
+                $columns[] = '"' . str_replace('"', '""', $column) . '"';
             }
 
             $csv[] = implode(',', $columns);
