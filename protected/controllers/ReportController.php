@@ -152,7 +152,7 @@ class ReportController extends Controller
                 )
             ))->findAllByAttributes(
                 array( 'target_id' => $target->id  ),
-                array( 'order'     => 't.name ASC' )
+                array( 'order'     => 'category.name ASC' )
             );
 
             foreach ($categories as $category)
@@ -1485,7 +1485,7 @@ class ReportController extends Controller
                 )
             ))->findAllByAttributes(
                 array( 'target_id' => $target->id  ),
-                array( 'order'     => 't.name ASC' )
+                array( 'order'     => 'category.name ASC' )
             );
 
             foreach ($categories as $category)

@@ -195,9 +195,9 @@ class ProjectController extends Controller
                 $referenceIds[] = $reference->reference_id;
 
             // get all categories
-            $categories = TargetCheckCategory::model()->findAllByAttributes(
+            $categories = TargetCheckCategory::model()->with('category')->findAllByAttributes(
                 array( 'target_id' => $target->id  ),
-                array( 'order'     => 't.name ASC' )
+                array( 'order'     => 'category.name ASC' )
             );
 
             if (!$categories)
@@ -691,7 +691,7 @@ class ProjectController extends Controller
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 'name ASC';
+        $criteria->order  = 'category.name ASC';
         $criteria->addCondition('t.target_id = :target_id');
         $criteria->params = array( 'target_id' => $target->id );
 
