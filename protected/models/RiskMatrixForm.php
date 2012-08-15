@@ -20,18 +20,13 @@ class RiskMatrixForm extends CFormModel
      */
     public $targetIds;
 
-    /**
-     * @var array matrix.
-     */
-    public $matrix;
-
 	/**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules()
 	{
 		return array(
-            array( 'clientId, projectId, targetIds, matrix', 'safe' ),
+            array( 'clientId, projectId, targetIds', 'safe' ),
 		);
 	}
 

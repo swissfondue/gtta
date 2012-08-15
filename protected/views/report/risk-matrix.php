@@ -45,35 +45,8 @@
             </div>
         </div>
 
-        <div id="check-list" class="hide">
-            <hr>
-            <h2><?php echo Yii::t('app', 'Checks'); ?></h2>
-            <div class="container">
-                <div class="row">
-                    <div class="span8">
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="form-actions">
             <button type="submit" class="btn" disabled><?php echo Yii::t('app', 'Generate'); ?></button>
         </div>
     </fieldset>
 </form>
-
-<script>
-    var riskCategories = [
-        <?php
-            $riskCategories = array();
-
-            foreach ($risks as $risk)
-                $riskCategories[] = json_encode(array(
-                    'id'   => $risk->id,
-                    'name' => $risk->localizedName
-                ));
-
-            echo implode(',', $riskCategories);
-        ?>
-    ];
-</script>

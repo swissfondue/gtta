@@ -70,6 +70,7 @@ class Check extends CActiveRecord
             'results'                => array( self::HAS_MANY,   'CheckResult',           'check_id' ),
             'solutions'              => array( self::HAS_MANY,   'CheckSolution',         'check_id' ),
             'inputs'                 => array( self::HAS_MANY,   'CheckInput',            'check_id' ),
+            'riskCategories'         => array( self::HAS_MANY,   'RiskCategoryCheck',     'check_id' ),
 		);
 	}
 

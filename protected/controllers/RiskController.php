@@ -67,15 +67,14 @@ class RiskController extends Controller
         $id        = (int) $id;
         $newRecord = false;
 
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
         if ($id)
-        {
-            $language = Language::model()->findByAttributes(array(
-                'code' => Yii::app()->language
-            ));
-
-            if ($language)
-                $language = $language->id;
-
             $risk = RiskCategory::model()->with(array(
                 'l10n' => array(
                     'joinType' => 'LEFT JOIN',
@@ -83,7 +82,6 @@ class RiskController extends Controller
                     'params'   => array( 'language_id' => $language )
                 )
             ))->findByPk($id);
-        }
         else
         {
             $risk      = new RiskCategory();
@@ -139,6 +137,25 @@ class RiskController extends Controller
                     $riskL10n->save();
                 }
 
+                foreach ($model->checks as $checkId => $value)
+                {
+                    $riskCategoryCheck = RiskCategoryCheck::model()->findByAttributes(array(
+                        'risk_category_id' => $risk->id,
+                        'check_id'         => $checkId
+                    ));
+
+                    if (!$riskCategoryCheck)
+                    {
+                        $riskCategoryCheck = new RiskCategoryCheck();
+                        $riskCategoryCheck->risk_category_id = $risk->id;
+                        $riskCategoryCheck->check_id         = $checkId;
+                    }
+
+                    $riskCategoryCheck->damage     = $value['damage'];
+                    $riskCategoryCheck->likelihood = $value['likelihood'];
+                    $riskCategoryCheck->save();
+                }
+
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Risk category saved.'));
 
                 $risk->refresh();
@@ -150,6 +167,51 @@ class RiskController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
+        $categories = CheckCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'l10n.language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            ),
+
+            'controls' => array(
+                'joinType' => 'LEFT JOIN',
+                'order'    => 'controls.name ASC',
+
+                'with' => array(
+                    'l10n' => array(
+                        'alias'    => 'l10n_controls',
+                        'joinType' => 'LEFT JOIN',
+                        'on'       => 'l10n_controls.language_id = :language_id',
+                        'params'   => array( 'language_id' => $language )
+                    ),
+
+                    'checks' => array(
+                        'joinType' => 'LEFT JOIN',
+                        'order'    => 'checks.name ASC',
+
+                        'with' => array(
+                            'l10n' => array(
+                                'alias'    => 'l10n_checks',
+                                'joinType' => 'LEFT JOIN',
+                                'on'       => 'l10n_checks.language_id = :language_id',
+                                'params'   => array( 'language_id' => $language )
+                            ),
+
+                            'riskCategories' => array(
+                                'joinType' => 'LEFT JOIN',
+                                'on'       => '"riskCategories".risk_category_id = :risk_category_id',
+                                'params'   => array( 'risk_category_id' => $id )
+                            )
+                        )
+                    )
+                )
+            )
+        ))->findAllByAttributes(
+            array(),
+            array( 'order' => 't.name ASC' )
+        );
+
         $this->breadcrumbs[] = array(Yii::t('app', 'Risk Categories'), $this->createUrl('risk/index'));
 
         if ($newRecord)
@@ -160,9 +222,10 @@ class RiskController extends Controller
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Risk Category') : $risk->localizedName;
 		$this->render('edit', array(
-            'model'     => $model,
-            'risk'      => $risk,
-            'languages' => $languages,
+            'model'      => $model,
+            'risk'       => $risk,
+            'languages'  => $languages,
+            'categories' => $categories,
         ));
 	}
 

@@ -247,16 +247,15 @@ table.check-header .status {
 div.control-header {
     border-top:1px solid #ddd;
     padding:8px;
-    font-weight:bold;
-}
-
-div.control-header a {
-    color:#333;
-    text-decoration:none;
 }
 
 div.control-header:first-child {
     border-top:none;
+}
+
+div.control-header-bold {
+    padding:8px;
+    font-weight:bold;
 }
 
 div.control-body {
@@ -453,64 +452,49 @@ table.check-header .actions {
     margin-bottom:10px;
 }
 
-.report-target-header {
+.risk-category-category-header, .risk-category-control-header {
     border-top:1px solid #ddd;
+    padding:8px;
+}
+
+.risk-category-category-header-bold {
     padding:8px;
     font-weight:bold;
 }
 
-.report-target-header:first-child {
-    border-top:none;
+.risk-category-category-header {
+    font-weight:normal;
 }
 
-.report-target-content {
+.risk-category-category-content {
     padding-left:20px;
     border-top:1px solid #ddd;
 }
 
-div.report-check-header {
-    padding:0;
+.risk-category-control-header:first-child {
+    border-top:none;
+}
+
+.risk-category-control-content {
+    padding-left:20px;
+    border-top:1px solid #ddd;
+}
+
+div.risk-category-check-header {
+    padding:8px;
     margin:0;
     border-top:1px solid #ddd;
 }
 
-div.report-check-header:first-child {
+div.risk-category-check-header:first-child {
     border-top:none;
 }
 
-table.report-check {
-    width:100%;
-}
-
-table.report-check td {
-    padding:8px;
-}
-
-table.report-check .status span {
-    vertical-align:top;
-}
-
-table.report-check .status {
-    width:70px;
-    text-align:right;
-    padding-top:10px;
-    white-space:nowrap;
-}
-
-.report-target-header a {
-    color:#333;
-    text-decoration:none;
-}
-
-div.report-check-content {
+div.risk-category-check-content {
     background-color:#f0f0f0;
-    padding:10px;
+    padding:8px;
     margin:0;
     border-top:1px dashed #ddd;
-}
-
-.report-risk-category-name {
-    font-weight:bold;
 }
 
 textarea.wysiwyg {

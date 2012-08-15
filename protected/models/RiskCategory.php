@@ -43,7 +43,8 @@ class RiskCategory extends CActiveRecord
 	public function relations()
 	{
 		return array(
-            'l10n' => array( self::HAS_MANY, 'RiskCategoryL10n', 'risk_category_id' ),
+            'l10n'   => array( self::HAS_MANY, 'RiskCategoryL10n',  'risk_category_id' ),
+            'checks' => array( self::HAS_MANY, 'RiskCategoryCheck', 'risk_category_id' ),
 		);
 	}
 

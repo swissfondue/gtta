@@ -1283,90 +1283,6 @@ class ReportController extends Controller
 
                     break;
 
-                case 'check-list':
-                    $target = Target::model()->findByPk($model->id);
-
-                    if (!$target)
-                        throw new CHttpException(404, Yii::t('app', 'Target not found.'));
-
-                    $referenceIds = array();
-
-                    $references = TargetReference::model()->findAllByAttributes(array(
-                        'target_id' => $target->id
-                    ));
-
-                    foreach ($references as $reference)
-                        $referenceIds[] = $reference->reference_id;
-
-                    $categories = TargetCheckCategory::model()->findAllByAttributes(
-                        array( 'target_id' => $target->id  )
-                    );
-
-                    $ratings = array(
-                        TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
-                        TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
-                        TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
-                        TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
-                        TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
-                    );
-
-                    foreach ($categories as $category)
-                    {
-                        $controlIds = array();
-
-                        $controls = CheckControl::model()->findAllByAttributes(array(
-                            'check_category_id' => $category->check_category_id
-                        ));
-
-                        foreach ($controls as $control)
-                            $controlIds[] = $control->id;
-
-                        $criteria = new CDbCriteria();
-
-                        $criteria->order = 't.name ASC';
-                        $criteria->addInCondition('t.reference_id', $referenceIds);
-                        $criteria->addInCondition('t.check_control_id', $controlIds);
-
-                        if (!$category->advanced)
-                            $criteria->addCondition('t.advanced = FALSE');
-
-                        $checks = Check::model()->with(array(
-                            'l10n' => array(
-                                'joinType' => 'LEFT JOIN',
-                                'on'       => 'l10n.language_id = :language_id',
-                                'params'   => array( 'language_id' => $language )
-                            ),
-                            'targetChecks' => array(
-                                'alias'    => 'tcs',
-                                'joinType' => 'INNER JOIN',
-                                'on'       => 'tcs.target_id = :target_id AND tcs.status = :status AND (tcs.rating = :high_risk OR tcs.rating = :med_risk)',
-                                'params'   => array(
-                                    'target_id' => $target->id,
-                                    'status'    => TargetCheck::STATUS_FINISHED,
-                                    'high_risk' => TargetCheck::RATING_HIGH_RISK,
-                                    'med_risk'  => TargetCheck::RATING_MED_RISK,
-                                ),
-                            ),
-                        ))->findAll($criteria);
-
-                        foreach ($checks as $check)
-                            $objects[] = array(
-                                'id'         => $check->id,
-                                'ratingName' => $ratings[$check->targetChecks[0]->rating],
-                                'rating'     => $check->targetChecks[0]->rating,
-                                'name'       => CHtml::encode($check->localizedName),
-                            );
-                    }
-
-                    $response->addData('target', array(
-                        'id'   => $target->id,
-                        'host' => $target->host,
-                    ));
-
-                    $response->addData('objects', $objects);
-
-                    break;
-
                 default:
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;
@@ -1741,7 +1657,7 @@ class ReportController extends Controller
     /**
      * Generate risk matrix report.
      */
-    private function _generateRiskMatrixReport($clientId, $projectId, $targetIds, $matrix)
+    private function _generateRiskMatrixReport($clientId, $projectId, $targetIds)
     {
         $project = Project::model()->findByAttributes(array(
             'client_id' => $clientId,
@@ -1778,13 +1694,33 @@ class ReportController extends Controller
                 'joinType' => 'LEFT JOIN',
                 'on'       => 'language_id = :language_id',
                 'params'   => array( 'language_id' => $language )
-            )
+            ),
+            'checks'
         ))->findAllByAttributes(
             array(),
             array( 'order' => 't.name ASC' )
         );
 
-        $data = array();
+        $riskList = array();
+
+        foreach ($risks as $risk)
+        {
+            $riskData = array(
+                'name'   => $risk->localizedName,
+                'checks' => array()
+            );
+
+            foreach ($risk->checks as $check)
+                $riskData['checks'][$check->check_id] = array(
+                    'damage'     => $check->damage,
+                    'likelihood' => $check->likelihood
+                );
+
+            $riskList[$risk->id] = $riskData;
+        }
+
+        $risks = $riskList;
+        $data  = array();
 
         foreach ($targets as $target)
         {
@@ -1800,14 +1736,6 @@ class ReportController extends Controller
 
             $categories = TargetCheckCategory::model()->findAllByAttributes(
                 array( 'target_id' => $target->id  )
-            );
-
-            $ratings = array(
-                TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
-                TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
-                TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
-                TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
-                TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
             );
 
             foreach ($categories as $category)
@@ -1846,27 +1774,29 @@ class ReportController extends Controller
                             'high_risk' => TargetCheck::RATING_HIGH_RISK,
                             'med_risk'  => TargetCheck::RATING_MED_RISK,
                         ),
-                    ),
+                    )
                 ))->findAll($criteria);
 
                 foreach ($checks as $check)
                 {
-                    if (!isset($matrix[$target->id][$check->id]))
-                        continue;
-
                     $ctr = 0;
 
-                    foreach ($risks as $risk)
+                    foreach ($risks as $riskId => $risk)
                     {
                         $ctr++;
 
-                        if (!isset($matrix[$target->id][$check->id][$risk->id]))
-                            continue;
-
                         $riskName = 'R' . $ctr;
 
-                        $damage     = $matrix[$target->id][$check->id][$risk->id]['damage']     - 1;
-                        $likelihood = $matrix[$target->id][$check->id][$risk->id]['likelihood'] - 1;
+                        if (isset($risk['checks'][$check->id]))
+                        {
+                            $damage     = $risk['checks'][$check->id]['damage']     - 1;
+                            $likelihood = $risk['checks'][$check->id]['likelihood'] - 1;
+                        }
+                        else
+                        {
+                            $damage     = 0;
+                            $likelihood = 0;
+                        }
 
                         if (!isset($mtrx[$damage]))
                             $mtrx[$damage] = array();
@@ -1989,7 +1919,7 @@ class ReportController extends Controller
             $ctr++;
 
             $table->writeToCell($row, 1, 'R' . $ctr);
-            $table->writeToCell($row, 2, $risk->localizedName);
+            $table->writeToCell($row, 2, $risk['name']);
 
             $row++;
         }
@@ -2099,7 +2029,7 @@ class ReportController extends Controller
             $model->attributes = $_POST['RiskMatrixForm'];
 
             if ($model->validate())
-                $this->_generateRiskMatrixReport($model->clientId, $model->projectId, $model->targetIds, $model->matrix);
+                $this->_generateRiskMatrixReport($model->clientId, $model->projectId, $model->targetIds);
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
         }

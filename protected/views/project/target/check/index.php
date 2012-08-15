@@ -36,6 +36,9 @@
     <div class="row">
         <div class="span8">
             <?php if (count($checks) > 0): ?>
+                <div class="control-header-bold">
+                    <?php echo Yii::t('app', 'Checks'); ?>
+                </div>
                 <?php
                     $counter     = 0;
                     $prevControl = 0;

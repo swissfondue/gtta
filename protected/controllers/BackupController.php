@@ -34,6 +34,7 @@ class BackupController extends Controller
         'target_check_solutions',
         'risk_categories',
         'risk_categories_l10n',
+        'risk_category_checks',
     );
 
     private $_sequences = array(

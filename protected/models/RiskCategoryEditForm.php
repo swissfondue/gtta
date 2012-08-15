@@ -10,6 +10,11 @@ class RiskCategoryEditForm extends LocalizedFormModel
      */
     public $name;
 
+    /**
+     * @var array checks.
+     */
+    public $checks;
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
@@ -18,7 +23,7 @@ class RiskCategoryEditForm extends LocalizedFormModel
 		return array(
 			array( 'name', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
-            array( 'localizedItems', 'safe' ),
+            array( 'localizedItems, checks', 'safe' ),
 		);
 	}
     
