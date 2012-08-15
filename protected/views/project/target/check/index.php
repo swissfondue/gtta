@@ -281,9 +281,15 @@
                                             <ul class="results">
                                                 <?php foreach ($check->results as $result): ?>
                                                     <li>
-                                                        <a href="#insert" onclick="user.check.insertResult(<?php echo $check->id; ?>, $('.result-content[data-id=<?php echo $check->id; ?>-<?php echo $result->id; ?>]').html());"><?php echo CHtml::encode($result->localizedTitle); ?></a>
+                                                        <div class="result-header">
+                                                            <a href="#insert" onclick="user.check.insertResult(<?php echo $check->id; ?>, $('.result-content[data-id=<?php echo $result->id; ?>]').html());"><?php echo CHtml::encode($result->localizedTitle); ?></a>
 
-                                                        <div class="result-content" data-id="<?php echo $check->id; ?>-<?php echo $result->id; ?>"><?php echo str_replace("\n", '<br>', CHtml::encode($result->localizedResult)); ?></div>
+                                                            <span class="result-control" data-id="<?php echo $result->id; ?>">
+                                                                <a href="#result" onclick="user.check.expandResult(<?php echo $result->id; ?>);"><i class="icon-chevron-down"></i></a>
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="result-content hide" data-id="<?php echo $result->id; ?>"><?php echo str_replace("\n", '<br>', CHtml::encode($result->localizedResult)); ?></div>
                                                     </li>
                                                 <?php endforeach; ?>
                                             </ul>
@@ -299,28 +305,34 @@
                                             <ul class="solutions">
                                                 <?php foreach ($check->solutions as $solution): ?>
                                                     <li>
-                                                        <?php
-                                                            $checked = false;
+                                                        <div class="solution-header">
+                                                            <?php
+                                                                $checked = false;
 
-                                                            if ($check->targetCheckSolutions)
-                                                                foreach ($check->targetCheckSolutions as $solutionValue)
-                                                                    if ($solutionValue->check_solution_id == $solution->id)
-                                                                    {
-                                                                        $checked = true;
-                                                                        break;
-                                                                    }
-                                                        ?>
-                                                        <?php if ($check->multiple_solutions): ?>
-                                                            <label class="checkbox">
-                                                                <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="checkbox" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning) echo 'disabled'; ?>>
-                                                        <?php else: ?>
-                                                            <label class="radio">
-                                                                <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="radio" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning) echo 'disabled'; ?>>
-                                                        <?php endif; ?>
-                                                            <?php echo CHtml::encode($solution->localizedTitle); ?>
-                                                        </label>
+                                                                if ($check->targetCheckSolutions)
+                                                                    foreach ($check->targetCheckSolutions as $solutionValue)
+                                                                        if ($solutionValue->check_solution_id == $solution->id)
+                                                                        {
+                                                                            $checked = true;
+                                                                            break;
+                                                                        }
+                                                            ?>
+                                                            <?php if ($check->multiple_solutions): ?>
+                                                                <label class="checkbox">
+                                                                    <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="checkbox" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning) echo 'disabled'; ?>>
+                                                            <?php else: ?>
+                                                                <label class="radio">
+                                                                    <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="radio" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning) echo 'disabled'; ?>>
+                                                            <?php endif; ?>
+                                                                <?php echo CHtml::encode($solution->localizedTitle); ?>
 
-                                                        <div class="solution-content">
+                                                                <span class="solution-control" data-id="<?php echo $solution->id; ?>">
+                                                                    <a href="#solution" onclick="user.check.expandSolution(<?php echo $solution->id; ?>);"><i class="icon-chevron-down"></i></a>
+                                                                </span>
+                                                            </label>
+                                                        </div>
+
+                                                        <div class="solution-content hide" data-id="<?php echo $solution->id; ?>">
                                                             <?php echo $solution->localizedSolution; ?>
                                                         </div>
                                                     </li>
