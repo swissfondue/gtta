@@ -60,8 +60,8 @@ class AutomationCommand extends ConsoleCommand
     private function _processRunningChecks()
     {
         $criteria = new CDbCriteria();
-        $criteria->addCondition('status = :status AND pid IS NOT NULL');
-        $criteria->params = array( 'status' => TargetCheck::STATUS_IN_PROGRESS );
+        $criteria->addCondition('pid IS NOT NULL');
+        $criteria->addInCondition('status', array( TargetCheck::STATUS_IN_PROGRESS, TargetCheck::STATUS_STOP ));
 
         $checks = TargetCheck::model()->findAll($criteria);
 
@@ -119,7 +119,7 @@ class AutomationCommand extends ConsoleCommand
      */
     private function _killProcess($pid)
     {
-        exec(($this->_isWindows() ? 'taskkill /pid ' : 'kill -9 ') . $pid);
+        exec($this->_isWindows() ? 'taskkill /PID ' . $pid . ' /F /T' : 'kill -9 ' . $pid);
         return $this->_isRunning($pid);
     }
 
