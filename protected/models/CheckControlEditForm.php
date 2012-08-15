@@ -10,14 +10,21 @@ class CheckControlEditForm extends LocalizedFormModel
      */
     public $name;
 
+    /**
+     * @var integer category id.
+     */
+    public $categoryId;
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules()
 	{
 		return array(
-			array( 'name', 'required' ),
+			array( 'name, categoryId', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
+            array( 'categoryId', 'numerical', 'integerOnly' => true ),
+            array( 'categoryId', 'checkCategory' ),
             array( 'localizedItems', 'safe' ),
 		);
 	}
@@ -28,7 +35,24 @@ class CheckControlEditForm extends LocalizedFormModel
 	public function attributeLabels()
 	{
 		return array(
-			'name' => Yii::t('app', 'Name'),
+			'name'       => Yii::t('app', 'Name'),
+            'categoryId' => Yii::t('app', 'Category'),
 		);
+	}
+
+    /**
+	 * Checks if category exists.
+	 */
+	public function checkCategory($attribute, $params)
+	{
+		$category = CheckCategory::model()->findByPk($this->categoryId);
+
+        if (!$category)
+        {
+            $this->addError('categoryId', Yii::t('app', 'Category doesn\\\'t exist.'));
+            return false;
+        }
+
+        return true;
 	}
 }

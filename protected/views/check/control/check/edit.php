@@ -73,17 +73,17 @@
             <?php endforeach; ?>
         </div>
 
-        <div>
-            <hr>
-        </div>
+        <hr>
 
         <div class="control-group <?php if ($model->getError('controlId')) echo 'error'; ?>">
             <label class="control-label" for="CheckEditForm_controlId"><?php echo Yii::t('app', 'Control'); ?></label>
             <div class="controls">
                 <select class="input-xlarge" id="CheckEditForm_controlId" name="CheckEditForm[controlId]">
                     <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
-                    <?php foreach ($controls as $ctrl): ?>
-                        <option value="<?php echo $ctrl->id; ?>" <?php if ($ctrl->id == $model->controlId) echo 'selected'; ?>><?php echo CHtml::encode($ctrl->localizedName); ?></option>
+                    <?php foreach ($categories as $cat): ?>
+                        <?php foreach ($cat->controls as $ctrl): ?>
+                            <option value="<?php echo $ctrl->id; ?>" <?php if ($ctrl->id == $model->controlId) echo 'selected'; ?>><?php echo CHtml::encode($cat->localizedName); ?> / <?php echo CHtml::encode($ctrl->localizedName); ?></option>
+                        <?php endforeach; ?>
                     <?php endforeach; ?>
                 </select>
                 <?php if ($model->getError('controlId')): ?>
@@ -122,9 +122,7 @@
             </div>
         </div>
 
-        <div>
-            <hr>
-        </div>
+        <hr>
         
         <div class="control-group <?php if ($model->getError('protocol')) echo 'error'; ?>">
             <label class="control-label" for="CheckEditForm_protocol"><?php echo Yii::t('app', 'Protocol'); ?></label>

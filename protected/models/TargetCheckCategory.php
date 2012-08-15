@@ -133,4 +133,15 @@ class TargetCheckCategory extends CActiveRecord
 
         $this->save();
     }
+
+    /**
+     * Update all stats.
+     */
+    static public function updateAllStats()
+    {
+        $targetCategories = TargetCheckCategory::model()->findAll();
+
+        foreach ($targetCategories as $targetCategory)
+            $targetCategory->updateStats();
+    }
 }

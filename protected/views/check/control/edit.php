@@ -44,6 +44,23 @@
             <?php endforeach; ?>
         </div>
 
+        <hr>
+
+        <div class="control-group <?php if ($model->getError('categoryId')) echo 'error'; ?>">
+            <label class="control-label" for="CheckControlEditForm_categoryId"><?php echo Yii::t('app', 'Category'); ?></label>
+            <div class="controls">
+                <select class="input-xlarge" id="CheckControlEditForm_categoryId" name="CheckControlEditForm[categoryId]">
+                    <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
+                    <?php foreach ($categories as $cat): ?>
+                        <option value="<?php echo $cat->id; ?>" <?php if ($cat->id == $model->categoryId) echo 'selected'; ?>><?php echo CHtml::encode($cat->localizedName); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if ($model->getError('categoryId')): ?>
+                    <p class="help-block"><?php echo $model->getError('categoryId'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>
         </div>
