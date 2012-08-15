@@ -241,36 +241,32 @@ function User()
          * Expand solution.
          */
         this.expandSolution = function (id) {
-            $('div.solution-content[data-id=' + id + ']').slideDown('slow', undefined, function () {
-                $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.check.shrinkSolution(' + id + ');"><i class="icon-chevron-up"></i></a>');
-            });
+            $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.check.shrinkSolution(' + id + ');"><i class="icon-chevron-up"></i></a>');
+            $('div.solution-content[data-id=' + id + ']').slideDown('slow');
         };
 
         /**
          * Shrink solution.
          */
         this.shrinkSolution = function (id) {
-            $('div.solution-content[data-id=' + id + ']').slideUp('slow', undefined, function () {
-                $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.check.expandSolution(' + id + ');"><i class="icon-chevron-down"></i></a>');
-            });
+            $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.check.expandSolution(' + id + ');"><i class="icon-chevron-down"></i></a>');
+            $('div.solution-content[data-id=' + id + ']').slideUp('slow');
         };
 
         /**
          * Expand result.
          */
         this.expandResult = function (id) {
-            $('div.result-content[data-id=' + id + ']').slideDown('slow', undefined, function () {
-                $('span.result-control[data-id=' + id + ']').html('<a href="#result" onclick="user.check.shrinkResult(' + id + ');"><i class="icon-chevron-up"></i></a>');
-            });
+            $('span.result-control[data-id=' + id + ']').html('<a href="#result" onclick="user.check.shrinkResult(' + id + ');"><i class="icon-chevron-up"></i></a>');
+            $('div.result-content[data-id=' + id + ']').slideDown('slow');
         };
 
         /**
          * Shrink result.
          */
         this.shrinkResult = function (id) {
-            $('div.result-content[data-id=' + id + ']').slideUp('slow', undefined, function () {
-                $('span.result-control[data-id=' + id + ']').html('<a href="#result" onclick="user.check.expandResult(' + id + ');"><i class="icon-chevron-down"></i></a>');
-            });
+            $('span.result-control[data-id=' + id + ']').html('<a href="#result" onclick="user.check.expandResult(' + id + ');"><i class="icon-chevron-down"></i></a>');
+            $('div.result-content[data-id=' + id + ']').slideUp('slow');
         };
 
         /**
