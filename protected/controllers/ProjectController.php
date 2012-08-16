@@ -111,6 +111,17 @@ class ProjectController extends Controller
 	}
 
     /**
+     * Prepare text for export.
+     */
+    private function _prepareText($text)
+    {
+        $text = str_replace('<br>', "\n", $text);
+        $text = strip_tags($text);
+
+        return $text;
+    }
+
+    /**
      * Export vulnerabilities.
      */
     private function _exportVulns($project)
@@ -138,37 +149,34 @@ class ProjectController extends Controller
             array( 'order'      => 't.host ASC' )
         );
 
-        $data = array();
+        $data   = array();
+        $header = array();
 
         if ($model->header)
         {
-            $row = array();
-
             if (in_array(TargetCheck::COLUMN_TARGET, $model->columns))
-                $row[] = Yii::t('app', 'Target');
+                $header[TargetCheck::COLUMN_TARGET] = Yii::t('app', 'Target');
 
             if (in_array(TargetCheck::COLUMN_NAME, $model->columns))
-                $row[] = Yii::t('app', 'Name');
+                $header[TargetCheck::COLUMN_NAME] = Yii::t('app', 'Name');
 
             if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns))
-                $row[] = Yii::t('app', 'Reference');
+                $header[TargetCheck::COLUMN_REFERENCE] = Yii::t('app', 'Reference');
 
             if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns))
-                $row[] = Yii::t('app', 'Background Info');
+                $header[TargetCheck::COLUMN_BACKGROUND_INFO] = Yii::t('app', 'Background Info');
 
             if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns))
-                $row[] = Yii::t('app', 'Question');
+                $header[TargetCheck::COLUMN_QUESTION] = Yii::t('app', 'Question');
 
             if (in_array(TargetCheck::COLUMN_RESULT, $model->columns))
-                $row[] = Yii::t('app', 'Result');
+                $header[TargetCheck::COLUMN_RESULT] = Yii::t('app', 'Result');
 
             if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns))
-                $row[] = Yii::t('app', 'Solution');
+                $header[TargetCheck::COLUMN_SOLUTION] = Yii::t('app', 'Solution');
 
             if (in_array(TargetCheck::COLUMN_RATING, $model->columns))
-                $row[] = Yii::t('app', 'Rating');
-
-            $data[] = $row;
+                $header[TargetCheck::COLUMN_RATING] = Yii::t('app', 'Rating');
         }
 
         $ratings = array(
@@ -276,35 +284,35 @@ class ProjectController extends Controller
                         $row = array();
 
                         if (in_array(TargetCheck::COLUMN_TARGET, $model->columns))
-                            $row[] = $target->host;
+                            $row[TargetCheck::COLUMN_TARGET] = $target->host;
 
                         if (in_array(TargetCheck::COLUMN_NAME, $model->columns))
-                            $row[] = $check->localizedName;
+                            $row[TargetCheck::COLUMN_NAME] = $check->localizedName;
 
                         if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns))
-                            $row[] = $check->_reference->name . ( $check->reference_code ? '-' . $check->reference_code : '' );
+                            $row[TargetCheck::COLUMN_REFERENCE] = $check->_reference->name . ( $check->reference_code ? '-' . $check->reference_code : '' );
 
                         if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns))
-                            $row[] = $check->localizedBackgroundInfo;
+                            $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareText($check->localizedBackgroundInfo);
 
                         if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns))
-                            $row[] = $check->localizedQuestion;
+                            $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareText($check->localizedQuestion);
 
                         if (in_array(TargetCheck::COLUMN_RESULT, $model->columns))
-                            $row[] = $check->targetChecks[0]->result;
+                            $row[TargetCheck::COLUMN_RESULT] = $check->targetChecks[0]->result;
 
                         if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns))
                         {
                             $solutions = array();
 
                             foreach ($check->targetCheckSolutions as $solution)
-                                $solutions[] = $solution->solution->localizedSolution;
+                                $solutions[] = $this->_prepareText($solution->solution->localizedSolution);
 
-                            $row[] = implode("\n", $solutions);
+                            $row[TargetCheck::COLUMN_SOLUTION] = implode("\n", $solutions);
                         }
 
                         if (in_array(TargetCheck::COLUMN_RATING, $model->columns))
-                            $row[] = $ratings[$check->targetChecks[0]->rating];
+                            $row[TargetCheck::COLUMN_RATING] = $ratings[$check->targetChecks[0]->rating];
 
                         $data[] = $row;
                     }
@@ -312,41 +320,155 @@ class ProjectController extends Controller
             }
         }
 
-        $csv = array();
+        // include all PHPExcel libraries
+        Yii::setPathOfAlias('xls', Yii::app()->basePath . '/extensions/PHPExcel');
+        Yii::import('xls.PHPExcel.Shared.ZipStreamWrapper', true);
+        Yii::import('xls.PHPExcel.Shared.String', true);
+        Yii::import('xls.PHPExcel', true);
+        Yii::registerAutoloader(array( 'PHPExcel_Autoloader', 'Load' ), true);
 
-        foreach ($data as $row)
+        $title = Yii::t('app', '{project} Vulnerabilities', array(
+            '{project}' => $project->name . ' (' . $project->year . ')'
+        )) . ' - ' . date('Y-m-d');
+
+        $xl = new PHPExcel();
+
+        $xl->getDefaultStyle()->getFont()->setName('Helvetica');
+        $xl->getDefaultStyle()->getFont()->setSize(12);
+        $xl->getProperties()->setTitle($title);
+        $xl->setActiveSheetIndex(0);
+
+        $sheet = $xl->getActiveSheet();
+        $sheet->getDefaultRowDimension()->setRowHeight(30);
+
+        $row  = 1;
+        $cols = range('A', 'Z');
+
+        if ($header)
         {
-            $columns = array();
+            $col = 0;
 
-            foreach ($row as $column)
+            foreach ($header as $type => $value)
             {
-                $column    = str_replace(array( "\r\n", "\r", "\n" ), "\r", $column);
-                $columns[] = '"' . str_replace('"', '""', $column) . '"';
+                $sheet->getCell($cols[$col] . $row)->setValue($value);
+                $width = 0;
+
+                switch ($type)
+                {
+                    case TargetCheck::COLUMN_BACKGROUND_INFO:
+                    case TargetCheck::COLUMN_QUESTION:
+                    case TargetCheck::COLUMN_RESULT:
+                    case TargetCheck::COLUMN_SOLUTION:
+                        $width = 30;
+                        break;
+
+                    default:
+                        $width = 20;
+                }
+
+                $sheet
+                    ->getStyle($cols[$col] . $row)
+                    ->getBorders()
+                    ->getBottom()
+                    ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+
+                $sheet
+                    ->getStyle($cols[$col] . $row)
+                    ->getBorders()
+                    ->getRight()
+                    ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+
+                $sheet->getColumnDimension($cols[$col])->setWidth($width);
+                $col++;
             }
 
-            $csv[] = implode(',', $columns);
+            $row++;
         }
 
-        $csv = implode("\n", $csv);
+        $lastCol = $cols[count($header) - 1];
+        $range   = 'A1:' . $lastCol . '1';
 
-        $fileName = Yii::t('app', '{project} Vulnerabilities', array(
-            '{project}' => $project->name . ' (' . $project->year . ')'
-        )) . ' - ' . date('Y-m-d') .  '.csv';
+        $sheet
+            ->getStyle($range)
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('FFE0E0E0');
+
+        $sheet
+            ->getStyle($range)
+            ->getAlignment()
+            ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER)
+            ->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+
+        $sheet
+            ->getStyle($range)
+            ->getFont()
+            ->setBold(true);
+
+        $sheet->getRowDimension(1)->setRowHeight(40);
+
+        foreach ($data as $dataRow)
+        {
+            $col = 0;
+
+            foreach ($dataRow as $type => $value)
+            {
+                $sheet->getCell($cols[$col] . $row)->setValue("\n" . $value . "\n");
+
+                $sheet
+                    ->getStyle($cols[$col] . $row)
+                    ->getBorders()
+                    ->getBottom()
+                    ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+
+                $sheet
+                    ->getStyle($cols[$col] . $row)
+                    ->getBorders()
+                    ->getRight()
+                    ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+
+                $col++;
+            }
+
+            $range = 'A' . $row . ':' . $lastCol . $row;
+
+            $sheet
+                ->getStyle($range)
+                ->getAlignment()
+                ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT)
+                ->setVertical(PHPExcel_Style_Alignment::VERTICAL_TOP);
+
+            $sheet
+                ->getStyle($range)
+                ->getAlignment()
+                ->setWrapText(true);
+
+            $sheet
+                ->getStyle($range)
+                ->getAlignment()
+                ->setIndent(1);
+
+            $sheet->getRowDimension($row)->setRowHeight(-1);
+
+            $row++;
+        }
+
+        $fileName = $title . '.xlsx';
 
         // give user a file
         header('Content-Description: File Transfer');
-        header('Content-Type: application/octet-stream');
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
         header('Content-Transfer-Encoding: binary');
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');
-        header('Content-Length: ' . strlen($csv));
 
         ob_clean();
         flush();
 
-        echo $csv;
+        $writer = PHPExcel_IOFactory::createWriter($xl, 'Excel2007');
+        $writer->save('php://output');
 
         exit();
     }
