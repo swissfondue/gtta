@@ -941,12 +941,12 @@ class ReportController extends Controller
 
         $targets1 = Target::model()->findAllByAttributes(
             array( 'project_id' => $project1->id ),
-            array( 'order'      => 't.name ASC'  )
+            array( 'order'      => 't.host ASC'  )
         );
 
         $targets2 = Target::model()->findAllByAttributes(
             array( 'project_id' => $project2->id ),
-            array( 'order'      => 't.name ASC'  )
+            array( 'order'      => 't.host ASC'  )
         );
 
         // find corresponding targets
