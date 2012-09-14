@@ -20,7 +20,11 @@ return array(
 	// application components
 	'components' => array(
         'session' => array(
-            'timeout' => 60,
+            'class'                  => 'CDbHttpSession',
+            'sessionTableName'       => 'sessions',
+            'connectionID'           => 'db',
+            'autoCreateSessionTable' => true,
+            'timeout'                => 60 * 60, // 1 hour
         ),
 
         'request' => array(
