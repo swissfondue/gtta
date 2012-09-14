@@ -11,6 +11,11 @@ class Controller extends CController
     public $breadcrumbs = array();
 
     /**
+     * @var int request time.
+     */
+    protected $_requestTime = 0;
+
+    /**
      * Controller initialization.
      */
     function init()
@@ -28,7 +33,17 @@ class Controller extends CController
 
         $app->language = $lang;
 
+        $this->_requestTime  = microtime(true);
         $this->breadcrumbs[] = array(Yii::t('app', 'Home'), $this->createUrl('app/index'));
+    }
+
+    /**
+     * Render template.
+     */
+    public function render($view, $data=NULL, $return=false)
+    {
+        $this->_requestTime = microtime(true) - $this->_requestTime;
+        return parent::render($view, $data, $return);
     }
 
     /**

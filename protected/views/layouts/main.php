@@ -144,5 +144,9 @@
                 <?php echo Yii::t('app', 'All Rights Reserved'); ?><br>
             </footer>
         </div>
+        <script>
+            if (console)
+                console.log('Page generated in', <?php echo $this->_requestTime; ?>, 'seconds');
+        </script>
     </body>
 </html>
