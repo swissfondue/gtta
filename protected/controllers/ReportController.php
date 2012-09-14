@@ -11,6 +11,7 @@ class ReportController extends Controller
 	public function filters()
 	{
 		return array(
+            'https',
 			'checkAuth',
             'checkUser',
             'ajaxOnly + projectlist, targetlist',

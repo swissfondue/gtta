@@ -11,6 +11,7 @@ class AppController extends Controller
 	public function filters()
 	{
 		return array(
+            'https',
 			'checkAuth - login, error, maintenance, l10n',
 		);
 	}

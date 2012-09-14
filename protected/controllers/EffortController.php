@@ -11,6 +11,7 @@ class EffortController extends Controller
 	public function filters()
 	{
 		return array(
+            'https',
 			'checkAuth',
 		);
 	}

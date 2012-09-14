@@ -11,6 +11,7 @@ class RiskController extends Controller
 	public function filters()
 	{
 		return array(
+            'https',
 			'checkAuth',
             'checkAdmin',
 		);

@@ -11,6 +11,7 @@ class ProjectController extends Controller
 	public function filters()
 	{
 		return array(
+            'https',
 			'checkAuth',
             'checkUser + edit, target, edittarget, controltarget, uploadattachment, controlattachment, attachment, controlcheck, updatechecks',
             'checkAdmin + control',

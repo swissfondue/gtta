@@ -11,6 +11,7 @@ class CheckController extends Controller
 	public function filters()
 	{
 		return array(
+            'https',
 			'checkAuth',
             'checkAdmin',
 		);

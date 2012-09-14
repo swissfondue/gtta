@@ -11,6 +11,7 @@ class ClientController extends Controller
 	public function filters()
 	{
 		return array(
+            'https',
 			'checkAuth',
             'checkUser',
             'checkAdmin + control',

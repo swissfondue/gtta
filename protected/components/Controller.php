@@ -83,4 +83,22 @@ class Controller extends CController
 
         $filterChain->run();
     }
+
+    /**
+     * HTTPS filter.
+     */
+    public function filterHttps($filterChain)
+    {
+        if (!Yii::app()->getRequest()->isSecureConnection)
+        {
+            $url = 'https://' .
+                Yii::app()->getRequest()->serverName .
+                Yii::app()->getRequest()->requestUri;
+                Yii::app()->request->redirect($url);
+
+            return;
+        }
+
+        $filterChain->run();
+    }
 }
