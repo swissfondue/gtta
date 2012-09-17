@@ -130,8 +130,8 @@ class BackupController extends Controller
         if (!$row)
             return '';
 
-        $value = $row['last_value'];
-        $dump  = '<gtta:sql>SELECT setval(' . $pdo->quote($sequence) . ', ' . $pdo->quote($value) . ', false);</gtta:sql>';
+        $value = $row['last_value'] + 1;
+        $dump  = '<gtta:sql>SELECT setval(' . $pdo->quote($sequence) . ', ' . $pdo->quote($value) . ', true);</gtta:sql>';
 
         return $dump;
     }
