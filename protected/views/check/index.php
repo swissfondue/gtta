@@ -2,7 +2,12 @@
     <a class="btn" href="<?php echo $this->createUrl('check/edit') ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New Category'); ?></a>
 </div>
 
-<h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+<h1>
+    <?php echo CHtml::encode($this->pageTitle); ?>
+    <?php if ($count): ?>
+        <span class="header-detail"><?php echo $count; ?></span>
+    <?php endif; ?>
+</h1>
 
 <hr>
 
@@ -14,12 +19,23 @@
                     <tbody>
                         <tr>
                             <th class="name"><?php echo Yii::t('app', 'Category'); ?></th>
+                            <th class="check-count"><?php echo Yii::t('app', 'Checks'); ?></th>
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($categories as $category): ?>
                             <tr data-id="<?php echo $category->id; ?>" data-control-url="<?php echo $this->createUrl('check/control'); ?>">
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('check/view', array( 'id' => $category->id )); ?>"><?php echo CHtml::encode($category->localizedName); ?></a>
+                                </td>
+                                <td>
+                                    <?php
+                                        $checkCount = 0;
+
+                                        foreach ($category->controls as $control)
+                                            $checkCount += $control->checkCount;
+
+                                        echo $checkCount;
+                                    ?>
                                 </td>
                                 <td class="actions">
                                     <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $category->id; ?>, '<?php echo Yii::t('app', 'WARNING! ALL CHECKS WITHIN THIS CATEGORY WILL BE DELETED!'); ?>');"><i class="icon icon-remove"></i></a>

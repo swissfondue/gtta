@@ -45,9 +45,10 @@ class CheckControl extends CActiveRecord
 	public function relations()
 	{
 		return array(
-            'l10n'     => array( self::HAS_MANY,   'CheckControlL10n', 'check_control_id'  ),
-            'checks'   => array( self::HAS_MANY,   'Check',            'check_control_id'  ),
-            'category' => array( self::BELONGS_TO, 'CheckCategory',    'check_category_id' ),
+            'l10n'       => array( self::HAS_MANY,   'CheckControlL10n', 'check_control_id'  ),
+            'checks'     => array( self::HAS_MANY,   'Check',            'check_control_id'  ),
+            'category'   => array( self::BELONGS_TO, 'CheckCategory',    'check_category_id' ),
+            'checkCount' => array( self::STAT,       'Check',            'check_control_id'  ),
 		);
 	}
 

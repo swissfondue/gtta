@@ -93,9 +93,9 @@ hr {
     width:70px;
 }
 
-.category-list .stats,
-.target-list .stats,
-.project-list .stats {
+.category-list td.stats,
+.target-list td.stats,
+.project-list td.stats {
     color:#909090;
 }
 
@@ -508,4 +508,13 @@ textarea.wysiwyg {
 
 .expand-collapse-icon {
     padding-top:5px;
+}
+
+.header-detail {
+    color:#ddd;
+    font-weight:normal;
+}
+
+.check-count {
+    width:50px;
 }

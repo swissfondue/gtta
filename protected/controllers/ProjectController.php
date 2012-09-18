@@ -520,6 +520,13 @@ class ProjectController extends Controller
             'lowRiskCount',
             'medRiskCount',
             'highRiskCount',
+            'categories' => array(
+                'with' => array(
+                    'controls' => array(
+                        'with' => 'checkCount'
+                    )
+                )
+            )
         ))->findAll($criteria);
 
         $targetCount = Target::model()->count($criteria);
@@ -833,6 +840,9 @@ class ProjectController extends Controller
                         'on'       => 'language_id = :language_id',
                         'params'   => array( 'language_id' => $language )
                     ),
+                    'controls' => array(
+                        'with' => 'checkCount'
+                    )
                 )
             ),
         ))->findAll($criteria);

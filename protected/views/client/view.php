@@ -22,7 +22,7 @@
                         <tr>
                             <th class="deadline"><?php echo Yii::t('app', 'Deadline'); ?></th>
                             <th class="name"><?php echo Yii::t('app', 'Name'); ?></th>
-                            <th class="status">&nbsp;</th>
+                            <th class="status"><?php echo Yii::t('app', 'Status'); ?></th>
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                 <th class="actions">&nbsp;</th>
                             <?php endif; ?>

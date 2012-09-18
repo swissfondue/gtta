@@ -44,11 +44,16 @@ class CheckController extends Controller
                 'joinType' => 'LEFT JOIN',
                 'on'       => 'language_id = :language_id',
                 'params'   => array( 'language_id' => $language )
+            ),
+            'controls' => array(
+                'with' => 'checkCount'
             )
         ))->findAll($criteria);
 
         $categoryCount = CheckCategory::model()->count($criteria);
         $paginator     = new Paginator($categoryCount, $page);
+
+        $count = Check::model()->count();
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), '');
 
@@ -56,7 +61,8 @@ class CheckController extends Controller
         $this->pageTitle = Yii::t('app', 'Checks');
 		$this->render('index', array(
             'categories' => $categories,
-            'p'          => $paginator
+            'p'          => $paginator,
+            'count'      => $count
         ));
 	}
 
@@ -100,11 +106,22 @@ class CheckController extends Controller
                 'joinType' => 'LEFT JOIN',
                 'on'       => 'language_id = :language_id',
                 'params'   => array( 'language_id' => $language )
-            )
+            ),
+            'checkCount'
         ))->findAll($criteria);
 
         $controlCount = CheckControl::model()->count($criteria);
         $paginator    = new Paginator($controlCount, $page);
+
+        $controlIds = array();
+
+        foreach ($controls as $control)
+            $controlIds[] = $control->id;
+
+        $criteria = new CDbCriteria();
+        $criteria->addInCondition('check_control_id', $controlIds);
+
+        $count = Check::model()->count($criteria);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
         $this->breadcrumbs[] = array($category->localizedName, '');
@@ -114,7 +131,8 @@ class CheckController extends Controller
 		$this->render('view', array(
             'controls' => $controls,
             'p'        => $paginator,
-            'category' => $category
+            'category' => $category,
+            'count'    => $count,
         ));
 	}
 
@@ -545,6 +563,10 @@ class CheckController extends Controller
         $checkCount = Check::model()->count($criteria);
         $paginator  = new Paginator($checkCount, $page);
 
+        $count = Check::model()->countByAttributes(array(
+            'check_control_id' => $control->id
+        ));
+
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
         $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
         $this->breadcrumbs[] = array($control->localizedName, '');
@@ -555,7 +577,8 @@ class CheckController extends Controller
             'checks'   => $checks,
             'p'        => $paginator,
             'category' => $category,
-            'control'  => $control
+            'control'  => $control,
+            'count'    => $count,
         ));
 	}
 

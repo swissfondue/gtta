@@ -32,8 +32,9 @@
                     <tbody>
                         <tr>
                             <th class="target"><?php echo Yii::t('app', 'Target'); ?></th>
-                            <th class="stats">&nbsp;</th>
-                            <th class="percent">&nbsp;</th>
+                            <th class="stats"><?php echo Yii::t('app', 'Risk Stats'); ?></th>
+                            <th class="percent"><?php echo Yii::t('app', 'Completed'); ?></th>
+                            <th class="check-count"><?php echo Yii::t('app', 'Checks'); ?></th>
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                 <th class="actions">&nbsp;</th>
                             <?php endif; ?>
@@ -61,6 +62,17 @@
 
                                         echo $target->checkCount ? sprintf('%.2f', ($finished / $target->checkCount) * 100) : '0.00';
                                     ?>%
+                                </td>
+                                <td>
+                                    <?php
+                                        $checkCount = 0;
+
+                                        foreach ($target->categories as $category)
+                                            foreach ($category->controls as $control)
+                                                $checkCount += $control->checkCount;
+
+                                        echo $checkCount;
+                                    ?>
                                 </td>
                                 <?php if (User::checkRole(User::ROLE_USER)): ?>
                                     <td class="actions">

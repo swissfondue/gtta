@@ -17,9 +17,9 @@
                         <tr>
                             <th class="deadline"><?php echo Yii::t('app', 'Deadline'); ?></th>
                             <th class="name"><?php echo Yii::t('app', 'Name'); ?></th>
-                            <th class="stats">&nbsp;</th>
-                            <th class="percent">&nbsp;</th>
-                            <th class="status">&nbsp;</th>
+                            <th class="stats"><?php echo Yii::t('app', 'Risk Stats'); ?></th>
+                            <th class="percent"><?php echo Yii::t('app', 'Completed'); ?></th>
+                            <th class="status"><?php echo Yii::t('app', 'Status'); ?></th>
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                 <th class="actions">&nbsp;</th>
                             <?php endif; ?>

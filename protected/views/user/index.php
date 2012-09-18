@@ -14,7 +14,7 @@
                     <tbody>
                         <tr>
                             <th class="email"><?php echo Yii::t('app', 'E-mail'); ?></th>
-                            <th class="role">&nbsp;</th>
+                            <th class="role"><?php echo Yii::t('app', 'Role'); ?></th>
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($users as $user): ?>

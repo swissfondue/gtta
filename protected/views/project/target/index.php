@@ -19,8 +19,9 @@
                     <tbody>
                         <tr>
                             <th class="name"><?php echo Yii::t('app', 'Category'); ?></th>
-                            <th class="stats">&nbsp;</th>
-                            <th class="percent">&nbsp;</th>
+                            <th class="stats"><?php echo Yii::t('app', 'Risk Stats'); ?></th>
+                            <th class="percent"><?php echo Yii::t('app', 'Completed'); ?></th>
+                            <th class="check-count"><?php echo Yii::t('app', 'Checks'); ?></th>
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($categories as $category): ?>
@@ -28,6 +29,7 @@
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('project/checks', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>"><?php echo CHtml::encode($category->category->localizedName); ?></a>
                                 </td>
+
                                 <td class="stats">
                                     <span class="high-risk"><?php echo $category->high_risk_count; ?></span> /
                                     <span class="med-risk"><?php echo $category->med_risk_count; ?></span> /
@@ -35,6 +37,16 @@
                                 </td>
                                 <td class="percent">
                                     <?php echo $category->check_count ? sprintf('%.2f', ($category->finished_count / $category->check_count) * 100) : '0.00'; ?>%
+                                </td>
+                                <td>
+                                    <?php
+                                        $checkCount = 0;
+
+                                        foreach ($category->category->controls as $control)
+                                            $checkCount += $control->checkCount;
+
+                                        echo $checkCount;
+                                    ?>
                                 </td>
                                 <td class="actions">
                                     <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="category.del(<?php echo $category->check_category_id; ?>);"><i class="icon icon-remove"></i></a>

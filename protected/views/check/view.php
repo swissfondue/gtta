@@ -9,7 +9,12 @@
         <a class="btn" href="<?php echo $this->createUrl('check/editcontrol', array( 'id' => $category->id )) ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New Control'); ?></a>
     </div>
 
-    <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+    <h1>
+        <?php echo CHtml::encode($this->pageTitle); ?>
+        <?php if ($count): ?>
+            <span class="header-detail"><?php echo $count; ?></span>
+        <?php endif; ?>
+    </h1>
 </div>
 
 <hr>
@@ -22,6 +27,7 @@
                     <tbody>
                         <tr>
                             <th class="name"><?php echo Yii::t('app', 'Control'); ?></th>
+                            <th class="check-count"><?php echo Yii::t('app', 'Checks'); ?></th>
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($controls as $control): ?>
@@ -29,6 +35,7 @@
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )); ?>"><?php echo CHtml::encode($control->localizedName); ?></a>
                                 </td>
+                                <td><?php echo $control->checkCount; ?></td>
                                 <td class="actions">
                                     <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $control->id; ?>, '<?php echo Yii::t('app', 'WARNING! ALL CHECKS WITHIN THIS CONTROL WILL BE DELETED!'); ?>');"><i class="icon icon-remove"></i></a>
                                 </td>
