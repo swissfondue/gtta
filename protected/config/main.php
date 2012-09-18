@@ -201,7 +201,7 @@ return array(
             'maxSize' => 100 * 1024 * 1024, // 100 megabytes
         ),
 
-        'tmpPath'            => GTTA_PRODUCTION ? 'C:\GTTA\tmp' : '/tmp',
+        'tmpPath'            => '/tmp',
         'timeZone'           => GTTA_PRODUCTION ? 'Europe/Zurich' : 'Europe/Moscow',
         'collapseCheckCount' => 20,
     ),

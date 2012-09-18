@@ -30,10 +30,10 @@ return array(
             'logging'       => false,
             'dryRun'        => false,
             'transportOptions' => GTTA_PRODUCTION ? array(
-                    'host'         => 'mail.netprotect.ch',
+                    'host'         => 'mailbak.netprotect.ch',
                     'port'         => 25,
                     'username'     => 'web365p2',
-                    'password'     => '6ghJZdGn',
+                    'password'     => 'babuschka',
                     'encryption'   => '',
                 ) :
                 array(
@@ -52,7 +52,7 @@ return array(
     'params' => array(
         // email sender
         'email' => array(
-            'lockFile'    => GTTA_PRODUCTION ? dirname(__FILE__).DIRECTORY_SEPARATOR.'../../../tmp/gtta.email' : '/tmp/gtta.email',
+            'lockFile'    => '/tmp/gtta.email',
             'systemEmail' => GTTA_PRODUCTION ? 'gtta@netprotect.ch' : 'gtta.test@yandex.ru',
             'maxAttempts' => 3,
         ),
@@ -61,25 +61,25 @@ return array(
         'automation' => array(
             'minNotificationInterval' => 5 * 60, // 5 minutes
 
-            'lockFile'    => GTTA_PRODUCTION ? dirname(__FILE__).DIRECTORY_SEPARATOR.'../../../tmp/gtta.automation' : '/tmp/gtta.automation',
+            'lockFile'    => '/tmp/gtta.automation',
             'tempPath'    => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../files/automation',
             'scriptsPath' => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../../scripts',
 
             'interpreters' => array(
                 'py' => array(
-                    'path'     => GTTA_PRODUCTION ? 'C:\Python27\python.exe' : '/usr/bin/python',
-                    'basePath' => GTTA_PRODUCTION ? 'C:\Python27' : '/usr/bin'
+                    'path'     => '/usr/bin/python',
+                    'basePath' => '/usr/bin'
                 ),
                 'pl' => array(
-                    'path'     => GTTA_PRODUCTION ? 'C:\Perl64\bin\perl.exe' : '/usr/bin/perl',
-                    'basePath' => GTTA_PRODUCTION ? 'C:\Perl64' : '/usr/bin'
+                    'path'     => '/usr/bin/perl',
+                    'basePath' => '/usr/bin'
                 )
             )
         ),
 
         // file cleaner
         'cleaner' => array(
-            'lockFile' => GTTA_PRODUCTION ? dirname(__FILE__).DIRECTORY_SEPARATOR.'../../../tmp/gtta.cleaner' : '/tmp/gtta.cleaner',
+            'lockFile' => '/tmp/gtta.cleaner',
         ),
 
         'yiicPath' => dirname(__FILE__).'/../',
