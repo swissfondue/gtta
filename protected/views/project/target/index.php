@@ -62,19 +62,22 @@
             <?php endif; ?>
         </div>
         <div class="span4">
-            <h3><a href="#toggle" onclick="$('#project-info').slideToggle('slow');"><?php echo Yii::t('app', 'Project Information'); ?></a></h3>
+            <div id="project-info-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-info');"><i class="icon-chevron-up"></i></div>
+            <h3><a href="#toggle" onclick="system.toggleBlock('#project-info');"><?php echo Yii::t('app', 'Project Information'); ?></a></h3>
 
             <div class="info-block" id="project-info">
                 <table class="table client-details">
                     <tbody>
-                        <tr>
-                            <th>
-                                <?php echo Yii::t('app', 'Client'); ?>
-                            </th>
-                            <td>
-                                <a href="<?php echo $this->createUrl('client/view', array( 'id' => $client->id )); ?>"><?php echo CHtml::encode($client->name); ?></a>
-                            </td>
-                        </tr>
+                        <?php if (!User::checkRole(User::ROLE_CLIENT)): ?>
+                            <tr>
+                                <th>
+                                    <?php echo Yii::t('app', 'Client'); ?>
+                                </th>
+                                <td>
+                                    <a href="<?php echo $this->createUrl('client/view', array( 'id' => $client->id )); ?>"><?php echo CHtml::encode($client->name); ?></a>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
                         <tr>
                             <th>
                                 <?php echo Yii::t('app', 'Year'); ?>
@@ -104,7 +107,8 @@
             </div>
 
             <?php if ($project->details): ?>
-                <h3><a href="#toggle" onclick="$('#project-details').slideToggle('slow');"><?php echo Yii::t('app', 'Project Details'); ?></a></h3>
+                <div id="project-details-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-details');"><i class="icon-chevron-up"></i></div>
+                <h3><a href="#toggle" onclick="system.toggleBlock('#project-details');"><?php echo Yii::t('app', 'Project Details'); ?></a></h3>
 
                 <div class="info-block" id="project-details">
                     <?php
@@ -122,115 +126,119 @@
                 </div>
             <?php endif; ?>
 
-            <?php if ($client->hasDetails): ?>
-                <h3><a href="#toggle" onclick="$('#client-address').slideToggle('slow');"><?php echo Yii::t('app', 'Client Address'); ?></a></h3>
+            <?php if (!User::checkRole(User::ROLE_CLIENT)): ?>
+                <?php if ($client->hasDetails): ?>
+                    <div id="client-address-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#client-address');"><i class="icon-chevron-up"></i></div>
+                    <h3><a href="#toggle" onclick="system.toggleBlock('#client-address');"><?php echo Yii::t('app', 'Client Address'); ?></a></h3>
 
-                <div class="info-block hidden-object" id="client-address">
-                    <table class="table client-details">
-                        <tbody>
-                            <?php if ($client->country): ?>
-                                <tr>
-                                    <th>
-                                        <?php echo Yii::t('app', 'Country'); ?>
-                                    </th>
-                                    <td>
-                                        <?php echo CHtml::encode($client->country); ?>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                            <?php if ($client->state): ?>
-                                <tr>
-                                    <th>
-                                        <?php echo Yii::t('app', 'State'); ?>
-                                    </th>
-                                    <td>
-                                        <?php echo CHtml::encode($client->state); ?>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                            <?php if ($client->city): ?>
-                                <tr>
-                                    <th>
-                                        <?php echo Yii::t('app', 'City'); ?>
-                                    </th>
-                                    <td>
-                                        <?php echo CHtml::encode($client->city); ?>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                            <?php if ($client->address): ?>
-                                <tr>
-                                    <th>
-                                        <?php echo Yii::t('app', 'Address'); ?>
-                                    </th>
-                                    <td>
-                                        <?php echo CHtml::encode($client->address); ?>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                            <?php if ($client->postcode): ?>
-                                <tr>
-                                    <th>
-                                        <?php echo Yii::t('app', 'P.C.'); ?>
-                                    </th>
-                                    <td>
-                                        <?php echo CHtml::encode($client->postcode); ?>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                            <?php if ($client->website): ?>
-                                <tr>
-                                    <th>
-                                        <?php echo Yii::t('app', 'Website'); ?>
-                                    </th>
-                                    <td>
-                                        <a href="<?php echo CHtml::encode($client->website); ?>"><?php echo CHtml::encode($client->website); ?></a>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php endif; ?>
-            <?php if ($client->hasContact): ?>
-                <h3><a href="#toggle" onclick="$('#client-contact').slideToggle('slow');"><?php echo Yii::t('app', 'Client Contact'); ?></a></h3>
+                    <div class="info-block" id="client-address">
+                        <table class="table client-details">
+                            <tbody>
+                                <?php if ($client->country): ?>
+                                    <tr>
+                                        <th>
+                                            <?php echo Yii::t('app', 'Country'); ?>
+                                        </th>
+                                        <td>
+                                            <?php echo CHtml::encode($client->country); ?>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                                <?php if ($client->state): ?>
+                                    <tr>
+                                        <th>
+                                            <?php echo Yii::t('app', 'State'); ?>
+                                        </th>
+                                        <td>
+                                            <?php echo CHtml::encode($client->state); ?>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                                <?php if ($client->city): ?>
+                                    <tr>
+                                        <th>
+                                            <?php echo Yii::t('app', 'City'); ?>
+                                        </th>
+                                        <td>
+                                            <?php echo CHtml::encode($client->city); ?>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                                <?php if ($client->address): ?>
+                                    <tr>
+                                        <th>
+                                            <?php echo Yii::t('app', 'Address'); ?>
+                                        </th>
+                                        <td>
+                                            <?php echo CHtml::encode($client->address); ?>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                                <?php if ($client->postcode): ?>
+                                    <tr>
+                                        <th>
+                                            <?php echo Yii::t('app', 'P.C.'); ?>
+                                        </th>
+                                        <td>
+                                            <?php echo CHtml::encode($client->postcode); ?>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                                <?php if ($client->website): ?>
+                                    <tr>
+                                        <th>
+                                            <?php echo Yii::t('app', 'Website'); ?>
+                                        </th>
+                                        <td>
+                                            <a href="<?php echo CHtml::encode($client->website); ?>"><?php echo CHtml::encode($client->website); ?></a>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+                <?php if ($client->hasContact): ?>
+                    <div id="client-contact-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#client-contact');"><i class="icon-chevron-up"></i></div>
+                    <h3><a href="#toggle" onclick="system.toggleBlock('#client-contact');"><?php echo Yii::t('app', 'Client Contact'); ?></a></h3>
 
-                <div class="info-block hidden-object" id="client-contact">
-                    <table class="table client-details">
-                        <tbody>
-                            <?php if ($client->contact_name): ?>
-                                <tr>
-                                    <th>
-                                        <?php echo Yii::t('app', 'Name'); ?>
-                                    </th>
-                                    <td>
-                                        <?php echo CHtml::encode($client->contact_name); ?>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                            <?php if ($client->contact_email): ?>
-                                <tr>
-                                    <th>
-                                        <?php echo Yii::t('app', 'E-mail'); ?>
-                                    </th>
-                                    <td>
-                                        <a href="mailto:<?php echo CHtml::encode($client->contact_email); ?>"><?php echo CHtml::encode($client->contact_email); ?></a>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                            <?php if ($client->contact_phone): ?>
-                                <tr>
-                                    <th>
-                                        <?php echo Yii::t('app', 'Phone'); ?>
-                                    </th>
-                                    <td>
-                                        <?php echo CHtml::encode($client->contact_phone); ?>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
+                    <div class="info-block" id="client-contact">
+                        <table class="table client-details">
+                            <tbody>
+                                <?php if ($client->contact_name): ?>
+                                    <tr>
+                                        <th>
+                                            <?php echo Yii::t('app', 'Name'); ?>
+                                        </th>
+                                        <td>
+                                            <?php echo CHtml::encode($client->contact_name); ?>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                                <?php if ($client->contact_email): ?>
+                                    <tr>
+                                        <th>
+                                            <?php echo Yii::t('app', 'E-mail'); ?>
+                                        </th>
+                                        <td>
+                                            <a href="mailto:<?php echo CHtml::encode($client->contact_email); ?>"><?php echo CHtml::encode($client->contact_email); ?></a>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                                <?php if ($client->contact_phone): ?>
+                                    <tr>
+                                        <th>
+                                            <?php echo Yii::t('app', 'Phone'); ?>
+                                        </th>
+                                        <td>
+                                            <?php echo CHtml::encode($client->contact_phone); ?>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>

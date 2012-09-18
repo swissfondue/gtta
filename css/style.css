@@ -505,3 +505,7 @@ textarea.wysiwyg {
 .solution-control, .result-control {
     float:right;
 }
+
+.expand-collapse-icon {
+    padding-top:5px;
+}

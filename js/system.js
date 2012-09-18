@@ -59,6 +59,20 @@ function System()
     };
 
     /**
+     * Toggle collapsible content block.
+     */
+    this.toggleBlock = function (blockId) {
+        $(blockId + '-icon > i').removeClass();
+
+        if ($(blockId).is(':visible'))
+            $(blockId + '-icon > i').addClass('icon-chevron-down');
+        else
+            $(blockId + '-icon > i').addClass('icon-chevron-up');
+
+        $(blockId).slideToggle('slow');
+    };
+
+    /**
      * Object control functions.
      */
     this.control = new function () {

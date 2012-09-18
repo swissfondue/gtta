@@ -90,7 +90,8 @@
             <?php endif; ?>
         </div>
         <div class="span4">
-            <h3><a href="#toggle" onclick="$('#project-info').slideToggle('slow');"><?php echo Yii::t('app', 'Project Information'); ?></a></h3>
+            <div id="project-info-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-info');"><i class="icon-chevron-up"></i></div>
+            <h3><a href="#toggle" onclick="system.toggleBlock('#project-info');"><?php echo Yii::t('app', 'Project Information'); ?></a></h3>
 
             <div class="info-block" id="project-info">
                 <table class="table client-details">
@@ -134,7 +135,8 @@
             </div>
 
             <?php if ($project->details): ?>
-                <h3><a href="#toggle" onclick="$('#project-details').slideToggle('slow');"><?php echo Yii::t('app', 'Project Details'); ?></a></h3>
+                <div id="project-details-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-details');"><i class="icon-chevron-up"></i></div>
+                <h3><a href="#toggle" onclick="system.toggleBlock('#project-details');"><?php echo Yii::t('app', 'Project Details'); ?></a></h3>
 
                 <div class="info-block" id="project-details">
                     <?php
@@ -154,9 +156,10 @@
 
             <?php if (!User::checkRole(User::ROLE_CLIENT)): ?>
                 <?php if ($client->hasDetails): ?>
-                    <h3><a href="#toggle" onclick="$('#client-address').slideToggle('slow');"><?php echo Yii::t('app', 'Client Address'); ?></a></h3>
+                    <div id="client-address-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#client-address');"><i class="icon-chevron-up"></i></div>
+                    <h3><a href="#toggle" onclick="system.toggleBlock('#client-address');"><?php echo Yii::t('app', 'Client Address'); ?></a></h3>
 
-                    <div class="info-block hidden-object" id="client-address">
+                    <div class="info-block" id="client-address">
                         <table class="table client-details">
                             <tbody>
                                 <?php if ($client->country): ?>
@@ -224,9 +227,10 @@
                     </div>
                 <?php endif; ?>
                 <?php if ($client->hasContact): ?>
-                    <h3><a href="#toggle" onclick="$('#client-contact').slideToggle('slow');"><?php echo Yii::t('app', 'Client Contact'); ?></a></h3>
+                    <div id="client-contact-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#client-contact');"><i class="icon-chevron-up"></i></div>
+                    <h3><a href="#toggle" onclick="system.toggleBlock('#client-contact');"><?php echo Yii::t('app', 'Client Contact'); ?></a></h3>
 
-                    <div class="info-block hidden-object" id="client-contact">
+                    <div class="info-block" id="client-contact">
                         <table class="table client-details">
                             <tbody>
                                 <?php if ($client->contact_name): ?>
