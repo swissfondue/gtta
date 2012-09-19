@@ -60,7 +60,7 @@
             </div>
         </div>
 
-        <div class="control-group <?php if ($model->getError('clientId')) echo 'error'; ?> <?php if ($model->role != User::ROLE_CLIENT) echo 'hidden-object'; ?>" id="client-input">
+        <div class="control-group <?php if ($model->getError('clientId')) echo 'error'; ?> <?php if ($model->role != User::ROLE_CLIENT) echo 'hide'; ?>" id="client-input">
             <label class="control-label" for="UserEditForm_clientId"><?php echo Yii::t('app', 'Client'); ?></label>
             <div class="controls">
                 <select class="input-xlarge" id="UserEditForm_clientId" name="UserEditForm[clientId]">

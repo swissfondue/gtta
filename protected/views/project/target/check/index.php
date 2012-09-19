@@ -145,7 +145,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="check-form hidden-object" data-id="<?php echo $check->id; ?>" data-save-url="<?php echo $this->createUrl('project/savecheck', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>">
+                    <div class="check-form hide" data-id="<?php echo $check->id; ?>" data-save-url="<?php echo $this->createUrl('project/savecheck', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>">
                         <table class="table check-form">
                             <tbody>
                                 <tr>
@@ -351,7 +351,7 @@
                                             <input type="file" name="TargetCheckAttachmentUploadForm[attachment]" data-id="<?php echo $check->id; ?>" data-upload-url="<?php echo $this->createUrl('project/uploadattachment', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>">
                                         </div>
 
-                                        <div class="upload-message hidden-object" id="upload-message-<?php echo $check->id; ?>"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+                                        <div class="upload-message hide" id="upload-message-<?php echo $check->id; ?>"><?php echo Yii::t('app', 'Uploading...'); ?></div>
 
                                         <?php if ($check->targetCheckAttachments): ?>
                                             <table class="table attachment-list">

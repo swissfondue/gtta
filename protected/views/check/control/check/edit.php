@@ -151,7 +151,7 @@
             </div>
         </div>
 
-        <div class="control-group <?php if (!$model->automated) echo 'hidden-object'; ?> <?php if ($model->getError('script')) echo 'error'; ?>" id="script-input">
+        <div class="control-group <?php if (!$model->automated) echo 'hide'; ?> <?php if ($model->getError('script')) echo 'error'; ?>" id="script-input">
             <label class="control-label" for="CheckEditForm_script"><?php echo Yii::t('app', 'Script'); ?></label>
             <div class="controls">
                 <input type="text" class="input-xlarge" id="CheckEditForm_script" name="CheckEditForm[script]" value="<?php echo CHtml::encode($model->script); ?>">

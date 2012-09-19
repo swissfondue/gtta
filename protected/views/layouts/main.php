@@ -101,7 +101,7 @@
                         </ul>
                     </div>
 
-                    <div class="loader-image pull-right hidden-object">
+                    <div class="loader-image pull-right hide">
                         <img src="<?php echo Yii::app()->baseUrl; ?>/images/loading.gif" />
                     </div>
                 </div>

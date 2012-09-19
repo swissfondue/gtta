@@ -64,10 +64,6 @@ hr {
     filter:alpha(opacity=100);
 }
 
-.hidden-object {
-    display:none;
-}
-
 .table > tbody > tr > th {
     border:0;
 }

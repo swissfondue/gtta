@@ -23,7 +23,7 @@ function System()
         $('.message-container').html('');
 
         $('<div />', {
-            'class' : 'alert alert-' + eventType + ' hidden-object',
+            'class' : 'alert alert-' + eventType + ' hide',
             html    : '<a class="close" data-dismiss="alert">×</a>' + message
         }).appendTo('.message-container');
 
