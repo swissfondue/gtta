@@ -1384,7 +1384,7 @@ select:focus:required:invalid:focus {
           border-radius: 0 3px 3px 0;
 }
 
-.search-query {
+input[type="text"].search-query {
   padding-right: 14px;
   padding-right: 4px \9;
   padding-left: 14px;

@@ -18,7 +18,8 @@ var _messages = {
     'Unordered List'                                    : '<?php echo Yii::t('app', 'Unordered List'); ?>',
     'Ordered List'                                      : '<?php echo Yii::t('app', 'Ordered List'); ?>',
     'Outdent'                                           : '<?php echo Yii::t('app', 'Outdent'); ?>',
-    'Indent'                                            : '<?php echo Yii::t('app', 'Indent'); ?>'
+    'Indent'                                            : '<?php echo Yii::t('app', 'Indent'); ?>',
+    'Search...'                                         : '<?php echo Yii::t('app', 'Search...'); ?>'
 };
 
 system.l10nMessages = _messages;

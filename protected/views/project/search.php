@@ -1,20 +1,16 @@
 <div class="active-header">
-    <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
-        <div class="pull-right">
-            <a class="btn" href="<?php echo $this->createUrl('project/edit'); ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New Project'); ?></a>
-        </div>
-    <?php endif; ?>
-
-    <div class="pull-right">
+    <div class="pull-right buttons">
         <div class="search-form">
             <form class="form-search" action="<?php echo $this->createUrl('project/search'); ?>" method="post" onsubmit="return system.search.validate();">
                 <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
-                <input name="SearchForm[query]" class="search-query" type="text" value="<?php echo Yii::t('app', 'Search...'); ?>" onfocus="system.search.focus();" onblur="system.search.blur();" />
+                <input name="SearchForm[query]" class="search-query" type="text" value="<?php echo $model->query ? CHtml::encode($model->query) : Yii::t('app', 'Search...'); ?>" onfocus="system.search.focus();" onblur="system.search.blur();" />
             </form>
         </div>
     </div>
 
-    <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+    <h1>
+        <?php echo CHtml::encode($this->pageTitle); ?>
+    </h1>
 </div>
 
 <hr>
@@ -31,12 +27,9 @@
                             <th class="stats"><?php echo Yii::t('app', 'Risk Stats'); ?></th>
                             <th class="percent"><?php echo Yii::t('app', 'Completed'); ?></th>
                             <th class="status"><?php echo Yii::t('app', 'Status'); ?></th>
-                            <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
-                                <th class="actions">&nbsp;</th>
-                            <?php endif; ?>
                         </tr>
                         <?php foreach ($projects as $project): ?>
-                            <tr data-id="<?php echo $project->id; ?>" data-control-url="<?php echo $this->createUrl('project/control'); ?>">
+                            <tr>
                                 <td class="deadline">
                                     <?php echo $project->deadline; ?>
                                 </td>
@@ -74,31 +67,12 @@
                                         }
                                     ?>
                                 </td>
-                                <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
-                                    <td class="actions">
-                                        <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $project->id; ?>, '<?php echo Yii::t('app', 'WARNING! ALL INFORMATION WITHIN THIS PROJECT WILL BE DELETED!'); ?>');"><i class="icon icon-remove"></i></a>
-                                    </td>
-                                <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-
-                <?php if ($p->pageCount > 1): ?>
-                    <div class="pagination">
-                        <ul>
-                            <li <?php if (!$p->prevPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('project/index', array( 'page' => $p->prevPage ? $p->prevPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Previous Page'); ?>">&laquo;</a></li>
-                            <?php for ($i = 1; $i <= $p->pageCount; $i++): ?>
-                                <li <?php if ($i == $p->page) echo 'class="active"'; ?>>
-                                    <a href="<?php echo $this->createUrl('project/index', array( 'page' => $i )); ?>"><?php echo $i; ?></a>
-                                </li>
-                            <?php endfor; ?>
-                            <li <?php if (!$p->nextPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('project/index', array( 'page' => $p->nextPage ? $p->nextPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Next Page'); ?>">&raquo;</a></li>
-                        </ul>
-                    </div>
-                <?php endif; ?>
             <?php else: ?>
-                <?php echo Yii::t('app', 'No projects yet.'); ?>
+                <?php echo Yii::t('app', 'No projects match your search criteria.'); ?>
             <?php endif; ?>
         </div>
     </div>

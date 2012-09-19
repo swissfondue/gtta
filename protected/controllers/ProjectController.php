@@ -2179,4 +2179,102 @@ class ProjectController extends Controller
 
         echo $response->serialize();
     }
+
+    /**
+     * Search action.
+     */
+    public function actionSearch()
+    {
+        $model        = new SearchForm();
+        $projects     = array();
+        $projectStats = array();
+
+        if (isset($_POST['SearchForm']))
+        {
+            $model->attributes = $_POST['SearchForm'];
+
+            if ($model->validate())
+            {
+                $criteria = new CDbCriteria();
+                $criteria->order = 't.deadline ASC, t.name ASC';
+
+                if (User::checkRole(User::ROLE_CLIENT))
+                {
+                    $user = User::model()->findByPk(Yii::app()->user->id);
+                    $criteria->addColumnCondition(array( 'client_id' => $user->client_id ));
+                }
+
+                $searchCriteria = new CDbCriteria();
+                $searchCriteria->addSearchCondition('t.name', $model->query, true, 'OR', 'ILIKE');
+                $criteria->mergeWith($searchCriteria);
+
+                $projects = Project::model()->with('client')->findAll($criteria);
+
+                $projectStats = array();
+
+                foreach ($projects as $project)
+                {
+                    $checkCount    = 0;
+                    $finishedCount = 0;
+                    $lowRiskCount  = 0;
+                    $medRiskCount  = 0;
+                    $highRiskCount = 0;
+
+                    $targets = Target::model()->with(array(
+                        'checkCount',
+                        'finishedCount',
+                        'lowRiskCount',
+                        'medRiskCount',
+                        'highRiskCount',
+                    ))->findAllByAttributes(array(
+                        'project_id' => $project->id
+                    ));
+
+                    foreach ($targets as $target)
+                    {
+                        if ($target->checkCount)
+                            $checkCount += $target->checkCount;
+
+                        if ($target->finishedCount)
+                            $finishedCount += $target->finishedCount;
+
+                        if ($target->lowRiskCount)
+                            $lowRiskCount += $target->lowRiskCount;
+
+                        if ($target->medRiskCount)
+                            $medRiskCount += $target->medRiskCount;
+
+                        if ($target->highRiskCount)
+                            $highRiskCount += $target->highRiskCount;
+                    }
+
+                    $projectStats[$project->id] = array(
+                        'checkCount'    => $checkCount,
+                        'finishedCount' => $finishedCount,
+                        'lowRiskCount'  => $lowRiskCount,
+                        'medRiskCount'  => $medRiskCount,
+                        'highRiskCount' => $highRiskCount
+                    );
+                }
+            }
+            else
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+        }
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Search'), '');
+
+		// display the page
+        $this->pageTitle = Yii::t('app', 'Search');
+		$this->render('search', array(
+            'model'    => $model,
+            'projects' => $projects,
+            'stats'    => $projectStats,
+            'statuses' => array(
+                Project::STATUS_OPEN        => Yii::t('app', 'Open'),
+                Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
+                Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
+            )
+        ));
+    }
 }

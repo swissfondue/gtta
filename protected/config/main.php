@@ -71,6 +71,7 @@ return array(
                 'project/attachment/<path:[a-z\d]+>/download'                                                => 'project/attachment',
                 'project/attachment/control'                                                                 => 'project/controlattachment',
                 'project/target/control'                                                                     => 'project/controltarget',
+                'project/search'                                                                             => 'project/search',
 
                 // reports
                 'reports/project'      => 'report/project',
@@ -86,6 +87,7 @@ return array(
                 'client/<id:\d+>/edit' => 'client/edit',
                 'client/new'           => 'client/edit',
                 'client/control'       => 'client/control',
+                'client/search'       => 'client/search',
 
                 // effort
                 'effort' => 'effort/index',
@@ -98,6 +100,7 @@ return array(
                 'check/<id:\d+>/edit'       => 'check/edit',
                 'check/new'                 => 'check/edit',
                 'check/control'             => 'check/control',
+                'check/search'              => 'check/search',
 
                 // check controls
                 'check/<id:\d+>/control/<control:\d+>/<page:\d+>' => 'check/viewcontrol',

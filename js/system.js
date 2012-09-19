@@ -145,6 +145,41 @@ function System()
     };
 
     /**
+     * Search form functions.
+     */
+    this.search = new function () {
+        var _search = this;
+
+        /**
+         * Validate search form.
+         */
+        this.validate = function () {
+            var query = $('.search-query').val();
+
+            if (query == '' || query.length < 3 || query == system.translate('Search...'))
+                return false;
+
+            return true;
+        };
+
+        /**
+         * On focus handler.
+         */
+        this.focus = function () {
+            if ($('.search-query').val() == system.translate('Search...'))
+                $('.search-query').val('');
+        };
+
+        /**
+         * On blur handler.
+         */
+        this.blur = function () {
+            if ($('.search-query').val() == '')
+                $('.search-query').val(system.translate('Search...'));
+        };
+    };
+
+    /**
      * Project object.
      */
     this.project = new function () {

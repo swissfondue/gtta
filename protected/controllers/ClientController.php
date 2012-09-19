@@ -223,4 +223,46 @@ class ClientController extends Controller
 
         echo $response->serialize();
     }
+
+    /**
+     * Search action.
+     */
+    public function actionSearch()
+    {
+        $model   = new SearchForm();
+        $clients = array();
+
+        if (isset($_POST['SearchForm']))
+        {
+            $model->attributes = $_POST['SearchForm'];
+
+            if ($model->validate())
+            {
+                $criteria = new CDbCriteria();
+                $criteria->order = 't.name ASC';
+
+                $searchCriteria = new CDbCriteria();
+                $searchCriteria->addSearchCondition('t.name', $model->query, true, 'OR', 'ILIKE');
+                $searchCriteria->addSearchCondition('t.country', $model->query, true, 'OR', 'ILIKE');
+                $searchCriteria->addSearchCondition('t.state', $model->query, true, 'OR', 'ILIKE');
+                $searchCriteria->addSearchCondition('t.city', $model->query, true, 'OR', 'ILIKE');
+                $searchCriteria->addSearchCondition('t.website', $model->query, true, 'OR', 'ILIKE');
+                $criteria->mergeWith($searchCriteria);
+
+                $clients = Client::model()->findAll($criteria);
+            }
+            else
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+        }
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Clients'), $this->createUrl('client/index'));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Search'), '');
+
+		// display the page
+        $this->pageTitle = Yii::t('app', 'Search');
+		$this->render('search', array(
+            'model'   => $model,
+            'clients' => $clients,
+        ));
+    }
 }

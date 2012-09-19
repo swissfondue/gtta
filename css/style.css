@@ -112,7 +112,7 @@ hr {
 .active-header {
     margin:0;
     padding:0;
-    overflow:visible;
+    overflow:hidden;
 }
 
 .active-header .nav-pills {
@@ -517,4 +517,20 @@ textarea.wysiwyg {
 
 .check-count {
     width:50px;
+}
+
+.search-form {
+    margin-right:10px;
+}
+
+.buttons > .search-form {
+    margin-right:2px;
+}
+
+input[type="text"].search-query {
+    color:#c0c0c0;
+}
+
+input[type="text"].search-query:focus {
+    color:#333;
 }

@@ -5,15 +5,13 @@
             <li><a href="<?php echo $this->createUrl('check/editcontrol', array( 'id' => $category->id, 'control' => $control->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
         </ul>
     </div>
+
     <div class="pull-right buttons">
         <a class="btn" href="<?php echo $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id )) ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New Check'); ?></a>
     </div>
 
     <h1>
         <?php echo CHtml::encode($this->pageTitle); ?>
-        <?php if ($count): ?>
-            <span class="header-detail"><?php echo $count; ?></span>
-        <?php endif; ?>
     </h1>
 </div>
 

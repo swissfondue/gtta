@@ -118,11 +118,6 @@ class CheckController extends Controller
         foreach ($controls as $control)
             $controlIds[] = $control->id;
 
-        $criteria = new CDbCriteria();
-        $criteria->addInCondition('check_control_id', $controlIds);
-
-        $count = Check::model()->count($criteria);
-
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
         $this->breadcrumbs[] = array($category->localizedName, '');
 
@@ -132,7 +127,6 @@ class CheckController extends Controller
             'controls' => $controls,
             'p'        => $paginator,
             'category' => $category,
-            'count'    => $count,
         ));
 	}
 
@@ -563,10 +557,6 @@ class CheckController extends Controller
         $checkCount = Check::model()->count($criteria);
         $paginator  = new Paginator($checkCount, $page);
 
-        $count = Check::model()->countByAttributes(array(
-            'check_control_id' => $control->id
-        ));
-
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
         $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
         $this->breadcrumbs[] = array($control->localizedName, '');
@@ -578,7 +568,6 @@ class CheckController extends Controller
             'p'        => $paginator,
             'category' => $category,
             'control'  => $control,
-            'count'    => $count,
         ));
 	}
 
@@ -1887,5 +1876,54 @@ class CheckController extends Controller
         }
 
         echo $response->serialize();
+    }
+
+    /**
+     * Search action.
+     */
+    public function actionSearch()
+    {
+        $model  = new SearchForm();
+        $checks = array();
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
+        if (isset($_POST['SearchForm']))
+        {
+            $model->attributes = $_POST['SearchForm'];
+
+            if ($model->validate())
+            {
+                $criteria = new CDbCriteria();
+                $criteria->order = 't.name ASC';
+                $criteria->addColumnCondition(array( 'language_id' => $language ));
+
+                $searchCriteria = new CDbCriteria();
+                $searchCriteria->addSearchCondition('t.name', $model->query, true, 'OR', 'ILIKE');
+                $searchCriteria->addSearchCondition('t.background_info', $model->query, true, 'OR', 'ILIKE');
+                $searchCriteria->addSearchCondition('t.hints', $model->query, true, 'OR', 'ILIKE');
+                $searchCriteria->addSearchCondition('t.question', $model->query, true, 'OR', 'ILIKE');
+                $criteria->mergeWith($searchCriteria);
+
+                $checks = CheckL10n::model()->findAll($criteria);
+            }
+            else
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+        }
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Search'), '');
+
+		// display the page
+        $this->pageTitle = Yii::t('app', 'Search');
+		$this->render('search', array(
+            'model'  => $model,
+            'checks' => $checks,
+        ));
     }
 }
