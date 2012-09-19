@@ -1,13 +1,15 @@
 <div class="active-header">
-    <div class="pull-right">
-        <ul class="nav nav-pills">
-            <li><a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
-            <li class="active"><a href="<?php echo $this->createUrl('project/edit', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
-            <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
-                <li><a href="<?php echo $this->createUrl('project/details', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Details'); ?></a></li>
-            <?php endif; ?>
-        </ul>
-    </div>
+    <?php if (!$project->isNewRecord): ?>
+        <div class="pull-right">
+            <ul class="nav nav-pills">
+                <li><a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
+                <li class="active"><a href="<?php echo $this->createUrl('project/edit', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+                <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
+                    <li><a href="<?php echo $this->createUrl('project/details', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Details'); ?></a></li>
+                <?php endif; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
 
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 </div>

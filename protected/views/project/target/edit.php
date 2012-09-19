@@ -1,10 +1,12 @@
 <div class="active-header">
-    <div class="pull-right">
-        <ul class="nav nav-pills">
-            <li><a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
-            <li class="active"><a href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
-        </ul>
-    </div>
+    <?php if (!$target->isNewRecord): ?>
+        <div class="pull-right">
+            <ul class="nav nav-pills">
+                <li><a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
+                <li class="active"><a href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+            </ul>
+        </div>
+    <?php endif; ?>
 
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 </div>
