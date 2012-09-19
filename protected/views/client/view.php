@@ -82,7 +82,8 @@
         </div>
         <div class="span4">
             <?php if ($client->hasDetails): ?>
-                <h3><a href="#toggle" onclick="$('#client-address').slideToggle('slow');"><?php echo Yii::t('app', 'Client Address'); ?></a></h3>
+                <div id="client-address-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#client-address');"><i class="icon-chevron-up"></i></div>
+                <h3><a href="#toggle" onclick="system.toggleBlock('#client-address')"><?php echo Yii::t('app', 'Client Address'); ?></a></h3>
 
                 <div class="info-block" id="client-address">
                     <table class="table client-details">
@@ -152,7 +153,8 @@
                 </div>
             <?php endif; ?>
             <?php if ($client->hasContact): ?>
-                <h3><a href="#toggle" onclick="$('#client-contact').slideToggle('slow');"><?php echo Yii::t('app', 'Client Contact'); ?></a></h3>
+                <div id="client-contact-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#client-contact');"><i class="icon-chevron-up"></i></div>
+                <h3><a href="#toggle" onclick="system.toggleBlock('#client-contact');"><?php echo Yii::t('app', 'Client Contact'); ?></a></h3>
 
                 <div class="info-block" id="client-contact">
                     <table class="table client-details">
