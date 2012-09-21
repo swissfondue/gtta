@@ -83,6 +83,12 @@ class ReportController extends Controller
             return;
         }
 
+        if (!$project->checkPermission())
+        {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
+            return;
+        }
+
         if (!$targetIds || !count($targetIds))
         {
             Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
@@ -891,10 +897,25 @@ class ReportController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
         }
 
-        $clients = Client::model()->findAllByAttributes(
-            array(),
-            array( 'order' => 't.name ASC' )
-        );
+        $criteria = new CDbCriteria();
+        $criteria->order = 't.name ASC';
+
+        if (!User::checkRole(User::ROLE_ADMIN))
+        {
+            $projects = ProjectUser::model()->with('project')->findAllByAttributes(array(
+                'user_id' => Yii::app()->user->id
+            ));
+
+            $clientIds = array();
+
+            foreach ($projects as $project)
+                if (!in_array($project->project->client_id, $clientIds))
+                    $clientIds[] = $project->project->client_id;
+
+            $criteria->addInCondition('id', $clientIds);
+        }
+
+        $clients = Client::model()->findAll($criteria);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Project Report'), '');
 
@@ -922,6 +943,12 @@ class ReportController extends Controller
             return;
         }
 
+        if (!$project1->checkPermission())
+        {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
+            return;
+        }
+
         $project2 = Project::model()->findByAttributes(array(
             'client_id' => $clientId,
             'id'        => $projectId2
@@ -930,6 +957,12 @@ class ReportController extends Controller
         if ($project2 === null)
         {
             Yii::app()->user->setFlash('error', Yii::t('app', 'Second project doesn\\\'t exist.'));
+            return;
+        }
+
+        if (!$project2->checkPermission())
+        {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
             return;
         }
 
@@ -1195,10 +1228,25 @@ class ReportController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
         }
 
-        $clients = Client::model()->findAllByAttributes(
-            array(),
-            array( 'order' => 't.name ASC' )
-        );
+        $criteria = new CDbCriteria();
+        $criteria->order = 't.name ASC';
+
+        if (!User::checkRole(User::ROLE_ADMIN))
+        {
+            $projects = ProjectUser::model()->with('project')->findAllByAttributes(array(
+                'user_id' => Yii::app()->user->id
+            ));
+
+            $clientIds = array();
+
+            foreach ($projects as $project)
+                if (!in_array($project->project->client_id, $clientIds))
+                    $clientIds[] = $project->project->client_id;
+
+            $criteria->addInCondition('id', $clientIds);
+        }
+
+        $clients = Client::model()->findAll($criteria);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Projects Comparison'), '');
 
@@ -1252,10 +1300,28 @@ class ReportController extends Controller
                     if (!$client)
                         throw new CHttpException(404, Yii::t('app', 'Client not found.'));
 
-                    $projects = Project::model()->findAllByAttributes(
-                        array( 'client_id' => $client->id ),
-                        array( 'order'     => 't.name ASC, t.year ASC' )
-                    );
+                    if (!$client->checkPermission())
+                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
+                    $criteria = new CDbCriteria();
+                    $criteria->order = 't.name ASC, t.year ASC';
+                    $criteria->addColumnCondition(array(
+                        't.client_id' => $client->id
+                    ));
+                    $criteria->together = true;
+
+                    if (User::checkRole(User::ROLE_ADMIN))
+                        $projects = Project::model()->findAll($criteria);
+                    else
+                        $projects = Project::model()->with(array(
+                            'project_users' => array(
+                                'joinType' => 'INNER JOIN',
+                                'on'       => 'project_users.user_id = :user_id',
+                                'params'   => array(
+                                    'user_id' => Yii::app()->user->id,
+                                ),
+                            ),
+                        ))->findAll($criteria);
 
                     foreach ($projects as $project)
                         $objects[] = array(
@@ -1270,6 +1336,9 @@ class ReportController extends Controller
 
                     if (!$project)
                         throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+                    if (!$project->checkPermission())
+                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
                     $targets = Target::model()->findAllByAttributes(
                         array( 'project_id' => $project->id ),
@@ -1348,6 +1417,12 @@ class ReportController extends Controller
         if ($project === null)
         {
             Yii::app()->user->setFlash('error', Yii::t('app', 'Project doesn\\\'t exist.'));
+            return;
+        }
+
+        if (!$project->checkPermission())
+        {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
             return;
         }
 
@@ -1640,10 +1715,25 @@ class ReportController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
         }
 
-        $clients = Client::model()->findAllByAttributes(
-            array(),
-            array( 'order' => 't.name ASC' )
-        );
+        $criteria = new CDbCriteria();
+        $criteria->order = 't.name ASC';
+
+        if (!User::checkRole(User::ROLE_ADMIN))
+        {
+            $projects = ProjectUser::model()->with('project')->findAllByAttributes(array(
+                'user_id' => Yii::app()->user->id
+            ));
+
+            $clientIds = array();
+
+            foreach ($projects as $project)
+                if (!in_array($project->project->client_id, $clientIds))
+                    $clientIds[] = $project->project->client_id;
+
+            $criteria->addInCondition('id', $clientIds);
+        }
+
+        $clients = Client::model()->findAll($criteria);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Degree of Fulfillment'), '');
 
@@ -1668,6 +1758,12 @@ class ReportController extends Controller
         if ($project === null)
         {
             Yii::app()->user->setFlash('error', Yii::t('app', 'Project doesn\\\'t exist.'));
+            return;
+        }
+
+        if (!$project->checkPermission())
+        {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
             return;
         }
 
@@ -2035,10 +2131,25 @@ class ReportController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
         }
 
-        $clients = Client::model()->findAllByAttributes(
-            array(),
-            array( 'order' => 't.name ASC' )
-        );
+        $criteria = new CDbCriteria();
+        $criteria->order = 't.name ASC';
+
+        if (!User::checkRole(User::ROLE_ADMIN))
+        {
+            $projects = ProjectUser::model()->with('project')->findAllByAttributes(array(
+                'user_id' => Yii::app()->user->id
+            ));
+
+            $clientIds = array();
+
+            foreach ($projects as $project)
+                if (!in_array($project->project->client_id, $clientIds))
+                    $clientIds[] = $project->project->client_id;
+
+            $criteria->addInCondition('id', $clientIds);
+        }
+
+        $clients = Client::model()->findAll($criteria);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Risk Matrix'), '');
 

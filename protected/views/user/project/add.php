@@ -17,7 +17,7 @@
                         <option value="<?php echo $client->id; ?>"><?php echo CHtml::encode($client->name); ?></option>
                     <?php endforeach; ?>
                 </select>
-                <p class="help-block hide"><?php echo Yii::t('app', 'This client has no available projects.'); ?></p>
+                <p class="help-block hide"><?php echo Yii::t('app', 'This client has no projects.'); ?></p>
             </div>
         </div>
 
