@@ -66,7 +66,7 @@ class UserController extends Controller
             $user = User::model()->findByPk($id);
         else
         {
-            $user     = new User();
+            $user      = new User();
             $newRecord = true;
         }
 
@@ -91,9 +91,15 @@ class UserController extends Controller
 
                 if (!$checkEmail || $checkEmail->id == $user->id)
                 {
-                    $user->email     = $model->email;
-                    $user->name      = $model->name;
-                    $user->role      = $model->role;
+                    $user->email = $model->email;
+                    $user->name  = $model->name;
+                    $user->role  = $model->role;
+
+                    // delete all projects from this client account
+                    if (!$newRecord && $user->role == User::ROLE_CLIENT && $model->clientId != $user->client_id)
+                        ProjectUser::model()->deleteAllByAttributes(array(
+                            'user_id' => $user->id
+                        ));
 
                     if ($user->role == User::ROLE_CLIENT && $model->clientId)
                         $user->client_id = $model->clientId;
@@ -295,10 +301,15 @@ class UserController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $clients = Client::model()->findAllByAttributes(
-            array(),
-            array( 'order' => 't.name ASC' )
-        );
+        if ($user->role == User::ROLE_CLIENT)
+            $clients = Client::model()->findAllByAttributes(array(
+                'id' => $user->client_id
+            ));
+        else
+            $clients = Client::model()->findAllByAttributes(
+                array(),
+                array( 'order' => 't.name ASC' )
+            );
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Users'), $this->createUrl('user/index'));
         $this->breadcrumbs[] = array($user->name ? $user->name : $user->email, $this->createUrl('user/edit', array( 'id' => $user->id )));
