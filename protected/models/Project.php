@@ -57,9 +57,34 @@ class Project extends CActiveRecord
 	public function relations()
 	{
 		return array(
-			'client'  => array( self::BELONGS_TO, 'Client',        'client_id' ),
-            'details' => array( self::HAS_MANY,   'ProjectDetail', 'project_id' ),
-            'users'   => array( self::MANY_MANY,  'User',          'project_users(project_id, user_id)' ),
+			'client'         => array( self::BELONGS_TO, 'Client',        'client_id' ),
+            'details'        => array( self::HAS_MANY,   'ProjectDetail', 'project_id' ),
+            'users'          => array( self::MANY_MANY,  'User',          'project_users(project_id, user_id)' ),
+            'project_users'  => array( self::HAS_MANY,   'ProjectUser',   'project_id' ),
 		);
 	}
+
+    /**
+     * Check if user is permitted to access the project.
+     */
+    public function checkPermission()
+    {
+        $user = Yii::app()->user;
+
+        if ($user->role == User::ROLE_ADMIN)
+            return true;
+
+        if (($user->role == User::ROLE_CLIENT && $user->client_id == $this->client_id) || $user->role == User::ROLE_USER)
+        {
+            $check = ProjectUser::model()->findByAttributes(array(
+                'project_id' => $this->id,
+                'user_id'    => $user->id
+            ));
+
+            if ($check)
+                return true;
+        }
+
+        return false;
+    }
 }

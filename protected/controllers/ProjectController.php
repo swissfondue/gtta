@@ -36,6 +36,7 @@ class ProjectController extends Controller
         $criteria->order  = 't.deadline ASC, t.name ASC';
         $criteria->addCondition('t.status != :status');
         $criteria->params = array( 'status' => Project::STATUS_FINISHED );
+        $criteria->together = true;
 
         if (User::checkRole(User::ROLE_CLIENT))
         {
@@ -43,7 +44,19 @@ class ProjectController extends Controller
             $criteria->addColumnCondition(array( 'client_id' => $user->client_id ));
         }
 
-        $projects = Project::model()->with('client')->findAll($criteria);
+        if (User::checkRole(User::ROLE_ADMIN))
+            $projects = Project::model()->with('client')->findAll($criteria);
+        else
+            $projects = Project::model()->with(array(
+                'project_users' => array(
+                    'joinType' => 'INNER JOIN',
+                    'on'       => 'project_users.user_id = :user_id',
+                    'params'   => array(
+                        'user_id' => Yii::app()->user->id,
+                    ),
+                ),
+                'client'
+            ))->findAll($criteria);
 
         $projectCount = Project::model()->count($criteria);
         $paginator    = new Paginator($projectCount, $page);
@@ -491,13 +504,8 @@ class ProjectController extends Controller
         if (!$project)
             throw new CHttpException(404, Yii::t('app', 'Project not found.'));
 
-        if (User::checkRole(User::ROLE_CLIENT))
-        {
-            $user = User::model()->findByPk(Yii::app()->user->id);
-
-            if ($user->client_id != $project->client_id)
-                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
-        }
+        if (!$project->checkPermission())
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
@@ -688,13 +696,8 @@ class ProjectController extends Controller
         if (!$project)
             throw new CHttpException(404, Yii::t('app', 'Project not found.'));
 
-        if (User::checkRole(User::ROLE_CLIENT))
-        {
-            $user = User::model()->findByPk(Yii::app()->user->id);
-
-            if ($user->client_id != $project->client_id)
-                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
-        }
+        if (!$project->checkPermission())
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
@@ -741,13 +744,8 @@ class ProjectController extends Controller
         if (!$project)
             throw new CHttpException(404, Yii::t('app', 'Project not found.'));
 
-        if (User::checkRole(User::ROLE_CLIENT))
-        {
-            $user = User::model()->findByPk(Yii::app()->user->id);
-
-            if ($user->client_id != $project->client_id)
-                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
-        }
+        if (!$project->checkPermission())
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
         if ($detail)
         {
@@ -829,6 +827,9 @@ class ProjectController extends Controller
         if (!$project)
             throw new CHttpException(404, Yii::t('app', 'Project not found.'));
 
+        if (!$project->checkPermission())
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
         $target = Target::model()->findByAttributes(array(
             'id'         => $target,
             'project_id' => $project->id
@@ -907,6 +908,9 @@ class ProjectController extends Controller
 
         if (!$project)
             throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+        if (!$project->checkPermission())
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
         if ($target)
         {
@@ -1135,6 +1139,9 @@ class ProjectController extends Controller
         if (!$project)
             throw new CHttpException(404, Yii::t('app', 'Project not found.'));
 
+        if (!$project->checkPermission())
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
         $target = Target::model()->findByAttributes(array(
             'id'         => $target,
             'project_id' => $project->id
@@ -1322,6 +1329,9 @@ class ProjectController extends Controller
 
             if (!$project)
                 throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+            if (!$project->checkPermission())
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
             $target = Target::model()->findByAttributes(array(
                 'id'         => $target,
@@ -1511,6 +1521,9 @@ class ProjectController extends Controller
             if (!$project)
                 throw new CHttpException(404, Yii::t('app', 'Project not found.'));
 
+            if (!$project->checkPermission())
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
             $target = Target::model()->findByAttributes(array(
                 'id'         => $target,
                 'project_id' => $project->id
@@ -1587,6 +1600,9 @@ class ProjectController extends Controller
             if ($project === null)
                 throw new CHttpException(404, Yii::t('app', 'Project not found.'));
 
+            if (!$project->checkPermission())
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
             switch ($model->operation)
             {
                 case 'delete':
@@ -1632,10 +1648,13 @@ class ProjectController extends Controller
             }
 
             $id     = $model->id;
-            $target = Target::model()->findByPk($id);
+            $target = Target::model()->with('project')->findByPk($id);
 
             if ($target === null)
                 throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+
+            if (!$target->project->checkPermission())
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
             switch ($model->operation)
             {
@@ -1690,13 +1709,8 @@ class ProjectController extends Controller
             if ($detail === null)
                 throw new CHttpException(404, Yii::t('app', 'Detail not found.'));
 
-            if (User::checkRole(User::ROLE_CLIENT))
-            {
-                $user = User::model()->findByPk(Yii::app()->user->id);
-
-                if ($user->client_id != $detail->project->client_id)
-                    throw new CHttpException(403, Yii::t('app', 'Access denied.'));
-            }
+            if (!$detail->project->checkPermission())
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
             switch ($model->operation)
             {
@@ -1735,6 +1749,9 @@ class ProjectController extends Controller
 
             if (!$project)
                 throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+            if (!$project->checkPermission())
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
             $target = Target::model()->findByAttributes(array(
                 'id'         => $target,
@@ -1838,12 +1855,19 @@ class ProjectController extends Controller
             }
 
             $path       = $model->path;
-            $attachment = TargetCheckAttachment::model()->findByAttributes(array(
+            $attachment = TargetCheckAttachment::model()->with(array(
+                'target' => array(
+                    'with' => 'project'
+                )
+            ))->findByAttributes(array(
                 'path' => $path
             ));
 
             if ($attachment === null)
                 throw new CHttpException(404, Yii::t('app', 'Attachment not found.'));
+
+            if (!$attachment->target->project->checkPermission())
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
             switch ($model->operation)
             {
@@ -1870,12 +1894,19 @@ class ProjectController extends Controller
      */
     public function actionAttachment($path)
     {
-        $attachment = TargetCheckAttachment::model()->findByAttributes(array(
+        $attachment = TargetCheckAttachment::model()->with(array(
+            'target' => array(
+                'with' => 'project'
+            )
+        ))->findByAttributes(array(
             'path' => $path
         ));
 
         if ($attachment === null)
             throw new CHttpException(404, Yii::t('app', 'Attachment not found.'));
+
+        if (!$attachment->target->project->checkPermission())
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
         $filePath = Yii::app()->params['attachments']['path'] . '/' . $attachment->path;
 
@@ -1918,6 +1949,9 @@ class ProjectController extends Controller
 
             if (!$project)
                 throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+            if (!$project->checkPermission())
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
             $target = Target::model()->findByAttributes(array(
                 'id'         => $target,
@@ -2112,6 +2146,9 @@ class ProjectController extends Controller
             if (!$project)
                 throw new CHttpException(404, Yii::t('app', 'Project not found.'));
 
+            if (!$project->checkPermission())
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
             $target = Target::model()->findByAttributes(array(
                 'id'         => $target,
                 'project_id' => $project->id
@@ -2218,7 +2255,8 @@ class ProjectController extends Controller
             if ($model->validate())
             {
                 $criteria = new CDbCriteria();
-                $criteria->order = 't.deadline ASC, t.name ASC';
+                $criteria->order    = 't.deadline ASC, t.name ASC';
+                $criteria->together = true;
 
                 if (User::checkRole(User::ROLE_CLIENT))
                 {
@@ -2230,7 +2268,19 @@ class ProjectController extends Controller
                 $searchCriteria->addSearchCondition('t.name', $model->query, true, 'OR', 'ILIKE');
                 $criteria->mergeWith($searchCriteria);
 
-                $projects = Project::model()->with('client')->findAll($criteria);
+                if (User::checkRole(User::ROLE_ADMIN))
+                    $projects = Project::model()->with('client')->findAll($criteria);
+                else
+                    $projects = Project::model()->with(array(
+                        'project_users' => array(
+                            'joinType' => 'INNER JOIN',
+                            'on'       => 'project_users.user_id = :user_id',
+                            'params'   => array(
+                                'user_id' => Yii::app()->user->id,
+                            ),
+                        ),
+                        'client'
+                    ))->findAll($criteria);
 
                 $projectStats = array();
 

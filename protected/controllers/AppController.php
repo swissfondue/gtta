@@ -98,7 +98,7 @@ class AppController extends Controller
     /**
      * Localization javascript file.
      */
-    public function ActionL10n()
+    public function actionL10n()
     {
         header('Content-Type: text/javascript');
         echo $this->renderPartial('l10n');

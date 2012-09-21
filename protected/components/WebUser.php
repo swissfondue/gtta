@@ -36,4 +36,17 @@ class WebUser extends CWebUser
 
         return $this->_model->role;
     }
+
+    /**
+     * Get client id.
+     */
+    public function getClient_id()
+    {
+        if ($this->isGuest)
+            return null;
+
+        $this->loadUserModel();
+
+        return $this->_model->client_id;
+    }
 }
