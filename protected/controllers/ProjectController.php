@@ -13,10 +13,10 @@ class ProjectController extends Controller
 		return array(
             'https',
 			'checkAuth',
-            'checkUser + edit, target, edittarget, controltarget, uploadattachment, controlattachment, attachment, controlcheck, updatechecks',
-            'checkAdmin + control',
-            'ajaxOnly + savecheck, controlattachment, controlcheck, updatechecks',
-            'postOnly + savecheck, uploadattachment, controlattachment, controlcheck, updatechecks',
+            'checkUser + target, edittarget, controltarget, uploadattachment, controlattachment, attachment, controlcheck, updatechecks',
+            'checkAdmin + control, edit, users, adduser, controluser',
+            'ajaxOnly + savecheck, controlattachment, controlcheck, updatechecks, controluser',
+            'postOnly + savecheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser',
 		);
 	}
 
@@ -2276,5 +2276,196 @@ class ProjectController extends Controller
                 Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
             )
         ));
+    }
+
+    /**
+     * Display a list of users.
+     */
+	public function actionUsers($id, $page=1)
+	{
+        $id   = (int) $id;
+        $page = (int) $page;
+
+        $project = Project::model()->findByPk($id);
+
+        if (!$project)
+            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+        if ($page < 1)
+            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+
+        $criteria = new CDbCriteria();
+        $criteria->limit  = Yii::app()->params['entriesPerPage'];
+        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->order  = 'role DESC, name ASC';
+        $criteria->addColumnCondition(array(
+            'project_id' => $project->id
+        ));
+
+        $users = ProjectUser::model()->with('user')->findAll($criteria);
+
+        $userCount = ProjectUser::model()->count($criteria);
+        $paginator = new Paginator($userCount, $page);
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Users'), '');
+
+        // display the page
+        $this->pageTitle = $project->name;
+		$this->render('user/index', array(
+            'project' => $project,
+            'users'   => $users,
+            'p'       => $paginator,
+        ));
+	}
+
+    /**
+     * Project user add page.
+     */
+	public function actionAddUser($id)
+	{
+        $id      = (int) $id;
+        $project = Project::model()->findByPk($id);
+
+        if (!$project)
+            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+		$model = new ProjectUserAddForm();
+
+		// collect user input data
+		if (isset($_POST['ProjectUserAddForm']))
+		{
+			$model->attributes = $_POST['ProjectUserAddForm'];
+
+			if ($model->validate())
+            {
+                $check = ProjectUser::model()->findByAttributes(array(
+                    'project_id' => $project->id,
+                    'user_id'    => $model->userId
+                ));
+
+                if ($check)
+                    $model->addError('userId', Yii::t('app', 'User is already added to this project.'));
+                else
+                {
+                    $user = User::model()->findByPk($model->userId);
+
+                    if ($user->role == User::ROLE_CLIENT && $user->client_id != $project->client_id)
+                        $model->addError('userId', Yii::t('app', 'User belongs to another client.'));
+                    else
+                    {
+                        $user = new ProjectUser();
+                        $user->project_id = $project->id;
+                        $user->user_id    = $model->userId;
+                        $user->save();
+
+                        Yii::app()->user->setFlash('success', Yii::t('app', 'User added.'));
+                    }
+                }
+            }
+
+            if (count($model->getErrors()) > 0)
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+		}
+
+        // find users
+        $addedUsers = ProjectUser::model()->findAllByAttributes(array(
+            'project_id' => $project->id
+        ));
+
+        $addedUserIds = array();
+
+        foreach ($addedUsers as $user)
+            $addedUserIds[] = $user->user_id;
+
+        $criteria = new CDbCriteria();
+        $criteria->addNotInCondition('id', $addedUserIds);
+        $criteria->order = 't.role DESC, t.name ASC, t.email ASC';
+
+        $roleCriteria = new CDbCriteria();
+        $roleCriteria->addColumnCondition(array(
+            'role'      => User::ROLE_CLIENT,
+            'client_id' => $project->client_id
+        ));
+        $roleCriteria->addColumnCondition(array(
+            'role' => User::ROLE_USER
+        ), 'AND', 'OR');
+
+        $criteria->mergeWith($roleCriteria);
+
+        $users = User::model()->findAll($criteria);
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Users'), $this->createUrl('project/users', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Add User'), '');
+
+		// display the page
+        $this->pageTitle = Yii::t('app', 'Add User');
+		$this->render('user/add', array(
+            'model'   => $model,
+            'project' => $project,
+            'users'   => $users
+        ));
+	}
+
+    /**
+     * Control user function.
+     */
+    public function actionControlUser($id)
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $id = (int) $id;
+
+            $project = Project::model()->findByPk($id);
+
+            if (!$project)
+                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $user = ProjectUser::model()->findByAttributes(array(
+                'project_id' => $project->id,
+                'user_id'    => $model->id
+            ));
+
+            if ($user === null)
+                throw new CHttpException(404, Yii::t('app', 'User not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $user->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
     }
 }

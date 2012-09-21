@@ -1,4 +1,15 @@
-<h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+<div class="active-header">
+    <?php if (!$user->isNewRecord): ?>
+        <div class="pull-right">
+            <ul class="nav nav-pills">
+                <li class="active"><a href="<?php echo $this->createUrl('user/edit', array( 'id' => $user->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+                <li><a href="<?php echo $this->createUrl('user/projects', array( 'id' => $user->id )); ?>"><?php echo Yii::t('app', 'Projects'); ?></a></li>
+            </ul>
+        </div>
+    <?php endif; ?>
+
+    <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+</div>
 
 <hr>
 

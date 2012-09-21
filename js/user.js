@@ -221,7 +221,7 @@ function User()
         };
 
         /**
-         * Shrink control.
+         * Collapse control.
          */
         this.collapseControl = function (id) {
             $('div.control-body[data-id=' + id + ']').slideUp('slow');
@@ -246,7 +246,7 @@ function User()
         };
 
         /**
-         * Shrink solution.
+         * Collapse solution.
          */
         this.collapseSolution = function (id) {
             $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.check.expandSolution(' + id + ');"><i class="icon-chevron-down"></i></a>');
@@ -262,7 +262,7 @@ function User()
         };
 
         /**
-         * Shrink result.
+         * Collapse result.
          */
         this.collapseResult = function (id) {
             $('span.result-control[data-id=' + id + ']').html('<a href="#result" onclick="user.check.expandResult(' + id + ');"><i class="icon-chevron-down"></i></a>');

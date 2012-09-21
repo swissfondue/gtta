@@ -14,6 +14,8 @@ class UserController extends Controller
             'https',
 			'checkAuth',
             'checkAdmin',
+            'ajaxOnly + control, controlproject, objectlist',
+            'postOnly + control, controlproject, objectlist',
 		);
 	}
 
@@ -30,7 +32,7 @@ class UserController extends Controller
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 't.role ASC, t.email ASC';
+        $criteria->order  = 't.role ASC, t.name ASC, t.email ASC';
 
         $users = User::model()->findAll($criteria);
 
@@ -123,7 +125,7 @@ class UserController extends Controller
         if ($newRecord)
             $this->breadcrumbs[] = array(Yii::t('app', 'New User'), '');
         else
-            $this->breadcrumbs[] = array($user->email, '');
+            $this->breadcrumbs[] = array($user->name ? $user->name : $user->email, '');
 
         $clients = Client::model()->findAllByAttributes(
             array(),
@@ -131,7 +133,7 @@ class UserController extends Controller
         );
 
 		// display the page
-        $this->pageTitle = $newRecord ? Yii::t('app', 'New User') : $user->email;
+        $this->pageTitle = $newRecord ? Yii::t('app', 'New User') : $user->name ? $user->name : $user->email;
 		$this->render('edit', array(
             'model'   => $model,
             'user'    => $user,
@@ -185,6 +187,264 @@ class UserController extends Controller
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;
             }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Display a list of projects.
+     */
+	public function actionProjects($id, $page=1)
+	{
+        $id   = (int) $id;
+        $page = (int) $page;
+
+        $user = User::model()->findByPk($id);
+
+        if ($user === null)
+            throw new CHttpException(404, Yii::t('app', 'User not found.'));
+
+        if ($page < 1)
+            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+
+        $criteria = new CDbCriteria();
+        $criteria->limit  = Yii::app()->params['entriesPerPage'];
+        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->order  = 'deadline ASC, project.name ASC';
+        $criteria->addColumnCondition(array(
+            'user_id' => $user->id
+        ));
+
+        $projects = ProjectUser::model()->with(array(
+            'project' => array(
+                'with' => 'client'
+            )
+        ))->findAll($criteria);
+
+        $projectCount = ProjectUser::model()->count($criteria);
+        $paginator    = new Paginator($projectCount, $page);
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Users'), $this->createUrl('user/index'));
+        $this->breadcrumbs[] = array($user->name ? $user->name : $user->email, $this->createUrl('user/edit', array( 'id' => $user->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), '');
+
+        // display the page
+        $this->pageTitle = Yii::t('app', 'Projects');
+		$this->render('project/index', array(
+            'user'     => $user,
+            'projects' => $projects,
+            'p'        => $paginator,
+            'statuses' => array(
+                Project::STATUS_OPEN        => Yii::t('app', 'Open'),
+                Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
+                Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
+            )
+        ));
+	}
+
+    /**
+     * Project add page.
+     */
+	public function actionAddProject($id)
+	{
+        $id   = (int) $id;
+        $user = User::model()->findByPk($id);
+
+        if (!$user)
+            throw new CHttpException(404, Yii::t('app', 'User not found.'));
+
+		$model = new UserProjectAddForm();
+
+		// collect user input data
+		if (isset($_POST['UserProjectAddForm']))
+		{
+			$model->attributes = $_POST['UserProjectAddForm'];
+
+			if ($model->validate())
+            {
+                $check = ProjectUser::model()->findByAttributes(array(
+                    'project_id' => $model->projectId,
+                    'user_id'    => $user->id
+                ));
+
+                if (!$check)
+                {
+                    $project = Project::model()->findByPk($model->projectId);
+
+                    if ($user->role == User::ROLE_CLIENT && $user->client_id != $project->client_id)
+                        Yii::app()->user->setFlash('error', Yii::t('app', 'Project belongs to another client.'));
+                    else
+                    {
+                        $project = new ProjectUser();
+                        $project->project_id = $model->projectId;
+                        $project->user_id    = $user->id;
+                        $project->save();
+
+                        Yii::app()->user->setFlash('success', Yii::t('app', 'Project added.'));
+                    }
+                }
+                else
+                    Yii::app()->user->setFlash('error', Yii::t('app', 'Project is already added for this user.'));
+            }
+            else
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+		}
+
+        $clients = Client::model()->findAllByAttributes(
+            array(),
+            array( 'order' => 't.name ASC' )
+        );
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Users'), $this->createUrl('user/index'));
+        $this->breadcrumbs[] = array($user->name ? $user->name : $user->email, $this->createUrl('user/edit', array( 'id' => $user->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('user/projects', array( 'id' => $user->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Add Project'), '');
+
+		// display the page
+        $this->pageTitle = Yii::t('app', 'Add Project');
+		$this->render('project/add', array(
+            'model'   => $model,
+            'user'    => $user,
+            'clients' => $clients,
+        ));
+	}
+
+    /**
+     * Control project function.
+     */
+    public function actionControlProject($id)
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $id   = (int) $id;
+            $user = User::model()->findByPk($id);
+
+            if (!$user)
+                throw new CHttpException(404, Yii::t('app', 'User not found.'));
+
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $project = ProjectUser::model()->findByAttributes(array(
+                'project_id' => $model->id,
+                'user_id'    => $user->id
+            ));
+
+            if ($project === null)
+                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $project->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Object list.
+     */
+    public function actionObjectList($id)
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $id   = (int) $id;
+            $user = User::model()->findByPk($id);
+
+            if (!$user)
+                throw new CHttpException(404, Yii::t('app', 'User not found.'));
+
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $objects = array();
+
+            switch ($model->operation)
+            {
+                case 'project-list':
+                    $client = Client::model()->findByPk($model->id);
+
+                    if (!$client)
+                        throw new CHttpException(404, Yii::t('app', 'Client not found.'));
+
+                    $userProjects = ProjectUser::model()->findAllByAttributes(array(
+                        'user_id' => $user->id
+                    ));
+
+                    $userProjectIds = array();
+
+                    foreach ($userProjects as $project)
+                        $userProjectIds[] = $project->project_id;
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addNotInCondition('id', $userProjectIds);
+                    $criteria->addColumnCondition(array(
+                        'client_id' => $client->id
+                    ));
+                    $criteria->order = 't.name ASC, t.year ASC';
+
+                    $projects = Project::model()->findAll($criteria);
+
+                    foreach ($projects as $project)
+                        $objects[] = array(
+                            'id'   => $project->id,
+                            'name' => CHtml::encode($project->name) . ' (' . $project->year . ')',
+                        );
+
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+
+            $response->addData('objects', $objects);
         }
         catch (Exception $e)
         {

@@ -46,18 +46,27 @@ return array(
                 'app/l10n.js'             => 'app/l10n',
 
                 // projects
-                'projects/<page:\d+>'                                                                        => 'project/index',
-                'projects'                                                                                   => 'project/index',
-                'project/<id:\d+>/<page:\d+>'                                                                => 'project/view',
-                'project/<id:\d+>'                                                                           => 'project/view',
-                'project/<id:\d+>/edit'                                                                      => 'project/edit',
-                'project/new'                                                                                => 'project/edit',
-                'project/control'                                                                            => 'project/control',
-                'project/<id:\d+>/details/<page:\d+>'                                                        => 'project/details',
-                'project/<id:\d+>/details'                                                                   => 'project/details',
-                'project/<id:\d+>/detail/<detail:\d+>/edit'                                                  => 'project/editdetail',
-                'project/<id:\d+>/detail/new'                                                                => 'project/editdetail',
-                'project/detail/control'                                                                     => 'project/controldetail',
+                'projects/<page:\d+>'         => 'project/index',
+                'projects'                    => 'project/index',
+                'project/<id:\d+>/<page:\d+>' => 'project/view',
+                'project/<id:\d+>'            => 'project/view',
+                'project/<id:\d+>/edit'       => 'project/edit',
+                'project/new'                 => 'project/edit',
+                'project/control'             => 'project/control',
+
+                // project details
+                'project/<id:\d+>/details/<page:\d+>'       => 'project/details',
+                'project/<id:\d+>/details'                  => 'project/details',
+                'project/<id:\d+>/detail/<detail:\d+>/edit' => 'project/editdetail',
+                'project/<id:\d+>/detail/new'               => 'project/editdetail',
+                'project/detail/control'                    => 'project/controldetail',
+
+                // project users
+                'project/<id:\d+>/users/<page:\d+>' => 'project/users',
+                'project/<id:\d+>/users'            => 'project/users',
+                'project/<id:\d+>/user/add'         => 'project/adduser',
+                'project/<id:\d+>/user/control'     => 'project/controluser',
+
                 'project/<id:\d+>/target/<target:\d+>/<page:\d+>'                                            => 'project/target',
                 'project/<id:\d+>/target/<target:\d+>'                                                       => 'project/target',
                 'project/<id:\d+>/target/<target:\d+>/edit'                                                  => 'project/edittarget',
@@ -87,7 +96,7 @@ return array(
                 'client/<id:\d+>/edit' => 'client/edit',
                 'client/new'           => 'client/edit',
                 'client/control'       => 'client/control',
-                'client/search'       => 'client/search',
+                'client/search'        => 'client/search',
 
                 // effort
                 'effort' => 'effort/index',
@@ -155,6 +164,13 @@ return array(
                 'user/<id:\d+>/edit' => 'user/edit',
                 'user/new'           => 'user/edit',
                 'user/control'       => 'user/control',
+
+                // user projects
+                'user/<id:\d+>/projects/<page:\d+>' => 'user/projects',
+                'user/<id:\d+>/projects'            => 'user/projects',
+                'user/<id:\d+>/project/add'         => 'user/addproject',
+                'user/<id:\d+>/project/control'     => 'user/controlproject',
+                'user/<id:\d+>/object-list'         => 'user/objectlist',
 
                 // backup
                 'backup'  => 'backup/backup',

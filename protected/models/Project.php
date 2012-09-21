@@ -59,6 +59,7 @@ class Project extends CActiveRecord
 		return array(
 			'client'  => array( self::BELONGS_TO, 'Client',        'client_id' ),
             'details' => array( self::HAS_MANY,   'ProjectDetail', 'project_id' ),
+            'users'   => array( self::MANY_MANY,  'User',          'project_users(project_id, user_id)' ),
 		);
 	}
 }
