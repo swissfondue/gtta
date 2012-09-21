@@ -578,7 +578,7 @@ class ProjectController extends Controller
             $project = Project::model()->findByPk($id);
         else
         {
-            $project  = new Project();
+            $project   = new Project();
             $newRecord = true;
         }
 
@@ -602,6 +602,28 @@ class ProjectController extends Controller
 
 			if ($model->validate())
             {
+                // delete all client accounts from this project
+                if (!$newRecord && $model->clientId != $project->client_id)
+                {
+                    $clientUsers = User::model()->findAllByAttributes(array(
+                        'role'      => User::ROLE_CLIENT,
+                        'client_id' => $project->client_id
+                    ));
+
+                    $clientUserIds = array();
+
+                    foreach ($clientUsers as $user)
+                        $clientUserIds[] = $user->id;
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addInCondition('user_id', $clientUserIds);
+                    $criteria->addColumnCondition(array(
+                        'project_id' => $project->id
+                    ));
+
+                    ProjectUser::model()->deleteAll($criteria);
+                }
+
                 $project->name      = $model->name;
                 $project->year      = $model->year;
                 $project->status    = $model->status;
