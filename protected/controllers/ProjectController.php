@@ -45,8 +45,12 @@ class ProjectController extends Controller
         }
 
         if (User::checkRole(User::ROLE_ADMIN))
-            $projects = Project::model()->with('client')->findAll($criteria);
+        {
+            $projects     = Project::model()->with('client')->findAll($criteria);
+            $projectCount = Project::model()->count($criteria);
+        }
         else
+        {
             $projects = Project::model()->with(array(
                 'project_users' => array(
                     'joinType' => 'INNER JOIN',
@@ -58,8 +62,19 @@ class ProjectController extends Controller
                 'client'
             ))->findAll($criteria);
 
-        $projectCount = Project::model()->count($criteria);
-        $paginator    = new Paginator($projectCount, $page);
+            $projectCount = Project::model()->with(array(
+                'project_users' => array(
+                    'joinType' => 'INNER JOIN',
+                    'on'       => 'project_users.user_id = :user_id',
+                    'params'   => array(
+                        'user_id' => Yii::app()->user->id,
+                    ),
+                ),
+                'client'
+            ))->count($criteria);
+        }
+
+        $paginator = new Paginator($projectCount, $page);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), '');
 

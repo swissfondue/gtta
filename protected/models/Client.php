@@ -64,4 +64,43 @@ class Client extends CActiveRecord
     {
         return $this->contact_email || $this->contact_name || $this->contact_phone;
     }
+
+    /**
+     * Check if user is permitted to access the client.
+     */
+    public function checkPermission()
+    {
+        $user = Yii::app()->user;
+
+        if ($user->role == User::ROLE_ADMIN)
+            return true;
+
+        if ($user->role == User::ROLE_CLIENT && $user->client_id == $this->client_id)
+            return true;
+
+        if ($user->role == User::ROLE_USER)
+        {
+            $projects = Project::model()->findAllByAttributes(array(
+                'client_id' => $this->id
+            ));
+
+            $projectIds = array();
+
+            foreach ($projects as $project)
+                $projectIds[] = $project->id;
+
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition('project_id', $projectIds);
+            $criteria->addColumnCondition(array(
+                'user_id' => Yii::app()->user->id
+            ));
+
+            $check = ProjectUser::model()->findAll($criteria);
+
+            if ($check)
+                return true;
+        }
+
+        return false;
+    }
 }

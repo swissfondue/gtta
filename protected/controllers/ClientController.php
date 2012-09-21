@@ -14,7 +14,7 @@ class ClientController extends Controller
             'https',
 			'checkAuth',
             'checkUser',
-            'checkAdmin + control',
+            'checkAdmin + edit, control',
 		);
 	}
 
@@ -32,6 +32,21 @@ class ClientController extends Controller
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
         $criteria->order  = 't.name ASC';
+
+        if (!User::checkRole(User::ROLE_ADMIN))
+        {
+            $projects = ProjectUser::model()->with('project')->findAllByAttributes(array(
+                'user_id' => Yii::app()->user->id
+            ));
+
+            $clientIds = array();
+
+            foreach ($projects as $project)
+                if (!in_array($project->project->client_id, $clientIds))
+                    $clientIds[] = $project->project->client_id;
+
+            $criteria->addInCondition('id', $clientIds);
+        }
 
         $clients = Client::model()->findAll($criteria);
 
@@ -61,6 +76,9 @@ class ClientController extends Controller
         if (!$client)
             throw new CHttpException(404, Yii::t('app', 'Client not found.'));
 
+        if (!$client->checkPermission())
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
@@ -68,13 +86,40 @@ class ClientController extends Controller
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
         $criteria->order  = 't.deadline ASC, t.name ASC';
-        $criteria->addCondition('t.client_id = :client_id');
-        $criteria->params = array( 'client_id' => $client->id );
+        $criteria->addColumnCondition(array(
+            't.client_id' => $client->id
+        ));
+        $criteria->together = true;
 
-        $projects = Project::model()->findAll($criteria);
+        if (User::checkRole(User::ROLE_ADMIN))
+        {
+            $projects     = Project::model()->findAll($criteria);
+            $projectCount = Project::model()->count($criteria);
+        }
+        else
+        {
+            $projects = Project::model()->with(array(
+                'project_users' => array(
+                    'joinType' => 'INNER JOIN',
+                    'on'       => 'project_users.user_id = :user_id',
+                    'params'   => array(
+                        'user_id' => Yii::app()->user->id,
+                    ),
+                ),
+            ))->findAll($criteria);
 
-        $projectCount = Project::model()->count($criteria);
-        $paginator    = new Paginator($projectCount, $page);
+            $projectCount = Project::model()->with(array(
+                'project_users' => array(
+                    'joinType' => 'INNER JOIN',
+                    'on'       => 'project_users.user_id = :user_id',
+                    'params'   => array(
+                        'user_id' => Yii::app()->user->id,
+                    ),
+                ),
+            ))->count($criteria);
+        }
+
+        $paginator = new Paginator($projectCount, $page);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Clients'), $this->createUrl('client/index'));
         $this->breadcrumbs[] = array($client->name, '');
@@ -240,6 +285,22 @@ class ClientController extends Controller
             {
                 $criteria = new CDbCriteria();
                 $criteria->order = 't.name ASC';
+                $criteria->together = true;
+
+                if (!User::checkRole(User::ROLE_ADMIN))
+                {
+                    $projects = ProjectUser::model()->with('project')->findAllByAttributes(array(
+                        'user_id' => Yii::app()->user->id
+                    ));
+
+                    $clientIds = array();
+
+                    foreach ($projects as $project)
+                        if (!in_array($project->project->client_id, $clientIds))
+                            $clientIds[] = $project->project->client_id;
+
+                    $criteria->addInCondition('id', $clientIds);
+                }
 
                 $searchCriteria = new CDbCriteria();
                 $searchCriteria->addSearchCondition('t.name', $model->query, true, 'OR', 'ILIKE');
