@@ -79,7 +79,7 @@ class ReportController extends Controller
 
         if ($project === null)
         {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Project doesn\\\'t exist.'));
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
             return;
         }
 
@@ -939,7 +939,7 @@ class ReportController extends Controller
 
         if ($project1 === null)
         {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'First project doesn\\\'t exist.'));
+            Yii::app()->user->setFlash('error', Yii::t('app', 'First project not found.'));
             return;
         }
 
@@ -956,7 +956,7 @@ class ReportController extends Controller
 
         if ($project2 === null)
         {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Second project doesn\\\'t exist.'));
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Second project not found.'));
             return;
         }
 
@@ -1416,7 +1416,7 @@ class ReportController extends Controller
 
         if ($project === null)
         {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Project doesn\\\'t exist.'));
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
             return;
         }
 
@@ -1757,7 +1757,7 @@ class ReportController extends Controller
 
         if ($project === null)
         {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Project doesn\\\'t exist.'));
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
             return;
         }
 

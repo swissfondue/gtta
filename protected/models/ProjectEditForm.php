@@ -76,7 +76,7 @@ class ProjectEditForm extends CFormModel
 
         if (!$client)
         {
-            $this->addError('clientId', Yii::t('app', 'Client doesn\\\'t exist.'));
+            $this->addError('clientId', Yii::t('app', 'Client not found.'));
             return false;
         }
 

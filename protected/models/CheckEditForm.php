@@ -145,7 +145,7 @@ class CheckEditForm extends LocalizedFormModel
 
         if (!$reference)
         {
-            $this->addError('referenceId', Yii::t('app', 'Reference doesn\\\'t exist.'));
+            $this->addError('referenceId', Yii::t('app', 'Reference not found.'));
             return false;
         }
 
@@ -161,7 +161,7 @@ class CheckEditForm extends LocalizedFormModel
 
         if (!$control)
         {
-            $this->addError('controlId', Yii::t('app', 'Control doesn\\\'t exist.'));
+            $this->addError('controlId', Yii::t('app', 'Control not found.'));
             return false;
         }
 

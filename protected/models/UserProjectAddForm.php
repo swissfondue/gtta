@@ -41,7 +41,7 @@ class UserProjectAddForm extends CFormModel
 
         if (!$project)
         {
-            $this->addError('projectId', Yii::t('app', 'Project doesn\\\'t exist.'));
+            $this->addError('projectId', Yii::t('app', 'Project not found.'));
             return false;
         }
 

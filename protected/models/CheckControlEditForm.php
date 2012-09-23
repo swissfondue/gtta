@@ -49,7 +49,7 @@ class CheckControlEditForm extends LocalizedFormModel
 
         if (!$category)
         {
-            $this->addError('categoryId', Yii::t('app', 'Category doesn\\\'t exist.'));
+            $this->addError('categoryId', Yii::t('app', 'Category not found.'));
             return false;
         }
 

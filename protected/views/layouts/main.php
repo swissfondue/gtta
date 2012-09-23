@@ -130,7 +130,7 @@
             ?>
                 <script>
                     <?php foreach ($flashes as $key => $message): ?>
-                        system.showMessage('<?php echo $key; ?>', '<?php echo $message; ?>');
+                        system.showMessage('<?php echo $key; ?>', '<?php echo str_replace("'", "\\'", $message); ?>');
                     <?php endforeach; ?>
                 </script>
             <?php endif; ?>
