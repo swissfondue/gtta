@@ -20,7 +20,24 @@ class Project extends CActiveRecord
     const STATUS_IN_PROGRESS = 'in_progress';
     const STATUS_FINISHED    = 'finished';
 
-	/**
+    /**
+     * Project filters.
+     */
+    const FILTER_STATUS_OPEN        = 1;
+    const FILTER_STATUS_IN_PROGRESS = 2;
+    const FILTER_STATUS_FINISHED    = 4;
+
+    // sorting
+    const FILTER_SORT_DEADLINE = 1;
+    const FILTER_SORT_NAME     = 2;
+    const FILTER_SORT_CLIENT   = 3;
+    const FILTER_SORT_STATUS   = 4;
+
+    // sorting direction
+    const FILTER_SORT_ASCENDING  = 1;
+    const FILTER_SORT_DESCENDING = 2;
+
+    /**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
 	 * @return Project the static model class

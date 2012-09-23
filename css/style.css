@@ -168,6 +168,11 @@ fieldset hr {
     border:1px solid #ddd;
 }
 
+.info-block hr {
+    border-top:1px solid #ddd;
+    border-bottom:none;
+}
+
 .client-details td,
 .client-details th {
     border:0;

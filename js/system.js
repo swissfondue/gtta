@@ -214,6 +214,31 @@ function System()
             $('#export-modal').modal('hide');
             $('#ProjectVulnExportForm').submit();
         };
+
+        /**
+         * Filter has been changed.
+         */
+        this.filterChange = function () {
+            var i, realStatus, status, sortBy, sortDirection;
+
+            status = $('input[name="ProjectFilterForm[status]"]:checked').map(function () {
+                return parseInt(this.value);
+            });
+
+            realStatus = 0;
+
+            for (i = 0; i < status.length; i++)
+                realStatus += status[i];
+
+            sortBy        = parseInt($('select[name="ProjectFilterForm[sortBy]"]').val());
+            sortDirection = parseInt($('select[name="ProjectFilterForm[sortDirection]"]').val());
+
+            $.cookie('project_filter_status', realStatus, { path : '/' });
+            $.cookie('project_filter_sort_by', sortBy, { path : '/' });
+            $.cookie('project_filter_sort_direction', sortDirection, { path : '/' });
+
+            location.reload();
+        }
     };
 
     /**

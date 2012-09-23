@@ -30,13 +30,67 @@ class ProjectController extends Controller
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
+        $cookies = Yii::app()->request->cookies;
+
+        $showStatuses = array();
+        $statusCookie = isset($cookies['project_filter_status']) ?
+            (int) $cookies['project_filter_status']->value : Project::FILTER_STATUS_OPEN | Project::FILTER_STATUS_IN_PROGRESS;
+
+        if ($statusCookie & Project::FILTER_STATUS_OPEN)
+            $showStatuses[] = Project::STATUS_OPEN;
+
+        if ($statusCookie & Project::FILTER_STATUS_IN_PROGRESS)
+            $showStatuses[] = Project::STATUS_IN_PROGRESS;
+
+        if ($statusCookie & Project::FILTER_STATUS_FINISHED)
+            $showStatuses[] = Project::STATUS_FINISHED;
+
+        $sortBy = null;
+        $sortDirection = null;
+
+        $sortByCookie = isset($cookies['project_filter_sort_by']) ?
+            (int) $cookies['project_filter_sort_by']->value : Project::FILTER_SORT_DEADLINE;
+        $sortDirectionCookie = isset($cookies['project_filter_sort_direction']) ?
+            (int) $cookies['project_filter_sort_direction']->value : Project::FILTER_SORT_ASCENDING;
+
+        switch ($sortDirectionCookie)
+        {
+            case Project::FILTER_SORT_ASCENDING:
+                $sortDirection = 'ASC';
+                break;
+
+            case Project::FILTER_SORT_DESCENDING:
+                $sortDirection = 'DESC';
+                break;
+        }
+
+        switch ($sortByCookie)
+        {
+            case Project::FILTER_SORT_DEADLINE:
+                $sortBy = 't.deadline';
+                break;
+
+            case Project::FILTER_SORT_NAME:
+                $sortBy = 't.name';
+                break;
+
+            case Project::FILTER_SORT_CLIENT:
+                $sortBy = 'client.name';
+                break;
+
+            case Project::FILTER_SORT_STATUS:
+                $sortBy = 't.status';
+                break;
+        }
+
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 't.deadline ASC, t.name ASC';
-        $criteria->addCondition('t.status != :status');
-        $criteria->params = array( 'status' => Project::STATUS_FINISHED );
         $criteria->together = true;
+        $criteria->addInCondition('status', $showStatuses);
+
+        if ($sortBy && $sortDirection)
+            $criteria->order = $sortBy . ' ' . $sortDirection . ', t.name ASC';
 
         if (User::checkRole(User::ROLE_CLIENT))
         {
@@ -128,9 +182,12 @@ class ProjectController extends Controller
         // display the page
         $this->pageTitle = Yii::t('app', 'Projects');
 		$this->render('index', array(
-            'projects' => $projects,
-            'stats'    => $projectStats,
-            'p'        => $paginator,
+            'projects'      => $projects,
+            'stats'         => $projectStats,
+            'p'             => $paginator,
+            'showStatuses'  => $showStatuses,
+            'sortBy'        => $sortByCookie,
+            'sortDirection' => $sortDirectionCookie,
             'statuses' => array(
                 Project::STATUS_OPEN        => Yii::t('app', 'Open'),
                 Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),

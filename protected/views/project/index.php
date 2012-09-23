@@ -101,5 +101,60 @@
                 <?php echo Yii::t('app', 'No projects yet.'); ?>
             <?php endif; ?>
         </div>
+        <div class="span4">
+            <div id="filter-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#filter');"><i class="icon-chevron-up"></i></div>
+            <h3><a href="#toggle" onclick="system.toggleBlock('#filter');"><?php echo Yii::t('app', 'Filter'); ?></a></h3>
+
+            <div class="info-block" id="filter">
+                <table class="table client-details">
+                    <tr>
+                        <th>
+                            <?php echo Yii::t('app', 'Status'); ?>
+                        </th>
+                        <td>
+                            <label>
+                                <input name="ProjectFilterForm[status]" type="checkbox" value="<?php echo Project::FILTER_STATUS_OPEN; ?>" <?php if (in_array(Project::STATUS_OPEN, $showStatuses)) echo 'checked'; ?> onchange="system.project.filterChange();">
+                                <?php echo Yii::t('app', 'Open'); ?>
+                            </label>
+                            <label>
+                                <input name="ProjectFilterForm[status]" type="checkbox" value="<?php echo Project::FILTER_STATUS_IN_PROGRESS; ?>" <?php if (in_array(Project::STATUS_IN_PROGRESS, $showStatuses)) echo 'checked'; ?> onchange="system.project.filterChange();">
+                                <?php echo Yii::t('app', 'In Progress'); ?>
+                            </label>
+                            <label>
+                                <input name="ProjectFilterForm[status]" type="checkbox" value="<?php echo Project::FILTER_STATUS_FINISHED; ?>" <?php if (in_array(Project::STATUS_FINISHED, $showStatuses)) echo 'checked'; ?> onchange="system.project.filterChange();">
+                                <?php echo Yii::t('app', 'Finished'); ?>
+                            </label>
+                        </td>
+                    </tr>
+                </table>
+
+                <hr>
+
+                <table class="table client-details">
+                    <tr>
+                        <th>
+                            <?php echo Yii::t('app', 'Sort By'); ?>
+                        </th>
+                        <td>
+                            <select name="ProjectFilterForm[sortBy]" class="max-width" onchange="system.project.filterChange();">
+                                <option value="<?php echo Project::FILTER_SORT_DEADLINE; ?>" <?php if ($sortBy == Project::FILTER_SORT_DEADLINE) echo 'selected'; ?>><?php echo Yii::t('app', 'Deadline'); ?></option>
+                                <option value="<?php echo Project::FILTER_SORT_NAME; ?>" <?php if ($sortBy == Project::FILTER_SORT_NAME) echo 'selected'; ?>><?php echo Yii::t('app', 'Name'); ?></option>
+                                <option value="<?php echo Project::FILTER_SORT_CLIENT; ?>" <?php if ($sortBy == Project::FILTER_SORT_CLIENT) echo 'selected'; ?>><?php echo Yii::t('app', 'Client'); ?></option>
+                                <option value="<?php echo Project::FILTER_SORT_STATUS; ?>" <?php if ($sortBy == Project::FILTER_SORT_STATUS) echo 'selected'; ?>><?php echo Yii::t('app', 'Status'); ?></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <td>
+                            <select name="ProjectFilterForm[sortDirection]" class="max-width" onchange="system.project.filterChange();">
+                                <option value="<?php echo Project::FILTER_SORT_ASCENDING; ?>" <?php if ($sortDirection == Project::FILTER_SORT_ASCENDING) echo 'selected'; ?>><?php echo Yii::t('app', 'Low to High'); ?></option>
+                                <option value="<?php echo Project::FILTER_SORT_DESCENDING; ?>" <?php if ($sortDirection == Project::FILTER_SORT_DESCENDING) echo 'selected'; ?>><?php echo Yii::t('app', 'High to Low'); ?></option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
