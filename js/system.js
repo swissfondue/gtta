@@ -22,7 +22,7 @@ function System()
     this.showMessage = function (eventType, message) {
         $('.message-container').html('');
 
-        $('<div />', {
+        $('<div>', {
             'class' : 'alert alert-' + eventType + ' hide',
             html    : '<a class="close" data-dismiss="alert">×</a>' + message
         }).appendTo('.message-container');

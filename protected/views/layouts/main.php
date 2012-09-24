@@ -102,7 +102,7 @@
                     </div>
 
                     <div class="loader-image pull-right hide">
-                        <img src="<?php echo Yii::app()->baseUrl; ?>/images/loading.gif" />
+                        <img src="<?php echo Yii::app()->baseUrl; ?>/images/loading.gif">
                     </div>
                 </div>
             </div>

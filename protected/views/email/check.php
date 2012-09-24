@@ -12,7 +12,7 @@
         </p>
 
         <div>
-            ---<br />
+            ---<br>
             <?php echo Yii::app()->name; ?> <?php echo Yii::t('app', 'Notification System'); ?>
         </div>
     </body>
