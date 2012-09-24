@@ -13,7 +13,7 @@
                 <table class="table reference-list">
                     <tbody>
                         <tr>
-                            <th class="name"><?php echo Yii::t('app', 'Name'); ?></th>
+                            <th class="name"><?php echo Yii::t('app', 'Reference'); ?></th>
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($references as $reference): ?>

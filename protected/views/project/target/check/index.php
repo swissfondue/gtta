@@ -37,7 +37,7 @@
         <div class="span8">
             <?php if (count($checks) > 0): ?>
                 <div class="control-header-bold">
-                    <?php echo Yii::t('app', 'Checks'); ?>
+                    <?php echo Yii::t('app', 'Check'); ?>
                 </div>
                 <?php
                     $counter     = 0;

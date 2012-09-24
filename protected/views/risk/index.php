@@ -13,7 +13,7 @@
                 <table class="table risk-list">
                     <tbody>
                         <tr>
-                            <th class="name"><?php echo Yii::t('app', 'Name'); ?></th>
+                            <th class="name"><?php echo Yii::t('app', 'Category'); ?></th>
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($risks as $risk): ?>

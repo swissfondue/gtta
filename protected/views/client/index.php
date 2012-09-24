@@ -26,7 +26,7 @@
                 <table class="table client-list">
                     <tbody>
                         <tr>
-                            <th class="name"><?php echo Yii::t('app', 'Name'); ?></th>
+                            <th class="name"><?php echo Yii::t('app', 'Client'); ?></th>
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                 <th class="actions">&nbsp;</th>
                             <?php endif; ?>

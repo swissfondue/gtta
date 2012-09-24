@@ -40,7 +40,7 @@
                 <div class="row">
                     <div class="span8">
                         <div class="risk-category-category-header-bold">
-                            <?php echo Yii::t('app', 'Checks'); ?>
+                            <?php echo Yii::t('app', 'Check'); ?>
                         </div>
                         <?php foreach ($categories as $category): ?>
                             <div class="risk-category-category-header" data-id="<?php echo $category->id; ?>">

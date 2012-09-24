@@ -23,7 +23,7 @@
                     <tbody>
                         <tr>
                             <th class="deadline"><?php echo Yii::t('app', 'Deadline'); ?></th>
-                            <th class="name"><?php echo Yii::t('app', 'Name'); ?></th>
+                            <th class="name"><?php echo Yii::t('app', 'Project'); ?></th>
                             <th class="status"><?php echo Yii::t('app', 'Status'); ?></th>
                             <th class="actions">&nbsp;</th>
                         </tr>
