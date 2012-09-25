@@ -1,19 +1,18 @@
 <?php
 
 /**
- * This is the model class for table "risk_categories".
+ * This is the model class for table "risk_templates".
  *
- * The followings are the available columns in table 'risk_categories':
+ * The followings are the available columns in table 'risk_templates':
  * @property integer $id
  * @property string $name
- * @property integer $risk_category_id
  */
-class RiskCategory extends CActiveRecord
+class RiskTemplate extends CActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
-	 * @return RiskCategory the static model class
+	 * @return RiskTemplate the static model class
 	 */
 	public static function model($className=__CLASS__)
 	{
@@ -25,7 +24,7 @@ class RiskCategory extends CActiveRecord
 	 */
 	public function tableName()
 	{
-		return 'risk_categories';
+		return 'risk_templates';
 	}
 
 	/**
@@ -34,8 +33,7 @@ class RiskCategory extends CActiveRecord
 	public function rules()
 	{
 		return array(
-            array( 'name, risk_template_id', 'required' ),
-            array( 'risk_template_id', 'numerical', 'integerOnly' => true ),
+            array( 'name', 'required' ),
 		);
 	}
 
@@ -45,9 +43,8 @@ class RiskCategory extends CActiveRecord
 	public function relations()
 	{
 		return array(
-            'l10n'     => array( self::HAS_MANY,   'RiskCategoryL10n',  'risk_category_id' ),
-            'checks'   => array( self::HAS_MANY,   'RiskCategoryCheck', 'risk_category_id' ),
-            'template' => array( self::BELONGS_TO, 'RiskTemplate',      'risk_template_id' ),
+            'l10n'       => array( self::HAS_MANY, 'RiskTemplateL10n', 'risk_template_id' ),
+            'categories' => array( self::HAS_MANY, 'RiskCategory',     'risk_template_id' ),
 		);
 	}
 

@@ -32,6 +32,8 @@ class BackupController extends Controller
         'target_check_attachments',
         'target_check_inputs',
         'target_check_solutions',
+        'risk_templates',
+        'risk_templates_l10n',
         'risk_categories',
         'risk_categories_l10n',
         'risk_category_checks',
@@ -53,6 +55,7 @@ class BackupController extends Controller
         'system_id_seq',
         'targets_id_seq',
         'users_id_seq',
+        'risk_templates_id_seq',
         'risk_categories_id_seq',
     );
 

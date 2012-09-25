@@ -1,4 +1,13 @@
-<h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+<div class="active-header">
+    <div class="pull-right">
+        <ul class="nav nav-pills">
+            <li><a href="<?php echo $this->createUrl('risk/view', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
+            <li class="active"><a href="<?php echo $this->createUrl('risk/edit', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+        </ul>
+    </div>
+
+    <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+</div>
 
 <hr>
 
@@ -21,9 +30,9 @@
             <?php foreach ($languages as $language): ?>
                 <div class="tab-pane<?php if ($language->default) echo ' active'; ?>" id="<?php echo CHtml::encode($language->code); ?>">
                     <div class="control-group <?php if ($model->getError('name')) echo 'error'; ?>">
-                        <label class="control-label" for="RiskCategoryEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_name"><?php echo Yii::t('app', 'Name'); ?></label>
+                        <label class="control-label" for="RiskTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_name"><?php echo Yii::t('app', 'Name'); ?></label>
                         <div class="controls">
-                            <input type="text" class="input-xlarge" id="RiskCategoryEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_name" name="RiskCategoryEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][name]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['name']) : ''; ?>">
+                            <input type="text" class="input-xlarge" id="RiskTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_name" name="RiskTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][name]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['name']) : ''; ?>">
                             <?php if ($model->getError('name')): ?>
                                 <p class="help-block"><?php echo $model->getError('name'); ?></p>
                             <?php endif; ?>
@@ -32,81 +41,6 @@
                 </div>
             <?php endforeach; ?>
         </div>
-
-        <hr>
-
-        <?php if (count($categories) > 0): ?>
-            <div class="container">
-                <div class="row">
-                    <div class="span8">
-                        <div class="risk-category-category-header-bold">
-                            <?php echo Yii::t('app', 'Check'); ?>
-                        </div>
-                        <?php foreach ($categories as $category): ?>
-                            <div class="risk-category-category-header" data-id="<?php echo $category->id; ?>">
-                                <a href="#toggle" onclick="user.riskCategory.categoryToggle(<?php echo $category->id; ?>);"><?php echo CHtml::encode($category->localizedName); ?></a>
-                            </div>
-                            <div class="risk-category-category-content hide" data-id="<?php echo $category->id; ?>">
-                                <?php if (count($category->controls)): ?>
-                                    <?php foreach ($category->controls as $control): ?>
-                                        <div class="risk-category-control-header" data-id="<?php echo $control->id; ?>">
-                                            <a href="#toggle" onclick="user.riskCategory.controlToggle(<?php echo $control->id; ?>);"><?php echo CHtml::encode($control->localizedName); ?></a>
-                                        </div>
-                                        <div class="risk-category-control-content hide" data-id="<?php echo $control->id; ?>">
-                                            <?php if (count($control->checks) > 0): ?>
-                                                <?php
-                                                    foreach ($control->checks as $check):
-                                                        $damage     = 1;
-                                                        $likelihood = 1;
-
-                                                        if ($check->riskCategories && $check->riskCategories[0])
-                                                        {
-                                                            $damage     = $check->riskCategories[0]->damage;
-                                                            $likelihood = $check->riskCategories[0]->likelihood;
-                                                        }
-                                                ?>
-                                                    <div class="risk-category-check-header" data-id="<?php echo $check->id; ?>">
-                                                        <a href="#toggle" onclick="user.riskCategory.checkToggle(<?php echo $check->id; ?>);"><?php echo CHtml::encode($check->localizedName); ?></a>
-                                                    </div>
-                                                    <div class="risk-category-check-content" data-id="<?php echo $check->id; ?>">
-                                                        <div class="control-group">
-                                                            <label class="control-label"><?php echo Yii::t('app', 'Damage'); ?></label>
-                                                            <div class="controls">
-                                                                <?php for ($i = 1; $i <= 4; $i++): ?>
-                                                                    <input type="radio" name="RiskCategoryEditForm[checks][<?php echo $check->id; ?>][damage]" value="<?php echo $i; ?>" <?php if ($i == $damage) echo 'checked'; ?>>&nbsp;&nbsp;
-                                                                <?php endfor; ?>
-                                                            </div>
-                                                        </div>
-                                                        <div class="control-group">
-                                                            <label class="control-label"><?php echo Yii::t('app', 'Likelihood'); ?></label>
-                                                            <div class="controls">
-                                                                <?php for ($i = 1; $i <= 4; $i++): ?>
-                                                                    <input type="radio" name="RiskCategoryEditForm[checks][<?php echo $check->id; ?>][likelihood]" value="<?php echo $i; ?>" <?php if ($i == $likelihood) echo 'checked'; ?>>&nbsp;&nbsp;
-                                                                <?php endfor; ?>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            <?php else: ?>
-                                                <div class="risk-category-check-header">
-                                                    <?php echo Yii::t('app', 'No checks yet.'); ?>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <div class="risk-category-control-header">
-                                        <?php echo Yii::t('app', 'No controls yet.'); ?>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            </div>
-        <?php else: ?>
-            <?php echo Yii::t('app', 'No categories yet.'); ?>
-        <?php endif; ?>
 
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>

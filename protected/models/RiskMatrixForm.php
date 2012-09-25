@@ -6,6 +6,11 @@
 class RiskMatrixForm extends CFormModel
 {
     /**
+     * @var integer template id.
+     */
+    public $templateId;
+
+    /**
      * @var integer client id.
      */
     public $clientId;
@@ -21,12 +26,19 @@ class RiskMatrixForm extends CFormModel
     public $targetIds;
 
 	/**
+     * @var array matrix.
+     */
+    public $matrix;
+
+	/**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules()
 	{
 		return array(
-            array( 'clientId, projectId, targetIds', 'safe' ),
+            array( 'templateId, clientId, projectId', 'required' ),
+            array( 'templateId, clientId, projectId', 'numerical', 'integerOnly' => true ),
+            array( 'targetIds, matrix', 'safe' ),
 		);
 	}
 

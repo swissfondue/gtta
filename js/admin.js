@@ -156,6 +156,51 @@ function Admin()
             }
         };
     };
+
+    /**
+     * Risk category object object.
+     */
+    this.riskCategory = new function () {
+        var _riskCategory = this;
+
+        /**
+         * Toggle risk category check.
+         */
+        this.checkToggle = function (id) {
+            if ($('div.risk-category-check-content[data-id=' + id + ']').is(':visible'))
+                $('div.risk-category-check-content[data-id=' + id + ']').slideUp('slow');
+            else
+                $('div.risk-category-check-content[data-id=' + id + ']').slideDown('slow');
+        };
+
+        /**
+         * Toggle risk category control.
+         */
+        this.controlToggle = function (id) {
+            if ($('div.risk-category-control-content[data-id=' + id + ']').is(':visible'))
+                $('div.risk-category-control-content[data-id=' + id + ']').slideUp('slow');
+            else
+                $('div.risk-category-control-content[data-id=' + id + ']').slideDown('slow');
+        };
+
+        /**
+         * Expand all checks.
+         */
+        this.expandAll = function () {
+            $('div.risk-category-control-content').slideDown('fast', undefined, function () {
+                $('div.risk-category-check-content').slideDown('slow');
+            });
+        };
+
+        /**
+         * Collapse all checks.
+         */
+        this.collapseAll = function () {
+            $('div.risk-category-check-content').slideUp('fast', undefined, function () {
+                $('div.risk-category-control-content').slideUp('slow');
+            });
+        };
+    };
 }
 
 var admin = new Admin();

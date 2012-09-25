@@ -151,12 +151,19 @@ return array(
                 'reference/new'           => 'reference/edit',
                 'reference/control'       => 'reference/control',
 
-                // risk classification categories
-                'risks/<page:\d+>'   => 'risk/index',
-                'risks'              => 'risk/index',
-                'risk/<id:\d+>/edit' => 'risk/edit',
-                'risk/new'           => 'risk/edit',
-                'risk/control'       => 'risk/control',
+                // risk classification categories (templates)
+                'risks/<page:\d+>'         => 'risk/index',
+                'risks'                    => 'risk/index',
+                'risk/<id:\d+>/<page:\d+>' => 'risk/view',
+                'risk/<id:\d+>'            => 'risk/view',
+                'risk/<id:\d+>/edit'       => 'risk/edit',
+                'risk/new'                 => 'risk/edit',
+                'risk/control'             => 'risk/control',
+
+                // risk categories
+                'risk/<id:\d+>/category/<category:\d+>/edit' => 'risk/editcategory',
+                'risk/<id:\d+>/category/new'                 => 'risk/editcategory',
+                'risk/<id:\d+>/category/control'             => 'risk/controlcategory',
 
                 // users
                 'users/<page:\d+>'   => 'user/index',
