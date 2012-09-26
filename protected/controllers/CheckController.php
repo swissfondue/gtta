@@ -433,7 +433,13 @@ class CheckController extends Controller
         if ($newRecord)
             $this->breadcrumbs[] = array(Yii::t('app', 'New Control'), '');
         else
-            $this->breadcrumbs[] = array($control->localizedName, '');
+        {
+            $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array(
+                'id'      => $category->id,
+                'control' => $control->id
+            )));
+            $this->breadcrumbs[] = array(Yii::t('app', 'Edit'), '');
+        }
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Control') : $control->localizedName;
