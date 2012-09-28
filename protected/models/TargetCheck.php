@@ -49,6 +49,9 @@ class TargetCheck extends CActiveRecord
     const COLUMN_RESULT          = 'result';
     const COLUMN_SOLUTION        = 'solution';
     const COLUMN_RATING          = 'rating';
+    const COLUMN_ASSIGNED_USER   = 'assigned_user';
+    const COLUMN_DEADLINE        = 'deadline';
+    const COLUMN_STATUS          = 'status';
 
 	/**
 	 * Returns the static model of the specified AR class.
@@ -89,10 +92,11 @@ class TargetCheck extends CActiveRecord
 	public function relations()
 	{
 		return array(
-            'target'   => array( self::BELONGS_TO, 'Target',   'target_id'   ),
-            'check'    => array( self::BELONGS_TO, 'Check',    'check_id'    ),
-            'language' => array( self::BELONGS_TO, 'Language', 'language_id' ),
-            'user'     => array( self::BELONGS_TO, 'User',     'user_id'     ),
+            'target'   => array( self::BELONGS_TO, 'Target',          'target_id'   ),
+            'check'    => array( self::BELONGS_TO, 'Check',           'check_id'    ),
+            'language' => array( self::BELONGS_TO, 'Language',        'language_id' ),
+            'user'     => array( self::BELONGS_TO, 'User',            'user_id'     ),
+            'vuln'     => array( self::HAS_ONE,    'TargetCheckVuln', array( 'target_id', 'check_id' ) ),
 		);
 	}
 

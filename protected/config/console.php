@@ -57,6 +57,11 @@ return array(
             'maxAttempts' => 3,
         ),
 
+        // vulnerability tracker
+        'vulntracker' => array(
+            'lockFile' => '/tmp/gtta.vulntracker',
+        ),
+
         // checks automation
         'automation' => array(
             'minNotificationInterval' => 5 * 60, // 5 minutes

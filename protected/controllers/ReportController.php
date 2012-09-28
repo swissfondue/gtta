@@ -2297,7 +2297,7 @@ class ReportController extends Controller
 
         // display the report generation form
         $this->pageTitle = Yii::t('app', 'Risk Matrix');
-		$this->render('risk-matrix', array(
+		$this->render('risk_matrix', array(
             'model'     => $model,
             'clients'   => $clients,
             'templates' => $templates

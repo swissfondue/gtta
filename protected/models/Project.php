@@ -10,6 +10,7 @@
  * @property string $name
  * @property string $deadline
  * @property string $status
+ * @property string $vuln_overdue
  */
 class Project extends CActiveRecord
 {
@@ -74,10 +75,11 @@ class Project extends CActiveRecord
 	public function relations()
 	{
 		return array(
-			'client'         => array( self::BELONGS_TO, 'Client',        'client_id' ),
-            'details'        => array( self::HAS_MANY,   'ProjectDetail', 'project_id' ),
-            'users'          => array( self::MANY_MANY,  'User',          'project_users(project_id, user_id)' ),
-            'project_users'  => array( self::HAS_MANY,   'ProjectUser',   'project_id' ),
+			'client'        => array( self::BELONGS_TO, 'Client',        'client_id' ),
+            'details'       => array( self::HAS_MANY,   'ProjectDetail', 'project_id' ),
+            'users'         => array( self::MANY_MANY,  'User',          'project_users(project_id, user_id)' ),
+            'project_users' => array( self::HAS_MANY,   'ProjectUser',   'project_id' ),
+            'targets'       => array( self::HAS_MANY,   'Target',        'project_id' ),
 		);
 	}
 
@@ -99,6 +101,28 @@ class Project extends CActiveRecord
             ));
 
             if ($check)
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if user is project admin
+     */
+    public function checkAdmin()
+    {
+        if (User::checkRole(User::ROLE_ADMIN))
+            return true;
+
+        if (User::checkRole(User::ROLE_USER))
+        {
+            $check = ProjectUser::model()->findByAttributes(array(
+                'project_id' => $this->id,
+                'user_id'    => Yii::app()->user->id,
+            ));
+
+            if ($check && $check->admin)
                 return true;
         }
 

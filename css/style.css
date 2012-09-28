@@ -235,7 +235,9 @@ h3 a:hover {
     white-space:nowrap;
 }
 
-.project-list .status span {
+.project-list .status span,
+.vulnerability-list .status span,
+.vulnerability-list .rating span {
     vertical-align:top;
 }
 
@@ -597,4 +599,33 @@ div.report-check-content {
 
 .report-risk-category-name {
     font-weight:bold;
+}
+
+.vulnerability-list .assigned {
+    width:120px;
+}
+
+.vulnerability-list .rating,
+.vulnerability-list .status {
+    width:50px;
+    text-align:right;
+    padding-top:10px;
+    white-space:nowrap;
+}
+
+.vulnerability-list .check .description,
+.vulnerability-list .assigned .description {
+    font-size:80%;
+    color:#909090;
+}
+
+.vulnerability-list .check .description a {
+    color:#909090;
+}
+
+.vulnerability-list .check .description span {
+    color:#606060;
+    font-size:80%;
+    margin-left:7px;
+    margin-right:7px;
 }

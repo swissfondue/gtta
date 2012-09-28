@@ -201,6 +201,31 @@ function Admin()
             });
         };
     };
+
+    /**
+     * Project object.
+     */
+    this.project = new function () {
+        var _project = this;
+
+        /**
+         * User add form has been changed.
+         */
+        this.userAddFormChange = function () {
+            var option = $('#ProjectUserAddForm_userId > option:selected');
+
+            if (option.data('role') == 'admin')
+            {
+                $('#ProjectUserAddForm_admin').prop('checked', true);
+                $('#ProjectUserAddForm_admin').prop('disabled', true);
+            }
+            else
+            {
+                $('#ProjectUserAddForm_admin').prop('checked', false);
+                $('#ProjectUserAddForm_admin').prop('disabled', false);
+            }
+        };
+    };
 }
 
 var admin = new Admin();

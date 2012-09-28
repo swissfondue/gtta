@@ -6,6 +6,7 @@
  * The followings are the available columns in table 'project_users':
  * @property integer $project_id
  * @property integer $user_id
+ * @property boolean $admin
  */
 class ProjectUser extends CActiveRecord
 {
@@ -33,8 +34,9 @@ class ProjectUser extends CActiveRecord
 	public function rules()
 	{
 		return array(
-            array( 'project_id, user_id', 'required' ),
+            array( 'project_id, user_id, admin', 'required' ),
             array( 'project_id, user_id', 'numerical', 'integerOnly' => true ),
+            array( 'admin', 'boolean' ),
 		);
 	}
 

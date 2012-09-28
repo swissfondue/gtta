@@ -23,7 +23,7 @@ class CleanerCommand extends ConsoleCommand
         
         if (flock($fp, LOCK_EX))
         {
-            $this->tmp();
+            $this->_tmp();
             flock($fp, LOCK_UN);
         }
         

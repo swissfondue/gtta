@@ -56,6 +56,7 @@ class Target extends CActiveRecord
             'lowRiskCount'  => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(low_risk_count)'  ),
             'medRiskCount'  => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(med_risk_count)'  ),
             'highRiskCount' => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(high_risk_count)' ),
+            'vulns'         => array( self::HAS_MANY,   'TargetCheckVuln',     'target_id' ),
 		);
 	}
 }

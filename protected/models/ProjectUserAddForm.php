@@ -10,14 +10,20 @@ class ProjectUserAddForm extends CFormModel
      */
     public $userId;
 
-	/**
+    /**
+     * @var boolean admin.
+     */
+    public $admin;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules()
 	{
 		return array(
-			array( 'userId', 'required' ),
+			array( 'userId, admin', 'required' ),
             array( 'userId', 'numerical', 'integerOnly' => true ),
+            array( 'admin', 'boolean' ),
             array( 'userId', 'checkUser' ),
 		);
 	}
@@ -29,6 +35,7 @@ class ProjectUserAddForm extends CFormModel
 	{
 		return array(
 			'userId' => Yii::t('app', 'User'),
+            'admin'  => Yii::t('app', 'Admin'),
 		);
 	}
 
@@ -42,6 +49,12 @@ class ProjectUserAddForm extends CFormModel
         if (!$user)
         {
             $this->addError('userId', Yii::t('app', 'User not found.'));
+            return false;
+        }
+
+        if ($user->role == User::ROLE_CLIENT && $this->admin)
+        {
+            $this->addError('admin', Yii::t('app', 'Client can\'t be a project admin.'));
             return false;
         }
 

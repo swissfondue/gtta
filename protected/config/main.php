@@ -67,6 +67,12 @@ return array(
                 'project/<id:\d+>/user/add'         => 'project/adduser',
                 'project/<id:\d+>/user/control'     => 'project/controluser',
 
+                // project vulnerabilities
+                'project/<id:\d+>/vulns/<page:\d+>'                   => 'project/vulns',
+                'project/<id:\d+>/vulns'                              => 'project/vulns',
+                'project/<id:\d+>/vuln/<target:\d+>/<check:\d+>/edit' => 'project/editvuln',
+
+                // project target and checks
                 'project/<id:\d+>/target/<target:\d+>/<page:\d+>'                                            => 'project/target',
                 'project/<id:\d+>/target/<target:\d+>'                                                       => 'project/target',
                 'project/<id:\d+>/target/<target:\d+>/edit'                                                  => 'project/edittarget',

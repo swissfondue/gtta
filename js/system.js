@@ -238,7 +238,7 @@ function System()
             $.cookie('project_filter_sort_direction', sortDirection, { path : '/' });
 
             location.reload();
-        }
+        };
     };
 
     /**

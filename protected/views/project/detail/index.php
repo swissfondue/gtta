@@ -9,6 +9,7 @@
             <?php if (User::checkRole(User::ROLE_ADMIN) || User::checkRole(User::ROLE_CLIENT)): ?>
                 <li class="active"><a href="<?php echo $this->createUrl('project/details', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Details'); ?></a></li>
             <?php endif; ?>
+            <li><a href="<?php echo $this->createUrl('project/vulns', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Vulns'); ?></a></li>
         </ul>
     </div>
 

@@ -9,6 +9,7 @@
             <?php if (User::checkRole(User::ROLE_ADMIN) || User::checkRole(User::ROLE_CLIENT)): ?>
                 <li><a href="<?php echo $this->createUrl('project/details', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Details'); ?></a></li>
             <?php endif; ?>
+            <li><a href="<?php echo $this->createUrl('project/vulns', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Vulns'); ?></a></li>
         </ul>
     </div>
 
@@ -29,12 +30,22 @@
                     <tbody>
                         <tr>
                             <th class="user"><?php echo Yii::t('app', 'User'); ?></th>
+                            <th class="role"><?php echo Yii::t('app', 'Role'); ?></th>
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($users as $user): ?>
                             <tr data-id="<?php echo $user->user_id; ?>" data-control-url="<?php echo $this->createUrl('project/controluser', array( 'id' => $project->id )); ?>">
                                 <td class="user">
-                                    <a href="<?php echo $this->createUrl('user/edit', array( 'id' => $user->user_id )); ?>"><?php echo CHtml::encode($user->user->name ? $user->user->name : $user->user->email); ?></a>
+                                    <?php echo CHtml::encode($user->user->name ? $user->user->name : $user->user->email); ?>
+                                </td>
+                                <td class="role">
+                                    <?php if ($user->admin): ?>
+                                        <span class="label label-admin"><?php echo Yii::t('app', 'Admin'); ?></span>
+                                    <?php elseif ($user->user->role == User::ROLE_CLIENT): ?>
+                                        <span class="label label-client"><?php echo Yii::t('app', 'Client'); ?></span>
+                                    <?php else: ?>
+                                        <span class="label label-user"><?php echo Yii::t('app', 'User'); ?></span>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="actions">
                                     <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $user->user_id; ?>);"><i class="icon icon-remove"></i></a>

@@ -263,6 +263,9 @@ class ProjectController extends Controller
 
             if (in_array(TargetCheck::COLUMN_RATING, $model->columns))
                 $header[TargetCheck::COLUMN_RATING] = Yii::t('app', 'Rating');
+
+            if (in_array(TargetCheck::COLUMN_STATUS, $model->columns))
+                $header[TargetCheck::COLUMN_STATUS] = Yii::t('app', 'Status');
         }
 
         $ratings = array(
@@ -271,6 +274,11 @@ class ProjectController extends Controller
             TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
             TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
             TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
+        );
+
+        $statuses = array(
+            TargetCheckVuln::STATUS_OPEN     => Yii::t('app', 'Open'),
+            TargetCheckVuln::STATUS_RESOLVED => Yii::t('app', 'Resolved'),
         );
 
         foreach ($targets as $target)
@@ -336,6 +344,11 @@ class ProjectController extends Controller
                                 'status'    => TargetCheck::STATUS_FINISHED,
                                 'hidden'    => TargetCheck::RATING_HIDDEN,
                             ),
+                            'with' => array(
+                                'vuln' => array(
+                                    'with' => 'user'
+                                )
+                            )
                         ),
                         'targetCheckSolutions' => array(
                             'alias'    => 'tss',
@@ -399,6 +412,16 @@ class ProjectController extends Controller
 
                         if (in_array(TargetCheck::COLUMN_RATING, $model->columns))
                             $row[TargetCheck::COLUMN_RATING] = $ratings[$check->targetChecks[0]->rating];
+
+                        if (in_array(TargetCheck::COLUMN_STATUS, $model->columns))
+                        {
+                            $vuln = $check->targetChecks[0] && $check->targetChecks[0]->vuln ? $check->targetChecks[0]->vuln : null;
+
+                            if ($vuln)
+                                $row[TargetCheck::COLUMN_STATUS] = $statuses[$vuln->status];
+                            else
+                                $row[TargetCheck::COLUMN_STATUS] = $statuses[TargetCheckVuln::STATUS_OPEN];
+                        }
 
                         $data[] = $row;
                     }
@@ -581,9 +604,6 @@ class ProjectController extends Controller
 
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
-
-        if (isset($_POST['ProjectVulnExportForm']))
-            $this->_exportVulns($project);
 
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
@@ -1517,6 +1537,12 @@ class ProjectController extends Controller
                 'check_id'  => $check->id
             ));
 
+            // delete old vulnerabilities
+            TargetCheckVuln::model()->deleteAllByAttributes(array(
+                'target_id' => $target->id,
+                'check_id'  => $check->id
+            ));
+
             // add solutions
             if ($model->solutions)
                 foreach ($model->solutions as $solutionId)
@@ -2146,6 +2172,12 @@ class ProjectController extends Controller
                         'check_id'  => $check->id
                     ));
 
+                    // delete vulnerabilities
+                    TargetCheckVuln::model()->deleteAllByAttributes(array(
+                        'target_id' => $target->id,
+                        'check_id'  => $check->id
+                    ));
+
                     // delete files
                     TargetCheckAttachment::model()->deleteAllByAttributes(array(
                         'target_id' => $target->id,
@@ -2441,7 +2473,7 @@ class ProjectController extends Controller
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 'role DESC, name ASC';
+        $criteria->order  = 'admin DESC, role DESC, name ASC';
         $criteria->addColumnCondition(array(
             'project_id' => $project->id
         ));
@@ -2482,6 +2514,9 @@ class ProjectController extends Controller
 		{
 			$model->attributes = $_POST['ProjectUserAddForm'];
 
+            if (!isset($_POST['ProjectUserAddForm']['admin']))
+                $model->admin = 0;
+
 			if ($model->validate())
             {
                 $check = ProjectUser::model()->findByAttributes(array(
@@ -2499,10 +2534,19 @@ class ProjectController extends Controller
                         $model->addError('userId', Yii::t('app', 'User belongs to another client.'));
                     else
                     {
+                        if ($user->role == User::ROLE_ADMIN)
+                            $model->admin = 1;
+
                         $user = new ProjectUser();
+                        $user->admin      = $model->admin;
                         $user->project_id = $project->id;
                         $user->user_id    = $model->userId;
-                        $user->save();
+
+                        if (!$user->save())
+                        {
+                            var_dump($user->getErrors());
+                            exit();
+                        }
 
                         Yii::app()->user->setFlash('success', Yii::t('app', 'User added.'));
                     }
@@ -2532,10 +2576,7 @@ class ProjectController extends Controller
             'role'      => User::ROLE_CLIENT,
             'client_id' => $project->client_id
         ));
-        $roleCriteria->addColumnCondition(array(
-            'role' => User::ROLE_USER
-        ), 'AND', 'OR');
-
+        $roleCriteria->addInCondition('role', array( User::ROLE_USER, User::ROLE_ADMIN ), 'OR');
         $criteria->mergeWith($roleCriteria);
 
         $users = User::model()->findAll($criteria);
@@ -2612,4 +2653,260 @@ class ProjectController extends Controller
 
         echo $response->serialize();
     }
+
+    /**
+     * Vulnerabilities.
+     */
+    public function actionVulns($id, $page=1)
+    {
+        $id   = (int) $id;
+        $page = (int) $page;
+
+        $project = Project::model()->findByPk($id);
+
+        if (!$project)
+            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+        if (!$project->checkPermission())
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
+        if ($page < 1)
+            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+
+        if (isset($_POST['ProjectVulnExportForm']))
+            $this->_exportVulns($project);
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
+        $targets = Target::model()->findAllByAttributes(array(
+            'project_id' => $project->id
+        ));
+
+        $targetIds = array();
+
+        foreach ($targets as $target)
+            $targetIds[] = $target->id;
+
+        $criteria = new CDbCriteria();
+        $criteria->addInCondition('t.target_id', $targetIds);
+        $criteria->addInCondition('t.rating', array(
+            TargetCheck::RATING_HIGH_RISK,
+            TargetCheck::RATING_MED_RISK,
+            TargetCheck::RATING_LOW_RISK
+        ));
+        $criteria->order = 'target.host, "check".name';
+        $criteria->limit  = Yii::app()->params['entriesPerPage'];
+        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->together = true;
+
+        $checks = TargetCheck::model()->with(array(
+            'check' => array(
+                'with' => array(
+                    'l10n' => array(
+                        'joinType' => 'LEFT JOIN',
+                        'on'       => 'l10n.language_id = :language_id',
+                        'params'   => array( 'language_id' => $language )
+                    ),
+                    'control' => array(
+                        'with' => array(
+                            'l10n' => array(
+                                'alias'    => 'l10n_co',
+                                'joinType' => 'LEFT JOIN',
+                                'on'       => 'l10n_co.language_id = :language_id',
+                                'params'   => array( 'language_id' => $language )
+                            ),
+                            'category' => array(
+                                'with' => array(
+                                    'l10n' => array(
+                                        'alias'    => 'l10n_ca',
+                                        'joinType' => 'LEFT JOIN',
+                                        'on'       => 'l10n_ca.language_id = :language_id',
+                                        'params'   => array( 'language_id' => $language )
+                                    ),
+                                )
+                            )
+                        )
+                    )
+                ),
+            ),
+            'vuln' => array(
+                'with' => 'user'
+            ),
+            'target',
+        ))->findAll($criteria);
+
+        $checkCount = TargetCheck::model()->count($criteria);
+        $paginator  = new Paginator($checkCount, $page);
+
+        Yii::app()->user->returnUrl = $this->createUrl('project/vulns', array( 'id' => $project->id, 'page' => $page ));
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Vulns'), '');
+
+        // display the page
+        $this->pageTitle = $project->name;
+		$this->render('vuln/index', array(
+            'project'      => $project,
+            'checks'       => $checks,
+            'p'            => $paginator,
+            'ratings' => array(
+                TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
+                TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
+                TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
+            ),
+            'statuses' => array(
+                TargetCheckVuln::STATUS_OPEN     => Yii::t('app', 'Open'),
+                TargetCheckVuln::STATUS_RESOLVED => Yii::t('app', 'Resolved'),
+            ),
+            'columns' => array(
+                TargetCheck::COLUMN_TARGET          => Yii::t('app', 'Target'),
+                TargetCheck::COLUMN_NAME            => Yii::t('app', 'Name'),
+                TargetCheck::COLUMN_REFERENCE       => Yii::t('app', 'Reference'),
+                TargetCheck::COLUMN_BACKGROUND_INFO => Yii::t('app', 'Background Info'),
+                TargetCheck::COLUMN_QUESTION        => Yii::t('app', 'Question'),
+                TargetCheck::COLUMN_RESULT          => Yii::t('app', 'Result'),
+                TargetCheck::COLUMN_SOLUTION        => Yii::t('app', 'Solution'),
+                TargetCheck::COLUMN_RATING          => Yii::t('app', 'Rating'),
+                TargetCheck::COLUMN_STATUS          => Yii::t('app', 'Status'),
+            )
+        ));
+    }
+
+    /**
+     * Vulnerability edit page.
+     */
+	public function actionEditVuln($id, $target, $check)
+	{
+        $id        = (int) $id;
+        $target    = (int) $target;
+        $check     = (int) $check;
+        $newRecord = false;
+
+        $project = Project::model()->findByPk($id);
+
+        if (!$project)
+            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
+        $check = TargetCheck::model()->with(array(
+            'check' => array(
+                'l10n' => array(
+                    'joinType' => 'LEFT JOIN',
+                    'on'       => 'l10n.language_id = :language_id',
+                    'params'   => array( 'language_id' => $language )
+                ),
+            )
+        ))->findByAttributes(array(
+            'check_id'  => $check,
+            'target_id' => $target
+        ));
+
+        if (!$check || !in_array($check->rating, array( TargetCheck::RATING_LOW_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_HIGH_RISK )))
+            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+
+        $vuln = TargetCheckVuln::model()->findByAttributes(array(
+            'check_id'  => $check->check_id,
+            'target_id' => $check->target_id
+        ));
+
+        if (!$vuln)
+        {
+            $vuln = new TargetCheckVuln();
+            $vuln->check_id  = $check->check_id;
+            $vuln->target_id = $check->target_id;
+            $newRecord = true;
+        }
+
+		$model = new VulnEditForm();
+
+        if (!$newRecord)
+        {
+            $model->status   = $vuln->status;
+            $model->userId   = $vuln->user_id;
+            $model->deadline = $vuln->deadline;
+        }
+        else
+            $model->deadline = date('Y-m-d');
+
+		// collect user input data
+		if (isset($_POST['VulnEditForm']))
+		{
+			$model->attributes = $_POST['VulnEditForm'];
+
+            if (!$model->userId)
+                $model->userId = null;
+
+			if ($model->validate())
+            {
+                $vuln->status   = $model->status;
+                $vuln->user_id  = $model->userId;
+                $vuln->deadline = $model->deadline;
+
+                $vuln->save();
+
+                Yii::app()->user->setFlash('success', Yii::t('app', 'Vulnerability saved.'));
+
+                $project->refresh();
+
+                $this->redirect(Yii::app()->user->returnUrl);
+            }
+            else
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+		}
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Vulns'), $this->createUrl('project/vulns', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array($check->check->localizedName, '');
+
+        $admins = User::model()->findAllByAttributes(array(
+            'role' => User::ROLE_ADMIN
+        ));
+
+        $clientIds = array();
+
+        $clients = User::model()->findAllByAttributes(array(
+            'role'      => User::ROLE_CLIENT,
+            'client_id' => $project->client_id
+        ));
+
+        foreach ($clients as $client)
+            $clientIds[] = $client->id;
+
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(array(
+            'project_id' => $project->id
+        ));
+        $criteria->order = 'name ASC, email ASC';
+
+        if (count($clientIds))
+            $criteria->addNotInCondition('user_id', $clientIds);
+
+        $users = ProjectUser::model()->with('user')->findAll($criteria);
+
+		// display the page
+        $this->pageTitle = $newRecord ? Yii::t('app', 'New Project') : $project->name;
+		$this->render('vuln/edit', array(
+            'model'    => $model,
+            'project'  => $project,
+            'admins'   => $admins,
+            'users'    => $users,
+            'statuses' => array(
+                TargetCheckVuln::STATUS_OPEN     => Yii::t('app', 'Open'),
+                TargetCheckVuln::STATUS_RESOLVED => Yii::t('app', 'Resolved'),
+            )
+        ));
+	}
 }
