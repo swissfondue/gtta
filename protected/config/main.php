@@ -37,7 +37,7 @@ return array(
 		),
 
 		'urlManager' => array(
-            'baseUrl'        => GTTA_PRODUCTION ? 'https://gtta.kicks-ass.net' : 'https://gtta.local',
+            'baseUrl'        => GTTA_PRODUCTION ? ( GTTA_VIRTUAL ? 'https://gtta.box' : 'https://gtta.kicks-ass.net' ) : 'https://gtta.local',
 			'urlFormat'      => 'path',
             'showScriptName' => false,
             'rules'          => array(
@@ -194,7 +194,7 @@ return array(
         'db' => array(
 			'connectionString' => 'pgsql:host=localhost;port=5432;dbname=gtta',
 			'username'         => 'gtta',
-			'password'         => '123',
+			'password'         => GTTA_VIRTUAL ? '3yNeMw4sMaj6TC8gJ2Ecvh2GF' : '123',
 			'charset'          => 'utf8',
 		),
 
