@@ -32,6 +32,7 @@ class BackupController extends Controller
         'target_check_attachments',
         'target_check_inputs',
         'target_check_solutions',
+        'target_check_vulns',
         'risk_templates',
         'risk_templates_l10n',
         'risk_categories',
