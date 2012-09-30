@@ -19,7 +19,7 @@ return array(
 		'db' => array(
 			'connectionString' => 'pgsql:host=localhost;port=5432;dbname=gtta',
 			'username'         => 'gtta',
-			'password'         => '123',
+			'password'         => GTTA_VIRTUAL ? '3yNeMw4sMaj6TC8gJ2Ecvh2GF' : '123',
 			'charset'          => 'utf8',
 		),
 
