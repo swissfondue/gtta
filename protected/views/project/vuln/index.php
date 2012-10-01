@@ -14,7 +14,7 @@
     </div>
 
     <div class="pull-right buttons">
-        <a class="btn" href="#export" onclick="system.project.exportVulnForm();"><i class="icon icon-download"></i> <?php echo Yii::t('app', 'Export Vulns'); ?></a>
+        <a class="btn" href="#export" onclick="system.project.exportVulnForm();"><i class="icon icon-download"></i> <?php echo Yii::t('app', 'Export'); ?></a>
     </div>
 
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
@@ -131,7 +131,7 @@
                     </div>
                 <?php endif; ?>
             <?php else: ?>
-                <?php echo Yii::t('app', 'No targets yet.'); ?>
+                <?php echo Yii::t('app', 'No vulnerabilities yet.'); ?>
             <?php endif; ?>
         </div>
     </div>
