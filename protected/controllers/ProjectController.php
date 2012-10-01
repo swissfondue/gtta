@@ -2875,7 +2875,10 @@ class ProjectController extends Controller
             'role' => User::ROLE_ADMIN
         ));
 
-        $clientIds = array();
+        $excludeIds = array();
+
+        foreach ($admins as $admin)
+            $excludeIds[] = $admin->id;
 
         $clients = User::model()->findAllByAttributes(array(
             'role'      => User::ROLE_CLIENT,
@@ -2883,7 +2886,7 @@ class ProjectController extends Controller
         ));
 
         foreach ($clients as $client)
-            $clientIds[] = $client->id;
+            $excludeIds[] = $client->id;
 
         $criteria = new CDbCriteria();
         $criteria->addColumnCondition(array(
@@ -2891,8 +2894,8 @@ class ProjectController extends Controller
         ));
         $criteria->order = 'name ASC, email ASC';
 
-        if (count($clientIds))
-            $criteria->addNotInCondition('user_id', $clientIds);
+        if (count($excludeIds))
+            $criteria->addNotInCondition('user_id', $excludeIds);
 
         $users = ProjectUser::model()->with('user')->findAll($criteria);
 
