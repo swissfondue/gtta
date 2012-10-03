@@ -59,4 +59,58 @@ class Target extends CActiveRecord
             'vulns'         => array( self::HAS_MANY,   'TargetCheckVuln',     'target_id' ),
 		);
 	}
+
+    /**
+     * Clean target checks (delete old ones).
+     */
+    public function cleanChecks()
+    {
+        $checkIds = array();
+        $referenceIds = array();
+
+        $references = TargetReference::model()->findAllByAttributes(array(
+            'target_id' => $this->id
+        ));
+
+        foreach ($references as $reference)
+            $referenceIds[] = $reference->reference_id;
+
+        $categories = TargetCheckCategory::model()->with('category')->findAllByAttributes(array(
+            'target_id' => $this->id
+        ));
+
+        foreach ($categories as $category)
+        {
+            $controlIds = array();
+
+            $controls = CheckControl::model()->findAllByAttributes(array(
+                'check_category_id' => $category->check_category_id
+            ));
+
+            foreach ($controls as $control)
+                $controlIds[] = $control->id;
+
+            $criteria = new CDbCriteria();
+
+            if (!$category->advanced)
+                $criteria->addCondition('t.advanced = FALSE');
+
+            $criteria->addInCondition('t.check_control_id', $controlIds);
+            $criteria->addInCondition('t.reference_id', $referenceIds);
+
+            $checks = Check::model()->findAll($criteria);
+
+            foreach ($checks as $check)
+                $checkIds[] = $check->id;
+        }
+
+        // clean target checks
+        $criteria = new CDbCriteria();
+        $criteria->addNotInCondition('check_id', $checkIds);
+        $criteria->addColumnCondition(array(
+            'target_id' => $this->id
+        ));
+
+        TargetCheck::model()->deleteAll($criteria);
+    }
 }

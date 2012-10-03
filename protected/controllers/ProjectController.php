@@ -1161,6 +1161,8 @@ class ProjectController extends Controller
                         $category->updateStats();
                 }
 
+                $target->cleanChecks();
+
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Target saved.'));
 
                 $target->refresh();
