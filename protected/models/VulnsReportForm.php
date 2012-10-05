@@ -3,8 +3,23 @@
 /**
  * This is the model class for project vulnerabilities export form.
  */
-class ProjectVulnExportForm extends CFormModel
+class VulnsReportForm extends CFormModel
 {
+    /**
+     * @var integer client id.
+     */
+    public $clientId;
+
+    /**
+     * @var integer project id.
+     */
+    public $projectId;
+
+    /**
+     * @var array target ids.
+     */
+    public $targetIds;
+
     /**
      * @var array ratings.
      */
@@ -28,7 +43,7 @@ class ProjectVulnExportForm extends CFormModel
 		return array(
             array( 'ratings, columns', 'required' ),
             array( 'header', 'boolean' ),
-            array( 'ratings, columns', 'safe' ),
+            array( 'clientId, projectId, targetIds, ratings, columns', 'safe' ),
 		);
 	}
 
@@ -38,8 +53,11 @@ class ProjectVulnExportForm extends CFormModel
 	public function attributeLabels()
 	{
 		return array(
-            'ratings' => Yii::t('app', 'Ratings'),
-			'columns' => Yii::t('app', 'Columns'),
+            'clientId'  => Yii::t('app', 'Client'),
+			'projectId' => Yii::t('app', 'Project'),
+			'targetIds' => Yii::t('app', 'Targets'),
+            'ratings'   => Yii::t('app', 'Ratings'),
+			'columns'   => Yii::t('app', 'Columns'),
 		);
 	}
 }

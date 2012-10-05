@@ -13,10 +13,6 @@
         </ul>
     </div>
 
-    <div class="pull-right buttons">
-        <a class="btn" href="#export" onclick="system.project.exportVulnForm();"><i class="icon icon-download"></i> <?php echo Yii::t('app', 'Export'); ?></a>
-    </div>
-
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 </div>
 
@@ -134,57 +130,5 @@
                 <?php echo Yii::t('app', 'No vulnerabilities yet.'); ?>
             <?php endif; ?>
         </div>
-    </div>
-</div>
-
-<div class="modal fade hide" id="export-modal">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">×</button>
-        <h3><?php echo Yii::t('app', 'Export Vulnerabilities'); ?></h3>
-    </div>
-    <div class="modal-body">
-        <div class="modal-text">
-            <?php echo Yii::t('app', 'Please select check ratings and columns that should be exported.'); ?>
-        </div>
-        <form id="ProjectVulnExportForm" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
-            <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
-
-            <fieldset>
-                <div class="control-group">
-                    <label class="control-label" for="ProjectVulnExportForm_header"><?php echo Yii::t('app', 'Show Header'); ?></label>
-                    <div class="controls">
-                        <input type="checkbox" id="ProjectVulnExportForm_header" name="ProjectVulnExportForm[header]" value="1" checked onchange="system.project.exportVulnFormChange(this);">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label"><?php echo Yii::t('app', 'Ratings'); ?></label>
-                    <div class="controls">
-                        <?php foreach ($ratings as $rating => $name): ?>
-                            <label class="checkbox">
-                                <input type="checkbox" id="ProjectVulnExportForm_ratings_<?php echo $rating; ?>" name="ProjectVulnExportForm[ratings][]" value="<?php echo $rating; ?>" checked onchange="system.project.exportVulnFormChange(this);">
-                                <?php echo $name; ?>
-                            </label>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label"><?php echo Yii::t('app', 'Columns'); ?></label>
-                    <div class="controls">
-                        <?php foreach ($columns as $column => $name): ?>
-                            <label class="checkbox">
-                                <input type="checkbox" id="ProjectVulnExportForm_columns_<?php echo $column; ?>" name="ProjectVulnExportForm[columns][]" value="<?php echo $column; ?>" checked onchange="system.project.exportVulnFormChange(this);">
-                                <?php echo $name; ?>
-                            </label>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            </fieldset>
-        </form>
-    </div>
-    <div class="modal-footer">
-        <button class="btn" data-dismiss="modal"><?php echo Yii::t('app', 'Cancel'); ?></button>
-        <button id="export-button" class="btn btn-primary" onclick="system.project.exportVulnFormSubmit();"><?php echo Yii::t('app', 'Export'); ?></button>
     </div>
 </div>

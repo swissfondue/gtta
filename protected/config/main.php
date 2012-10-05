@@ -89,12 +89,13 @@ return array(
                 'project/search'                                                                             => 'project/search',
 
                 // reports
-                'reports/project'      => 'report/project',
-                'reports/comparison'   => 'report/comparison',
-                'reports/fulfillment'  => 'report/fulfillment',
-                'reports/risk-matrix'  => 'report/riskmatrix',
-                'reports/object-list'  => 'report/objectlist',
-                'reports/effort'       => 'report/effort',
+                'reports/project'     => 'report/project',
+                'reports/comparison'  => 'report/comparison',
+                'reports/fulfillment' => 'report/fulfillment',
+                'reports/risk-matrix' => 'report/riskmatrix',
+                'reports/object-list' => 'report/objectlist',
+                'reports/effort'      => 'report/effort',
+                'reports/vulns'       => 'report/vulns',
 
                 // clients
                 'clients/<page:\d+>'   => 'client/index',
