@@ -49,6 +49,7 @@
                                     <ul class="dropdown-menu">
                                         <li <?php if (Yii::app()->controller->action->id == 'project') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/project'); ?>"><?php echo Yii::t('app', 'Project Report'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->action->id == 'comparison') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/comparison'); ?>"><?php echo Yii::t('app', 'Projects Comparison'); ?></a></li>
+                                        <li <?php if (Yii::app()->controller->action->id == 'effort') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/effort'); ?>"><?php echo Yii::t('app', 'Effort Estimation'); ?></a></li>
                                         <li class="divider"></li>
                                         <li <?php if (Yii::app()->controller->action->id == 'fulfillment') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/fulfillment'); ?>"><?php echo Yii::t('app', 'Degree of Fulfillment'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->action->id == 'riskmatrix') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/riskmatrix'); ?>"><?php echo Yii::t('app', 'Risk Matrix'); ?></a></li>
@@ -56,8 +57,6 @@
                                 </li>
                                 <li <?php if (Yii::app()->controller->id == 'client') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('client/index'); ?>"><?php echo Yii::t('app', 'Clients'); ?></a></li>
                             <?php endif; ?>
-                            
-                            <li <?php if (Yii::app()->controller->id == 'effort') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('effort/index'); ?>"><?php echo Yii::t('app', 'Effort'); ?></a></li>
 
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                 <li class="dropdown <?php if (in_array(Yii::app()->controller->id, array( 'backup', 'check', 'reference', 'user' ))) echo 'active'; ?>">

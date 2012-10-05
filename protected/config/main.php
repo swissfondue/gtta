@@ -94,6 +94,7 @@ return array(
                 'reports/fulfillment'  => 'report/fulfillment',
                 'reports/risk-matrix'  => 'report/riskmatrix',
                 'reports/object-list'  => 'report/objectlist',
+                'reports/effort'       => 'report/effort',
 
                 // clients
                 'clients/<page:\d+>'   => 'client/index',
@@ -103,9 +104,6 @@ return array(
                 'client/new'           => 'client/edit',
                 'client/control'       => 'client/control',
                 'client/search'        => 'client/search',
-
-                // effort
-                'effort' => 'effort/index',
 
                 // checks
                 'checks/<page:\d+>'         => 'check/index',
