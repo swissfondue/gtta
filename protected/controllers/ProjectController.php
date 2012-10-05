@@ -2817,8 +2817,6 @@ class ProjectController extends Controller
             'target_id' => $target
         ));
 
-        echo $language;
-
         if (!$check || !in_array($check->rating, array( TargetCheck::RATING_LOW_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_HIGH_RISK )))
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
 
