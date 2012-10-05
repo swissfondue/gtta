@@ -2804,16 +2804,20 @@ class ProjectController extends Controller
 
         $check = TargetCheck::model()->with(array(
             'check' => array(
-                'l10n' => array(
-                    'joinType' => 'LEFT JOIN',
-                    'on'       => 'l10n.language_id = :language_id',
-                    'params'   => array( 'language_id' => $language )
+                'with' => array(
+                    'l10n' => array(
+                        'joinType' => 'LEFT JOIN',
+                        'on'       => 'l10n.language_id = :language_id',
+                        'params'   => array( 'language_id' => $language )
+                    ),
                 ),
             )
         ))->findByAttributes(array(
             'check_id'  => $check,
             'target_id' => $target
         ));
+
+        echo $language;
 
         if (!$check || !in_array($check->rating, array( TargetCheck::RATING_LOW_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_HIGH_RISK )))
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
@@ -2902,7 +2906,7 @@ class ProjectController extends Controller
         $users = ProjectUser::model()->with('user')->findAll($criteria);
 
 		// display the page
-        $this->pageTitle = $newRecord ? Yii::t('app', 'New Project') : $project->name;
+        $this->pageTitle = $check->check->localizedName;
 		$this->render('vuln/edit', array(
             'model'    => $model,
             'project'  => $project,
