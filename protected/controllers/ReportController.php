@@ -70,8 +70,12 @@ class ReportController extends Controller
     /**
      * Generate project function.
      */
-    private function _generateProjectReport($clientId, $projectId, $targetIds)
+    private function _generateProjectReport($model)
     {
+        $clientId  = $model->clientId;
+        $projectId = $model->projectId;
+        $targetIds = $model->targetIds;
+
         $project = Project::model()->findByAttributes(array(
             'client_id' => $clientId,
             'id'        => $projectId
@@ -892,7 +896,7 @@ class ReportController extends Controller
             $model->attributes = $_POST['ProjectReportForm'];
 
             if ($model->validate())
-                $this->_generateProjectReport($model->clientId, $model->projectId, $model->targetIds);
+                $this->_generateProjectReport($model);
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
         }
@@ -930,8 +934,12 @@ class ReportController extends Controller
     /**
      * Generate comparison report.
      */
-    private function _generateComparisonReport($clientId, $projectId1, $projectId2)
+    private function _generateComparisonReport($model)
     {
+        $clientId   = $model->clientId;
+        $projectId1 = $model->projectId1;
+        $projectId2 = $model->projectId2;
+
         $project1 = Project::model()->findByAttributes(array(
             'client_id' => $clientId,
             'id'        => $projectId1
@@ -1223,7 +1231,7 @@ class ReportController extends Controller
             $model->attributes = $_POST['ProjectComparisonForm'];
 
             if ($model->validate())
-                $this->_generateComparisonReport($model->clientId, $model->projectId1, $model->projectId2);
+                $this->_generateComparisonReport($model);
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
         }
@@ -1536,8 +1544,12 @@ class ReportController extends Controller
     /**
      * Generate a Degree of Fulfillment report
      */
-    private function _generateFulfillmentDegreeReport($clientId, $projectId, $targetIds)
+    private function _generateFulfillmentDegreeReport($model)
     {
+        $clientId  = $model->clientId;
+        $projectId = $model->projectId;
+        $targetIds = $model->targetIds;
+
         $project = Project::model()->findByAttributes(array(
             'client_id' => $clientId,
             'id'        => $projectId
@@ -1839,7 +1851,7 @@ class ReportController extends Controller
             $model->attributes = $_POST['FulfillmentDegreeForm'];
 
             if ($model->validate())
-                $this->_generateFulfillmentDegreeReport($model->clientId, $model->projectId, $model->targetIds);
+                $this->_generateFulfillmentDegreeReport($model);
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
         }
@@ -1877,8 +1889,14 @@ class ReportController extends Controller
     /**
      * Generate risk matrix report.
      */
-    private function _generateRiskMatrixReport($templateId, $clientId, $projectId, $targetIds, $matrix)
+    private function _generateRiskMatrixReport($model)
     {
+        $templateId = $model->templateId;
+        $clientId   = $model->clientId;
+        $projectId  = $model->projectId;
+        $targetIds  = $model->targetIds;
+        $matrix     = $model->matrix;
+
         $template = RiskTemplate::model()->findByAttributes(array(
             'id' => $templateId
         ));
@@ -2243,13 +2261,7 @@ class ReportController extends Controller
             $model->attributes = $_POST['RiskMatrixForm'];
 
             if ($model->validate())
-                $this->_generateRiskMatrixReport(
-                    $model->templateId,
-                    $model->clientId,
-                    $model->projectId,
-                    $model->targetIds,
-                    $model->matrix
-                );
+                $this->_generateRiskMatrixReport($model);
 
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
