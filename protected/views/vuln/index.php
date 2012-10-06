@@ -9,9 +9,9 @@
 
     <fieldset>
         <div class="control-group" id="client-list">
-            <label class="control-label" for="ProjectReportForm_clientId"><?php echo Yii::t('app', 'Client'); ?></label>
+            <label class="control-label" for="ProjectSelectForm_clientId"><?php echo Yii::t('app', 'Client'); ?></label>
             <div class="controls">
-                <select class="input-xlarge" id="ProjectReportForm_clientId" name="ProjectReportForm[clientId]" onchange="system.report.projectFormChange(this);">
+                <select class="input-xlarge" id="ProjectSelectForm_clientId" name="ProjectSelectForm[clientId]" onchange="system.vuln.projectSelectFormChange(this);">
                     <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                     <?php foreach ($clients as $client): ?>
                         <option value="<?php echo $client->id; ?>"><?php echo CHtml::encode($client->name); ?></option>
@@ -22,25 +22,17 @@
         </div>
 
         <div class="hide control-group" id="project-list">
-            <label class="control-label" for="ProjectReportForm_projectId"><?php echo Yii::t('app', 'Project'); ?></label>
+            <label class="control-label" for="ProjectSelectForm_projectId"><?php echo Yii::t('app', 'Project'); ?></label>
             <div class="controls">
-                <select class="input-xlarge" id="ProjectReportForm_projectId" name="ProjectReportForm[projectId]" onchange="system.report.projectFormChange(this);">
+                <select class="input-xlarge" id="ProjectSelectForm_projectId" name="ProjectSelectForm[projectId]" onchange="system.vuln.projectSelectFormChange(this);">
                     <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                 </select>
                 <p class="help-block hide"><?php echo Yii::t('app', 'This project has no targets.'); ?></p>
             </div>
         </div>
 
-        <div class="hide control-group" id="target-list">
-            <label class="control-label"><?php echo Yii::t('app', 'Targets'); ?></label>
-            <div class="controls">
-                <ul class="report-target-list">
-                </ul>
-            </div>
-        </div>
-
         <div class="form-actions">
-            <button type="submit" class="btn" disabled><?php echo Yii::t('app', 'Generate'); ?></button>
+            <button type="submit" class="btn" disabled><?php echo Yii::t('app', 'View'); ?></button>
         </div>
     </fieldset>
 </form>

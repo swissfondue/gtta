@@ -56,6 +56,8 @@
                                 </ul>
                             </li>
 
+                            <li <?php if (Yii::app()->controller->id == 'vuln') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('vuln/index'); ?>"><?php echo Yii::t('app', 'Vulnerabilities'); ?></a></li>
+
                             <?php if (User::checkRole(User::ROLE_USER)): ?>
                                 <li <?php if (Yii::app()->controller->id == 'client') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('client/index'); ?>"><?php echo Yii::t('app', 'Clients'); ?></a></li>
                             <?php endif; ?>

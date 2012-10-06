@@ -1,18 +1,4 @@
 <div class="active-header">
-    <div class="pull-right">
-        <ul class="nav nav-pills">
-            <li><a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
-            <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
-                <li><a href="<?php echo $this->createUrl('project/edit', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
-                <li><a href="<?php echo $this->createUrl('project/users', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Users'); ?></a></li>
-            <?php endif; ?>
-            <?php if (User::checkRole(User::ROLE_ADMIN) || User::checkRole(User::ROLE_CLIENT)): ?>
-                <li><a href="<?php echo $this->createUrl('project/details', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Details'); ?></a></li>
-            <?php endif; ?>
-            <li class="active"><a href="<?php echo $this->createUrl('project/vulns', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Vulns'); ?></a></li>
-        </ul>
-    </div>
-
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 </div>
 
@@ -38,7 +24,7 @@
                             <tr<?php if (User::checkRole(User::ROLE_USER) && $check->vuln && $check->vuln->overdued && $check->vuln->status == TargetCheckVuln::STATUS_OPEN) echo ' class="delete-row"'; ?>>
                                 <td class="check">
                                     <?php if ($project->checkAdmin()): ?>
-                                        <a href="<?php echo $this->createUrl('project/editvuln', array( 'id' => $project->id, 'target' => $check->target_id, 'check' => $check->check_id )); ?>"><?php echo CHtml::encode($check->check->localizedName); ?></a>
+                                        <a href="<?php echo $this->createUrl('vuln/edit', array( 'id' => $project->id, 'target' => $check->target_id, 'check' => $check->check_id )); ?>"><?php echo CHtml::encode($check->check->localizedName); ?></a>
                                     <?php else: ?>
                                         <?php echo CHtml::encode($check->check->localizedName); ?>
                                     <?php endif; ?>
@@ -116,13 +102,13 @@
                 <?php if ($p->pageCount > 1): ?>
                     <div class="pagination">
                         <ul>
-                            <li <?php if (!$p->prevPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('project/vulns', array( 'id' => $project->id, 'page' => $p->prevPage ? $p->prevPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Previous Page'); ?>">&laquo;</a></li>
+                            <li <?php if (!$p->prevPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('vuln/vulns', array( 'id' => $project->id, 'page' => $p->prevPage ? $p->prevPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Previous Page'); ?>">&laquo;</a></li>
                             <?php for ($i = 1; $i <= $p->pageCount; $i++): ?>
                                 <li <?php if ($i == $p->page) echo 'class="active"'; ?>>
-                                    <a href="<?php echo $this->createUrl('project/vulns', array( 'id' => $project->id, 'page' => $i )); ?>"><?php echo $i; ?></a>
+                                    <a href="<?php echo $this->createUrl('vuln/vulns', array( 'id' => $project->id, 'page' => $i )); ?>"><?php echo $i; ?></a>
                                 </li>
                             <?php endfor; ?>
-                            <li <?php if (!$p->nextPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('project/vulns', array( 'id' => $project->id, 'page' => $p->nextPage ? $p->nextPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Next Page'); ?>">&raquo;</a></li>
+                            <li <?php if (!$p->nextPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('vuln/vulns', array( 'id' => $project->id, 'page' => $p->nextPage ? $p->nextPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Next Page'); ?>">&raquo;</a></li>
                         </ul>
                     </div>
                 <?php endif; ?>

@@ -41,9 +41,10 @@ return array(
 			'urlFormat'      => 'path',
             'showScriptName' => false,
             'rules'          => array(
-                // account
+                // misc
                 '<action:(login|logout)>' => 'app/<action>',
                 'app/l10n.js'             => 'app/l10n',
+                'app/object-list'         => 'app/objectlist',
 
                 // projects
                 'projects/<page:\d+>'         => 'project/index',
@@ -67,11 +68,6 @@ return array(
                 'project/<id:\d+>/user/add'         => 'project/adduser',
                 'project/<id:\d+>/user/control'     => 'project/controluser',
 
-                // project vulnerabilities
-                'project/<id:\d+>/vulns/<page:\d+>'                   => 'project/vulns',
-                'project/<id:\d+>/vulns'                              => 'project/vulns',
-                'project/<id:\d+>/vuln/<target:\d+>/<check:\d+>/edit' => 'project/editvuln',
-
                 // project target and checks
                 'project/<id:\d+>/target/<target:\d+>/<page:\d+>'                                            => 'project/target',
                 'project/<id:\d+>/target/<target:\d+>'                                                       => 'project/target',
@@ -93,9 +89,14 @@ return array(
                 'reports/comparison'  => 'report/comparison',
                 'reports/fulfillment' => 'report/fulfillment',
                 'reports/risk-matrix' => 'report/riskmatrix',
-                'reports/object-list' => 'report/objectlist',
                 'reports/effort'      => 'report/effort',
                 'reports/vulns'       => 'report/vulns',
+
+                // vulnerability tracker
+                'vulns'                                             => 'vuln/index',
+                'vulns/<id:\d+>/<page:\d+>'                         => 'vuln/vulns',
+                'vulns/<id:\d+>'                                    => 'vuln/vulns',
+                'vulns/<id:\d+>/vuln/<target:\d+>/<check:\d+>/edit' => 'vuln/edit',
 
                 // clients
                 'clients/<page:\d+>'   => 'client/index',

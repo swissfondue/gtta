@@ -142,6 +142,69 @@ function System()
             else
                 $('tr[data-id=' + id + ']').removeClass('delete-row');
         };
+
+        /**
+         * Disable inputs and select boxes.
+         */
+        this._setLoading = function () {
+            $('#object-selection-form input').prop('disabled', true);
+            $('#object-selection-form select').prop('disabled', true);
+        };
+
+        /**
+         * Enable inputs and select boxes.
+         */
+        this._setLoaded = function () {
+            $('#object-selection-form input').prop('disabled', false);
+            $('#object-selection-form select').prop('disabled', false);
+        };
+
+        /**
+         * Load a list of objects.
+         */
+        this.loadObjects = function (parentId, operation, callback) {
+            var url = $('#object-selection-form').data('object-list-url');
+
+            $.ajax({
+                dataType : 'json',
+                url      : url,
+                timeout  : _system.ajaxTimeout,
+                type     : 'POST',
+
+                data : {
+                    'EntryControlForm[id]'        : parentId,
+                    'EntryControlForm[operation]' : operation,
+                    'YII_CSRF_TOKEN'              : _system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $('.loader-image').hide();
+                    _system_control._setLoaded();
+
+                    if (data.status == 'error')
+                    {
+                        _system.showMessage('error', data.errorText);
+                        callback();
+
+                        return;
+                    }
+
+                    callback(data.data);
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $('.loader-image').hide();
+                    _system_control._setLoaded();
+                    _system.showMessage('error', _system.translate('Request failed, please try again.'));
+                    callback();
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $('.loader-image').show();
+                    _system_control._setLoading();
+                }
+            });
+        };
     };
 
     /**
@@ -212,6 +275,76 @@ function System()
     };
 
     /**
+     * Vulnerability list object.
+     */
+    this.vuln = new function () {
+        var _vuln = this;
+
+        /**
+         * Project select form has been changed.
+         */
+        this.projectSelectFormChange = function (e) {
+            var val;
+
+            $('#client-list').removeClass('error');
+            $('#project-list').removeClass('error');
+            $('#project-list > div > .help-block').hide();
+            $('#client-list > div > .help-block').hide();
+
+            if (e.id == 'ProjectSelectForm_clientId')
+            {
+                val = $('#ProjectSelectForm_clientId').val();
+
+                $('#project-list').hide();
+                $('.form-actions > button[type="submit"]').prop('disabled', true);
+
+                if (val != 0)
+                {
+                    _system.control.loadObjects(val, 'project-list', function (data) {
+                        $('#ProjectSelectForm_clientId').prop('disabled', false);
+                        $('#ProjectSelectForm_projectId > option:not(:first)').remove();
+
+                        if (data && data.objects.length)
+                        {
+                            for (var i = 0; i < data.objects.length; i++)
+                                $('<option>')
+                                    .val(data.objects[i].id)
+                                    .html(data.objects[i].name)
+                                    .appendTo('#ProjectSelectForm_projectId');
+
+                            $('#project-list').show();
+                        }
+                        else
+                        {
+                            $('#client-list').addClass('error');
+                            $('#client-list > div > .help-block').show();
+                        }
+                    });
+                }
+            }
+            else if (e.id == 'ProjectSelectForm_projectId')
+            {
+                val = $('#ProjectSelectForm_projectId').val();
+
+                $('.form-actions > button[type="submit"]').prop('disabled', true);
+
+                if (val != 0)
+                {
+                    _system.control.loadObjects(val, 'target-list', function (data) {
+                        if (data && data.objects.length)
+                            $('.form-actions > button[type="submit"]').prop('disabled', false);
+                        else
+                        {
+                            $('#project-list').addClass('error');
+                            $('#project-list > div > .help-block').show();
+                        }
+                    });
+                }
+            }
+        };
+    };
+
+    /**
      * Report object.
      */
     this.report = new function () {
@@ -219,69 +352,6 @@ function System()
 
         this._riskMatrixTargets = [];
         this._effortList = [];
-
-        /**
-         * Disable inputs and select boxes.
-         */
-        this._setLoading = function () {
-            $('#project-report-form input').prop('disabled', true);
-            $('#project-report-form select').prop('disabled', true);
-        };
-
-        /**
-         * Enable inputs and select boxes.
-         */
-        this._setLoaded = function () {
-            $('#project-report-form input').prop('disabled', false);
-            $('#project-report-form select').prop('disabled', false);
-        };
-
-        /**
-         * Load a list of objects.
-         */
-        this._loadObjects = function (parentId, operation, callback) {
-            var url = $('#project-report-form').data('object-list-url');
-
-            $.ajax({
-                dataType : 'json',
-                url      : url,
-                timeout  : _system.ajaxTimeout,
-                type     : 'POST',
-
-                data : {
-                    'EntryControlForm[id]'        : parentId,
-                    'EntryControlForm[operation]' : operation,
-                    'YII_CSRF_TOKEN'              : _system.csrf
-                },
-
-                success : function (data, textStatus) {
-                    $('.loader-image').hide();
-                    _report._setLoaded();
-
-                    if (data.status == 'error')
-                    {
-                        _system.showMessage('error', data.errorText);
-                        callback();
-
-                        return;
-                    }
-
-                    callback(data.data);
-                },
-
-                error : function(jqXHR, textStatus, e) {
-                    $('.loader-image').hide();
-                    _report._setLoaded();
-                    _system.showMessage('error', _system.translate('Request failed, please try again.'));
-                    callback();
-                },
-
-                beforeSend : function (jqXHR, settings) {
-                    $('.loader-image').show();
-                    _report._setLoading();
-                }
-            });
-        };
 
         /**
          * Project form has been changed.
@@ -304,7 +374,7 @@ function System()
 
                 if (val != 0)
                 {
-                    _report._loadObjects(val, 'project-list', function (data) {
+                    _system.control.loadObjects(val, 'project-list', function (data) {
                         $('#ProjectReportForm_clientId').prop('disabled', false);
                         $('#ProjectReportForm_projectId > option:not(:first)').remove();
 
@@ -335,7 +405,7 @@ function System()
 
                 if (val != 0)
                 {
-                    _report._loadObjects(val, 'target-list', function (data) {
+                    _system.control.loadObjects(val, 'target-list', function (data) {
                         $('#target-list > .controls > .report-target-list > li').remove();
 
                         if (data && data.objects.length)
@@ -402,7 +472,7 @@ function System()
 
                 if (val != 0)
                 {
-                    _report._loadObjects(val, 'project-list', function (data) {
+                    _system.control.loadObjects(val, 'project-list', function (data) {
                         $('#ProjectComparisonForm_projectId1 > option:not(:first)').remove();
                         $('#ProjectComparisonForm_projectId2 > option:not(:first)').remove();
 
@@ -465,7 +535,7 @@ function System()
 
                 if (val != 0)
                 {
-                    _report._loadObjects(val, 'project-list', function (data) {
+                    _system.control.loadObjects(val, 'project-list', function (data) {
                         $('#FulfillmentDegreeForm_projectId > option:not(:first)').remove();
 
                         if (data && data.objects.length)
@@ -495,7 +565,7 @@ function System()
 
                 if (val != 0)
                 {
-                    _report._loadObjects(val, 'target-list', function (data) {
+                    _system.control.loadObjects(val, 'target-list', function (data) {
                         $('#target-list > .controls > .report-target-list > li').remove();
 
                         if (data && data.objects.length)
@@ -590,7 +660,7 @@ function System()
 
             for (i = 0; i < addTargets.length; i++)
             {
-                _report._loadObjects(addTargets[i], 'check-list', function (data) {
+                _system.control.loadObjects(addTargets[i], 'check-list', function (data) {
                     var targetHeader, targetDiv, category, categoryDiv, check, checkDiv, i, k, j, rating, risk, field,
                         checked, damage, likelihood;
 
@@ -613,7 +683,7 @@ function System()
 
                             if (check.rating == _system.RATING_HIGH_RISK)
                                 rating = '<span class="label label-high-risk">' + check.ratingName + '</span>';
-                            else
+                            else if (check.rating == _system.RATING_MED_RISK)
                                 rating = '<span class="label label-med-risk">' + check.ratingName + '</span>';
 
                             $('<div>')
@@ -742,7 +812,7 @@ function System()
 
                 if (val != 0)
                 {
-                    _report._loadObjects(val, 'category-list', function (data) {
+                    _system.control.loadObjects(val, 'category-list', function (data) {
                         if (data && data.objects.length)
                         {
                             _report._riskMatrixCategories = data.objects;
@@ -778,7 +848,7 @@ function System()
 
                 if (val != 0)
                 {
-                    _report._loadObjects(val, 'project-list', function (data) {
+                    _system.control.loadObjects(val, 'project-list', function (data) {
                         if (data && data.objects.length)
                         {
                             for (var i = 0; i < data.objects.length; i++)
@@ -814,7 +884,7 @@ function System()
 
                 if (val != 0)
                 {
-                    _report._loadObjects(val, 'target-list', function (data) {
+                    _system.control.loadObjects(val, 'target-list', function (data) {
                         if (data && data.objects.length)
                         {
                             for (var i = 0; i < data.objects.length; i++)
@@ -905,7 +975,7 @@ function System()
 
                 if (val != 0)
                 {
-                    _report._loadObjects(val, 'project-list', function (data) {
+                    _system.control.loadObjects(val, 'project-list', function (data) {
                         $('#VulnsReportForm_clientId').prop('disabled', false);
                         $('#VulnsReportForm_projectId > option:not(:first)').remove();
 
@@ -941,7 +1011,7 @@ function System()
 
                 if (val != 0)
                 {
-                    _report._loadObjects(val, 'target-list', function (data) {
+                    _system.control.loadObjects(val, 'target-list', function (data) {
                         $('#target-list > .controls > .report-target-list > li').remove();
 
                         if (data && data.objects.length)
