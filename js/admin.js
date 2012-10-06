@@ -219,6 +219,11 @@ function Admin()
                 $('#ProjectUserAddForm_admin').prop('checked', true);
                 $('#ProjectUserAddForm_admin').prop('disabled', true);
             }
+            else if (option.data('role') == 'client')
+            {
+                $('#ProjectUserAddForm_admin').prop('checked', false);
+                $('#ProjectUserAddForm_admin').prop('disabled', true);
+            }
             else
             {
                 $('#ProjectUserAddForm_admin').prop('checked', false);

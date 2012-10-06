@@ -12,7 +12,7 @@
                 <select class="input-xlarge" id="ProjectUserAddForm_userId" name="ProjectUserAddForm[userId]" onchange="admin.project.userAddFormChange();">
                     <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                     <?php foreach ($users as $user): ?>
-                        <option value="<?php echo $user->id; ?>" <?php if ($model->userId == $user->id) echo 'selected'; ?> <?php if ($user->role == User::ROLE_ADMIN) echo 'data-role="admin"'; ?>><?php echo CHtml::encode($user->name ? $user->name : $user->email); ?></option>
+                        <option value="<?php echo $user->id; ?>" <?php if ($model->userId == $user->id) echo 'selected'; ?> <?php echo 'data-role="' . $user->role . '"'; ?>><?php echo CHtml::encode($user->name ? $user->name : $user->email); ?></option>
                     <?php endforeach; ?>
                 </select>
                 <?php if ($model->getError('userId')): ?>
