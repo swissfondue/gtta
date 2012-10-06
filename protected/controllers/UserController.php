@@ -288,7 +288,8 @@ class UserController extends Controller
                     {
                         $project = new ProjectUser();
                         $project->project_id = $model->projectId;
-                        $project->user_id    = $user->id;
+                        $project->user_id = $user->id;
+                        $project->admin = 0;
                         $project->save();
 
                         Yii::app()->user->setFlash('success', Yii::t('app', 'Project added.'));
