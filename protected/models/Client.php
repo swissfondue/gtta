@@ -75,7 +75,7 @@ class Client extends CActiveRecord
         if ($user->role == User::ROLE_ADMIN)
             return true;
 
-        if ($user->role == User::ROLE_CLIENT && $user->client_id == $this->client_id)
+        if ($user->role == User::ROLE_CLIENT && $user->client_id == $this->id)
             return true;
 
         if ($user->role == User::ROLE_USER)

@@ -13,7 +13,6 @@ class ReportController extends Controller
 		return array(
             'https',
 			'checkAuth',
-            'checkUser',
             'ajaxOnly + projectlist, targetlist',
             'postOnly + projectlist, targetlist',
 		);
@@ -2415,6 +2414,12 @@ class ReportController extends Controller
         if (!$project)
         {
             Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
+            return;
+        }
+
+        if (!$project->checkPermission())
+        {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
             return;
         }
 

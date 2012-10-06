@@ -11,7 +11,7 @@
         <div class="control-group" id="client-list">
             <label class="control-label" for="VulnsReportForm_clientId"><?php echo Yii::t('app', 'Client'); ?></label>
             <div class="controls">
-                <select class="input-xlarge" id="VulnsReportForm_clientId" name="VulnsReportForm[clientId]" onchange="user.report.vulnsFormChange(this);">
+                <select class="input-xlarge" id="VulnsReportForm_clientId" name="VulnsReportForm[clientId]" onchange="system.report.vulnsFormChange(this);">
                     <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                     <?php foreach ($clients as $client): ?>
                         <option value="<?php echo $client->id; ?>"><?php echo CHtml::encode($client->name); ?></option>
@@ -24,7 +24,7 @@
         <div class="hide control-group" id="project-list">
             <label class="control-label" for="VulnsReportForm_projectId"><?php echo Yii::t('app', 'Project'); ?></label>
             <div class="controls">
-                <select class="input-xlarge" id="VulnsReportForm_projectId" name="VulnsReportForm[projectId]" onchange="user.report.vulnsFormChange(this);">
+                <select class="input-xlarge" id="VulnsReportForm_projectId" name="VulnsReportForm[projectId]" onchange="system.report.vulnsFormChange(this);">
                     <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                 </select>
                 <p class="help-block hide"><?php echo Yii::t('app', 'This project has no targets.'); ?></p>
@@ -43,7 +43,7 @@
             <div class="control-group">
                 <label class="control-label" for="VulnsReportForm_header"><?php echo Yii::t('app', 'Show Header'); ?></label>
                 <div class="controls">
-                    <input type="checkbox" id="VulnsReportForm_header" name="VulnsReportForm[header]" value="1" checked onchange="user.report.vulnsFormChange(this);">
+                    <input type="checkbox" id="VulnsReportForm_header" name="VulnsReportForm[header]" value="1" checked onchange="system.report.vulnsFormChange(this);">
                 </div>
             </div>
 
@@ -52,7 +52,7 @@
                 <div class="controls">
                     <?php foreach ($ratings as $rating => $name): ?>
                         <label class="checkbox">
-                            <input type="checkbox" id="VulnsReportForm_ratings_<?php echo $rating; ?>" name="VulnsReportForm[ratings][]" value="<?php echo $rating; ?>" checked onchange="user.report.vulnsFormChange(this);">
+                            <input type="checkbox" id="VulnsReportForm_ratings_<?php echo $rating; ?>" name="VulnsReportForm[ratings][]" value="<?php echo $rating; ?>" checked onchange="system.report.vulnsFormChange(this);">
                             <?php echo $name; ?>
                         </label>
                     <?php endforeach; ?>
@@ -64,7 +64,7 @@
                 <div class="controls">
                     <?php foreach ($columns as $column => $name): ?>
                         <label class="checkbox">
-                            <input type="checkbox" id="VulnsReportForm_columns_<?php echo $column; ?>" name="VulnsReportForm[columns][]" value="<?php echo $column; ?>" checked onchange="user.report.vulnsFormChange(this);">
+                            <input type="checkbox" id="VulnsReportForm_columns_<?php echo $column; ?>" name="VulnsReportForm[columns][]" value="<?php echo $column; ?>" checked onchange="system.report.vulnsFormChange(this);">
                             <?php echo $name; ?>
                         </label>
                     <?php endforeach; ?>
