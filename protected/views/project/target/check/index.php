@@ -621,8 +621,8 @@
                 }
 
                 $ratingNames[] = $k . ':' . json_encode(array(
-                    'text'  => CHtml::encode($v),
-                    'class' => $class
+                    'text'   => CHtml::encode($v),
+                    'classN' => $class
                 ));
             }
 

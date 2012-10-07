@@ -410,7 +410,7 @@ function User()
                     if (data.rating != undefined && data.rating != null)
                         $('td.status', headerRow).html(
                             '<span class="label ' +
-                            (ratings[data.rating].class ? ratings[data.rating].class : '') + '">' +
+                            (ratings[data.rating].classN ? ratings[data.rating].classN : '') + '">' +
                             ratings[data.rating].text + '</span>'
                         );
 

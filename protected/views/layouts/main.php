@@ -51,7 +51,7 @@
                                     <li <?php if (Yii::app()->controller->id == 'report' && Yii::app()->controller->action->id == 'vulnexport') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/vulnexport'); ?>"><?php echo Yii::t('app', 'Vulnerability Export'); ?></a></li>
                                     <li <?php if (Yii::app()->controller->action->id == 'fulfillment') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/fulfillment'); ?>"><?php echo Yii::t('app', 'Degree of Fulfillment'); ?></a></li>
                                     <li <?php if (Yii::app()->controller->action->id == 'riskmatrix') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/riskmatrix'); ?>"><?php echo Yii::t('app', 'Risk Matrix'); ?></a></li>
-                                    <li class="divider"></li></li>
+                                    <li class="divider"></li>
                                     <li <?php if (Yii::app()->controller->action->id == 'effort') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/effort'); ?>"><?php echo Yii::t('app', 'Effort Estimation'); ?></a></li>
                                 </ul>
                             </li>
@@ -148,8 +148,14 @@
             </footer>
         </div>
         <script>
-            if (console)
+            try
+            {
                 console.log('Page generated in', <?php echo $this->_requestTime; ?>, 'seconds');
+            }
+            catch (e)
+            {
+                // pass
+            }
         </script>
     </body>
 </html>
