@@ -2231,6 +2231,9 @@ class ReportController extends Controller
             if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns))
                 $header[TargetCheck::COLUMN_SOLUTION] = Yii::t('app', 'Solution');
 
+            if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $model->columns))
+                $header[TargetCheck::COLUMN_ASSIGNED_USER] = Yii::t('app', 'Assigned');
+
             if (in_array(TargetCheck::COLUMN_RATING, $model->columns))
                 $header[TargetCheck::COLUMN_RATING] = Yii::t('app', 'Rating');
 
@@ -2378,6 +2381,16 @@ class ReportController extends Controller
                                 $solutions[] = $this->_prepareText($solution->solution->localizedSolution);
 
                             $row[TargetCheck::COLUMN_SOLUTION] = implode("\n", $solutions);
+                        }
+
+                        if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $model->columns))
+                        {
+                            $user = $check->targetChecks[0] && $check->targetChecks[0]->vuln && $check->targetChecks[0]->vuln->user ? $check->targetChecks[0]->vuln->user : null;
+
+                            if ($user)
+                                $row[TargetCheck::COLUMN_ASSIGNED_USER] = $user->name ? $user->name : $user->email;
+                            else
+                                $row[TargetCheck::COLUMN_ASSIGNED_USER] = '';
                         }
 
                         if (in_array(TargetCheck::COLUMN_RATING, $model->columns))
@@ -2612,6 +2625,7 @@ class ReportController extends Controller
                 TargetCheck::COLUMN_RESULT          => Yii::t('app', 'Result'),
                 TargetCheck::COLUMN_SOLUTION        => Yii::t('app', 'Solution'),
                 TargetCheck::COLUMN_RATING          => Yii::t('app', 'Rating'),
+                TargetCheck::COLUMN_ASSIGNED_USER   => Yii::t('app', 'Assigned'),
                 TargetCheck::COLUMN_STATUS          => Yii::t('app', 'Status'),
             )
         ));
