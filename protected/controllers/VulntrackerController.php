@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Vulnerability controller.
+ * Vulnerability tracker controller.
  */
-class VulnController extends Controller
+class VulntrackerController extends Controller
 {
     /**
 	 * @return array action filters
@@ -29,7 +29,7 @@ class VulnController extends Controller
 
             if ($model->validate())
             {
-                $this->redirect(array( 'vuln/vulns', 'id' => $model->projectId ));
+                $this->redirect(array( 'vulntracker/vulns', 'id' => $model->projectId ));
                 return;
             }
             else
@@ -56,10 +56,10 @@ class VulnController extends Controller
 
         $clients = Client::model()->findAll($criteria);
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerabilities'), '');
+        $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerability Tracker'), '');
 
         // display the report generation form
-        $this->pageTitle = Yii::t('app', 'Vulnerabilities');
+        $this->pageTitle = Yii::t('app', 'Vulnerability Tracker');
 		$this->render('index', array(
             'clients' => $clients,
             'model'   => $model,
@@ -152,9 +152,9 @@ class VulnController extends Controller
         $checkCount = TargetCheck::model()->count($criteria);
         $paginator  = new Paginator($checkCount, $page);
 
-        Yii::app()->user->returnUrl = $this->createUrl('vuln/vulns', array( 'id' => $project->id, 'page' => $page ));
+        Yii::app()->user->returnUrl = $this->createUrl('vulntracker/vulns', array( 'id' => $project->id, 'page' => $page ));
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerabilities'), $this->createUrl('vuln/index'));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerability Tracker'), $this->createUrl('vulntracker/index'));
         $this->breadcrumbs[] = array($project->name, '');
 
         // display the page
@@ -265,9 +265,8 @@ class VulnController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
-        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
-        $this->breadcrumbs[] = array(Yii::t('app', 'Vulns'), $this->createUrl('project/vulns', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerability Tracker'), $this->createUrl('vulntracker/index'));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('vulntracker/vulns', array( 'id' => $project->id )));
         $this->breadcrumbs[] = array($check->check->localizedName, '');
 
         $admins = User::model()->findAllByAttributes(array(

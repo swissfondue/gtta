@@ -13,7 +13,6 @@ class ReportController extends Controller
 		return array(
             'https',
 			'checkAuth',
-            'checkUser',
 		);
 	}
 
@@ -2167,7 +2166,7 @@ class ReportController extends Controller
     /**
      * Generate vulnerabilities report.
      */
-    private function _generateVulnsReport($model)
+    private function _generateVulnExportReport($model)
     {
         $project = Project::model()->findByPk($model->projectId);
 
@@ -2419,7 +2418,7 @@ class ReportController extends Controller
         Yii::import('xls.PHPExcel', true);
         Yii::registerAutoloader(array( 'PHPExcel_Autoloader', 'Load' ), true);
 
-        $title = Yii::t('app', '{project} Vulnerabilities', array(
+        $title = Yii::t('app', '{project} Vulnerability Export', array(
             '{project}' => $project->name . ' (' . $project->year . ')'
         )) . ' - ' . date('Y-m-d');
 
@@ -2567,19 +2566,19 @@ class ReportController extends Controller
 
 
     /**
-     * Show vulnerabilities report form.
+     * Show vulnerability export report form.
      */
-    public function actionVulns()
+    public function actionVulnExport()
     {
-        $model = new VulnsReportForm();
+        $model = new VulnExportReportForm();
 
-        if (isset($_POST['VulnsReportForm']))
+        if (isset($_POST['VulnExportReportForm']))
         {
-            $model->attributes = $_POST['VulnsReportForm'];
-            $model->header = isset($_POST['VulnsReportForm']['header']);
+            $model->attributes = $_POST['VulnExportReportForm'];
+            $model->header = isset($_POST['VulnExportReportForm']['header']);
 
             if ($model->validate())
-                $this->_generateVulnsReport($model);
+                $this->_generateVulnExportReport($model);
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
         }
@@ -2604,11 +2603,11 @@ class ReportController extends Controller
 
         $clients = Client::model()->findAll($criteria);
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerabilities'), '');
+        $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerability Export'), '');
 
         // display the report generation form
-        $this->pageTitle = Yii::t('app', 'Vulnerabilities');
-		$this->render('vulns', array(
+        $this->pageTitle = Yii::t('app', 'Vulnerability Export');
+		$this->render('vuln_export', array(
             'model'   => $model,
             'clients' => $clients,
             'ratings' => array(

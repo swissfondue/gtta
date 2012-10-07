@@ -11,7 +11,7 @@
         <div class="control-group" id="client-list">
             <label class="control-label" for="ProjectReportForm_clientId"><?php echo Yii::t('app', 'Client'); ?></label>
             <div class="controls">
-                <select class="input-xlarge" id="ProjectReportForm_clientId" name="ProjectReportForm[clientId]" onchange="user.report.projectFormChange(this);">
+                <select class="input-xlarge" id="ProjectReportForm_clientId" name="ProjectReportForm[clientId]" onchange="system.report.projectFormChange(this);">
                     <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                     <?php foreach ($clients as $client): ?>
                         <option value="<?php echo $client->id; ?>"><?php echo CHtml::encode($client->name); ?></option>
@@ -24,7 +24,7 @@
         <div class="hide control-group" id="project-list">
             <label class="control-label" for="ProjectReportForm_projectId"><?php echo Yii::t('app', 'Project'); ?></label>
             <div class="controls">
-                <select class="input-xlarge" id="ProjectReportForm_projectId" name="ProjectReportForm[projectId]" onchange="user.report.projectFormChange(this);">
+                <select class="input-xlarge" id="ProjectReportForm_projectId" name="ProjectReportForm[projectId]" onchange="system.report.projectFormChange(this);">
                     <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                 </select>
                 <p class="help-block hide"><?php echo Yii::t('app', 'This project has no targets.'); ?></p>

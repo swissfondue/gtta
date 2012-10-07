@@ -90,13 +90,13 @@ return array(
                 'reports/fulfillment' => 'report/fulfillment',
                 'reports/risk-matrix' => 'report/riskmatrix',
                 'reports/effort'      => 'report/effort',
-                'reports/vulns'       => 'report/vulns',
+                'reports/vuln-export' => 'report/vulnexport',
 
                 // vulnerability tracker
-                'vulns'                                             => 'vuln/index',
-                'vulns/<id:\d+>/<page:\d+>'                         => 'vuln/vulns',
-                'vulns/<id:\d+>'                                    => 'vuln/vulns',
-                'vulns/<id:\d+>/vuln/<target:\d+>/<check:\d+>/edit' => 'vuln/edit',
+                'vuln-tracker'                                             => 'vulntracker/index',
+                'vuln-tracker/<id:\d+>/<page:\d+>'                         => 'vulntracker/vulns',
+                'vuln-tracker/<id:\d+>'                                    => 'vulntracker/vulns',
+                'vuln-tracker/<id:\d+>/vuln/<target:\d+>/<check:\d+>/edit' => 'vulntracker/edit',
 
                 // clients
                 'clients/<page:\d+>'   => 'client/index',

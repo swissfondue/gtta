@@ -24,7 +24,7 @@
                             <tr<?php if (User::checkRole(User::ROLE_USER) && $check->vuln && $check->vuln->overdued && $check->vuln->status == TargetCheckVuln::STATUS_OPEN) echo ' class="delete-row"'; ?>>
                                 <td class="check">
                                     <?php if ($project->checkAdmin()): ?>
-                                        <a href="<?php echo $this->createUrl('vuln/edit', array( 'id' => $project->id, 'target' => $check->target_id, 'check' => $check->check_id )); ?>"><?php echo CHtml::encode($check->check->localizedName); ?></a>
+                                        <a href="<?php echo $this->createUrl('vulntracker/edit', array( 'id' => $project->id, 'target' => $check->target_id, 'check' => $check->check_id )); ?>"><?php echo CHtml::encode($check->check->localizedName); ?></a>
                                     <?php else: ?>
                                         <?php echo CHtml::encode($check->check->localizedName); ?>
                                     <?php endif; ?>
@@ -102,13 +102,13 @@
                 <?php if ($p->pageCount > 1): ?>
                     <div class="pagination">
                         <ul>
-                            <li <?php if (!$p->prevPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('vuln/vulns', array( 'id' => $project->id, 'page' => $p->prevPage ? $p->prevPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Previous Page'); ?>">&laquo;</a></li>
+                            <li <?php if (!$p->prevPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('vulntracker/vulns', array( 'id' => $project->id, 'page' => $p->prevPage ? $p->prevPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Previous Page'); ?>">&laquo;</a></li>
                             <?php for ($i = 1; $i <= $p->pageCount; $i++): ?>
                                 <li <?php if ($i == $p->page) echo 'class="active"'; ?>>
-                                    <a href="<?php echo $this->createUrl('vuln/vulns', array( 'id' => $project->id, 'page' => $i )); ?>"><?php echo $i; ?></a>
+                                    <a href="<?php echo $this->createUrl('vulntracker/vulns', array( 'id' => $project->id, 'page' => $i )); ?>"><?php echo $i; ?></a>
                                 </li>
                             <?php endfor; ?>
-                            <li <?php if (!$p->nextPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('vuln/vulns', array( 'id' => $project->id, 'page' => $p->nextPage ? $p->nextPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Next Page'); ?>">&raquo;</a></li>
+                            <li <?php if (!$p->nextPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('vulntracker/vulns', array( 'id' => $project->id, 'page' => $p->nextPage ? $p->nextPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Next Page'); ?>">&raquo;</a></li>
                         </ul>
                     </div>
                 <?php endif; ?>

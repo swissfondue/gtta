@@ -16,7 +16,7 @@
             <div class="control-group" id="template-list">
                 <label class="control-label" for="RiskMatrixForm_templateId"><?php echo Yii::t('app', 'Template'); ?></label>
                 <div class="controls">
-                    <select class="input-xlarge" id="RiskMatrixForm_templateId" name="RiskMatrixForm[templateId]" onchange="user.report.riskMatrixFormChange(this);">
+                    <select class="input-xlarge" id="RiskMatrixForm_templateId" name="RiskMatrixForm[templateId]" onchange="system.report.riskMatrixFormChange(this);">
                         <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                         <?php foreach ($templates as $template): ?>
                             <option value="<?php echo $template->id; ?>"><?php echo CHtml::encode($template->name); ?></option>
@@ -29,7 +29,7 @@
             <div class="control-group hide" id="client-list">
                 <label class="control-label" for="RiskMatrixForm_clientId"><?php echo Yii::t('app', 'Client'); ?></label>
                 <div class="controls">
-                    <select class="input-xlarge" id="RiskMatrixForm_clientId" name="RiskMatrixForm[clientId]" onchange="user.report.riskMatrixFormChange(this);">
+                    <select class="input-xlarge" id="RiskMatrixForm_clientId" name="RiskMatrixForm[clientId]" onchange="system.report.riskMatrixFormChange(this);">
                         <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                         <?php foreach ($clients as $client): ?>
                             <option value="<?php echo $client->id; ?>"><?php echo CHtml::encode($client->name); ?></option>
@@ -42,7 +42,7 @@
             <div class="hide control-group" id="project-list">
                 <label class="control-label" for="RiskMatrixForm_projectId"><?php echo Yii::t('app', 'Project'); ?></label>
                 <div class="controls">
-                    <select class="input-xlarge" id="RiskMatrixForm_projectId" name="RiskMatrixForm[projectId]" onchange="user.report.riskMatrixFormChange(this);">
+                    <select class="input-xlarge" id="RiskMatrixForm_projectId" name="RiskMatrixForm[projectId]" onchange="system.report.riskMatrixFormChange(this);">
                         <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                     </select>
                     <p class="help-block hide"><?php echo Yii::t('app', 'This project has no targets.'); ?></p>

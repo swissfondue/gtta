@@ -3,7 +3,7 @@
 /**
  * This is the model class for project vulnerabilities export form.
  */
-class VulnsReportForm extends CFormModel
+class VulnExportReportForm extends CFormModel
 {
     /**
      * @var integer client id.
