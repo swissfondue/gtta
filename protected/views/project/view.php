@@ -275,6 +275,16 @@
                                         </td>
                                     </tr>
                                 <?php endif; ?>
+                                <?php if ($client->contact_fax): ?>
+                                    <tr>
+                                        <th>
+                                            <?php echo Yii::t('app', 'Fax'); ?>
+                                        </th>
+                                        <td>
+                                            <?php echo CHtml::encode($client->contact_fax); ?>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>

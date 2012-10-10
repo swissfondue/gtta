@@ -117,6 +117,16 @@
             </div>
         </div>
 
+        <div class="control-group <?php if ($model->getError('contactFax')) echo 'error'; ?>">
+            <label class="control-label" for="ClientEditForm_contactFax"><?php echo Yii::t('app', 'Contact Fax'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="ClientEditForm_contactFax" name="ClientEditForm[contactFax]" value="<?php echo CHtml::encode($model->contactFax); ?>">
+                <?php if ($model->getError('contactFax')): ?>
+                    <p class="help-block"><?php echo $model->getError('contactFax'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+        
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>
         </div>

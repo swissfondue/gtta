@@ -168,6 +168,7 @@ class ClientController extends Controller
             $model->contactEmail = $client->contact_email;
             $model->contactName  = $client->contact_name;
             $model->contactPhone = $client->contact_phone;
+            $model->contactFax   = $client->contact_fax;
         }
 
 		// collect user input data
@@ -187,6 +188,7 @@ class ClientController extends Controller
                 $client->contact_email = $model->contactEmail;
                 $client->contact_name  = $model->contactName;
                 $client->contact_phone = $model->contactPhone;
+                $client->contact_fax   = $model->contactFax;
 
                 $client->save();
 

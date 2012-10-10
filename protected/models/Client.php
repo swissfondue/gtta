@@ -15,6 +15,7 @@
  * @property string $contact_name
  * @property string $contact_phone
  * @property string $contact_email
+ * @property string $contact_fax
  */
 class Client extends CActiveRecord
 {   
@@ -43,7 +44,7 @@ class Client extends CActiveRecord
 	{
 		return array(
             array( 'name', 'required' ),
-            array( 'name, country, state, city, address, postcode, website, contact_name, contact_phone, contact_email', 'length', 'max' => 1000 ),
+            array( 'name, country, state, city, address, postcode, website, contact_name, contact_phone, contact_email, contact_fax', 'length', 'max' => 1000 ),
             array( 'contact_email', 'email' ),
             array( 'website', 'url', 'defaultScheme' => 'http' ),
 		);
@@ -62,7 +63,7 @@ class Client extends CActiveRecord
      */
     public function getHasContact()
     {
-        return $this->contact_email || $this->contact_name || $this->contact_phone;
+        return $this->contact_email || $this->contact_name || $this->contact_phone || $this->contact_fax;
     }
 
     /**

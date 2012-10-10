@@ -55,14 +55,19 @@ class ClientEditForm extends CFormModel
      */
     public $contactPhone;
 
-	/**
+    /**
+     * @var string contact fax.
+     */
+    public $contactFax;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules()
 	{
 		return array(
 			array( 'name', 'required' ),
-            array( 'name, country, state, city, address, postcode, website, contactName, contactEmail, contactPhone', 'length', 'max' => 1000 ),
+            array( 'name, country, state, city, address, postcode, website, contactName, contactEmail, contactPhone, contactFax', 'length', 'max' => 1000 ),
             array( 'contactEmail', 'email' ),
             array( 'website', 'url', 'defaultScheme' => 'http' ),
 		);
@@ -84,6 +89,7 @@ class ClientEditForm extends CFormModel
             'contactName'  => Yii::t('app', 'Contact Name'),
             'contactPhone' => Yii::t('app', 'Contact Phone'),
             'contactEmail' => Yii::t('app', 'Contact E-mail'),
+            'contactFax'   => Yii::t('app', 'Contact Fax'),
 		);
 	}
 }
