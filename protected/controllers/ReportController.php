@@ -65,6 +65,17 @@ class ReportController extends Controller
     }
 
     /**
+     * Prepare text for project report.
+     */
+    private function _prepareProjectReportText($text)
+    {
+        $text = str_replace(array( "\r", "\n" ), '', $text);
+        $text = strip_tags($text, '<b><i><br>');
+
+        return $text;
+    }
+
+    /**
      * Generate project function.
      */
     private function _generateProjectReport($model)
@@ -268,8 +279,8 @@ class ReportController extends Controller
                     {
                         $checkData = array(
                             'name'             => $check->localizedName,
-                            'background'       => $check->localizedBackgroundInfo,
-                            'question'         => $check->localizedQuestion,
+                            'background'       => $this->_prepareProjectReportText($check->localizedBackgroundInfo),
+                            'question'         => $this->_prepareProjectReportText($check->localizedQuestion),
                             'result'           => $check->targetChecks[0]->result,
                             'rating'           => 0,
                             'ratingName'       => $ratings[$check->targetChecks[0]->rating],
@@ -312,7 +323,7 @@ class ReportController extends Controller
 
                         if ($check->targetCheckSolutions)
                             foreach ($check->targetCheckSolutions as $solution)
-                                $checkData['solutions'][] = $solution->solution->localizedSolution;
+                                $checkData['solutions'][] = $this->_prepareProjectReportText($solution->solution->localizedSolution);
 
                         if ($check->targetCheckAttachments)
                             foreach ($check->targetCheckAttachments as $attachment)
@@ -2155,8 +2166,9 @@ class ReportController extends Controller
     /**
      * Prepare text for vulnerabilities report.
      */
-    private function _prepareText($text)
+    private function _prepareVulnExportText($text)
     {
+        $text = str_replace(array( "\r", "\n" ), '', $text);
         $text = str_replace('<br>', "\n", $text);
         $text = strip_tags($text);
 
@@ -2364,10 +2376,10 @@ class ReportController extends Controller
                             $row[TargetCheck::COLUMN_REFERENCE] = $check->_reference->name . ( $check->reference_code ? '-' . $check->reference_code : '' );
 
                         if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns))
-                            $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareText($check->localizedBackgroundInfo);
+                            $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($check->localizedBackgroundInfo);
 
                         if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns))
-                            $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareText($check->localizedQuestion);
+                            $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareVulnExportText($check->localizedQuestion);
 
                         if (in_array(TargetCheck::COLUMN_RESULT, $model->columns))
                             $row[TargetCheck::COLUMN_RESULT] = $check->targetChecks[0]->result;
@@ -2377,7 +2389,7 @@ class ReportController extends Controller
                             $solutions = array();
 
                             foreach ($check->targetCheckSolutions as $solution)
-                                $solutions[] = $this->_prepareText($solution->solution->localizedSolution);
+                                $solutions[] = $this->_prepareVulnExportText($solution->solution->localizedSolution);
 
                             $row[TargetCheck::COLUMN_SOLUTION] = implode("\n", $solutions);
                         }
