@@ -52,8 +52,8 @@
                             </div>
                         <?php endif; ?>
 
-                        <div class="control-header" data-id="<?php echo $check->control->id; ?>">
-                            <a href="#toggle" onclick="user.check.toggleControl(<?php echo $check->control->id; ?>);"><?php echo CHtml::encode($check->control->localizedName); ?></a>
+                        <div id="control-<?php echo $check->control->id; ?>" class="control-header" data-id="<?php echo $check->control->id; ?>">
+                            <a href="#control-<?php echo $check->control->id; ?>" onclick="user.check.toggleControl(<?php echo $check->control->id; ?>);"><?php echo CHtml::encode($check->control->localizedName); ?></a>
                         </div>
 
                         <div class="control-body<?php if ($collapseControls) echo ' hide'; ?>" data-id="<?php echo $check->control->id; ?>">
@@ -62,12 +62,12 @@
 
                         $prevControl = $check->control->id;
                     ?>
-                    <div class="check-header <?php if ($check->isRunning) echo 'in-progress'; ?>" data-id="<?php echo $check->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlcheck', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>" data-type="<?php echo $check->automated ? 'automated' : 'manual'; ?>">
+                    <div id="check-<?php echo $check->id; ?>" class="check-header <?php if ($check->isRunning) echo 'in-progress'; ?>" data-id="<?php echo $check->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlcheck', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>" data-type="<?php echo $check->automated ? 'automated' : 'manual'; ?>">
                         <table class="check-header">
                             <tbody>
                                 <tr>
                                     <td class="name">
-                                        <a href="#toggle" onclick="user.check.toggle(<?php echo $check->id; ?>);"><?php echo CHtml::encode($check->localizedName); ?></a>
+                                        <a href="#check-<?php echo $check->id; ?>" onclick="user.check.toggle(<?php echo $check->id; ?>);"><?php echo CHtml::encode($check->localizedName); ?></a>
                                         <?php if ($check->automated): ?>
                                             <i class="icon-cog" title="<?php echo Yii::t('app', 'Automated'); ?>"></i>
                                         <?php endif; ?>
@@ -664,5 +664,15 @@
         setTimeout(function () {
             user.check.update('<?php echo $this->createUrl('project/updatechecks', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>');
         }, 1000);
+
+        var href = window.location.href;
+
+        if (href.indexOf('#check-') >= 0)
+        {
+            var checkId = href.substring(href.indexOf('#check-') + 7, href.length);
+            user.check.expand(parseInt(checkId), function () {
+                location.href = '#check-' + checkId;
+            });
+        }
     });
 </script>

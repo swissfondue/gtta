@@ -192,15 +192,21 @@ function User()
         /**
          * Expand.
          */
-        this.expand = function (id) {
-            $('div.check-form[data-id=' + id + ']').slideDown('slow');
+        this.expand = function (id, callback) {
+            $('div.check-form[data-id=' + id + ']').slideDown('slow', undefined, function () {
+                if (callback)
+                    callback();
+            });
         };
 
         /**
          * Collapse.
          */
-        this.collapse = function (id) {
-            $('div.check-form[data-id=' + id + ']').slideUp('slow');
+        this.collapse = function (id, callback) {
+            $('div.check-form[data-id=' + id + ']').slideUp('slow', undefined, function () {
+                if (callback)
+                    callback();
+            });
         };
 
         /**
@@ -422,15 +428,19 @@ function User()
 
                     if (goToNext)
                     {
-                        _check.collapse(id);
+                        _check.collapse(id, function () {
+                            nextRow = $('div.check-form[data-id="' + id + '"] + div + div.check-form');
 
-                        nextRow = $('div.check-form[data-id="' + id + '"] + div + div.check-form');
+                            if (!nextRow.length)
+                                nextRow = $('div.check-form[data-id="' + id + '"]').parent().next().next().find('div.check-form:first');
 
-                        if (!nextRow.length)
-                            nextRow = $('div.check-form[data-id="' + id + '"]').parent().next().next().find('div.check-form:first');
-
-                        if (nextRow.length)
-                            _check.expand(nextRow.data('id'));
+                            if (nextRow.length)
+                            {
+                                _check.expand(nextRow.data('id'), function () {
+                                    location.href = '#check-' + nextRow.data('id');
+                                });
+                            }
+                        });
                     }
                 },
 

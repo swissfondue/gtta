@@ -35,7 +35,7 @@
 
                                             <span>|</span>
 
-                                            <a href="<?php echo $this->createUrl('project/checks', array('id' => $project->id, 'target' => $check->target_id, 'category' => $check->check->control->check_category_id)); ?>">
+                                            <a href="<?php echo $this->createUrl('project/checks', array('id' => $project->id, 'target' => $check->target_id, 'category' => $check->check->control->check_category_id)); ?>#check-<?php echo $check->check_id; ?>">
                                                 <?php echo CHtml::encode($check->check->control->category->localizedName); ?> /
                                                 <?php echo CHtml::encode($check->check->control->localizedName); ?>
                                             </a>
