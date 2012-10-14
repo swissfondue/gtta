@@ -1010,6 +1010,7 @@ class ProjectController extends Controller
                 Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
             ),
             'ratings' => array(
+                TargetCheck::RATING_NONE      => Yii::t('app', 'None'),
                 TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
                 TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
                 TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
@@ -1126,7 +1127,7 @@ class ProjectController extends Controller
             if ($model->result == '')
                 $model->result = NULL;
 
-            if ($model->rating == '')
+            if ($model->rating == '' || $model->rating == TargetCheck::RATING_NONE)
                 $model->rating = NULL;
 
             $targetCheck->user_id         = Yii::app()->user->id;
@@ -1163,6 +1164,10 @@ class ProjectController extends Controller
             if ($model->solutions)
                 foreach ($model->solutions as $solutionId)
                 {
+                    // reset solution
+                    if (!$solutionId)
+                        break;
+
                     $solution = CheckSolution::model()->findByAttributes(array(
                         'id'       => $solutionId,
                         'check_id' => $check->id

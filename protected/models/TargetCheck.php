@@ -32,6 +32,7 @@ class TargetCheck extends CActiveRecord
     /**
      * Result ratings.
      */
+    const RATING_NONE      = 'none';
     const RATING_HIDDEN    = 'hidden';
     const RATING_INFO      = 'info';
     const RATING_LOW_RISK  = 'low_risk';

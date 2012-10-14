@@ -419,6 +419,8 @@ function User()
                             (ratings[data.rating].classN ? ratings[data.rating].classN : '') + '">' +
                             ratings[data.rating].text + '</span>'
                         );
+                    else
+                        $('td.status', headerRow).html('');
 
                     $('i.icon-refresh', headerRow).parent().remove();
                     $('td.actions', headerRow).append(

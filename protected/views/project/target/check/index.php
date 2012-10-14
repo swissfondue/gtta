@@ -303,6 +303,16 @@
                                         </th>
                                         <td class="text">
                                             <ul class="solutions">
+                                                <?php if (!$check->multiple_solutions): ?>
+                                                    <li>
+                                                        <div class="solution-header">
+                                                            <label class="radio">
+                                                                <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="radio" value="0" <?php if ($check->isRunning) echo 'disabled'; ?> <?php if (!$check->targetCheckSolutions) echo 'checked'; ?>>
+                                                                <?php echo Yii::t('app', 'None'); ?>
+                                                            </label>
+                                                        </div>
+                                                    </li>
+                                                <?php endif; ?>
                                                 <?php foreach ($check->solutions as $solution): ?>
                                                     <li>
                                                         <div class="solution-header">
@@ -377,10 +387,10 @@
                                     </th>
                                     <td class="text">
                                         <ul class="rating">
-                                            <?php foreach(array( TargetCheck::RATING_HIDDEN, TargetCheck::RATING_INFO, TargetCheck::RATING_LOW_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_HIGH_RISK ) as $rating): ?>
+                                            <?php foreach(array( TargetCheck::RATING_NONE, TargetCheck::RATING_HIDDEN, TargetCheck::RATING_INFO, TargetCheck::RATING_LOW_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_HIGH_RISK ) as $rating): ?>
                                                 <li>
                                                     <label class="radio">
-                                                        <input type="radio" name="TargetCheckEditForm_<?php echo $check->id; ?>[rating]" value="<?php echo $rating; ?>" <?php if ($check->targetChecks && $check->targetChecks[0]->rating == $rating) echo 'checked'; ?> <?php if ($check->isRunning) echo 'disabled'; ?>>
+                                                        <input type="radio" name="TargetCheckEditForm_<?php echo $check->id; ?>[rating]" value="<?php echo $rating; ?>" <?php if (($check->targetChecks && $check->targetChecks[0]->rating == $rating) || ($rating == TargetCheck::RATING_NONE && (!$check->targetChecks || !$check->targetChecks[0]->rating))) echo 'checked'; ?> <?php if ($check->isRunning) echo 'disabled'; ?>>
                                                         <?php echo $ratings[$rating]; ?>
                                                     </label>
                                                 </li>
