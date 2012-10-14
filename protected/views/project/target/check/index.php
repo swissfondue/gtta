@@ -9,25 +9,25 @@
     </div>
 </div>
 
-<?php
-    $hasAutomated = false;
+<div class="pull-right buttons">
+    <a class="btn" href="#expand-all" onclick="user.check.expandAll();"><i class="icon icon-arrow-down"></i> <?php echo Yii::t('app', 'Expand'); ?></a>&nbsp;
+    <a class="btn" href="#collapse-all" onclick="user.check.collapseAll();"><i class="icon icon-arrow-up"></i> <?php echo Yii::t('app', 'Collapse'); ?></a>&nbsp;
 
-    foreach ($checks as $check)
-        if ($check->automated)
-        {
-            $hasAutomated = true;
-            break;
-        }
+    <?php
+        $hasAutomated = false;
 
-    if ($hasAutomated):
-?>
-    <div class="pull-right buttons">
-        <a class="btn" href="#expand-all" onclick="user.check.expandAll();"><i class="icon icon-arrow-down"></i> <?php echo Yii::t('app', 'Expand'); ?></a>&nbsp;
-        <a class="btn" href="#collapse-all" onclick="user.check.collapseAll();"><i class="icon icon-arrow-up"></i> <?php echo Yii::t('app', 'Collapse'); ?></a>&nbsp;
+        foreach ($checks as $check)
+            if ($check->automated)
+            {
+                $hasAutomated = true;
+                break;
+            }
+
+        if ($hasAutomated):
+    ?>
         <a class="btn" href="#start-all" onclick="user.check.startAll();"><i class="icon icon-play"></i> <?php echo Yii::t('app', 'Start'); ?></a>
-    </div>
-<?php endif; ?>
-
+    <?php endif; ?>
+</div>
 <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 
 <hr>
@@ -177,7 +177,7 @@
                                             <?php echo Yii::t('app', 'Background Info'); ?>
                                         </th>
                                         <td class="text">
-                                            <?php echo $check->localizedBackgroundInfo; ?>
+                                            <div class="limiter"><?php echo $check->localizedBackgroundInfo; ?></div>
                                         </td>
                                     </tr>
                                 <?php endif; ?>
@@ -187,7 +187,7 @@
                                             <?php echo Yii::t('app', 'Hints'); ?>
                                         </th>
                                         <td class="text">
-                                            <?php echo $check->localizedHints; ?>
+                                            <div class="limiter"><?php echo $check->localizedHints; ?></div>
                                         </td>
                                     </tr>
                                 <?php endif; ?>
@@ -197,7 +197,7 @@
                                             <?php echo Yii::t('app', 'Question'); ?>
                                         </th>
                                         <td class="text">
-                                            <?php echo $check->localizedQuestion; ?>
+                                            <div class="limiter"><?php echo $check->localizedQuestion; ?></div>
                                         </td>
                                     </tr>
                                 <?php endif; ?>

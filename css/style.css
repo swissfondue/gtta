@@ -309,6 +309,13 @@ div.check-form {
     padding:8px 10px 8px 10px;
 }
 
+.check-form td.text .limiter,
+.solution-content,
+.result-content {
+    word-wrap:break-word;
+    width:400px;
+}
+
 .check-form,
 .check-form tbody tr:hover td,
 .check-form tbody tr:hover th {
