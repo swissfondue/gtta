@@ -37,7 +37,7 @@
                     <div class="control-group <?php if ($model->getError('solution')) echo 'error'; ?>">
                         <label class="control-label" for="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_solution"><?php echo Yii::t('app', 'Solution'); ?></label>
                         <div class="controls">
-                            <textarea class="wysiwyg" style="height:200px;" id="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_solution" name="CheckSolutionEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][solution]"><?php echo isset($model->localizedItems[$language->id]) ? $model->localizedItems[$language->id]['solution'] : ''; ?></textarea>
+                            <textarea class="wysiwyg" style="height:200px;" id="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_solution" name="CheckSolutionEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][solution]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['solution']) : ''; ?></textarea>
                             <?php if ($model->getError('solution')): ?>
                                 <p class="help-block"><?php echo $model->getError('solution'); ?></p>
                             <?php endif; ?>
