@@ -332,6 +332,7 @@ class AutomationCommand extends ConsoleCommand
                         'projectId'  => $target->project_id,
                         'targetId'   => $target->id,
                         'categoryId' => $check->check->control->check_category_id,
+                        'checkId'    => $check->check_id,
                         'checkName'  => $check->check->localizedName,
                         'targetHost' => $target->host
                     ),
