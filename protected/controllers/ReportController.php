@@ -214,7 +214,7 @@ class ReportController extends Controller
 
                     $infoControlData = array(
                         'name'   => $control->localizedName,
-                        'checks' => array()
+                        'checks' => array(),
                     );
 
                     $criteria = new CDbCriteria();
@@ -356,17 +356,19 @@ class ReportController extends Controller
                         $infoCategoryData['controls'][] = $infoControlData;
                 }
 
-                if ($categoryData['controls'])
+                if ($categoryData['checkCount'])
                 {
                     $categoryData['rating'] /= $categoryData['checkCount'];
-                    $targetData['categories'][] = $categoryData;
+
+                    if ($categoryData['controls'])
+                        $targetData['categories'][] = $categoryData;
                 }
 
                 if ($infoCategoryData['controls'])
                     $infoTargetData['categories'][] = $infoCategoryData;
             }
 
-            if ($targetData['categories'])
+            if ($targetData['checkCount'])
                 $targetData['rating'] /= $targetData['checkCount'];
 
             $data[] = $targetData;
@@ -443,6 +445,7 @@ class ReportController extends Controller
         // overall summary
         $section->writeText(Yii::t('app', 'Overall Summary'), $h3Font, $h3Par);
         $image = $section->addImage($this->_generateRatingImage($totalRating), $centerPar);
+        $section->writeText('Rating: ' . sprintf('%.2f', $totalRating), $textFont, $centerPar);
 
         // detailed summary
         $section->writeText(Yii::t('app', 'Detailed Summary') . '<br>', $h3Font, $noPar);
