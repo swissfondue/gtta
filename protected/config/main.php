@@ -233,6 +233,34 @@ return array(
             'maxSize' => 100 * 1024 * 1024, // 100 megabytes
         ),
 
+        'reports' => array(
+            'fontSize' => 12,
+            'minFontSize' => 1,
+            'maxFontSize' => 50,
+
+            'font' => 'Helvetica',
+            'fonts' => array(
+                'Arial',
+                'Bookman Old Style',
+                'Courier',
+                'Courier New',
+                'Garamond',
+                'Helvetica',
+                'Microsoft Sans Serif',
+                'Palatino',
+                'Times',
+                'Verdana',
+            ),
+
+            'pageMargin' => 1.5,
+            'minPageMargin' => 0.0,
+            'maxPageMargin' => 5.0,
+
+            'cellPadding' => 0.2,
+            'minCellPadding' => 0.0,
+            'maxCellPadding' => 5.0,
+        ),
+
         'tmpPath'            => '/tmp',
         'timeZone'           => GTTA_PRODUCTION ? 'Europe/Zurich' : 'Europe/Moscow',
         'collapseCheckCount' => 20,

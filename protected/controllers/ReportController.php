@@ -388,7 +388,7 @@ class ReportController extends Controller
 
         $rtf = new PHPRtfLite();
         $rtf->setCharset('UTF-8');
-        $rtf->setMargins(1.5, 1, 1.5, 1);
+        $rtf->setMargins($model->pageMargin, $model->pageMargin, $model->pageMargin, $model->pageMargin);
 
         // borders
         $thinBorder = new PHPRtfLite_Border(
@@ -400,21 +400,21 @@ class ReportController extends Controller
         );
 
         // fonts
-        $h1Font = new PHPRtfLite_Font(24, 'Helvetica');
+        $h1Font = new PHPRtfLite_Font($model->fontSize * 2, $model->fontFamily);
         $h1Font->setBold();
 
-        $h2Font = new PHPRtfLite_Font(20, 'Helvetica');
+        $h2Font = new PHPRtfLite_Font(round($model->fontSize * 1.7), $model->fontFamily);
         $h2Font->setBold();
 
-        $h3Font = new PHPRtfLite_Font(16, 'Helvetica');
+        $h3Font = new PHPRtfLite_Font(round($model->fontSize * 1.3), $model->fontFamily);
         $h3Font->setBold();
 
-        $textFont = new PHPRtfLite_Font(12, 'Helvetica');
+        $textFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
 
-        $boldFont = new PHPRtfLite_Font(12, 'Helvetica');
+        $boldFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
         $boldFont->setBold();
 
-        $linkFont = new PHPRtfLite_Font(12, 'Helvetica', '#0088CC');
+        $linkFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily, '#0088CC');
         $linkFont->setUnderline();
 
         // paragraphs
@@ -451,8 +451,10 @@ class ReportController extends Controller
         $section->writeText(Yii::t('app', 'Detailed Summary') . '<br>', $h3Font, $noPar);
         $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
 
+        $docWidth = 21.0 - 2 * $model->pageMargin;
+
         $table->addRows(count($data) + 1);
-        $table->addColumnsList(array( 8, 7, 3 ));
+        $table->addColumnsList(array( $docWidth * 0.44, $docWidth * 0.39, $docWidth * 0.17 ));
         $table->mergeCellRange(1, 2, 1, 3);
         $table->setFontForCellRange($boldFont, 1, 1, 1, 2);
         $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 2);
@@ -464,7 +466,7 @@ class ReportController extends Controller
         for ($row = 1; $row <= count($data) + 1; $row++)
             for ($col = 1; $col <= 3; $col++)
             {
-                $table->getCell($row, $col)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                $table->getCell($row, $col)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                 $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
             }
 
@@ -476,7 +478,7 @@ class ReportController extends Controller
         foreach ($data as $target)
         {
             $table->writeToCell($row, 1, $target['host']);
-            $table->addImageToCell($row, 2, $this->_generateRatingImage($target['rating']));
+            $table->addImageToCell($row, 2, $this->_generateRatingImage($target['rating']), null, $docWidth * 0.34);
             $table->writeToCell($row, 3, sprintf('%.2f', $target['rating']));
 
             $table->getCell($row, 2)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
@@ -498,7 +500,7 @@ class ReportController extends Controller
             }
 
             $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-            $table->addColumnsList(array( 5, 13 ));
+            $table->addColumnsList(array( $docWidth * 0.28, $docWidth * 0.72 ));
 
             $row = 1;
 
@@ -507,7 +509,7 @@ class ReportController extends Controller
                 $table->addRow();
                 $table->mergeCellRange($row, 1, $row, 2);
 
-                $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                 $table->getCell($row, 1)->setBorder($thinBorder);
                 $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
                 $table->setBackgroundForCellRange('#B0B0B0', $row, 1, $row, 1);
@@ -520,7 +522,7 @@ class ReportController extends Controller
                     $table->addRow();
                     $table->mergeCellRange($row, 1, $row, 2);
 
-                    $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                    $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                     $table->getCell($row, 1)->setBorder($thinBorder);
                     $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
                     $table->setBackgroundForCellRange('#D0D0D0', $row, 1, $row, 1);
@@ -533,7 +535,7 @@ class ReportController extends Controller
                         $table->addRow();
                         $table->mergeCellRange($row, 1, $row, 2);
 
-                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                        $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                         $table->getCell($row, 1)->setBorder($thinBorder);
                         $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
                         $table->setBackgroundForCellRange('#F0F0F0', $row, 1, $row, 1);
@@ -543,10 +545,10 @@ class ReportController extends Controller
 
                         // reference info
                         $table->addRow();
-                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                        $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                         $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                         $table->getCell($row, 1)->setBorder($thinBorder);
-                        $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                        $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                         $table->getCell($row, 2)->setBorder($thinBorder);
 
                         $table->writeToCell($row, 1, Yii::t('app', 'Reference'));
@@ -569,10 +571,10 @@ class ReportController extends Controller
                         if ($check['background'])
                         {
                             $table->addRow();
-                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                             $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 2)->setBorder($thinBorder);
 
                             $table->writeToCell($row, 1, Yii::t('app', 'Background Info'));
@@ -584,10 +586,10 @@ class ReportController extends Controller
                         if ($check['question'])
                         {
                             $table->addRow();
-                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                             $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 2)->setBorder($thinBorder);
 
                             $table->writeToCell($row, 1, Yii::t('app', 'Question'));
@@ -599,10 +601,10 @@ class ReportController extends Controller
                         if ($check['result'])
                         {
                             $table->addRow();
-                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                             $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 2)->setBorder($thinBorder);
 
                             $table->writeToCell($row, 1, Yii::t('app', 'Result'));
@@ -617,7 +619,7 @@ class ReportController extends Controller
 
                             $table->mergeCellRange($row, 1, $row + count($check['solutions']) - 1, 1);
 
-                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                             $table->getCell($row, 1)->setBorder($thinBorder);
                             $table->writeToCell($row, 1, Yii::t('app', 'Solutions'));
@@ -625,7 +627,7 @@ class ReportController extends Controller
                             foreach ($check['solutions'] as $solution)
                             {
                                 $table->getCell($row, 1)->setBorder($thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                                 $table->getCell($row, 2)->setBorder($thinBorder);
                                 $table->writeToCell($row, 2, $solution);
 
@@ -639,7 +641,7 @@ class ReportController extends Controller
 
                             $table->mergeCellRange($row, 1, $row + count($check['images']) - 1, 1);
 
-                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                             $table->getCell($row, 1)->setBorder($thinBorder);
                             $table->writeToCell($row, 1, Yii::t('app', 'Attachments'));
@@ -647,16 +649,10 @@ class ReportController extends Controller
                             foreach ($check['images'] as $image)
                             {
                                 $table->getCell($row, 1)->setBorder($thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                                 $table->getCell($row, 2)->setBorder($thinBorder);
 
-                                list($imageWidth, $imageHeight) = getimagesize($image);
-
-                                $ratio       = $imageWidth / $imageHeight;
-                                $imageWidth  = 12; // cm
-                                $imageHeight = $imageWidth / $ratio;
-
-                                $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $imageWidth, $imageHeight);
+                                $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $docWidth * 0.67);
 
                                 $row++;
                             }
@@ -665,9 +661,9 @@ class ReportController extends Controller
                         $table->addRow();
 
                         // rating
-                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                        $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                         $table->getCell($row, 1)->setBorder($thinBorder);
-                        $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                        $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                         $table->getCell($row, 2)->setBorder($thinBorder);
 
                         $table->writeToCell($row, 1, Yii::t('app', 'Rating'));
@@ -690,7 +686,7 @@ class ReportController extends Controller
                 $section->writeText($target['host'] . '<br>', $boldFont, $noPar);
 
                 $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-                $table->addColumnsList(array( 5, 13 ));
+                $table->addColumnsList(array( $docWidth * 0.28, $docWidth * 0.72 ));
 
                 $row = 1;
 
@@ -699,7 +695,7 @@ class ReportController extends Controller
                     $table->addRow();
                     $table->mergeCellRange($row, 1, $row, 2);
 
-                    $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                    $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                     $table->getCell($row, 1)->setBorder($thinBorder);
                     $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
                     $table->setBackgroundForCellRange('#B0B0B0', $row, 1, $row, 1);
@@ -712,7 +708,7 @@ class ReportController extends Controller
                         $table->addRow();
                         $table->mergeCellRange($row, 1, $row, 2);
 
-                        $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                        $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                         $table->getCell($row, 1)->setBorder($thinBorder);
                         $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
                         $table->setBackgroundForCellRange('#D0D0D0', $row, 1, $row, 1);
@@ -725,7 +721,7 @@ class ReportController extends Controller
                             $table->addRow();
                             $table->mergeCellRange($row, 1, $row, 2);
 
-                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 1)->setBorder($thinBorder);
                             $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
                             $table->setBackgroundForCellRange('#F0F0F0', $row, 1, $row, 1);
@@ -735,10 +731,10 @@ class ReportController extends Controller
 
                             // reference info
                             $table->addRow();
-                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                             $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 2)->setBorder($thinBorder);
 
                             $table->writeToCell($row, 1, Yii::t('app', 'Reference'));
@@ -761,10 +757,10 @@ class ReportController extends Controller
                             if ($check['background'])
                             {
                                 $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                                 $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                                 $table->getCell($row, 1)->setBorder($thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                                 $table->getCell($row, 2)->setBorder($thinBorder);
 
                                 $table->writeToCell($row, 1, Yii::t('app', 'Background Info'));
@@ -776,10 +772,10 @@ class ReportController extends Controller
                             if ($check['question'])
                             {
                                 $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                                 $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                                 $table->getCell($row, 1)->setBorder($thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                                 $table->getCell($row, 2)->setBorder($thinBorder);
 
                                 $table->writeToCell($row, 1, Yii::t('app', 'Question'));
@@ -790,10 +786,10 @@ class ReportController extends Controller
 
                             // result
                             $table->addRow();
-                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                             $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 2)->setBorder($thinBorder);
 
                             $table->writeToCell($row, 1, Yii::t('app', 'Result'));
@@ -807,7 +803,7 @@ class ReportController extends Controller
 
                                 $table->mergeCellRange($row, 1, $row + count($check['solutions']) - 1, 1);
 
-                                $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                                 $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                                 $table->getCell($row, 1)->setBorder($thinBorder);
                                 $table->writeToCell($row, 1, Yii::t('app', 'Solutions'));
@@ -815,7 +811,7 @@ class ReportController extends Controller
                                 foreach ($check['solutions'] as $solution)
                                 {
                                     $table->getCell($row, 1)->setBorder($thinBorder);
-                                    $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                    $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                                     $table->getCell($row, 2)->setBorder($thinBorder);
                                     $table->writeToCell($row, 2, $solution);
 
@@ -829,7 +825,7 @@ class ReportController extends Controller
 
                                 $table->mergeCellRange($row, 1, $row + count($check['images']) - 1, 1);
 
-                                $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                                 $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                                 $table->getCell($row, 1)->setBorder($thinBorder);
                                 $table->writeToCell($row, 1, Yii::t('app', 'Attachments'));
@@ -837,16 +833,10 @@ class ReportController extends Controller
                                 foreach ($check['images'] as $image)
                                 {
                                     $table->getCell($row, 1)->setBorder($thinBorder);
-                                    $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                                    $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                                     $table->getCell($row, 2)->setBorder($thinBorder);
 
-                                    list($imageWidth, $imageHeight) = getimagesize($image);
-
-                                    $ratio       = $imageWidth / $imageHeight;
-                                    $imageWidth  = 12; // cm
-                                    $imageHeight = $imageWidth / $ratio;
-
-                                    $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $imageWidth, $imageHeight);
+                                    $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $docWidth * 0.67);
 
                                     $row++;
                                 }
@@ -855,9 +845,9 @@ class ReportController extends Controller
                             $table->addRow();
 
                             // rating
-                            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                            $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                             $table->getCell($row, 2)->setBorder($thinBorder);
 
                             $table->writeToCell($row, 1, Yii::t('app', 'Rating'));
@@ -1126,7 +1116,7 @@ class ReportController extends Controller
 
         $rtf = new PHPRtfLite();
         $rtf->setCharset('UTF-8');
-        $rtf->setMargins(1.5, 1, 1.5, 1);
+        $rtf->setMargins($model->pageMargin, $model->pageMargin, $model->pageMargin, $model->pageMargin);
 
         // borders
         $thinBorder = new PHPRtfLite_Border(
@@ -1138,18 +1128,18 @@ class ReportController extends Controller
         );
 
         // fonts
-        $h1Font = new PHPRtfLite_Font(24, 'Helvetica');
+        $h1Font = new PHPRtfLite_Font($model->fontSize * 2, $model->fontFamily);
         $h1Font->setBold();
 
-        $h2Font = new PHPRtfLite_Font(20, 'Helvetica');
+        $h2Font = new PHPRtfLite_Font(round($model->fontSize * 1.7), $model->fontFamily);
         $h2Font->setBold();
 
-        $h3Font = new PHPRtfLite_Font(16, 'Helvetica');
+        $h3Font = new PHPRtfLite_Font(round($model->fontSize * 1.3), $model->fontFamily);
         $h3Font->setBold();
 
-        $textFont = new PHPRtfLite_Font(12, 'Helvetica');
+        $textFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
 
-        $boldFont = new PHPRtfLite_Font(12, 'Helvetica');
+        $boldFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
         $boldFont->setBold();
 
         // paragraphs
@@ -1172,8 +1162,10 @@ class ReportController extends Controller
         $section->writeText(Yii::t('app', 'Target Comparison') . '<br>', $h3Font, $noPar);
         $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
 
+        $docWidth = 21.0 - 2 * $model->pageMargin;
+
         $table->addRows(count($targetsData) + 1);
-        $table->addColumnsList(array( 6, 6, 6 ));
+        $table->addColumnsList(array( $docWidth * 0.33, $docWidth * 0.33, $docWidth * 0.34 ));
         $table->setFontForCellRange($boldFont, 1, 1, 1, 3);
         $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
         $table->setFontForCellRange($textFont, 2, 1, count($targetsData) + 1, 3);
@@ -1184,7 +1176,7 @@ class ReportController extends Controller
         for ($row = 1; $row <= count($targetsData) + 1; $row++)
             for ($col = 1; $col <= 3; $col++)
             {
-                $table->getCell($row, $col)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                $table->getCell($row, $col)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                 $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
             }
 
@@ -1197,8 +1189,8 @@ class ReportController extends Controller
         foreach ($targetsData as $target)
         {
             $table->writeToCell($row, 1, $target['host']);
-            $table->addImageToCell($row, 2, $this->_generateRatingImage($target['ratings'][0]));
-            $table->addImageToCell($row, 3, $this->_generateRatingImage($target['ratings'][1]));
+            $table->addImageToCell($row, 2, $this->_generateRatingImage($target['ratings'][0]), null, $docWidth * 0.30);
+            $table->addImageToCell($row, 3, $this->_generateRatingImage($target['ratings'][1]), null, $docWidth * 0.30);
 
             $table->getCell($row, 2)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
             $table->getCell($row, 3)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
@@ -1483,7 +1475,7 @@ class ReportController extends Controller
 
         $rtf = new PHPRtfLite();
         $rtf->setCharset('UTF-8');
-        $rtf->setMargins(1.5, 1, 1.5, 1);
+        $rtf->setMargins($model->pageMargin, $model->pageMargin, $model->pageMargin, $model->pageMargin);
 
         // borders
         $thinBorder = new PHPRtfLite_Border(
@@ -1495,18 +1487,18 @@ class ReportController extends Controller
         );
 
         // fonts
-        $h1Font = new PHPRtfLite_Font(24, 'Helvetica');
+        $h1Font = new PHPRtfLite_Font($model->fontSize * 2, $model->fontFamily);
         $h1Font->setBold();
 
-        $h2Font = new PHPRtfLite_Font(20, 'Helvetica');
+        $h2Font = new PHPRtfLite_Font(round($model->fontSize * 1.7), $model->fontFamily);
         $h2Font->setBold();
 
-        $h3Font = new PHPRtfLite_Font(16, 'Helvetica');
+        $h3Font = new PHPRtfLite_Font(round($model->fontSize * 1.3), $model->fontFamily);
         $h3Font->setBold();
 
-        $textFont = new PHPRtfLite_Font(12, 'Helvetica');
+        $textFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
 
-        $boldFont = new PHPRtfLite_Font(12, 'Helvetica');
+        $boldFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
         $boldFont->setBold();
 
         // paragraphs
@@ -1521,6 +1513,8 @@ class ReportController extends Controller
         $noPar = new PHPRtfLite_ParFormat();
         $noPar->setSpaceBefore(0);
         $noPar->setSpaceAfter(0);
+
+        $docWidth = 21.0 - 2 * $model->pageMargin;
 
         // title
         $section = $rtf->addSection();
@@ -1538,17 +1532,17 @@ class ReportController extends Controller
             }
 
             $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-            $table->addColumnsList(array( 5, 10, 3 ));
+            $table->addColumnsList(array( $docWidth * 0.28, $docWidth * 0.56, $docWidth * 0.16 ));
 
             $row = 1;
 
             $table->addRow();
             $table->mergeCellRange(1, 2, 1, 3);
 
-            $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
             $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
 
-            $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+            $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
             $table->getCell($row, 2)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
 
             $table->setFontForCellRange($boldFont, 1, 1, 1, 3);
@@ -1566,19 +1560,19 @@ class ReportController extends Controller
             foreach ($target['controls'] as $control)
             {
                 $table->addRow();
-                $table->getCell($row, 1)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                 $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                 $table->getCell($row, 1)->setBorder($thinBorder);
 
-                $table->getCell($row, 2)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                 $table->getCell($row, 2)->setBorder($thinBorder);
                 $table->getCell($row, 2)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
 
-                $table->getCell($row, 3)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                $table->getCell($row, 3)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                 $table->getCell($row, 3)->setBorder($thinBorder);
 
                 $table->writeToCell($row, 1, $control['name'], $textFont);
-                $table->addImageToCell($row, 2, $this->_generateFulfillmentImage($control['degree']));
+                $table->addImageToCell($row, 2, $this->_generateFulfillmentImage($control['degree']), null, $docWidth * 0.50);
                 $table->writeToCell($row, 3, $control['degree'] . '%');
 
                 $row++;
@@ -1828,7 +1822,7 @@ class ReportController extends Controller
 
         $rtf = new PHPRtfLite();
         $rtf->setCharset('UTF-8');
-        $rtf->setMargins(1.5, 1, 1.5, 1);
+        $rtf->setMargins($model->pageMargin, $model->pageMargin, $model->pageMargin, $model->pageMargin);
 
         // borders
         $thinBorder = new PHPRtfLite_Border(
@@ -1856,21 +1850,21 @@ class ReportController extends Controller
         );
 
         // fonts
-        $h1Font = new PHPRtfLite_Font(24, 'Helvetica');
+        $h1Font = new PHPRtfLite_Font($model->fontSize * 2, $model->fontFamily);
         $h1Font->setBold();
 
-        $h2Font = new PHPRtfLite_Font(20, 'Helvetica');
+        $h2Font = new PHPRtfLite_Font(round($model->fontSize * 1.7), $model->fontFamily);
         $h2Font->setBold();
 
-        $h3Font = new PHPRtfLite_Font(16, 'Helvetica');
+        $h3Font = new PHPRtfLite_Font(round($model->fontSize * 1.3), $model->fontFamily);
         $h3Font->setBold();
 
-        $textFont = new PHPRtfLite_Font(12, 'Helvetica');
+        $textFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
 
-        $boldFont = new PHPRtfLite_Font(12, 'Helvetica');
+        $boldFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
         $boldFont->setBold();
 
-        $smallBoldFont = new PHPRtfLite_Font(10, 'Helvetica');
+        $smallBoldFont = new PHPRtfLite_Font(round($model->fontSize * 0.8), $model->fontFamily);
         $smallBoldFont->setBold();
 
         // paragraphs
@@ -1887,6 +1881,8 @@ class ReportController extends Controller
         $noPar->setSpaceBefore(0);
         $noPar->setSpaceAfter(0);
 
+        $docWidth = 21.0 - 2 * $model->pageMargin;
+
         // title
         $section = $rtf->addSection();
         $section->writeText(Yii::t('app', 'Risk Matrix'), $h1Font, $titlePar);
@@ -1896,7 +1892,7 @@ class ReportController extends Controller
 
         $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
         $table->addRows(count($risks) + 1);
-        $table->addColumnsList(array( 2, 16 ));
+        $table->addColumnsList(array( $docWidth * 0.11, $docWidth * 0.89 ));
         $table->setFontForCellRange($boldFont, 1, 1, 1, 2);
         $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 2);
         $table->setFontForCellRange($textFont, 2, 1, count($risks), 2);
@@ -1906,7 +1902,7 @@ class ReportController extends Controller
         for ($row = 1; $row <= count($risks) + 1; $row++)
             for ($col = 1; $col <= 2; $col++)
             {
-                $table->getCell($row, $col)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                $table->getCell($row, $col)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                 $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
             }
 
@@ -1943,7 +1939,7 @@ class ReportController extends Controller
             $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
 
             $table->addRows(5);
-            $table->addColumnsList(array( 2, 4, 4, 4, 4 ));
+            $table->addColumnsList(array( $docWidth * 0.12, $docWidth * 0.22, $docWidth * 0.22, $docWidth * 0.22, $docWidth * 0.22 ));
 
             $table->mergeCellRange(1, 1, 4, 1);
             $table->mergeCellRange(5, 1, 5, 5);
@@ -1963,7 +1959,7 @@ class ReportController extends Controller
             for ($row = 1; $row <= 5; $row++)
                 for ($col = 1; $col <= 5; $col++)
                 {
-                    $table->getCell($row, $col)->setCellPaddings(0.2, 0.2, 0.2, 0.2);
+                    $table->getCell($row, $col)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
 
                     if ($col == 1 || $row == 5)
                     {
