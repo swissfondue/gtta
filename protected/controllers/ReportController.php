@@ -500,7 +500,7 @@ class ReportController extends Controller
             }
 
             $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-            $table->addColumnsList(array( $docWidth * 0.28, $docWidth * 0.72 ));
+            $table->addColumnsList(array( $docWidth * 0.17, $docWidth * 0.83 ));
 
             $row = 1;
 
@@ -652,7 +652,7 @@ class ReportController extends Controller
                                 $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                                 $table->getCell($row, 2)->setBorder($thinBorder);
 
-                                $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $docWidth * 0.67);
+                                $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $docWidth * 0.78);
 
                                 $row++;
                             }
@@ -686,7 +686,7 @@ class ReportController extends Controller
                 $section->writeText($target['host'] . '<br>', $boldFont, $noPar);
 
                 $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-                $table->addColumnsList(array( $docWidth * 0.28, $docWidth * 0.72 ));
+                $table->addColumnsList(array( $docWidth * 0.17, $docWidth * 0.83 ));
 
                 $row = 1;
 
@@ -836,7 +836,7 @@ class ReportController extends Controller
                                     $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                                     $table->getCell($row, 2)->setBorder($thinBorder);
 
-                                    $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $docWidth * 0.67);
+                                    $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $docWidth * 0.78);
 
                                     $row++;
                                 }
