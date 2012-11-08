@@ -47,11 +47,26 @@
                                     <?php else: ?>
                                         <?php echo CHtml::encode($target->host); ?>
                                     <?php endif; ?>
+
+                                    <?php if ($target->description): ?>
+                                        / <span class="description"><?php echo CHtml::encode($target->description); ?></span>
+                                    <?php endif; ?>
+
+                                    <div class="categories">
+                                        <?php if ($target->categories): ?>
+                                            <?php foreach ($target->categories as $category): ?>
+                                                <a href="<?php echo $this->createUrl('project/checks', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->id )); ?>"><span class="label"><?php echo CHtml::encode($category->localizedName); ?></span></a>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <?php echo Yii::t('app', 'No categories yet.'); ?>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                                 <td class="stats">
                                     <span class="high-risk"><?php echo $target->highRiskCount ? $target->highRiskCount : 0; ?></span> /
                                     <span class="med-risk"><?php echo $target->medRiskCount ? $target->medRiskCount: 0; ?></span> /
-                                    <span class="low-risk"><?php echo $target->lowRiskCount ? $target->lowRiskCount : 0; ?></span>
+                                    <span class="low-risk"><?php echo $target->lowRiskCount ? $target->lowRiskCount : 0; ?></span> /
+                                    <span class="info"><?php echo $target->infoCount ? $target->infoCount : 0; ?></span>
                                 </td>
                                 <td class="percent">
                                     <?php
@@ -60,8 +75,10 @@
                                         if (!$finished)
                                             $finished = 0;
 
-                                        echo $target->checkCount ? sprintf('%.2f', ($finished / $target->checkCount) * 100) : '0.00';
+                                        echo $target->checkCount ? sprintf('%.0f', ($finished / $target->checkCount) * 100) : '0';
                                     ?>%
+                                    /
+                                    <?php echo $finished; ?>
                                 </td>
                                 <td>
                                     <?php

@@ -636,3 +636,11 @@ div.report-check-content {
     margin-left:7px;
     margin-right:7px;
 }
+
+.target-list .target .description {
+    color:#909090;
+}
+
+.target-list .target .categories a {
+    text-decoration:none;
+}

@@ -7,6 +7,7 @@
  * @property integer $id
  * @property integer $project_id
  * @property string $host
+ * @property string $description
  */
 class Target extends CActiveRecord
 {   
@@ -35,7 +36,7 @@ class Target extends CActiveRecord
 	{
 		return array(
             array( 'host, project_id', 'required' ),
-            array( 'host', 'length', 'max' => 1000 ),
+            array( 'host, description', 'length', 'max' => 1000 ),
             array( 'project_id', 'numerical', 'integerOnly' => true ),
 		);
 	}
@@ -53,6 +54,7 @@ class Target extends CActiveRecord
             'references'    => array( self::MANY_MANY,  'Reference',           'target_references(target_id, reference_id)'    ),
             'checkCount'    => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(check_count)'     ),
             'finishedCount' => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(finished_count)'  ),
+            'infoCount'     => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(info_count)'      ),
             'lowRiskCount'  => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(low_risk_count)'  ),
             'medRiskCount'  => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(med_risk_count)'  ),
             'highRiskCount' => array( self::STAT,       'TargetCheckCategory', 'target_id', 'select' => 'SUM(high_risk_count)' ),

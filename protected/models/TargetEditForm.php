@@ -11,6 +11,11 @@ class TargetEditForm extends CFormModel
     public $host;
 
     /**
+     * @var string description.
+     */
+    public $description;
+
+    /**
      * @var array category ids.
      */
     public $categoryIds;
@@ -27,7 +32,7 @@ class TargetEditForm extends CFormModel
 	{
 		return array(
 			array( 'host', 'required' ),
-            array( 'host', 'length', 'max' => 1000 ),
+            array( 'host, description', 'length', 'max' => 1000 ),
             array( 'categoryIds, referenceIds', 'safe' ),
 		);
 	}
@@ -38,7 +43,8 @@ class TargetEditForm extends CFormModel
 	public function attributeLabels()
 	{
 		return array(
-			'host' => Yii::t('app', 'Host'),
+			'host'        => Yii::t('app', 'Host'),
+            'description' => Yii::t('app', 'Description'),
 		);
 	}
 }

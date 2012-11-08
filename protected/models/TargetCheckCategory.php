@@ -12,6 +12,7 @@
  * @property integer $low_risk_count
  * @property integer $med_risk_count
  * @property integer $high_risk_count
+ * @property integer $info_count
  */
 class TargetCheckCategory extends CActiveRecord
 {
@@ -66,6 +67,7 @@ class TargetCheckCategory extends CActiveRecord
         $lowCount      = 0;
         $medCount      = 0;
         $highCount     = 0;
+        $infoCount     = 0;
 
         $controlIds   = array();
         $referenceIds = array();
@@ -110,6 +112,11 @@ class TargetCheckCategory extends CActiveRecord
 
         $finishedCount = TargetCheck::model()->count($criteria);
 
+        // info count
+        $infoCriteria = clone $criteria;
+        $infoCriteria->addColumnCondition(array( 'rating' => TargetCheck::RATING_INFO ));
+        $infoCount = TargetCheck::model()->count($infoCriteria);
+        
         // low count
         $lowCriteria = clone $criteria;
         $lowCriteria->addColumnCondition(array( 'rating' => TargetCheck::RATING_LOW_RISK ));
@@ -127,6 +134,7 @@ class TargetCheckCategory extends CActiveRecord
 
         $this->check_count     = $checkCount;
         $this->finished_count  = $finishedCount;
+        $this->info_count      = $infoCount;
         $this->low_risk_count  = $lowCount;
         $this->med_risk_count  = $medCount;
         $this->high_risk_count = $highCount;

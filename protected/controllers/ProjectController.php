@@ -228,6 +228,13 @@ class ProjectController extends Controller
 
         $client = Client::model()->findByPk($project->client_id);
 
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
         $targets = Target::model()->with(array(
             'checkCount',
             'finishedCount',
@@ -236,10 +243,16 @@ class ProjectController extends Controller
             'highRiskCount',
             'categories' => array(
                 'with' => array(
+                    'l10n' => array(
+                        'joinType' => 'LEFT JOIN',
+                        'on'       => 'language_id = :language_id',
+                        'params'   => array( 'language_id' => $language )
+                    ),
                     'controls' => array(
                         'with' => 'checkCount'
                     )
-                )
+                ),
+                'order' => 'categories.name',
             )
         ))->findAll($criteria);
 
@@ -586,7 +599,7 @@ class ProjectController extends Controller
         $this->breadcrumbs[] = array($target->host, '');
 
         // display the page
-        $this->pageTitle = $target->host;
+        $this->pageTitle = $target->host . ($target->description ? ' / ' . $target->description : '');
 		$this->render('target/index', array(
             'project'    => $project,
             'target'     => $target,
@@ -642,6 +655,7 @@ class ProjectController extends Controller
         if (!$newRecord)
         {
             $model->host = $target->host;
+            $model->description = $target->description;
 
             $categories = TargetCheckCategory::model()->findAllByAttributes(array(
                 'target_id' => $target->id
@@ -669,7 +683,8 @@ class ProjectController extends Controller
 			if ($model->validate())
             {
                 $target->project_id = $project->id;
-                $target->host       = $model->host;
+                $target->host = $model->host;
+                $target->description = $model->description;
 
                 $target->save();
 
@@ -823,7 +838,7 @@ class ProjectController extends Controller
         );
 
 		// display the page
-        $this->pageTitle = $newRecord ? Yii::t('app', 'New Target') : $target->host;
+        $this->pageTitle = $newRecord ? Yii::t('app', 'New Target') : $target->host . ($target->description ? ' / ' . $target->description : '');
 		$this->render('target/edit', array(
             'model'      => $model,
             'project'    => $project,

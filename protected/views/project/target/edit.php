@@ -30,6 +30,16 @@
                 <?php endif; ?>
             </div>
         </div>
+        
+        <div class="control-group <?php if ($model->getError('description')) echo 'error'; ?>">
+            <label class="control-label" for="TargetEditForm_description"><?php echo Yii::t('app', 'Description'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="TargetEditForm_description" name="TargetEditForm[description]" value="<?php echo CHtml::encode($model->description); ?>">
+                <?php if ($model->getError('description')): ?>
+                    <p class="help-block"><?php echo $model->getError('description'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
 
         <?php if (count($categories)): ?>
             <div class="control-group">
