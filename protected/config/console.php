@@ -78,6 +78,10 @@ return array(
                 'pl' => array(
                     'path'     => '/usr/bin/perl',
                     'basePath' => '/usr/bin'
+                ),
+                'rb' => array(
+                    'path'     => '/usr/bin/ruby',
+                    'basePath' => '/usr/bin'
                 )
             )
         ),
