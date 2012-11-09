@@ -1004,6 +1004,47 @@ class ProjectController extends Controller
             '_reference'
         ))->findAll($criteria);
 
+        $controlStats = array();
+
+        foreach ($checks as $check)
+        {
+            if (!isset($controlStats[$check->check_control_id]))
+                $controlStats[$check->check_control_id] = array(
+                    'checks'   => 0,
+                    'finished' => 0,
+                    'info'     => 0,
+                    'lowRisk'  => 0,
+                    'medRisk'  => 0,
+                    'highRisk' => 0,
+                );
+
+            $controlStats[$check->check_control_id]['checks']++;
+
+            if ($check->targetChecks && $check->targetChecks[0] && $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED)
+            {
+                $controlStats[$check->check_control_id]['finished']++;
+
+                switch ($check->targetChecks[0]->rating)
+                {
+                    case TargetCheck::RATING_INFO:
+                        $controlStats[$check->check_control_id]['info']++;
+                        break;
+
+                    case TargetCheck::RATING_LOW_RISK:
+                        $controlStats[$check->check_control_id]['lowRisk']++;
+                        break;
+
+                    case TargetCheck::RATING_MED_RISK:
+                        $controlStats[$check->check_control_id]['medRisk']++;
+                        break;
+
+                    case TargetCheck::RATING_HIGH_RISK:
+                        $controlStats[$check->check_control_id]['highRisk']++;
+                        break;
+                }
+            }
+        }
+
         $client = Client::model()->findByPk($project->client_id);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
@@ -1031,7 +1072,8 @@ class ProjectController extends Controller
                 TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
                 TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
                 TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
-            )
+            ),
+            'controlStats' => $controlStats,
         ));
 	}
 

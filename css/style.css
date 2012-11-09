@@ -83,6 +83,8 @@ hr {
 .category-list .percent,
 .category-list .stats,
 .target-list .stats,
+.control-header .stats,
+.control-header .percent,
 .target-list .percent,
 .project-list .stats,
 .project-list .percent {
@@ -91,7 +93,8 @@ hr {
 
 .category-list td.stats,
 .target-list td.stats,
-.project-list td.stats {
+.project-list td.stats,
+.control-header td.stats {
     color:#909090;
 }
 
@@ -250,7 +253,6 @@ table.check-header .status {
 
 div.control-header {
     border-top:1px solid #ddd;
-    padding:8px;
 }
 
 div.control-header:first-child {
@@ -258,8 +260,8 @@ div.control-header:first-child {
 }
 
 div.control-header-bold {
-    padding:8px;
-    font-weight:bold;
+    /*padding:8px;
+    font-weight:bold;*/
 }
 
 div.control-body {
@@ -643,4 +645,14 @@ div.report-check-content {
 
 .target-list .target .categories a {
     text-decoration:none;
+}
+
+table.control-header {
+    padding-bottom:0;
+    margin-bottom:0;
+    width:100%;
+}
+
+table.control-header td {
+    border:none;
 }

@@ -36,8 +36,17 @@
     <div class="row">
         <div class="span8">
             <?php if (count($checks) > 0): ?>
-                <div class="control-header-bold">
-                    <?php echo Yii::t('app', 'Check'); ?>
+                <div>
+                    <table class="table control-header">
+                        <tbody>
+                            <tr>
+                                <th class="name"><?php echo Yii::t('app', 'Category'); ?></th>
+                                <th class="stats"><?php echo Yii::t('app', 'Risk Stats'); ?></th>
+                                <th class="percent"><?php echo Yii::t('app', 'Completed'); ?></th>
+                                <th class="check-count"><?php echo Yii::t('app', 'Checks'); ?></th>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <?php
                     $counter     = 0;
@@ -53,7 +62,28 @@
                         <?php endif; ?>
 
                         <div id="control-<?php echo $check->control->id; ?>" class="control-header" data-id="<?php echo $check->control->id; ?>">
-                            <a href="#control-<?php echo $check->control->id; ?>" onclick="user.check.toggleControl(<?php echo $check->control->id; ?>);"><?php echo CHtml::encode($check->control->localizedName); ?></a>
+                            <table class="table control-header">
+                                <tbody>
+                                    <tr>
+                                        <td class="name">
+                                            <a href="#control-<?php echo $check->control->id; ?>" onclick="user.check.toggleControl(<?php echo $check->control->id; ?>);"><?php echo CHtml::encode($check->control->localizedName); ?></a>
+                                        </td>
+                                        <td class="stats">
+                                            <span class="high-risk"><?php echo $controlStats[$check->control->id]['highRisk']; ?></span> /
+                                            <span class="med-risk"><?php echo $controlStats[$check->control->id]['medRisk']; ?></span> /
+                                            <span class="low-risk"><?php echo $controlStats[$check->control->id]['lowRisk']; ?></span> /
+                                            <span class="info"><?php echo $controlStats[$check->control->id]['info']; ?></span>
+                                        </td>
+                                        <td class="percent">
+                                            <?php echo $controlStats[$check->control->id]['checks'] ? sprintf('%.0f', ($controlStats[$check->control->id]['finished'] / $controlStats[$check->control->id]['checks']) * 100) : '0'; ?>% /
+                                            <?php echo $controlStats[$check->control->id]['finished']; ?>
+                                        </td>
+                                        <td class="check-count">
+                                            <?php echo $controlStats[$check->control->id]['checks']; ?>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
 
                         <div class="control-body<?php if ($collapseControls) echo ' hide'; ?>" data-id="<?php echo $check->control->id; ?>">

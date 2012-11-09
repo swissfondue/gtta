@@ -29,14 +29,15 @@
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('project/checks', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>"><?php echo CHtml::encode($category->category->localizedName); ?></a>
                                 </td>
-
                                 <td class="stats">
                                     <span class="high-risk"><?php echo $category->high_risk_count; ?></span> /
                                     <span class="med-risk"><?php echo $category->med_risk_count; ?></span> /
-                                    <span class="low-risk"><?php echo $category->low_risk_count; ?></span>
+                                    <span class="low-risk"><?php echo $category->low_risk_count; ?></span> /
+                                    <span class="info"><?php echo $category->info_count; ?></span>
                                 </td>
                                 <td class="percent">
-                                    <?php echo $category->check_count ? sprintf('%.2f', ($category->finished_count / $category->check_count) * 100) : '0.00'; ?>%
+                                    <?php echo $category->check_count ? sprintf('%.0f', ($category->finished_count / $category->check_count) * 100) : '0'; ?>% /
+                                    <?php echo $category->finished_count; ?>
                                 </td>
                                 <td>
                                     <?php
