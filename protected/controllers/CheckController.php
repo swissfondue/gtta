@@ -14,6 +14,8 @@ class CheckController extends Controller
             'https',
 			'checkAuth',
             'checkAdmin',
+            'ajaxOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput',
+            'postOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput',
 		);
 	}
 

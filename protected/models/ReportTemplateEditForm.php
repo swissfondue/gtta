@@ -1,9 +1,9 @@
 <?php
 
 /**
- * This is the model class for risk template edit form.
+ * This is the model class for report template edit form.
  */
-class RiskTemplateEditForm extends LocalizedFormModel
+class ReportTemplateEditForm extends LocalizedFormModel
 {
 	/**
      * @var string name.
@@ -28,7 +28,7 @@ class RiskTemplateEditForm extends LocalizedFormModel
 		return array(
 			array( 'name', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
-            array( 'localizedItems, intro, appendix', 'safe' ),
+            array( 'intro, appendix, localizedItems', 'safe' ),
 		);
 	}
     
@@ -38,7 +38,9 @@ class RiskTemplateEditForm extends LocalizedFormModel
 	public function attributeLabels()
 	{
 		return array(
-			'name' => Yii::t('app', 'Name'),
+			'name'     => Yii::t('app', 'Name'),
+            'intro'    => Yii::t('app', 'Introduction'),
+            'appendix' => Yii::t('app', 'Appendix'),
 		);
 	}
 }

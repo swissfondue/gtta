@@ -19,7 +19,8 @@ var _messages = {
     'Ordered List'                                      : '<?php echo Yii::t('app', 'Ordered List'); ?>',
     'Outdent'                                           : '<?php echo Yii::t('app', 'Outdent'); ?>',
     'Indent'                                            : '<?php echo Yii::t('app', 'Indent'); ?>',
-    'Search...'                                         : '<?php echo Yii::t('app', 'Search...'); ?>'
+    'Search...'                                         : '<?php echo Yii::t('app', 'Search...'); ?>',
+    'No header image.'                                  : '<?php echo Yii::t('app', 'No header image.'); ?>',
 };
 
 system.l10nMessages = _messages;

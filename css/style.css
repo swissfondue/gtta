@@ -141,7 +141,8 @@ hr {
 .reference-list .actions,
 .effort-list .actions,
 .risk-list .actions,
-.risk-template-list .actions {
+.risk-template-list .actions,
+.summary-list .actions {
     width:30px;
     text-align:right;
 }
@@ -655,4 +656,12 @@ table.control-header {
 
 table.control-header td {
     border:none;
+}
+
+.header-image {
+    margin-bottom:10px;
+}
+
+.summary-list .range {
+    width:70px;
 }

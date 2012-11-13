@@ -1,0 +1,121 @@
+<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/bootstrap-wysihtml5.css">
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/wysihtml5.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap/bootstrap-wysihtml5.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.ui.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.iframe-transport.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.fileupload.js"></script>
+
+<div class="active-header">
+    <?php if (!$template->isNewRecord): ?>
+        <div class="pull-right">
+            <ul class="nav nav-pills">
+                <li class="active"><a href="<?php echo $this->createUrl('reporttemplate/edit', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+                <li><a href="<?php echo $this->createUrl('reporttemplate/summary', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Summary Blocks'); ?></a></li>
+            </ul>
+        </div>
+    <?php endif; ?>
+    <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+</div>
+
+<hr>
+
+<form class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
+    <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
+
+    <fieldset>
+        <ul class="nav nav-tabs" id="languages-tab">
+            <?php foreach ($languages as $language): ?>
+                <li<?php if ($language->default) echo ' class="active"'; ?>>
+                    <a href="#<?php echo CHtml::encode($language->code); ?>">
+                        <img src="<?php echo Yii::app()->baseUrl; ?>/images/languages/<?php echo CHtml::encode($language->code); ?>.png" alt="<?php echo CHtml::encode($language->name); ?>">
+                        <?php echo CHtml::encode($language->name); ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+
+        <div class="tab-content">
+            <?php foreach ($languages as $language): ?>
+                <div class="tab-pane<?php if ($language->default) echo ' active'; ?>" id="<?php echo CHtml::encode($language->code); ?>">
+                    <div class="control-group <?php if ($model->getError('name')) echo 'error'; ?>">
+                        <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_name"><?php echo Yii::t('app', 'Name'); ?></label>
+                        <div class="controls">
+                            <input type="text" class="input-xlarge" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_name" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][name]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['name']) : ''; ?>">
+                            <?php if ($model->getError('name')): ?>
+                                <p class="help-block"><?php echo $model->getError('name'); ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div class="control-group <?php if ($model->getError('intro')) echo 'error'; ?>">
+                        <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_intro"><?php echo Yii::t('app', 'Introduction'); ?></label>
+                        <div class="controls">
+                            <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_intro" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][intro]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['intro']) : ''; ?></textarea>
+                            <?php if ($model->getError('intro')): ?>
+                                <p class="help-block"><?php echo $model->getError('intro'); ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group <?php if ($model->getError('appendix')) echo 'error'; ?>">
+                        <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_appendix"><?php echo Yii::t('app', 'Appendix'); ?></label>
+                        <div class="controls">
+                            <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_appendix" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][appendix]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['appendix']) : ''; ?></textarea>
+                            <?php if ($model->getError('appendix')): ?>
+                                <p class="help-block"><?php echo $model->getError('appendix'); ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+
+        <?php if (!$template->isNewRecord): ?>
+            <hr>
+
+            <div class="control-group">
+                <label class="control-label"><?php echo Yii::t('app', 'Header Image'); ?></label>
+                <div class="controls form-text">
+                    <div class="header-image" data-control-url="<?php echo $this->createUrl('reporttemplate/controlheaderimage'); ?>">
+                        <?php if ($template->header_image_path): ?>
+                            <img src="<?php echo $this->createUrl('reporttemplate/headerimage', array( 'id' => $template->id )); ?>" width="400">
+                        <?php else: ?>
+                            <?php echo Yii::t('app', 'No header image.'); ?>
+                        <?php endif; ?>
+                    </div>
+                    <div class="file-input">
+                        <a href="#header-image"><?php echo Yii::t('app', 'Upload Header Image'); ?></a>
+                        <input type="file" name="ReportTemplateHeaderImageUploadForm[image]" data-upload-url="<?php echo $this->createUrl('reporttemplate/uploadheaderimage', array( 'id' => $template->id )); ?>">
+                    </div>
+
+                    <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+
+                    <a class="delete-header-link<?php if (!$template->header_image_path) echo ' hide'; ?>" href="#delete-header-image" onclick="admin.reportTemplate.delHeaderImage(<?php echo $template->id; ?>);"><?php echo Yii::t('app', 'Delete Header Image'); ?></a>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <div class="form-actions">
+            <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>
+        </div>
+    </fieldset>
+</form>
+
+<script>
+    $('#languages-tab a').click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+    });
+
+    $(function () {
+        $('textarea').wysihtml5({
+            'font-styles' : false,
+            'image'       : false,
+            'link'        : false,
+            'html'        : false,
+            'lists'       : false
+        });
+
+        admin.reportTemplate.initHeaderImageUploadForms();
+    });
+</script>

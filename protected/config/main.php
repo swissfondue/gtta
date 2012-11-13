@@ -157,6 +157,23 @@ return array(
                 'reference/new'           => 'reference/edit',
                 'reference/control'       => 'reference/control',
 
+                // report templates
+                'report-templates/<page:\d+>'   => 'reporttemplate/index',
+                'report-templates'              => 'reporttemplate/index',
+                'report-template/<id:\d+>/edit' => 'reporttemplate/edit',
+                'report-template/new'           => 'reporttemplate/edit',
+                'report-template/control'       => 'reporttemplate/control',
+                'report-template/<id:\d+>/header/new' => 'reporttemplate/uploadheaderimage',
+                'report-template/<id:\d+>/header'     => 'reporttemplate/headerimage',
+                'report-template/header/control'      => 'reporttemplate/controlheaderimage',
+
+                // summary blocks
+                'report-template/<id:\d+>/summary-blocks/<page:\d+>'        => 'reporttemplate/summary',
+                'report-template/<id:\d+>/summary-blocks'                   => 'reporttemplate/summary',
+                'report-template/<id:\d+>/summary-block/<summary:\d+>/edit' => 'reporttemplate/editsummary',
+                'report-template/<id:\d+>/summary-block/new'                => 'reporttemplate/editsummary',
+                'report-template/summary-block/control'                     => 'reporttemplate/controlsummary',
+
                 // risk classification categories (templates)
                 'risks/<page:\d+>'         => 'risk/index',
                 'risks'                    => 'risk/index',
@@ -259,6 +276,11 @@ return array(
             'cellPadding' => 0.2,
             'minCellPadding' => 0.0,
             'maxCellPadding' => 5.0,
+
+            'headerImages' => array(
+                'path'    => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../files/header-images',
+                'maxSize' => 10 * 1024 * 1024, // 10 megabytes
+            ),
         ),
 
         'tmpPath'            => '/tmp',
