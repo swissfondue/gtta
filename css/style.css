@@ -518,6 +518,11 @@ textarea.wysiwyg {
     height:200px;
 }
 
+.span8 textarea.wysiwyg {
+    width:450px;
+    height:200px;
+}
+
 .solution-control, .result-control {
     float:right;
 }

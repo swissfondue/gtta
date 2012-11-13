@@ -23,77 +23,230 @@
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
     <fieldset>
-        <ul class="nav nav-tabs" id="languages-tab">
-            <?php foreach ($languages as $language): ?>
-                <li<?php if ($language->default) echo ' class="active"'; ?>>
-                    <a href="#<?php echo CHtml::encode($language->code); ?>">
-                        <img src="<?php echo Yii::app()->baseUrl; ?>/images/languages/<?php echo CHtml::encode($language->code); ?>.png" alt="<?php echo CHtml::encode($language->name); ?>">
-                        <?php echo CHtml::encode($language->name); ?>
-                    </a>
-                </li>
-            <?php endforeach; ?>
-        </ul>
+        <div class="container">
+            <div class="row">
+                <div class="span8">
+                    <ul class="nav nav-tabs" id="languages-tab">
+                        <?php foreach ($languages as $language): ?>
+                            <li<?php if ($language->default) echo ' class="active"'; ?>>
+                                <a href="#<?php echo CHtml::encode($language->code); ?>">
+                                    <img src="<?php echo Yii::app()->baseUrl; ?>/images/languages/<?php echo CHtml::encode($language->code); ?>.png" alt="<?php echo CHtml::encode($language->name); ?>">
+                                    <?php echo CHtml::encode($language->name); ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
 
-        <div class="tab-content">
-            <?php foreach ($languages as $language): ?>
-                <div class="tab-pane<?php if ($language->default) echo ' active'; ?>" id="<?php echo CHtml::encode($language->code); ?>">
-                    <div class="control-group <?php if ($model->getError('name')) echo 'error'; ?>">
-                        <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_name"><?php echo Yii::t('app', 'Name'); ?></label>
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_name" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][name]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['name']) : ''; ?>">
-                            <?php if ($model->getError('name')): ?>
-                                <p class="help-block"><?php echo $model->getError('name'); ?></p>
-                            <?php endif; ?>
-                        </div>
+                    <div class="tab-content">
+                        <?php foreach ($languages as $language): ?>
+                            <div class="tab-pane<?php if ($language->default) echo ' active'; ?>" id="<?php echo CHtml::encode($language->code); ?>">
+                                <div class="control-group <?php if ($model->getError('name')) echo 'error'; ?>">
+                                    <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_name"><?php echo Yii::t('app', 'Name'); ?></label>
+                                    <div class="controls">
+                                        <input type="text" class="input-xlarge" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_name" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][name]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['name']) : ''; ?>">
+                                        <?php if ($model->getError('name')): ?>
+                                            <p class="help-block"><?php echo $model->getError('name'); ?></p>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+
+                                <div class="control-group <?php if ($model->getError('intro')) echo 'error'; ?>">
+                                    <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_intro"><?php echo Yii::t('app', 'Introduction'); ?></label>
+                                    <div class="controls">
+                                        <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_intro" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][intro]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['intro']) : ''; ?></textarea>
+                                        <?php if ($model->getError('intro')): ?>
+                                            <p class="help-block"><?php echo $model->getError('intro'); ?></p>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+
+                                <div class="control-group <?php if ($model->getError('appendix')) echo 'error'; ?>">
+                                    <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_appendix"><?php echo Yii::t('app', 'Appendix'); ?></label>
+                                    <div class="controls">
+                                        <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_appendix" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][appendix]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['appendix']) : ''; ?></textarea>
+                                        <?php if ($model->getError('appendix')): ?>
+                                            <p class="help-block"><?php echo $model->getError('appendix'); ?></p>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
 
-                    <div class="control-group <?php if ($model->getError('intro')) echo 'error'; ?>">
-                        <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_intro"><?php echo Yii::t('app', 'Introduction'); ?></label>
-                        <div class="controls">
-                            <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_intro" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][intro]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['intro']) : ''; ?></textarea>
-                            <?php if ($model->getError('intro')): ?>
-                                <p class="help-block"><?php echo $model->getError('intro'); ?></p>
-                            <?php endif; ?>
+                    <?php if (!$template->isNewRecord): ?>
+                        <hr>
+
+                        <div class="control-group">
+                            <label class="control-label"><?php echo Yii::t('app', 'Header Image'); ?></label>
+                            <div class="controls form-text">
+                                <div class="header-image" data-control-url="<?php echo $this->createUrl('reporttemplate/controlheaderimage'); ?>">
+                                    <?php if ($template->header_image_path): ?>
+                                        <img src="<?php echo $this->createUrl('reporttemplate/headerimage', array( 'id' => $template->id )); ?>" width="400">
+                                    <?php else: ?>
+                                        <?php echo Yii::t('app', 'No header image.'); ?>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="file-input">
+                                    <a href="#header-image"><?php echo Yii::t('app', 'Upload Header Image'); ?></a>
+                                    <input type="file" name="ReportTemplateHeaderImageUploadForm[image]" data-upload-url="<?php echo $this->createUrl('reporttemplate/uploadheaderimage', array( 'id' => $template->id )); ?>">
+                                </div>
+
+                                <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+
+                                <a class="delete-header-link<?php if (!$template->header_image_path) echo ' hide'; ?>" href="#delete-header-image" onclick="admin.reportTemplate.delHeaderImage(<?php echo $template->id; ?>);"><?php echo Yii::t('app', 'Delete Header Image'); ?></a>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="control-group <?php if ($model->getError('appendix')) echo 'error'; ?>">
-                        <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_appendix"><?php echo Yii::t('app', 'Appendix'); ?></label>
-                        <div class="controls">
-                            <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_appendix" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][appendix]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['appendix']) : ''; ?></textarea>
-                            <?php if ($model->getError('appendix')): ?>
-                                <p class="help-block"><?php echo $model->getError('appendix'); ?></p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
-            <?php endforeach; ?>
-        </div>
+                <div class="span4">
+                    <div id="var-list-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#var-list');"><i class="icon-chevron-up"></i></div>
+                    <h3><a href="#toggle" onclick="system.toggleBlock('#var-list');"><?php echo Yii::t('app', 'Variable List'); ?></a></h3>
 
-        <?php if (!$template->isNewRecord): ?>
-            <hr>
-
-            <div class="control-group">
-                <label class="control-label"><?php echo Yii::t('app', 'Header Image'); ?></label>
-                <div class="controls form-text">
-                    <div class="header-image" data-control-url="<?php echo $this->createUrl('reporttemplate/controlheaderimage'); ?>">
-                        <?php if ($template->header_image_path): ?>
-                            <img src="<?php echo $this->createUrl('reporttemplate/headerimage', array( 'id' => $template->id )); ?>" width="400">
-                        <?php else: ?>
-                            <?php echo Yii::t('app', 'No header image.'); ?>
-                        <?php endif; ?>
+                    <div class="info-block" id="var-list">
+                        <table class="table client-details">
+                            <tr>
+                                <th>
+                                    {client}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'Client name'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {name}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'Project name'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {year}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'Project year'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {deadline}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'Project deadline'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {admin}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'Project admin'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {rating}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'Project rating'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <br><hr>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {targets}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'Number of targets'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {target.list}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'List of targets'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <br><hr>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {checks}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'Number of checks'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {checks.fin}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'Number of finished checks'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {checks.hi}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'Number of high risk checks'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {checks.med}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'Number of med risk checks'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {checks.lo}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'Number of low risk checks'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {checks.info}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'Number of info rating checks'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {checks.hid}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'Number of hidden checks'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {check.list}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'List of high and med risk checks'); ?>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
-                    <div class="file-input">
-                        <a href="#header-image"><?php echo Yii::t('app', 'Upload Header Image'); ?></a>
-                        <input type="file" name="ReportTemplateHeaderImageUploadForm[image]" data-upload-url="<?php echo $this->createUrl('reporttemplate/uploadheaderimage', array( 'id' => $template->id )); ?>">
-                    </div>
-
-                    <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
-
-                    <a class="delete-header-link<?php if (!$template->header_image_path) echo ' hide'; ?>" href="#delete-header-image" onclick="admin.reportTemplate.delHeaderImage(<?php echo $template->id; ?>);"><?php echo Yii::t('app', 'Delete Header Image'); ?></a>
                 </div>
             </div>
-        <?php endif; ?>
+        </div>
 
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>
