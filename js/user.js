@@ -286,6 +286,7 @@ function User()
 
             result = result.replace(/\n<br>/g, '\n');
             result = result.replace(/<br>/g, '\n');
+            result = result.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
             textarea.val(result + '\n' + textarea.val());
         };
 
