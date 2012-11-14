@@ -437,8 +437,18 @@ class ReportController extends Controller
         $noPar->setSpaceBefore(0);
         $noPar->setSpaceAfter(0);
 
-        // title
+        $docWidth = 21.0 - 2 * $model->pageMargin;
         $section = $rtf->addSection();
+
+        // footer
+        $footer = $section->addFooter();
+        $footer->writeText(Yii::t('app', 'Project Report') . ' / ' . $project->name . ' (' . $project->year . '), ');
+        $footer->writePlainRtfCode(Yii::t('app', 'page {page} of {numPages}', array(
+            '{page}'     => '{\field{\*\fldinst {PAGE}}{\fldrslt {1}}}',
+            '{numPages}' => '{\field{\*\fldinst {NUMPAGES}}{\fldrslt {1}}}'
+        )));
+
+        // title
         $section->writeText(Yii::t('app', 'Project Report'), $h1Font, $titlePar);
         $section->writeText($project->name . ' (' . $project->year . ')', $h2Font, $projectPar);
 
@@ -450,8 +460,6 @@ class ReportController extends Controller
         // detailed summary
         $section->writeText(Yii::t('app', 'Detailed Summary') . '<br>', $h3Font, $noPar);
         $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-
-        $docWidth = 21.0 - 2 * $model->pageMargin;
 
         $table->addRows(count($data) + 1);
         $table->addColumnsList(array( $docWidth * 0.44, $docWidth * 0.39, $docWidth * 0.17 ));
