@@ -153,6 +153,22 @@
                                 </td>
                             </tr>
                             <tr>
+                                <th>
+                                    {date.from}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'The beginning date of project tests'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {date.to}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'The last date of project tests'); ?>
+                                </td>
+                            </tr>
+                            <tr>
                                 <td colspan="2">
                                     <br><hr>
                                 </td>
