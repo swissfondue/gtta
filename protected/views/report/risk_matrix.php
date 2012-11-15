@@ -63,7 +63,7 @@
                     <select class="input-xlarge" id="RiskMatrixForm_templateId" name="RiskMatrixForm[templateId]" onchange="system.report.riskMatrixFormChange(this);">
                         <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                         <?php foreach ($templates as $template): ?>
-                            <option value="<?php echo $template->id; ?>"><?php echo CHtml::encode($template->name); ?></option>
+                            <option value="<?php echo $template->id; ?>"><?php echo CHtml::encode($template->localizedName); ?></option>
                         <?php endforeach; ?>
                     </select>
                     <p class="help-block hide"><?php echo Yii::t('app', 'This template has no categories.'); ?></p>
