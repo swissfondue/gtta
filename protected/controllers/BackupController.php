@@ -25,6 +25,7 @@ class BackupController extends Controller
         'check_solutions_l10n',
         'projects',
         'project_details',
+        'project_users',
         'targets',
         'target_references',
         'target_check_categories',
@@ -38,6 +39,10 @@ class BackupController extends Controller
         'risk_categories',
         'risk_categories_l10n',
         'risk_category_checks',
+        'report_templates',
+        'report_templates_l10n',
+        'report_template_summary',
+        'report_template_summary_l10n',
     );
 
     private $_sequences = array(
@@ -58,6 +63,8 @@ class BackupController extends Controller
         'users_id_seq',
         'risk_templates_id_seq',
         'risk_categories_id_seq',
+        'report_template_summary_id_seq',
+        'report_templates_id_seq',
     );
 
     /**
