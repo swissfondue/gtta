@@ -663,7 +663,7 @@ table.control-header td {
     border:none;
 }
 
-.header-image {
+.header-image, .logo-image {
     margin-bottom:10px;
 }
 

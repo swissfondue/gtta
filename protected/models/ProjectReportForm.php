@@ -5,6 +5,10 @@
  */
 class ProjectReportForm extends CFormModel
 {
+    const INFO_LOCATION_TARGET   = 'target';
+    const INFO_LOCATION_TABLE    = 'table';
+    const INFO_LOCATION_APPENDIX = 'appendix';
+
     /**
      * @var string font size.
      */
@@ -26,6 +30,11 @@ class ProjectReportForm extends CFormModel
     public $cellPadding;
 
     /**
+     * @var string info checks location
+     */
+    public $infoChecksLocation;
+
+    /**
      * @var integer client id.
      */
     public $clientId;
@@ -40,7 +49,22 @@ class ProjectReportForm extends CFormModel
      */
     public $targetIds;
 
-	/**
+    /**
+     * @var integer template id.
+     */
+    public $templateId;
+
+    /**
+     * @var integer risk template id.
+     */
+    public $riskTemplateId;
+
+    /**
+     * @var array options (title page, reduced vuln list, risk matrix, degree)
+     */
+    public $options;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules()
@@ -51,7 +75,8 @@ class ProjectReportForm extends CFormModel
             array( 'cellPadding', 'numerical', 'min' => Yii::app()->params['reports']['minCellPadding'], 'max' => Yii::app()->params['reports']['maxCellPadding'] ),
             array( 'pageMargin', 'numerical', 'min' => Yii::app()->params['reports']['minPageMargin'], 'max' => Yii::app()->params['reports']['maxPageMargin'] ),
             array( 'fontFamily', 'in', 'range' => Yii::app()->params['reports']['fonts'] ),
-            array( 'clientId, projectId, targetIds', 'safe' ),
+            array( 'infoChecksLocation', 'in', 'range' => array( self::INFO_LOCATION_TARGET, self::INFO_LOCATION_TABLE, self::INFO_LOCATION_APPENDIX ) ),
+            array( 'clientId, projectId, targetIds, options, templateId', 'safe' ),
 		);
 	}
 

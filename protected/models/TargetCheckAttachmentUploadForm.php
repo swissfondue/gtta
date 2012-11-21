@@ -25,12 +25,14 @@ class TargetCheckAttachmentUploadForm extends CFormModel
             ),
 		);
 	}
-    
+
     /**
 	 * @return array customized attribute labels (name=>label)
 	 */
 	public function attributeLabels()
 	{
-		return array( 'attachment' => 'Attachment' );
+		return array(
+            'attachment' => Yii::t('app', 'Attachment')
+        );
 	}
 }

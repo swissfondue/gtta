@@ -86,7 +86,7 @@
                             </tr>
                             <tr>
                                 <th>
-                                    {name}
+                                    {project}
                                 </th>
                                 <td>
                                     <?php echo Yii::t('app', 'Project name'); ?>
@@ -125,22 +125,6 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th>
-                                    {date.from}
-                                </th>
-                                <td>
-                                    <?php echo Yii::t('app', 'The beginning date of project tests'); ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    {date.to}
-                                </th>
-                                <td>
-                                    <?php echo Yii::t('app', 'The last date of project tests'); ?>
-                                </td>
-                            </tr>
-                            <tr>
                                 <td colspan="2">
                                     <br><hr>
                                 </td>
@@ -169,14 +153,6 @@
                             <tr>
                                 <th>
                                     {checks}
-                                </th>
-                                <td>
-                                    <?php echo Yii::t('app', 'Number of checks'); ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    {checks.fin}
                                 </th>
                                 <td>
                                     <?php echo Yii::t('app', 'Number of finished checks'); ?>
@@ -212,22 +188,6 @@
                                 </th>
                                 <td>
                                     <?php echo Yii::t('app', 'Number of info rating checks'); ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    {checks.hid}
-                                </th>
-                                <td>
-                                    <?php echo Yii::t('app', 'Number of hidden checks'); ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    {check.list}
-                                </th>
-                                <td>
-                                    <?php echo Yii::t('app', 'List of high and med risk checks'); ?>
                                 </td>
                             </tr>
                         </table>

@@ -15,6 +15,8 @@ class ClientController extends Controller
 			'checkAuth',
             'checkUser',
             'checkAdmin + edit, control',
+            'ajaxOnly + controllogo',
+            'postOnly + uploadlogo, controllogo',
 		);
 	}
 
@@ -327,5 +329,156 @@ class ClientController extends Controller
             'model'   => $model,
             'clients' => $clients,
         ));
+    }
+
+    /**
+     * Upload logo.
+     */
+    function actionUploadLogo($id)
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $id = (int) $id;
+
+            $client = Client::model()->findByPk($id);
+
+            if (!$client)
+                throw new CHttpException(404, Yii::t('app', 'Client not found.'));
+
+            $model = new ClientLogoUploadForm();
+            $model->image = CUploadedFile::getInstanceByName('ClientLogoUploadForm[image]');
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            // delete the old image
+            if ($client->logo_path)
+                @unlink(Yii::app()->params['clientLogos']['path'] . '/' . $client->logo_path);
+
+            $client->logo_type = $model->image->type;
+            $client->logo_path = hash('sha256', $model->image->name . rand() . time());
+            $client->save();
+
+            $model->image->saveAs(Yii::app()->params['clientLogos']['path'] . '/' . $client->logo_path);
+
+            $response->addData('url', $this->createUrl('client/logo', array( 'id' => $client->id )));
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Control logo.
+     */
+    public function actionControlLogo()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $client = Client::model()->findByPk($model->id);
+
+            if ($client === null)
+                throw new CHttpException(404, Yii::t('app', 'Client not found.'));
+
+            if (!$client->logo_path)
+                throw new CHttpException(404, Yii::t('app', 'Logo not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    @unlink(Yii::app()->params['clientLogos']['path'] . '/' . $client->logo_path);
+                    $client->logo_path = NULL;
+                    $client->logo_type = NULL;
+                    $client->save();
+
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Get logo.
+     */
+    public function actionLogo($id)
+    {
+        $id = (int) $id;
+
+        $client = Client::model()->findByPk($id);
+
+        if ($client === null)
+            throw new CHttpException(404, Yii::t('app', 'Client not found.'));
+
+        if (!$client->logo_path)
+            throw new CHttpException(404, Yii::t('app', 'Logo not found.'));
+
+        $filePath = Yii::app()->params['clientLogos']['path'] . '/' . $client->logo_path;
+
+        if (!file_exists($filePath))
+            throw new CHttpException(404, Yii::t('app', 'Logo not found.'));
+
+        $extension = 'jpg';
+
+        if ($client->logo_type == 'image/png')
+            $extension = 'png';
+
+        // give user a file
+        header('Content-Description: File Transfer');
+        header('Content-Type: ' . $client->logo_type);
+        header('Content-Disposition: attachment; filename="logo.' . $extension . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filePath));
+
+        ob_clean();
+        flush();
+
+        readfile($filePath);
+
+        exit();
     }
 }

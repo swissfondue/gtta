@@ -424,4 +424,13 @@ class PHPRtfLite_Font
         return $content;
     }
 
+    /**
+     * Returns font index
+     *
+     * @return integer
+     */
+    public function getFontIndex()
+    {
+        return $this->_fontFamily && $this->_fontTable ? $this->_fontTable->getFontIndex($this->_fontFamily) : false;
+    }
 }

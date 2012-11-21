@@ -1,9 +1,9 @@
 <?php
 
 /**
- * This is the model class for report tpl header image upload form.
+ * This is the model class for client logo upload form
  */
-class ReportTemplateHeaderImageUploadForm extends CFormModel
+class ClientLogoUploadForm extends CFormModel
 {
 	/**
      * @var CUploadedFile image.
@@ -20,20 +20,20 @@ class ReportTemplateHeaderImageUploadForm extends CFormModel
             array( 
                 'image',
                 'file',
-                'maxSize'  => Yii::app()->params['reports']['headerImages']['maxSize'],
+                'maxSize'  => Yii::app()->params['clientLogos']['maxSize'],
                 'maxFiles' => 1,
                 'types' => array( 'jpg', 'png' ),
             ),
 		);
 	}
-
+    
     /**
 	 * @return array customized attribute labels (name=>label)
 	 */
 	public function attributeLabels()
 	{
 		return array(
-            'image' => Yii::t('app', 'Header Image')
+            'image' => Yii::t('app', 'Logo'),
         );
 	}
 }

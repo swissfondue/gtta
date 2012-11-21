@@ -1,3 +1,7 @@
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.ui.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.iframe-transport.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.fileupload.js"></script>
+
 <div class="active-header">
     <?php if (!$client->isNewRecord): ?>
         <div class="pull-right">
@@ -17,6 +21,29 @@
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
     <fieldset>
+        <?php if (!$client->isNewRecord): ?>
+            <div class="control-group">
+                <label class="control-label"><?php echo Yii::t('app', 'Logo'); ?></label>
+                <div class="controls form-text">
+                    <div class="logo-image" data-control-url="<?php echo $this->createUrl('client/controllogo'); ?>">
+                        <?php if ($client->logo_path): ?>
+                            <img src="<?php echo $this->createUrl('client/logo', array( 'id' => $client->id )); ?>">
+                        <?php else: ?>
+                            <?php echo Yii::t('app', 'No logo.'); ?>
+                        <?php endif; ?>
+                    </div>
+                    <div class="file-input">
+                        <a href="#logo"><?php echo Yii::t('app', 'Upload Logo'); ?></a>
+                        <input type="file" name="ClientLogoUploadForm[image]" data-upload-url="<?php echo $this->createUrl('client/uploadlogo', array( 'id' => $client->id )); ?>">
+                    </div>
+
+                    <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+
+                    <a class="delete-logo-link<?php if (!$client->logo_path) echo ' hide'; ?>" href="#delete-logo" onclick="admin.client.delLogo(<?php echo $client->id; ?>);"><?php echo Yii::t('app', 'Delete Logo'); ?></a>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <div class="control-group <?php if ($model->getError('name')) echo 'error'; ?>">
             <label class="control-label" for="ClientEditForm_name"><?php echo Yii::t('app', 'Name'); ?></label>
             <div class="controls">
@@ -132,3 +159,9 @@
         </div>
     </fieldset>
 </form>
+
+<script>
+    $(function () {
+        admin.client.initLogoUploadForm();
+    });
+</script>

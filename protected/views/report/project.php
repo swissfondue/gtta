@@ -52,6 +52,76 @@
             </div>
         </div>
 
+        <div class="control-group" id="template-list">
+            <label class="control-label" for="ProjectReportForm_templateId"><?php echo Yii::t('app', 'Template'); ?></label>
+            <div class="controls">
+                <select class="input-xlarge" id="ProjectReportForm_templateId" name="ProjectReportForm[templateId]" onchange="system.report.projectFormChange(this);">
+                    <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
+                    <?php foreach ($templates as $template): ?>
+                        <option value="<?php echo $template->id; ?>"><?php echo CHtml::encode($template->localizedName); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+
+        <div class="control-group" id="info-checks-location-list">
+            <label class="control-label" for="ProjectReportForm_infoChecksLocation"><?php echo Yii::t('app', 'Info Checks Location'); ?></label>
+            <div class="controls">
+                <select class="input-xlarge" id="ProjectReportForm_infoChecksLocation" name="ProjectReportForm[infoChecksLocation]" onchange="system.report.projectFormChange(this);">
+                    <?php foreach ($infoChecksLocation as $id => $loc): ?>
+                        <option value="<?php echo $id; ?>"><?php echo $loc; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+        
+        <div class="control-group" id="options">
+            <label class="control-label"><?php echo Yii::t('app', 'Options'); ?></label>
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" id="ProjectReportForm_options_title" name="ProjectReportForm[options][]" value="title" onchange="system.report.projectFormChange(this);" checked>
+                    <?php echo Yii::t('app', 'Title Page'); ?>
+                </label>
+                <label class="checkbox">
+                    <input type="checkbox" id="ProjectReportForm_options_intro" name="ProjectReportForm[options][]" value="intro" onchange="system.report.projectFormChange(this);" checked>
+                    <?php echo Yii::t('app', 'Introduction'); ?>
+                </label>
+                <label class="checkbox">
+                    <input type="checkbox" id="ProjectReportForm_options_summary" name="ProjectReportForm[options][]" value="summary" onchange="system.report.projectFormChange(this);" checked>
+                    <?php echo Yii::t('app', 'Summary Block'); ?>
+                </label>
+                <label class="checkbox">
+                    <input type="checkbox" id="ProjectReportForm_options_fulfillment" name="ProjectReportForm[options][]" value="fulfillment" onchange="system.report.projectFormChange(this);" checked>
+                    <?php echo Yii::t('app', 'Degree of Fulfillment Section'); ?>
+                </label>
+                <label class="checkbox">
+                    <input type="checkbox" id="ProjectReportForm_options_matrix" name="ProjectReportForm[options][]" value="matrix" onchange="system.report.projectFormChange(this);" checked>
+                    <?php echo Yii::t('app', 'Risk Matrix Section'); ?>
+                </label>
+                <label class="checkbox">
+                    <input type="checkbox" id="ProjectReportForm_options_vulns" name="ProjectReportForm[options][]" value="vulns" onchange="system.report.projectFormChange(this);" checked>
+                    <?php echo Yii::t('app', 'Reduced Vulnerability List'); ?>
+                </label>
+                <label class="checkbox">
+                    <input type="checkbox" id="ProjectReportForm_options_appendix" name="ProjectReportForm[options][]" value="appendix" onchange="system.report.projectFormChange(this);" checked>
+                    <?php echo Yii::t('app', 'Appendix Section'); ?>
+                </label>
+            </div>
+        </div>
+
+        <div class="control-group" id="risk-template-list">
+            <label class="control-label" for="RiskMatrixForm_templateId"><?php echo Yii::t('app', 'Risk Matrix Template'); ?></label>
+            <div class="controls">
+                <select class="input-xlarge" id="RiskMatrixForm_templateId" name="RiskMatrixForm[templateId]" onchange="system.report.projectFormChange(this);">
+                    <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
+                    <?php foreach ($riskTemplates as $template): ?>
+                        <option value="<?php echo $template->id; ?>"><?php echo CHtml::encode($template->localizedName); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <p class="help-block hide"><?php echo Yii::t('app', 'This template has no categories.'); ?></p>
+            </div>
+        </div>
+
         <div class="control-group" id="client-list">
             <label class="control-label" for="ProjectReportForm_clientId"><?php echo Yii::t('app', 'Client'); ?></label>
             <div class="controls">
@@ -80,6 +150,16 @@
             <div class="controls">
                 <ul class="report-target-list">
                 </ul>
+            </div>
+        </div>
+
+        <div id="check-list" class="hide">
+            <hr>
+            <div class="container">
+                <div class="row">
+                    <div class="span8">
+                    </div>
+                </div>
             </div>
         </div>
 

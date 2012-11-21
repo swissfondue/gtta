@@ -106,6 +106,9 @@ return array(
                 'client/new'           => 'client/edit',
                 'client/control'       => 'client/control',
                 'client/search'        => 'client/search',
+                'client/<id:\d+>/logo/new' => 'client/uploadlogo',
+                'client/<id:\d+>/logo'     => 'client/logo',
+                'client/logo/control'      => 'client/controllogo',
 
                 // checks
                 'checks/<page:\d+>'         => 'check/index',
@@ -241,6 +244,10 @@ return array(
 	'params' => array(
         'entriesPerPage' => 10,
 
+        'fonts' => array(
+            'path' => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../fonts',
+        ),
+
         'attachments' => array(
             'path'    => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../files/attachments',
             'maxSize' => 100 * 1024 * 1024, // 100 megabytes
@@ -248,6 +255,11 @@ return array(
 
         'backups' => array(
             'maxSize' => 100 * 1024 * 1024, // 100 megabytes
+        ),
+
+        'clientLogos' => array(
+            'path' => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../files/logos',
+            'maxSize' => 10 * 1024 * 1024, // 10 megabytes
         ),
 
         'reports' => array(

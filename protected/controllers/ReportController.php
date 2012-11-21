@@ -5,6 +5,20 @@
  */
 class ReportController extends Controller
 {
+    private $rtf;
+    private $cellPadding;
+    private $fontSize;
+    private $fontFamily;
+    private $thinBorder, $thinBorderTL, $thinBorderBR;
+    private $h1Font, $h2Font, $h3Font, $textFont, $boldFont, $linkFont, $smallBoldFont;
+    private $titlePar, $h3Par, $centerPar, $leftPar, $noPar;
+    private $docWidth;
+    private $project;
+
+    const NORMAL_VULN_LIST   = 0;
+    const APPENDIX_VULN_LIST = 1;
+    const SEPARATE_VULN_LIST = 2;
+
     /**
 	 * @return array action filters
 	 */
@@ -65,6 +79,100 @@ class ReportController extends Controller
     }
 
     /**
+     * Center text on image.
+     */
+    private function _centerImageText($image, $text, $font, $color, $size, $x, $y, $width)
+    {
+        $box = imagettfbbox($size, 0, $font, $text);
+        $offset = round(($width - ($box[2] - $box[1])) / 2);
+        imagettftext($image, $size, 0, $x + $offset, $y, $color, $font, $text);
+    }
+
+    /**
+     * Vuln distribution chart.
+     */
+    private function _generateVulnDistributionChart()
+    {
+        $image = imagecreatetruecolor(600, 300);
+        $lineColor = imagecolorallocate($image, 0, 0, 0);
+        $medLineColor = imagecolorallocate($image, 0xD0, 0xD0, 0xD0);
+        $white = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);
+        $highColor = imagecolorallocate($image, 0xD6, 0x35, 0x15);
+        $medColor = imagecolorallocate($image, 0xDA, 0xCE, 0x2F);
+        $lowColor = imagecolorallocate($image, 0x53, 0xA2, 0x54);
+
+        imagefilledrectangle($image, 0, 0, 600, 300, $white);
+
+        imageline($image, 30, 10, 30, 270, $lineColor);
+        imageline($image, 30, 270, 570, 270, $lineColor);
+
+        for ($i = 220; $i > 10; $i -= 50)
+            imageline($image, 30, $i, 570, $i, $medLineColor);
+
+        // get max number of checks
+        $max = 0;
+
+        if ($this->project['checksHigh'] > $max)
+            $max = $this->project['checksHigh'];
+
+        if ($this->project['checksMed'] > $max)
+            $max = $this->project['checksMed'];
+
+        if ($this->project['checksLow'] > $max)
+            $max = $this->project['checksLow'];
+
+        // get chart scale
+        $topValue = 0;
+
+        if ($max <= 5)
+            $topValue = 5;
+        else if ($max <= 10)
+            $topValue = 10;
+        else if ($max <= 25)
+            $topValue = 25;
+        else if ($max <= 50)
+            $topValue = 50;
+        else if ($max <= 100)
+            $topValue = 100;
+        else if ($max <= 500)
+            $topValue = 500;
+        else
+            $topValue = 1000;
+
+        $scaleStep = $topValue / 5;
+        $step = 250 / $topValue;
+
+        $font = Yii::app()->params['fonts']['path'] . '/arial.ttf';
+
+        for ($i = 0; $i <= 5; $i++)
+        {
+            $scale = $i * $scaleStep;
+            imagettftext($image, 8, 0, 5, 270 - $i * 50 + 4, $lineColor, $font, $scale);
+        }
+
+        imagefilledrectangle($image, 50, 270 - $step * $this->project['checksHigh'], 190, 270, $highColor);
+        imagerectangle($image, 50, 270 - $step * $this->project['checksHigh'], 190, 270, $lineColor);
+
+        imagefilledrectangle($image, 230, 270 - $step * $this->project['checksMed'], 370, 270, $medColor);
+        imagerectangle($image, 230, 270 - $step * $this->project['checksMed'], 370, 270, $lineColor);
+
+        imagefilledrectangle($image, 410, 270 - $step * $this->project['checksLow'], 550, 270, $lowColor);
+        imagerectangle($image, 410, 270 - $step * $this->project['checksLow'], 550, 270, $lineColor);
+
+        $this->_centerImageText($image, Yii::t('app', 'High Risk') . ' (' . $this->project['checksHigh'] . ')', $font, $lineColor, 10, 30, 290, 180);
+        $this->_centerImageText($image, Yii::t('app', 'Med Risk') . ' (' . $this->project['checksMed'] . ')', $font, $lineColor, 10, 210, 290, 180);
+        $this->_centerImageText($image, Yii::t('app', 'Low Risk') . ' (' . $this->project['checksLow'] . ')', $font, $lineColor, 10, 390, 290, 180);
+
+        $hashName = hash('sha256', rand() . time() . rand());
+        $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName . '.png';
+
+        imagepng($image, $filePath, 0);
+        imagedestroy($image);
+
+        return $filePath;
+    }
+
+    /**
      * Prepare text for project report.
      */
     private function _prepareProjectReportText($text)
@@ -76,15 +184,603 @@ class ReportController extends Controller
     }
 
     /**
+     * Sort checks by ratings
+     */
+    static function sortHighMedChecks($a, $b)
+    {
+        if ($a['rating'] == $b['rating'])
+            return 0;
+
+        return $a['rating'] < $b['rating'] ? 1 : -1;
+    }
+
+    /**
+     * Render tables
+     */
+    private function _renderTables($table, &$section, $text)
+    {
+        if (strpos($text, $table) === false)
+            return false;
+
+        $textBlocks = explode($table, $text);
+
+        for ($i = 0; $i < count($textBlocks); $i++)
+        {
+            $this->_renderText($section, $textBlocks[$i]);
+
+            if ($i >= count($textBlocks) - 1)
+                continue;
+
+            switch ($table)
+            {
+                case '{target.list}':
+                    $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+                    $table->addRows(count($this->project['targets']) + 1);
+                    $table->addColumnsList(array( $this->docWidth * 0.4, $this->docWidth * 0.2, $this->docWidth * 0.2, $this->docWidth * 0.2 ));
+
+                    $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 4);
+                    $table->setFontForCellRange($this->boldFont, 1, 1, 1, 4);
+                    $table->setFontForCellRange($this->textFont, 2, 1, count($this->project['targets']) + 1, 4);
+                    $table->setBorderForCellRange($this->thinBorder, 1, 1, count($this->project['targets']) + 1, 4);
+                    $table->setFirstRowAsHeader();
+
+                    // set paddings
+                    for ($row = 1; $row <= count($this->project['targets']) + 1; $row++)
+                        for ($col = 1; $col <= 4; $col++)
+                        {
+                            $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                            $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+                        }
+
+                    $row = 1;
+
+                    $table->getCell($row, 1)->writeText(Yii::t('app', 'Target'));
+                    $table->getCell($row, 2)->writeText(Yii::t('app', 'Risk Stats'));
+                    $table->getCell($row, 3)->writeText(Yii::t('app', 'Completed'));
+                    $table->getCell($row, 4)->writeText(Yii::t('app', 'Checks'));
+
+                    $row++;
+
+                    foreach ($this->project['targets'] as $target)
+                    {
+                        $table->getCell($row, 1)->writeText($target->host, $this->textFont, $this->noPar);
+
+                        if ($target->description)
+                        {
+                            $table->getCell($row, 1)->writeText(' / ', $this->textFont);
+                            $table->getCell($row, 1)->writeText($target->description, new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+                        }
+
+                        $table->getCell($row, 2)->writeText($target->highRiskCount, new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#d63515'));
+                        $table->getCell($row, 2)->writeText(' / ', $this->textFont);
+                        $table->getCell($row, 2)->writeText($target->medRiskCount, new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#dace2f'));
+                        $table->getCell($row, 2)->writeText(' / ', $this->textFont);
+                        $table->getCell($row, 2)->writeText($target->lowRiskCount, new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#53a254'));
+                        $table->getCell($row, 2)->writeText(' / ', $this->textFont);
+                        $table->getCell($row, 2)->writeText($target->infoCount, $this->textFont);
+
+                        $table->getCell($row, 3)->writeText(
+                            ($target->checkCount ? sprintf('%.2f%%', $target->finishedCount / $target->checkCount) : '0.00%') .
+                            ' / ' . $target->finishedCount,
+                            $this->textFont
+                        );
+
+                        $table->getCell($row, 4)->writeText($target->checkCount, $this->textFont);
+
+                        $row++;
+                    }
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Render variable values
+     */
+    private function _renderText(&$section, $text)
+    {
+        if ($this->_renderTables('{target.list}', $section, $text))
+            return;
+
+        $text = str_replace('{client}', $this->project['project']->client->name, $text);
+        $text = str_replace('{project}', $this->project['project']->name, $text);
+        $text = str_replace('{year}', $this->project['project']->year, $text);
+
+        $deadline = implode('.', array_reverse(explode('-', $this->project['project']->deadline)));
+        $text = str_replace('{deadline}', $deadline, $text);
+
+        $admin = Yii::t('app', 'N/A');
+
+        if ($this->project['project']->project_users)
+        {
+            foreach ($this->project['project']->project_users as $user)
+                if ($user->admin)
+                {
+                    $admin = $user->user->name ? $user->user->name : $user->user->email;
+                    break;
+                }
+        }
+
+        $text = str_replace('{admin}', $admin, $text);
+        $text = str_replace('{rating}', sprintf('%.2f', $this->project['rating']), $text);
+        $text = str_replace('{targets}', count($this->project['targets']), $text);
+        $text = str_replace('{checks}', $this->project['checks'], $text);
+        $text = str_replace('{checks.info}', $this->project['checksInfo'], $text);
+        $text = str_replace('{checks.med}', $this->project['checksMed'], $text);
+        $text = str_replace('{checks.lo}', $this->project['checksLow'], $text);
+        $text = str_replace('{checks.hi}', $this->project['checksHigh'], $text);
+
+        $section->writeText($text, $this->textFont, $this->noPar);
+    }
+
+    /**
+     * Set up RTF variables
+     */
+    private function _rtfSetup($model)
+    {
+        $this->rtf = new PHPRtfLite();
+        $this->rtf->setCharset('UTF-8');
+        $this->rtf->setMargins($model->pageMargin, $model->pageMargin, $model->pageMargin, $model->pageMargin);
+
+        $this->cellPadding = $model->cellPadding;
+        $this->fontSize = $model->fontSize;
+        $this->fontFamily = $model->fontFamily;
+
+        // borders
+        $this->thinBorder = new PHPRtfLite_Border(
+            $this->rtf,
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090')
+        );
+
+        $this->thinBorderTL = new PHPRtfLite_Border(
+            $this->rtf,
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(0, '#909090'),
+            new PHPRtfLite_Border_Format(0, '#909090')
+        );
+
+        $this->thinBorderBR = new PHPRtfLite_Border(
+            $this->rtf,
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(0, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090'),
+            new PHPRtfLite_Border_Format(1, '#909090')
+        );
+
+        // fonts
+        $this->smallBoldFont = new PHPRtfLite_Font(round($this->fontSize * 0.8), $this->fontFamily);
+        $this->smallBoldFont->setBold();
+
+        $this->h1Font = new PHPRtfLite_Font($model->fontSize * 2, $model->fontFamily);
+        $this->h1Font->setBold();
+
+        $this->h2Font = new PHPRtfLite_Font(round($model->fontSize * 1.7), $model->fontFamily);
+        $this->h2Font->setBold();
+
+        $this->h3Font = new PHPRtfLite_Font(round($model->fontSize * 1.3), $model->fontFamily);
+        $this->h3Font->setBold();
+
+        $this->textFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
+
+        $this->boldFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
+        $this->boldFont->setBold();
+
+        $this->linkFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily, '#0088CC');
+        $this->linkFont->setUnderline();
+
+        // paragraphs
+        $this->titlePar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_LEFT);
+        $this->titlePar->setSpaceBefore(10);
+        $this->titlePar->setSpaceAfter(10);
+
+        $this->h3Par = new PHPRtfLite_ParFormat();
+        $this->h3Par->setSpaceAfter(10);
+
+        $this->centerPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
+        $this->centerPar->setSpaceAfter(0);
+
+        $this->leftPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_LEFT);
+        $this->leftPar->setSpaceAfter(20);
+
+        $this->noPar = new PHPRtfLite_ParFormat();
+        $this->noPar->setSpaceBefore(0);
+        $this->noPar->setSpaceAfter(0);
+
+        $this->docWidth = 21.0 - 2 * $model->pageMargin;
+    }
+
+    /**
+     * Generate a vulnerability list.
+     */
+    private function _generateVulnerabilityList($data, &$section, $sectionNumber, $type = self::NORMAL_VULN_LIST, $infoLocation = null)
+    {
+        // extract separate checks
+        if ($type == self::SEPARATE_VULN_LIST)
+        {
+            $tmpData = array();
+            $separate = 0;
+
+            foreach ($data as $target)
+            {
+                if (!$target['separate'])
+                    continue;
+
+                foreach ($target['categories'] as $category)
+                {
+                    if (!$category['separate'])
+                        continue;
+
+                    if (!isset($tmpData[$category['id']]))
+                        $tmpData[$category['id']] = array(
+                            'name'     => $category['name'],
+                            'controls' => array(),
+                            'checkCount' => 0,
+                            'separate' => 0,
+                            'info'     => 0,
+                        );
+
+                    foreach ($category['controls'] as $control)
+                    {
+                        if (!$control['separate'])
+                            continue;
+
+                        if (!isset($tmpData[$category['id']]['controls'][$control['id']]))
+                            $tmpData[$category['id']]['controls'][$control['id']] = array(
+                                'name'     => $control['name'],
+                                'checks'   => array(),
+                                'checkCount' => 0,
+                                'separate' => 0,
+                                'info'     => 0,
+                            );
+
+                        foreach ($control['checks'] as $check)
+                        {
+                            if (!$check['separate'])
+                                continue;
+
+                            $tmpData[$category['id']]['controls'][$control['id']]['checks'][] = $check;
+                            $tmpData[$category['id']]['controls'][$control['id']]['separate']++;
+                            $tmpData[$category['id']]['controls'][$control['id']]['checkCount']++;
+                            $tmpData[$category['id']]['separate']++;
+                            $tmpData[$category['id']]['checkCount']++;
+                            $separate++;
+                        }
+                    }
+                }
+            }
+
+            $data = array(
+                array(
+                    'categories' => $tmpData,
+                    'separate'   => $separate,
+                    'checkCount' => $separate,
+                )
+            );
+        }
+
+        $targetNumber = 1;
+
+        foreach ($data as $target)
+        {
+            if ($type == self::SEPARATE_VULN_LIST && !$target['separate'])
+                continue;
+
+            if ($type == self::APPENDIX_VULN_LIST && !$target['info'])
+                continue;
+
+            if (
+                $type == self::NORMAL_VULN_LIST &&
+                (
+                    $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $target['checkCount'] == $target['info'] + $target['separate'] ||
+                    $target['checkCount'] == $target['separate']
+                )
+            )
+                continue;
+
+            $tableCount = 1;
+
+            if ($type == self::NORMAL_VULN_LIST && $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE && $target['info'])
+                $tableCount = 2;
+
+            for ($tableNumber = 0; $tableNumber < $tableCount; $tableNumber++)
+            {
+                if ($type != self::SEPARATE_VULN_LIST)
+                {
+                    $section->writeText($sectionNumber . '.' . $targetNumber . '. ' . $target['host'], $this->boldFont);
+
+                    if ($target['description'])
+                    {
+                        $section->writeText(' / ', $this->textFont);
+                        $section->writeText($target['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+                    }
+
+                    if ($tableNumber == 1)
+                        $section->writeText(' - ' . Yii::t('app', 'Info Checks'), $this->textFont);
+
+                    $section->writeText("\n", $this->textFont);
+
+                    $targetNumber++;
+                }
+
+                if (!count($target['categories']))
+                {
+                    if ($type == self::SEPARATE_VULN_LIST)
+                        continue;
+
+                    $section->writeText(Yii::t('app', 'No vulnerabilities found.') . '<br>', $this->textFont, $this->noPar);
+                    continue;
+                }
+
+                $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+                $table->addColumnsList(array( $this->docWidth * 0.17, $this->docWidth * 0.83 ));
+
+                $row = 1;
+
+                foreach ($target['categories'] as $category)
+                {
+                    if ($type == self::SEPARATE_VULN_LIST && !$target['separate'])
+                        continue;
+
+                    if ($type == self::APPENDIX_VULN_LIST && !$category['info'])
+                        continue;
+
+                    if (
+                        $type == self::NORMAL_VULN_LIST &&
+                        (
+                            $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $category['checkCount'] == $category['info'] + $category['separate'] ||
+                            $category['checkCount'] == $category['separate'] ||
+                            $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE &&
+                            (
+                                $tableNumber == 0 && $category['checkCount'] == $category['info'] + $category['separate'] ||
+                                $tableNumber == 1 && !$category['info']
+                            )
+                        )
+                    )
+                        continue;
+
+                    $table->addRow();
+                    $table->mergeCellRange($row, 1, $row, 2);
+
+                    $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                    $table->getCell($row, 1)->setBorder($this->thinBorder);
+                    $table->setFontForCellRange($this->boldFont, $row, 1, $row, 1);
+                    $table->setBackgroundForCellRange('#B0B0B0', $row, 1, $row, 1);
+                    $table->writeToCell($row, 1, $category['name']);
+
+                    $row++;
+
+                    foreach ($category['controls'] as $control)
+                    {
+                        if ($type == self::SEPARATE_VULN_LIST && !$control['separate'])
+                            continue;
+
+                        if ($type == self::APPENDIX_VULN_LIST && !$control['info'])
+                            continue;
+
+                        if (
+                            $type == self::NORMAL_VULN_LIST &&
+                            (
+                                $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $control['checkCount'] == $control['info'] + $control['separate'] ||
+                                $control['checkCount'] == $control['separate'] ||
+                                $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE &&
+                                (
+                                    $tableNumber == 0 && $control['checkCount'] == $control['info'] + $control['separate'] ||
+                                    $tableNumber == 1 && !$control['info']
+                                )
+                            )
+                        )
+                            continue;
+
+                        $table->addRow();
+                        $table->mergeCellRange($row, 1, $row, 2);
+
+                        $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                        $table->getCell($row, 1)->setBorder($this->thinBorder);
+                        $table->setFontForCellRange($this->boldFont, $row, 1, $row, 1);
+                        $table->setBackgroundForCellRange('#D0D0D0', $row, 1, $row, 1);
+                        $table->writeToCell($row, 1, $control['name']);
+
+                        $row++;
+
+                        foreach ($control['checks'] as $check)
+                        {
+                            if ($type == self::SEPARATE_VULN_LIST && !$check['separate'])
+                                continue;
+
+                            if ($type == self::APPENDIX_VULN_LIST && !$check['info'])
+                                continue;
+
+                            if (
+                                $type == self::NORMAL_VULN_LIST &&
+                                (
+                                    $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $check['info'] ||
+                                    $check['separate'] ||
+                                    $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE &&
+                                    (
+                                        $tableNumber == 0 && $check['info'] ||
+                                        $tableNumber == 1 && !$check['info']
+                                    )
+                                )
+                            )
+                                continue;
+
+                            $table->addRow();
+                            $table->mergeCellRange($row, 1, $row, 2);
+
+                            $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                            $table->getCell($row, 1)->setBorder($this->thinBorder);
+                            $table->setFontForCellRange($this->boldFont, $row, 1, $row, 1);
+                            $table->setBackgroundForCellRange('#F0F0F0', $row, 1, $row, 1);
+                            $table->writeToCell($row, 1, $check['name']);
+
+                            $row++;
+
+                            // reference info
+                            $table->addRow();
+                            $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                            $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                            $table->getCell($row, 1)->setBorder($this->thinBorder);
+                            $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                            $table->getCell($row, 2)->setBorder($this->thinBorder);
+
+                            $table->writeToCell($row, 1, Yii::t('app', 'Reference'));
+
+                            $reference    = $check['reference'] . ( $check['referenceCode'] ? '-' . $check['referenceCode'] : '' );
+                            $referenceUrl = '';
+
+                            if ($check['referenceCode'] && $check['referenceCodeUrl'])
+                                $referenceUrl = $check['referenceCodeUrl'];
+                            else if ($check['referenceUrl'])
+                                $referenceUrl = $check['referenceUrl'];
+
+                            if ($referenceUrl)
+                                $table->getCell($row, 2)->writeHyperLink($referenceUrl, $reference, $this->linkFont);
+                            else
+                                $table->writeToCell($row, 2, $reference);
+
+                            $row++;
+
+                            if ($check['background'])
+                            {
+                                $table->addRow();
+                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($this->thinBorder);
+                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 2)->setBorder($this->thinBorder);
+
+                                $table->writeToCell($row, 1, Yii::t('app', 'Background Info'));
+                                $table->writeToCell($row, 2, $check['background']);
+
+                                $row++;
+                            }
+
+                            if ($check['question'])
+                            {
+                                $table->addRow();
+                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($this->thinBorder);
+                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 2)->setBorder($this->thinBorder);
+
+                                $table->writeToCell($row, 1, Yii::t('app', 'Question'));
+                                $table->writeToCell($row, 2, $check['question']);
+
+                                $row++;
+                            }
+
+                            if ($check['result'])
+                            {
+                                $table->addRow();
+                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($this->thinBorder);
+                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 2)->setBorder($this->thinBorder);
+
+                                $table->writeToCell($row, 1, Yii::t('app', 'Result'));
+                                $table->writeToCell($row, 2, $check['result']);
+
+                                $row++;
+                            }
+
+                            if ($check['solutions'])
+                            {
+                                $table->addRows(count($check['solutions']));
+
+                                $table->mergeCellRange($row, 1, $row + count($check['solutions']) - 1, 1);
+
+                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($this->thinBorder);
+                                $table->writeToCell($row, 1, Yii::t('app', 'Solutions'));
+
+                                foreach ($check['solutions'] as $solution)
+                                {
+                                    $table->getCell($row, 1)->setBorder($this->thinBorder);
+                                    $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                    $table->getCell($row, 2)->setBorder($this->thinBorder);
+                                    $table->writeToCell($row, 2, $solution);
+
+                                    $row++;
+                                }
+                            }
+
+                            if ($check['images'])
+                            {
+                                $table->addRows(count($check['images']));
+
+                                $table->mergeCellRange($row, 1, $row + count($check['images']) - 1, 1);
+
+                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($this->thinBorder);
+                                $table->writeToCell($row, 1, Yii::t('app', 'Attachments'));
+
+                                foreach ($check['images'] as $image)
+                                {
+                                    $table->getCell($row, 1)->setBorder($this->thinBorder);
+                                    $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                    $table->getCell($row, 2)->setBorder($this->thinBorder);
+
+                                    $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $this->docWidth * 0.78);
+
+                                    $row++;
+                                }
+                            }
+
+                            $table->addRow();
+
+                            // rating
+                            $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                            $table->getCell($row, 1)->setBorder($this->thinBorder);
+                            $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                            $table->getCell($row, 2)->setBorder($this->thinBorder);
+
+                            $table->writeToCell($row, 1, Yii::t('app', 'Rating'));
+                            $table->writeToCell($row, 2, '■ ', new PHPRtfLite_Font($this->fontSize, $this->fontFamily, $check['ratingColor']));
+                            $table->writeToCell($row, 2, $check['ratingName']);
+
+                            $row++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Generate project function.
      */
     private function _generateProjectReport($model)
     {
-        $clientId  = $model->clientId;
-        $projectId = $model->projectId;
-        $targetIds = $model->targetIds;
+        $clientId   = $model->clientId;
+        $projectId  = $model->projectId;
+        $targetIds  = $model->targetIds;
+        $options    = $model->options;
+        $templateId = $model->templateId;
 
-        $project = Project::model()->findByAttributes(array(
+        if (!$options)
+            $options = array();
+
+        $project = Project::model()->with(array(
+            'project_users' => array(
+                'with' => 'user'
+            ),
+            'client',
+            'targets',
+        ))->findByAttributes(array(
             'client_id' => $clientId,
             'id'        => $projectId
         ));
@@ -101,6 +797,10 @@ class ReportController extends Controller
             return;
         }
 
+        $this->project = array(
+            'project' => $project
+        );
+
         if (!$targetIds || !count($targetIds))
         {
             Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
@@ -114,17 +814,55 @@ class ReportController extends Controller
         if ($language)
             $language = $language->id;
 
+        $template = ReportTemplate::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            ),
+            'summary' => array(
+                'with' => array(
+                    'l10n' => array(
+                        'alias'  => 'summary_l10n',
+                        'on'     => 'summary_l10n.language_id = :language_id',
+                        'params' => array( 'language_id' => $language )
+                    )
+                )
+            )
+        ))->findByPk($templateId);
+
+        if ($template === null)
+        {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Template not found.'));
+            return;
+        }
+
         $criteria = new CDbCriteria();
         $criteria->addInCondition('id', $targetIds);
         $criteria->addColumnCondition(array( 'project_id' => $project->id ));
         $criteria->order = 't.host ASC';
-        $targets = Target::model()->findAll($criteria);
+        $targets = Target::model()->with(array(
+            'checkCount',
+            'finishedCount',
+            'lowRiskCount',
+            'medRiskCount',
+            'highRiskCount',
+        ))->findAll($criteria);
 
-        $data     = array();
-        $infoData = array();
+        $this->project['targets'] = $targets;
 
-        $totalRating     = 0.0;
+        $data = array();
+        $haveInfo = true;
+        $haveSeparate = false;
+
+        $totalRating = 0.0;
         $totalCheckCount = 0;
+        $checksHigh = 0;
+        $checksMed = 0;
+        $checksLow = 0;
+        $checksInfo = 0;
+
+        $reducedChecks = array();
 
         $ratings = array(
             TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
@@ -137,15 +875,13 @@ class ReportController extends Controller
         foreach ($targets as $target)
         {
             $targetData = array(
-                'host'       => $target->host,
-                'rating'     => 0.0,
-                'checkCount' => 0,
-                'categories' => array(),
-            );
-
-            $infoTargetData = array(
-                'host'       => $target->host,
-                'categories' => array()
+                'host'        => $target->host,
+                'description' => $target->description,
+                'rating'      => 0.0,
+                'checkCount'  => 0,
+                'categories'  => array(),
+                'info'        => 0,
+                'separate'    => 0,
             );
 
             // get all references (they are the same across all target categories)
@@ -177,15 +913,13 @@ class ReportController extends Controller
             foreach ($categories as $category)
             {
                 $categoryData = array(
+                    'id'         => $category->check_category_id,
                     'name'       => $category->category->localizedName,
                     'rating'     => 0.0,
                     'checkCount' => 0,
-                    'controls'   => array()
-                );
-
-                $infoCategoryData = array(
-                    'name'     => $category->category->localizedName,
-                    'controls' => array()
+                    'controls'   => array(),
+                    'info'       => 0,
+                    'separate'   => 0,
                 );
 
                 // get all controls
@@ -206,15 +940,13 @@ class ReportController extends Controller
                 foreach ($controls as $control)
                 {
                     $controlData = array(
+                        'id'         => $control->id,
                         'name'       => $control->localizedName,
                         'rating'     => 0.0,
                         'checkCount' => 0,
-                        'checks'     => array()
-                    );
-
-                    $infoControlData = array(
-                        'name'   => $control->localizedName,
-                        'checks' => array(),
+                        'checks'     => array(),
+                        'info'       => 0,
+                        'separate'   => 0,
                     );
 
                     $criteria = new CDbCriteria();
@@ -291,33 +1023,50 @@ class ReportController extends Controller
                             'referenceUrl'     => $check->_reference->url,
                             'referenceCode'    => $check->reference_code,
                             'referenceCodeUrl' => $check->reference_url,
+                            'info'             => $check->targetChecks[0]->rating == TargetCheck::RATING_INFO,
+                            'separate'         => $template->separate_category_id == $category->check_category_id,
                         );
+
+                        if ($checkData['info'])
+                        {
+                            $controlData['info']++;
+                            $categoryData['info']++;
+                            $targetData['info']++;
+                            $haveInfo = true;
+                        }
+
+                        if ($checkData['separate'])
+                        {
+                            $controlData['separate']++;
+                            $categoryData['separate']++;
+                            $targetData['separate']++;
+                            $haveSeparate = true;
+                        }
 
                         switch ($check->targetChecks[0]->rating)
                         {
-                            case TargetCheck::RATING_HIDDEN:
-                                $checkData['rating']      = 0;
-                                $checkData['ratingColor'] = '#999999';
-                                break;
-
                             case TargetCheck::RATING_INFO:
                                 $checkData['rating'] = 1;
                                 $checkData['ratingColor'] = '#3A87AD';
+                                $checksInfo++;
                                 break;
 
                             case TargetCheck::RATING_LOW_RISK:
                                 $checkData['rating'] = 2;
                                 $checkData['ratingColor'] = '#53A254';
+                                $checksLow++;
                                 break;
 
                             case TargetCheck::RATING_MED_RISK:
                                 $checkData['rating'] = 3;
                                 $checkData['ratingColor'] = '#DACE2F';
+                                $checksMed++;
                                 break;
 
                             case TargetCheck::RATING_HIGH_RISK:
                                 $checkData['rating'] = 4;
                                 $checkData['ratingColor'] = '#D63515';
+                                $checksHigh++;
                                 break;
                         }
 
@@ -330,16 +1079,24 @@ class ReportController extends Controller
                                 if (in_array($attachment->type, array( 'image/jpeg', 'image/png', 'image/gif' )))
                                     $checkData['images'][] = Yii::app()->params['attachments']['path'] . '/' . $attachment->path;
 
+                        if (in_array($check->targetChecks[0]->rating, array( TargetCheck::RATING_HIGH_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_LOW_RISK )))
+                            $reducedChecks[] = array(
+                                'target' => array(
+                                    'host'        => $target->host,
+                                    'description' => $target->description
+                                ),
+                                'name'     => $checkData['name'],
+                                'solution' => $checkData['solutions'] ? implode("\n", $checkData['solutions']) : Yii::t('app', 'N/A'),
+                                'rating'   => $check->targetChecks[0]->rating,
+                            );
+
                         $controlData['rating']  += $checkData['rating'];
                         $categoryData['rating'] += $checkData['rating'];
                         $targetData['rating']   += $checkData['rating'];
                         $totalRating            += $checkData['rating'];
 
                         // put checks with RATING_INFO rating to a separate category
-                        if ($check->targetChecks[0]->rating == TargetCheck::RATING_INFO)
-                            $infoControlData['checks'][] = $checkData;
-                        else
-                            $controlData['checks'][] = $checkData;
+                        $controlData['checks'][] = $checkData;
                     }
 
                     $controlData['checkCount'] = count($checks);
@@ -351,9 +1108,6 @@ class ReportController extends Controller
 
                     if ($controlData['checks'])
                         $categoryData['controls'][]  = $controlData;
-
-                    if ($infoControlData['checks'])
-                        $infoCategoryData['controls'][] = $infoControlData;
                 }
 
                 if ($categoryData['checkCount'])
@@ -363,22 +1117,24 @@ class ReportController extends Controller
                     if ($categoryData['controls'])
                         $targetData['categories'][] = $categoryData;
                 }
-
-                if ($infoCategoryData['controls'])
-                    $infoTargetData['categories'][] = $infoCategoryData;
             }
 
             if ($targetData['checkCount'])
                 $targetData['rating'] /= $targetData['checkCount'];
 
             $data[] = $targetData;
-
-            if ($infoTargetData['categories'])
-                $infoData[] = $infoTargetData;
         }
 
         if ($totalCheckCount)
             $totalRating /= $totalCheckCount;
+
+        $this->project['rating'] = $totalRating;
+        $this->project['checks'] = $totalCheckCount;
+        $this->project['checksInfo'] = $checksInfo;
+        $this->project['checksLow'] = $checksLow;
+        $this->project['checksMed'] = $checksMed;
+        $this->project['checksHigh'] = $checksHigh;
+        $this->project['reducedChecks'] = $reducedChecks;
 
         // include all PHPRtfLite libraries
         Yii::setPathOfAlias('rtf', Yii::app()->basePath . '/extensions/PHPRtfLite/PHPRtfLite');
@@ -386,88 +1142,217 @@ class ReportController extends Controller
         PHPRtfLite_Autoloader::setBaseDir(Yii::app()->basePath . '/extensions/PHPRtfLite');
         Yii::registerAutoloader(array( 'PHPRtfLite_Autoloader', 'autoload' ), true);
 
-        $rtf = new PHPRtfLite();
-        $rtf->setCharset('UTF-8');
-        $rtf->setMargins($model->pageMargin, $model->pageMargin, $model->pageMargin, $model->pageMargin);
+        $fileName = Yii::t('app', 'Penetration Test Report') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
 
-        // borders
-        $thinBorder = new PHPRtfLite_Border(
-            $rtf,
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090')
-        );
-
-        // fonts
-        $h1Font = new PHPRtfLite_Font($model->fontSize * 2, $model->fontFamily);
-        $h1Font->setBold();
-
-        $h2Font = new PHPRtfLite_Font(round($model->fontSize * 1.7), $model->fontFamily);
-        $h2Font->setBold();
-
-        $h3Font = new PHPRtfLite_Font(round($model->fontSize * 1.3), $model->fontFamily);
-        $h3Font->setBold();
-
-        $textFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
-
-        $boldFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
-        $boldFont->setBold();
-
-        $linkFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily, '#0088CC');
-        $linkFont->setUnderline();
-
-        // paragraphs
-        $titlePar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
-        $titlePar->setSpaceBefore(0);
-
-        $projectPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
-        $projectPar->setSpaceAfter(20);
-
-        $h3Par = new PHPRtfLite_ParFormat();
-        $h3Par->setSpaceAfter(10);
-
-        $centerPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
-        $centerPar->setSpaceAfter(20);
-
-        $leftPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_LEFT);
-        $leftPar->setSpaceAfter(20);
-
-        $noPar = new PHPRtfLite_ParFormat();
-        $noPar->setSpaceBefore(0);
-        $noPar->setSpaceAfter(0);
-
-        $docWidth = 21.0 - 2 * $model->pageMargin;
-        $section = $rtf->addSection();
+        $this->_rtfSetup($model);
+        $section = $this->rtf->addSection();
 
         // footer
         $footer = $section->addFooter();
-        $footer->writeText(Yii::t('app', 'Project Report') . ' / ' . $project->name . ' (' . $project->year . '), ');
-        $footer->writePlainRtfCode(Yii::t('app', 'page {page} of {numPages}', array(
-            '{page}'     => '{\field{\*\fldinst {PAGE}}{\fldrslt {1}}}',
-            '{numPages}' => '{\field{\*\fldinst {NUMPAGES}}{\fldrslt {1}}}'
-        )));
+        $footer->writeText(Yii::t('app', 'Penetration Test Report') . ': ' . $project->name . ' / ' . $project->year . ', ', $this->textFont, $this->noPar);
+        $footer->writePlainRtfCode(
+            '\fs' . ($this->textFont->getSize() * 2) . ' \f' . $this->textFont->getFontIndex() . ' ' .
+             Yii::t('app', 'page {page} of {numPages}',
+            array(
+                '{page}'     => '{\field{\*\fldinst {PAGE}}{\fldrslt {1}}}',
+                '{numPages}' => '{\field{\*\fldinst {NUMPAGES}}{\fldrslt {1}}}'
+            )
+        ));
 
         // title
-        $section->writeText(Yii::t('app', 'Project Report'), $h1Font, $titlePar);
-        $section->writeText($project->name . ' (' . $project->year . ')', $h2Font, $projectPar);
+        if (in_array('title', $options))
+        {
+            // header image
+            if ($template->header_image_path)
+            {
+                $extension = 'jpg';
 
-        // overall summary
-        $section->writeText(Yii::t('app', 'Overall Summary'), $h3Font, $h3Par);
-        $image = $section->addImage($this->_generateRatingImage($totalRating), $centerPar);
-        $section->writeText('Rating: ' . sprintf('%.2f', $totalRating), $textFont, $centerPar);
+                if ($template->header_image_type == 'image/png')
+                    $extension = 'png';
 
-        // detailed summary
-        $section->writeText(Yii::t('app', 'Detailed Summary') . '<br>', $h3Font, $noPar);
+                $filePath = Yii::app()->params['tmpPath'] . '/' . $template->header_image_path . '.' . $extension;
+
+                if (@copy(
+                    Yii::app()->params['reports']['headerImages']['path'] . '/' . $template->header_image_path,
+                    $filePath
+                ))
+                {
+                    $section->addImage($filePath, $this->centerPar, $this->docWidth);
+                    @unlink($filePath);
+                }
+            }
+
+            $section->writeText(Yii::t('app', 'Penetration Test Report') . ': ' . $project->name, $this->h1Font, $this->titlePar);
+            $section->writeText(Yii::t('app', 'Prepared for') . ":\n", $this->textFont, $this->noPar);
+
+            $client = Client::model()->findByPk($clientId);
+
+            $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+            $table->addRows(5);
+            $table->addColumnsList(array( $this->docWidth * 0.4, $this->docWidth * 0.6 ));
+
+            $col = 1;
+
+            if ($client->logo_path)
+            {
+                $extension = 'jpg';
+
+                if ($client->logo_type == 'image/png')
+                    $extension = 'png';
+
+                $filePath = Yii::app()->params['tmpPath'] . '/' . $client->logo_path . '.' . $extension;
+
+                if (@copy(
+                    Yii::app()->params['clientLogos']['path'] . '/' . $client->logo_path,
+                    $filePath
+                ))
+                {
+                    $table->getCell(1, $col)->addImage($filePath, $this->leftPar, $this->docWidth * 0.35);
+                    @unlink($filePath);
+                    $col++;
+                }
+            }
+
+            $table->getCell(1, $col)->writeText(Yii::t('app', 'Company'), $this->boldFont, $this->titlePar);
+            $table->getCell(1, $col)->writeText($client->name, $this->textFont, $this->noPar);
+
+            if ($client->address)
+                $table->getCell(1, $col)->writeText($client->address, $this->textFont, $this->noPar);
+
+            if ($client->city || $client->state)
+            {
+                $address = array();
+
+                if ($client->city)
+                    $address[] = $client->city;
+
+                if ($client->state)
+                    $address[] = $client->state;
+
+                $table->getCell(1, $col)->writeText(implode(', ', $address), $this->textFont, $this->noPar);
+            }
+
+            if ($client->country)
+                $table->getCell(1, $col)->writeText($client->country, $this->textFont, $this->noPar);
+
+            if ($client->postcode)
+                $table->getCell(1, $col)->writeText($client->postcode, $this->textFont, $this->noPar);
+
+            if ($client->website)
+                $table->getCell(1, $col)->writeHyperLink($client->website, $client->website, $this->linkFont, $this->noPar);
+
+            if ($client->contact_name || $client->contact_email || $client->contact_phone || $client->contact_fax)
+            {
+                $table->getCell(1, $col)->writeText(' ', $this->textFont, $this->noPar);
+
+                if ($client->contact_name)
+                    $table->getCell(1, $col)->writeText($client->contact_name, $this->textFont, $this->noPar);
+
+                if ($client->contact_email)
+                    $table->getCell(1, $col)->writeHyperLink('mailto:' . $client->contact_email, $client->contact_email, $this->linkFont, $this->noPar);
+
+                if ($client->contact_phone)
+                    $table->getCell(1, $col)->writeText(Yii::t('app', 'Phone') . ': ' . $client->contact_phone, $this->textFont, $this->noPar);
+
+                if ($client->contact_fax)
+                    $table->getCell(1, $col)->writeText(Yii::t('app', 'Fax') . ': ' . $client->contact_fax, $this->textFont, $this->noPar);
+            }
+
+            $user = User::model()->findByPk(Yii::app()->user->id);
+            $owner = $user->name ? $user->name : $user->email;
+
+            $table->getCell(2, 1)->writeText("\n" . Yii::t('app', 'Document Information'), $this->boldFont, $this->titlePar);
+
+            $table->getCell(3, 1)->writeText(Yii::t('app', 'Owner'), $this->textFont, $this->noPar);
+            $table->getCell(3, 2)->writeText($owner, $this->textFont, $this->noPar);
+
+            $table->getCell(3, 1)->writeText(Yii::t('app', 'Status'), $this->textFont, $this->noPar);
+            $table->getCell(3, 2)->writeText(Yii::t('app', 'Draft'), $this->textFont, $this->noPar);
+
+            $table->getCell(3, 1)->writeText(Yii::t('app', 'Originator'), $this->textFont, $this->noPar);
+            $table->getCell(3, 2)->writeText($owner, $this->textFont, $this->noPar);
+
+            $table->getCell(3, 1)->writeText(Yii::t('app', 'Review'), $this->textFont, $this->noPar);
+            $table->getCell(3, 2)->writeText($owner, $this->textFont, $this->noPar);
+
+            $table->getCell(3, 1)->writeText(Yii::t('app', 'File Name'), $this->textFont, $this->noPar);
+            $table->getCell(3, 2)->writeText($fileName, $this->textFont, $this->noPar);
+
+            $table->getCell(3, 1)->writeText(Yii::t('app', 'Modified'), $this->textFont, $this->noPar);
+            $table->getCell(3, 2)->writeText(date('d.m.Y'), $this->textFont, $this->noPar);
+
+            $table->getCell(4, 1)->writeText("\n" . Yii::t('app', 'Changes'), $this->boldFont, $this->titlePar);
+
+            $table->getCell(5, 1)->writeText(Yii::t('app', 'Version') . ' / ' . Yii::t('app', 'Date'), $this->boldFont, $this->noPar);
+            $table->getCell(5, 1)->writeText('1.0 / ' . date('d.m.Y'), $this->textFont, $this->noPar);
+            $table->getCell(5, 2)->writeText(Yii::t('app', 'Notes'), $this->boldFont, $this->noPar);
+            $table->getCell(5, 2)->writeText(Yii::t('app', 'Draft'), $this->textFont, $this->noPar);
+
+            $section->insertPageBreak();
+        }
+        else
+            $section->writeText(Yii::t('app', 'Penetration Test Report') . ': ' . $project->name, $this->h2Font, $this->titlePar);
+
+        $sectionNumber = 1;
+
+        // introduction
+        if (in_array('intro', $options) && $template->localizedIntro)
+        {
+            $section->writeText($sectionNumber . '. ' . Yii::t('app', 'Introduction'), $this->h2Font, $this->h3Par);
+            $this->_renderText($section, $template->localizedIntro);
+
+            $section->insertPageBreak();
+            $sectionNumber++;
+        }
+
+        // summary
+        $section->writeText($sectionNumber . '. ' . Yii::t('app', 'Summary'), $this->h2Font, $this->h3Par);
+        $subsectionNumber = 1;
+
+        $summary = false;
+
+        if (in_array('summary', $options) && $template->summary)
+        {
+            foreach ($template->summary as $sum)
+                if ($totalRating >= $sum->rating_from && $totalRating <= $sum->rating_to)
+                {
+                    $summary = $sum;
+                    break;
+                }
+
+            if ($summary)
+            {
+                $section->writeText(
+                    $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Overview') . "\n",
+                    $this->h3Font,
+                    $this->noPar
+                );
+
+                $this->_renderText($section, $summary->localizedSummary . "\n");
+                $subsectionNumber++;
+            }
+        }
+
+        $section->writeText(
+            $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Security Level') . "\n",
+            $this->h3Font,
+            $this->noPar
+        );
+
+        $subsectionNumber++;
+
+        $section->addImage($this->_generateRatingImage($totalRating), $this->centerPar);
+        $section->writeText('Rating: ' . sprintf('%.2f', $totalRating) . ($summary ? ' (' . $summary->localizedTitle . ')' : '') . "\n", $this->textFont, $this->centerPar);
+
         $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
 
         $table->addRows(count($data) + 1);
-        $table->addColumnsList(array( $docWidth * 0.44, $docWidth * 0.39, $docWidth * 0.17 ));
+        $table->addColumnsList(array( $this->docWidth * 0.44, $this->docWidth * 0.39, $this->docWidth * 0.17 ));
         $table->mergeCellRange(1, 2, 1, 3);
-        $table->setFontForCellRange($boldFont, 1, 1, 1, 2);
-        $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 2);
-        $table->setFontForCellRange($textFont, 2, 1, count($data) + 1, 3);
-        $table->setBorderForCellRange($thinBorder, 1, 1, count($data) + 1, 3);
+        $table->setFontForCellRange($this->boldFont, 1, 1, 1, 3);
+        $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
+        $table->setFontForCellRange($this->textFont, 2, 1, count($data) + 1, 3);
+        $table->setBorderForCellRange($this->thinBorder, 1, 1, count($data) + 1, 3);
         $table->setFirstRowAsHeader();
 
         // set paddings
@@ -476,6 +1361,7 @@ class ReportController extends Controller
             {
                 $table->getCell($row, $col)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
                 $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+                $table->getCell($row, $col)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_LEFT);
             }
 
         $table->writeToCell(1, 1, Yii::t('app', 'Target'));
@@ -486,7 +1372,14 @@ class ReportController extends Controller
         foreach ($data as $target)
         {
             $table->writeToCell($row, 1, $target['host']);
-            $table->addImageToCell($row, 2, $this->_generateRatingImage($target['rating']), null, $docWidth * 0.34);
+
+            if ($target['description'])
+            {
+                $table->getCell($row, 1)->writeText(' / ', $this->textFont);
+                $table->getCell($row, 1)->writeText($target['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+            }
+
+            $table->addImageToCell($row, 2, $this->_generateRatingImage($target['rating']), null, $this->docWidth * 0.34);
             $table->writeToCell($row, 3, sprintf('%.2f', $target['rating']));
 
             $table->getCell($row, 2)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
@@ -494,386 +1387,257 @@ class ReportController extends Controller
             $row++;
         }
 
-        // detailed report with vulnerabilities
-        $section->writeText(Yii::t('app', 'Detailed Report'), $h3Font, $h3Par);
+        $section->writeText(
+            $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Vulnerability Distribution') . "\n",
+            $this->h3Font,
+            $this->noPar
+        );
 
-        foreach ($data as $target)
+        $subsectionNumber++;
+        $section->addImage($this->_generateVulnDistributionChart(), $this->centerPar);
+
+        if (in_array('fulfillment', $options))
         {
-            $section->writeText($target['host'] . '<br>', $boldFont, $noPar);
+            $section->writeText(
+                $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Degree of Fulfillment') . "\n",
+                $this->h3Font,
+                $this->noPar
+            );
 
-            if (!count($target['categories']))
-            {
-                $section->writeText(Yii::t('app', 'No vulnerabilities found.') . '<br>', $textFont, $noPar);
-                continue;
-            }
+            $section->writeText(
+                Yii::t('app', 'The degree of fulfillment shows the security level for the individual controls. 0 is the worst value, 100% means that all security controls are met in accordance with the checklist.') . "\n\n",
+                $this->textFont,
+                $this->noPar
+            );
 
-            $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-            $table->addColumnsList(array( $docWidth * 0.17, $docWidth * 0.83 ));
+            $this->_generateFulfillmentDegreeReport($model, $section, $sectionNumber . '.' . $subsectionNumber);
 
-            $row = 1;
-
-            foreach ($target['categories'] as $category)
-            {
-                $table->addRow();
-                $table->mergeCellRange($row, 1, $row, 2);
-
-                $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                $table->getCell($row, 1)->setBorder($thinBorder);
-                $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
-                $table->setBackgroundForCellRange('#B0B0B0', $row, 1, $row, 1);
-                $table->writeToCell($row, 1, $category['name']);
-
-                $row++;
-
-                foreach ($category['controls'] as $control)
-                {
-                    $table->addRow();
-                    $table->mergeCellRange($row, 1, $row, 2);
-
-                    $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                    $table->getCell($row, 1)->setBorder($thinBorder);
-                    $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
-                    $table->setBackgroundForCellRange('#D0D0D0', $row, 1, $row, 1);
-                    $table->writeToCell($row, 1, $control['name']);
-
-                    $row++;
-
-                    foreach ($control['checks'] as $check)
-                    {
-                        $table->addRow();
-                        $table->mergeCellRange($row, 1, $row, 2);
-
-                        $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                        $table->getCell($row, 1)->setBorder($thinBorder);
-                        $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
-                        $table->setBackgroundForCellRange('#F0F0F0', $row, 1, $row, 1);
-                        $table->writeToCell($row, 1, $check['name']);
-
-                        $row++;
-
-                        // reference info
-                        $table->addRow();
-                        $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                        $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                        $table->getCell($row, 1)->setBorder($thinBorder);
-                        $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                        $table->getCell($row, 2)->setBorder($thinBorder);
-
-                        $table->writeToCell($row, 1, Yii::t('app', 'Reference'));
-
-                        $reference    = $check['reference'] . ( $check['referenceCode'] ? '-' . $check['referenceCode'] : '' );
-                        $referenceUrl = '';
-
-                        if ($check['referenceCode'] && $check['referenceCodeUrl'])
-                            $referenceUrl = $check['referenceCodeUrl'];
-                        else if ($check['referenceUrl'])
-                            $referenceUrl = $check['referenceUrl'];
-
-                        if ($referenceUrl)
-                            $table->getCell($row, 2)->writeHyperLink($referenceUrl, $reference, $linkFont);
-                        else
-                            $table->writeToCell($row, 2, $reference);
-
-                        $row++;
-
-                        if ($check['background'])
-                        {
-                            $table->addRow();
-                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                            $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 2)->setBorder($thinBorder);
-
-                            $table->writeToCell($row, 1, Yii::t('app', 'Background Info'));
-                            $table->writeToCell($row, 2, $check['background']);
-
-                            $row++;
-                        }
-
-                        if ($check['question'])
-                        {
-                            $table->addRow();
-                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                            $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 2)->setBorder($thinBorder);
-
-                            $table->writeToCell($row, 1, Yii::t('app', 'Question'));
-                            $table->writeToCell($row, 2, $check['question']);
-
-                            $row++;
-                        }
-
-                        if ($check['result'])
-                        {
-                            $table->addRow();
-                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                            $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 2)->setBorder($thinBorder);
-
-                            $table->writeToCell($row, 1, Yii::t('app', 'Result'));
-                            $table->writeToCell($row, 2, $check['result']);
-
-                            $row++;
-                        }
-
-                        if ($check['solutions'])
-                        {
-                            $table->addRows(count($check['solutions']));
-
-                            $table->mergeCellRange($row, 1, $row + count($check['solutions']) - 1, 1);
-
-                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                            $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->writeToCell($row, 1, Yii::t('app', 'Solutions'));
-
-                            foreach ($check['solutions'] as $solution)
-                            {
-                                $table->getCell($row, 1)->setBorder($thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                                $table->getCell($row, 2)->setBorder($thinBorder);
-                                $table->writeToCell($row, 2, $solution);
-
-                                $row++;
-                            }
-                        }
-
-                        if ($check['images'])
-                        {
-                            $table->addRows(count($check['images']));
-
-                            $table->mergeCellRange($row, 1, $row + count($check['images']) - 1, 1);
-
-                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                            $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->writeToCell($row, 1, Yii::t('app', 'Attachments'));
-
-                            foreach ($check['images'] as $image)
-                            {
-                                $table->getCell($row, 1)->setBorder($thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                                $table->getCell($row, 2)->setBorder($thinBorder);
-
-                                $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $docWidth * 0.78);
-
-                                $row++;
-                            }
-                        }
-
-                        $table->addRow();
-
-                        // rating
-                        $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                        $table->getCell($row, 1)->setBorder($thinBorder);
-                        $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                        $table->getCell($row, 2)->setBorder($thinBorder);
-
-                        $table->writeToCell($row, 1, Yii::t('app', 'Rating'));
-                        $table->writeToCell($row, 2, '■ ', new PHPRtfLite_Font(12, null, $check['ratingColor']));
-                        $table->writeToCell($row, 2, $check['ratingName'] . ' (' . $check['rating'] . ')');
-
-                        $row++;
-                    }
-                }
-            }
+            $subsectionNumber++;
         }
 
-        // list of checks with information
-        if ($infoData)
+        if (in_array('matrix', $options))
         {
-            $section->writeText(Yii::t('app', 'Additional Information'), $h3Font, $h3Par);
+            $section->writeText(
+                $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Risk Matrix') . "\n",
+                $this->h3Font,
+                $this->noPar
+            );
 
-            foreach ($infoData as $target)
+            $riskMatrixModel = new RiskMatrixForm();
+            $riskMatrixModel->attributes = $_POST['RiskMatrixForm'];
+
+            $this->_generateRiskMatrixReport($riskMatrixModel, $section, $sectionNumber . '.' . $subsectionNumber);
+
+            $subsectionNumber++;
+        }
+
+        $sectionNumber++;
+        $section->insertPageBreak();
+
+        $subsectionNumber = 1;
+
+        // reduced vulnerability list
+        if (in_array('vulns', $options))
+        {
+            $section->writeText(
+                $sectionNumber . '. ' . Yii::t('app', 'Results and Recommendations'),
+                $this->h2Font,
+                $this->h3Par
+            );
+
+            $section->writeText(
+                Yii::t('app', 'This section contains the worst vulnerabilities and associated solutions. The left column contains the reference number, which indicates the test number.') . "\n\n" .
+                Yii::t('app', 'All checks have various vulnerability levels. The following table shows all possible ratings.') . "\n",
+                $this->textFont,
+                $this->noPar
+            );
+
+            $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+            $table->addColumnsList(array( $this->docWidth * 0.15, $this->docWidth * 0.2, $this->docWidth * 0.65 ));
+            $table->addRows(4);
+
+            $table->setFontForCellRange($this->boldFont, 1, 1, 1, 3);
+            $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
+            $table->setFontForCellRange($this->textFont, 2, 1, 4, 3);
+            $table->setBorderForCellRange($this->thinBorder, 1, 1, 4, 3);
+            $table->setFirstRowAsHeader();
+
+            // set paddings
+            for ($row = 1; $row <= 4; $row++)
+                for ($col = 1; $col <= 3; $col++)
+                {
+                    $table->getCell($row, $col)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
+
+                    if ($row >= 2 && $row <= 4 && $col >= 1 && $col <= 2)
+                        $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                    else
+                        $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+                }
+
+            $table->getCell(1, 1)->writeText(Yii::t('app', 'Symbol'));
+            $table->getCell(1, 2)->writeText(Yii::t('app', 'Meaning'));
+            $table->getCell(1, 3)->writeText(Yii::t('app', 'Description'));
+
+            $table->addImageToCell(2, 1, Yii::app()->basePath . '/../images/high.png');
+            $table->addImageToCell(3, 1, Yii::app()->basePath . '/../images/med.png');
+            $table->addImageToCell(4, 1, Yii::app()->basePath . '/../images/low.png');
+
+            $table->getCell(2, 2)->writeText(Yii::t('app', 'High Risk'), $this->textFont);
+            $table->getCell(3, 2)->writeText(Yii::t('app', 'Med Risk'), $this->textFont);
+            $table->getCell(4, 2)->writeText(Yii::t('app', 'Low Risk'), $this->textFont);
+
+            $table->getCell(2, 3)->writeText(Yii::t('app', 'Immediate threat to the system: an exploitation of the vulnerability can be used to control the equipment, or to obtain sensitive information. Such weak points should always be fixed.'), $this->textFont);
+            $table->getCell(3, 3)->writeText(Yii::t('app', 'Moderate vulnerability: no direct threat to the system (but this is possible in combination with other moderate vulnerability). This type of vulnerability should also be fixed.'), $this->textFont);
+            $table->getCell(4, 3)->writeText(Yii::t('app', 'Minor security flaw: no immediate threat to the system. It has to be decided case by case, whether measures to improve safety should be taken.'), $this->textFont);
+
+            $section->writeText("\n");
+
+            if (!count($this->project['reducedChecks']))
+                $section->writeText("\n" . Yii::t('app', 'No vulnerabilities found.') . "\n", $this->textFont, $this->noPar);
+            else
             {
-                $section->writeText($target['host'] . '<br>', $boldFont, $noPar);
-
                 $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-                $table->addColumnsList(array( $docWidth * 0.17, $docWidth * 0.83 ));
+                $table->addRows(count($this->project['reducedChecks']) + 1);
+                $table->addColumnsList(array( $this->docWidth * 0.2, $this->docWidth * 0.2, $this->docWidth * 0.5, $this->docWidth * 0.1 ));
+
+                $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 4);
+                $table->setFontForCellRange($this->boldFont, 1, 1, 1, 4);
+                $table->setFontForCellRange($this->textFont, 2, 1, count($this->project['reducedChecks']) + 1, 4);
+                $table->setBorderForCellRange($this->thinBorder, 1, 1, count($this->project['reducedChecks']) + 1, 4);
+                $table->setFirstRowAsHeader();
+
+                // set paddings
+                for ($row = 1; $row <= count($this->project['reducedChecks']) + 1; $row++)
+                    for ($col = 1; $col <= 4; $col++)
+                    {
+                        $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+
+                        if ($row > 1)
+                            $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                        else
+                            $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+                    }
 
                 $row = 1;
 
-                foreach ($target['categories'] as $category)
-                {
-                    $table->addRow();
-                    $table->mergeCellRange($row, 1, $row, 2);
+                $table->getCell($row, 1)->writeText(Yii::t('app', 'Target'));
+                $table->getCell($row, 2)->writeText(Yii::t('app', 'Name'));
+                $table->getCell($row, 3)->writeText(Yii::t('app', 'Solution'));
+                $table->getCell($row, 4)->writeText(Yii::t('app', 'Rating'));
 
-                    $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                    $table->getCell($row, 1)->setBorder($thinBorder);
-                    $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
-                    $table->setBackgroundForCellRange('#B0B0B0', $row, 1, $row, 1);
-                    $table->writeToCell($row, 1, $category['name']);
+                $row++;
+
+                $reducedChecks = $this->project['reducedChecks'];
+                usort($reducedChecks, array( 'ReportController', 'sortHighMedChecks' ));
+
+                foreach ($reducedChecks as $check)
+                {
+                    $table->getCell($row, 1)->writeText($check['target']['host'], $this->textFont);
+
+                    if ($check['target']['description'])
+                    {
+                        $table->getCell($row, 1)->writeText(' / ', $this->textFont);
+                        $table->getCell($row, 1)->writeText($check['target']['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+                    }
+
+                    $table->getCell($row, 2)->writeText($check['name'], $this->textFont, $this->noPar);
+                    $table->getCell($row, 3)->writeText($check['solution'], $this->textFont, $this->noPar);
+
+                    $image = null;
+
+                    switch ($check['rating'])
+                    {
+                        case TargetCheck::RATING_HIGH_RISK:
+                            $image = Yii::app()->basePath . '/../images/high.png';
+                            break;
+
+                        case TargetCheck::RATING_MED_RISK:
+                            $image = Yii::app()->basePath . '/../images/med.png';
+                            break;
+
+                        case TargetCheck::RATING_LOW_RISK:
+                            $image = Yii::app()->basePath . '/../images/low.png';
+                            break;
+                    }
+
+                    $table->addImageToCell($row, 4, $image);
 
                     $row++;
-
-                    foreach ($category['controls'] as $control)
-                    {
-                        $table->addRow();
-                        $table->mergeCellRange($row, 1, $row, 2);
-
-                        $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                        $table->getCell($row, 1)->setBorder($thinBorder);
-                        $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
-                        $table->setBackgroundForCellRange('#D0D0D0', $row, 1, $row, 1);
-                        $table->writeToCell($row, 1, $control['name']);
-
-                        $row++;
-
-                        foreach ($control['checks'] as $check)
-                        {
-                            $table->addRow();
-                            $table->mergeCellRange($row, 1, $row, 2);
-
-                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->setFontForCellRange($boldFont, $row, 1, $row, 1);
-                            $table->setBackgroundForCellRange('#F0F0F0', $row, 1, $row, 1);
-                            $table->writeToCell($row, 1, $check['name']);
-
-                            $row++;
-
-                            // reference info
-                            $table->addRow();
-                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                            $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 2)->setBorder($thinBorder);
-
-                            $table->writeToCell($row, 1, Yii::t('app', 'Reference'));
-
-                            $reference    = $check['reference'] . ( $check['referenceCode'] ? '-' . $check['referenceCode'] : '' );
-                            $referenceUrl = '';
-
-                            if ($check['referenceCode'] && $check['referenceCodeUrl'])
-                                $referenceUrl = $check['referenceCodeUrl'];
-                            else if ($check['referenceUrl'])
-                                $referenceUrl = $check['referenceUrl'];
-
-                            if ($referenceUrl)
-                                $table->getCell($row, 2)->writeHyperLink($referenceUrl, $reference, $linkFont);
-                            else
-                                $table->writeToCell($row, 2, $reference);
-
-                            $row++;
-
-                            if ($check['background'])
-                            {
-                                $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                                $table->getCell($row, 2)->setBorder($thinBorder);
-
-                                $table->writeToCell($row, 1, Yii::t('app', 'Background Info'));
-                                $table->writeToCell($row, 2, $check['background']);
-
-                                $row++;
-                            }
-
-                            if ($check['question'])
-                            {
-                                $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                                $table->getCell($row, 2)->setBorder($thinBorder);
-
-                                $table->writeToCell($row, 1, Yii::t('app', 'Question'));
-                                $table->writeToCell($row, 2, $check['question']);
-
-                                $row++;
-                            }
-
-                            // result
-                            $table->addRow();
-                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                            $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 2)->setBorder($thinBorder);
-
-                            $table->writeToCell($row, 1, Yii::t('app', 'Result'));
-                            $table->writeToCell($row, 2, $check['result']);
-
-                            $row++;
-
-                            if ($check['solutions'])
-                            {
-                                $table->addRows(count($check['solutions']));
-
-                                $table->mergeCellRange($row, 1, $row + count($check['solutions']) - 1, 1);
-
-                                $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($thinBorder);
-                                $table->writeToCell($row, 1, Yii::t('app', 'Solutions'));
-
-                                foreach ($check['solutions'] as $solution)
-                                {
-                                    $table->getCell($row, 1)->setBorder($thinBorder);
-                                    $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                                    $table->getCell($row, 2)->setBorder($thinBorder);
-                                    $table->writeToCell($row, 2, $solution);
-
-                                    $row++;
-                                }
-                            }
-
-                            if ($check['images'])
-                            {
-                                $table->addRows(count($check['images']));
-
-                                $table->mergeCellRange($row, 1, $row + count($check['images']) - 1, 1);
-
-                                $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($thinBorder);
-                                $table->writeToCell($row, 1, Yii::t('app', 'Attachments'));
-
-                                foreach ($check['images'] as $image)
-                                {
-                                    $table->getCell($row, 1)->setBorder($thinBorder);
-                                    $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                                    $table->getCell($row, 2)->setBorder($thinBorder);
-
-                                    $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $docWidth * 0.78);
-
-                                    $row++;
-                                }
-                            }
-
-                            $table->addRow();
-
-                            // rating
-                            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 1)->setBorder($thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                            $table->getCell($row, 2)->setBorder($thinBorder);
-
-                            $table->writeToCell($row, 1, Yii::t('app', 'Rating'));
-                            $table->writeToCell($row, 2, '■ ', new PHPRtfLite_Font(12, null, $check['ratingColor']));
-                            $table->writeToCell($row, 2, $check['ratingName'] . ' (' . $check['rating'] . ')');
-
-                            $row++;
-                        }
-                    }
                 }
             }
+
+            $sectionNumber++;
+            $section->insertPageBreak();
         }
 
-        $fileName = Yii::t('app', 'Project Report') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
+        // detailed report with vulnerabilities
+        $section->writeText($sectionNumber . '. ' . Yii::t('app', 'Vulnerabilities'), $this->h2Font, $this->h3Par);
+        $subsectionNumber = 1;
+
+        if ($haveSeparate)
+        {
+            $section->writeText(
+                $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Information Gathering'),
+                $this->h3Font,
+                $this->noPar
+            );
+
+            if ($template->localizedSeparateVulnsIntro)
+                $section->writeText(
+                    "\n" . $this->_prepareProjectReportText($template->localizedSeparateVulnsIntro) . "\n",
+                    $this->textFont,
+                    $this->noPar
+                );
+
+            $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::SEPARATE_VULN_LIST, $model->infoChecksLocation);
+            $subsectionNumber++;
+        }
+
+        if ($haveSeparate || $haveInfo && $model->infoChecksLocation == ProjectReportForm::INFO_LOCATION_APPENDIX)
+        {
+            $section->writeText($sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Found Vulnerabilities'), $this->h3Font, $this->noPar);
+
+            if ($template->localizedVulnsIntro)
+                $section->writeText(
+                    "\n" . $this->_prepareProjectReportText($template->localizedVulnsIntro) . "\n\n",
+                    $this->textFont,
+                    $this->noPar
+                );
+        }
+
+        $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::NORMAL_VULN_LIST, $model->infoChecksLocation);
+        $subsectionNumber++;
+
+        if ($haveInfo && $model->infoChecksLocation == ProjectReportForm::INFO_LOCATION_APPENDIX)
+        {
+            $section->writeText($sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Additional Data'), $this->h3Font, $this->noPar);
+
+            if ($template->localizedInfoChecksIntro)
+                $section->writeText(
+                    "\n" . $this->_prepareProjectReportText($template->localizedInfoChecksIntro) . "\n",
+                    $this->textFont,
+                    $this->noPar
+                );
+
+            $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::APPENDIX_VULN_LIST);
+        }
+
+        $section->insertPageBreak();
+        $sectionNumber++;
+
+        // appendix
+        if (in_array('appendix', $options) && $template->localizedAppendix)
+        {
+            $section->writeText($sectionNumber . '. ' . Yii::t('app', 'Appendix'), $this->h2Font, $this->h3Par);
+            $this->_renderText($section, $template->localizedAppendix);
+
+            $sectionNumber++;
+        }
+
         $hashName = hash('sha256', rand() . time() . $fileName);
         $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
 
-        $rtf->save($filePath);
+        $this->rtf->save($filePath);
 
         // give user a file
         header('Content-Description: File Transfer');
@@ -930,13 +1694,49 @@ class ReportController extends Controller
 
         $clients = Client::model()->findAll($criteria);
 
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
+        $criteria = new CDbCriteria();
+        $criteria->order = 't.name ASC';
+
+        $templates = ReportTemplate::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findAll($criteria);
+
+        $riskTemplates = RiskTemplate::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findAllByAttributes(
+            array(),
+            array( 'order' => 't.name ASC' )
+        );
+
         $this->breadcrumbs[] = array(Yii::t('app', 'Project Report'), '');
 
         // display the report generation form
         $this->pageTitle = Yii::t('app', 'Project Report');
 		$this->render('project', array(
-            'model'   => $model,
-            'clients' => $clients
+            'model'         => $model,
+            'clients'       => $clients,
+            'templates'     => $templates,
+            'riskTemplates' => $riskTemplates,
+            'infoChecksLocation' => array(
+                ProjectReportForm::INFO_LOCATION_TARGET   => Yii::t('app', 'in the main list'),
+                ProjectReportForm::INFO_LOCATION_TABLE    => Yii::t('app', 'in a separate table'),
+                ProjectReportForm::INFO_LOCATION_APPENDIX => Yii::t('app', 'in the appendix'),
+            ),
         ));
     }
 
@@ -1316,33 +2116,52 @@ class ReportController extends Controller
     /**
      * Generate a Degree of Fulfillment report
      */
-    private function _generateFulfillmentDegreeReport($model)
+    private function _generateFulfillmentDegreeReport($model, &$section = null, $sectionNumber = null)
     {
-        $clientId  = $model->clientId;
-        $projectId = $model->projectId;
-        $targetIds = $model->targetIds;
+        $fullReport = true;
 
-        $project = Project::model()->findByAttributes(array(
-            'client_id' => $clientId,
-            'id'        => $projectId
-        ));
+        if (!$section)
+            $fullReport = false;
 
-        if ($project === null)
+        if (!$fullReport)
         {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
-            return;
+            $clientId  = $model->clientId;
+            $projectId = $model->projectId;
+            $targetIds = $model->targetIds;
+
+            $project = Project::model()->findByAttributes(array(
+                'client_id' => $clientId,
+                'id'        => $projectId
+            ));
+
+            if ($project === null)
+            {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
+                return;
+            }
+
+            if (!$project->checkPermission())
+            {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
+                return;
+            }
+
+            if (!$targetIds || !count($targetIds))
+            {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
+                return;
+            }
+
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition('id', $targetIds);
+            $criteria->addColumnCondition(array( 'project_id' => $project->id ));
+            $criteria->order = 't.host ASC';
+            $targets = Target::model()->findAll($criteria);
         }
-
-        if (!$project->checkPermission())
+        else
         {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
-            return;
-        }
-
-        if (!$targetIds || !count($targetIds))
-        {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
-            return;
+            $project = $this->project['project'];
+            $targets = $this->project['targets'];
         }
 
         $language = Language::model()->findByAttributes(array(
@@ -1352,19 +2171,14 @@ class ReportController extends Controller
         if ($language)
             $language = $language->id;
 
-        $criteria = new CDbCriteria();
-        $criteria->addInCondition('id', $targetIds);
-        $criteria->addColumnCondition(array( 'project_id' => $project->id ));
-        $criteria->order = 't.host ASC';
-        $targets = Target::model()->findAll($criteria);
-
         $data = array();
 
         foreach ($targets as $target)
         {
             $targetData = array(
-                'host'     => $target->host,
-                'controls' => array(),
+                'host'        => $target->host,
+                'description' => $target->description,
+                'controls'    => array(),
             );
 
             // get all references (they are the same across all target categories)
@@ -1475,87 +2289,74 @@ class ReportController extends Controller
             $data[] = $targetData;
         }
 
-        // include all PHPRtfLite libraries
-        Yii::setPathOfAlias('rtf', Yii::app()->basePath . '/extensions/PHPRtfLite/PHPRtfLite');
-        Yii::import('rtf.Autoloader', true);
-        PHPRtfLite_Autoloader::setBaseDir(Yii::app()->basePath . '/extensions/PHPRtfLite');
-        Yii::registerAutoloader(array( 'PHPRtfLite_Autoloader', 'autoload' ), true);
+        if (!$fullReport)
+        {
+            // include all PHPRtfLite libraries
+            Yii::setPathOfAlias('rtf', Yii::app()->basePath . '/extensions/PHPRtfLite/PHPRtfLite');
+            Yii::import('rtf.Autoloader', true);
+            PHPRtfLite_Autoloader::setBaseDir(Yii::app()->basePath . '/extensions/PHPRtfLite');
+            Yii::registerAutoloader(array( 'PHPRtfLite_Autoloader', 'autoload' ), true);
 
-        $rtf = new PHPRtfLite();
-        $rtf->setCharset('UTF-8');
-        $rtf->setMargins($model->pageMargin, $model->pageMargin, $model->pageMargin, $model->pageMargin);
+            $this->_rtfSetup($model);
 
-        // borders
-        $thinBorder = new PHPRtfLite_Border(
-            $rtf,
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090')
-        );
+            // title
+            $section = $this->rtf->addSection();
+            $section->writeText(Yii::t('app', 'Degree of Fulfillment') . ': ' . $project->name, $this->h1Font, $this->titlePar);
+            $section->writeText("\n\n");
+        }
 
-        // fonts
-        $h1Font = new PHPRtfLite_Font($model->fontSize * 2, $model->fontFamily);
-        $h1Font->setBold();
-
-        $h2Font = new PHPRtfLite_Font(round($model->fontSize * 1.7), $model->fontFamily);
-        $h2Font->setBold();
-
-        $h3Font = new PHPRtfLite_Font(round($model->fontSize * 1.3), $model->fontFamily);
-        $h3Font->setBold();
-
-        $textFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
-
-        $boldFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
-        $boldFont->setBold();
-
-        // paragraphs
-        $titlePar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
-        $titlePar->setSpaceBefore(0);
-
-        $projectPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
-        $projectPar->setSpaceAfter(20);
-
-        $h3Par = new PHPRtfLite_ParFormat();
-
-        $noPar = new PHPRtfLite_ParFormat();
-        $noPar->setSpaceBefore(0);
-        $noPar->setSpaceAfter(0);
-
-        $docWidth = 21.0 - 2 * $model->pageMargin;
-
-        // title
-        $section = $rtf->addSection();
-        $section->writeText(Yii::t('app', 'Degree of Fulfillment'), $h1Font, $titlePar);
-        $section->writeText($project->name . ' (' . $project->year . ')', $h2Font, $projectPar);
+        $targetNumber = 1;
 
         foreach ($data as $target)
         {
-            $section->writeText($target['host'] . '<br>', $h3Font, $h3Par);
+            if ($fullReport)
+            {
+                $section->writeText($sectionNumber . '.' . $targetNumber . '. ' . $target['host'], $this->boldFont);
+                $targetNumber++;
+
+                if ($target['description'])
+                {
+                    $section->writeText(' / ', $this->textFont);
+                    $section->writeText($target['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+                }
+            }
+            else
+            {
+                $section->writeText($target['host'], $this->h3Font);
+
+                if ($target['description'])
+                {
+                    $section->writeText(' / ', $this->h3Font);
+                    $section->writeText($target['description'], new PHPRtfLite_Font($this->h3Font->getSize(), $this->fontFamily, '#909090'));
+                }
+            }
+
+            $section->writeText("\n");
 
             if (!count($target['controls']))
             {
-                $section->writeText(Yii::t('app', 'No checks.') . '<br>', $textFont, $noPar);
+                $section->writeText("\n", $this->textFont);
+                $section->writeText(Yii::t('app', 'No checks.') . "\n\n", $this->textFont);
                 continue;
             }
 
             $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-            $table->addColumnsList(array( $docWidth * 0.28, $docWidth * 0.56, $docWidth * 0.16 ));
+            $table->addColumnsList(array( $this->docWidth * 0.28, $this->docWidth * 0.56, $this->docWidth * 0.16 ));
 
             $row = 1;
 
             $table->addRow();
             $table->mergeCellRange(1, 2, 1, 3);
 
-            $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
+            $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
             $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
 
-            $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
+            $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
             $table->getCell($row, 2)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
 
-            $table->setFontForCellRange($boldFont, 1, 1, 1, 3);
+            $table->setFontForCellRange($this->boldFont, 1, 1, 1, 3);
             $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
-            $table->setBorderForCellRange($thinBorder, 1, 1, 1, 3);
+            $table->setBorderForCellRange($this->thinBorder, 1, 1, 1, 3);
             $table->setFirstRowAsHeader();
 
             $table->writeToCell($row, 1, Yii::t('app', 'Control'));
@@ -1568,49 +2369,52 @@ class ReportController extends Controller
             foreach ($target['controls'] as $control)
             {
                 $table->addRow();
-                $table->getCell($row, 1)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
+                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                 $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                $table->getCell($row, 1)->setBorder($thinBorder);
+                $table->getCell($row, 1)->setBorder($this->thinBorder);
 
-                $table->getCell($row, 2)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                $table->getCell($row, 2)->setBorder($thinBorder);
+                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                $table->getCell($row, 2)->setBorder($this->thinBorder);
                 $table->getCell($row, 2)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
 
-                $table->getCell($row, 3)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
-                $table->getCell($row, 3)->setBorder($thinBorder);
+                $table->getCell($row, 3)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                $table->getCell($row, 3)->setBorder($this->thinBorder);
 
-                $table->writeToCell($row, 1, $control['name'], $textFont);
-                $table->addImageToCell($row, 2, $this->_generateFulfillmentImage($control['degree']), null, $docWidth * 0.50);
+                $table->writeToCell($row, 1, $control['name'], $this->textFont);
+                $table->addImageToCell($row, 2, $this->_generateFulfillmentImage($control['degree']), null, $this->docWidth * 0.50);
                 $table->writeToCell($row, 3, $control['degree'] . '%');
 
                 $row++;
             }
 
-            $table->setFontForCellRange($textFont, 1, 1, count($target['controls']) + 1, 2);
+            $table->setFontForCellRange($this->textFont, 1, 1, count($target['controls']) + 1, 2);
         }
 
-        $fileName = Yii::t('app', 'Degree of Fulfillment') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
-        $hashName = hash('sha256', rand() . time() . $fileName);
-        $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
+        if (!$fullReport)
+        {
+            $fileName = Yii::t('app', 'Degree of Fulfillment') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
+            $hashName = hash('sha256', rand() . time() . $fileName);
+            $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
 
-        $rtf->save($filePath);
+            $this->rtf->save($filePath);
 
-        // give user a file
-        header('Content-Description: File Transfer');
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="' . $fileName . '"');
-        header('Content-Transfer-Encoding: binary');
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Pragma: public');
-        header('Content-Length: ' . filesize($filePath));
+            // give user a file
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="' . $fileName . '"');
+            header('Content-Transfer-Encoding: binary');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($filePath));
 
-        ob_clean();
-        flush();
+            ob_clean();
+            flush();
 
-        readfile($filePath);
+            readfile($filePath);
 
-        exit();
+            exit();
+        }
     }
 
     /**
@@ -1663,46 +2467,12 @@ class ReportController extends Controller
     /**
      * Generate risk matrix report.
      */
-    private function _generateRiskMatrixReport($model)
+    private function _generateRiskMatrixReport($model, &$section = null, $sectionNumber = null)
     {
-        $templateId = $model->templateId;
-        $clientId   = $model->clientId;
-        $projectId  = $model->projectId;
-        $targetIds  = $model->targetIds;
-        $matrix     = $model->matrix;
+        $fullReport = true;
 
-        $template = RiskTemplate::model()->findByAttributes(array(
-            'id' => $templateId
-        ));
-
-        if ($template === null)
-        {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Template not found.'));
-            return;
-        }
-
-        $project = Project::model()->findByAttributes(array(
-            'client_id' => $clientId,
-            'id'        => $projectId
-        ));
-
-        if ($project === null)
-        {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
-            return;
-        }
-
-        if (!$project->checkPermission())
-        {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
-            return;
-        }
-
-        if (!$targetIds || !count($targetIds))
-        {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
-            return;
-        }
+        if (!$section)
+            $fullReport = false;
 
         $language = Language::model()->findByAttributes(array(
             'code' => Yii::app()->language
@@ -1711,11 +2481,69 @@ class ReportController extends Controller
         if ($language)
             $language = $language->id;
 
-        $criteria = new CDbCriteria();
-        $criteria->addInCondition('id', $targetIds);
-        $criteria->addColumnCondition(array( 'project_id' => $project->id ));
-        $criteria->order = 't.host ASC';
-        $targets = Target::model()->findAll($criteria);
+        $matrix = $model->matrix;
+
+        if (!$fullReport)
+        {
+            $templateId = $model->templateId;
+            $clientId   = $model->clientId;
+            $projectId  = $model->projectId;
+            $targetIds  = $model->targetIds;
+
+            $template = RiskTemplate::model()->findByAttributes(array(
+                'id' => $templateId
+            ));
+
+            if ($template === null)
+            {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Template not found.'));
+                return;
+            }
+
+            $project = Project::model()->findByAttributes(array(
+                'client_id' => $clientId,
+                'id'        => $projectId
+            ));
+
+            if ($project === null)
+            {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
+                return;
+            }
+
+            if (!$project->checkPermission())
+            {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
+                return;
+            }
+
+            if (!$targetIds || !count($targetIds))
+            {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
+                return;
+            }
+
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition('id', $targetIds);
+            $criteria->addColumnCondition(array( 'project_id' => $project->id ));
+            $criteria->order = 't.host ASC';
+            $targets = Target::model()->findAll($criteria);
+        }
+        else
+        {
+            $template = RiskTemplate::model()->findByAttributes(array(
+                'id' => $model->templateId
+            ));
+
+            if ($template === null)
+            {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Template not found.'));
+                return;
+            }
+
+            $targets = $this->project['targets'];
+            $project = $this->project['project'];
+        }
 
         $risks = RiskCategory::model()->with(array(
             'l10n' => array(
@@ -1817,107 +2645,48 @@ class ReportController extends Controller
             }
 
             $data[] = array(
-                'host'   => $target->host,
-                'matrix' => $mtrx
+                'host'        => $target->host,
+                'description' => $target->description,
+                'matrix'      => $mtrx
             );
         }
 
-        // include all PHPRtfLite libraries
-        Yii::setPathOfAlias('rtf', Yii::app()->basePath . '/extensions/PHPRtfLite/PHPRtfLite');
-        Yii::import('rtf.Autoloader', true);
-        PHPRtfLite_Autoloader::setBaseDir(Yii::app()->basePath . '/extensions/PHPRtfLite');
-        Yii::registerAutoloader(array( 'PHPRtfLite_Autoloader', 'autoload' ), true);
+        if (!$fullReport)
+        {
+            // include all PHPRtfLite libraries
+            Yii::setPathOfAlias('rtf', Yii::app()->basePath . '/extensions/PHPRtfLite/PHPRtfLite');
+            Yii::import('rtf.Autoloader', true);
+            PHPRtfLite_Autoloader::setBaseDir(Yii::app()->basePath . '/extensions/PHPRtfLite');
+            Yii::registerAutoloader(array( 'PHPRtfLite_Autoloader', 'autoload' ), true);
 
-        $rtf = new PHPRtfLite();
-        $rtf->setCharset('UTF-8');
-        $rtf->setMargins($model->pageMargin, $model->pageMargin, $model->pageMargin, $model->pageMargin);
+            $this->_rtfSetup($model);
 
-        // borders
-        $thinBorder = new PHPRtfLite_Border(
-            $rtf,
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090')
-        );
-
-        $thinBorderTL = new PHPRtfLite_Border(
-            $rtf,
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(0, '#909090'),
-            new PHPRtfLite_Border_Format(0, '#909090')
-        );
-
-        $thinBorderBR = new PHPRtfLite_Border(
-            $rtf,
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(0, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090')
-        );
-
-        // fonts
-        $h1Font = new PHPRtfLite_Font($model->fontSize * 2, $model->fontFamily);
-        $h1Font->setBold();
-
-        $h2Font = new PHPRtfLite_Font(round($model->fontSize * 1.7), $model->fontFamily);
-        $h2Font->setBold();
-
-        $h3Font = new PHPRtfLite_Font(round($model->fontSize * 1.3), $model->fontFamily);
-        $h3Font->setBold();
-
-        $textFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
-
-        $boldFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
-        $boldFont->setBold();
-
-        $smallBoldFont = new PHPRtfLite_Font(round($model->fontSize * 0.8), $model->fontFamily);
-        $smallBoldFont->setBold();
-
-        // paragraphs
-        $titlePar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
-        $titlePar->setSpaceBefore(0);
-
-        $projectPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
-        $projectPar->setSpaceAfter(20);
-
-        $h3Par = new PHPRtfLite_ParFormat();
-        $h3Par->setSpaceAfter(10);
-
-        $noPar = new PHPRtfLite_ParFormat();
-        $noPar->setSpaceBefore(0);
-        $noPar->setSpaceAfter(0);
-
-        $docWidth = 21.0 - 2 * $model->pageMargin;
-
-        // title
-        $section = $rtf->addSection();
-        $section->writeText(Yii::t('app', 'Risk Matrix'), $h1Font, $titlePar);
-        $section->writeText($project->name . ' (' . $project->year . ')', $h2Font, $projectPar);
-
-        $section->writeText(Yii::t('app', 'Risk Categories') . '<br>', $h3Font, $noPar);
+            // title
+            $section = $this->rtf->addSection();
+            $section->writeText(Yii::t('app', 'Risk Matrix') . ': ' . $project->name, $this->h1Font, $this->titlePar);
+            $section->writeText(Yii::t('app', 'Risk Categories') . "\n", $this->h3Font, $this->noPar);
+        }
 
         $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
         $table->addRows(count($risks) + 1);
-        $table->addColumnsList(array( $docWidth * 0.11, $docWidth * 0.89 ));
-        $table->setFontForCellRange($boldFont, 1, 1, 1, 2);
+        $table->addColumnsList(array( $this->docWidth * 0.11, $this->docWidth * 0.89 ));
+        $table->setFontForCellRange($this->boldFont, 1, 1, 1, 2);
         $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 2);
-        $table->setFontForCellRange($textFont, 2, 1, count($risks), 2);
-        $table->setBorderForCellRange($thinBorder, 1, 1, count($risks) + 1, 2);
+        $table->setFontForCellRange($this->textFont, 2, 1, count($risks), 2);
+        $table->setBorderForCellRange($this->thinBorder, 1, 1, count($risks) + 1, 2);
 
         // set paddings
         for ($row = 1; $row <= count($risks) + 1; $row++)
             for ($col = 1; $col <= 2; $col++)
             {
-                $table->getCell($row, $col)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
+                $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                 $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
             }
 
         $row = 1;
 
-        $table->writeToCell($row, 1, Yii::t('app', 'Code'));
-        $table->writeToCell($row, 2, Yii::t('app', 'Risk Category'));
+        $table->writeToCell($row, 1, Yii::t('app', 'Code'), $this->boldFont);
+        $table->writeToCell($row, 2, Yii::t('app', 'Risk Category'), $this->boldFont);
 
         $row++;
         $ctr = 0;
@@ -1932,33 +2701,54 @@ class ReportController extends Controller
             $row++;
         }
 
-        $section->writeText(Yii::t('app', 'Targets'), $h3Font, $h3Par);
+        if (!$fullReport)
+        {
+            $section->writeText(Yii::t('app', 'Targets'), $this->h3Font, $this->h3Par);
+            $section->writeText("\n\n", $this->textFont);
+        }
+
+        $targetNumber = 1;
 
         foreach ($data as $target)
         {
-            $section->writeText($target['host'] . '<br>', $boldFont, $noPar);
+            if ($fullReport)
+            {
+                $section->writeText($sectionNumber . '.' . $targetNumber . '. ' . $target['host'], $this->boldFont);
+                $targetNumber++;
+            }
+            else
+                $section->writeText($target['host'], $this->boldFont);
+
+            if ($target['description'])
+            {
+                $section->writeText(' / ', $this->textFont);
+                $section->writeText($target['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+            }
+
+            $section->writeText("\n");
 
             if (!$target['matrix'])
             {
-                $section->writeText(Yii::t('app', 'No checks.') . '<br>', $textFont, $noPar);
+                $section->writeText("\n", $this->textFont);
+                $section->writeText(Yii::t('app', 'No checks.') . "\n\n", $this->textFont);
                 continue;
             }
 
             $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
 
             $table->addRows(5);
-            $table->addColumnsList(array( $docWidth * 0.12, $docWidth * 0.22, $docWidth * 0.22, $docWidth * 0.22, $docWidth * 0.22 ));
+            $table->addColumnsList(array( $this->docWidth * 0.12, $this->docWidth * 0.22, $this->docWidth * 0.22, $this->docWidth * 0.22, $this->docWidth * 0.22 ));
 
             $table->mergeCellRange(1, 1, 4, 1);
             $table->mergeCellRange(5, 1, 5, 5);
 
-            $table->setFontForCellRange($smallBoldFont, 1, 1, 5, 1);
-            $table->setFontForCellRange($smallBoldFont, 5, 1, 5, 1);
-            $table->setBorderForCellRange($thinBorderTL, 1, 1, 5, 1);
-            $table->setBorderForCellRange($thinBorderBR, 5, 1, 5, 5);
+            $table->setFontForCellRange($this->smallBoldFont, 1, 1, 5, 1);
+            $table->setFontForCellRange($this->smallBoldFont, 5, 1, 5, 1);
+            $table->setBorderForCellRange($this->thinBorderTL, 1, 1, 5, 1);
+            $table->setBorderForCellRange($this->thinBorderBR, 5, 1, 5, 5);
 
-            $table->setFontForCellRange($textFont, 1, 2, 4, 5);
-            $table->setBorderForCellRange($thinBorder, 1, 2, 4, 5);
+            $table->setFontForCellRange($this->textFont, 1, 2, 4, 5);
+            $table->setBorderForCellRange($this->thinBorder, 1, 2, 4, 5);
 
             $table->writeToCell(1, 1, '&uarr;<br>' . Yii::t('app', 'Damage'));
             $table->writeToCell(5, 1, Yii::t('app', 'Likelihood') . ' &rarr;');
@@ -1967,7 +2757,7 @@ class ReportController extends Controller
             for ($row = 1; $row <= 5; $row++)
                 for ($col = 1; $col <= 5; $col++)
                 {
-                    $table->getCell($row, $col)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
+                    $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
 
                     if ($col == 1 || $row == 5)
                     {
@@ -2001,28 +2791,31 @@ class ReportController extends Controller
                 }
         }
 
-        $fileName = Yii::t('app', 'Risk Matrix') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
-        $hashName = hash('sha256', rand() . time() . $fileName);
-        $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
+        if (!$fullReport)
+        {
+            $fileName = Yii::t('app', 'Risk Matrix') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
+            $hashName = hash('sha256', rand() . time() . $fileName);
+            $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
 
-        $rtf->save($filePath);
+            $this->rtf->save($filePath);
 
-        // give user a file
-        header('Content-Description: File Transfer');
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="' . $fileName . '"');
-        header('Content-Transfer-Encoding: binary');
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Pragma: public');
-        header('Content-Length: ' . filesize($filePath));
+            // give user a file
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="' . $fileName . '"');
+            header('Content-Transfer-Encoding: binary');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($filePath));
 
-        ob_clean();
-        flush();
+            ob_clean();
+            flush();
 
-        readfile($filePath);
+            readfile($filePath);
 
-        exit();
+            exit();
+        }
     }
 
     /**

@@ -21,6 +21,7 @@ var _messages = {
     'Indent'                                            : '<?php echo Yii::t('app', 'Indent'); ?>',
     'Search...'                                         : '<?php echo Yii::t('app', 'Search...'); ?>',
     'No header image.'                                  : '<?php echo Yii::t('app', 'No header image.'); ?>',
+    'No logo.'                                          : '<?php echo Yii::t('app', 'No logo.'); ?>',
 };
 
 system.l10nMessages = _messages;

@@ -241,7 +241,7 @@ function Admin()
         /**
          * Initialize header image upload form.
          */
-        this.initHeaderImageUploadForms = function () {
+        this.initHeaderImageUploadForm = function () {
             $('input[name^="ReportTemplateHeaderImageUploadForm"]').each(function () {
                 var url  = $(this).data('upload-url'),
                     data = {};
@@ -346,10 +346,129 @@ function Admin()
          * Delete header image.
          */
         this.delHeaderImage = function (id) {
-            if (confirm(system.translate('Are you sure that you want to delete the header image?')))
+            if (confirm(system.translate('Are you sure that you want to delete this object?')))
                 _reportTemplate._controlHeaderImage(id, 'delete');
         };
-    }
+    };
+
+    /**
+     * Client object.
+     */
+    this.client = new function () {
+        var _client = this;
+
+        /**
+         * Initialize logo upload form.
+         */
+        this.initLogoUploadForm = function () {
+            $('input[name^="ClientLogoUploadForm"]').each(function () {
+                var url  = $(this).data('upload-url'),
+                    data = {};
+
+                data['YII_CSRF_TOKEN'] = system.csrf;
+
+                $(this).fileupload({
+                    dataType             : 'json',
+                    url                  : url,
+                    forceIframeTransport : true,
+                    timeout              : 120000,
+                    formData             : data,
+
+                    done : function (e, data) {
+                        $('.loader-image').hide();
+                        $('.upload-message').hide();
+                        $('.file-input').show();
+
+                        var json = data.result;
+
+                        if (json.status == 'error')
+                        {
+                            system.showMessage('error', json.errorText);
+                            return;
+                        }
+
+                        data = json.data;
+
+                        // refresh the image
+                        var d = new Date();
+
+                        if ($('.logo-image > img').length)
+                            $('.logo-image > img').attr('src', data.url + '?' + d.getTime());
+                        else
+                            $('.logo-image').html('<img src="' + data.url + '?' + d.getTime() + '">');
+
+                        $('.delete-logo-link').show();
+                    },
+
+                    fail : function (e, data) {
+                        $('.loader-image').hide();
+                        $('.upload-message').hide();
+                        $('.file-input').show();
+                        system.showMessage('error', system.translate('Request failed, please try again.'));
+                    },
+
+                    start : function (e) {
+                        $('.loader-image').show();
+                        $('.file-input').hide();
+                        $('.upload-message').show();
+                    }
+                });
+            });
+        };
+
+        /**
+         * Control logo.
+         */
+        this._controlLogo = function(id, operation) {
+            var url = $('.logo-image').data('control-url');
+
+            $.ajax({
+                dataType : 'json',
+                url      : url,
+                timeout  : system.ajaxTimeout,
+                type     : 'POST',
+
+                data : {
+                    'EntryControlForm[operation]' : operation,
+                    'EntryControlForm[id]'        : id,
+                    'YII_CSRF_TOKEN'              : system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $('.loader-image').hide();
+
+                    if (data.status == 'error')
+                    {
+                        system.showMessage('error', data.errorText);
+                        return;
+                    }
+
+                    if (operation == 'delete')
+                    {
+                        $('.logo-image').html(system.translate('No logo.'));
+                        $('.delete-logo-link').hide();
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $('.loader-image').hide();
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $('.loader-image').show();
+                }
+            });
+        };
+
+        /**
+         * Delete logo.
+         */
+        this.delLogo = function (id) {
+            if (confirm(system.translate('Are you sure that you want to delete this object?')))
+                _client._controlLogo(id, 'delete');
+        };
+    };
 }
 
 var admin = new Admin();

@@ -69,8 +69,55 @@
                                         <?php endif; ?>
                                     </div>
                                 </div>
+
+                                <div class="control-group <?php if ($model->getError('separateVulnsIntro')) echo 'error'; ?>">
+                                    <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_separateVulnsIntro"><?php echo Yii::t('app', 'Separate Category Introduction'); ?></label>
+                                    <div class="controls">
+                                        <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_separateVulnsIntro" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][separateVulnsIntro]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['separateVulnsIntro']) : ''; ?></textarea>
+                                        <?php if ($model->getError('separateVulnsIntro')): ?>
+                                            <p class="help-block"><?php echo $model->getError('separateVulnsIntro'); ?></p>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                
+                                <div class="control-group <?php if ($model->getError('vulnsIntro')) echo 'error'; ?>">
+                                    <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_vulnsIntro"><?php echo Yii::t('app', 'Vulns Introduction'); ?></label>
+                                    <div class="controls">
+                                        <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_vulnsIntro" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][vulnsIntro]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['vulnsIntro']) : ''; ?></textarea>
+                                        <?php if ($model->getError('vulnsIntro')): ?>
+                                            <p class="help-block"><?php echo $model->getError('vulnsIntro'); ?></p>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                
+                                <div class="control-group <?php if ($model->getError('infoChecksIntro')) echo 'error'; ?>">
+                                    <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_infoChecksIntro"><?php echo Yii::t('app', 'Info Checks Introduction'); ?></label>
+                                    <div class="controls">
+                                        <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_infoChecksIntro" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][infoChecksIntro]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['infoChecksIntro']) : ''; ?></textarea>
+                                        <?php if ($model->getError('infoChecksIntro')): ?>
+                                            <p class="help-block"><?php echo $model->getError('infoChecksIntro'); ?></p>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
                             </div>
                         <?php endforeach; ?>
+                    </div>
+
+                    <hr>
+
+                    <div class="control-group <?php if ($model->getError('separateCategoryId')) echo 'error'; ?>">
+                        <label class="control-label" for="ReportTemplateEditForm_separateCategoryId"><?php echo Yii::t('app', 'Separate Category'); ?></label>
+                        <div class="controls">
+                            <select class="input-xlarge" id="ReportTemplateEditForm_separateCategoryId" name="ReportTemplateEditForm[separateCategoryId]">
+                                <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
+                                <?php foreach ($categories as $cat): ?>
+                                    <option value="<?php echo $cat->id; ?>" <?php if ($cat->id == $model->separateCategoryId) echo 'selected'; ?>><?php echo CHtml::encode($cat->localizedName); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <?php if ($model->getError('separateCategoryId')): ?>
+                                <p class="help-block"><?php echo $model->getError('separateCategoryId'); ?></p>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
                     <?php if (!$template->isNewRecord): ?>
@@ -114,7 +161,7 @@
                             </tr>
                             <tr>
                                 <th>
-                                    {name}
+                                    {project}
                                 </th>
                                 <td>
                                     <?php echo Yii::t('app', 'Project name'); ?>
@@ -153,22 +200,6 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th>
-                                    {date.from}
-                                </th>
-                                <td>
-                                    <?php echo Yii::t('app', 'The beginning date of project tests'); ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    {date.to}
-                                </th>
-                                <td>
-                                    <?php echo Yii::t('app', 'The last date of project tests'); ?>
-                                </td>
-                            </tr>
-                            <tr>
                                 <td colspan="2">
                                     <br><hr>
                                 </td>
@@ -197,14 +228,6 @@
                             <tr>
                                 <th>
                                     {checks}
-                                </th>
-                                <td>
-                                    <?php echo Yii::t('app', 'Number of checks'); ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    {checks.fin}
                                 </th>
                                 <td>
                                     <?php echo Yii::t('app', 'Number of finished checks'); ?>
@@ -242,22 +265,6 @@
                                     <?php echo Yii::t('app', 'Number of info rating checks'); ?>
                                 </td>
                             </tr>
-                            <tr>
-                                <th>
-                                    {checks.hid}
-                                </th>
-                                <td>
-                                    <?php echo Yii::t('app', 'Number of hidden checks'); ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    {check.list}
-                                </th>
-                                <td>
-                                    <?php echo Yii::t('app', 'List of high and med risk checks'); ?>
-                                </td>
-                            </tr>
                         </table>
                     </div>
                 </div>
@@ -285,6 +292,6 @@
             'lists'       : false
         });
 
-        admin.reportTemplate.initHeaderImageUploadForms();
+        admin.reportTemplate.initHeaderImageUploadForm();
     });
 </script>

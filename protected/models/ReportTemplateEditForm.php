@@ -21,6 +21,26 @@ class ReportTemplateEditForm extends LocalizedFormModel
     public $appendix;
 
     /**
+     * @var integer separate category id
+     */
+    public $separateCategoryId;
+
+    /**
+     * @var string separate vulns intro.
+     */
+    public $separateVulnsIntro;
+
+    /**
+     * @var string vulns intro.
+     */
+    public $vulnsIntro;
+
+    /**
+     * @var string info checks intro.
+     */
+    public $infoChecksIntro;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules()
@@ -28,7 +48,8 @@ class ReportTemplateEditForm extends LocalizedFormModel
 		return array(
 			array( 'name', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
-            array( 'intro, appendix, localizedItems', 'safe' ),
+            array( 'separateCategoryId', 'numerical', 'integerOnly' => true, 'min' => 0 ),
+            array( 'intro, appendix, localizedItems, vulnsIntro, separateVulnsIntro, infoChecksIntro', 'safe' ),
 		);
 	}
     
@@ -38,9 +59,13 @@ class ReportTemplateEditForm extends LocalizedFormModel
 	public function attributeLabels()
 	{
 		return array(
-			'name'     => Yii::t('app', 'Name'),
-            'intro'    => Yii::t('app', 'Introduction'),
-            'appendix' => Yii::t('app', 'Appendix'),
+			'name'               => Yii::t('app', 'Name'),
+            'intro'              => Yii::t('app', 'Introduction'),
+            'appendix'           => Yii::t('app', 'Appendix'),
+            'separateCategoryId' => Yii::t('app', 'Separate Category'),
+            'separateVulnsIntro' => Yii::t('app', 'Separate Category Introduction'),
+            'vulnsIntro'         => Yii::t('app', 'Vulns Introduction'),
+            'infoChecksIntro'    => Yii::t('app', 'Info Checks Introduction'),
 		);
 	}
 }
