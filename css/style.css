@@ -670,3 +670,16 @@ table.control-header td {
 .summary-list .range {
     width:70px;
 }
+
+.login-logo {
+    float:left;
+    margin:20px 30px 0 0;
+
+}
+
+.login-block {
+    overflow:hidden;
+    padding:0px 30px 20px 30px;
+    margin:20px 0 30px 0;
+    border-left:1px dashed #ddd;
+}
