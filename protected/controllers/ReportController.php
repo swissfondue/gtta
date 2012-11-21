@@ -324,6 +324,12 @@ class ReportController extends Controller
      */
     private function _rtfSetup($model)
     {
+        // include all PHPRtfLite libraries
+        Yii::setPathOfAlias('rtf', Yii::app()->basePath . '/extensions/PHPRtfLite/PHPRtfLite');
+        Yii::import('rtf.Autoloader', true);
+        PHPRtfLite_Autoloader::setBaseDir(Yii::app()->basePath . '/extensions/PHPRtfLite');
+        Yii::registerAutoloader(array( 'PHPRtfLite_Autoloader', 'autoload' ), true);
+
         $this->rtf = new PHPRtfLite();
         $this->rtf->setCharset('UTF-8');
         $this->rtf->setMargins($model->pageMargin, $model->pageMargin, $model->pageMargin, $model->pageMargin);
@@ -1136,12 +1142,6 @@ class ReportController extends Controller
         $this->project['checksHigh'] = $checksHigh;
         $this->project['reducedChecks'] = $reducedChecks;
 
-        // include all PHPRtfLite libraries
-        Yii::setPathOfAlias('rtf', Yii::app()->basePath . '/extensions/PHPRtfLite/PHPRtfLite');
-        Yii::import('rtf.Autoloader', true);
-        PHPRtfLite_Autoloader::setBaseDir(Yii::app()->basePath . '/extensions/PHPRtfLite');
-        Yii::registerAutoloader(array( 'PHPRtfLite_Autoloader', 'autoload' ), true);
-
         $fileName = Yii::t('app', 'Penetration Test Report') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
 
         $this->_rtfSetup($model);
@@ -1916,68 +1916,34 @@ class ReportController extends Controller
             $targetsData[] = $targetData;
         }
 
-        // include all PHPRtfLite libraries
-        Yii::setPathOfAlias('rtf', Yii::app()->basePath . '/extensions/PHPRtfLite/PHPRtfLite');
-        Yii::import('rtf.Autoloader', true);
-        PHPRtfLite_Autoloader::setBaseDir(Yii::app()->basePath . '/extensions/PHPRtfLite');
-        Yii::registerAutoloader(array( 'PHPRtfLite_Autoloader', 'autoload' ), true);
+        $this->_rtfSetup($model);
+        $section = $this->rtf->addSection();
 
-        $rtf = new PHPRtfLite();
-        $rtf->setCharset('UTF-8');
-        $rtf->setMargins($model->pageMargin, $model->pageMargin, $model->pageMargin, $model->pageMargin);
-
-        // borders
-        $thinBorder = new PHPRtfLite_Border(
-            $rtf,
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090'),
-            new PHPRtfLite_Border_Format(1, '#909090')
-        );
-
-        // fonts
-        $h1Font = new PHPRtfLite_Font($model->fontSize * 2, $model->fontFamily);
-        $h1Font->setBold();
-
-        $h2Font = new PHPRtfLite_Font(round($model->fontSize * 1.7), $model->fontFamily);
-        $h2Font->setBold();
-
-        $h3Font = new PHPRtfLite_Font(round($model->fontSize * 1.3), $model->fontFamily);
-        $h3Font->setBold();
-
-        $textFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
-
-        $boldFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
-        $boldFont->setBold();
-
-        // paragraphs
-        $titlePar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
-        $titlePar->setSpaceBefore(0);
-
-        $projectPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
-        $projectPar->setSpaceAfter(20);
-
-        $noPar = new PHPRtfLite_ParFormat();
-        $noPar->setSpaceBefore(0);
-        $noPar->setSpaceAfter(0);
+        // footer
+        $footer = $section->addFooter();
+        $footer->writeText(Yii::t('app', 'Projects Comparison') . ', ', $this->textFont, $this->noPar);
+        $footer->writePlainRtfCode(
+            '\fs' . ($this->textFont->getSize() * 2) . ' \f' . $this->textFont->getFontIndex() . ' ' .
+             Yii::t('app', 'page {page} of {numPages}',
+            array(
+                '{page}'     => '{\field{\*\fldinst {PAGE}}{\fldrslt {1}}}',
+                '{numPages}' => '{\field{\*\fldinst {NUMPAGES}}{\fldrslt {1}}}'
+            )
+        ));
 
         // title
-        $section = $rtf->addSection();
-        $section->writeText(Yii::t('app', 'Projects Comparison'), $h1Font, $titlePar);
-        $section->writeText($project1->name . ' (' . $project1->year . ')<br>' . $project2->name . ' (' . $project2->year . ')', $h2Font, $projectPar);
+        $section->writeText(Yii::t('app', 'Projects Comparison'), $this->h1Font, $this->titlePar);
 
         // detailed summary
-        $section->writeText(Yii::t('app', 'Target Comparison') . '<br>', $h3Font, $noPar);
+        $section->writeText(Yii::t('app', 'Target Comparison') . '<br>', $this->h3Font, $this->noPar);
         $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
 
-        $docWidth = 21.0 - 2 * $model->pageMargin;
-
         $table->addRows(count($targetsData) + 1);
-        $table->addColumnsList(array( $docWidth * 0.33, $docWidth * 0.33, $docWidth * 0.34 ));
-        $table->setFontForCellRange($boldFont, 1, 1, 1, 3);
+        $table->addColumnsList(array( $this->docWidth * 0.33, $this->docWidth * 0.33, $this->docWidth * 0.34 ));
+        $table->setFontForCellRange($this->boldFont, 1, 1, 1, 3);
         $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
-        $table->setFontForCellRange($textFont, 2, 1, count($targetsData) + 1, 3);
-        $table->setBorderForCellRange($thinBorder, 1, 1, count($targetsData) + 1, 3);
+        $table->setFontForCellRange($this->textFont, 2, 1, count($targetsData) + 1, 3);
+        $table->setBorderForCellRange($this->thinBorder, 1, 1, count($targetsData) + 1, 3);
         $table->setFirstRowAsHeader();
 
         // set paddings
@@ -1997,8 +1963,8 @@ class ReportController extends Controller
         foreach ($targetsData as $target)
         {
             $table->writeToCell($row, 1, $target['host']);
-            $table->addImageToCell($row, 2, $this->_generateRatingImage($target['ratings'][0]), null, $docWidth * 0.30);
-            $table->addImageToCell($row, 3, $this->_generateRatingImage($target['ratings'][1]), null, $docWidth * 0.30);
+            $table->addImageToCell($row, 2, $this->_generateRatingImage($target['ratings'][0]), null, $this->docWidth * 0.30);
+            $table->addImageToCell($row, 3, $this->_generateRatingImage($target['ratings'][1]), null, $this->docWidth * 0.30);
 
             $table->getCell($row, 2)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
             $table->getCell($row, 3)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
@@ -2010,7 +1976,7 @@ class ReportController extends Controller
         $hashName = hash('sha256', rand() . time() . $fileName);
         $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
 
-        $rtf->save($filePath);
+        $this->rtf->save($filePath);
 
         // give user a file
         header('Content-Description: File Transfer');
@@ -2291,16 +2257,22 @@ class ReportController extends Controller
 
         if (!$fullReport)
         {
-            // include all PHPRtfLite libraries
-            Yii::setPathOfAlias('rtf', Yii::app()->basePath . '/extensions/PHPRtfLite/PHPRtfLite');
-            Yii::import('rtf.Autoloader', true);
-            PHPRtfLite_Autoloader::setBaseDir(Yii::app()->basePath . '/extensions/PHPRtfLite');
-            Yii::registerAutoloader(array( 'PHPRtfLite_Autoloader', 'autoload' ), true);
-
             $this->_rtfSetup($model);
+            $section = $this->rtf->addSection();
+
+            // footer
+            $footer = $section->addFooter();
+            $footer->writeText(Yii::t('app', 'Degree of Fulfillment') . ': ' . $project->name . ', ', $this->textFont, $this->noPar);
+            $footer->writePlainRtfCode(
+                '\fs' . ($this->textFont->getSize() * 2) . ' \f' . $this->textFont->getFontIndex() . ' ' .
+                 Yii::t('app', 'page {page} of {numPages}',
+                array(
+                    '{page}'     => '{\field{\*\fldinst {PAGE}}{\fldrslt {1}}}',
+                    '{numPages}' => '{\field{\*\fldinst {NUMPAGES}}{\fldrslt {1}}}'
+                )
+            ));
 
             // title
-            $section = $this->rtf->addSection();
             $section->writeText(Yii::t('app', 'Degree of Fulfillment') . ': ' . $project->name, $this->h1Font, $this->titlePar);
             $section->writeText("\n\n");
         }
@@ -2653,16 +2625,22 @@ class ReportController extends Controller
 
         if (!$fullReport)
         {
-            // include all PHPRtfLite libraries
-            Yii::setPathOfAlias('rtf', Yii::app()->basePath . '/extensions/PHPRtfLite/PHPRtfLite');
-            Yii::import('rtf.Autoloader', true);
-            PHPRtfLite_Autoloader::setBaseDir(Yii::app()->basePath . '/extensions/PHPRtfLite');
-            Yii::registerAutoloader(array( 'PHPRtfLite_Autoloader', 'autoload' ), true);
-
             $this->_rtfSetup($model);
+            $section = $this->rtf->addSection();
+
+            // footer
+            $footer = $section->addFooter();
+            $footer->writeText(Yii::t('app', 'Risk Matrix') . ': ' . $project->name . ', ', $this->textFont, $this->noPar);
+            $footer->writePlainRtfCode(
+                '\fs' . ($this->textFont->getSize() * 2) . ' \f' . $this->textFont->getFontIndex() . ' ' .
+                 Yii::t('app', 'page {page} of {numPages}',
+                array(
+                    '{page}'     => '{\field{\*\fldinst {PAGE}}{\fldrslt {1}}}',
+                    '{numPages}' => '{\field{\*\fldinst {NUMPAGES}}{\fldrslt {1}}}'
+                )
+            ));
 
             // title
-            $section = $this->rtf->addSection();
             $section->writeText(Yii::t('app', 'Risk Matrix') . ': ' . $project->name, $this->h1Font, $this->titlePar);
             $section->writeText(Yii::t('app', 'Risk Categories') . "\n", $this->h3Font, $this->noPar);
         }
