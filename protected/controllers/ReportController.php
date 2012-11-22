@@ -316,7 +316,7 @@ class ReportController extends Controller
         $text = str_replace('{checks.lo}', $this->project['checksLow'], $text);
         $text = str_replace('{checks.hi}', $this->project['checksHigh'], $text);
 
-        $section->writeText($text, $this->textFont, $this->noPar);
+        $section->writeText($this->_prepareProjectReportText($text), $this->textFont, $this->noPar);
     }
 
     /**
@@ -1328,7 +1328,7 @@ class ReportController extends Controller
                     $this->noPar
                 );
 
-                $this->_renderText($section, $summary->localizedSummary . "\n");
+                $this->_renderText($section, $summary->localizedSummary . "<br>");
                 $subsectionNumber++;
             }
         }
@@ -1577,17 +1577,13 @@ class ReportController extends Controller
         if ($haveSeparate)
         {
             $section->writeText(
-                $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Information Gathering'),
+                $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Information Gathering') . "\n",
                 $this->h3Font,
                 $this->noPar
             );
 
             if ($template->localizedSeparateVulnsIntro)
-                $section->writeText(
-                    "\n" . $this->_prepareProjectReportText($template->localizedSeparateVulnsIntro) . "\n",
-                    $this->textFont,
-                    $this->noPar
-                );
+                $this->_renderText($section, $template->localizedSeparateVulnsIntro . "<br>");
 
             $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::SEPARATE_VULN_LIST, $model->infoChecksLocation);
             $subsectionNumber++;
@@ -1595,14 +1591,14 @@ class ReportController extends Controller
 
         if ($haveSeparate || $haveInfo && $model->infoChecksLocation == ProjectReportForm::INFO_LOCATION_APPENDIX)
         {
-            $section->writeText($sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Found Vulnerabilities'), $this->h3Font, $this->noPar);
+            $section->writeText(
+                $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Found Vulnerabilities') . "\n",
+                $this->h3Font,
+                $this->noPar
+            );
 
             if ($template->localizedVulnsIntro)
-                $section->writeText(
-                    "\n" . $this->_prepareProjectReportText($template->localizedVulnsIntro) . "\n\n",
-                    $this->textFont,
-                    $this->noPar
-                );
+                $this->_renderText($section, $template->localizedVulnsIntro . "<br><br>");
         }
 
         $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::NORMAL_VULN_LIST, $model->infoChecksLocation);
@@ -1610,14 +1606,14 @@ class ReportController extends Controller
 
         if ($haveInfo && $model->infoChecksLocation == ProjectReportForm::INFO_LOCATION_APPENDIX)
         {
-            $section->writeText($sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Additional Data'), $this->h3Font, $this->noPar);
+            $section->writeText(
+                $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Additional Data') . "\n",
+                $this->h3Font,
+                $this->noPar
+            );
 
             if ($template->localizedInfoChecksIntro)
-                $section->writeText(
-                    "\n" . $this->_prepareProjectReportText($template->localizedInfoChecksIntro) . "\n",
-                    $this->textFont,
-                    $this->noPar
-                );
+                $this->_renderText($section, $template->localizedInfoChecksIntro . "<br><br>");
 
             $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::APPENDIX_VULN_LIST);
         }
