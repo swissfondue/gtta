@@ -1599,9 +1599,15 @@ class ReportController extends Controller
 
             if ($template->localizedVulnsIntro)
                 $this->_renderText($section, $template->localizedVulnsIntro . "<br><br>");
+
+            $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::NORMAL_VULN_LIST, $model->infoChecksLocation);
+        }
+        else
+        {
+            $section->writeText("\n\n");
+            $this->_generateVulnerabilityList($data, $section, $sectionNumber, self::NORMAL_VULN_LIST, $model->infoChecksLocation);
         }
 
-        $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::NORMAL_VULN_LIST, $model->infoChecksLocation);
         $subsectionNumber++;
 
         if ($haveInfo && $model->infoChecksLocation == ProjectReportForm::INFO_LOCATION_APPENDIX)
