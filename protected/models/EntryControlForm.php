@@ -22,7 +22,6 @@ class EntryControlForm extends CFormModel
 	{
 		return array(
 			array( 'id, operation', 'required' ),
-            array( 'id', 'numerical', 'integerOnly' => true, 'min' => 0 ),
 		);
 	}
 }

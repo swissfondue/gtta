@@ -355,6 +355,19 @@ function System()
         this._effortList = [];
 
         /**
+         * Switch save button state for the project report form
+         */
+        this._projectFormSwitchButton = function () {
+            if ($('.report-target-list input:checked').length == 0 ||
+                $('#ProjectReportForm_templateId').val() == 0 ||
+                ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() == 0)
+            )
+                $('.form-actions > button[type="submit"]').prop('disabled', true);
+            else
+                $('.form-actions > button[type="submit"]').prop('disabled', false);
+        };
+
+        /**
          * Project form has been changed.
          */
         this.projectFormChange = function (e) {
@@ -368,6 +381,8 @@ function System()
             if (e.id == 'ProjectReportForm_clientId')
             {
                 val = $('#ProjectReportForm_clientId').val();
+
+                _report._riskMatrixTargets = [];
 
                 $('.report-target-header').remove();
                 $('.report-target-content').remove();
@@ -403,6 +418,8 @@ function System()
             else if (e.id == 'ProjectReportForm_projectId')
             {
                 val = $('#ProjectReportForm_projectId').val();
+
+                _report._riskMatrixTargets = [];
 
                 $('.report-target-header').remove();
                 $('.report-target-content').remove();
@@ -443,13 +460,10 @@ function System()
 
                             $('#target-list').show();
 
-                            if ($('#ProjectReportForm_templateId').val() &&
-                                (!$('#ProjectReportForm_options_matrix').is(':checked') || $('#RiskMatrixForm_templateId').val())
-                            )
-                                $('.form-actions > button[type="submit"]').prop('disabled', false);
-
-                            if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val())
+                            if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0)
                                 _report._refreshChecks(true);
+
+                            _report._projectFormSwitchButton();
                         }
                         else
                         {
@@ -459,21 +473,22 @@ function System()
                     });
                 }
             }
-            else if (e.id.match(/^ProjectReportForm_targetIds_/i) || e.id == 'ProjectReportForm_templateId')
+            else if (e.id.match(/^ProjectReportForm_targetIds_/i))
             {
-                if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val())
+                if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0)
                     _report._refreshChecks(true);
 
-                if ($('.report-target-list input:checked').length == 0 ||
-                    $('#ProjectReportForm_templateId').val() == 0 ||
-                    ($('#ProjectReportForm_options_matrix').is(':checked') && !$('#RiskMatrixForm_templateId').val())
-                )
-                    $('.form-actions > button[type="submit"]').prop('disabled', true);
-                else
-                    $('.form-actions > button[type="submit"]').prop('disabled', false);
+                _report._projectFormSwitchButton();
+            }
+            else if (e.id == 'ProjectReportForm_templateId')
+            {
+                _report._projectFormSwitchButton();
             }
             else if (e.id == 'ProjectReportForm_options_matrix')
             {
+                _report._riskMatrixTargets = [];
+                _report._riskMatrixCategories = [];
+
                 if ($('#ProjectReportForm_options_matrix').is(':checked'))
                 {
                     $('#risk-template-list').show();
@@ -485,17 +500,11 @@ function System()
                     $('#check-list').hide();
                     $('.report-target-header').remove();
                     $('.report-target-content').remove();
-                    _report._riskMatrixCategories = [];
                     $('#RiskMatrixForm_templateId').val(0);
                     $('#risk-template-list').removeClass('error');
                     $('#risk-template-list > div > .help-block').hide();
 
-                    if ($('.report-target-list input:checked').length == 0 ||
-                        $('#ProjectReportForm_templateId').val() == 0
-                    )
-                        $('.form-actions > button[type="submit"]').prop('disabled', true);
-                    else
-                        $('.form-actions > button[type="submit"]').prop('disabled', false);
+                    _report._projectFormSwitchButton();
                 }
             }
             else if (e.id == 'RiskMatrixForm_templateId')
@@ -503,7 +512,9 @@ function System()
                 var val = $('#RiskMatrixForm_templateId').val();
 
                 $('#check-list').hide();
+
                 _report._riskMatrixTargets = [];
+                _report._riskMatrixCategories = [];
 
                 $('#risk-template-list').removeClass('error');
                 $('#risk-template-list > div > .help-block').hide();
@@ -518,15 +529,11 @@ function System()
                         if (data && data.objects.length)
                         {
                             _report._riskMatrixCategories = data.objects;
-                            _report._refreshChecks(true);
 
-                            if ($('.report-target-list input:checked').length == 0 ||
-                                $('#ProjectReportForm_templateId').val() == 0 ||
-                                ($('#ProjectReportForm_options_matrix').is(':checked') && !$('#RiskMatrixForm_templateId').val())
-                            )
-                                $('.form-actions > button[type="submit"]').prop('disabled', true);
-                            else
-                                $('.form-actions > button[type="submit"]').prop('disabled', false);
+                            if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0)
+                                _report._refreshChecks(true);
+
+                            _report._projectFormSwitchButton();
                         }
                         else
                         {
@@ -704,11 +711,10 @@ function System()
         /**
          * Refresh check list.
          */
-        this._refreshChecks = function (ignoreButton) {
-            var targets, delTargets, addTargets, i, k, id;
+        this._refreshChecks = function (projectReport) {
+            var targets, delTargets, addTargets, i, k, id, targetIds, target;
 
-            if (!ignoreButton)
-                $('.form-actions > button[type="submit"]').prop('disabled', true);
+            $('.form-actions > button[type="submit"]').prop('disabled', true);
 
             targets = $('.report-target-list input:checked').map(function () {
                 return parseInt($(this).val());
@@ -747,118 +753,131 @@ function System()
                 });
             }
 
-            for (i = 0; i < addTargets.length; i++)
+            if (addTargets.length > 0)
             {
-                _system.control.loadObjects(addTargets[i], 'check-list', function (data) {
+                targetIds = addTargets.join(',');
+
+                _system.control.loadObjects(targetIds, 'target-check-list', function (data) {
                     var targetHeader, targetDiv, category, categoryDiv, check, checkDiv, i, k, j, rating, risk, field,
                         checked, damage, likelihood;
 
                     if (data && data.objects.length)
                     {
-                        targetHeader = $('<div>')
-                            .attr('data-id', data.target.id)
-                            .addClass('report-target-header')
-                            .addClass('hide')
-                            .html('<a href="#toggle" onclick="system.report.riskMatrixTargetToggle(' + data.target.id + ');">' + data.target.host + '</a>');
-
-                        targetDiv = $('<div>')
-                            .attr('data-id', data.target.id)
-                            .addClass('report-target-content')
-                            .addClass('hide');
-
-                        for (k = 0; k < data.objects.length; k++)
+                        for (i = 0; i < data.objects.length; i++)
                         {
-                            check = data.objects[k];
+                            target = data.objects[i];
 
-                            if (check.rating == _system.RATING_HIGH_RISK)
-                                rating = '<span class="label label-high-risk">' + check.ratingName + '</span>';
-                            else if (check.rating == _system.RATING_MED_RISK)
-                                rating = '<span class="label label-med-risk">' + check.ratingName + '</span>';
+                            targetHeader = $('<div>')
+                                .attr('data-id', target.id)
+                                .addClass('report-target-header')
+                                .addClass('hide')
+                                .html('<a href="#toggle" onclick="system.report.riskMatrixTargetToggle(' + target.id + ');">' + target.host + '</a>');
 
-                            $('<div>')
-                                .attr('data-id', check.id)
-                                .addClass('report-check-header')
-                                .html(
-                                    '<table class="report-check"><tbody><tr><td class="name">' +
-                                    '<a href="#toggle" onclick="system.report.riskMatrixCheckToggle(' + check.id +
-                                    ');">' + check.name + '</a></td>' +
-                                    '<td class="status">' + rating +  '</td></tr></tbody></table>'
-                                )
-                                .appendTo(targetDiv);
+                            targetDiv = $('<div>')
+                                .attr('data-id', target.id)
+                                .addClass('report-target-content')
+                                .addClass('hide');
 
-                            checkDiv = $('<div>')
-                                .attr('data-id', check.id)
-                                .addClass('report-check-content');
-
-                            for (j = 0; j < _report._riskMatrixCategories.length; j++)
+                            if (target.checks.length)
                             {
-                                damage     = 1;
-                                likelihood = 1;
-
-                                risk = _report._riskMatrixCategories[j];
-
-                                if (check.id in risk.checks)
+                                for (k = 0; k < target.checks.length; k++)
                                 {
-                                    damage     = risk.checks[check.id].damage;
-                                    likelihood = risk.checks[check.id].likelihood;
+                                    check = target.checks[k];
+
+                                    if (check.rating == _system.RATING_HIGH_RISK)
+                                        rating = '<span class="label label-high-risk">' + check.ratingName + '</span>';
+                                    else if (check.rating == _system.RATING_MED_RISK)
+                                        rating = '<span class="label label-med-risk">' + check.ratingName + '</span>';
+
+                                    $('<div>')
+                                        .attr('data-id', check.id)
+                                        .addClass('report-check-header')
+                                        .html(
+                                            '<table class="report-check"><tbody><tr><td class="name">' +
+                                            '<a href="#toggle" onclick="system.report.riskMatrixCheckToggle(' + check.id +
+                                            ');">' + check.name + '</a></td>' +
+                                            '<td class="status">' + rating +  '</td></tr></tbody></table>'
+                                        )
+                                        .appendTo(targetDiv);
+
+                                    checkDiv = $('<div>')
+                                        .attr('data-id', check.id)
+                                        .addClass('report-check-content');
+
+                                    for (j = 0; j < _report._riskMatrixCategories.length; j++)
+                                    {
+                                        damage     = 1;
+                                        likelihood = 1;
+
+                                        risk = _report._riskMatrixCategories[j];
+
+                                        if (check.id in risk.checks)
+                                        {
+                                            damage     = risk.checks[check.id].damage;
+                                            likelihood = risk.checks[check.id].likelihood;
+                                        }
+
+                                        $('<div>')
+                                            .addClass('report-risk-category-name')
+                                            .html(risk.name + ' (R' + (j + 1).toString() + ')')
+                                            .appendTo(checkDiv);
+
+                                        $('<div>')
+                                            .addClass('control-group')
+                                            .html(
+                                                '<label class="control-label">' + _system.translate('Damage') + '</label>' +
+                                                '<div class="controls">' +
+                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="1"' + ( damage == 1 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="2"' + ( damage == 2 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="3"' + ( damage == 3 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="4"' + ( damage == 4 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '</div>'
+                                            )
+                                            .appendTo(checkDiv);
+
+                                        $('<div>')
+                                            .addClass('control-group')
+                                            .html(
+                                                '<label class="control-label">' + _system.translate('Likelihood') + '</label>' +
+                                                '<div class="controls">' +
+                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="1"' + ( likelihood == 1 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="2"' + ( likelihood == 2 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="3"' + ( likelihood == 3 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="4"' + ( likelihood == 4 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '</div>'
+                                            )
+                                            .appendTo(checkDiv);
+                                    }
+
+                                    checkDiv.appendTo(targetDiv);
                                 }
 
-                                $('<div>')
-                                    .addClass('report-risk-category-name')
-                                    .html(risk.name + ' (R' + (j + 1).toString() + ')')
-                                    .appendTo(checkDiv);
+                                $('#check-list .span8')
+                                    .append(targetHeader)
+                                    .append(targetDiv);
 
-                                $('<div>')
-                                    .addClass('control-group')
-                                    .html(
-                                        '<label class="control-label">' + _system.translate('Damage') + '</label>' +
-                                        '<div class="controls">' +
-                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][damage]" value="1"' + ( damage == 1 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][damage]" value="2"' + ( damage == 2 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][damage]" value="3"' + ( damage == 3 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][damage]" value="4"' + ( damage == 4 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                        '</div>'
-                                    )
-                                    .appendTo(checkDiv);
+                                _report._riskMatrixTargets.push(target.id);
 
-                                $('<div>')
-                                    .addClass('control-group')
-                                    .html(
-                                        '<label class="control-label">' + _system.translate('Likelihood') + '</label>' +
-                                        '<div class="controls">' +
-                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="1"' + ( likelihood == 1 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="2"' + ( likelihood == 2 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="3"' + ( likelihood == 3 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                        '<input type="radio" name="RiskMatrixForm[matrix][' + data.target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="4"' + ( likelihood == 4 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                        '</div>'
-                                    )
-                                    .appendTo(checkDiv);
+                                $('.report-target-header[data-id=' + target.id + ']').slideDown('fast', undefined, function () {
+                                    $('.report-target-content[data-id=' + $(this).data('id') + ']').slideDown('slow', undefined, function () {
+                                        if (projectReport)
+                                            _report._projectFormSwitchButton();
+                                        else
+                                            $('.form-actions > button[type="submit"]').prop('disabled', false);
+                                    });
+                                });
+
+                                if (!$('#check-list').is(':visible'))
+                                    $('#check-list').slideDown('fast');
                             }
-
-                            checkDiv.appendTo(targetDiv);
+                            else if (projectReport)
+                                _report._projectFormSwitchButton();
                         }
-
-                        $('#check-list .span8')
-                            .append(targetHeader)
-                            .append(targetDiv);
-
-                        _report._riskMatrixTargets.push(data.target.id);
-
-                        $('.report-target-header[data-id=' + data.target.id + ']').slideDown('fast', undefined, function () {
-                            $('.report-target-content[data-id=' + data.target.id + ']').slideDown('slow');
-                        });
-
-                        if (!$('#check-list').is(':visible'))
-                            $('#check-list').slideDown('fast');
                     }
-
-                    if (_report._riskMatrixTargets.length > 0 && !ignoreButton)
-                        $('.form-actions > button[type="submit"]').prop('disabled', false);
+                    else if (projectReport)
+                        _report._projectFormSwitchButton();
                 });
             }
-
-            if (addTargets.length == 0 && !ignoreButton)
-                $('.form-actions > button[type="submit"]').prop('disabled', false);
         };
 
         /**

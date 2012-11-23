@@ -244,89 +244,99 @@ class AppController extends Controller
 
                     break;
 
-                case 'check-list':
-                    $target = Target::model()->with('project')->findByPk($model->id);
+                case 'target-check-list':
+                    $targets = explode(',', $model->id);
 
-                    if (!$target)
-                        throw new CHttpException(404, Yii::t('app', 'Target not found.'));
-
-                    if (!$target->project->checkPermission())
-                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
-
-                    $checkList    = array();
-                    $referenceIds = array();
-
-                    $references = TargetReference::model()->findAllByAttributes(array(
-                        'target_id' => $target->id
-                    ));
-
-                    foreach ($references as $reference)
-                        $referenceIds[] = $reference->reference_id;
-
-                    $categories = TargetCheckCategory::model()->findAllByAttributes(
-                        array( 'target_id' => $target->id  )
-                    );
-
-                    $ratings = array(
-                        TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
-                        TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
-                        TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
-                        TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
-                        TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
-                    );
-
-                    foreach ($categories as $category)
+                    foreach ($targets as $target)
                     {
-                        $controlIds = array();
+                        $target = (int) $target;
+                        $target = Target::model()->with('project')->findByPk($target);
 
-                        $controls = CheckControl::model()->findAllByAttributes(array(
-                            'check_category_id' => $category->check_category_id
+                        if (!$target)
+                            throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+
+                        if (!$target->project->checkPermission())
+                            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
+                        $checkList    = array();
+                        $referenceIds = array();
+
+                        $references = TargetReference::model()->findAllByAttributes(array(
+                            'target_id' => $target->id
                         ));
 
-                        foreach ($controls as $control)
-                            $controlIds[] = $control->id;
+                        foreach ($references as $reference)
+                            $referenceIds[] = $reference->reference_id;
 
-                        $criteria = new CDbCriteria();
+                        $categories = TargetCheckCategory::model()->findAllByAttributes(
+                            array( 'target_id' => $target->id  )
+                        );
 
-                        $criteria->order = 't.name ASC';
-                        $criteria->addInCondition('t.reference_id', $referenceIds);
-                        $criteria->addInCondition('t.check_control_id', $controlIds);
+                        $ratings = array(
+                            TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
+                            TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
+                            TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
+                            TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
+                            TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
+                        );
 
-                        if (!$category->advanced)
-                            $criteria->addCondition('t.advanced = FALSE');
+                        $targetData = array(
+                            'id'          => $target->id,
+                            'host'        => $target->host,
+                            'description' => $target->description,
+                            'checks'      => array()
+                        );
 
-                        $checks = Check::model()->with(array(
-                            'l10n' => array(
-                                'joinType' => 'LEFT JOIN',
-                                'on'       => 'l10n.language_id = :language_id',
-                                'params'   => array( 'language_id' => $language )
-                            ),
-                            'targetChecks' => array(
-                                'alias'    => 'tcs',
-                                'joinType' => 'INNER JOIN',
-                                'on'       => 'tcs.target_id = :target_id AND tcs.status = :status AND (tcs.rating = :high_risk OR tcs.rating = :med_risk)',
-                                'params'   => array(
-                                    'target_id' => $target->id,
-                                    'status'    => TargetCheck::STATUS_FINISHED,
-                                    'high_risk' => TargetCheck::RATING_HIGH_RISK,
-                                    'med_risk'  => TargetCheck::RATING_MED_RISK,
+                        foreach ($categories as $category)
+                        {
+                            $controlIds = array();
+
+                            $controls = CheckControl::model()->findAllByAttributes(array(
+                                'check_category_id' => $category->check_category_id
+                            ));
+
+                            foreach ($controls as $control)
+                                $controlIds[] = $control->id;
+
+                            $criteria = new CDbCriteria();
+
+                            $criteria->order = 't.name ASC';
+                            $criteria->addInCondition('t.reference_id', $referenceIds);
+                            $criteria->addInCondition('t.check_control_id', $controlIds);
+
+                            if (!$category->advanced)
+                                $criteria->addCondition('t.advanced = FALSE');
+
+                            $checks = Check::model()->with(array(
+                                'l10n' => array(
+                                    'joinType' => 'LEFT JOIN',
+                                    'on'       => 'l10n.language_id = :language_id',
+                                    'params'   => array( 'language_id' => $language )
                                 ),
-                            )
-                        ))->findAll($criteria);
+                                'targetChecks' => array(
+                                    'alias'    => 'tcs',
+                                    'joinType' => 'INNER JOIN',
+                                    'on'       => 'tcs.target_id = :target_id AND tcs.status = :status AND (tcs.rating = :high_risk OR tcs.rating = :med_risk)',
+                                    'params'   => array(
+                                        'target_id' => $target->id,
+                                        'status'    => TargetCheck::STATUS_FINISHED,
+                                        'high_risk' => TargetCheck::RATING_HIGH_RISK,
+                                        'med_risk'  => TargetCheck::RATING_MED_RISK,
+                                    ),
+                                )
+                            ))->findAll($criteria);
 
-                        foreach ($checks as $check)
-                            $objects[] = array(
-                                'id'         => $check->id,
-                                'ratingName' => $ratings[$check->targetChecks[0]->rating],
-                                'rating'     => $check->targetChecks[0]->rating,
-                                'name'       => CHtml::encode($check->localizedName),
-                            );
+                            foreach ($checks as $check)
+                                $targetData['checks'][] = array(
+                                    'id'         => $check->id,
+                                    'ratingName' => $ratings[$check->targetChecks[0]->rating],
+                                    'rating'     => $check->targetChecks[0]->rating,
+                                    'name'       => CHtml::encode($check->localizedName),
+                                );
+                        }
+
+                        $objects[] = $targetData;
                     }
-
-                    $response->addData('target', array(
-                        'id'   => $target->id,
-                        'host' => $target->host,
-                    ));
 
                     break;
 
