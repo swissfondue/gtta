@@ -37,7 +37,8 @@ class RiskController extends Controller
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 't.name ASC';
+        $criteria->order  = 'COALESCE(l10n.name, t.name) ASC';
+        $criteria->together = true;
 
         $templates = RiskTemplate::model()->with(array(
             'l10n' => array(
@@ -250,8 +251,9 @@ class RiskController extends Controller
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 't.name ASC';
+        $criteria->order  = 'COALESCE(l10n.name, t.name) ASC';
         $criteria->addColumnCondition(array( 'risk_template_id' => $template->id ));
+        $criteria->together = true;
 
         $risks = RiskCategory::model()->with(array(
             'l10n' => array(
@@ -408,7 +410,7 @@ class RiskController extends Controller
 
             'controls' => array(
                 'joinType' => 'LEFT JOIN',
-                'order'    => 'controls.name ASC',
+                'order'    => 'COALESCE(l10n_controls.name, controls.name) ASC',
 
                 'with' => array(
                     'l10n' => array(
@@ -420,7 +422,7 @@ class RiskController extends Controller
 
                     'checks' => array(
                         'joinType' => 'LEFT JOIN',
-                        'order'    => 'checks.name ASC',
+                        'order'    => 'COALESCE(l10n_checks.name, checks.name) ASC',
 
                         'with' => array(
                             'l10n' => array(
@@ -441,7 +443,7 @@ class RiskController extends Controller
             )
         ))->findAllByAttributes(
             array(),
-            array( 'order' => 't.name ASC' )
+            array( 'order' => 'COALESCE(l10n.name, t.name) ASC' )
         );
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Risk Matrix Templates'), $this->createUrl('risk/index'));

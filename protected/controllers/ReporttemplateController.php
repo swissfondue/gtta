@@ -39,7 +39,8 @@ class ReporttemplateController extends Controller
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 't.name ASC';
+        $criteria->order  = 'COALESCE(l10n.name, t.name) ASC';
+        $criteria->together = true;
 
         $templates = ReportTemplate::model()->with(array(
             'l10n' => array(
@@ -197,7 +198,8 @@ class ReporttemplateController extends Controller
 		}
 
         $criteria = new CDbCriteria();
-        $criteria->order = 't.name ASC';
+        $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
+        $criteria->together = true;
 
         $categories = CheckCategory::model()->with(array(
             'l10n' => array(

@@ -563,9 +563,10 @@ class ProjectController extends Controller
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 'category.name ASC';
+        $criteria->order  = 'COALESCE(l10n.name, category.name) ASC';
         $criteria->addCondition('t.target_id = :target_id');
         $criteria->params = array( 'target_id' => $target->id );
+        $criteria->together = true;
 
         $language = Language::model()->findByAttributes(array(
             'code' => Yii::app()->language
@@ -829,7 +830,7 @@ class ProjectController extends Controller
             )
         ))->findAllByAttributes(
             array(),
-            array( 'order' => 't.name ASC' )
+            array( 'order' => 'COALESCE(l10n.name, t.name) ASC' )
         );
 
         $references = Reference::model()->findAllByAttributes(
@@ -919,7 +920,7 @@ class ProjectController extends Controller
 
         $criteria->addInCondition('t.check_control_id', $controlIds);
         $criteria->addInCondition('t.reference_id', $referenceIds);
-        $criteria->order = 'control.name ASC, t.name ASC';
+        $criteria->order = 'COALESCE(l10n_c.name, control.name) ASC, COALESCE(l10n.name, t.name) ASC';
 
         if (!$category->advanced)
             $criteria->addCondition('t.advanced = FALSE');

@@ -39,7 +39,8 @@ class CheckController extends Controller
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 't.name ASC';
+        $criteria->order  = 'COALESCE(l10n.name, t.name) ASC';
+        $criteria->together = true;
 
         $categories = CheckCategory::model()->with(array(
             'l10n' => array(
@@ -100,8 +101,9 @@ class CheckController extends Controller
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 't.name ASC';
+        $criteria->order  = 'COALESCE(l10n.name, t.name) ASC';
         $criteria->addColumnCondition(array( 'check_category_id' => $category->id ));
+        $criteria->together = true;
 
         $controls = CheckControl::model()->with(array(
             'l10n' => array(
@@ -426,7 +428,7 @@ class CheckController extends Controller
             )
         ))->findAllByAttributes(
             array(),
-            array( 'order' => 't.name ASC' )
+            array( 'order' => 'COALESCE(l10n.name, t.name) ASC' )
         );
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
@@ -551,8 +553,9 @@ class CheckController extends Controller
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 't.name ASC';
+        $criteria->order  = 'COALESCE(l10n.name, t.name) ASC';
         $criteria->addColumnCondition(array( 'check_control_id' => $control->id ));
+        $criteria->together = true;
 
         $checks = Check::model()->with(array(
             'l10n' => array(
@@ -817,7 +820,7 @@ class CheckController extends Controller
             )
         ))->findAllByAttributes(
             array(),
-            array( 'order' => 't.name ASC' )
+            array( 'order' => 'COALESCE(l10n.name, t.name) ASC' )
         );
 
 		// display the page

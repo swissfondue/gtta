@@ -108,7 +108,7 @@ class VulntrackerController extends Controller
             TargetCheck::RATING_MED_RISK,
             TargetCheck::RATING_LOW_RISK
         ));
-        $criteria->order = 'target.host, "check".name';
+        $criteria->order = 'target.host ASC, COALESCE(l10n.name, "check".name) ASC';
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
         $criteria->together = true;

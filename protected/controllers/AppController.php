@@ -149,7 +149,7 @@ class AppController extends Controller
                         throw new CHttpException(404, Yii::t('app', 'Template not found.'));
 
                     $criteria = new CDbCriteria();
-                    $criteria->order = 't.name ASC';
+                    $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
                     $criteria->addColumnCondition(array(
                         't.risk_template_id' => $template->id
                     ));
@@ -300,9 +300,10 @@ class AppController extends Controller
 
                             $criteria = new CDbCriteria();
 
-                            $criteria->order = 't.name ASC';
+                            $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
                             $criteria->addInCondition('t.reference_id', $referenceIds);
                             $criteria->addInCondition('t.check_control_id', $controlIds);
+                            $criteria->together = true;
 
                             if (!$category->advanced)
                                 $criteria->addCondition('t.advanced = FALSE');
