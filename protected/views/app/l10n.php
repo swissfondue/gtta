@@ -15,6 +15,7 @@ var _messages = {
     'PROCEED AT YOUR OWN RISK!'                         : '<?php echo Yii::t('app', 'PROCEED AT YOUR OWN RISK!'); ?>',
     'Bold'                                              : '<?php echo Yii::t('app', 'Bold'); ?>',
     'Italic'                                            : '<?php echo Yii::t('app', 'Italic'); ?>',
+    'Underline'                                         : '<?php echo Yii::t('app', 'Underline'); ?>',
     'Unordered List'                                    : '<?php echo Yii::t('app', 'Unordered List'); ?>',
     'Ordered List'                                      : '<?php echo Yii::t('app', 'Ordered List'); ?>',
     'Outdent'                                           : '<?php echo Yii::t('app', 'Outdent'); ?>',

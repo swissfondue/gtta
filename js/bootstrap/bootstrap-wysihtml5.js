@@ -16,7 +16,7 @@
 							"<div class='btn-group'>" 
 							    + "<a class='btn' data-wysihtml5-command='bold' title='CTRL+B'>" + system.translate('Bold') + "</a>"
 							    + "<a class='btn' data-wysihtml5-command='italic' title='CTRL+I'>" + system.translate('Italic') + "</a>"
-							    //,+ "<a class='btn' data-wysihtml5-command='underline' title='CTRL+U'>Underline</a>" 
+							    + "<a class='btn' data-wysihtml5-command='underline' title='CTRL+U'>" + system.translate('Underline') + "</a>"
 							+ "</div>" 
 						+ "</li>",
 		"lists": 	"<li>" 
@@ -94,7 +94,7 @@
 				"li": {},
 				"h1": {},
 				"h2": {},
-				"u": 1,
+				"u": {},
 				"img": {
 					"check_attributes": {
 			            "width": "numbers",
