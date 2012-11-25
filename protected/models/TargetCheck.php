@@ -106,7 +106,16 @@ class TargetCheck extends CActiveRecord
      */
     public function automationError($error)
     {
-        $this->result = $error;
+        $uniqueHash = strtoupper(substr(hash('sha256', time() . rand() . $error), 0, 16));
+
+        Yii::log($uniqueHash . ' ' . $error, 'error');
+        Yii::getLogger()->flush(true);
+
+        $message = Yii::t('app', 'Internal server error. Please send this error code to the administrator - {code}.', array(
+            '{code}' => $uniqueHash
+        ));
+
+        $this->result = $message;
         $this->status = TargetCheck::STATUS_FINISHED;
         $this->save();
     }

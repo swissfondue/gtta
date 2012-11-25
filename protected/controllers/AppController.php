@@ -77,12 +77,26 @@ class AppController extends Controller
 
         if ($error)
 	    {
-	    	if (Yii::app()->request->isAjaxRequest)
-	    		echo $error['message'];
-	    	else
+            $message = $error['message'];
+
+            if ($error['code'] == 500)
+            {
+                $uniqueHash = strtoupper(substr(hash('sha256', time() . rand() . $error['message']), 0, 16));
+                Yii::log($uniqueHash, 'error');
+
+                $message = Yii::t('app', 'Internal server error. Please send this error code to the administrator - {code}.', array(
+                    '{code}' => $uniqueHash
+                ));
+            }
+
+            if (Yii::app()->request->isAjaxRequest)
+                echo $message;
+            else
             {
                 $this->pageTitle = Yii::t('app', 'Error {code}', array( '{code}' => $error['code'] ));
-	        	$this->render('error', array( 'message' => $error['message'] ));
+                $this->render('error', array(
+                    'message' => $message
+                ));
             }
 	    }
 	}

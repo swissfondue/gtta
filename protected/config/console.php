@@ -7,6 +7,9 @@ return array(
 	'basePath' => dirname(__FILE__).DIRECTORY_SEPARATOR.'..',
 	'name'     => 'GTTA',
 
+    // preloading components
+	'preload' => array( 'log' ),
+
     // autoloading model and component classes
 	'import' => array(
 		'application.models.*',
@@ -46,6 +49,17 @@ return array(
         ),
 
         'urlManager' => $mainConfig['components']['urlManager'],
+
+        'log' => array(
+			'class'  => 'CLogRouter',
+			'routes' => array(
+				array(
+					'class'   => 'CFileLogRoute',
+					'levels'  => 'error, warning',
+                    'logFile' => 'console.log',
+				),
+			),
+		),
 	),
 
     // parameters
