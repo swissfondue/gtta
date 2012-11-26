@@ -2954,6 +2954,7 @@ class ReportController extends Controller
         $text = str_replace(array( "\r", "\n" ), '', $text);
         $text = str_replace('<br>', "\n", $text);
         $text = strip_tags($text);
+        $text = html_entity_decode($text, ENT_COMPAT, 'UTF-8');
 
         return $text;
     }
