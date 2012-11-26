@@ -111,7 +111,19 @@ class AutomationCommand extends ConsoleCommand
             return false;
         }
         else
-            return file_exists('/proc/' . $pid);
+        {
+            $data = shell_exec('ps ax -o  "%p %r" | grep ' . $pid);
+
+            if (!$data)
+                return false;
+
+            $data = explode("\n", $data);
+
+            if (count($data) >= 2)
+                return true;
+
+            return false;
+        }
     }
 
     /**
@@ -119,7 +131,7 @@ class AutomationCommand extends ConsoleCommand
      */
     private function _killProcess($pid)
     {
-        exec($this->_isWindows() ? 'taskkill /PID ' . $pid . ' /F /T' : 'kill -9 ' . $pid);
+        exec($this->_isWindows() ? 'taskkill /PID ' . $pid . ' /F /T' : 'kill -9 -' . $pid);
         return $this->_isRunning($pid);
     }
 
@@ -223,7 +235,7 @@ class AutomationCommand extends ConsoleCommand
             if (!$interpreter || !file_exists($interpreter['path']))
                 throw new Exception(Yii::t('app', 'Interpreter not found.'));
 
-            $check->pid         = getmypid();
+            $check->pid         = posix_getpgid(getmypid());
             $check->started     = new CDbExpression('NOW()');
             $check->target_file = $this->_generateFileName();
             $check->result_file = $this->_generateFileName();
