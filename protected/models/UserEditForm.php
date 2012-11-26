@@ -47,7 +47,7 @@ class UserEditForm extends CFormModel
 	public function rules()
 	{
 		return array(
-            array( 'email', 'email' ),
+            array( 'email', 'EmailValidator' ),
 			array( 'email, role', 'required' ),
             array( 'name, email', 'length', 'max' => 1000 ),
             array( 'password, passwordConfirmation', 'required', 'on' => self::ADD_USER_SCENARIO ),

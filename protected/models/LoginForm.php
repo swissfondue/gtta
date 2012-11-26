@@ -27,7 +27,7 @@ class LoginForm extends CFormModel
 	{
 		return array(
 			array( 'email, password', 'required' ),
-            array( 'email', 'email' ),
+            array( 'email', 'EmailValidator' ),
             array( 'password', 'authenticate' ),
 		);
 	}
