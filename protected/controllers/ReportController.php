@@ -1093,6 +1093,7 @@ class ReportController extends Controller
                                     'description' => $target->description
                                 ),
                                 'name'     => $checkData['name'],
+                                'question' => $checkData['question'],
                                 'solution' => $checkData['solutions'] ? implode("\n", $checkData['solutions']) : Yii::t('app', 'N/A'),
                                 'rating'   => $check->targetChecks[0]->rating,
                             );
@@ -1543,7 +1544,7 @@ class ReportController extends Controller
                 $row = 1;
 
                 $table->getCell($row, 1)->writeText(Yii::t('app', 'Target'));
-                $table->getCell($row, 2)->writeText(Yii::t('app', 'Name'));
+                $table->getCell($row, 2)->writeText(Yii::t('app', 'Name') . ' (' . Yii::t('app', 'Question') . ')');
                 $table->getCell($row, 3)->writeText(Yii::t('app', 'Solution'));
                 $table->getCell($row, 4)->writeText(Yii::t('app', 'Rating'));
 
@@ -1562,7 +1563,11 @@ class ReportController extends Controller
                         $table->getCell($row, 1)->writeText($check['target']['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
                     }
 
-                    $table->getCell($row, 2)->writeText($check['name'], $this->textFont, $this->noPar);
+                    $table->getCell($row, 2)->writeText(
+                        $check['name'] . ($check['question'] ? ' (' . $check['question'] . ')' : ''),
+                        $this->textFont,
+                        $this->noPar
+                    );
                     $table->getCell($row, 3)->writeText($check['solution'], $this->textFont, $this->noPar);
 
                     $image = null;
