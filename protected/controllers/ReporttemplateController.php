@@ -106,6 +106,8 @@ class ReporttemplateController extends Controller
             $model->separateVulnsIntro = $template->separate_vulns_intro;
             $model->vulnsIntro = $template->vulns_intro;
             $model->infoChecksIntro = $template->info_checks_intro;
+            $model->securityLevelIntro = $template->security_level_intro;
+            $model->vulnDistributionIntro = $template->vuln_distribution_intro;
 
             $templateL10n = ReportTemplateL10n::model()->findAllByAttributes(array(
                 'report_template_id' => $template->id
@@ -119,6 +121,8 @@ class ReporttemplateController extends Controller
                 $model->localizedItems[$tl->language_id]['separateVulnsIntro'] = $tl->separate_vulns_intro;
                 $model->localizedItems[$tl->language_id]['vulnsIntro'] = $tl->vulns_intro;
                 $model->localizedItems[$tl->language_id]['infoChecksIntro'] = $tl->info_checks_intro;
+                $model->localizedItems[$tl->language_id]['securityLevelIntro'] = $tl->security_level_intro;
+                $model->localizedItems[$tl->language_id]['vulnDistributionIntro'] = $tl->vuln_distribution_intro;
             }
         }
 
@@ -132,6 +136,8 @@ class ReporttemplateController extends Controller
             $model->separateVulnsIntro = $model->defaultL10n($languages, 'separateVulnsIntro');
             $model->vulnsIntro = $model->defaultL10n($languages, 'vulnsIntro');
             $model->infoChecksIntro = $model->defaultL10n($languages, 'infoChecksIntro');
+            $model->securityLevelIntro = $model->defaultL10n($languages, 'securityLevelIntro');
+            $model->vulnDistributionIntro = $model->defaultL10n($languages, 'vulnDistributionIntro');
 
 			if ($model->validate())
             {
@@ -142,6 +148,8 @@ class ReporttemplateController extends Controller
                 $template->separate_vulns_intro = $model->separateVulnsIntro;
                 $template->vulns_intro = $model->vulnsIntro;
                 $template->info_checks_intro = $model->infoChecksIntro;
+                $template->security_level_intro = $model->securityLevelIntro;
+                $template->vuln_distribution_intro = $model->vulnDistributionIntro;
                 $template->save();
 
                 foreach ($model->localizedItems as $languageId => $value)
@@ -176,12 +184,20 @@ class ReporttemplateController extends Controller
                     if ($value['infoChecksIntro'] == '')
                         $value['infoChecksIntro'] = NULL;
 
+                    if ($value['securityLevelIntro'] == '')
+                        $value['securityLevelIntro'] = NULL;
+
+                    if ($value['vulnDistributionIntro'] == '')
+                        $value['vulnDistributionIntro'] = NULL;
+
                     $templateL10n->name = $value['name'];
                     $templateL10n->intro = $value['intro'];
                     $templateL10n->appendix = $value['appendix'];
                     $templateL10n->separate_vulns_intro = $value['separateVulnsIntro'];
                     $templateL10n->vulns_intro = $value['vulnsIntro'];
                     $templateL10n->info_checks_intro = $value['infoChecksIntro'];
+                    $templateL10n->security_level_intro = $value['securityLevelIntro'];
+                    $templateL10n->vuln_distribution_intro = $value['vulnDistributionIntro'];
 
                     $templateL10n->save();
                 }

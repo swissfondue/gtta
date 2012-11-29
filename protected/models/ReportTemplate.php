@@ -14,6 +14,8 @@
  * @property string $separate_vulns_intro
  * @property string $vulns_intro
  * @property string $info_checks_intro
+ * @property string $security_level_intro
+ * @property string $vuln_distribution_intro
  */
 class ReportTemplate extends CActiveRecord
 {   
@@ -44,7 +46,7 @@ class ReportTemplate extends CActiveRecord
             array( 'name', 'required' ),
             array( 'separate_category_id', 'numerical', 'integerOnly' => true ),
             array( 'name, header_image_path, header_image_type', 'length', 'max' => 1000 ),
-            array( 'intro, appendix, separate_vulns_intro, vulns_intro, info_checks_intro', 'safe' ),
+            array( 'intro, appendix, separate_vulns_intro, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro', 'safe' ),
 		);
 	}
 
@@ -124,5 +126,27 @@ class ReportTemplate extends CActiveRecord
             return $this->l10n[0]->info_checks_intro != NULL ? $this->l10n[0]->info_checks_intro : $this->info_checks_intro;
 
         return $this->info_checks_intro;
+    }
+
+    /**
+     * @return string localized security level intro.
+     */
+    public function getLocalizedSecurityLevelIntro()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->security_level_intro != NULL ? $this->l10n[0]->security_level_intro : $this->security_level_intro;
+
+        return $this->security_level_intro;
+    }
+
+    /**
+     * @return string localized vuln distribution intro.
+     */
+    public function getLocalizedVulnDistributionIntro()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->vuln_distribution_intro != NULL ? $this->l10n[0]->vuln_distribution_intro : $this->vuln_distribution_intro;
+
+        return $this->vuln_distribution_intro;
     }
 }

@@ -41,6 +41,16 @@ class ReportTemplateEditForm extends LocalizedFormModel
     public $infoChecksIntro;
 
     /**
+     * @var string security level intro.
+     */
+    public $securityLevelIntro;
+
+    /**
+     * @var string vuln distribution intro.
+     */
+    public $vulnDistributionIntro;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules()
@@ -49,7 +59,7 @@ class ReportTemplateEditForm extends LocalizedFormModel
 			array( 'name', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
             array( 'separateCategoryId', 'numerical', 'integerOnly' => true, 'min' => 0 ),
-            array( 'intro, appendix, localizedItems, vulnsIntro, separateVulnsIntro, infoChecksIntro', 'safe' ),
+            array( 'intro, appendix, localizedItems, vulnsIntro, separateVulnsIntro, infoChecksIntro, securityLevelIntro, vulnDistributionIntro', 'safe' ),
 		);
 	}
     
@@ -59,13 +69,15 @@ class ReportTemplateEditForm extends LocalizedFormModel
 	public function attributeLabels()
 	{
 		return array(
-			'name'               => Yii::t('app', 'Name'),
-            'intro'              => Yii::t('app', 'Introduction'),
-            'appendix'           => Yii::t('app', 'Appendix'),
-            'separateCategoryId' => Yii::t('app', 'Separate Category'),
-            'separateVulnsIntro' => Yii::t('app', 'Separate Category Introduction'),
-            'vulnsIntro'         => Yii::t('app', 'Vulns Introduction'),
-            'infoChecksIntro'    => Yii::t('app', 'Info Checks Introduction'),
+			'name'                  => Yii::t('app', 'Name'),
+            'intro'                 => Yii::t('app', 'Introduction'),
+            'appendix'              => Yii::t('app', 'Appendix'),
+            'separateCategoryId'    => Yii::t('app', 'Separate Category'),
+            'separateVulnsIntro'    => Yii::t('app', 'Separate Category Introduction'),
+            'vulnsIntro'            => Yii::t('app', 'Vulns Introduction'),
+            'infoChecksIntro'       => Yii::t('app', 'Info Checks Introduction'),
+            'securityLevelIntro'    => Yii::t('app', 'Security Level Introduction'),
+            'vulnDistributionIntro' => Yii::t('app', 'Vuln Distribution Introduction'),
 		);
 	}
 }

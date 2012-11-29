@@ -1355,6 +1355,9 @@ class ReportController extends Controller
             $this->noPar
         );
 
+        if ($template->localizedSecurityLevelIntro)
+            $this->_renderText($section, $template->localizedSecurityLevelIntro . "<br>");
+
         $subsectionNumber++;
 
         $section->addImage($this->_generateRatingImage($totalRating), $this->centerPar);
@@ -1408,6 +1411,9 @@ class ReportController extends Controller
             $this->h3Font,
             $this->noPar
         );
+
+        if ($template->localizedVulnDistributionIntro)
+            $this->_renderText($section, $template->localizedVulnDistributionIntro . "<br>");
 
         $subsectionNumber++;
         $section->addImage($this->_generateVulnDistributionChart(), $this->centerPar);

