@@ -142,7 +142,8 @@ hr {
 .effort-list .actions,
 .risk-list .actions,
 .risk-template-list .actions,
-.summary-list .actions {
+.summary-list .actions,
+.section-list .actions {
     width:30px;
     text-align:right;
 }

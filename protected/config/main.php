@@ -177,6 +177,13 @@ return array(
                 'report-template/<id:\d+>/summary-block/new'                => 'reporttemplate/editsummary',
                 'report-template/summary-block/control'                     => 'reporttemplate/controlsummary',
 
+                // report template sections
+                'report-template/<id:\d+>/sections/<page:\d+>'        => 'reporttemplate/sections',
+                'report-template/<id:\d+>/sections'                   => 'reporttemplate/sections',
+                'report-template/<id:\d+>/section/<section:\d+>/edit' => 'reporttemplate/editsection',
+                'report-template/<id:\d+>/section/new'                => 'reporttemplate/editsection',
+                'report-template/section/control'                     => 'reporttemplate/controlsection',
+
                 // risk classification categories (templates)
                 'risks/<page:\d+>'         => 'risk/index',
                 'risks'                    => 'risk/index',

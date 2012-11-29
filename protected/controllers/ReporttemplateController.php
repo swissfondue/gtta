@@ -14,8 +14,8 @@ class ReporttemplateController extends Controller
             'https',
 			'checkAuth',
             'checkAdmin',
-            'ajaxOnly + controlheaderimage, controlsummary',
-            'postOnly + uploadheaderimage, controlheaderimage, controlsummary',
+            'ajaxOnly + controlheaderimage, controlsummary, controlsection',
+            'postOnly + uploadheaderimage, controlheaderimage, controlsummary, controlsection',
 		);
 	}
 
@@ -622,7 +622,8 @@ class ReporttemplateController extends Controller
                 if ($newRecord)
                     $this->redirect(array( 'reporttemplate/editsummary', 'id' => $template->id, 'summary' => $summary->id ));
             }
-            else
+
+            if (count($model->getErrors()) > 0)
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
@@ -680,6 +681,295 @@ class ReporttemplateController extends Controller
             {
                 case 'delete':
                     $summary->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Display a list of vulnerability sections.
+     */
+	public function actionSections($id, $page=1)
+	{
+        $id = (int) $id;
+        $page = (int) $page;
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
+        $template = ReportTemplate::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByPk($id);
+
+        if (!$template)
+            throw new CHttpException(404, Yii::t('app', 'Template not found.'));
+
+        if ($page < 1)
+            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+
+        $criteria = new CDbCriteria();
+        $criteria->limit  = Yii::app()->params['entriesPerPage'];
+        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->order  = 't.sort_order ASC';
+        $criteria->addColumnCondition(array( 'report_template_id' => $template->id ));
+
+        $sections = ReportTemplateSection::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findAll($criteria);
+
+        $blockCount = ReportTemplateSection::model()->count($criteria);
+        $paginator = new Paginator($blockCount, $page);
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Report Templates'), $this->createUrl('reporttemplate/index'));
+        $this->breadcrumbs[] = array($template->localizedName, $this->createUrl('reporttemplate/edit', array( 'id' => $template->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerability Sections'), '');
+
+        // display the page
+        $this->pageTitle = $template->localizedName;
+		$this->render('section/index', array(
+            'sections' => $sections,
+            'p'        => $paginator,
+            'template' => $template,
+        ));
+	}
+
+    /**
+     * Section edit page.
+     */
+	public function actionEditSection($id, $section=0)
+	{
+        $id = (int) $id;
+        $section = (int) $section;
+        $newRecord = false;
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
+        $template = ReportTemplate::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByPk($id);
+
+        if (!$template)
+            throw new CHttpException(404, Yii::t('app', 'Template not found.'));
+
+        if ($section)
+        {
+            $section = ReportTemplateSection::model()->with(array(
+                'l10n' => array(
+                    'joinType' => 'LEFT JOIN',
+                    'on'       => 'language_id = :language_id',
+                    'params'   => array( 'language_id' => $language )
+                )
+            ))->findByAttributes(array(
+                'id' => $section,
+                'report_template_id' => $template->id
+            ));
+
+            if (!$section)
+                throw new CHttpException(404, Yii::t('app', 'Section not found.'));
+        }
+        else
+        {
+            $section = new ReportTemplateSection();
+            $newRecord = true;
+        }
+
+        $languages = Language::model()->findAll();
+
+		$model = new ReportTemplateSectionEditForm();
+        $model->localizedItems = array();
+
+        if (!$newRecord)
+        {
+            $model->intro      = $section->intro;
+            $model->title      = $section->title;
+            $model->categoryId = $section->check_category_id;
+            $model->sortOrder  = $section->sort_order;
+            $model->categoryId = $section->check_category_id;
+
+            $reportTemplateSectionL10n = ReportTemplateSectionL10n::model()->findAllByAttributes(array(
+                'report_template_section_id' => $section->id
+            ));
+
+            foreach ($reportTemplateSectionL10n as $rtsl)
+            {
+                $model->localizedItems[$rtsl->language_id]['intro'] = $rtsl->intro;
+                $model->localizedItems[$rtsl->language_id]['title'] = $rtsl->title;
+            }
+        }
+        else
+        {
+            // increment last sort_order, if any
+            $criteria = new CDbCriteria();
+            $criteria->select = 'MAX(sort_order) as max_sort_order';
+            $criteria->addColumnCondition(array( 'report_template_id' => $template->id ));
+
+            $maxOrder = ReportTemplateSection::model()->find($criteria);
+
+            if ($maxOrder && $maxOrder->max_sort_order !== NULL)
+                $model->sortOrder = $maxOrder->max_sort_order + 1;
+        }
+
+		// collect user input data
+		if (isset($_POST['ReportTemplateSectionEditForm']))
+		{
+			$model->attributes = $_POST['ReportTemplateSectionEditForm'];
+            $model->intro = $model->defaultL10n($languages, 'intro');
+            $model->title = $model->defaultL10n($languages, 'title');
+
+			if ($model->validate())
+            {
+                $check = ReportTemplateSection::model()->findByAttributes(array(
+                    'report_template_id' => $template->id,
+                    'check_category_id'  => $model->categoryId
+                ));
+
+                if ($check)
+                    $model->addError('categoryId', Yii::t('app', 'Section with this category already exists.'));
+                else
+                {
+                    $section->report_template_id = $template->id;
+                    $section->intro = $model->intro;
+                    $section->title = $model->title;
+                    $section->sort_order = $model->sortOrder;
+                    $section->check_category_id = $model->categoryId;
+                    $section->save();
+
+                    foreach ($model->localizedItems as $languageId => $value)
+                    {
+                        $reportTemplateSectionL10n = ReportTemplateSectionL10n::model()->findByAttributes(array(
+                            'report_template_section_id' => $section->id,
+                            'language_id' => $languageId
+                        ));
+
+                        if (!$reportTemplateSectionL10n)
+                        {
+                            $reportTemplateSectionL10n = new ReportTemplateSectionL10n();
+                            $reportTemplateSectionL10n->report_template_section_id = $section->id;
+                            $reportTemplateSectionL10n->language_id = $languageId;
+                        }
+
+                        if ($value['title'] == '')
+                            $value['title'] = NULL;
+
+                        if ($value['intro'] == '')
+                            $value['intro'] = NULL;
+
+                        $reportTemplateSectionL10n->intro = $value['intro'];
+                        $reportTemplateSectionL10n->title = $value['title'];
+                        $reportTemplateSectionL10n->save();
+                    }
+
+                    Yii::app()->user->setFlash('success', Yii::t('app', 'Section saved.'));
+
+                    $section->refresh();
+
+                    if ($newRecord)
+                        $this->redirect(array( 'reporttemplate/editsection', 'id' => $template->id, 'section' => $section->id ));
+                }
+            }
+
+            if (count($model->getErrors()) > 0)
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+		}
+
+        $criteria = new CDbCriteria();
+        $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
+        $criteria->together = true;
+
+        $categories = CheckCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findAll($criteria);
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Report Templates'), $this->createUrl('reporttemplate/index'));
+        $this->breadcrumbs[] = array($template->localizedName, $this->createUrl('reporttemplate/edit', array( 'id' => $template->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerability Sections'), $this->createUrl('reporttemplate/sections', array( 'id' => $template->id )));
+
+        if ($newRecord)
+            $this->breadcrumbs[] = array(Yii::t('app', 'New Section'), '');
+        else
+            $this->breadcrumbs[] = array($section->localizedTitle, '');
+
+		// display the page
+        $this->pageTitle = $newRecord ? Yii::t('app', 'New Section') : $section->localizedTitle;
+		$this->render('section/edit', array(
+            'model'      => $model,
+            'template'   => $template,
+            'section'    => $section,
+            'languages'  => $languages,
+            'categories' => $categories,
+        ));
+	}
+
+    /**
+     * Section control function.
+     */
+    public function actionControlSection()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $id = $model->id;
+            $section = ReportTemplateSection::model()->findByPk($id);
+
+            if ($section === null)
+                throw new CHttpException(404, Yii::t('app', 'Section not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    $section->delete();
                     break;
 
                 default:
