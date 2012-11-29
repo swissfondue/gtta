@@ -1189,7 +1189,7 @@ class ReportController extends Controller
             $client = Client::model()->findByPk($clientId);
 
             $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-            $table->addRows(5);
+            $table->addRows(1);
             $table->addColumnsList(array( $this->docWidth * 0.4, $this->docWidth * 0.6 ));
 
             $col = 1;
@@ -1259,35 +1259,50 @@ class ReportController extends Controller
                     $table->getCell(1, $col)->writeText(Yii::t('app', 'Fax') . ': ' . $client->contact_fax, $this->textFont, $this->noPar);
             }
 
+            $section->insertPageBreak();
+
+            $section->writeText(Yii::t('app', 'Document Information') . "\n", $this->boldFont, $this->noPar);
+
+            $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+            $table->addRows(6);
+            $table->addColumnsList(array( $this->docWidth * 0.4, $this->docWidth * 0.6 ));
+
             $user = User::model()->findByPk(Yii::app()->user->id);
             $owner = $user->name ? $user->name : $user->email;
 
-            $table->getCell(2, 1)->writeText("\n" . Yii::t('app', 'Document Information'), $this->boldFont, $this->titlePar);
+            $table->getCell(1, 1)->writeText(Yii::t('app', 'Owner'), $this->textFont, $this->noPar);
+            $table->getCell(1, 2)->writeText($owner, $this->textFont, $this->noPar);
 
-            $table->getCell(3, 1)->writeText(Yii::t('app', 'Owner'), $this->textFont, $this->noPar);
-            $table->getCell(3, 2)->writeText($owner, $this->textFont, $this->noPar);
-
-            $table->getCell(3, 1)->writeText(Yii::t('app', 'Status'), $this->textFont, $this->noPar);
-            $table->getCell(3, 2)->writeText(Yii::t('app', 'Draft'), $this->textFont, $this->noPar);
+            $table->getCell(2, 1)->writeText(Yii::t('app', 'Status'), $this->textFont, $this->noPar);
+            $table->getCell(2, 2)->writeText(Yii::t('app', 'Draft'), $this->textFont, $this->noPar);
 
             $table->getCell(3, 1)->writeText(Yii::t('app', 'Originator'), $this->textFont, $this->noPar);
             $table->getCell(3, 2)->writeText($owner, $this->textFont, $this->noPar);
 
-            $table->getCell(3, 1)->writeText(Yii::t('app', 'Review'), $this->textFont, $this->noPar);
-            $table->getCell(3, 2)->writeText($owner, $this->textFont, $this->noPar);
+            $table->getCell(4, 1)->writeText(Yii::t('app', 'Review'), $this->textFont, $this->noPar);
+            $table->getCell(4, 2)->writeText($owner, $this->textFont, $this->noPar);
 
-            $table->getCell(3, 1)->writeText(Yii::t('app', 'File Name'), $this->textFont, $this->noPar);
-            $table->getCell(3, 2)->writeText($fileName, $this->textFont, $this->noPar);
+            $table->getCell(5, 1)->writeText(Yii::t('app', 'File Name'), $this->textFont, $this->noPar);
+            $table->getCell(5, 2)->writeText($fileName, $this->textFont, $this->noPar);
 
-            $table->getCell(3, 1)->writeText(Yii::t('app', 'Modified'), $this->textFont, $this->noPar);
-            $table->getCell(3, 2)->writeText(date('d.m.Y'), $this->textFont, $this->noPar);
+            $table->getCell(6, 1)->writeText(Yii::t('app', 'Modified'), $this->textFont, $this->noPar);
+            $table->getCell(6, 2)->writeText(date('d.m.Y'), $this->textFont, $this->noPar);
 
-            $table->getCell(4, 1)->writeText("\n" . Yii::t('app', 'Changes'), $this->boldFont, $this->titlePar);
+            $section->writeText(Yii::t('app', 'Changes') . "\n", $this->boldFont, $this->noPar);
 
-            $table->getCell(5, 1)->writeText(Yii::t('app', 'Version') . ' / ' . Yii::t('app', 'Date'), $this->boldFont, $this->noPar);
-            $table->getCell(5, 1)->writeText('1.0 / ' . date('d.m.Y'), $this->textFont, $this->noPar);
-            $table->getCell(5, 2)->writeText(Yii::t('app', 'Notes'), $this->boldFont, $this->noPar);
-            $table->getCell(5, 2)->writeText(Yii::t('app', 'Draft'), $this->textFont, $this->noPar);
+            $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+            $table->addRows(2);
+            $table->addColumnsList(array( $this->docWidth * 0.4, $this->docWidth * 0.6 ));
+
+            $table->getCell(1, 1)->writeText(Yii::t('app', 'Version') . ' / ' . Yii::t('app', 'Date'), $this->boldFont, $this->noPar);
+            $table->getCell(2, 1)->writeText('1.0 / ' . date('d.m.Y'), $this->textFont, $this->noPar);
+
+            $table->getCell(1, 2)->writeText(Yii::t('app', 'Notes'), $this->boldFont, $this->noPar);
+            $table->getCell(2, 2)->writeText(Yii::t('app', 'Draft'), $this->textFont, $this->noPar);
+
+            $section->insertPageBreak();
+
+            $section->writeText(Yii::t('app', 'Table of Contents'), $this->h2Font, $this->h3Par);
 
             $section->insertPageBreak();
         }
