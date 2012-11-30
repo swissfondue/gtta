@@ -58,6 +58,7 @@ class ReportTemplate extends CActiveRecord
 		return array(
             'l10n'     => array( self::HAS_MANY, 'ReportTemplateL10n',    'report_template_id' ),
             'summary'  => array( self::HAS_MANY, 'ReportTemplateSummary', 'report_template_id' ),
+            'sections' => array( self::HAS_MANY, 'ReportTemplateSection', 'report_template_id' ),
             'category' => array( self::HAS_ONE,  'CheckCategory', 'separate_category_id' ),
 		);
 	}

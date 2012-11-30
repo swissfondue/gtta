@@ -408,77 +408,19 @@ class ReportController extends Controller
     /**
      * Generate a vulnerability list.
      */
-    private function _generateVulnerabilityList($data, &$section, $sectionNumber, $type = self::NORMAL_VULN_LIST, $infoLocation = null)
+    private function _generateVulnerabilityList($data, &$section, $sectionNumber, $type = self::NORMAL_VULN_LIST, $infoLocation = null, $categoryId = null)
     {
-        // extract separate checks
-        if ($type == self::SEPARATE_VULN_LIST)
-        {
-            $tmpData = array();
-            $separate = 0;
-
-            foreach ($data as $target)
-            {
-                if (!$target['separate'])
-                    continue;
-
-                foreach ($target['categories'] as $category)
-                {
-                    if (!$category['separate'])
-                        continue;
-
-                    if (!isset($tmpData[$category['id']]))
-                        $tmpData[$category['id']] = array(
-                            'name'     => $category['name'],
-                            'controls' => array(),
-                            'checkCount' => 0,
-                            'separate' => 0,
-                            'info'     => 0,
-                        );
-
-                    foreach ($category['controls'] as $control)
-                    {
-                        if (!$control['separate'])
-                            continue;
-
-                        if (!isset($tmpData[$category['id']]['controls'][$control['id']]))
-                            $tmpData[$category['id']]['controls'][$control['id']] = array(
-                                'name'     => $control['name'],
-                                'checks'   => array(),
-                                'checkCount' => 0,
-                                'separate' => 0,
-                                'info'     => 0,
-                            );
-
-                        foreach ($control['checks'] as $check)
-                        {
-                            if (!$check['separate'])
-                                continue;
-
-                            $tmpData[$category['id']]['controls'][$control['id']]['checks'][] = $check;
-                            $tmpData[$category['id']]['controls'][$control['id']]['separate']++;
-                            $tmpData[$category['id']]['controls'][$control['id']]['checkCount']++;
-                            $tmpData[$category['id']]['separate']++;
-                            $tmpData[$category['id']]['checkCount']++;
-                            $separate++;
-                        }
-                    }
-                }
-            }
-
-            $data = array(
-                array(
-                    'categories' => $tmpData,
-                    'separate'   => $separate,
-                    'checkCount' => $separate,
-                )
-            );
-        }
-
         $targetNumber = 1;
 
         foreach ($data as $target)
         {
-            if ($type == self::SEPARATE_VULN_LIST && !$target['separate'])
+            if (!$target['checkCount'])
+                continue;
+
+            if ($type == self::SEPARATE_VULN_LIST &&
+                !in_array($categoryId, $target['separate']) ||
+                $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $target['separateCount'] == $target['info']
+            )
                 continue;
 
             if ($type == self::APPENDIX_VULN_LIST && !$target['info'])
@@ -487,45 +429,33 @@ class ReportController extends Controller
             if (
                 $type == self::NORMAL_VULN_LIST &&
                 (
-                    $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $target['checkCount'] == $target['info'] + $target['separate'] ||
-                    $target['checkCount'] == $target['separate']
+                    $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $target['checkCount'] == $target['info'] + $target['separateCount'] ||
+                    $target['checkCount'] == $target['separateCount']
                 )
             )
                 continue;
 
             $tableCount = 1;
 
-            if ($type == self::NORMAL_VULN_LIST && $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE && $target['info'])
+            if ($type != self::APPENDIX_VULN_LIST && $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE && $target['info'])
                 $tableCount = 2;
 
             for ($tableNumber = 0; $tableNumber < $tableCount; $tableNumber++)
             {
-                if ($type != self::SEPARATE_VULN_LIST)
+                $section->writeText($sectionNumber . '.' . $targetNumber . '. ' . $target['host'], $this->boldFont);
+
+                if ($target['description'])
                 {
-                    $section->writeText($sectionNumber . '.' . $targetNumber . '. ' . $target['host'], $this->boldFont);
-
-                    if ($target['description'])
-                    {
-                        $section->writeText(' / ', $this->textFont);
-                        $section->writeText($target['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
-                    }
-
-                    if ($tableNumber == 1)
-                        $section->writeText(' - ' . Yii::t('app', 'Info Checks'), $this->textFont);
-
-                    $section->writeText("\n", $this->textFont);
-
-                    $targetNumber++;
+                    $section->writeText(' / ', $this->textFont);
+                    $section->writeText($target['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
                 }
 
-                if (!count($target['categories']))
-                {
-                    if ($type == self::SEPARATE_VULN_LIST)
-                        continue;
+                if ($tableNumber == 1)
+                    $section->writeText(' - ' . Yii::t('app', 'Info Checks'), $this->textFont);
 
-                    $section->writeText(Yii::t('app', 'No vulnerabilities found.') . '<br>', $this->textFont, $this->noPar);
-                    continue;
-                }
+                $section->writeText("\n", $this->textFont);
+
+                $targetNumber++;
 
                 $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
                 $table->addColumnsList(array( $this->docWidth * 0.17, $this->docWidth * 0.83 ));
@@ -534,7 +464,18 @@ class ReportController extends Controller
 
                 foreach ($target['categories'] as $category)
                 {
-                    if ($type == self::SEPARATE_VULN_LIST && !$target['separate'])
+                    if (
+                        $type == self::SEPARATE_VULN_LIST &&
+                        (
+                            $category['id'] != $categoryId ||
+                            $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $category['info'] == $category['separate'] ||
+                            $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE &&
+                            (
+                                $tableNumber == 0 && $category['separate'] == $category['info'] ||
+                                $tableNumber == 1 && !$category['info']
+                            )
+                        )
+                    )
                         continue;
 
                     if ($type == self::APPENDIX_VULN_LIST && !$category['info'])
@@ -567,7 +508,18 @@ class ReportController extends Controller
 
                     foreach ($category['controls'] as $control)
                     {
-                        if ($type == self::SEPARATE_VULN_LIST && !$control['separate'])
+                        if (
+                            $type == self::SEPARATE_VULN_LIST &&
+                            (
+                                !$control['separate'] ||
+                                $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $control['info'] == $control['separate'] ||
+                                $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE &&
+                                (
+                                    $tableNumber == 0 && $control['separate'] == $control['info'] ||
+                                    $tableNumber == 1 && !$control['info']
+                                )
+                            )
+                        )
                             continue;
 
                         if ($type == self::APPENDIX_VULN_LIST && !$control['info'])
@@ -600,7 +552,18 @@ class ReportController extends Controller
 
                         foreach ($control['checks'] as $check)
                         {
-                            if ($type == self::SEPARATE_VULN_LIST && !$check['separate'])
+                            if (
+                                $type == self::SEPARATE_VULN_LIST &&
+                                (
+                                    !$check['separate'] ||
+                                    $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $check['info'] ||
+                                    $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE &&
+                                    (
+                                        $tableNumber == 0 && $check['info'] ||
+                                        $tableNumber == 1 && !$check['info']
+                                    )
+                                )
+                            )
                                 continue;
 
                             if ($type == self::APPENDIX_VULN_LIST && !$check['info'])
@@ -834,7 +797,17 @@ class ReportController extends Controller
                         'params' => array( 'language_id' => $language )
                     )
                 )
-            )
+            ),
+            'sections' => array(
+                'order' => 'sections.sort_order ASC',
+                'with'  => array(
+                    'l10n' => array(
+                        'alias'  => 'section_l10n',
+                        'on'     => 'section_l10n.language_id = :language_id',
+                        'params' => array( 'language_id' => $language )
+                    )
+                )
+            ),
         ))->findByPk($templateId);
 
         if ($template === null)
@@ -842,6 +815,11 @@ class ReportController extends Controller
             Yii::app()->user->setFlash('error', Yii::t('app', 'Template not found.'));
             return;
         }
+
+        $templateCategoryIds = array();
+
+        foreach ($template->sections as $section)
+            $templateCategoryIds[] = $section->check_category_id;
 
         $criteria = new CDbCriteria();
         $criteria->addInCondition('id', $targetIds);
@@ -881,13 +859,14 @@ class ReportController extends Controller
         foreach ($targets as $target)
         {
             $targetData = array(
-                'host'        => $target->host,
-                'description' => $target->description,
-                'rating'      => 0.0,
-                'checkCount'  => 0,
-                'categories'  => array(),
-                'info'        => 0,
-                'separate'    => 0,
+                'host'          => $target->host,
+                'description'   => $target->description,
+                'rating'        => 0.0,
+                'checkCount'    => 0,
+                'categories'    => array(),
+                'info'          => 0,
+                'separate'      => array(),
+                'separateCount' => 0,
             );
 
             // get all references (they are the same across all target categories)
@@ -1031,7 +1010,7 @@ class ReportController extends Controller
                             'referenceCode'    => $check->reference_code,
                             'referenceCodeUrl' => $check->reference_url,
                             'info'             => $check->targetChecks[0]->rating == TargetCheck::RATING_INFO,
-                            'separate'         => $template->separate_category_id == $category->check_category_id,
+                            'separate'         => in_array($category->check_category_id, $templateCategoryIds),
                         );
 
                         if ($checkData['info'])
@@ -1046,7 +1025,12 @@ class ReportController extends Controller
                         {
                             $controlData['separate']++;
                             $categoryData['separate']++;
-                            $targetData['separate']++;
+
+                            if (!in_array($category->check_category_id, $targetData['separate']))
+                                $targetData['separate'][] = $category->check_category_id;
+
+                            $targetData['separateCount']++;
+
                             $haveSeparate = true;
                         }
 
@@ -1603,37 +1587,40 @@ class ReportController extends Controller
 
         if ($haveSeparate)
         {
-            $section->writeText(
-                $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Information Gathering') . "\n",
-                $this->h3Font,
-                $this->noPar
-            );
+            foreach ($template->sections as $scn)
+            {
+                $section->writeText(
+                    $sectionNumber . '.' . $subsectionNumber . '. ' . $scn->localizedTitle . "\n",
+                    $this->h3Font,
+                    $this->noPar
+                );
 
-            if ($template->localizedSeparateVulnsIntro)
-                $this->_renderText($section, $template->localizedSeparateVulnsIntro . "<br>");
+                if ($scn->localizedIntro)
+                    $this->_renderText($section, $scn->localizedIntro . "<br><br>");
 
-            $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::SEPARATE_VULN_LIST, $model->infoChecksLocation);
-            $subsectionNumber++;
+                $this->_generateVulnerabilityList(
+                    $data,
+                    $section,
+                    $sectionNumber . '.' . $subsectionNumber,
+                    self::SEPARATE_VULN_LIST,
+                    $model->infoChecksLocation,
+                    $scn->check_category_id
+                );
+
+                $subsectionNumber++;
+            }
         }
 
-        if ($haveSeparate || $haveInfo && $model->infoChecksLocation == ProjectReportForm::INFO_LOCATION_APPENDIX)
-        {
-            $section->writeText(
-                $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Found Vulnerabilities') . "\n",
-                $this->h3Font,
-                $this->noPar
-            );
+        $section->writeText(
+            $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Found Vulnerabilities') . "\n",
+            $this->h3Font,
+            $this->noPar
+        );
 
-            if ($template->localizedVulnsIntro)
-                $this->_renderText($section, $template->localizedVulnsIntro . "<br><br>");
+        if ($template->localizedVulnsIntro)
+            $this->_renderText($section, $template->localizedVulnsIntro . "<br><br>");
 
-            $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::NORMAL_VULN_LIST, $model->infoChecksLocation);
-        }
-        else
-        {
-            $section->writeText("\n\n");
-            $this->_generateVulnerabilityList($data, $section, $sectionNumber, self::NORMAL_VULN_LIST, $model->infoChecksLocation);
-        }
+        $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::NORMAL_VULN_LIST, $model->infoChecksLocation);
 
         $subsectionNumber++;
 
