@@ -11,6 +11,14 @@
  * @property string $appendix
  * @property string $vulns_intro
  * @property string $info_checks_intro
+ * @property string $security_level_intro
+ * @property string $vuln_distribution_intro
+ * @property string $reduced_intro
+ * @property string $high_description
+ * @property string $low_description
+ * @property string $med_description
+ * @property string $degree_intro
+ * @property string $risk_intro
  */
 class ReportTemplateL10n extends CActiveRecord
 {   
@@ -41,7 +49,7 @@ class ReportTemplateL10n extends CActiveRecord
             array( 'report_template_id, language_id', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
             array( 'report_template_id, language_id', 'numerical', 'integerOnly' => true ),
-            array( 'intro, appendix, vulns_intro, info_checks_intro', 'safe' ),
+            array( 'intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro', 'safe' ),
 		);
 	}
 

@@ -106,6 +106,12 @@ class ReporttemplateController extends Controller
             $model->infoChecksIntro = $template->info_checks_intro;
             $model->securityLevelIntro = $template->security_level_intro;
             $model->vulnDistributionIntro = $template->vuln_distribution_intro;
+            $model->degreeIntro = $template->degree_intro;
+            $model->reducedIntro = $template->reduced_intro;
+            $model->riskIntro = $template->risk_intro;
+            $model->highDescription = $template->high_description;
+            $model->medDescription = $template->med_description;
+            $model->lowDescription = $template->low_description;
 
             $templateL10n = ReportTemplateL10n::model()->findAllByAttributes(array(
                 'report_template_id' => $template->id
@@ -120,6 +126,12 @@ class ReporttemplateController extends Controller
                 $model->localizedItems[$tl->language_id]['infoChecksIntro'] = $tl->info_checks_intro;
                 $model->localizedItems[$tl->language_id]['securityLevelIntro'] = $tl->security_level_intro;
                 $model->localizedItems[$tl->language_id]['vulnDistributionIntro'] = $tl->vuln_distribution_intro;
+                $model->localizedItems[$tl->language_id]['reducedIntro'] = $tl->reduced_intro;
+                $model->localizedItems[$tl->language_id]['degreeIntro'] = $tl->degree_intro;
+                $model->localizedItems[$tl->language_id]['riskIntro'] = $tl->risk_intro;
+                $model->localizedItems[$tl->language_id]['highDescription'] = $tl->high_description;
+                $model->localizedItems[$tl->language_id]['medDescription'] = $tl->med_description;
+                $model->localizedItems[$tl->language_id]['lowDescription'] = $tl->low_description;
             }
         }
 
@@ -134,6 +146,12 @@ class ReporttemplateController extends Controller
             $model->infoChecksIntro = $model->defaultL10n($languages, 'infoChecksIntro');
             $model->securityLevelIntro = $model->defaultL10n($languages, 'securityLevelIntro');
             $model->vulnDistributionIntro = $model->defaultL10n($languages, 'vulnDistributionIntro');
+            $model->reducedIntro = $model->defaultL10n($languages, 'reducedIntro');
+            $model->degreeIntro = $model->defaultL10n($languages, 'degreeIntro');
+            $model->riskIntro = $model->defaultL10n($languages, 'riskIntro');
+            $model->highDescription = $model->defaultL10n($languages, 'highDescription');
+            $model->medDescription = $model->defaultL10n($languages, 'medDescription');
+            $model->lowDescription = $model->defaultL10n($languages, 'lowDescription');
 
 			if ($model->validate())
             {
@@ -144,6 +162,12 @@ class ReporttemplateController extends Controller
                 $template->info_checks_intro = $model->infoChecksIntro;
                 $template->security_level_intro = $model->securityLevelIntro;
                 $template->vuln_distribution_intro = $model->vulnDistributionIntro;
+                $template->degree_intro = $model->degreeIntro;
+                $template->reduced_intro = $model->reducedIntro;
+                $template->risk_intro = $model->riskIntro;
+                $template->high_description = $model->highDescription;
+                $template->med_description = $model->medDescription;
+                $template->low_description = $model->lowDescription;
                 $template->save();
 
                 foreach ($model->localizedItems as $languageId => $value)
@@ -181,6 +205,24 @@ class ReporttemplateController extends Controller
                     if ($value['vulnDistributionIntro'] == '')
                         $value['vulnDistributionIntro'] = NULL;
 
+                    if ($value['reducedIntro'] == '')
+                        $value['reducedIntro'] = NULL;
+
+                    if ($value['degreeIntro'] == '')
+                        $value['degreeIntro'] = NULL;
+
+                    if ($value['riskIntro'] == '')
+                        $value['riskIntro'] = NULL;
+
+                    if ($value['highDescription'] == '')
+                        $value['highDescription'] = NULL;
+
+                    if ($value['medDescription'] == '')
+                        $value['medDescription'] = NULL;
+
+                    if ($value['lowDescription'] == '')
+                        $value['lowDescription'] = NULL;
+
                     $templateL10n->name = $value['name'];
                     $templateL10n->intro = $value['intro'];
                     $templateL10n->appendix = $value['appendix'];
@@ -188,6 +230,12 @@ class ReporttemplateController extends Controller
                     $templateL10n->info_checks_intro = $value['infoChecksIntro'];
                     $templateL10n->security_level_intro = $value['securityLevelIntro'];
                     $templateL10n->vuln_distribution_intro = $value['vulnDistributionIntro'];
+                    $templateL10n->reduced_intro = $value['reducedIntro'];
+                    $templateL10n->degree_intro = $value['degreeIntro'];
+                    $templateL10n->risk_intro = $value['riskIntro'];
+                    $templateL10n->high_description = $value['highDescription'];
+                    $templateL10n->med_description = $value['medDescription'];
+                    $templateL10n->low_description = $value['lowDescription'];
 
                     $templateL10n->save();
                 }

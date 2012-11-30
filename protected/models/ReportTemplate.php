@@ -14,6 +14,12 @@
  * @property string $info_checks_intro
  * @property string $security_level_intro
  * @property string $vuln_distribution_intro
+ * @property string $reduced_intro
+ * @property string $high_description
+ * @property string $low_description
+ * @property string $med_description
+ * @property string $degree_intro
+ * @property string $risk_intro
  */
 class ReportTemplate extends CActiveRecord
 {   
@@ -43,7 +49,7 @@ class ReportTemplate extends CActiveRecord
 		return array(
             array( 'name', 'required' ),
             array( 'name, header_image_path, header_image_type', 'length', 'max' => 1000 ),
-            array( 'intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro', 'safe' ),
+            array( 'intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro', 'safe' ),
 		);
 	}
 
@@ -134,5 +140,71 @@ class ReportTemplate extends CActiveRecord
             return $this->l10n[0]->vuln_distribution_intro != NULL ? $this->l10n[0]->vuln_distribution_intro : $this->vuln_distribution_intro;
 
         return $this->vuln_distribution_intro;
+    }
+
+    /**
+     * @return string localized reduced intro.
+     */
+    public function getLocalizedReducedIntro()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->reduced_intro != NULL ? $this->l10n[0]->reduced_intro : $this->reduced_intro;
+
+        return $this->reduced_intro;
+    }
+
+    /**
+     * @return string localized risk intro.
+     */
+    public function getLocalizedRiskIntro()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->risk_intro != NULL ? $this->l10n[0]->risk_intro : $this->risk_intro;
+
+        return $this->risk_intro;
+    }
+
+    /**
+     * @return string localized degree intro.
+     */
+    public function getLocalizedDegreeIntro()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->degree_intro != NULL ? $this->l10n[0]->degree_intro : $this->degree_intro;
+
+        return $this->degree_intro;
+    }
+
+    /**
+     * @return string localized high description
+     */
+    public function getLocalizedHighDescription()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->high_description != NULL ? $this->l10n[0]->high_description : $this->high_description;
+
+        return $this->high_description;
+    }
+
+    /**
+     * @return string localized med description
+     */
+    public function getLocalizedMedDescription()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->med_description != NULL ? $this->l10n[0]->med_description : $this->med_description;
+
+        return $this->high_description;
+    }
+
+    /**
+     * @return string localized low description
+     */
+    public function getLocalizedLowDescription()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->low_description != NULL ? $this->l10n[0]->low_description : $this->low_description;
+
+        return $this->low_description;
     }
 }

@@ -1411,11 +1411,8 @@ class ReportController extends Controller
                 $this->noPar
             );
 
-            $section->writeText(
-                Yii::t('app', 'The degree of fulfillment shows the security level for the individual controls. 0 is the worst value, 100% means that all security controls are met in accordance with the checklist.') . "\n\n",
-                $this->textFont,
-                $this->noPar
-            );
+            if ($template->localizedDegreeIntro)
+                $this->_renderText($section, $template->localizedDegreeIntro . "<br><br>");
 
             $this->_generateFulfillmentDegreeReport($model, $section, $sectionNumber . '.' . $subsectionNumber);
 
@@ -1432,6 +1429,9 @@ class ReportController extends Controller
 
             $riskMatrixModel = new RiskMatrixForm();
             $riskMatrixModel->attributes = $_POST['RiskMatrixForm'];
+
+            if ($template->localizedRiskIntro)
+                $this->_renderText($section, $template->localizedRiskIntro . "<br>");
 
             $this->_generateRiskMatrixReport($riskMatrixModel, $section, $sectionNumber . '.' . $subsectionNumber);
 
@@ -1452,12 +1452,8 @@ class ReportController extends Controller
                 $this->h3Par
             );
 
-            $section->writeText(
-                Yii::t('app', 'This section contains the worst vulnerabilities and associated solutions. The left column contains the reference number, which indicates the test number.') . "\n\n" .
-                Yii::t('app', 'All checks have various vulnerability levels. The following table shows all possible ratings.') . "\n",
-                $this->textFont,
-                $this->noPar
-            );
+            if ($template->localizedReducedIntro)
+                $this->_renderText($section, $template->localizedReducedIntro . "<br>");
 
             $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
             $table->addColumnsList(array( $this->docWidth * 0.15, $this->docWidth * 0.2, $this->docWidth * 0.65 ));
@@ -1493,9 +1489,9 @@ class ReportController extends Controller
             $table->getCell(3, 2)->writeText(Yii::t('app', 'Med Risk'), $this->textFont);
             $table->getCell(4, 2)->writeText(Yii::t('app', 'Low Risk'), $this->textFont);
 
-            $table->getCell(2, 3)->writeText(Yii::t('app', 'Immediate threat to the system: an exploitation of the vulnerability can be used to control the equipment, or to obtain sensitive information. Such weak points should always be fixed.'), $this->textFont);
-            $table->getCell(3, 3)->writeText(Yii::t('app', 'Moderate vulnerability: no direct threat to the system (but this is possible in combination with other moderate vulnerability). This type of vulnerability should also be fixed.'), $this->textFont);
-            $table->getCell(4, 3)->writeText(Yii::t('app', 'Minor security flaw: no immediate threat to the system. It has to be decided case by case, whether measures to improve safety should be taken.'), $this->textFont);
+            $table->getCell(2, 3)->writeText($template->localizedHighDescription, $this->textFont);
+            $table->getCell(3, 3)->writeText($template->localizedMedDescription, $this->textFont);
+            $table->getCell(4, 3)->writeText($template->localizedLowDescription, $this->textFont);
 
             $section->writeText("\n");
 

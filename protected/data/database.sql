@@ -4,7 +4,7 @@
 
 -- Dumped from database version 8.4.13
 -- Dumped by pg_dump version 9.1.3
--- Started on 2012-11-30 13:13:25 MSK
+-- Started on 2012-11-30 14:38:03 MSK
 
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -988,7 +988,13 @@ CREATE TABLE report_templates (
     vulns_intro character varying,
     info_checks_intro character varying,
     security_level_intro character varying,
-    vuln_distribution_intro character varying
+    vuln_distribution_intro character varying,
+    reduced_intro character varying,
+    high_description character varying,
+    med_description character varying,
+    low_description character varying,
+    degree_intro character varying,
+    risk_intro character varying
 );
 
 
@@ -1043,7 +1049,13 @@ CREATE TABLE report_templates_l10n (
     vulns_intro character varying,
     info_checks_intro character varying,
     security_level_intro character varying,
-    vuln_distribution_intro character varying
+    vuln_distribution_intro character varying,
+    reduced_intro character varying,
+    high_description character varying,
+    med_description character varying,
+    low_description character varying,
+    degree_intro character varying,
+    risk_intro character varying
 );
 
 
@@ -2266,9 +2278,9 @@ COPY report_template_summary_l10n (report_template_summary_id, language_id, summ
 -- Data for Name: report_templates; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY report_templates (id, name, header_image_path, header_image_type, intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro) FROM stdin;
-3	Yay ;)	\N	\N					\N	\N
-1	Test Template	0caf7534e0fee7a603c2948652ab8de6815ccea0b277340d7122269f4a847c89	image/png	Test Template Intro<br>The client is: {client}<br>The project is: {project}<br>Project year:&nbsp;<b>{year}<br></b>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br>Date from: {date.from}<br>Date to: {date.to}<br>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}This text goes after the list of targets.<br><b>well done<br><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b>{check.list}<b><br></b>well done	Test Template Appendix	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}	test one two&nbsp;{targets}
+COPY report_templates (id, name, header_image_path, header_image_type, intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro) FROM stdin;
+3	Yay ;)	\N	\N					\N	\N	\N	\N	\N	\N	\N	\N
+1	Test Template	0caf7534e0fee7a603c2948652ab8de6815ccea0b277340d7122269f4a847c89	image/png	Test Template Intro<br>The client is: {client}<br>The project is: {project}<br>Project year:&nbsp;<b>{year}<br></b>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br>Date from: {date.from}<br>Date to: {date.to}<br>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}This text goes after the list of targets.<br><b>well done<br><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b>{check.list}<b><br></b>well done	Test Template Appendix	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}	test one two&nbsp;{targets}	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}	risk&nbsp;targets {targets}
 \.
 
 
@@ -2278,11 +2290,11 @@ COPY report_templates (id, name, header_image_path, header_image_type, intro, ap
 -- Data for Name: report_templates_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY report_templates_l10n (report_template_id, language_id, name, intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro) FROM stdin;
-3	1	Yay ;)	\N	\N	\N	\N	\N	\N
-3	2	\N	\N	\N	\N	\N	\N	\N
-1	1	Test Template	Test Template Intro<br>The client is: {client}<br>The project is: {project}<br>Project year:&nbsp;<b>{year}<br></b>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br>Date from: {date.from}<br>Date to: {date.to}<br>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}This text goes after the list of targets.<br><b>well done<br><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b>{check.list}<b><br></b>well done	Test Template Appendix	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}	test one two&nbsp;{targets}
-1	2	zzz	Testen Templaten Intro	Testen Templaten Appendix	Worlda	\N	test eins zwei&nbsp;{targets}	test eins zwei&nbsp;{targets}
+COPY report_templates_l10n (report_template_id, language_id, name, intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro) FROM stdin;
+3	1	Yay ;)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+3	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1	1	Test Template	Test Template Intro<br>The client is: {client}<br>The project is: {project}<br>Project year:&nbsp;<b>{year}<br></b>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br>Date from: {date.from}<br>Date to: {date.to}<br>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}This text goes after the list of targets.<br><b>well done<br><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b>{check.list}<b><br></b>well done	Test Template Appendix	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}	test one two&nbsp;{targets}	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}	risk&nbsp;targets {targets}
+1	2	zzz	Testen Templaten Intro	Testen Templaten Appendix	Worlda	\N	test eins zwei&nbsp;{targets}	test eins zwei&nbsp;{targets}	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -2533,7 +2545,8 @@ COPY risk_templates_l10n (risk_template_id, language_id, name) FROM stdin;
 --
 
 COPY sessions (id, expire, data) FROM stdin;
-92idvjmpldqshdm9jquv2apqo2      	1354270311	BXVssiPQLnuQVp6XzbYlz5puJd4-X85hplC_Im0VC_qq4CDyRDexnrFrzy-srklBpdilzOaCANL0P2JMS0RG80nDxuIPze7qH2QIG7o7wMxFIUatAwmpJIzT5t1gT2GGVqlKT0aZSzxTq5a1FhfSfHDMef6D-kzKs-bfbkiM2qySGACRdWU33RdlMTulDz-KWo_WC-1FJZRAv475wP4PJaU2CeRxO-ntyaJl3tzbu051gqxQy_XIcD8aSBI-pPw07OiRIF8mSfLdrDSxDfsYwGq4uGMK7ORbuSdYPyBAvW0H4TBMRVGwwyZak80Liiu0
+92idvjmpldqshdm9jquv2apqo2      	1354275050	R7ksic6iQrzLGLr8JtOlj7qJzhcN9MzXJ9wVQw1-GPRKonj-D8nbyx9Zr7DASojcG6c09T9s_ZrkQ-j5PphQj5YOUioEAPwHKJcFVVZVEyw_gnsu5inneG349H1O7y7sjhsCWEVFr2hrK6nwy_tvClHaJCuiQvlSqQKzQzJVBCic5SxA7UlZ2HM44ZAqCDFZt7ADvhUQw3Fz1PxQUS--Nw..
+3v64nsmgh8te1ueaj1g4ju6km0      	1354275432	ACt63GE4YuNqfiBioc53w0zuFQL48Jh61ME3jOk-o7mNGx5B9ze95KTii2IewkMQ0oLOb78uetNOd4adNm94tVc6gyAFqjOxXjMG9c3Mc2sUCvfl4ZXBKT-B8ptTpwoJzlp3TVyRozQIZW0LrSwy-sz0-QbwPxBzxruXQT73mkSjAZv3ykDn0vU39MkUcRTWnsMz42ZEBA2m9lzz3j2H8Shb5728yJiBE0fa2FskNVIro-dVuWtzNI6ZlUERtNH2tz26V3x0D4dbANSyo9oX34TsJqs1TWzqbkhx-DlsARNmfWnrM91NeYrNuoWlu2l-
 \.
 
 
@@ -3463,7 +3476,7 @@ ALTER TABLE ONLY report_template_summary
 
 
 --
--- TOC entry 2206 (class 2606 OID 28165)
+-- TOC entry 2206 (class 2606 OID 28175)
 -- Dependencies: 194 162 2093
 -- Name: report_templates_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
@@ -3473,7 +3486,7 @@ ALTER TABLE ONLY report_templates_l10n
 
 
 --
--- TOC entry 2207 (class 2606 OID 28170)
+-- TOC entry 2207 (class 2606 OID 28180)
 -- Dependencies: 2137 194 193
 -- Name: report_templates_l10n_report_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
@@ -3814,7 +3827,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2012-11-30 13:13:30 MSK
+-- Completed on 2012-11-30 14:38:08 MSK
 
 --
 -- PostgreSQL database dump complete

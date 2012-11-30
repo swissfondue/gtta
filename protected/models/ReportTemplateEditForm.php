@@ -41,6 +41,36 @@ class ReportTemplateEditForm extends LocalizedFormModel
     public $vulnDistributionIntro;
 
     /**
+     * @var string reduced intro.
+     */
+    public $reducedIntro;
+
+    /**
+     * @var string risk intro.
+     */
+    public $riskIntro;
+
+    /**
+     * @var string degree intro.
+     */
+    public $degreeIntro;
+
+    /**
+     * @var string high description.
+     */
+    public $highDescription;
+
+    /**
+     * @var string med description.
+     */
+    public $medDescription;
+
+    /**
+     * @var string low description.
+     */
+    public $lowDescription;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules()
@@ -48,7 +78,7 @@ class ReportTemplateEditForm extends LocalizedFormModel
 		return array(
 			array( 'name', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
-            array( 'intro, appendix, localizedItems, vulnsIntro, infoChecksIntro, securityLevelIntro, vulnDistributionIntro', 'safe' ),
+            array( 'intro, appendix, localizedItems, vulnsIntro, infoChecksIntro, securityLevelIntro, vulnDistributionIntro, reducedIntro, highDescription, medDescription, lowDescription, degreeIntro, riskIntro', 'safe' ),
 		);
 	}
     
@@ -65,6 +95,12 @@ class ReportTemplateEditForm extends LocalizedFormModel
             'infoChecksIntro'       => Yii::t('app', 'Info Checks Introduction'),
             'securityLevelIntro'    => Yii::t('app', 'Security Level Introduction'),
             'vulnDistributionIntro' => Yii::t('app', 'Vuln Distribution Introduction'),
+            'reducedIntro'          => Yii::t('app', 'Reduced Vuln List Introduction'),
+            'highDescription'       => Yii::t('app', 'High Risk Description'),
+            'medDescription'        => Yii::t('app', 'Med Risk Description'),
+            'lowDescription'        => Yii::t('app', 'Low Risk Description'),
+            'degreeIntro'           => Yii::t('app', 'Degree of Fulfillment Introduction'),
+            'riskIntro'             => Yii::t('app', 'Risk Matrix Introduction'),
 		);
 	}
 }
