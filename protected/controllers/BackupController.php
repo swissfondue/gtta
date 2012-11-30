@@ -43,6 +43,8 @@ class BackupController extends Controller
         'report_templates_l10n',
         'report_template_summary',
         'report_template_summary_l10n',
+        'report_template_sections',
+        'report_template_sections_l10n',
     );
 
     private $_sequences = array(
@@ -63,8 +65,9 @@ class BackupController extends Controller
         'users_id_seq',
         'risk_templates_id_seq',
         'risk_categories_id_seq',
-        'report_template_summary_id_seq',
         'report_templates_id_seq',
+        'report_template_summary_id_seq',
+        'report_template_sections_id_seq',
     );
 
     /**
