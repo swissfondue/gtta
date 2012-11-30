@@ -61,22 +61,22 @@
                                     </div>
                                 </div>
 
-                                <div class="control-group <?php if ($model->getError('appendix')) echo 'error'; ?>">
-                                    <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_appendix"><?php echo Yii::t('app', 'Appendix'); ?></label>
+                                <div class="control-group <?php if ($model->getError('securityLevelIntro')) echo 'error'; ?>">
+                                    <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_securityLevelIntro"><?php echo Yii::t('app', 'Security Level Introduction'); ?></label>
                                     <div class="controls">
-                                        <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_appendix" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][appendix]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['appendix']) : ''; ?></textarea>
-                                        <?php if ($model->getError('appendix')): ?>
-                                            <p class="help-block"><?php echo $model->getError('appendix'); ?></p>
+                                        <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_securityLevelIntro" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][securityLevelIntro]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['securityLevelIntro']) : ''; ?></textarea>
+                                        <?php if ($model->getError('securityLevelIntro')): ?>
+                                            <p class="help-block"><?php echo $model->getError('securityLevelIntro'); ?></p>
                                         <?php endif; ?>
                                     </div>
                                 </div>
 
-                                <div class="control-group <?php if ($model->getError('separateVulnsIntro')) echo 'error'; ?>">
-                                    <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_separateVulnsIntro"><?php echo Yii::t('app', 'Separate Category Introduction'); ?></label>
+                                <div class="control-group <?php if ($model->getError('vulnDistributionIntro')) echo 'error'; ?>">
+                                    <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_vulnDistributionIntro"><?php echo Yii::t('app', 'Vuln Distribution Introduction'); ?></label>
                                     <div class="controls">
-                                        <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_separateVulnsIntro" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][separateVulnsIntro]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['separateVulnsIntro']) : ''; ?></textarea>
-                                        <?php if ($model->getError('separateVulnsIntro')): ?>
-                                            <p class="help-block"><?php echo $model->getError('separateVulnsIntro'); ?></p>
+                                        <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_vulnDistributionIntro" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][vulnDistributionIntro]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['vulnDistributionIntro']) : ''; ?></textarea>
+                                        <?php if ($model->getError('vulnDistributionIntro')): ?>
+                                            <p class="help-block"><?php echo $model->getError('vulnDistributionIntro'); ?></p>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -100,23 +100,13 @@
                                         <?php endif; ?>
                                     </div>
                                 </div>
-                                
-                                <div class="control-group <?php if ($model->getError('securityLevelIntro')) echo 'error'; ?>">
-                                    <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_securityLevelIntro"><?php echo Yii::t('app', 'Security Level Introduction'); ?></label>
+
+                                <div class="control-group <?php if ($model->getError('appendix')) echo 'error'; ?>">
+                                    <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_appendix"><?php echo Yii::t('app', 'Appendix'); ?></label>
                                     <div class="controls">
-                                        <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_securityLevelIntro" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][securityLevelIntro]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['securityLevelIntro']) : ''; ?></textarea>
-                                        <?php if ($model->getError('securityLevelIntro')): ?>
-                                            <p class="help-block"><?php echo $model->getError('securityLevelIntro'); ?></p>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                                
-                                <div class="control-group <?php if ($model->getError('vulnDistributionIntro')) echo 'error'; ?>">
-                                    <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_vulnDistributionIntro"><?php echo Yii::t('app', 'Vuln Distribution Introduction'); ?></label>
-                                    <div class="controls">
-                                        <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_vulnDistributionIntro" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][vulnDistributionIntro]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['vulnDistributionIntro']) : ''; ?></textarea>
-                                        <?php if ($model->getError('vulnDistributionIntro')): ?>
-                                            <p class="help-block"><?php echo $model->getError('vulnDistributionIntro'); ?></p>
+                                        <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_appendix" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][appendix]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['appendix']) : ''; ?></textarea>
+                                        <?php if ($model->getError('appendix')): ?>
+                                            <p class="help-block"><?php echo $model->getError('appendix'); ?></p>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -125,21 +115,6 @@
                     </div>
 
                     <hr>
-
-                    <div class="control-group <?php if ($model->getError('separateCategoryId')) echo 'error'; ?>">
-                        <label class="control-label" for="ReportTemplateEditForm_separateCategoryId"><?php echo Yii::t('app', 'Separate Category'); ?></label>
-                        <div class="controls">
-                            <select class="input-xlarge" id="ReportTemplateEditForm_separateCategoryId" name="ReportTemplateEditForm[separateCategoryId]">
-                                <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
-                                <?php foreach ($categories as $cat): ?>
-                                    <option value="<?php echo $cat->id; ?>" <?php if ($cat->id == $model->separateCategoryId) echo 'selected'; ?>><?php echo CHtml::encode($cat->localizedName); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                            <?php if ($model->getError('separateCategoryId')): ?>
-                                <p class="help-block"><?php echo $model->getError('separateCategoryId'); ?></p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
 
                     <?php if (!$template->isNewRecord): ?>
                         <hr>

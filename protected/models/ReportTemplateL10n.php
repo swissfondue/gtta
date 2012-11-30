@@ -9,7 +9,6 @@
  * @property string $name
  * @property string $intro
  * @property string $appendix
- * @property string $separate_vulns_intro
  * @property string $vulns_intro
  * @property string $info_checks_intro
  */
@@ -42,7 +41,7 @@ class ReportTemplateL10n extends CActiveRecord
             array( 'report_template_id, language_id', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
             array( 'report_template_id, language_id', 'numerical', 'integerOnly' => true ),
-            array( 'intro, appendix, separate_vulns_intro, vulns_intro, info_checks_intro', 'safe' ),
+            array( 'intro, appendix, vulns_intro, info_checks_intro', 'safe' ),
 		);
 	}
 

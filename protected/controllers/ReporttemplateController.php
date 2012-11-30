@@ -102,8 +102,6 @@ class ReporttemplateController extends Controller
             $model->name = $template->name;
             $model->intro = $template->intro;
             $model->appendix = $template->appendix;
-            $model->separateCategoryId = $template->separate_category_id;
-            $model->separateVulnsIntro = $template->separate_vulns_intro;
             $model->vulnsIntro = $template->vulns_intro;
             $model->infoChecksIntro = $template->info_checks_intro;
             $model->securityLevelIntro = $template->security_level_intro;
@@ -118,7 +116,6 @@ class ReporttemplateController extends Controller
                 $model->localizedItems[$tl->language_id]['name'] = $tl->name;
                 $model->localizedItems[$tl->language_id]['intro'] = $tl->intro;
                 $model->localizedItems[$tl->language_id]['appendix'] = $tl->appendix;
-                $model->localizedItems[$tl->language_id]['separateVulnsIntro'] = $tl->separate_vulns_intro;
                 $model->localizedItems[$tl->language_id]['vulnsIntro'] = $tl->vulns_intro;
                 $model->localizedItems[$tl->language_id]['infoChecksIntro'] = $tl->info_checks_intro;
                 $model->localizedItems[$tl->language_id]['securityLevelIntro'] = $tl->security_level_intro;
@@ -133,7 +130,6 @@ class ReporttemplateController extends Controller
             $model->name = $model->defaultL10n($languages, 'name');
             $model->intro = $model->defaultL10n($languages, 'intro');
             $model->appendix = $model->defaultL10n($languages, 'appendix');
-            $model->separateVulnsIntro = $model->defaultL10n($languages, 'separateVulnsIntro');
             $model->vulnsIntro = $model->defaultL10n($languages, 'vulnsIntro');
             $model->infoChecksIntro = $model->defaultL10n($languages, 'infoChecksIntro');
             $model->securityLevelIntro = $model->defaultL10n($languages, 'securityLevelIntro');
@@ -144,8 +140,6 @@ class ReporttemplateController extends Controller
                 $template->name = $model->name;
                 $template->intro = $model->intro;
                 $template->appendix = $model->appendix;
-                $template->separate_category_id = $model->separateCategoryId;
-                $template->separate_vulns_intro = $model->separateVulnsIntro;
                 $template->vulns_intro = $model->vulnsIntro;
                 $template->info_checks_intro = $model->infoChecksIntro;
                 $template->security_level_intro = $model->securityLevelIntro;
@@ -175,9 +169,6 @@ class ReporttemplateController extends Controller
                     if ($value['appendix'] == '')
                         $value['appendix'] = NULL;
 
-                    if ($value['separateVulnsIntro'] == '')
-                        $value['separateVulnsIntro'] = NULL;
-
                     if ($value['vulnsIntro'] == '')
                         $value['vulnsIntro'] = NULL;
 
@@ -193,7 +184,6 @@ class ReporttemplateController extends Controller
                     $templateL10n->name = $value['name'];
                     $templateL10n->intro = $value['intro'];
                     $templateL10n->appendix = $value['appendix'];
-                    $templateL10n->separate_vulns_intro = $value['separateVulnsIntro'];
                     $templateL10n->vulns_intro = $value['vulnsIntro'];
                     $templateL10n->info_checks_intro = $value['infoChecksIntro'];
                     $templateL10n->security_level_intro = $value['securityLevelIntro'];
@@ -213,18 +203,6 @@ class ReporttemplateController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $criteria = new CDbCriteria();
-        $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
-        $criteria->together = true;
-
-        $categories = CheckCategory::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
-            )
-        ))->findAll($criteria);
-
         $this->breadcrumbs[] = array(Yii::t('app', 'Report Templates'), $this->createUrl('reporttemplate/index'));
 
         if ($newRecord)
@@ -238,7 +216,6 @@ class ReporttemplateController extends Controller
             'model'      => $model,
             'template'   => $template,
             'languages'  => $languages,
-            'categories' => $categories,
         ));
 	}
 

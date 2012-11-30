@@ -10,8 +10,6 @@
  * @property string $header_image_type
  * @property string $intro
  * @property string $appendix
- * @property integer $separate_category_id
- * @property string $separate_vulns_intro
  * @property string $vulns_intro
  * @property string $info_checks_intro
  * @property string $security_level_intro
@@ -44,9 +42,8 @@ class ReportTemplate extends CActiveRecord
 	{
 		return array(
             array( 'name', 'required' ),
-            array( 'separate_category_id', 'numerical', 'integerOnly' => true ),
             array( 'name, header_image_path, header_image_type', 'length', 'max' => 1000 ),
-            array( 'intro, appendix, separate_vulns_intro, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro', 'safe' ),
+            array( 'intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro', 'safe' ),
 		);
 	}
 
@@ -59,7 +56,6 @@ class ReportTemplate extends CActiveRecord
             'l10n'     => array( self::HAS_MANY, 'ReportTemplateL10n',    'report_template_id' ),
             'summary'  => array( self::HAS_MANY, 'ReportTemplateSummary', 'report_template_id' ),
             'sections' => array( self::HAS_MANY, 'ReportTemplateSection', 'report_template_id' ),
-            'category' => array( self::HAS_ONE,  'CheckCategory', 'separate_category_id' ),
 		);
 	}
 
@@ -94,17 +90,6 @@ class ReportTemplate extends CActiveRecord
             return $this->l10n[0]->appendix != NULL ? $this->l10n[0]->appendix : $this->appendix;
 
         return $this->appendix;
-    }
-
-    /**
-     * @return string localized separate vulns intro.
-     */
-    public function getLocalizedSeparateVulnsIntro()
-    {
-        if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->separate_vulns_intro != NULL ? $this->l10n[0]->separate_vulns_intro : $this->separate_vulns_intro;
-
-        return $this->separate_vulns_intro;
     }
 
     /**
