@@ -4,7 +4,7 @@
 
 -- Dumped from database version 8.4.13
 -- Dumped by pg_dump version 9.1.3
--- Started on 2012-11-30 14:38:03 MSK
+-- Started on 2012-12-02 02:20:34 MSK
 
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -2545,8 +2545,8 @@ COPY risk_templates_l10n (risk_template_id, language_id, name) FROM stdin;
 --
 
 COPY sessions (id, expire, data) FROM stdin;
-92idvjmpldqshdm9jquv2apqo2      	1354275050	R7ksic6iQrzLGLr8JtOlj7qJzhcN9MzXJ9wVQw1-GPRKonj-D8nbyx9Zr7DASojcG6c09T9s_ZrkQ-j5PphQj5YOUioEAPwHKJcFVVZVEyw_gnsu5inneG349H1O7y7sjhsCWEVFr2hrK6nwy_tvClHaJCuiQvlSqQKzQzJVBCic5SxA7UlZ2HM44ZAqCDFZt7ADvhUQw3Fz1PxQUS--Nw..
-3v64nsmgh8te1ueaj1g4ju6km0      	1354275432	ACt63GE4YuNqfiBioc53w0zuFQL48Jh61ME3jOk-o7mNGx5B9ze95KTii2IewkMQ0oLOb78uetNOd4adNm94tVc6gyAFqjOxXjMG9c3Mc2sUCvfl4ZXBKT-B8ptTpwoJzlp3TVyRozQIZW0LrSwy-sz0-QbwPxBzxruXQT73mkSjAZv3ykDn0vU39MkUcRTWnsMz42ZEBA2m9lzz3j2H8Shb5728yJiBE0fa2FskNVIro-dVuWtzNI6ZlUERtNH2tz26V3x0D4dbANSyo9oX34TsJqs1TWzqbkhx-DlsARNmfWnrM91NeYrNuoWlu2l-
+19v2qu72vshovgatrtkb9hgn22      	1354403395	Haz5_2c7avun5fAkVp4C2xJBQAc3ZCJokIBxkT1Yg0hVG1zklQz1k0ye9JITKsGsyiwtdGwbJBsE_Psd0cw6DR9Ff31OoQhpmc0Y4VAfRs7aoJ0Mn8goji9S-mMKkBso6rHCmCjUBYLu94nBeH4IVfk3FendrafFczOoqL0v6oSWRp543SbqwH8VorjzdXWpK1DfoaOYF_W5mTGbuLL_Mg..
+de8hc6l7535cbf0u4ggrqurr16      	1354403724	L-UCfNUn8F7e-bxPSKV3C7e6dkWlW0B5mSITLeW-jAceIdQzcQesJw-hERxo4L7fHJy4y5o-rfvN9jZsmxlMpx0HmJKrqxUSg_TNJk514VL9nHQwQytfporWLuqB_Q-cB_KvMYzPjrs4yo22SoXMIt7pRofnvJyklwClVtpcRnwropd9f6GGYio5MzAhYcuKlc2uQ7FbT3D35Ty0zBugCeGrT9W_zvES7y4g5qP7nfZowtJ0cjQJqn81vVCljDbndqF5pTTpXMR3yJ3akrVErYepPKHtcBzu94rBYzVDYe3a0yFgafTJ5fys32u7IIq_lL4nvd8E9-OVyV7h0icw-I03u6ADGmXGdqq3m7s0V8hTJyqVsKx0PmnpJIA1fuOP1aRqDikhX8oraW3_0ogv8ILxDMQLPEx5HLEkw3Z5MJc.
 \.
 
 
@@ -3827,7 +3827,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2012-11-30 14:38:08 MSK
+-- Completed on 2012-12-02 02:20:39 MSK
 
 --
 -- PostgreSQL database dump complete
