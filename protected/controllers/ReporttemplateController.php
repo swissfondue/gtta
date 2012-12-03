@@ -879,7 +879,7 @@ class ReporttemplateController extends Controller
                     'check_category_id'  => $model->categoryId
                 ));
 
-                if ($check)
+                if ($check && $check->id != $section->id)
                     $model->addError('categoryId', Yii::t('app', 'Section with this category already exists.'));
                 else
                 {
