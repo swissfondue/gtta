@@ -219,13 +219,6 @@ class ProjectController extends Controller
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
-        $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 't.host ASC';
-        $criteria->addCondition('t.project_id = :project_id');
-        $criteria->params = array( 'project_id' => $project->id );
-
         $client = Client::model()->findByPk($project->client_id);
 
         $language = Language::model()->findByAttributes(array(
@@ -234,6 +227,27 @@ class ProjectController extends Controller
 
         if ($language)
             $language = $language->id;
+
+        $criteria = new CDbCriteria();
+        $criteria->limit  = Yii::app()->params['entriesPerPage'];
+        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->order  = 't.host ASC';
+        $criteria->addCondition('t.project_id = :project_id');
+        $criteria->params = array( 'project_id' => $project->id );
+        $criteria->together = true;
+
+        $targets = Target::model()->findAll($criteria);
+        $targetIds = array();
+
+        foreach ($targets as $target)
+            $targetIds[] = $target->id;
+
+        $newCriteria = new CDbCriteria();
+        $newCriteria->order  = 't.host ASC';
+        $newCriteria->addCondition('t.project_id = :project_id');
+        $newCriteria->params = array( 'project_id' => $project->id );
+        $newCriteria->addInCondition('t.id', $targetIds);
+        $newCriteria->together = true;
 
         $targets = Target::model()->with(array(
             'checkCount',
@@ -254,7 +268,7 @@ class ProjectController extends Controller
                 ),
                 'order' => 'categories.name',
             )
-        ))->findAll($criteria);
+        ))->findAll($newCriteria);
 
         $targetCount = Target::model()->count($criteria);
         $paginator   = new Paginator($targetCount, $page);
@@ -583,12 +597,36 @@ class ProjectController extends Controller
                         'on'       => 'language_id = :language_id',
                         'params'   => array( 'language_id' => $language )
                     ),
+                )
+            ),
+        ))->findAll($criteria);
+
+        $categoryIds = array();
+
+        foreach ($categories as $category)
+            $categoryIds[] = $category->check_category_id;
+
+        $newCriteria = new CDbCriteria();
+        $newCriteria->addCondition('t.target_id = :target_id');
+        $newCriteria->params = array( 'target_id' => $target->id );
+        $newCriteria->addInCondition('t.check_category_id', $categoryIds);
+        $newCriteria->order = 'COALESCE(l10n.name, category.name) ASC';
+        $newCriteria->together = true;
+
+        $categories = TargetCheckCategory::model()->with(array(
+            'category' => array(
+                'with' => array(
+                    'l10n' => array(
+                        'joinType' => 'LEFT JOIN',
+                        'on'       => 'language_id = :language_id',
+                        'params'   => array( 'language_id' => $language )
+                    ),
                     'controls' => array(
                         'with' => 'checkCount'
                     )
                 )
             ),
-        ))->findAll($criteria);
+        ))->findAll($newCriteria);
 
         $categoryCount = TargetCheckCategory::model()->count($criteria);
         $paginator     = new Paginator($categoryCount, $page);

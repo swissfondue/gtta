@@ -48,10 +48,27 @@ class CheckController extends Controller
                 'on'       => 'language_id = :language_id',
                 'params'   => array( 'language_id' => $language )
             ),
-            'controls' => array(
-                'with' => 'checkCount'
-            )
         ))->findAll($criteria);
+
+        $categoryIds = array();
+
+        foreach ($categories as $category)
+            $categoryIds[] = $category->id;
+
+        $newCriteria = new CDbCriteria();
+        $newCriteria->addInCondition('t.id', $categoryIds);
+        $newCriteria->order = 'COALESCE(l10n.name, t.name) ASC';
+        $newCriteria->together = true;
+        $categories = CheckCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            ),
+            'controls' => array(
+                'with' => 'checkCount',
+            ),
+        ))->findAll($newCriteria);
 
         $categoryCount = CheckCategory::model()->count($criteria);
         $paginator     = new Paginator($categoryCount, $page);

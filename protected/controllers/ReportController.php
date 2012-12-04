@@ -935,7 +935,6 @@ class ReportController extends Controller
                     );
 
                     $criteria = new CDbCriteria();
-
                     $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
                     $criteria->addInCondition('t.reference_id', $referenceIds);
                     $criteria->addColumnCondition(array(
@@ -2571,7 +2570,6 @@ class ReportController extends Controller
                     $controlIds[] = $control->id;
 
                 $criteria = new CDbCriteria();
-
                 $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
                 $criteria->addInCondition('t.reference_id', $referenceIds);
                 $criteria->addInCondition('t.check_control_id', $controlIds);
@@ -3096,7 +3094,6 @@ class ReportController extends Controller
                 foreach ($controls as $control)
                 {
                     $criteria = new CDbCriteria();
-
                     $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
                     $criteria->addInCondition('t.reference_id', $referenceIds);
                     $criteria->addColumnCondition(array(
