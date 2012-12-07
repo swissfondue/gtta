@@ -219,6 +219,11 @@ fieldset hr {
     font-weight:bold;
 }
 
+.project-detail .content {
+    width:270px;
+    word-wrap:break-word;
+}
+
 .detail-list .detail .content {
     font-size:80%;
     color:#909090;
