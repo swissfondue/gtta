@@ -380,6 +380,18 @@ div.check-form {
     color:#53a254;
 }
 
+.label-target-category {
+    background-color:#f0f0f0;
+    color:#aaa;
+    font-weight:normal;
+    text-shadow:none;
+    border:1px solid #ddd;
+    margin-top:5px;
+    margin-right:5px;
+    display:block;
+    float:left;
+}
+
 .label-high-risk, .label-admin {
     background-color:#d63515;
 }
