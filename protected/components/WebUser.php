@@ -49,4 +49,18 @@ class WebUser extends CWebUser
 
         return $this->_model->client_id;
     }
+
+    /**
+     * Update last action time.
+     */
+    public function updateLastActionTime()
+    {
+        if ($this->isGuest)
+            return null;
+
+        $this->loadUserModel();
+
+        $this->_model->last_action = new CDbExpression('NOW()');
+        $this->_model->save();
+    }
 }

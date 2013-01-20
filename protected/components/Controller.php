@@ -59,6 +59,9 @@ class Controller extends CController
             return;
         }
 
+        // update last action time for logged in users
+        Yii::app()->user->updateLastActionTime();
+
         $filterChain->run();
     }
 

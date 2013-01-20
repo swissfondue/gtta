@@ -469,6 +469,67 @@ function Admin()
                 _client._controlLogo(id, 'delete');
         };
     };
+
+    /**
+     * Process object.
+     */
+    this.process = new function () {
+        var _process = this;
+
+        /**
+         * Control process function.
+         */
+        this._control = function (id, operation) {
+            var row, url;
+
+            row = $('div.process-monitor[data-id="' + id + '"]');
+            url = row.data('control-url');
+
+            $.ajax({
+                dataType : 'json',
+                url      : url,
+                timeout  : system.ajaxTimeout,
+                type     : 'POST',
+
+                data : {
+                    'EntryControlForm[operation]' : operation,
+                    'EntryControlForm[id]'        : id,
+                    'YII_CSRF_TOKEN'              : system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $('.loader-image').hide();
+
+                    if (data.status == 'error')
+                    {
+                        system.showMessage('error', data.errorText);
+                        return;
+                    }
+
+                    data = data.data;
+
+                    if (operation == 'stop')
+                        $('div.process-monitor[data-id="' + id + '"]').addClass('disabled');
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $('.loader-image').hide();
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $('.loader-image').show();
+                }
+            });
+        };
+
+        /**
+         * Stop process.
+         */
+        this.stop = function (targetId, checkId) {
+            _process._control(targetId.toString() + '-' + checkId.toString(), 'stop');
+        };
+    };
 }
 
 var admin = new Admin();

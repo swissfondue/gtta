@@ -78,6 +78,9 @@
                                         <li class="divider"></li>
                                         <li <?php if (Yii::app()->controller->id == 'backup' && Yii::app()->controller->action->id == 'backup') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('backup/backup'); ?>"><?php echo Yii::t('app', 'Backup'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'backup' && Yii::app()->controller->action->id == 'restore') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('backup/restore'); ?>"><?php echo Yii::t('app', 'Restore'); ?></a></li>
+                                        <li class="divider"></li>
+                                        <li <?php if (Yii::app()->controller->id == 'monitor' && Yii::app()->controller->action->id == 'processes') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('monitor/processes'); ?>"><?php echo Yii::t('app', 'Running Processes'); ?></a></li>
+                                        <li <?php if (Yii::app()->controller->id == 'monitor' && Yii::app()->controller->action->id == 'sessions') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('monitor/sessions'); ?>"><?php echo Yii::t('app', 'Active Sessions'); ?></a></li>
                                     </ul>
                                 </li>
                             <?php endif; ?>

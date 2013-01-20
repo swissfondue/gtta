@@ -13,13 +13,13 @@
                 <table class="table user-list">
                     <tbody>
                         <tr>
-                            <th class="email"><?php echo Yii::t('app', 'User'); ?></th>
+                            <th class="name"><?php echo Yii::t('app', 'User'); ?></th>
                             <th class="role"><?php echo Yii::t('app', 'Role'); ?></th>
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($users as $user): ?>
                             <tr data-id="<?php echo $user->id; ?>" data-control-url="<?php echo $this->createUrl('user/control'); ?>">
-                                <td class="email">
+                                <td class="name">
                                     <a href="<?php echo $this->createUrl('user/edit', array( 'id' => $user->id )); ?>"><?php echo CHtml::encode($user->name ? $user->name : $user->email); ?></a>
                                 </td>
                                 <td class="role">

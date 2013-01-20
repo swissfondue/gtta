@@ -99,13 +99,13 @@ return array(
                 'vuln-tracker/<id:\d+>/vuln/<target:\d+>/<check:\d+>/edit' => 'vulntracker/edit',
 
                 // clients
-                'clients/<page:\d+>'   => 'client/index',
-                'clients'              => 'client/index',
-                'client/<id:\d+>'      => 'client/view',
-                'client/<id:\d+>/edit' => 'client/edit',
-                'client/new'           => 'client/edit',
-                'client/control'       => 'client/control',
-                'client/search'        => 'client/search',
+                'clients/<page:\d+>'       => 'client/index',
+                'clients'                  => 'client/index',
+                'client/<id:\d+>'          => 'client/view',
+                'client/<id:\d+>/edit'     => 'client/edit',
+                'client/new'               => 'client/edit',
+                'client/control'           => 'client/control',
+                'client/search'            => 'client/search',
                 'client/<id:\d+>/logo/new' => 'client/uploadlogo',
                 'client/<id:\d+>/logo'     => 'client/logo',
                 'client/logo/control'      => 'client/controllogo',
@@ -215,6 +215,11 @@ return array(
                 // backup
                 'backup'  => 'backup/backup',
                 'restore' => 'backup/restore',
+
+                // system monitor
+                'processes'       => 'monitor/processes',
+                'process/control' => 'monitor/controlprocess',
+                'sessions'        => 'monitor/sessions',
             ),
 		),
 

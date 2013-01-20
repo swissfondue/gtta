@@ -149,14 +149,14 @@ fieldset hr {
     padding-top:0;
 }
 
-.user-list .role {
+.user-list .role, table.session-monitor .role {
     width:60px;
     text-align:right;
     padding-top:10px;
     white-space:nowrap;
 }
 
-.user-list .role span {
+.user-list .role span, table.session-monitor .role span {
     vertical-align:top;
 }
 
@@ -247,11 +247,17 @@ h3 a:hover {
     vertical-align:top;
 }
 
-table.check-header .status {
+table.check-header .status, table.process-monitor .status {
     width:70px;
     text-align:right;
     padding-top:10px;
     white-space:nowrap;
+}
+
+table.process-monitor .user {
+    width:150px;
+    text-align:left;
+    vertical-align:top;
 }
 
 div.control-header {
@@ -262,30 +268,25 @@ div.control-header:first-child {
     border-top:none;
 }
 
-div.control-header-bold {
-    /*padding:8px;
-    font-weight:bold;*/
-}
-
 div.control-body {
     padding-left:20px;
     border-top:1px solid #ddd;
 }
 
-div.check-header {
+div.check-header, div.process-monitor, div.session-monitor {
     padding:0;
     border-top:1px solid #ddd;
 }
 
-div.check-header:first-child {
+div.check-header:first-child, div.process-monitor:first-child, div.session-monitor:first-child {
     border-top:none;
 }
 
-table.check-header {
+table.check-header, table.process-monitor, table.session-monitor {
     width:100%;
 }
 
-table.check-header td {
+table.check-header td, table.process-monitor td, table.session-monitor td {
     padding:8px;
 }
 
@@ -444,9 +445,13 @@ div.check-form {
     margin-bottom:10px;
 }
 
-table.check-header .actions {
+table.check-header .actions, table.process-monitor .actions {
     width:50px;
     text-align:right;
+}
+
+table.process-monitor .actions {
+    vertical-align:top;
 }
 
 .disabled {
@@ -659,7 +664,7 @@ div.report-check-content {
     margin-right:7px;
 }
 
-.target-list .target .description {
+.target-list .target .description, .process-monitor .name .description {
     color:#909090;
 }
 
@@ -667,7 +672,7 @@ div.report-check-content {
     text-decoration:none;
 }
 
-table.control-header {
+table.control-header, table.process-monitor, table.session-monitor {
     padding-bottom:0;
     margin-bottom:0;
     width:100%;
