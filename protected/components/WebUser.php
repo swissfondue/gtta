@@ -60,7 +60,7 @@ class WebUser extends CWebUser
 
         $this->loadUserModel();
 
-        $this->_model->last_action = new CDbExpression('NOW()');
+        $this->_model->last_action_time = new CDbExpression('NOW()');
         $this->_model->save();
     }
 }

