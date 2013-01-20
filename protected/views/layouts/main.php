@@ -87,6 +87,7 @@
                                 </li>
                             <?php endif; ?>
 
+                            <li><a href="<?php echo $this->createUrl('account/edit'); ?>"><?php echo Yii::t('app', 'Account'); ?></a></li>
                             <li><a href="<?php echo $this->createUrl('app/logout'); ?>"><?php echo Yii::t('app', 'Logout'); ?></a></li>
                         </ul>
                     <?php endif; ?>

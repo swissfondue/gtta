@@ -11,6 +11,7 @@
  * @property string $role
  * @property integer $client_id
  * @property string $last_action_time
+ * @property boolean $send_notifications
  */
 class User extends CActiveRecord
 {
@@ -48,7 +49,7 @@ class User extends CActiveRecord
             array( 'email, password, role', 'required' ),
             array( 'email, password, name', 'length', 'max' => 1000 ),
             array( 'role', 'in', 'range' => array( self::ROLE_ADMIN, self::ROLE_USER, self::ROLE_CLIENT ) ),
-            array( 'client_id, last_action_time', 'safe' ),
+            array( 'client_id, last_action_time, send_notifications', 'safe' ),
 		);
 	}
 

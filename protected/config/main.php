@@ -41,10 +41,13 @@ return array(
 			'urlFormat'      => 'path',
             'showScriptName' => false,
             'rules'          => array(
-                // misc
+                // account
                 '<action:(login|logout)>' => 'app/<action>',
-                'app/l10n.js'             => 'app/l10n',
-                'app/object-list'         => 'app/objectlist',
+                'account'                 => 'account/edit',
+
+                // misc
+                'app/l10n.js'     => 'app/l10n',
+                'app/object-list' => 'app/objectlist',
 
                 // projects
                 'projects/<page:\d+>'         => 'project/index',

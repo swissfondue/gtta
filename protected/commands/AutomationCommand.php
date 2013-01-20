@@ -329,30 +329,33 @@ class AutomationCommand extends ConsoleCommand
             {
                 $user = User::model()->findByPk($check->user_id);
 
-                $email = new Email();
-                $email->user_id = $user->id;
+                if ($user->send_notifications)
+                {
+                    $email = new Email();
+                    $email->user_id = $user->id;
 
-                $email->subject = Yii::t('app', '{checkName} check has been finished', array(
-                    '{checkName}' => $check->check->localizedName
-                ));
+                    $email->subject = Yii::t('app', '{checkName} check has been finished', array(
+                        '{checkName}' => $check->check->localizedName
+                    ));
 
-                $email->content = $this->render(
-                    'application.views.email.check',
+                    $email->content = $this->render(
+                        'application.views.email.check',
 
-                    array(
-                        'userName'   => $user->name ? CHtml::encode($user->name) : $user->email,
-                        'projectId'  => $target->project_id,
-                        'targetId'   => $target->id,
-                        'categoryId' => $check->check->control->check_category_id,
-                        'checkId'    => $check->check_id,
-                        'checkName'  => $check->check->localizedName,
-                        'targetHost' => $target->host
-                    ),
+                        array(
+                            'userName'   => $user->name ? CHtml::encode($user->name) : $user->email,
+                            'projectId'  => $target->project_id,
+                            'targetId'   => $target->id,
+                            'categoryId' => $check->check->control->check_category_id,
+                            'checkId'    => $check->check_id,
+                            'checkName'  => $check->check->localizedName,
+                            'targetHost' => $target->host
+                        ),
 
-                    true
-                );
+                        true
+                    );
 
-                $email->save();
+                    $email->save();
+                }
             }
         }
         catch (Exception $e)
