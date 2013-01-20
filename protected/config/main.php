@@ -220,6 +220,10 @@ return array(
                 'processes'       => 'monitor/processes',
                 'process/control' => 'monitor/controlprocess',
                 'sessions'        => 'monitor/sessions',
+
+                // history
+                'history/logins/<page:\d+>' => 'history/logins',
+                'history/logins'            => 'history/logins',
             ),
 		),
 

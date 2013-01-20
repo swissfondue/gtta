@@ -45,6 +45,11 @@ class UserIdentity extends CUserIdentity
             $this->username  = $user->email;
 			$this->email     = $user->email;
 			$this->errorCode = self::ERROR_NONE;
+
+            $entry = new LoginHistory();
+            $entry->user_id = $user->id;
+            $entry->user_name = $user->name ? $user->name : $user->email;
+            $entry->save();
 		}
         
 		return $this->errorCode == self::ERROR_NONE;

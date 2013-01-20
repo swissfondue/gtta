@@ -81,6 +81,8 @@
                                         <li class="divider"></li>
                                         <li <?php if (Yii::app()->controller->id == 'monitor' && Yii::app()->controller->action->id == 'processes') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('monitor/processes'); ?>"><?php echo Yii::t('app', 'Running Processes'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'monitor' && Yii::app()->controller->action->id == 'sessions') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('monitor/sessions'); ?>"><?php echo Yii::t('app', 'Active Sessions'); ?></a></li>
+                                        <li class="divider"></li>
+                                        <li <?php if (Yii::app()->controller->id == 'history' && Yii::app()->controller->action->id == 'logins') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('history/logins'); ?>"><?php echo Yii::t('app', 'Login History'); ?></a></li>
                                     </ul>
                                 </li>
                             <?php endif; ?>
