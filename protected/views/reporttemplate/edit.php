@@ -345,7 +345,7 @@
             'image'       : false,
             'link'        : false,
             'html'        : false,
-            'lists'       : false
+            'lists'       : true
         });
 
         admin.reportTemplate.initHeaderImageUploadForm();

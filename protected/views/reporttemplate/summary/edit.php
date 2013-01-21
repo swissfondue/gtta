@@ -214,7 +214,7 @@
             'image'       : false,
             'link'        : false,
             'html'        : false,
-            'lists'       : false
+            'lists'       : true
         });
     });
 </script>

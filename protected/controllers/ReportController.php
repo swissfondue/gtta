@@ -178,7 +178,7 @@ class ReportController extends Controller
     private function _prepareProjectReportText($text)
     {
         $text = str_replace(array( "\r", "\n" ), '', $text);
-        $text = strip_tags($text, '<b><i><u><br>');
+        $text = strip_tags($text, '<b><i><u><br><ol><ul><li>');
 
         return $text;
     }
@@ -197,7 +197,7 @@ class ReportController extends Controller
     /**
      * Render tables
      */
-    private function _renderTables($table, &$section, $text)
+    private function _renderTables($table, &$container, $text, $substitute=true)
     {
         if (strpos($text, $table) === false)
             return false;
@@ -206,7 +206,7 @@ class ReportController extends Controller
 
         for ($i = 0; $i < count($textBlocks); $i++)
         {
-            $this->_renderText($section, $textBlocks[$i]);
+            $this->_renderText($container, $textBlocks[$i], $substitute);
 
             if ($i >= count($textBlocks) - 1)
                 continue;
@@ -214,7 +214,7 @@ class ReportController extends Controller
             switch ($table)
             {
                 case '{target.list}':
-                    $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+                    $table = $container->addTable(PHPRtfLite_Table::ALIGN_LEFT);
                     $table->addRows(count($this->project['targets']) + 1);
                     $table->addColumnsList(array( $this->docWidth * 0.4, $this->docWidth * 0.2, $this->docWidth * 0.2, $this->docWidth * 0.2 ));
 
@@ -281,42 +281,110 @@ class ReportController extends Controller
     }
 
     /**
-     * Render variable values
+     * Render lists.
      */
-    private function _renderText(&$section, $text)
+    private function _renderLists(&$container, $text, $substitute=true)
     {
-        if ($this->_renderTables('{target.list}', $section, $text))
-            return;
+        $listTypes = array( 'ul', 'ol' );
+        $rendered = false;
 
-        $text = str_replace('{client}', $this->project['project']->client->name, $text);
-        $text = str_replace('{project}', $this->project['project']->name, $text);
-        $text = str_replace('{year}', $this->project['project']->year, $text);
-
-        $deadline = implode('.', array_reverse(explode('-', $this->project['project']->deadline)));
-        $text = str_replace('{deadline}', $deadline, $text);
-
-        $admin = Yii::t('app', 'N/A');
-
-        if ($this->project['project']->project_users)
+        foreach ($listTypes as $listType)
         {
-            foreach ($this->project['project']->project_users as $user)
-                if ($user->admin)
-                {
-                    $admin = $user->user->name ? $user->user->name : $user->user->email;
-                    break;
-                }
+            $openTag = '<' . $listType . '>';
+            $closeTag = '</' . $listType . '>';
+
+            if (strpos($text, $openTag) === false)
+                continue;
+
+            $openTagPosition = strpos($text, $openTag);
+
+            if ($openTagPosition === false)
+                continue;
+
+            $closeTagPosition = strpos($text, $closeTag, $openTagPosition);
+
+            if ($closeTagPosition === false)
+                continue;
+
+            $textBlock = substr($text, 0, $openTagPosition);
+            $this->_renderText($container, $textBlock, $substitute);
+
+            $listBlock = substr($text, $openTagPosition + strlen($openTag), $closeTagPosition - $openTagPosition - strlen($openTag));
+            $listElements = explode('<li>', $listBlock);
+
+            $listObject = null;
+
+            if ($listType == 'ol')
+                $listObject = new PHPRtfLite_List_Numbering($this->rtf);
+            elseif ($listType == 'ul')
+                $listObject = new PHPRtfLite_List_Enumeration($this->rtf, PHPRtfLite_List_Enumeration::TYPE_CIRCLE);
+
+            foreach ($listElements as $listElement)
+            {
+                if (!$listElement)
+                    continue;
+
+                $listElement = str_replace('</li>', '', $listElement);
+                $listObject->addItem($listElement, $this->textFont, $this->noPar);
+            }
+
+            $container->writeRtfCode('\par ');
+            $container->addList($listObject);
+            $container->writeRtfCode('\par ');
+
+            $textBlock = substr($text, $closeTagPosition + strlen($closeTag));
+            $this->_renderText($container, $textBlock, $substitute);
+
+            $rendered = true;
+            break;
         }
 
-        $text = str_replace('{admin}', $admin, $text);
-        $text = str_replace('{rating}', sprintf('%.2f', $this->project['rating']), $text);
-        $text = str_replace('{targets}', count($this->project['targets']), $text);
-        $text = str_replace('{checks}', $this->project['checks'], $text);
-        $text = str_replace('{checks.info}', $this->project['checksInfo'], $text);
-        $text = str_replace('{checks.med}', $this->project['checksMed'], $text);
-        $text = str_replace('{checks.lo}', $this->project['checksLow'], $text);
-        $text = str_replace('{checks.hi}', $this->project['checksHigh'], $text);
+        return $rendered;
+    }
 
-        $section->writeText($this->_prepareProjectReportText($text), $this->textFont, $this->noPar);
+    /**
+     * Render variable values
+     */
+    private function _renderText(&$container, $text, $substitute=true)
+    {
+        if ($substitute && $this->_renderTables('{target.list}', $container, $text, $substitute))
+            return;
+
+        if ($this->_renderLists($container, $text, $substitute))
+            return;
+
+        if ($substitute)
+        {
+            $text = str_replace('{client}', $this->project['project']->client->name, $text);
+            $text = str_replace('{project}', $this->project['project']->name, $text);
+            $text = str_replace('{year}', $this->project['project']->year, $text);
+
+            $deadline = implode('.', array_reverse(explode('-', $this->project['project']->deadline)));
+            $text = str_replace('{deadline}', $deadline, $text);
+
+            $admin = Yii::t('app', 'N/A');
+
+            if ($this->project['project']->project_users)
+            {
+                foreach ($this->project['project']->project_users as $user)
+                    if ($user->admin)
+                    {
+                        $admin = $user->user->name ? $user->user->name : $user->user->email;
+                        break;
+                    }
+            }
+
+            $text = str_replace('{admin}', $admin, $text);
+            $text = str_replace('{rating}', sprintf('%.2f', $this->project['rating']), $text);
+            $text = str_replace('{targets}', count($this->project['targets']), $text);
+            $text = str_replace('{checks}', $this->project['checks'], $text);
+            $text = str_replace('{checks.info}', $this->project['checksInfo'], $text);
+            $text = str_replace('{checks.med}', $this->project['checksMed'], $text);
+            $text = str_replace('{checks.lo}', $this->project['checksLow'], $text);
+            $text = str_replace('{checks.hi}', $this->project['checksHigh'], $text);
+        }
+
+        $container->writeText($this->_prepareProjectReportText($text), $this->textFont, $this->noPar);
     }
 
     /**
@@ -629,7 +697,9 @@ class ReportController extends Controller
                                 $table->getCell($row, 2)->setBorder($this->thinBorder);
 
                                 $table->writeToCell($row, 1, Yii::t('app', 'Background Info'));
-                                $table->writeToCell($row, 2, $check['background']);
+
+                                $cell = $table->getCell($row, 2);
+                                $this->_renderText($cell, $check['background'], false);
 
                                 $row++;
                             }
@@ -644,7 +714,9 @@ class ReportController extends Controller
                                 $table->getCell($row, 2)->setBorder($this->thinBorder);
 
                                 $table->writeToCell($row, 1, Yii::t('app', 'Question'));
-                                $table->writeToCell($row, 2, $check['question']);
+
+                                $cell = $table->getCell($row, 2);
+                                $this->_renderText($cell, $check['question'], false);
 
                                 $row++;
                             }
@@ -680,7 +752,9 @@ class ReportController extends Controller
                                     $table->getCell($row, 1)->setBorder($this->thinBorder);
                                     $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                     $table->getCell($row, 2)->setBorder($this->thinBorder);
-                                    $table->writeToCell($row, 2, $solution);
+
+                                    $cell = $table->getCell($row, 2);
+                                    $this->_renderText($cell, $solution, false);
 
                                     $row++;
                                 }
@@ -1543,11 +1617,18 @@ class ReportController extends Controller
                     }
 
                     $table->getCell($row, 2)->writeText(
-                        $check['name'] . ($check['question'] ? ' (' . $check['question'] . ')' : ''),
+                        $check['name'],
                         $this->textFont,
                         $this->noPar
                     );
-                    $table->getCell($row, 3)->writeText($check['solution'], $this->textFont, $this->noPar);
+
+                    $cell = $table->getCell($row, 2);
+
+                    if ($check['question'])
+                        $this->_renderText($cell, '(' . $check['question'] . ')', false);
+
+                    $cell = $table->getCell($row, 3);
+                    $this->_renderText($cell, $check['solution'], false);
 
                     $image = null;
 
@@ -1640,7 +1721,7 @@ class ReportController extends Controller
         if (in_array('appendix', $options) && $template->localizedAppendix)
         {
             $section->writeText($sectionNumber . '. ' . Yii::t('app', 'Appendix'), $this->h2Font, $this->h3Par);
-            $this->_renderText($section, $template->localizedAppendix);
+            $this->_renderText($section, $template->localizedAppendix, false);
 
             $sectionNumber++;
         }

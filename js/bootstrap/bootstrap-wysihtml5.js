@@ -23,8 +23,8 @@
 						+ "<div class='btn-group'>" 
 					    	+ "<a class='btn' data-wysihtml5-command='insertUnorderedList' title='" + system.translate('Unordered List') + "'><i class='icon-list'></i></a>"
 						    + "<a class='btn' data-wysihtml5-command='insertOrderedList' title='" + system.translate('Ordered List') + "'><i class='icon-th-list'></i></a>"
-						    + "<a class='btn' data-wysihtml5-command='Outdent' title='" + system.translate('Outdent') + "'><i class='icon-indent-right'></i></a>"
-						    + "<a class='btn' data-wysihtml5-command='Indent' title='" + system.translate('Indent') + "'><i class='icon-indent-left'></i></a>"
+						    //+ "<a class='btn' data-wysihtml5-command='Outdent' title='" + system.translate('Outdent') + "'><i class='icon-indent-right'></i></a>"
+						    //+ "<a class='btn' data-wysihtml5-command='Indent' title='" + system.translate('Indent') + "'><i class='icon-indent-left'></i></a>"
 						+ "</div>" 
 					+ "</li>",
 
