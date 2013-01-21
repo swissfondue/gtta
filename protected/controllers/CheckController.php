@@ -1657,6 +1657,12 @@ class CheckController extends Controller
             'check'    => $check,
             'category' => $category,
             'control'  => $control,
+            'types'    => array(
+                CheckInput::TYPE_TEXT     => Yii::t('app', 'Text'),
+                CheckInput::TYPE_TEXTAREA => Yii::t('app', 'Textarea'),
+                CheckInput::TYPE_CHECKBOX => Yii::t('app', 'Checkbox'),
+                CheckInput::TYPE_SELECT   => Yii::t('app', 'Select'),
+            )
         ));
 	}
 
@@ -1750,6 +1756,7 @@ class CheckController extends Controller
             $model->description = $input->description;
             $model->value       = $input->value;
             $model->sortOrder   = $input->sort_order;
+            $model->type        = $input->type;
 
             $checkInputL10n = CheckInputL10n::model()->findAllByAttributes(array(
                 'check_input_id' => $input->id
@@ -1790,6 +1797,7 @@ class CheckController extends Controller
                 $input->description = $model->description;
                 $input->value       = $model->value;
                 $input->sort_order  = $model->sortOrder;
+                $input->type        = $model->type;
 
                 $input->save();
 
@@ -1853,6 +1861,12 @@ class CheckController extends Controller
             'check'     => $check,
             'input'     => $input,
             'languages' => $languages,
+            'types'     => array(
+                CheckInput::TYPE_TEXT     => Yii::t('app', 'Text'),
+                CheckInput::TYPE_TEXTAREA => Yii::t('app', 'Textarea'),
+                CheckInput::TYPE_CHECKBOX => Yii::t('app', 'Checkbox'),
+                CheckInput::TYPE_SELECT   => Yii::t('app', 'Select'),
+            )
         ));
 	}
 

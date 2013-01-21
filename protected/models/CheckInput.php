@@ -11,9 +11,18 @@
  * @property string $value
  * @property integer $sort_order
  * @property integer $max_sort_order
+ * @property string $type
  */
 class CheckInput extends CActiveRecord
 {
+    /**
+     * Input types.
+     */
+    const TYPE_TEXT     = 'text';
+    const TYPE_TEXTAREA = 'textarea';
+    const TYPE_CHECKBOX = 'checkbox';
+    const TYPE_SELECT   = 'select';
+
     /**
      * @var integer max sort order.
      */
@@ -46,6 +55,7 @@ class CheckInput extends CActiveRecord
             array( 'check_id, name', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
             array( 'sort_order', 'numerical', 'integerOnly' => true, 'min' => 0 ),
+            array( 'type', 'in', 'range' => array( self::TYPE_TEXT, self::TYPE_TEXTAREA, self::TYPE_CHECKBOX, self::TYPE_SELECT ) ),
             array( 'description, value', 'safe' ),
 		);
 	}

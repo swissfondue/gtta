@@ -322,11 +322,38 @@ function User()
          * Get check data in array.
          */
         this.getData = function (id) {
-            var row, inputs, override, protocol, port, result, solutions, rating, data;
+            var i, row, textareas, texts, checkboxes, selects, override, protocol, port, result, solutions, rating, data;
 
             row = $('div.check-form[data-id="' + id + '"]');
 
-            inputs = $('textarea[name^="TargetCheckEditForm_' + id + '[inputs]"]', row).map(
+            texts = $('input[type="text"][name^="TargetCheckEditForm_' + id + '[inputs]"]', row).map(
+                function () {
+                    return {
+                        name  : $(this).attr('name'),
+                        value : $(this).val()
+                    }
+                }
+            ).get();
+
+            textareas = $('textarea[name^="TargetCheckEditForm_' + id + '[inputs]"]', row).map(
+                function () {
+                    return {
+                        name  : $(this).attr('name'),
+                        value : $(this).val()
+                    }
+                }
+            ).get();
+
+            checkboxes = $('input[type="checkbox"][name^="TargetCheckEditForm_' + id + '[inputs]"]', row).map(
+                function () {
+                    return {
+                        name  : $(this).attr('name'),
+                        value : $(this).is(':checked') ? $(this).val() : '0'
+                    }
+                }
+            ).get();
+
+            selects = $('select[name^="TargetCheckEditForm_' + id + '[inputs]"]', row).map(
                 function () {
                     return {
                         name  : $(this).attr('name'),
@@ -374,8 +401,17 @@ function User()
             data.push({ name : 'TargetCheckEditForm_' + id + '[result]',         value : result   });
             data.push({ name : 'TargetCheckEditForm_' + id + '[rating]',         value : rating   });
 
-            for (i = 0; i < inputs.length; i++)
-                data.push(inputs[i]);
+            for (i = 0; i < texts.length; i++)
+                data.push(texts[i]);
+
+            for (i = 0; i < textareas.length; i++)
+                data.push(textareas[i]);
+
+            for (i = 0; i < checkboxes.length; i++)
+                data.push(checkboxes[i]);
+
+            for (i = 0; i < selects.length; i++)
+                data.push(selects[i]);
 
             for (i = 0; i < solutions.length; i++)
                 data.push(solutions[i]);

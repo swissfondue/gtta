@@ -11,6 +11,11 @@ class CheckInputEditForm extends LocalizedFormModel
     public $name;
 
     /**
+     * @var string type.
+     */
+    public $type;
+
+    /**
      * @var string description.
      */
     public $description;
@@ -34,6 +39,7 @@ class CheckInputEditForm extends LocalizedFormModel
 			array( 'name, sortOrder', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
             array( 'sortOrder', 'numerical', 'integerOnly' => true, 'min' => 0 ),
+            array( 'type', 'in', 'range' => array( CheckInput::TYPE_TEXT, CheckInput::TYPE_TEXTAREA, CheckInput::TYPE_CHECKBOX, CheckInput::TYPE_SELECT ) ),
             array( 'localizedItems, description, value', 'safe' ),
 		);
 	}
@@ -45,6 +51,7 @@ class CheckInputEditForm extends LocalizedFormModel
 	{
 		return array(
 			'name'        => Yii::t('app', 'Name'),
+            'type'        => Yii::t('app', 'Type'),
             'description' => Yii::t('app', 'Description'),
             'value'       => Yii::t('app', 'Value'),
             'sortOrder'   => Yii::t('app', 'Sort Order'),

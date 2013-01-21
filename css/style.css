@@ -706,3 +706,7 @@ table.control-header td {
 .login-history .time {
     width:150px;
 }
+
+.input-list .type {
+    width:100px;
+}

@@ -50,6 +50,20 @@
         <div>
             <hr>
         </div>
+        
+        <div class="control-group <?php if ($model->getError('type')) echo 'error'; ?>">
+            <label class="control-label" for="CheckInputEditForm_type"><?php echo Yii::t('app', 'Type'); ?></label>
+            <div class="controls">
+                <select class="input-xlarge" id="CheckInputEditForm_type" name="CheckInputEditForm[type]">
+                    <?php foreach ($types as $k => $v): ?>
+                        <option value="<?php echo $k; ?>" <?php if ($k == $model->type) echo 'selected'; ?>><?php echo CHtml::encode($v); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if ($model->getError('type')): ?>
+                    <p class="help-block"><?php echo $model->getError('type'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
 
         <div class="control-group <?php if ($model->getError('sortOrder')) echo 'error'; ?>">
             <label class="control-label" for="CheckInputEditForm_sortOrder"><?php echo Yii::t('app', 'Sort Order'); ?></label>

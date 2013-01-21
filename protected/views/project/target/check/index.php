@@ -268,23 +268,78 @@
                                                 <?php echo CHtml::encode($input->localizedName); ?>
                                             </th>
                                             <td>
-                                                <textarea wrap="off" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" rows="2" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?>><?php
-                                                    $value = NULL;
+                                                <?php if ($input->type == CheckInput::TYPE_TEXT): ?>
+                                                    <?php
+                                                        $value = '';
 
-                                                    if ($check->targetCheckInputs)
-                                                        foreach ($check->targetCheckInputs as $inputValue)
-                                                            if ($inputValue->check_input_id == $input->id)
-                                                            {
-                                                                $value = $inputValue->value;
-                                                                break;
-                                                            }
+                                                        if ($check->targetCheckInputs)
+                                                            foreach ($check->targetCheckInputs as $inputValue)
+                                                                if ($inputValue->check_input_id == $input->id)
+                                                                {
+                                                                    $value = $inputValue->value;
+                                                                    break;
+                                                                }
 
-                                                    if ($value == NULL && $input->localizedValue != NULL)
-                                                        $value = $input->localizedValue;
+                                                        if ($value == NULL && $input->localizedValue != NULL)
+                                                            $value = $input->localizedValue;
 
-                                                    if ($value != NULL)
-                                                        echo CHtml::encode($value);
-                                                ?></textarea>
+                                                        if ($value != NULL)
+                                                            $value = CHtml::encode($value);
+                                                    ?>
+                                                    <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?> value="<?php echo $value; ?>">
+                                                <?php elseif ($input->type == CheckInput::TYPE_TEXTAREA): ?>
+                                                    <?php
+                                                        $value = '';
+
+                                                        if ($check->targetCheckInputs)
+                                                            foreach ($check->targetCheckInputs as $inputValue)
+                                                                if ($inputValue->check_input_id == $input->id)
+                                                                {
+                                                                    $value = $inputValue->value;
+                                                                    break;
+                                                                }
+
+                                                        if ($value == NULL && $input->localizedValue != NULL)
+                                                            $value = $input->localizedValue;
+
+                                                        if ($value != NULL)
+                                                            $value = CHtml::encode($value);
+                                                    ?>
+                                                    <textarea wrap="off" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" rows="2" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?>><?php echo $value; ?></textarea>
+                                                <?php elseif ($input->type == CheckInput::TYPE_CHECKBOX): ?>
+                                                    <?php
+                                                        $value = '';
+
+                                                        if ($check->targetCheckInputs)
+                                                            foreach ($check->targetCheckInputs as $inputValue)
+                                                                if ($inputValue->check_input_id == $input->id)
+                                                                {
+                                                                    $value = $inputValue->value;
+                                                                    break;
+                                                                }
+                                                    ?>
+                                                    <input type="checkbox" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?> value="1"<?php if ($value) echo ' checked'; ?>>
+                                                <?php elseif ($input->type == CheckInput::TYPE_SELECT): ?>
+                                                    <?php
+                                                        $value = '';
+
+                                                        if ($check->targetCheckInputs)
+                                                            foreach ($check->targetCheckInputs as $inputValue)
+                                                                if ($inputValue->check_input_id == $input->id)
+                                                                {
+                                                                    $value = $inputValue->value;
+                                                                    break;
+                                                                }
+
+                                                        $options = explode("\n", str_replace("\r", '', $input->value));
+                                                    ?>
+                                                    <select name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?>>
+                                                        <?php foreach ($options as $option): ?>
+                                                            <option value="<?php echo CHtml::encode($option); ?>"<?php if ($option == $value) echo ' selected'; ?>><?php echo CHtml::encode($option); ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                <?php endif; ?>
+
                                                 <?php if ($input->localizedDescription): ?>
                                                     <p class="help-block">
                                                         <?php echo CHtml::encode($input->localizedDescription); ?>
