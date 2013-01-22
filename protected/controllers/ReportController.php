@@ -990,7 +990,7 @@ class ReportController extends Controller
                     )
                 ))->findAllByAttributes(
                     array( 'check_category_id' => $category->check_category_id ),
-                    array( 'order'             => 'COALESCE(l10n.name, t.name) ASC' )
+                    array( 'order'             => 't.sort_order ASC' )
                 );
 
                 if (!$controls)
@@ -1009,7 +1009,7 @@ class ReportController extends Controller
                     );
 
                     $criteria = new CDbCriteria();
-                    $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
+                    $criteria->order = 't.sort_order ASC';
                     $criteria->addInCondition('t.reference_id', $referenceIds);
                     $criteria->addColumnCondition(array(
                         't.check_control_id' => $control->id
@@ -2277,7 +2277,7 @@ class ReportController extends Controller
                     )
                 ))->findAllByAttributes(
                     array( 'check_category_id' => $category->check_category_id ),
-                    array( 'order'             => 'COALESCE(l10n.name, t.name) ASC' )
+                    array( 'order'             => 't.sort_order ASC' )
                 );
 
                 if (!$controls)
@@ -2651,7 +2651,7 @@ class ReportController extends Controller
                     $controlIds[] = $control->id;
 
                 $criteria = new CDbCriteria();
-                $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
+                $criteria->order = 't.sort_order ASC';
                 $criteria->addInCondition('t.reference_id', $referenceIds);
                 $criteria->addInCondition('t.check_control_id', $controlIds);
                 $criteria->together = true;
@@ -2993,7 +2993,7 @@ class ReportController extends Controller
             'control'
         ))->findAllByAttributes(
             array(),
-            array( 'order' => 'COALESCE(l10n.name, t.name) ASC' )
+            array( 'order' => 't.sort_order ASC' )
         );
 
         $referenceArray = array();
@@ -3166,7 +3166,7 @@ class ReportController extends Controller
                 // get all controls
                 $controls = CheckControl::model()->findAllByAttributes(
                     array( 'check_category_id' => $category->check_category_id ),
-                    array( 'order'             => 't.name ASC' )
+                    array( 'order'             => 't.sort_order ASC' )
                 );
 
                 if (!$controls)
@@ -3175,7 +3175,7 @@ class ReportController extends Controller
                 foreach ($controls as $control)
                 {
                     $criteria = new CDbCriteria();
-                    $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
+                    $criteria->order = 't.sort_order ASC';
                     $criteria->addInCondition('t.reference_id', $referenceIds);
                     $criteria->addColumnCondition(array(
                         't.check_control_id' => $control->id

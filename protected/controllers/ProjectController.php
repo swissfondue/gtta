@@ -958,7 +958,7 @@ class ProjectController extends Controller
 
         $criteria->addInCondition('t.check_control_id', $controlIds);
         $criteria->addInCondition('t.reference_id', $referenceIds);
-        $criteria->order = 'COALESCE(l10n_c.name, control.name) ASC, COALESCE(l10n.name, t.name) ASC';
+        $criteria->order = 'control.sort_order ASC, t.sort_order ASC';
 
         if (!$category->advanced)
             $criteria->addCondition('t.advanced = FALSE');

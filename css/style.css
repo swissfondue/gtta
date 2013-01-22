@@ -124,7 +124,6 @@ hr {
 }
 
 .category-list .actions,
-.check-list .actions,
 .result-list .actions,
 .solution-list .actions,
 .input-list .actions,
@@ -141,6 +140,11 @@ hr {
 .summary-list .actions,
 .section-list .actions {
     width:30px;
+    text-align:right;
+}
+
+.check-list .actions {
+    width:60px;
     text-align:right;
 }
 

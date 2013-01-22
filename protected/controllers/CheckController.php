@@ -118,7 +118,7 @@ class CheckController extends Controller
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 'COALESCE(l10n.name, t.name) ASC';
+        $criteria->order  = 't.sort_order ASC';
         $criteria->addColumnCondition(array( 'check_category_id' => $category->id ));
         $criteria->together = true;
 
@@ -510,6 +510,68 @@ class CheckController extends Controller
                     $control->delete();
                     break;
 
+                case 'up':
+                    $criteria = new CDbCriteria();
+                    $criteria->addCondition('t.sort_order < :sort_order AND t.check_category_id = :category_id');
+                    $criteria->params = array(
+                        'sort_order'  => $control->sort_order,
+                        'category_id' => $control->check_category_id
+                    );
+                    $criteria->select = 'MAX(t.sort_order) as nearest_sort_order';
+
+                    $nearestControl = CheckControl::model()->find($criteria);
+
+                    if (!$nearestControl || !$nearestControl->nearest_sort_order)
+                        throw new CHttpException(403, Yii::t('app', 'Control is already first on the list.'));
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addColumnCondition(array(
+                        't.check_category_id' => $control->check_category_id,
+                        't.sort_order'        => $nearestControl->nearest_sort_order
+                    ));
+
+                    $nearestControl = CheckControl::model()->find($criteria);
+
+                    $newSortOrder = $nearestControl->sort_order;
+                    $nearestControl->sort_order = $control->sort_order;
+                    $control->sort_order = $newSortOrder;
+
+                    $nearestControl->save();
+                    $control->save();
+
+                    break;
+
+                case 'down':
+                    $criteria = new CDbCriteria();
+                    $criteria->addCondition('t.sort_order > :sort_order AND t.check_category_id = :category_id');
+                    $criteria->params = array(
+                        'sort_order'  => $control->sort_order,
+                        'category_id' => $control->check_category_id
+                    );
+                    $criteria->select = 'MIN(t.sort_order) as nearest_sort_order';
+
+                    $nearestControl = CheckControl::model()->find($criteria);
+
+                    if (!$nearestControl || !$nearestControl->nearest_sort_order)
+                        throw new CHttpException(403, Yii::t('app', 'Control is already last on the list.'));
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addColumnCondition(array(
+                        't.check_category_id' => $control->check_category_id,
+                        't.sort_order'        => $nearestControl->nearest_sort_order
+                    ));
+
+                    $nearestControl = CheckControl::model()->find($criteria);
+
+                    $newSortOrder = $nearestControl->sort_order;
+                    $nearestControl->sort_order = $control->sort_order;
+                    $control->sort_order = $newSortOrder;
+
+                    $nearestControl->save();
+                    $control->save();
+
+                    break;
+
                 default:
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;
@@ -570,7 +632,7 @@ class CheckController extends Controller
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 'COALESCE(l10n.name, t.name) ASC';
+        $criteria->order  = 't.sort_order ASC';
         $criteria->addColumnCondition(array( 'check_control_id' => $control->id ));
         $criteria->together = true;
 
@@ -890,6 +952,68 @@ class CheckController extends Controller
                 case 'delete':
                     $check->delete();
                     TargetCheckCategory::updateAllStats();
+                    break;
+
+                case 'up':
+                    $criteria = new CDbCriteria();
+                    $criteria->addCondition('t.sort_order < :sort_order AND t.check_control_id = :control_id');
+                    $criteria->params = array(
+                        'sort_order' => $check->sort_order,
+                        'control_id' => $check->check_control_id
+                    );
+                    $criteria->select = 'MAX(t.sort_order) as nearest_sort_order';
+
+                    $nearestCheck = Check::model()->find($criteria);
+
+                    if (!$nearestCheck || !$nearestCheck->nearest_sort_order)
+                        throw new CHttpException(403, Yii::t('app', 'Check is already first on the list.'));
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addColumnCondition(array(
+                        't.check_control_id' => $check->check_control_id,
+                        't.sort_order'       => $nearestCheck->nearest_sort_order
+                    ));
+
+                    $nearestCheck = Check::model()->find($criteria);
+
+                    $newSortOrder = $nearestCheck->sort_order;
+                    $nearestCheck->sort_order = $check->sort_order;
+                    $check->sort_order = $newSortOrder;
+
+                    $nearestCheck->save();
+                    $check->save();
+
+                    break;
+
+                case 'down':
+                    $criteria = new CDbCriteria();
+                    $criteria->addCondition('t.sort_order > :sort_order AND t.check_control_id = :control_id');
+                    $criteria->params = array(
+                        'sort_order' => $check->sort_order,
+                        'control_id' => $check->check_control_id
+                    );
+                    $criteria->select = 'MIN(t.sort_order) as nearest_sort_order';
+
+                    $nearestCheck = Check::model()->find($criteria);
+
+                    if (!$nearestCheck || !$nearestCheck->nearest_sort_order)
+                        throw new CHttpException(403, Yii::t('app', 'Check is already first on the list.'));
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addColumnCondition(array(
+                        't.check_control_id' => $check->check_control_id,
+                        't.sort_order'       => $nearestCheck->nearest_sort_order
+                    ));
+
+                    $nearestCheck = Check::model()->find($criteria);
+
+                    $newSortOrder = $nearestCheck->sort_order;
+                    $nearestCheck->sort_order = $check->sort_order;
+                    $check->sort_order = $newSortOrder;
+
+                    $nearestCheck->save();
+                    $check->save();
+
                     break;
 
                 default:

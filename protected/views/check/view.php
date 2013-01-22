@@ -35,6 +35,8 @@
                                 </td>
                                 <td><?php echo $control->checkCount; ?></td>
                                 <td class="actions">
+                                    <a href="#up" title="<?php echo Yii::t('app', 'Move Up'); ?>" onclick="system.control.up(<?php echo $control->id; ?>);"><i class="icon icon-arrow-up"></i></a>
+                                    <a href="#down" title="<?php echo Yii::t('app', 'Move Down'); ?>" onclick="system.control.down(<?php echo $control->id; ?>);"><i class="icon icon-arrow-down"></i></a>
                                     <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $control->id; ?>, '<?php echo Yii::t('app', 'WARNING! ALL CHECKS WITHIN THIS CONTROL WILL BE DELETED!'); ?>');"><i class="icon icon-remove"></i></a>
                                 </td>
                             </tr>

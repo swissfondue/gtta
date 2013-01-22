@@ -7,9 +7,13 @@
  * @property integer $id
  * @property integer $check_category_id
  * @property string $name
+ * @property integer $sort_order
  */
 class CheckControl extends CActiveRecord
-{   
+{
+    // nearest sort order
+    public $nearest_sort_order;
+
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -34,8 +38,8 @@ class CheckControl extends CActiveRecord
 	public function rules()
 	{
 		return array(
-            array( 'name, check_category_id', 'required' ),
-            array( 'check_category_id', 'numerical', 'integerOnly' => true ),
+            array( 'name, check_category_id, sort_order', 'required' ),
+            array( 'check_category_id, sort_order', 'numerical', 'integerOnly' => true ),
 		);
 	}
 

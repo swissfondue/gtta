@@ -20,9 +20,13 @@
  * @property string $reference_code
  * @property string $reference_url
  * @property integer $effort
+ * @property integer $sort_order
  */
 class Check extends CActiveRecord
 {
+    // nearest sort order
+    public $nearest_sort_order;
+
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -47,9 +51,9 @@ class Check extends CActiveRecord
 	public function rules()
 	{
 		return array(
-            array( 'name, check_control_id', 'required' ),
+            array( 'name, check_control_id, sort_order', 'required' ),
             array( 'name, script, protocol, reference_code, reference_url', 'length', 'max' => 1000 ),
-            array( 'check_control_id, reference_id, port, effort', 'numerical', 'integerOnly' => true ),
+            array( 'check_control_id, reference_id, port, effort, sort_order', 'numerical', 'integerOnly' => true ),
             array( 'advanced, automated, multiple_solutions', 'boolean' ),
 		);
 	}

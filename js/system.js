@@ -115,6 +115,10 @@ function System()
                                 location.reload();
                         });
                     }
+                    else if (operation == 'up' || operation == 'down')
+                    {
+                        location.reload();
+                    }
                 },
 
                 error : function(jqXHR, textStatus, e) {
@@ -126,6 +130,20 @@ function System()
                     $('.loader-image').show();
                 }
             });
+        };
+
+        /**
+         * Move object up.
+         */
+        this.up = function (id) {
+            _system_control._control(id, 'up');
+        };
+
+        /**
+         * Move object down.
+         */
+        this.down = function (id) {
+            _system_control._control(id, 'down');
         };
 
         /**
