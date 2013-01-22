@@ -186,7 +186,7 @@ class ReportController extends Controller
     /**
      * Sort checks by ratings
      */
-    static function sortHighMedChecks($a, $b)
+    static function sortChecksByRating($a, $b)
     {
         if ($a['rating'] == $b['rating'])
             return 0;
@@ -272,6 +272,105 @@ class ReportController extends Controller
 
                     break;
 
+                case '{target.c.list}':
+                    $table = $container->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+                    $table->addRows(count($this->project['targets']) + 1);
+                    $table->addColumnsList(array( $this->docWidth * 0.4, $this->docWidth * 0.4, $this->docWidth * 0.2 ));
+
+                    $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
+                    $table->setFontForCellRange($this->boldFont, 1, 1, 1, 3);
+                    $table->setFontForCellRange($this->textFont, 2, 1, count($this->project['targets']) + 1, 3);
+                    $table->setBorderForCellRange($this->thinBorder, 1, 1, count($this->project['targets']) + 1, 3);
+                    $table->mergeCellRange(1, 2, 1, 3);
+                    $table->setFirstRowAsHeader();
+
+                    // set paddings
+                    for ($row = 1; $row <= count($this->project['targets']) + 1; $row++)
+                        for ($col = 1; $col <= 3; $col++)
+                        {
+                            $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                            $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+                        }
+
+                    $row = 1;
+
+                    $table->getCell($row, 1)->writeText(Yii::t('app', 'Target'));
+                    $table->getCell($row, 2)->writeText(Yii::t('app', 'Weakest Control'));
+
+                    $row++;
+
+                    foreach ($this->project['targets'] as $target)
+                    {
+                        $table->getCell($row, 1)->writeText($target->host, $this->textFont, $this->noPar);
+
+                        if ($target->description)
+                        {
+                            $table->getCell($row, 1)->writeText(' / ', $this->textFont);
+                            $table->getCell($row, 1)->writeText($target->description, new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+                        }
+
+                        $control = $this->project['weakestControls'][$target->id];
+
+                        $table->getCell($row, 2)->writeText($control ? $control['name'] : Yii::t('app', 'N/A'));
+                        $table->getCell($row, 3)->writeText($control ? $control['degree'] . '%' : Yii::t('app', 'N/A'));
+
+                        $row++;
+                    }
+
+                    break;
+
+                case '{vuln.5.list}':
+                    $table = $container->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+                    $rowCount = count($this->project['reducedChecks']) > 5 ? 6 : count($this->project['reducedChecks']) + 1;
+                    $table->addRows($rowCount);
+                    $table->addColumnsList(array( $this->docWidth * 0.4, $this->docWidth * 0.3, $this->docWidth * 0.3 ));
+
+                    $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
+                    $table->setFontForCellRange($this->boldFont, 1, 1, 1, 3);
+                    $table->setFontForCellRange($this->textFont, 2, 1, $rowCount, 3);
+                    $table->setBorderForCellRange($this->thinBorder, 1, 1, $rowCount, 3);
+                    $table->setFirstRowAsHeader();
+
+                    // set paddings
+                    for ($row = 1; $row <= $rowCount; $row++)
+                        for ($col = 1; $col <= 3; $col++)
+                        {
+                            $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                            $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+                        }
+
+                    $row = 1;
+
+                    $table->getCell($row, 1)->writeText(Yii::t('app', 'Target'));
+                    $table->getCell($row, 2)->writeText(Yii::t('app', 'Check'));
+                    $table->getCell($row, 3)->writeText(Yii::t('app', 'Question'));
+
+                    $row++;
+
+                    $reducedChecks = $this->project['reducedChecks'];
+                    usort($reducedChecks, array( 'ReportController', 'sortChecksByRating' ));
+
+                    foreach ($reducedChecks as $check)
+                    {
+                        $table->getCell($row, 1)->writeText($check['target']['host'], $this->textFont, $this->noPar);
+
+                        if ($check['target']['description'])
+                        {
+                            $table->getCell($row, 1)->writeText(' / ', $this->textFont);
+                            $table->getCell($row, 1)->writeText($check['target']['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+                        }
+
+                        $table->getCell($row, 2)->writeText($check['name']);
+                        $table->getCell($row, 3)->writeText($check['question'] ? $check['question'] : Yii::t('app', 'N/A'));
+
+                        $row++;
+
+                        if ($row > $rowCount)
+                            break;
+                    }
+
+                    break;
+
                 default:
                     break;
             }
@@ -348,6 +447,12 @@ class ReportController extends Controller
     private function _renderText(&$container, $text, $substitute=true)
     {
         if ($substitute && $this->_renderTables('{target.list}', $container, $text, $substitute))
+            return;
+
+        if ($substitute && $this->_renderTables('{target.c.list}', $container, $text, $substitute))
+            return;
+
+        if ($substitute && $this->_renderTables('{vuln.5.list}', $container, $text, $substitute))
             return;
 
         if ($this->_renderLists($container, $text, $substitute))
@@ -908,6 +1013,7 @@ class ReportController extends Controller
         ))->findAll($criteria);
 
         $this->project['targets'] = $targets;
+        $this->_generateFulfillmentDegreeReport(null, true);
 
         $data = array();
         $haveInfo = true;
@@ -1487,7 +1593,7 @@ class ReportController extends Controller
             if ($template->localizedDegreeIntro)
                 $this->_renderText($section, $template->localizedDegreeIntro . "<br><br>");
 
-            $this->_generateFulfillmentDegreeReport($model, $section, $sectionNumber . '.' . $subsectionNumber);
+            $this->_generateFulfillmentDegreeReport($model, false, $section, $sectionNumber . '.' . $subsectionNumber);
 
             $subsectionNumber++;
         }
@@ -1604,7 +1710,7 @@ class ReportController extends Controller
                 $row++;
 
                 $reducedChecks = $this->project['reducedChecks'];
-                usort($reducedChecks, array( 'ReportController', 'sortHighMedChecks' ));
+                usort($reducedChecks, array( 'ReportController', 'sortChecksByRating' ));
 
                 foreach ($reducedChecks as $check)
                 {
@@ -2175,14 +2281,14 @@ class ReportController extends Controller
     /**
      * Generate a Degree of Fulfillment report
      */
-    private function _generateFulfillmentDegreeReport($model, &$section = null, $sectionNumber = null)
+    private function _generateFulfillmentDegreeReport($model = null, $findWeakest = false, &$section = null, $sectionNumber = null)
     {
         $fullReport = true;
 
         if (!$section)
             $fullReport = false;
 
-        if (!$fullReport)
+        if (!$fullReport && !$findWeakest)
         {
             $clientId  = $model->clientId;
             $projectId = $model->projectId;
@@ -2235,6 +2341,7 @@ class ReportController extends Controller
         foreach ($targets as $target)
         {
             $targetData = array(
+                'id'          => $target->id,
                 'host'        => $target->host,
                 'description' => $target->description,
                 'controls'    => array(),
@@ -2348,7 +2455,7 @@ class ReportController extends Controller
             $data[] = $targetData;
         }
 
-        if (!$fullReport)
+        if (!$fullReport && !$findWeakest)
         {
             $this->_rtfSetup($model);
             $section = $this->rtf->addSection();
@@ -2372,8 +2479,29 @@ class ReportController extends Controller
 
         $targetNumber = 1;
 
+        if ($findWeakest)
+            $this->project['weakestControls'] = array();
+
         foreach ($data as $target)
         {
+            // dry run - just fill in the data
+            if ($findWeakest)
+            {
+                $degree = 100.0;
+                $weakest = null;
+
+                foreach ($target['controls'] as $control)
+                    if ($control['degree'] < $degree)
+                    {
+                        $weakest = $control;
+                        $degree = $control['degree'];
+                    }
+
+                $this->project['weakestControls'][$target['id']] = $weakest;
+
+                continue;
+            }
+
             if ($fullReport)
             {
                 $section->writeText($sectionNumber . '.' . $targetNumber . '. ' . $target['host'], $this->boldFont);
@@ -2455,7 +2583,7 @@ class ReportController extends Controller
             $table->setFontForCellRange($this->textFont, 1, 1, count($target['controls']) + 1, 2);
         }
 
-        if (!$fullReport)
+        if (!$fullReport && !$findWeakest)
         {
             $fileName = Yii::t('app', 'Degree of Fulfillment') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
             $hashName = hash('sha256', rand() . time() . $fileName);
