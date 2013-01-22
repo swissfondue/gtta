@@ -4,7 +4,7 @@
 
 -- Dumped from database version 8.4.13
 -- Dumped by pg_dump version 9.1.3
--- Started on 2013-01-22 15:47:34 MSK
+-- Started on 2013-01-22 19:58:35 MSK
 
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -193,7 +193,7 @@ ALTER TABLE public.check_controls OWNER TO gtta;
 
 --
 -- TOC entry 144 (class 1259 OID 21625)
--- Dependencies: 6 143
+-- Dependencies: 143 6
 -- Name: check_controls_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -242,7 +242,7 @@ ALTER TABLE public.check_controls_l10n OWNER TO gtta;
 
 --
 -- TOC entry 146 (class 1259 OID 21633)
--- Dependencies: 2031 2033 692 6
+-- Dependencies: 2031 2033 6 692
 -- Name: check_inputs; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -475,7 +475,7 @@ ALTER TABLE public.checks OWNER TO gtta;
 
 --
 -- TOC entry 156 (class 1259 OID 21685)
--- Dependencies: 6 155
+-- Dependencies: 155 6
 -- Name: checks_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -554,7 +554,7 @@ ALTER TABLE public.clients OWNER TO gtta;
 
 --
 -- TOC entry 159 (class 1259 OID 21699)
--- Dependencies: 158 6
+-- Dependencies: 6 158
 -- Name: clients_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -656,7 +656,7 @@ ALTER TABLE public.languages OWNER TO gtta;
 
 --
 -- TOC entry 163 (class 1259 OID 21717)
--- Dependencies: 6 162
+-- Dependencies: 162 6
 -- Name: languages_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -706,7 +706,7 @@ ALTER TABLE public.login_history OWNER TO gtta;
 
 --
 -- TOC entry 201 (class 1259 OID 28211)
--- Dependencies: 202 6
+-- Dependencies: 6 202
 -- Name: login_history_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -735,7 +735,7 @@ ALTER SEQUENCE login_history_id_seq OWNED BY login_history.id;
 -- Name: login_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('login_history_id_seq', 12, true);
+SELECT pg_catalog.setval('login_history_id_seq', 13, true);
 
 
 --
@@ -805,7 +805,7 @@ ALTER TABLE public.project_users OWNER TO gtta;
 
 --
 -- TOC entry 166 (class 1259 OID 21727)
--- Dependencies: 2047 6 504
+-- Dependencies: 2047 504 6
 -- Name: projects; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -824,7 +824,7 @@ ALTER TABLE public.projects OWNER TO gtta;
 
 --
 -- TOC entry 167 (class 1259 OID 21734)
--- Dependencies: 6 166
+-- Dependencies: 166 6
 -- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -1304,7 +1304,7 @@ ALTER TABLE public.system OWNER TO gtta;
 
 --
 -- TOC entry 171 (class 1259 OID 21747)
--- Dependencies: 170 6
+-- Dependencies: 6 170
 -- Name: system_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -1426,7 +1426,7 @@ ALTER TABLE public.target_check_vulns OWNER TO gtta;
 
 --
 -- TOC entry 176 (class 1259 OID 21773)
--- Dependencies: 2058 6 498 501
+-- Dependencies: 2058 501 6 498
 -- Name: target_checks; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -1444,7 +1444,8 @@ CREATE TABLE target_checks (
     protocol character varying(1000),
     port integer,
     override_target character varying(1000),
-    user_id bigint NOT NULL
+    user_id bigint NOT NULL,
+    table_result character varying
 );
 
 
@@ -1482,7 +1483,7 @@ ALTER TABLE public.targets OWNER TO gtta;
 
 --
 -- TOC entry 179 (class 1259 OID 21789)
--- Dependencies: 6 178
+-- Dependencies: 178 6
 -- Name: targets_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -1516,7 +1517,7 @@ SELECT pg_catalog.setval('targets_id_seq', 6, true);
 
 --
 -- TOC entry 180 (class 1259 OID 21791)
--- Dependencies: 2060 2062 6 507
+-- Dependencies: 2060 2062 507 6
 -- Name: users; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -1651,7 +1652,7 @@ ALTER TABLE ONLY languages ALTER COLUMN id SET DEFAULT nextval('languages_id_seq
 
 --
 -- TOC entry 2075 (class 2604 OID 28216)
--- Dependencies: 202 201 202
+-- Dependencies: 201 202 202
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
 
@@ -1687,7 +1688,7 @@ ALTER TABLE ONLY "references" ALTER COLUMN id SET DEFAULT nextval('references_id
 
 --
 -- TOC entry 2073 (class 2604 OID 28058)
--- Dependencies: 198 199 199
+-- Dependencies: 199 198 199
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
 
@@ -1705,7 +1706,7 @@ ALTER TABLE ONLY report_template_summary ALTER COLUMN id SET DEFAULT nextval('re
 
 --
 -- TOC entry 2069 (class 2604 OID 27309)
--- Dependencies: 192 193 193
+-- Dependencies: 193 192 193
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
 
@@ -2291,6 +2292,7 @@ COPY login_history (id, user_id, user_name, create_time) FROM stdin;
 10	1	Oliver Muenchow	2013-01-22 00:09:47.837418
 11	1	Oliver Muenchow	2013-01-22 12:48:55.146417
 12	1	Oliver Muenchow	2013-01-22 14:48:23.294127
+13	1	Oliver Muenchow	2013-01-22 19:29:43.01782
 \.
 
 
@@ -2410,7 +2412,7 @@ COPY report_template_summary_l10n (report_template_summary_id, language_id, summ
 
 COPY report_templates (id, name, header_image_path, header_image_type, intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro) FROM stdin;
 3	Yay ;)	\N	\N					\N	\N	\N	\N	\N	\N	\N	\N
-1	Test Template	0caf7534e0fee7a603c2948652ab8de6815ccea0b277340d7122269f4a847c89	image/png	Test Template Intro<br><ul><li>The client is: {client}</li><li>The project is: {project}</li><li>Project year:&nbsp;<b>{year}</b></li></ul>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br><ol><li>Date from: {date.from}</li><li>Date to: {date.to}</li></ol>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}This text goes after the list of targets.<br><b>well done<br><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b>{check.list}<b><br></b>well done	Test Template Appendix<br><ol><li>one</li><li>two</li><li>three</li></ol>	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}<br><br><ul><li>hello</li><li>wtf is that</li></ul>No way<br><ol><li>one list</li><li>two lists</li></ol>	test one two&nbsp;{targets}<br><br>vuln distribution<br><br>with<br><ul><li>some</li><li>list</li></ul>	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}<br><br><ol><li>degree</li><li>list</li></ol>	risk&nbsp;targets {targets}<br><br>risk<br><ul><li>matrix</li><li>list</li></ul>
+1	Test Template	0caf7534e0fee7a603c2948652ab8de6815ccea0b277340d7122269f4a847c89	image/png	Test Template Intro<br><ul><li>The client is: {client}</li><li>The project is: {project}</li><li>Project year:&nbsp;<b>{year}</b></li></ul>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br><ol><li>Date from: {date.from}</li><li>Date to: {date.to}</li></ol>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}<br>This text goes after the list of targets.<br><b>well done<br><br>And here is a list of targets with controls lol:<br></b>{target.c.list}<br><b><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b><b>Here go top 5 vulns:<br></b>{vuln.5.list}<b><br></b>well done	Test Template Appendix<br><ol><li>one</li><li>two</li><li>three</li></ol>	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}<br><br><ul><li>hello</li><li>wtf is that</li></ul>No way<br><ol><li>one list</li><li>two lists</li></ol>	test one two&nbsp;{targets}<br><br>vuln distribution<br><br>with<br><ul><li>some</li><li>list</li></ul>	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}<br><br><ol><li>degree</li><li>list</li></ol>	risk&nbsp;targets {targets}<br><br>risk<br><ul><li>matrix</li><li>list</li></ul>
 \.
 
 
@@ -2424,7 +2426,7 @@ COPY report_templates_l10n (report_template_id, language_id, name, intro, append
 3	1	Yay ;)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 3	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 1	2	zzz	Testen Templaten Intro	Testen Templaten Appendix	Worlda	\N	test eins zwei&nbsp;{targets}	test eins zwei&nbsp;{targets}	\N	\N	\N	\N	\N	\N
-1	1	Test Template	Test Template Intro<br><ul><li>The client is: {client}</li><li>The project is: {project}</li><li>Project year:&nbsp;<b>{year}</b></li></ul>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br><ol><li>Date from: {date.from}</li><li>Date to: {date.to}</li></ol>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}This text goes after the list of targets.<br><b>well done<br><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b>{check.list}<b><br></b>well done	Test Template Appendix<br><ol><li>one</li><li>two</li><li>three</li></ol>	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}<br><br><ul><li>hello</li><li>wtf is that</li></ul>No way<br><ol><li>one list</li><li>two lists</li></ol>	test one two&nbsp;{targets}<br><br>vuln distribution<br><br>with<br><ul><li>some</li><li>list</li></ul>	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}<br><br><ol><li>degree</li><li>list</li></ol>	risk&nbsp;targets {targets}<br><br>risk<br><ul><li>matrix</li><li>list</li></ul>
+1	1	Test Template	Test Template Intro<br><ul><li>The client is: {client}</li><li>The project is: {project}</li><li>Project year:&nbsp;<b>{year}</b></li></ul>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br><ol><li>Date from: {date.from}</li><li>Date to: {date.to}</li></ol>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}<br>This text goes after the list of targets.<br><b>well done<br><br>And here is a list of targets with controls lol:<br></b>{target.c.list}<br><b><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b><b>Here go top 5 vulns:<br></b>{vuln.5.list}<b><br></b>well done	Test Template Appendix<br><ol><li>one</li><li>two</li><li>three</li></ol>	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}<br><br><ul><li>hello</li><li>wtf is that</li></ul>No way<br><ol><li>one list</li><li>two lists</li></ol>	test one two&nbsp;{targets}<br><br>vuln distribution<br><br>with<br><ul><li>some</li><li>list</li></ul>	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}<br><br><ol><li>degree</li><li>list</li></ol>	risk&nbsp;targets {targets}<br><br>risk<br><ul><li>matrix</li><li>list</li></ul>
 \.
 
 
@@ -2488,8 +2490,8 @@ COPY risk_templates_l10n (risk_template_id, language_id, name) FROM stdin;
 --
 
 COPY sessions (id, expire, data) FROM stdin;
-iae8q3rs93gq24i08u7cbohe47      	1358855299	Wo0Hd_fC5v-KwJgvj1KxhU9ddWVUOzgZYhCFmF-D1_gHio3VODS5XHUfWhz_w9tj9Hyjfrd12wmNb7hu1icE4ChCBSPVflzZsjFjP7CUM1phRnzUu9-sY4OENuJ7ma4Mtze2UbTfZiPTvovQlcaxxJt6J-Z0Fpvz_Yy2UZpdfgP1-xTG1Nl5z1CvbBKRZHPN
-t2vaitj95eopljlt1mhta9d4o3      	1358858547	FHExjm3nzRdjxjbCX_cBLUfVep6-lQrOiIOcTCiFD5PCEesrL-0hMGNBPlIlH9F7QnmniRUSl8jcW-BHGMUTeZ4l_U499UwMbp1DA1sy4afWJANQRNtzx1JZthoZHlQlOzJTIj9CIWdoZe845tN_xxO19dlTQZdkj1U1ID0agj6evUqy2kGUHQX7QITmq-VTUSUbA1Q-ypmi7rxrCxnAovXJBBUVC6Czk13zhjzXcuPa3eZKQVOeBxVQZ2FkPuG8VsQD47JwzVEAcJZjxtDt8rebWU9Xs_0D4VdsfOccp9Tjp4gCDu9AHBpEtMKHPG7JqsbCVp-w06AQRyJ4zMSLnZs_-d2a38Y5tccW9rDc9AOzKqJYsXrSB0nhmzL9TPAt4onv2lWW_1FAK6T-zwtV3w..
+t2vaitj95eopljlt1mhta9d4o3      	1358872178	hU8Ziv9YDbImBUmVajFU6HbKe6lH0vYEJYZ8i7NWGbpcCiD35wHtfpMzSxxEa0_in3Nw1JJt1G7qyswXFn4R9k9H1rZt5ye-JL0E9oouhYZ34qWXFC6JTU8cMSHTtbEwrczV5gHzwulAQDdicDL8WSYTaUieq5bk_tRcwDRmq0lqoXnvJK56QOfuXhU0vOaIQ-d_y7K3fP-DjwPH6iamPXlDpvf-clQA-bp3IODHqv4.
+noet04ol691du3s3lb789as9e4      	1358873857	9icJTkdr267lGDH3W-sRWbvGIncYwpUUwodX0eiBZUg0BNUC1m98GOP9dX6rnZU6dDsTpXemInBIqfS9jlk0pcmnvnMrnVAJPUEMx4QzpkdC4OmJcGwRd_qaY22dDiONwSAzGEamjC_q9-VeTER_UdBCko0xNgfPlfPpRvSGDx00I9Q21a-c1lBqsxMMYyewMf2hNJrxxFQlcl5Si4-_gN1_Vw_UgSiE9rEBsAFKLdYmxL5JJYu61QzwJ-Qw3aZLljdEkekBBJeNWj1Y2R4A6nn_mZhzx6DntQlW5k-MNFV1RFFlQxRB-yNHhPzWdruP909hv3qDku8qalZEFTcJkPfS2iDJ5iXfUCJXibeV-Ly-zx-aHHGK5m681CISQjI8qeXDOtF2IkH9J9JFmcEARDb1qqHGqtWbRsTxdw47DWQ.
 \.
 
 
@@ -2597,35 +2599,35 @@ COPY target_check_vulns (target_id, check_id, user_id, deadline, status) FROM st
 -- Data for Name: target_checks; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY target_checks (target_id, check_id, result, target_file, rating, started, pid, status, result_file, language_id, protocol, port, override_target, user_id) FROM stdin;
-1	8	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-1	5	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-1	17	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1
-1	15	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-1	16	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-1	6	\N	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1
-1	14	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-1	11	query failed: NXDOMAIN	ba958ad7b51889ad6b8cfc6c06d9d334417e50010bafe54f2d3df41eb8bd7524	\N	2012-10-12 03:19:08.402282	\N	finished	7b0b9efbc239fb0be3e01c8c7409a51e49797f209f914961c7002a585541ddeb	1	\N	\N	fuck it all	1
-2	26	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1
-2	28	\N	\N	hidden	\N	\N	finished	\N	1	\N	\N	\N	1
-2	29	\N	\N	info	\N	\N	finished	\N	1	http	\N	\N	1
-6	28	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1
-6	29	\N	\N	info	\N	\N	finished	\N	1	http	\N	\N	1
-2	27	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1
-6	30	\N	\N	med_risk	\N	\N	finished	\N	1	http	\N	\N	1
-1	13	No output.	5f60a27e9c2111670b7ac522d67ea4a28ea0f82830f54082b96b699dfe045aa4	\N	\N	\N	finished	3bff8cdab5a34d561ea20db0b51d64c820448d8d00dac24f0fab2fbe657acbe8	1	\N	\N	\N	1
-1	1	81.19.85.92\n81.19.85.89\n	1f4cd9dfbc2d506522864ab4b6d924a0c143204f9590b81103a8873250ed5c5c	\N	2013-01-21 01:58:46.565227	\N	finished	434eaf8e0f84755445d73e497ae88e956eb2a121259ff78fdf61524a08e4e3aa	1	\N	\N	lenta.ru	1
-1	47	No output.	daff9c357f092f45dd347a9ceb199488924a8148820d568eaede13a94728f2a1	\N	2012-11-26 07:09:01.609125	\N	finished	f08845086cba4dc36b7eaccd7071742540942bef7383300185ccb93211904cc6	1	http	80	infoguard.com	1
-1	48	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1
-2	32	\N	\N	med_risk	\N	\N	finished	\N	1	http	\N	\N	1
-1	46	No output.	13de8523bc591c0c649d9faa04c7bd299c43b307e8f7b21645e641dff0d67796	med_risk	\N	\N	finished	d2183750509d6b7d48c8b699f53ec860936265c9479ac60b4d894bff0ed77f7e	1	\N	\N	demonstratr.com	1
-1	7	Internal server error. Please send this error code to the administrator - A783BAE2332FE839.	8db8e350872d7f8f5a904757929873d40b4907527b806750727e9acb5fb0ae31	\N	\N	\N	finished	9efe9da38c259364f97fa07233a34a5bb43ae7a83ff2777ec8d021c8b72a40e5	1	\N	\N	80.248.198.9 - 80.248.198.14	1
-1	9	Internal server error. Please send this error code to the administrator - 4500C4EA45249D2B.	2a29974663f07789e79bb70d5eeb12a174d8c3618de10bc50182f977e2f5c82b	\N	\N	\N	finished	6f1536eb2f83fd2dd9ca4c1a00424ce2af483b1ab4fbcc632125fae9a4128e7d	1	\N	\N	80.248.198.9	1
-1	12	Nameserver                     IP                  SOA Serial      Refresh    Retry      Expire     Minimum\n-----------------------------------------------------------------------------------------------------------\nns3.google.com                 IP 216.239.36.10    SOA 2013015000  2h         30m        14d        5m        \nns4.google.com                 IP 216.239.38.10    SOA 2013015000  2h         30m        14d        5m        \nns1.google.com                 IP 216.239.32.10    SOA 2013015000  2h         30m        14d        5m        \nns2.google.com                 IP 216.239.34.10    SOA 2013015000  2h         30m        14d        5m        \nThe recommended syntax for serial number is YYYYMMDDnn (YYYY=year, MM=month, DD=day, nn=revision number), RFC 1912 (2013015000)\nThe recommended value for minimum TTL is 1 to 5 days, RFC 1912 (5m)\n	ef581d8726c59821f7e4f88bbe8cd78de01f23d24dfb1b132cfd4fce87c2f05e	\N	2013-01-21 02:01:22.216199	\N	finished	86a074c1f106e46b6a33cc55934da18d190ad034fa93254db0bd63593e705f8a	1	\N	\N	\N	1
-1	45	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1
-1	10	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1
-1	3	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1
-1	27	tried 879 time(s) with 0 successful time(s)\n	d1ed11b5e9259aa95e347e6cfb242c6f29264193deff6dca98e7fd06e1ec0ca4	\N	2013-01-21 01:52:55.779798	\N	finished	30a05cb7ef48b856ec5256e9ee09e294c7a9fe0776f94879bc71ee50c2a2be63	1	\N	\N	onexchanger.com	1
+COPY target_checks (target_id, check_id, result, target_file, rating, started, pid, status, result_file, language_id, protocol, port, override_target, user_id, table_result) FROM stdin;
+1	8	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	5	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	17	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	15	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	16	\N	\N	low_risk	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	6	\N	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	14	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	11	query failed: NXDOMAIN	ba958ad7b51889ad6b8cfc6c06d9d334417e50010bafe54f2d3df41eb8bd7524	\N	2012-10-12 03:19:08.402282	\N	finished	7b0b9efbc239fb0be3e01c8c7409a51e49797f209f914961c7002a585541ddeb	1	\N	\N	fuck it all	1	\N
+2	26	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+2	28	\N	\N	hidden	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+2	29	\N	\N	info	\N	\N	finished	\N	1	http	\N	\N	1	\N
+6	28	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+6	29	\N	\N	info	\N	\N	finished	\N	1	http	\N	\N	1	\N
+2	27	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+6	30	\N	\N	med_risk	\N	\N	finished	\N	1	http	\N	\N	1	\N
+1	1	81.19.85.92\n81.19.85.89\n	1f4cd9dfbc2d506522864ab4b6d924a0c143204f9590b81103a8873250ed5c5c	\N	2013-01-21 01:58:46.565227	\N	finished	434eaf8e0f84755445d73e497ae88e956eb2a121259ff78fdf61524a08e4e3aa	1	\N	\N	lenta.ru	1	<gtta-table>\n    <columns>\n        <column name="Hello" width="0.5"/>\n        <column name="World" width="0.5"/>\n    </columns>\n    <row>\n        <cell>1</cell>\n        <cell>lalalla</cell>\n    </row>\n    <row>\n        <cell>fuck that</cell>\n        <cell>test</cell>\n    </row>\n    <row>\n        <cell>empty</cell>\n        <cell></cell>\n    </row>\n</gtta-table>\n
+1	13	No output.	5f60a27e9c2111670b7ac522d67ea4a28ea0f82830f54082b96b699dfe045aa4	\N	\N	\N	finished	3bff8cdab5a34d561ea20db0b51d64c820448d8d00dac24f0fab2fbe657acbe8	1	\N	\N	\N	1	\N
+1	47	No output.	daff9c357f092f45dd347a9ceb199488924a8148820d568eaede13a94728f2a1	\N	2012-11-26 07:09:01.609125	\N	finished	f08845086cba4dc36b7eaccd7071742540942bef7383300185ccb93211904cc6	1	http	80	infoguard.com	1	\N
+1	48	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+2	32	\N	\N	med_risk	\N	\N	finished	\N	1	http	\N	\N	1	\N
+1	46	No output.	13de8523bc591c0c649d9faa04c7bd299c43b307e8f7b21645e641dff0d67796	med_risk	\N	\N	finished	d2183750509d6b7d48c8b699f53ec860936265c9479ac60b4d894bff0ed77f7e	1	\N	\N	demonstratr.com	1	\N
+1	7	Internal server error. Please send this error code to the administrator - A783BAE2332FE839.	8db8e350872d7f8f5a904757929873d40b4907527b806750727e9acb5fb0ae31	\N	\N	\N	finished	9efe9da38c259364f97fa07233a34a5bb43ae7a83ff2777ec8d021c8b72a40e5	1	\N	\N	80.248.198.9 - 80.248.198.14	1	\N
+1	9	Internal server error. Please send this error code to the administrator - 4500C4EA45249D2B.	2a29974663f07789e79bb70d5eeb12a174d8c3618de10bc50182f977e2f5c82b	\N	\N	\N	finished	6f1536eb2f83fd2dd9ca4c1a00424ce2af483b1ab4fbcc632125fae9a4128e7d	1	\N	\N	80.248.198.9	1	\N
+1	12	Nameserver                     IP                  SOA Serial      Refresh    Retry      Expire     Minimum\n-----------------------------------------------------------------------------------------------------------\nns3.google.com                 IP 216.239.36.10    SOA 2013015000  2h         30m        14d        5m        \nns4.google.com                 IP 216.239.38.10    SOA 2013015000  2h         30m        14d        5m        \nns1.google.com                 IP 216.239.32.10    SOA 2013015000  2h         30m        14d        5m        \nns2.google.com                 IP 216.239.34.10    SOA 2013015000  2h         30m        14d        5m        \nThe recommended syntax for serial number is YYYYMMDDnn (YYYY=year, MM=month, DD=day, nn=revision number), RFC 1912 (2013015000)\nThe recommended value for minimum TTL is 1 to 5 days, RFC 1912 (5m)\n	ef581d8726c59821f7e4f88bbe8cd78de01f23d24dfb1b132cfd4fce87c2f05e	\N	2013-01-21 02:01:22.216199	\N	finished	86a074c1f106e46b6a33cc55934da18d190ad034fa93254db0bd63593e705f8a	1	\N	\N	\N	1	\N
+1	45	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	10	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	3	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	27	tried 879 time(s) with 0 successful time(s)\n	d1ed11b5e9259aa95e347e6cfb242c6f29264193deff6dca98e7fd06e1ec0ca4	\N	2013-01-21 01:52:55.779798	\N	finished	30a05cb7ef48b856ec5256e9ee09e294c7a9fe0776f94879bc71ee50c2a2be63	1	\N	\N	onexchanger.com	1	\N
 \.
 
 
@@ -2668,7 +2670,7 @@ COPY targets (id, project_id, host, description) FROM stdin;
 --
 
 COPY users (id, email, password, name, client_id, role, last_action_time, send_notifications) FROM stdin;
-1	oliver@muenchow.ch	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-01-22 15:42:26.715911	f
+1	oliver@muenchow.ch	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-01-22 19:57:35.679906	f
 3	erbol@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		\N	user	2013-01-20 17:53:45.446201	f
 \.
 
@@ -3135,7 +3137,7 @@ ALTER TABLE ONLY users
 
 --
 -- TOC entry 2169 (class 2606 OID 21875)
--- Dependencies: 142 140 2077
+-- Dependencies: 140 142 2077
 -- Name: check_categories_l10n_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3145,7 +3147,7 @@ ALTER TABLE ONLY check_categories_l10n
 
 --
 -- TOC entry 2170 (class 2606 OID 21880)
--- Dependencies: 142 2109 162
+-- Dependencies: 162 2109 142
 -- Name: check_categories_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3175,7 +3177,7 @@ ALTER TABLE ONLY check_controls_l10n
 
 --
 -- TOC entry 2173 (class 2606 OID 21895)
--- Dependencies: 2109 145 162
+-- Dependencies: 162 2109 145
 -- Name: check_controls_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3185,7 +3187,7 @@ ALTER TABLE ONLY check_controls_l10n
 
 --
 -- TOC entry 2174 (class 2606 OID 28291)
--- Dependencies: 146 155 2097
+-- Dependencies: 146 2097 155
 -- Name: check_inputs_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3205,7 +3207,7 @@ ALTER TABLE ONLY check_inputs_l10n
 
 --
 -- TOC entry 2176 (class 2606 OID 21910)
--- Dependencies: 2109 148 162
+-- Dependencies: 148 2109 162
 -- Name: check_inputs_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3215,7 +3217,7 @@ ALTER TABLE ONLY check_inputs_l10n
 
 --
 -- TOC entry 2177 (class 2606 OID 22135)
--- Dependencies: 149 155 2097
+-- Dependencies: 2097 155 149
 -- Name: check_results_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3225,7 +3227,7 @@ ALTER TABLE ONLY check_results
 
 --
 -- TOC entry 2178 (class 2606 OID 22105)
--- Dependencies: 151 149 2089
+-- Dependencies: 2089 151 149
 -- Name: check_results_l10n_check_result_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3235,7 +3237,7 @@ ALTER TABLE ONLY check_results_l10n
 
 --
 -- TOC entry 2179 (class 2606 OID 22110)
--- Dependencies: 151 162 2109
+-- Dependencies: 2109 151 162
 -- Name: check_results_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3245,7 +3247,7 @@ ALTER TABLE ONLY check_results_l10n
 
 --
 -- TOC entry 2180 (class 2606 OID 22130)
--- Dependencies: 155 2097 152
+-- Dependencies: 2097 155 152
 -- Name: check_solutions_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3255,7 +3257,7 @@ ALTER TABLE ONLY check_solutions
 
 --
 -- TOC entry 2181 (class 2606 OID 22120)
--- Dependencies: 154 152 2093
+-- Dependencies: 152 2093 154
 -- Name: check_solutions_l10n_check_solution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3265,7 +3267,7 @@ ALTER TABLE ONLY check_solutions_l10n
 
 --
 -- TOC entry 2182 (class 2606 OID 22125)
--- Dependencies: 154 2109 162
+-- Dependencies: 2109 154 162
 -- Name: check_solutions_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3275,7 +3277,7 @@ ALTER TABLE ONLY check_solutions_l10n
 
 --
 -- TOC entry 2183 (class 2606 OID 28318)
--- Dependencies: 2081 143 155
+-- Dependencies: 155 143 2081
 -- Name: checks_check_control_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3295,7 +3297,7 @@ ALTER TABLE ONLY checks_l10n
 
 --
 -- TOC entry 2186 (class 2606 OID 22155)
--- Dependencies: 2109 157 162
+-- Dependencies: 157 162 2109
 -- Name: checks_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3305,7 +3307,7 @@ ALTER TABLE ONLY checks_l10n
 
 --
 -- TOC entry 2184 (class 2606 OID 28323)
--- Dependencies: 2115 155 168
+-- Dependencies: 155 2115 168
 -- Name: checks_reference_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3315,7 +3317,7 @@ ALTER TABLE ONLY checks
 
 --
 -- TOC entry 2187 (class 2606 OID 21965)
--- Dependencies: 2135 180 160
+-- Dependencies: 160 180 2135
 -- Name: emails_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3325,7 +3327,7 @@ ALTER TABLE ONLY emails
 
 --
 -- TOC entry 2233 (class 2606 OID 28242)
--- Dependencies: 202 180 2135
+-- Dependencies: 2135 202 180
 -- Name: login_history_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3335,7 +3337,7 @@ ALTER TABLE ONLY login_history
 
 --
 -- TOC entry 2188 (class 2606 OID 21970)
--- Dependencies: 166 2113 164
+-- Dependencies: 2113 166 164
 -- Name: project_details_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3345,7 +3347,7 @@ ALTER TABLE ONLY project_details
 
 --
 -- TOC entry 2216 (class 2606 OID 26896)
--- Dependencies: 2113 187 166
+-- Dependencies: 166 187 2113
 -- Name: project_users_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3355,7 +3357,7 @@ ALTER TABLE ONLY project_users
 
 --
 -- TOC entry 2217 (class 2606 OID 26901)
--- Dependencies: 2135 187 180
+-- Dependencies: 180 2135 187
 -- Name: project_users_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3365,7 +3367,7 @@ ALTER TABLE ONLY project_users
 
 --
 -- TOC entry 2189 (class 2606 OID 26965)
--- Dependencies: 2101 166 158
+-- Dependencies: 2101 158 166
 -- Name: projects_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3375,7 +3377,7 @@ ALTER TABLE ONLY projects
 
 --
 -- TOC entry 2229 (class 2606 OID 28153)
--- Dependencies: 199 140 2077
+-- Dependencies: 199 2077 140
 -- Name: report_template_sections_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3385,7 +3387,7 @@ ALTER TABLE ONLY report_template_sections
 
 --
 -- TOC entry 2231 (class 2606 OID 28143)
--- Dependencies: 162 2109 200
+-- Dependencies: 2109 162 200
 -- Name: report_template_sections_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3395,7 +3397,7 @@ ALTER TABLE ONLY report_template_sections_l10n
 
 --
 -- TOC entry 2232 (class 2606 OID 28148)
--- Dependencies: 199 200 2161
+-- Dependencies: 2161 199 200
 -- Name: report_template_sections_l10n_report_template_section_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3405,7 +3407,7 @@ ALTER TABLE ONLY report_template_sections_l10n
 
 --
 -- TOC entry 2230 (class 2606 OID 28158)
--- Dependencies: 2153 193 199
+-- Dependencies: 199 2153 193
 -- Name: report_template_sections_report_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3415,7 +3417,7 @@ ALTER TABLE ONLY report_template_sections
 
 --
 -- TOC entry 2227 (class 2606 OID 27375)
--- Dependencies: 197 162 2109
+-- Dependencies: 2109 162 197
 -- Name: report_template_summary_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3445,7 +3447,7 @@ ALTER TABLE ONLY report_template_summary
 
 --
 -- TOC entry 2224 (class 2606 OID 28175)
--- Dependencies: 162 194 2109
+-- Dependencies: 2109 162 194
 -- Name: report_templates_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3455,7 +3457,7 @@ ALTER TABLE ONLY report_templates_l10n
 
 --
 -- TOC entry 2225 (class 2606 OID 28180)
--- Dependencies: 194 2153 193
+-- Dependencies: 2153 194 193
 -- Name: report_templates_l10n_report_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3465,7 +3467,7 @@ ALTER TABLE ONLY report_templates_l10n
 
 --
 -- TOC entry 2213 (class 2606 OID 22095)
--- Dependencies: 184 162 2109
+-- Dependencies: 162 184 2109
 -- Name: risk_categories_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3475,7 +3477,7 @@ ALTER TABLE ONLY risk_categories_l10n
 
 --
 -- TOC entry 2212 (class 2606 OID 22090)
--- Dependencies: 184 183 2137
+-- Dependencies: 183 184 2137
 -- Name: risk_categories_l10n_risk_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3485,7 +3487,7 @@ ALTER TABLE ONLY risk_categories_l10n
 
 --
 -- TOC entry 2211 (class 2606 OID 26388)
--- Dependencies: 2147 183 189
+-- Dependencies: 189 183 2147
 -- Name: risk_categories_risk_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3495,7 +3497,7 @@ ALTER TABLE ONLY risk_categories
 
 --
 -- TOC entry 2214 (class 2606 OID 24924)
--- Dependencies: 2097 185 155
+-- Dependencies: 185 2097 155
 -- Name: risk_category_checks_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3505,7 +3507,7 @@ ALTER TABLE ONLY risk_category_checks
 
 --
 -- TOC entry 2215 (class 2606 OID 24929)
--- Dependencies: 185 183 2137
+-- Dependencies: 2137 185 183
 -- Name: risk_category_checks_risk_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3515,7 +3517,7 @@ ALTER TABLE ONLY risk_category_checks
 
 --
 -- TOC entry 2219 (class 2606 OID 26383)
--- Dependencies: 2147 190 189
+-- Dependencies: 189 190 2147
 -- Name: risk_templates_l10n_risk_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3525,7 +3527,7 @@ ALTER TABLE ONLY risk_templates_l10n
 
 --
 -- TOC entry 2218 (class 2606 OID 26378)
--- Dependencies: 2109 190 162
+-- Dependencies: 162 190 2109
 -- Name: risk_templatess_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3535,7 +3537,7 @@ ALTER TABLE ONLY risk_templates_l10n
 
 --
 -- TOC entry 2190 (class 2606 OID 27274)
--- Dependencies: 172 2097 155
+-- Dependencies: 155 172 2097
 -- Name: target_check_attachments_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3545,7 +3547,7 @@ ALTER TABLE ONLY target_check_attachments
 
 --
 -- TOC entry 2191 (class 2606 OID 27279)
--- Dependencies: 178 172 2131
+-- Dependencies: 172 2131 178
 -- Name: target_check_attachments_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3555,7 +3557,7 @@ ALTER TABLE ONLY target_check_attachments
 
 --
 -- TOC entry 2192 (class 2606 OID 27284)
--- Dependencies: 176 2127 172 172 176
+-- Dependencies: 176 172 172 2127 176
 -- Name: target_check_attachments_target_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3565,7 +3567,7 @@ ALTER TABLE ONLY target_check_attachments
 
 --
 -- TOC entry 2193 (class 2606 OID 27294)
--- Dependencies: 140 2077 173
+-- Dependencies: 2077 140 173
 -- Name: target_check_categories_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3575,7 +3577,7 @@ ALTER TABLE ONLY target_check_categories
 
 --
 -- TOC entry 2194 (class 2606 OID 27299)
--- Dependencies: 178 2131 173
+-- Dependencies: 2131 178 173
 -- Name: target_check_categories_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3585,7 +3587,7 @@ ALTER TABLE ONLY target_check_categories
 
 --
 -- TOC entry 2195 (class 2606 OID 27254)
--- Dependencies: 174 155 2097
+-- Dependencies: 2097 174 155
 -- Name: target_check_inputs_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3595,7 +3597,7 @@ ALTER TABLE ONLY target_check_inputs
 
 --
 -- TOC entry 2196 (class 2606 OID 27259)
--- Dependencies: 2085 174 146
+-- Dependencies: 174 146 2085
 -- Name: target_check_inputs_check_input_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3615,7 +3617,7 @@ ALTER TABLE ONLY target_check_inputs
 
 --
 -- TOC entry 2198 (class 2606 OID 27269)
--- Dependencies: 174 176 176 174 2127
+-- Dependencies: 176 2127 176 174 174
 -- Name: target_check_inputs_target_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3625,7 +3627,7 @@ ALTER TABLE ONLY target_check_inputs
 
 --
 -- TOC entry 2199 (class 2606 OID 27214)
--- Dependencies: 2097 175 155
+-- Dependencies: 155 175 2097
 -- Name: target_check_solutions_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3635,7 +3637,7 @@ ALTER TABLE ONLY target_check_solutions
 
 --
 -- TOC entry 2200 (class 2606 OID 27219)
--- Dependencies: 175 2093 152
+-- Dependencies: 152 175 2093
 -- Name: target_check_solutions_check_solution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3645,7 +3647,7 @@ ALTER TABLE ONLY target_check_solutions
 
 --
 -- TOC entry 2201 (class 2606 OID 27224)
--- Dependencies: 178 175 2131
+-- Dependencies: 2131 178 175
 -- Name: target_check_solutions_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3655,7 +3657,7 @@ ALTER TABLE ONLY target_check_solutions
 
 --
 -- TOC entry 2202 (class 2606 OID 27229)
--- Dependencies: 176 2127 176 175 175
+-- Dependencies: 2127 176 176 175 175
 -- Name: target_check_solutions_target_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3665,7 +3667,7 @@ ALTER TABLE ONLY target_check_solutions
 
 --
 -- TOC entry 2220 (class 2606 OID 27194)
--- Dependencies: 2097 155 191
+-- Dependencies: 155 2097 191
 -- Name: target_check_vulns_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3685,7 +3687,7 @@ ALTER TABLE ONLY target_check_vulns
 
 --
 -- TOC entry 2223 (class 2606 OID 27209)
--- Dependencies: 191 191 176 2127 176
+-- Dependencies: 2127 191 176 176 191
 -- Name: target_check_vulns_target_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3695,7 +3697,7 @@ ALTER TABLE ONLY target_check_vulns
 
 --
 -- TOC entry 2222 (class 2606 OID 27204)
--- Dependencies: 2135 180 191
+-- Dependencies: 180 2135 191
 -- Name: target_check_vulns_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3704,8 +3706,8 @@ ALTER TABLE ONLY target_check_vulns
 
 
 --
--- TOC entry 2203 (class 2606 OID 22030)
--- Dependencies: 2097 176 155
+-- TOC entry 2203 (class 2606 OID 28329)
+-- Dependencies: 176 155 2097
 -- Name: target_checks_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3714,7 +3716,7 @@ ALTER TABLE ONLY target_checks
 
 
 --
--- TOC entry 2204 (class 2606 OID 22035)
+-- TOC entry 2204 (class 2606 OID 28334)
 -- Dependencies: 2109 162 176
 -- Name: target_checks_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
@@ -3724,8 +3726,8 @@ ALTER TABLE ONLY target_checks
 
 
 --
--- TOC entry 2205 (class 2606 OID 22040)
--- Dependencies: 176 2131 178
+-- TOC entry 2205 (class 2606 OID 28339)
+-- Dependencies: 2131 178 176
 -- Name: target_checks_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3734,8 +3736,8 @@ ALTER TABLE ONLY target_checks
 
 
 --
--- TOC entry 2206 (class 2606 OID 22045)
--- Dependencies: 176 180 2135
+-- TOC entry 2206 (class 2606 OID 28344)
+-- Dependencies: 2135 180 176
 -- Name: target_checks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3745,7 +3747,7 @@ ALTER TABLE ONLY target_checks
 
 --
 -- TOC entry 2207 (class 2606 OID 22050)
--- Dependencies: 2115 168 177
+-- Dependencies: 2115 177 168
 -- Name: target_references_reference_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3755,7 +3757,7 @@ ALTER TABLE ONLY target_references
 
 --
 -- TOC entry 2208 (class 2606 OID 22055)
--- Dependencies: 177 178 2131
+-- Dependencies: 2131 177 178
 -- Name: target_references_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3765,7 +3767,7 @@ ALTER TABLE ONLY target_references
 
 --
 -- TOC entry 2209 (class 2606 OID 27169)
--- Dependencies: 166 2113 178
+-- Dependencies: 2113 178 166
 -- Name: targets_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3775,7 +3777,7 @@ ALTER TABLE ONLY targets
 
 --
 -- TOC entry 2210 (class 2606 OID 28237)
--- Dependencies: 158 2101 180
+-- Dependencies: 158 180 2101
 -- Name: users_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3795,7 +3797,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2013-01-22 15:47:39 MSK
+-- Completed on 2013-01-22 19:58:41 MSK
 
 --
 -- PostgreSQL database dump complete

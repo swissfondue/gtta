@@ -317,6 +317,14 @@ class AutomationCommand extends ConsoleCommand
             if (!$check->result)
                 $check->result = Yii::t('app', 'No output.');
 
+            $tablePos = strpos($check->result, '<' . ResultTable::TAG_MAIN);
+
+            if ($tablePos != false)
+            {
+                $check->table_result = substr($check->result, $tablePos);
+                $check->result = substr($check->result, 0, $tablePos);
+            }
+
             $check->status = TargetCheck::STATUS_FINISHED;
             $check->save();
 

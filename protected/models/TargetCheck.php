@@ -18,6 +18,7 @@
  * @property integer $port
  * @property string $override_target
  * @property integer $user_id
+ * @property string $table_result
  */
 class TargetCheck extends CActiveRecord
 {
@@ -83,7 +84,7 @@ class TargetCheck extends CActiveRecord
             array( 'target_file, result_file, protocol, override_target', 'length', 'max' => 1000 ),
             array( 'status', 'in', 'range' => array( self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_STOP, self::STATUS_FINISHED ) ),
             array( 'rating', 'in', 'range' => array( self::RATING_HIDDEN, self::RATING_INFO, self::RATING_LOW_RISK, self::RATING_MED_RISK, self::RATING_HIGH_RISK ) ),
-            array( 'result, started', 'safe' ),
+            array( 'result, started, table_result', 'safe' ),
 		);
 	}
 
