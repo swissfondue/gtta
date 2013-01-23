@@ -841,6 +841,70 @@ class ReportController extends Controller
                                 $row++;
                             }
 
+                            if ($check['tableResult'])
+                            {
+                                $table->addRow();
+                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($this->thinBorder);
+                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 2)->setBorder($this->thinBorderBR);
+
+                                if ($check['result'])
+                                    $table->mergeCellRange($row - 1, 1, $row, 1);
+                                else
+                                    $table->writeToCell($row, 1, Yii::t('app', 'Result'));
+
+                                $tableResult = new ResultTable();
+                                $tableResult->parse($check['tableResult']);
+
+                                $nestedTable = $table->getCell($row, 2)->addTable();
+                                $nestedTable->addRows($tableResult->rowCount + 1);
+
+                                $columnWidths = array();
+                                $tableWidth = $this->docWidth * 0.83 - $this->cellPadding * 2;
+
+                                foreach ($tableResult->columns as $column)
+                                    $columnWidths[] = (float)$column['width'] * $tableWidth;
+
+                                $nestedTable->addColumnsList($columnWidths);
+
+                                $nestedTable->setFontForCellRange($this->boldFont, 1, 1, 1, $tableResult->columnCount);
+                                $nestedTable->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, $tableResult->columnCount);
+                                $nestedTable->setFontForCellRange($this->textFont, 2, 1, $tableResult->rowCount + 1, $tableResult->columnCount);
+                                $nestedTable->setBorderForCellRange($this->thinBorder, 1, 1, $tableResult->rowCount + 1, $tableResult->columnCount);
+                                $nestedTable->setFirstRowAsHeader();
+
+                                $nestedRow = 1;
+                                $nestedColumn = 1;
+
+                                foreach ($tableResult->columns as $column)
+                                {
+                                    $nestedTable->getCell($nestedRow, $nestedColumn)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                    $nestedTable->getCell($nestedRow, $nestedColumn)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                    $nestedTable->writeToCell($nestedRow, $nestedColumn, $column['name']);
+                                    $nestedColumn++;
+                                }
+
+                                foreach ($tableResult->data as $dataRow)
+                                {
+                                    $nestedRow++;
+                                    $nestedColumn = 1;
+
+                                    foreach ($dataRow as $dataCell)
+                                    {
+                                        $nestedTable->getCell($nestedRow, $nestedColumn)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                        $nestedTable->getCell($nestedRow, $nestedColumn)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+
+                                        $nestedTable->writeToCell($nestedRow, $nestedColumn, $dataCell);
+
+                                        $nestedColumn++;
+                                    }
+                                }
+
+                                $row++;
+                            }
+
                             if ($check['solutions'])
                             {
                                 $table->addRows(count($check['solutions']));
@@ -1179,6 +1243,7 @@ class ReportController extends Controller
                             'background'       => $this->_prepareProjectReportText($check->localizedBackgroundInfo),
                             'question'         => $this->_prepareProjectReportText($check->localizedQuestion),
                             'result'           => $check->targetChecks[0]->result,
+                            'tableResult'      => $check->targetChecks[0]->table_result,
                             'rating'           => 0,
                             'ratingName'       => $ratings[$check->targetChecks[0]->rating],
                             'ratingColor'      => '#999999',

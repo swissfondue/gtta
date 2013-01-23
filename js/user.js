@@ -124,6 +124,7 @@ function User()
                                 check = data.checks[i];
 
                                 $('#TargetCheckEditForm_' + check.id + '_result').val(check.result);
+                                $('div.check-form[data-id="' + check.id + '"] div.table-result').html(check.tableResult);
 
                                 for (var k = 0; k < _check.runningChecks.length; k++)
                                 {
@@ -730,6 +731,7 @@ function User()
                         $('input[type="checkbox"]', row).prop('checked', false);
                         $('textarea', row).val('');
                         $('table.attachment-list', row).remove();
+                        $('div.table-result', row).html('');
 
                         // port & protocol values
                         if (data.protocol != null && data.protocol != undefined)

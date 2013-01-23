@@ -356,15 +356,16 @@
                                     <td>
                                         <textarea wrap="off" name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->isRunning) echo 'readonly'; ?>><?php if ($check->targetChecks) echo $check->targetChecks[0]->result; ?></textarea>
 
-                                        <?php
-                                            if ($check->targetChecks && $check->targetChecks[0]->table_result)
-                                            {
-                                                $table = new ResultTable();
-                                                $table->parse($check->targetChecks[0]->table_result);
-
-                                                echo $table->toHTML();
-                                            }
-                                        ?>
+                                        <div class="table-result">
+                                            <?php
+                                                if ($check->targetChecks && $check->targetChecks[0]->table_result)
+                                                {
+                                                    $table = new ResultTable();
+                                                    $table->parse($check->targetChecks[0]->table_result);
+                                                    echo $this->renderPartial('/project/target/check/tableresult', array( 'table' => $table ));
+                                                }
+                                            ?>
+                                        </div>
                                     </td>
                                 </tr>
                                 <?php if ($check->results): ?>

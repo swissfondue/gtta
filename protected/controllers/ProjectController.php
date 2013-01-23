@@ -2042,11 +2042,20 @@ class ProjectController extends Controller
                 else
                     $time = -1;
 
+                $table = null;
+
+                if ($check->targetChecks[0]->table_result)
+                {
+                    $table = new ResultTable();
+                    $table->parse($check->targetChecks[0]->table_result);
+                }
+
                 $checkData[] = array(
-                    'id'       => $check->id,
-                    'result'   => $check->targetChecks[0]->result,
-                    'finished' => $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED,
-                    'time'     => $time
+                    'id'          => $check->id,
+                    'result'      => $check->targetChecks[0]->result,
+                    'tableResult' => $table ? $this->renderPartial('/project/target/check/tableresult', array( 'table' => $table ), true) : '',
+                    'finished'    => $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED,
+                    'time'        => $time
                 );
             }
 
