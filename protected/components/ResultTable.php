@@ -17,7 +17,6 @@ class ResultTable
     /**
      * Attributes
      */
-    const ATTR_ROWS  = 'rows';
     const ATTR_NAME  = 'name';
     const ATTR_WIDTH = 'width';
 
