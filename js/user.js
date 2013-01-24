@@ -698,6 +698,7 @@ function User()
                         );
 
                         $('#TargetCheckEditForm_' + id + '_result').val('');
+                        $('div.table-result', row).html('');
 
                         _check.setLoading(id);
                         $('.loader-image').hide();
