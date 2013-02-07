@@ -35,6 +35,10 @@ class PHPRtfLite_Element_Hyperlink extends PHPRtfLite_Element
      */
     protected $_hyperlink = '';
 
+    /**
+     * @var boolean
+     */
+    protected $_local = false;
 
     /**
      * sets hyperling
@@ -43,7 +47,13 @@ class PHPRtfLite_Element_Hyperlink extends PHPRtfLite_Element
      */
     public function setHyperlink($hyperlink)
     {
-        $this->_hyperlink = $hyperlink;
+        if (substr($hyperlink, 0, 1) == "#")
+        {
+            $this->_local = true;
+            $this->_hyperlink = substr($hyperlink, 1);
+        }
+        else
+            $this->_hyperlink = $hyperlink;
     }
 
 
@@ -55,7 +65,13 @@ class PHPRtfLite_Element_Hyperlink extends PHPRtfLite_Element
     protected function getOpeningToken()
     {
         $hyperlink = PHPRtfLite::quoteRtfCode($this->_hyperlink);
-        return '{\field {\*\fldinst {HYPERLINK "' . $hyperlink . '"}}{\\fldrslt {';
+
+        if ($this->_local)
+            $token = '{\field {\*\fldinst {HYPERLINK \\\l "' . $hyperlink . '"}}{\\fldrslt {';
+        else
+            $token = '{\field {\*\fldinst {HYPERLINK "' . $hyperlink . '"}}{\\fldrslt {';
+
+        return $token;
     }
 
 

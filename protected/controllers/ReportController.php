@@ -14,6 +14,7 @@ class ReportController extends Controller
     private $titlePar, $h3Par, $centerPar, $leftPar, $noPar;
     private $docWidth;
     private $project;
+    private $toc;
 
     const NORMAL_VULN_LIST   = 0;
     const APPENDIX_VULN_LIST = 1;
@@ -615,18 +616,40 @@ class ReportController extends Controller
 
             for ($tableNumber = 0; $tableNumber < $tableCount; $tableNumber++)
             {
-                $section->writeText($sectionNumber . '.' . $targetNumber . '. ' . $target['host'], $this->boldFont);
+                $subsectionNumber = substr($sectionNumber, strpos($sectionNumber, '.') + 1);
+
+                $this->toc->writeHyperLink(
+                    '#vulns_section_' . $subsectionNumber . '_' . $targetNumber,
+                    '        ' . $sectionNumber . '.' . $targetNumber . '. ' . $target['host'],
+                    $this->textFont
+                );
+
+                $section->writeBookmark(
+                    'vulns_section_' . $subsectionNumber . '_' . $targetNumber,
+                    $sectionNumber . '.' . $targetNumber . '. ' . $target['host'],
+                    $this->boldFont
+                );
 
                 if ($target['description'])
                 {
+                    $font = new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090');
+
+                    $this->toc->writeText(' / ', $this->textFont);
+                    $this->toc->writeHyperLink(
+                        '#vulns_section_' . $subsectionNumber . '_' . $targetNumber,
+                        $target['description'],
+                        $font
+                    );
+
                     $section->writeText(' / ', $this->textFont);
-                    $section->writeText($target['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+                    $section->writeText($target['description'], $font);
                 }
 
                 if ($tableNumber == 1)
                     $section->writeText(' - ' . Yii::t('app', 'Info Checks'), $this->textFont);
 
                 $section->writeText("\n", $this->textFont);
+                $this->toc->writeText("\n", $this->textFont);
 
                 $targetNumber++;
 
@@ -1529,11 +1552,10 @@ class ReportController extends Controller
             $table->getCell(1, 2)->writeText(Yii::t('app', 'Notes'), $this->boldFont, $this->noPar);
             $table->getCell(2, 2)->writeText(Yii::t('app', 'Draft'), $this->textFont, $this->noPar);
 
-            $section->insertPageBreak();
-
-            $section->writeText(Yii::t('app', 'Table of Contents'), $this->h2Font, $this->h3Par);
-
-            $section->insertPageBreak();
+            $this->toc = $this->rtf->addSection();
+            $this->toc->writeText(Yii::t('app', 'Table of Contents'), $this->h2Font, $this->h3Par);
+            $this->toc->writeText("\n\n", $this->textFont);
+            $section = $this->rtf->addSection();
         }
         else
             $section->writeText(Yii::t('app', 'Penetration Test Report') . ': ' . $project->name, $this->h2Font, $this->titlePar);
@@ -1543,7 +1565,19 @@ class ReportController extends Controller
         // introduction
         if (in_array('intro', $options) && $template->localizedIntro)
         {
-            $section->writeText($sectionNumber . '. ' . Yii::t('app', 'Introduction'), $this->h2Font, $this->h3Par);
+            $this->toc->writeHyperLink(
+                '#introduction',
+                $sectionNumber . '. ' . Yii::t('app', 'Introduction') . "\n",
+                $this->textFont
+            );
+
+            $section->writeBookmark(
+                'introduction',
+                $sectionNumber . '. ' . Yii::t('app', 'Introduction'),
+                $this->h2Font,
+                $this->h3Par
+            );
+
             $this->_renderText($section, $template->localizedIntro);
 
             $section->insertPageBreak();
@@ -1551,7 +1585,19 @@ class ReportController extends Controller
         }
 
         // summary
-        $section->writeText($sectionNumber . '. ' . Yii::t('app', 'Summary'), $this->h2Font, $this->h3Par);
+        $this->toc->writeHyperLink(
+            '#summary',
+            $sectionNumber . '. ' . Yii::t('app', 'Summary') . "\n",
+            $this->textFont
+        );
+
+        $section->writeBookmark(
+            'summary',
+            $sectionNumber . '. ' . Yii::t('app', 'Summary'),
+            $this->h2Font,
+            $this->h3Par
+        );
+
         $subsectionNumber = 1;
 
         $summary = false;
@@ -1567,7 +1613,14 @@ class ReportController extends Controller
 
             if ($summary)
             {
-                $section->writeText(
+                $this->toc->writeHyperLink(
+                    '#overview',
+                    '    ' . $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Overview') . "\n",
+                    $this->textFont
+                );
+
+                $section->writeBookmark(
+                    'overview',
                     $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Overview') . "\n",
                     $this->h3Font,
                     $this->noPar
@@ -1578,7 +1631,14 @@ class ReportController extends Controller
             }
         }
 
-        $section->writeText(
+        $this->toc->writeHyperLink(
+            '#security_level',
+            '    ' . $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Security Level') . "\n",
+            $this->textFont
+        );
+
+        $section->writeBookmark(
+            'security_level',
             $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Security Level') . "\n",
             $this->h3Font,
             $this->noPar
@@ -1635,7 +1695,14 @@ class ReportController extends Controller
             $row++;
         }
 
-        $section->writeText(
+        $this->toc->writeHyperLink(
+            '#vuln_distribution',
+            '    ' . $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Vulnerability Distribution') . "\n",
+            $this->textFont
+        );
+
+        $section->writeBookmark(
+            'vuln_distribution',
             $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Vulnerability Distribution') . "\n",
             $this->h3Font,
             $this->noPar
@@ -1649,7 +1716,14 @@ class ReportController extends Controller
 
         if (in_array('fulfillment', $options))
         {
-            $section->writeText(
+            $this->toc->writeHyperLink(
+                '#degree',
+                '    ' . $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Degree of Fulfillment') . "\n",
+                $this->textFont
+            );
+
+            $section->writeBookmark(
+                'degree',
                 $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Degree of Fulfillment') . "\n",
                 $this->h3Font,
                 $this->noPar
@@ -1665,7 +1739,14 @@ class ReportController extends Controller
 
         if (in_array('matrix', $options))
         {
-            $section->writeText(
+            $this->toc->writeHyperLink(
+                '#risk_matrix',
+                '    ' . $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Risk Matrix') . "\n",
+                $this->textFont
+            );
+
+            $section->writeBookmark(
+                'risk_matrix',
                 $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Risk Matrix') . "\n",
                 $this->h3Font,
                 $this->noPar
@@ -1690,7 +1771,14 @@ class ReportController extends Controller
         // reduced vulnerability list
         if (in_array('vulns', $options))
         {
-            $section->writeText(
+            $this->toc->writeHyperLink(
+                '#reduced_vulns',
+                '    ' . $sectionNumber . '. ' . Yii::t('app', 'Results and Recommendations') . "\n",
+                $this->textFont
+            );
+
+            $section->writeBookmark(
+                'reduced_vulns',
                 $sectionNumber . '. ' . Yii::t('app', 'Results and Recommendations'),
                 $this->h2Font,
                 $this->h3Par
@@ -1829,14 +1917,33 @@ class ReportController extends Controller
         }
 
         // detailed report with vulnerabilities
-        $section->writeText($sectionNumber . '. ' . Yii::t('app', 'Vulnerabilities'), $this->h2Font, $this->h3Par);
+        $this->toc->writeHyperLink(
+            '#vulns',
+            $sectionNumber . '. ' . Yii::t('app', 'Vulnerabilities') . "\n",
+            $this->textFont
+        );
+
+        $section->writeBookmark(
+            'vulns',
+            $sectionNumber . '. ' . Yii::t('app', 'Vulnerabilities'),
+            $this->h2Font,
+            $this->h3Par
+        );
+
         $subsectionNumber = 1;
 
         if ($haveSeparate)
         {
             foreach ($template->sections as $scn)
             {
-                $section->writeText(
+                $this->toc->writeHyperLink(
+                    '#vulns_section_' . $subsectionNumber,
+                    '    ' . $sectionNumber . '.' . $subsectionNumber . '. ' . $scn->localizedTitle . "\n",
+                    $this->textFont
+                );
+
+                $section->writeBookmark(
+                    'vulns_section_' . $subsectionNumber,
                     $sectionNumber . '.' . $subsectionNumber . '. ' . $scn->localizedTitle . "\n",
                     $this->h3Font,
                     $this->noPar
@@ -1858,7 +1965,14 @@ class ReportController extends Controller
             }
         }
 
-        $section->writeText(
+        $this->toc->writeHyperLink(
+            '#vulns_section_' . $subsectionNumber,
+            '    ' . $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Found Vulnerabilities') . "\n",
+            $this->textFont
+        );
+
+        $section->writeBookmark(
+            'vulns_section_' . $subsectionNumber,
             $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Found Vulnerabilities') . "\n",
             $this->h3Font,
             $this->noPar
@@ -1873,7 +1987,14 @@ class ReportController extends Controller
 
         if ($haveInfo && $model->infoChecksLocation == ProjectReportForm::INFO_LOCATION_APPENDIX)
         {
-            $section->writeText(
+            $this->toc->writeHyperLink(
+                '#vulns_section_' . $subsectionNumber,
+                '    ' . $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Additional Data') . "\n",
+                $this->textFont
+            );
+
+            $section->writeBookmark(
+                'vulns_section_' . $subsectionNumber,
                 $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Additional Data') . "\n",
                 $this->h3Font,
                 $this->noPar
@@ -1891,7 +2012,19 @@ class ReportController extends Controller
         // appendix
         if (in_array('appendix', $options) && $template->localizedAppendix)
         {
-            $section->writeText($sectionNumber . '. ' . Yii::t('app', 'Appendix'), $this->h2Font, $this->h3Par);
+            $this->toc->writeHyperLink(
+                '#appendix',
+                $sectionNumber . '. ' . Yii::t('app', 'Appendix') . "\n",
+                $this->textFont
+            );
+
+            $section->writeBookmark(
+                'appendix',
+                $sectionNumber . '. ' . Yii::t('app', 'Appendix'),
+                $this->h2Font,
+                $this->h3Par
+            );
+
             $this->_renderText($section, $template->localizedAppendix, false);
 
             $sectionNumber++;
@@ -2569,14 +2702,37 @@ class ReportController extends Controller
 
             if ($fullReport)
             {
-                $section->writeText($sectionNumber . '.' . $targetNumber . '. ' . $target['host'], $this->boldFont);
-                $targetNumber++;
+                $this->toc->writeHyperLink(
+                    '#degree_' . $targetNumber,
+                    '        ' . $sectionNumber . '.' . $targetNumber . '. ' . $target['host'],
+                    $this->textFont
+                );
+
+                $section->writeBookmark(
+                    'degree_' . $targetNumber,
+                    $sectionNumber . '.' . $targetNumber . '. ' . $target['host'],
+                    $this->boldFont
+                );
 
                 if ($target['description'])
                 {
+                    $font = new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090');
+
+                    $this->toc->writeText(' / ', $this->textFont);
+                    $this->toc->writeHyperLink(
+                        '#degree_' . $targetNumber,
+                        $target['description'],
+                        $font
+                    );
+                    $this->toc->writeText("\n");
+
                     $section->writeText(' / ', $this->textFont);
-                    $section->writeText($target['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+                    $section->writeText($target['description'], $font);
                 }
+                else
+                    $this->toc->writeText("\n");
+
+                $targetNumber++;
             }
             else
             {
@@ -2977,16 +3133,47 @@ class ReportController extends Controller
         {
             if ($fullReport)
             {
-                $section->writeText($sectionNumber . '.' . $targetNumber . '. ' . $target['host'], $this->boldFont);
+                $this->toc->writeHyperLink(
+                    '#risk_matrix_' . $targetNumber,
+                    '        ' . $sectionNumber . '.' . $targetNumber . '. ' . $target['host'],
+                    $this->textFont
+                );
+
+                $section->writeBookmark(
+                    'risk_matrix_' . $targetNumber,
+                    $sectionNumber . '.' . $targetNumber . '. ' . $target['host'],
+                    $this->boldFont
+                );
+
+                if ($target['description'])
+                {
+                    $font = new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090');
+
+                    $this->toc->writeText(' / ', $this->textFont);
+                    $this->toc->writeHyperLink(
+                        '#risk_matrix_' . $targetNumber,
+                        $target['description'],
+                        $font
+                    );
+                    $this->toc->writeText("\n");
+
+                    $section->writeText(' / ', $this->textFont);
+                    $section->writeText($target['description'], $font);
+                }
+                else
+                    $this->toc->writeText("\n");
+
                 $targetNumber++;
             }
             else
+            {
                 $section->writeText($target['host'], $this->boldFont);
 
-            if ($target['description'])
-            {
-                $section->writeText(' / ', $this->textFont);
-                $section->writeText($target['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+                if ($target['description'])
+                {
+                    $section->writeText(' / ', $this->textFont);
+                    $section->writeText($target['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+                }
             }
 
             $section->writeText("\n");

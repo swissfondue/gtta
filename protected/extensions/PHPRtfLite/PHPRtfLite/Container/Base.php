@@ -210,6 +210,32 @@ abstract class PHPRtfLite_Container_Base
         return $element;
     }
 
+    /**
+     * writes bookmark to container.
+     *
+     * @param string                $bookmark           bookmark name
+     * @param string                $text               hyperlink text, if empty, hyperlink is written in previous paragraph format.
+     * @param PHPRtfLite_Font       $font
+     * @param PHPRtfLite_ParFormat  $parFormat
+     * @param boolean               $convertTagsToRtf   if false, then html style tags are not replaced with rtf code
+     */
+    public function writeBookmark($bookmark,
+                                   $text,
+                                   PHPRtfLite_Font $font = null,
+                                   PHPRtfLite_ParFormat $parFormat = null,
+                                   $convertTagsToRtf = true)
+    {
+        if ($parFormat)
+            $this->writePlainRtfCode('\pard ' . $parFormat->getContent() . '{');
+
+        $this->writePlainRtfCode('{\*\bkmkstart ' . $bookmark . '}');
+        $this->writeText($text, $font, null, $convertTagsToRtf);
+        $this->writePlainRtfCode('{\*\bkmkend ' . $bookmark . '}');
+
+        if ($parFormat)
+            $this->writePlainRtfCode('} \par ');
+    }
+
 
     /**
      * adds table to element container.
