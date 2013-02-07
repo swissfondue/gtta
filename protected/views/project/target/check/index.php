@@ -319,7 +319,7 @@
                                                                 }
                                                     ?>
                                                     <input type="checkbox" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?> value="1"<?php if ($value) echo ' checked'; ?>>
-                                                <?php elseif ($input->type == CheckInput::TYPE_SELECT): ?>
+                                                <?php elseif ($input->type == CheckInput::TYPE_RADIO): ?>
                                                     <?php
                                                         $value = '';
 
@@ -331,13 +331,19 @@
                                                                     break;
                                                                 }
 
-                                                        $options = explode("\n", str_replace("\r", '', $input->value));
+                                                        $radioBoxes = explode("\n", str_replace("\r", '', $input->value));
                                                     ?>
-                                                    <select name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?>>
-                                                        <?php foreach ($options as $option): ?>
-                                                            <option value="<?php echo CHtml::encode($option); ?>"<?php if ($option == $value) echo ' selected'; ?>><?php echo CHtml::encode($option); ?></option>
+
+                                                    <ul class="radio-input">
+                                                        <?php foreach ($radioBoxes as $radio): ?>
+                                                            <li>
+                                                                <label class="radio">
+                                                                    <input name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" type="radio" value="<?php echo CHtml::encode($radio); ?>" <?php if ($check->isRunning) echo 'disabled'; ?> <?php if ($value == $radio) echo ' checked'; ?>>
+                                                                    <?php echo CHtml::encode($radio); ?>
+                                                                </label>
+                                                            </li>
                                                         <?php endforeach; ?>
-                                                    </select>
+                                                    </ul>
                                                 <?php endif; ?>
 
                                                 <?php if ($input->localizedDescription): ?>

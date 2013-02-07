@@ -323,7 +323,7 @@ function User()
          * Get check data in array.
          */
         this.getData = function (id) {
-            var i, row, textareas, texts, checkboxes, selects, override, protocol, port, result, solutions, rating, data;
+            var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, solutions, rating, data;
 
             row = $('div.check-form[data-id="' + id + '"]');
 
@@ -354,7 +354,7 @@ function User()
                 }
             ).get();
 
-            selects = $('select[name^="TargetCheckEditForm_' + id + '[inputs]"]', row).map(
+            radios = $('input[type="radio"][name^="TargetCheckEditForm_' + id + '[inputs]"]:checked', row).map(
                 function () {
                     return {
                         name  : $(this).attr('name'),
@@ -411,8 +411,8 @@ function User()
             for (i = 0; i < checkboxes.length; i++)
                 data.push(checkboxes[i]);
 
-            for (i = 0; i < selects.length; i++)
-                data.push(selects[i]);
+            for (i = 0; i < radios.length; i++)
+                data.push(radios[i]);
 
             for (i = 0; i < solutions.length; i++)
                 data.push(solutions[i]);

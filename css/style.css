@@ -347,7 +347,8 @@ table.check-form > tbody > tr > td {
 
 .check-form .results,
 .check-form .solutions,
-.check-form .rating {
+.check-form .rating,
+.check-form .radio-input {
     margin:0;
     padding:0;
     list-style:none;
@@ -365,7 +366,8 @@ table.check-form > tbody > tr > td {
 
 .check-form .results li,
 .check-form .solutions > li,
-.check-form .rating li {
+.check-form .rating li,
+.check-form .radio-input li {
     margin-bottom:10px;
 }
 

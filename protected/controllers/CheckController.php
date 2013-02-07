@@ -225,7 +225,7 @@ class CheckController extends Controller
                     }
 
                     if ($value['name'] == '')
-                        $value['name'] = NULL;
+                        $value['name'] = null;
 
                     $categoryL10n->name = $value['name'];
                     $categoryL10n->save();
@@ -420,7 +420,7 @@ class CheckController extends Controller
                     }
 
                     if ($value['name'] == '')
-                        $value['name'] = NULL;
+                        $value['name'] = null;
 
                     $controlL10n->name = $value['name'];
                     $controlL10n->save();
@@ -829,16 +829,16 @@ class CheckController extends Controller
                     }
 
                     if ($value['name'] == '')
-                        $value['name'] = NULL;
+                        $value['name'] = null;
 
                     if ($value['backgroundInfo'] == '')
-                        $value['backgroundInfo'] = NULL;
+                        $value['backgroundInfo'] = null;
 
                     if ($value['hints'] == '')
-                        $value['hints'] = NULL;
+                        $value['hints'] = null;
 
                     if ($value['question'] == '')
-                        $value['question'] = NULL;
+                        $value['question'] = null;
 
                     $checkL10n->name            = $value['name'];
                     $checkL10n->background_info = $value['backgroundInfo'];
@@ -1231,7 +1231,7 @@ class CheckController extends Controller
 
             $maxOrder = CheckResult::model()->find($criteria);
 
-            if ($maxOrder && $maxOrder->max_sort_order !== NULL)
+            if ($maxOrder && $maxOrder->max_sort_order !== null)
                 $model->sortOrder = $maxOrder->max_sort_order + 1;
         }
 
@@ -1266,10 +1266,10 @@ class CheckController extends Controller
                     }
 
                     if ($value['title'] == '')
-                        $value['title'] = NULL;
+                        $value['title'] = null;
 
                     if ($value['result'] == '')
-                        $value['result'] = NULL;
+                        $value['result'] = null;
 
                     $checkResultL10n->title  = $value['title'];
                     $checkResultL10n->result = $value['result'];
@@ -1562,7 +1562,7 @@ class CheckController extends Controller
 
             $maxOrder = CheckSolution::model()->find($criteria);
 
-            if ($maxOrder && $maxOrder->max_sort_order !== NULL)
+            if ($maxOrder && $maxOrder->max_sort_order !== null)
                 $model->sortOrder = $maxOrder->max_sort_order + 1;
         }
 
@@ -1597,10 +1597,10 @@ class CheckController extends Controller
                     }
 
                     if ($value['solution'] == '')
-                        $value['solution'] = NULL;
+                        $value['solution'] = null;
 
                     if ($value['title'] == '')
-                        $value['title'] = NULL;
+                        $value['title'] = null;
 
                     $checkSolutionL10n->title    = $value['title'];
                     $checkSolutionL10n->solution = $value['solution'];
@@ -1785,7 +1785,7 @@ class CheckController extends Controller
                 CheckInput::TYPE_TEXT     => Yii::t('app', 'Text'),
                 CheckInput::TYPE_TEXTAREA => Yii::t('app', 'Textarea'),
                 CheckInput::TYPE_CHECKBOX => Yii::t('app', 'Checkbox'),
-                CheckInput::TYPE_SELECT   => Yii::t('app', 'Select'),
+                CheckInput::TYPE_RADIO    => Yii::t('app', 'Radio'),
             )
         ));
 	}
@@ -1902,7 +1902,7 @@ class CheckController extends Controller
 
             $maxOrder = CheckInput::model()->find($criteria);
 
-            if ($maxOrder && $maxOrder->max_sort_order !== NULL)
+            if ($maxOrder && $maxOrder->max_sort_order !== null)
                 $model->sortOrder = $maxOrder->max_sort_order + 1;
         }
 
@@ -1940,13 +1940,13 @@ class CheckController extends Controller
                     }
 
                     if ($value['name'] == '')
-                        $value['name'] = NULL;
+                        $value['name'] = null;
 
                     if ($value['description'] == '')
-                        $value['description'] = NULL;
+                        $value['description'] = null;
 
                     if ($value['value'] == '')
-                        $value['value'] = NULL;
+                        $value['value'] = null;
 
                     $checkInputL10n->name        = $value['name'];
                     $checkInputL10n->description = $value['description'];
@@ -1989,7 +1989,7 @@ class CheckController extends Controller
                 CheckInput::TYPE_TEXT     => Yii::t('app', 'Text'),
                 CheckInput::TYPE_TEXTAREA => Yii::t('app', 'Textarea'),
                 CheckInput::TYPE_CHECKBOX => Yii::t('app', 'Checkbox'),
-                CheckInput::TYPE_SELECT   => Yii::t('app', 'Select'),
+                CheckInput::TYPE_RADIO    => Yii::t('app', 'Radio'),
             )
         ));
 	}

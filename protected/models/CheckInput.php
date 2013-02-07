@@ -21,7 +21,7 @@ class CheckInput extends CActiveRecord
     const TYPE_TEXT     = 'text';
     const TYPE_TEXTAREA = 'textarea';
     const TYPE_CHECKBOX = 'checkbox';
-    const TYPE_SELECT   = 'select';
+    const TYPE_RADIO    = 'radio';
 
     /**
      * @var integer max sort order.
@@ -55,7 +55,7 @@ class CheckInput extends CActiveRecord
             array( 'check_id, name', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
             array( 'sort_order', 'numerical', 'integerOnly' => true, 'min' => 0 ),
-            array( 'type', 'in', 'range' => array( self::TYPE_TEXT, self::TYPE_TEXTAREA, self::TYPE_CHECKBOX, self::TYPE_SELECT ) ),
+            array( 'type', 'in', 'range' => array( self::TYPE_TEXT, self::TYPE_TEXTAREA, self::TYPE_CHECKBOX, self::TYPE_RADIO ) ),
             array( 'description, value', 'safe' ),
 		);
 	}
@@ -77,7 +77,7 @@ class CheckInput extends CActiveRecord
     public function getLocalizedName()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->name != NULL ? $this->l10n[0]->name : $this->name;
+            return $this->l10n[0]->name != null ? $this->l10n[0]->name : $this->name;
 
         return $this->name;
     }
@@ -88,7 +88,7 @@ class CheckInput extends CActiveRecord
     public function getLocalizedDescription()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->description != NULL ? $this->l10n[0]->description : $this->description;
+            return $this->l10n[0]->description != null ? $this->l10n[0]->description : $this->description;
 
         return $this->description;
     }
@@ -99,7 +99,7 @@ class CheckInput extends CActiveRecord
     public function getLocalizedValue()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->value != NULL ? $this->l10n[0]->value : $this->value;
+            return $this->l10n[0]->value != null ? $this->l10n[0]->value : $this->value;
 
         return $this->value;
     }
