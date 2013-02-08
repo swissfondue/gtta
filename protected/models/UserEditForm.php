@@ -22,6 +22,11 @@ class UserEditForm extends CFormModel
     public $email;
 
     /**
+     * @var boolean send email notifications.
+     */
+    public $sendNotifications;
+
+    /**
      * @var string password.
      */
     public $password;
@@ -54,6 +59,7 @@ class UserEditForm extends CFormModel
             array( 'passwordConfirmation', 'compare', 'compareAttribute' => 'password' ),
             array( 'password', 'safe', 'on' => self::EDIT_USER_SCENARIO ),
             array( 'role', 'in', 'range' => array( User::ROLE_ADMIN, User::ROLE_CLIENT, User::ROLE_USER ) ),
+            array( 'sendNotifications', 'boolean' ),
             array( 'clientId', 'checkClient' ),
 		);
 	}
@@ -68,6 +74,7 @@ class UserEditForm extends CFormModel
             'email'                => Yii::t('app', 'E-mail'),
             'password'             => Yii::t('app', 'Password'),
             'passwordConfirmation' => Yii::t('app', 'Password Confirmation'),
+            'sendNotifications'    => Yii::t('app', 'Send Notifications'),
             'role'                 => Yii::t('app', 'Role'),
             'clientId'             => Yii::t('app', 'Client'),
 		);

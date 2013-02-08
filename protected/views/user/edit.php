@@ -27,26 +27,6 @@
             </div>
         </div>
 
-        <div class="control-group <?php if ($model->getError('password')) echo 'error'; ?>">
-            <label class="control-label" for="UserEditForm_password"><?php echo Yii::t('app', 'Password'); ?></label>
-            <div class="controls">
-                <input type="password" class="input-xlarge" id="UserEditForm_password" name="UserEditForm[password]">
-                <?php if ($model->getError('password')): ?>
-                    <p class="help-block"><?php echo $model->getError('password'); ?></p>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <div class="control-group <?php if ($model->getError('passwordConfirmation')) echo 'error'; ?>">
-            <label class="control-label" for="UserEditForm_passwordConfirmation"><?php echo Yii::t('app', 'Password Confirmation'); ?></label>
-            <div class="controls">
-                <input type="password" class="input-xlarge" id="UserEditForm_passwordConfirmation" name="UserEditForm[passwordConfirmation]">
-                <?php if ($model->getError('passwordConfirmation')): ?>
-                    <p class="help-block"><?php echo $model->getError('passwordConfirmation'); ?></p>
-                <?php endif; ?>
-            </div>
-        </div>
-
         <div class="control-group <?php if ($model->getError('name')) echo 'error'; ?>">
             <label class="control-label" for="UserEditForm_name"><?php echo Yii::t('app', 'Name'); ?></label>
             <div class="controls">
@@ -56,6 +36,15 @@
                 <?php endif; ?>
             </div>
         </div>
+
+        <?php if (!$user->isNewRecord && $user->role != User::ROLE_CLIENT): ?>
+            <div class="control-group">
+                <label class="control-label" for="UserEditForm_sendNotifications"><?php echo Yii::t('app', 'Send Notifications'); ?></label>
+                <div class="controls">
+                    <input type="checkbox" id="UserEditForm_sendNotifications" name="UserEditForm[sendNotifications]" value="1" <?php if ($model->sendNotifications) echo 'checked="checked"'; ?>>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <div class="control-group <?php if ($model->getError('role')) echo 'error'; ?>">
             <label class="control-label" for="UserEditForm_role"><?php echo Yii::t('app', 'Role'); ?></label>
@@ -82,6 +71,26 @@
                 </select>
                 <?php if ($model->getError('clientId')): ?>
                     <p class="help-block"><?php echo $model->getError('clientId'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($model->getError('password')) echo 'error'; ?>">
+            <label class="control-label" for="UserEditForm_password"><?php echo Yii::t('app', 'Password'); ?></label>
+            <div class="controls">
+                <input type="password" class="input-xlarge" id="UserEditForm_password" name="UserEditForm[password]">
+                <?php if ($model->getError('password')): ?>
+                    <p class="help-block"><?php echo $model->getError('password'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($model->getError('passwordConfirmation')) echo 'error'; ?>">
+            <label class="control-label" for="UserEditForm_passwordConfirmation"><?php echo Yii::t('app', 'Password Confirmation'); ?></label>
+            <div class="controls">
+                <input type="password" class="input-xlarge" id="UserEditForm_passwordConfirmation" name="UserEditForm[passwordConfirmation]">
+                <?php if ($model->getError('passwordConfirmation')): ?>
+                    <p class="help-block"><?php echo $model->getError('passwordConfirmation'); ?></p>
                 <?php endif; ?>
             </div>
         </div>

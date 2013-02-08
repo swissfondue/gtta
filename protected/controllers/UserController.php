@@ -78,6 +78,7 @@ class UserController extends Controller
             $model->name     = $user->name;
             $model->role     = $user->role;
             $model->clientId = $user->client_id;
+            $model->sendNotifications = $user->send_notifications;
         }
 
 		// collect user input data
@@ -89,11 +90,15 @@ class UserController extends Controller
             {
                 $checkEmail = User::model()->findByAttributes(array( 'email' => $model->email ));
 
+                if ($user->role == User::ROLE_CLIENT || !isset($_POST['UserEditForm']['sendNotifications']))
+                    $model->sendNotifications = false;
+
                 if (!$checkEmail || $checkEmail->id == $user->id)
                 {
                     $user->email = $model->email;
                     $user->name  = $model->name;
                     $user->role  = $model->role;
+                    $user->send_notifications = $model->sendNotifications;
 
                     // delete all projects from this client account
                     if (!$newRecord && $user->role == User::ROLE_CLIENT && $model->clientId != $user->client_id)
