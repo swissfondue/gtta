@@ -1722,11 +1722,12 @@ class ReportController extends Controller
                 $this->textFont
             );
 
+            $section->writeText("\n");
             $section->writeBookmark(
                 'degree',
-                $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Degree of Fulfillment') . "\n",
+                $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Degree of Fulfillment'),
                 $this->h3Font,
-                $this->noPar
+                $this->h3Par
             );
 
             if ($template->localizedDegreeIntro)
@@ -1747,9 +1748,9 @@ class ReportController extends Controller
 
             $section->writeBookmark(
                 'risk_matrix',
-                $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Risk Matrix') . "\n",
+                $sectionNumber . '.' . $subsectionNumber . '. ' . Yii::t('app', 'Risk Matrix'),
                 $this->h3Font,
-                $this->noPar
+                $this->h3Par
             );
 
             $riskMatrixModel = new RiskMatrixForm();
