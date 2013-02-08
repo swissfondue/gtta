@@ -308,8 +308,6 @@ div.check-form {
 table.check-form > tbody > tr > th {
     width:140px;
     text-align:right;
-    word-break:break-all;
-    word-wrap:break-word;
 }
 
 table.check-form > tbody > tr > td {
