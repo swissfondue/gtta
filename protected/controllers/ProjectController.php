@@ -373,6 +373,15 @@ class ProjectController extends Controller
 
                 $project->save();
 
+                if ($newRecord)
+                {
+                    $projectUser = new ProjectUser();
+                    $projectUser->user_id = Yii::app()->user->id;
+                    $projectUser->project_id = $project->id;
+                    $projectUser->admin = true;
+                    $projectUser->save();
+                }
+
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Project saved.'));
 
                 $project->refresh();
