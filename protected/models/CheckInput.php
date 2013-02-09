@@ -116,13 +116,13 @@ class CheckInput extends CActiveRecord
             $extPos = strpos($check->script, '.pl');
 
         if ($extPos === false)
-            return 'no ext ' . $check->script;
+            return '';
 
         $scriptName = substr($check->script, 0, $extPos);
         $fileName = preg_replace('/[^a-zA-Z0-9]/', '_', $this->name) . '.txt';
         $filePath = Yii::app()->params['automation']['scriptsPath'] . '/' . $scriptName . '_files/' . $fileName;
 
-        $content = 'file not exists or size is null: ' . $filePath;
+        $content = '';
 
         if (file_exists($filePath) && filesize($filePath))
         {
