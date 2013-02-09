@@ -280,8 +280,18 @@ class AutomationCommand extends ConsoleCommand
                 $input->file = $this->_generateFileName();
                 $input->save();
 
+                $value = '';
+
+                if ($input->input->type == CheckInput::TYPE_FILE)
+                {
+                    if ($input->value)
+                        $value = $input->input->getFileData();
+                }
+                else
+                    $value = $input->value;
+
                 $inputFile = fopen($tempPath . '/' . $input->file, 'w');
-                fwrite($inputFile, $input->value . "\n");
+                fwrite($inputFile, $value . "\n");
                 fclose($inputFile);
 
                 $inputFiles[] = $input->file;

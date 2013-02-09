@@ -36,13 +36,6 @@
                             <input type="text" class="input-xlarge" id="CheckInputEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_description" name="CheckInputEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][description]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['description']) : ''; ?>">
                         </div>
                     </div>
-
-                    <div class="control-group">
-                        <label class="control-label" for="CheckInputEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_value"><?php echo Yii::t('app', 'Value'); ?></label>
-                        <div class="controls">
-                            <textarea class="wysiwyg" id="CheckInputEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_value" name="CheckInputEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][value]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['value']) : ''; ?></textarea>
-                        </div>
-                    </div>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -50,7 +43,7 @@
         <div>
             <hr>
         </div>
-        
+
         <div class="control-group <?php if ($model->getError('type')) echo 'error'; ?>">
             <label class="control-label" for="CheckInputEditForm_type"><?php echo Yii::t('app', 'Type'); ?></label>
             <div class="controls">
@@ -62,6 +55,13 @@
                 <?php if ($model->getError('type')): ?>
                     <p class="help-block"><?php echo $model->getError('type'); ?></p>
                 <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="CheckInputEditForm_value"><?php echo Yii::t('app', 'Value'); ?></label>
+            <div class="controls">
+                <textarea class="wysiwyg" id="CheckInputEditForm_value" name="CheckInputEditForm[value]"><?php echo isset($model->value) ? CHtml::encode($model->value) : ''; ?></textarea>
             </div>
         </div>
 

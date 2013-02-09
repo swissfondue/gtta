@@ -317,6 +317,10 @@ return array(
         'tmpPath'            => '/tmp',
         'timeZone'           => GTTA_PRODUCTION ? 'Europe/Zurich' : 'Europe/Moscow',
         'collapseCheckCount' => 20,
+
+        'automation' => array(
+            'scriptsPath' => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../../scripts',
+        ),
     ),
 
     // default controller name

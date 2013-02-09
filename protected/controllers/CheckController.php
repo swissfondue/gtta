@@ -287,7 +287,15 @@ class CheckController extends Controller
             }
 
             $id       = $model->id;
-            $category = CheckCategory::model()->findByPk($id);
+            $category = CheckCategory::model()->with(array(
+                'controls' => array(
+                    'with' => array(
+                        'checks' => array(
+                            'with' => 'inputs'
+                        )
+                    )
+                )
+            ))->findByPk($id);
 
             if ($category === null)
                 throw new CHttpException(404, Yii::t('app', 'Category not found.'));
@@ -295,6 +303,13 @@ class CheckController extends Controller
             switch ($model->operation)
             {
                 case 'delete':
+                    foreach ($category->controls as $control)
+                        foreach ($control->checks as $check)
+                            if ($check->automated)
+                                foreach ($check->inputs as $input)
+                                    if ($input->type == CheckInput::TYPE_FILE)
+                                        $input->deleteFile();
+
                     $category->delete();
                     break;
 
@@ -499,7 +514,11 @@ class CheckController extends Controller
             }
 
             $id      = $model->id;
-            $control = CheckControl::model()->findByPk($id);
+            $control = CheckControl::model()->with(array(
+                'checks' => array(
+                    'with' => 'inputs'
+                )
+            ))->findByPk($id);
 
             if ($control === null)
                 throw new CHttpException(404, Yii::t('app', 'Control not found.'));
@@ -507,6 +526,12 @@ class CheckController extends Controller
             switch ($model->operation)
             {
                 case 'delete':
+                    foreach ($control->checks as $check)
+                        if ($check->automated)
+                            foreach ($check->inputs as $input)
+                                if ($input->type == CheckInput::TYPE_FILE)
+                                    $input->deleteFile();
+
                     $control->delete();
                     break;
 
@@ -950,6 +975,11 @@ class CheckController extends Controller
             switch ($model->operation)
             {
                 case 'delete':
+                    if ($check->automated)
+                        foreach ($check->inputs as $input)
+                            if ($input->type == CheckInput::TYPE_FILE)
+                                $input->deleteFile();
+
                     $check->delete();
                     TargetCheckCategory::updateAllStats();
                     break;
@@ -1786,6 +1816,7 @@ class CheckController extends Controller
                 CheckInput::TYPE_TEXTAREA => Yii::t('app', 'Textarea'),
                 CheckInput::TYPE_CHECKBOX => Yii::t('app', 'Checkbox'),
                 CheckInput::TYPE_RADIO    => Yii::t('app', 'Radio'),
+                CheckInput::TYPE_FILE     => Yii::t('app', 'File'),
             )
         ));
 	}
@@ -1882,6 +1913,9 @@ class CheckController extends Controller
             $model->sortOrder   = $input->sort_order;
             $model->type        = $input->type;
 
+            if ($input->type == CheckInput::TYPE_FILE)
+                $model->value = $input->getfileData();
+
             $checkInputL10n = CheckInputL10n::model()->findAllByAttributes(array(
                 'check_input_id' => $input->id
             ));
@@ -1890,7 +1924,6 @@ class CheckController extends Controller
             {
                 $model->localizedItems[$cil->language_id]['name']        = $cil->name;
                 $model->localizedItems[$cil->language_id]['description'] = $cil->description;
-                $model->localizedItems[$cil->language_id]['value']       = $cil->value;
             }
         }
         else
@@ -1912,7 +1945,6 @@ class CheckController extends Controller
 			$model->attributes = $_POST['CheckInputEditForm'];
             $model->name        = $model->defaultL10n($languages, 'name');
             $model->description = $model->defaultL10n($languages, 'description');
-            $model->value       = $model->defaultL10n($languages, 'value');
 
 			if ($model->validate())
             {
@@ -1922,6 +1954,12 @@ class CheckController extends Controller
                 $input->value       = $model->value;
                 $input->sort_order  = $model->sortOrder;
                 $input->type        = $model->type;
+
+                if ($input->type == CheckInput::TYPE_FILE)
+                {
+                    $input->setFileData($model->value);
+                    $input->value = '';
+                }
 
                 $input->save();
 
@@ -1945,12 +1983,8 @@ class CheckController extends Controller
                     if ($value['description'] == '')
                         $value['description'] = null;
 
-                    if ($value['value'] == '')
-                        $value['value'] = null;
-
                     $checkInputL10n->name        = $value['name'];
                     $checkInputL10n->description = $value['description'];
-                    $checkInputL10n->value       = $value['value'];
                     $checkInputL10n->save();
                 }
 
@@ -1990,6 +2024,7 @@ class CheckController extends Controller
                 CheckInput::TYPE_TEXTAREA => Yii::t('app', 'Textarea'),
                 CheckInput::TYPE_CHECKBOX => Yii::t('app', 'Checkbox'),
                 CheckInput::TYPE_RADIO    => Yii::t('app', 'Radio'),
+                CheckInput::TYPE_FILE     => Yii::t('app', 'File'),
             )
         ));
 	}
@@ -2028,6 +2063,9 @@ class CheckController extends Controller
             switch ($model->operation)
             {
                 case 'delete':
+                    if ($input->type == CheckInput::TYPE_FILE)
+                        $input->deleteFile();
+
                     $input->delete();
                     break;
 

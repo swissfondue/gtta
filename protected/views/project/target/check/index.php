@@ -280,8 +280,8 @@
                                                                     break;
                                                                 }
 
-                                                        if ($value == NULL && $input->localizedValue != NULL)
-                                                            $value = $input->localizedValue;
+                                                        if ($value == NULL && $input->value != NULL)
+                                                            $value = $input->value;
 
                                                         if ($value != NULL)
                                                             $value = CHtml::encode($value);
@@ -299,8 +299,8 @@
                                                                     break;
                                                                 }
 
-                                                        if ($value == NULL && $input->localizedValue != NULL)
-                                                            $value = $input->localizedValue;
+                                                        if ($value == NULL && $input->value != NULL)
+                                                            $value = $input->value;
 
                                                         if ($value != NULL)
                                                             $value = CHtml::encode($value);
@@ -344,6 +344,19 @@
                                                             </li>
                                                         <?php endforeach; ?>
                                                     </ul>
+                                                <?php elseif ($input->type == CheckInput::TYPE_FILE): ?>
+                                                    <?php
+                                                        $value = '';
+
+                                                        if ($check->targetCheckInputs)
+                                                            foreach ($check->targetCheckInputs as $inputValue)
+                                                                if ($inputValue->check_input_id == $input->id)
+                                                                {
+                                                                    $value = $inputValue->value;
+                                                                    break;
+                                                                }
+                                                    ?>
+                                                    <input type="checkbox" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?> value="1"<?php if ($value) echo ' checked'; ?>>
                                                 <?php endif; ?>
 
                                                 <?php if ($input->localizedDescription): ?>

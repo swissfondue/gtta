@@ -8,7 +8,6 @@
  * @property integer $language_id
  * @property string $name
  * @property string $description
- * @property string $value
  */
 class CheckInputL10n extends CActiveRecord
 {   
@@ -39,7 +38,7 @@ class CheckInputL10n extends CActiveRecord
             array( 'check_input_id, language_id', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
             array( 'check_input_id, language_id', 'numerical', 'integerOnly' => true ),
-            array( 'description, value', 'safe' ),
+            array( 'description', 'safe' ),
 		);
 	}
 

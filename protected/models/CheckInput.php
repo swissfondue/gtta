@@ -18,10 +18,11 @@ class CheckInput extends CActiveRecord
     /**
      * Input types.
      */
-    const TYPE_TEXT     = 'text';
-    const TYPE_TEXTAREA = 'textarea';
-    const TYPE_CHECKBOX = 'checkbox';
-    const TYPE_RADIO    = 'radio';
+    const TYPE_TEXT     = 0;
+    const TYPE_TEXTAREA = 1;
+    const TYPE_CHECKBOX = 2;
+    const TYPE_RADIO    = 3;
+    const TYPE_FILE     = 4;
 
     /**
      * @var integer max sort order.
@@ -55,7 +56,13 @@ class CheckInput extends CActiveRecord
             array( 'check_id, name', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
             array( 'sort_order', 'numerical', 'integerOnly' => true, 'min' => 0 ),
-            array( 'type', 'in', 'range' => array( self::TYPE_TEXT, self::TYPE_TEXTAREA, self::TYPE_CHECKBOX, self::TYPE_RADIO ) ),
+            array( 'type', 'in', 'range' => array(
+                self::TYPE_TEXT,
+                self::TYPE_TEXTAREA,
+                self::TYPE_CHECKBOX,
+                self::TYPE_RADIO,
+                self::TYPE_FILE
+            )),
             array( 'description, value', 'safe' ),
 		);
 	}
@@ -94,13 +101,92 @@ class CheckInput extends CActiveRecord
     }
 
     /**
-     * @return string localized value.
+     * Get file data
+     * @return string
      */
-    public function getLocalizedValue()
+    public function getFileData()
     {
-        if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->value != null ? $this->l10n[0]->value : $this->value;
+        if ($this->type != self::TYPE_FILE)
+            throw new Exception('Invalid check input type');
 
-        return $this->value;
+        $check = Check::model()->findByPk($this->check_id);
+        $extPos = strpos($check->script, '.py');
+
+        if ($extPos === false)
+            $extPos = strpos($check->script, '.pl');
+
+        if ($extPos === false)
+            return 'no ext ' . $check->script;
+
+        $scriptName = substr($check->script, 0, $extPos);
+        $fileName = preg_replace('/[^a-zA-Z0-9]/', '_', $this->name) . '.txt';
+        $filePath = Yii::app()->params['automation']['scriptsPath'] . '/' . $scriptName . '_files/' . $fileName;
+
+        $content = 'file not exists or size is null: ' . $filePath;
+
+        if (file_exists($filePath) && filesize($filePath))
+        {
+            $fp = fopen($filePath, 'r');
+            $content = fread($fp, filesize($filePath));
+            fclose($fp);
+        }
+
+        return $content;
+    }
+
+    /**
+     * Set file data
+     * @param $data string
+     */
+    public function setFileData($data)
+    {
+        if ($this->type != self::TYPE_FILE)
+            throw new Exception('Invalid check input type');
+
+        $check = Check::model()->findByPk($this->check_id);
+        $extPos = strpos($check->script, '.py');
+
+        if ($extPos === false)
+            $extPos = strpos($check->script, '.pl');
+
+        if ($extPos === false)
+            return;
+
+        $scriptName = substr($check->script, 0, $extPos);
+        $fileName = preg_replace('/[^a-zA-Z0-9]/', '_', $this->name) . '.txt';
+        $scriptDir = Yii::app()->params['automation']['scriptsPath'] . '/' . $scriptName . '_files';
+        $filePath =  $scriptDir . '/' . $fileName;
+
+        if (!is_dir($scriptDir))
+            @mkdir($scriptDir, 0777, true);
+
+        $fp = fopen($filePath, 'w');
+        fwrite($fp, $data);
+        fclose($fp);
+    }
+
+    /**
+     * Delete file
+     */
+    public function deleteFile()
+    {
+        if ($this->type != self::TYPE_FILE)
+            throw new Exception('Invalid check input type');
+
+        $check = Check::model()->findByPk($this->check_id);
+        $extPos = strpos($check->script, '.py');
+
+        if ($extPos === false)
+            $extPos = strpos($check->script, '.pl');
+
+        if ($extPos === false)
+            return;
+
+        $scriptName = substr($check->script, 0, $extPos);
+        $fileName = preg_replace('/[^a-zA-Z0-9]/', '_', $this->name) . '.txt';
+        $filePath = Yii::app()->params['automation']['scriptsPath'] . '/' . $scriptName . '_files/' . $fileName;
+
+        if (file_exists($filePath))
+            @unlink($filePath);
     }
 }

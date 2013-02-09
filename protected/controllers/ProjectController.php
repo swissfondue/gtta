@@ -1935,7 +1935,7 @@ class ProjectController extends Controller
                         foreach ($inputs as $input)
                             $inputValues[] = array(
                                 'id'    => 'TargetCheckEditForm_' . $check->id . '_inputs_' . $input->id,
-                                'value' => $input->localizedValue
+                                'value' => $input->value
                             );
                     }
 
