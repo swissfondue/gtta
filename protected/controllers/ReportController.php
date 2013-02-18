@@ -218,7 +218,7 @@ class ReportController extends Controller
                     $list = new PHPRtfLite_List_Enumeration($this->rtf, PHPRtfLite_List_Enumeration::TYPE_CIRCLE);
 
                     foreach ($this->project['targets'] as $target)
-                        $list->addItem($target->host);
+                        $list->addItem($target->host, $this->textFont, $this->noPar);
 
                     $container->writeRtfCode('\par ');
                     $container->addList($list);
@@ -462,10 +462,13 @@ class ReportController extends Controller
         if ($substitute && $this->_renderTables('{target.list}', $container, $text, $substitute))
             return;
 
-        if ($substitute && $this->_renderTables('{target.c.list}', $container, $text, $substitute))
+        if ($substitute && $this->_renderTables('{target.stats}', $container, $text, $substitute))
             return;
 
-        if ($substitute && $this->_renderTables('{vuln.5.list}', $container, $text, $substitute))
+        if ($substitute && $this->_renderTables('{target.weakest}', $container, $text, $substitute))
+            return;
+
+        if ($substitute && $this->_renderTables('{vuln.list}', $container, $text, $substitute))
             return;
 
         if ($this->_renderLists($container, $text, $substitute))
