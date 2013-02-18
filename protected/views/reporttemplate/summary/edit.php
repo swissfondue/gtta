@@ -147,7 +147,15 @@
                             </tr>
                             <tr>
                                 <th>
-                                    {target.c.list}
+                                    {target.stats}
+                                </th>
+                                <td>
+                                    <?php echo Yii::t('app', 'List of targets with statistics'); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    {target.weakest}
                                 </th>
                                 <td>
                                     <?php echo Yii::t('app', 'List of targets with a name of the weakest control'); ?>
@@ -155,7 +163,7 @@
                             </tr>
                             <tr>
                                 <th>
-                                    {vuln.5.list}
+                                    {vuln.list}
                                 </th>
                                 <td>
                                     <?php echo Yii::t('app', 'List of top 5 most dangerous vulnerabilities'); ?>

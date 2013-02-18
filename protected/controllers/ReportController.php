@@ -215,6 +215,18 @@ class ReportController extends Controller
             switch ($table)
             {
                 case '{target.list}':
+                    $list = new PHPRtfLite_List_Enumeration($this->rtf, PHPRtfLite_List_Enumeration::TYPE_CIRCLE);
+
+                    foreach ($this->project['targets'] as $target)
+                        $list->addItem($target->host);
+
+                    $container->writeRtfCode('\par ');
+                    $container->addList($list);
+                    $container->writeRtfCode('\par ');
+
+                    break;
+
+                case '{target.stats}':
                     $table = $container->addTable(PHPRtfLite_Table::ALIGN_LEFT);
                     $table->addRows(count($this->project['targets']) + 1);
                     $table->addColumnsList(array( $this->docWidth * 0.4, $this->docWidth * 0.2, $this->docWidth * 0.2, $this->docWidth * 0.2 ));
@@ -273,7 +285,7 @@ class ReportController extends Controller
 
                     break;
 
-                case '{target.c.list}':
+                case '{target.weakest}':
                     $table = $container->addTable(PHPRtfLite_Table::ALIGN_LEFT);
                     $table->addRows(count($this->project['targets']) + 1);
                     $table->addColumnsList(array( $this->docWidth * 0.4, $this->docWidth * 0.4, $this->docWidth * 0.2 ));
@@ -320,7 +332,7 @@ class ReportController extends Controller
 
                     break;
 
-                case '{vuln.5.list}':
+                case '{vuln.list}':
                     $table = $container->addTable(PHPRtfLite_Table::ALIGN_LEFT);
                     $rowCount = count($this->project['reducedChecks']) > 5 ? 6 : count($this->project['reducedChecks']) + 1;
                     $table->addRows($rowCount);
