@@ -273,7 +273,7 @@ class ReportController extends Controller
                         $table->getCell($row, 2)->writeText($target->infoCount, $this->textFont);
 
                         $table->getCell($row, 3)->writeText(
-                            ($target->checkCount ? sprintf('%.2f%%', $target->finishedCount / $target->checkCount) : '0.00%') .
+                            ($target->checkCount ? sprintf('%.2f%%', $target->finishedCount / $target->checkCount * 100) : '0.00%') .
                             ' / ' . $target->finishedCount,
                             $this->textFont
                         );
