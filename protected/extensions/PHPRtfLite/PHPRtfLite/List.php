@@ -250,9 +250,10 @@ abstract class PHPRtfLite_List
             $item->render();
 
             if (false == ($item instanceof PHPRtfLite_List)) {
-                $stream->write('\par\pard' . "\r\n");
+                $stream->write('\par ');
             }
         }
+        $stream->write('\pard ');
     }
 
 }
