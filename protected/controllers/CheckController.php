@@ -417,6 +417,12 @@ class CheckController extends Controller
                 $control->name              = $model->name;
                 $control->save();
 
+                if ($newRecord)
+                {
+                    $control->sort_order = $control->id;
+                    $control->save();
+                }
+
                 if (!$newRecord)
                     TargetCheckCategory::updateAllStats();
 
@@ -546,7 +552,7 @@ class CheckController extends Controller
 
                     $nearestControl = CheckControl::model()->find($criteria);
 
-                    if (!$nearestControl || !$nearestControl->nearest_sort_order)
+                    if (!$nearestControl || $nearestControl->nearest_sort_order === null)
                         throw new CHttpException(403, Yii::t('app', 'Control is already first on the list.'));
 
                     $criteria = new CDbCriteria();
@@ -577,7 +583,7 @@ class CheckController extends Controller
 
                     $nearestControl = CheckControl::model()->find($criteria);
 
-                    if (!$nearestControl || !$nearestControl->nearest_sort_order)
+                    if (!$nearestControl || $nearestControl->nearest_sort_order === null)
                         throw new CHttpException(403, Yii::t('app', 'Control is already last on the list.'));
 
                     $criteria = new CDbCriteria();
@@ -836,6 +842,12 @@ class CheckController extends Controller
 
                 $check->save();
 
+                if ($newRecord)
+                {
+                    $check->sort_order = $check->id;
+                    $check->save();
+                }
+
                 if (!$newRecord)
                     TargetCheckCategory::updateAllStats();
 
@@ -995,7 +1007,7 @@ class CheckController extends Controller
 
                     $nearestCheck = Check::model()->find($criteria);
 
-                    if (!$nearestCheck || !$nearestCheck->nearest_sort_order)
+                    if (!$nearestCheck || $nearestCheck->nearest_sort_order === null)
                         throw new CHttpException(403, Yii::t('app', 'Check is already first on the list.'));
 
                     $criteria = new CDbCriteria();
@@ -1026,7 +1038,7 @@ class CheckController extends Controller
 
                     $nearestCheck = Check::model()->find($criteria);
 
-                    if (!$nearestCheck || !$nearestCheck->nearest_sort_order)
+                    if (!$nearestCheck || $nearestCheck->nearest_sort_order === null)
                         throw new CHttpException(403, Yii::t('app', 'Check is already first on the list.'));
 
                     $criteria = new CDbCriteria();
