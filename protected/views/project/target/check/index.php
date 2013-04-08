@@ -272,8 +272,8 @@
                                                     <?php
                                                         $value = '';
 
-                                                        if ($check->targetCheckInputs)
-                                                            foreach ($check->targetCheckInputs as $inputValue)
+                                                        if ($input->targetInputs)
+                                                            foreach ($input->targetInputs as $inputValue)
                                                                 if ($inputValue->check_input_id == $input->id)
                                                                 {
                                                                     $value = $inputValue->value;
@@ -291,8 +291,8 @@
                                                     <?php
                                                         $value = '';
 
-                                                        if ($check->targetCheckInputs)
-                                                            foreach ($check->targetCheckInputs as $inputValue)
+                                                        if ($input->targetInputs)
+                                                            foreach ($input->targetInputs as $inputValue)
                                                                 if ($inputValue->check_input_id == $input->id)
                                                                 {
                                                                     $value = $inputValue->value;
@@ -310,8 +310,8 @@
                                                     <?php
                                                         $value = '';
 
-                                                        if ($check->targetCheckInputs)
-                                                            foreach ($check->targetCheckInputs as $inputValue)
+                                                        if ($input->targetInputs)
+                                                            foreach ($input->targetInputs as $inputValue)
                                                                 if ($inputValue->check_input_id == $input->id)
                                                                 {
                                                                     $value = $inputValue->value;
@@ -323,8 +323,8 @@
                                                     <?php
                                                         $value = '';
 
-                                                        if ($check->targetCheckInputs)
-                                                            foreach ($check->targetCheckInputs as $inputValue)
+                                                        if ($input->targetInputs)
+                                                            foreach ($input->targetInputs as $inputValue)
                                                                 if ($inputValue->check_input_id == $input->id)
                                                                 {
                                                                     $value = $inputValue->value;
@@ -348,8 +348,8 @@
                                                     <?php
                                                         $value = '';
 
-                                                        if ($check->targetCheckInputs)
-                                                            foreach ($check->targetCheckInputs as $inputValue)
+                                                        if ($input->targetInputs)
+                                                            foreach ($input->targetInputs as $inputValue)
                                                                 if ($inputValue->check_input_id == $input->id)
                                                                 {
                                                                     $value = $inputValue->value;

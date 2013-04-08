@@ -73,8 +73,9 @@ class CheckInput extends CActiveRecord
 	public function relations()
 	{
 		return array(
-            'l10n'  => array( self::HAS_MANY,   'CheckInputL10n', 'check_input_id' ),
-            'check' => array( self::BELONGS_TO, 'Check',          'check_id' ),
+            'l10n'         => array( self::HAS_MANY,   'CheckInputL10n',   'check_input_id' ),
+            'check'        => array( self::BELONGS_TO, 'Check',            'check_id' ),
+            'targetInputs' => array( self::HAS_MANY,   'TargetCheckInput', 'check_input_id' ),
 		);
 	}
 

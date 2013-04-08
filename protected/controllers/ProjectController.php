@@ -984,12 +984,6 @@ class ProjectController extends Controller
                 'on'       => 'tcs.target_id = :target_id',
                 'params'   => array( 'target_id' => $target->id )
             ),
-            'targetCheckInputs' => array(
-                'alias'    => 'tis',
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'tis.target_id = :target_id',
-                'params'   => array( 'target_id' => $target->id )
-            ),
             'targetCheckSolutions' => array(
                 'alias'    => 'tss',
                 'joinType' => 'LEFT JOIN',
@@ -1005,6 +999,12 @@ class ProjectController extends Controller
             'inputs' => array(
                 'joinType' => 'LEFT JOIN',
                 'with'     => array(
+                    'targetInputs' => array(
+                        'alias'    => 'tis',
+                        'joinType' => 'LEFT JOIN',
+                        'on'       => 'tis.target_id = :target_id',
+                        'params'   => array( 'target_id' => $target->id )
+                    ),
                     'l10n' => array(
                         'alias'    => 'l10n_i',
                         'joinType' => 'LEFT JOIN',
