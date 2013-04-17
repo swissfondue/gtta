@@ -101,6 +101,9 @@
                                         <?php if ($check->automated): ?>
                                             <i class="icon-cog" title="<?php echo Yii::t('app', 'Automated'); ?>"></i>
                                         <?php endif; ?>
+                                        <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
+                                            <a href="<?php echo $this->createUrl('check/editcheck', array( 'id' => $check->control->check_category_id, 'control' => $check->check_control_id, 'check' => $check->id )); ?>"><i class="icon-edit" title="<?php echo Yii::t('app', 'Edit'); ?>"></i></a>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="status">
                                         <?php if ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED): ?>
