@@ -55,7 +55,11 @@
                                     <div class="categories">
                                         <?php if ($target->categories): ?>
                                             <?php foreach ($target->categories as $category): ?>
-                                                <a href="<?php echo $this->createUrl('project/checks', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->id )); ?>"><span class="label label-target-category"><?php echo CHtml::encode($category->localizedName); ?></span></a>
+                                                <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                                    <a href="<?php echo $this->createUrl('project/checks', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->id )); ?>"><span class="label label-target-category"><?php echo CHtml::encode($category->localizedName); ?></span></a>
+                                                <?php else: ?>
+                                                    <span class="label label-target-category"><?php echo CHtml::encode($category->localizedName); ?></span>
+                                                <?php endif; ?>
                                             <?php endforeach; ?>
                                         <?php else: ?>
                                             <?php echo Yii::t('app', 'No categories yet.'); ?>

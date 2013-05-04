@@ -13,7 +13,7 @@ class ProjectController extends Controller
 		return array(
             'https',
 			'checkAuth',
-            'checkUser + target, edittarget, controltarget, uploadattachment, controlattachment, attachment, controlcheck, updatechecks',
+            'checkUser + target, edittarget, controltarget, uploadattachment, controlattachment, attachment, controlcheck, updatechecks, checks',
             'checkAdmin + control, edit, users, adduser, controluser',
             'ajaxOnly + savecheck, controlattachment, controlcheck, updatechecks, controluser',
             'postOnly + savecheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser',
