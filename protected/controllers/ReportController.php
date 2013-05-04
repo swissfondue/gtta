@@ -178,7 +178,7 @@ class ReportController extends Controller
      */
     private function _prepareProjectReportText($text)
     {
-        $text = str_replace(array( "\r", "\n" ), '', $text);
+        $text = str_replace(array("\r", "\n"), ' ', $text);
         $text = strip_tags($text, '<b><i><u><br><ol><ul><li>');
 
         return $text;
