@@ -129,9 +129,7 @@ class ProjectController extends Controller
         }
 
         $paginator = new Paginator($projectCount, $page);
-
         $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), '');
-
         $projectStats = array();
 
         foreach ($projects as $project)

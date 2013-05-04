@@ -30,6 +30,11 @@
                             <th class="name"><?php echo Yii::t('app', 'Project'); ?></th>
                             <th class="stats"><?php echo Yii::t('app', 'Risk Stats'); ?></th>
                             <th class="percent"><?php echo Yii::t('app', 'Completed'); ?></th>
+
+                            <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
+                                <th class="auditors"><?php echo Yii::t('app', 'Auditors'); ?></th>
+                            <?php endif; ?>
+
                             <th class="status"><?php echo Yii::t('app', 'Status'); ?></th>
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                 <th class="actions">&nbsp;</th>
@@ -56,6 +61,46 @@
                                 <td class="percent">
                                     <?php echo $stats[$project->id]['checkCount'] ? sprintf('%.2f', ($stats[$project->id]['finishedCount'] / $stats[$project->id]['checkCount']) * 100) : '0.00'; ?>%
                                 </td>
+
+                                <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
+                                    <td class="auditors">
+                                        <?php
+                                            $projectUsers = $project->project_users;
+                                            $auditors = array();
+
+                                            foreach ($projectUsers as $user) {
+                                                if ($user->user->role != User::ROLE_CLIENT) {
+                                                    $auditors[] = $user;
+                                                }
+                                            }
+                                        ?>
+
+                                        <?php if (count($auditors) > 0): ?>
+                                            <?php foreach ($auditors as $auditor): ?>
+                                                <a href="<?php echo $this->createUrl("user/edit", array("id" => $auditor->user_id)); ?>">
+                                                    <?php if ($auditor->user->name): ?>
+                                                        <?php
+                                                            $name = explode(" ", $auditor->user->name);
+                                                            $shortName = $name[0][0];
+
+                                                            if (count($name) > 1 && $name[1]) {
+                                                                $shortName .= $name[1][0];
+                                                            }
+
+                                                            echo '<span class="label label-' . $auditor->user->role . '">' .
+                                                                CHtml::encode($shortName) . '</span>';
+                                                        ?>
+                                                    <?php else: ?>
+                                                        <span class="label label-<?php echo $auditor->user->role; ?>">??</span>
+                                                    <?php endif; ?>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <?php echo Yii::t("app", "N/A"); ?>
+                                        <?php endif; ?>
+                                    </td>
+                                <?php endif; ?>
+
                                 <td class="status">
                                     <?php
                                         switch ($project->status)

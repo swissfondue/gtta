@@ -82,6 +82,7 @@ hr {
 .control-header .stats,
 .control-header .percent,
 .target-list .percent,
+.project-list .auditors,
 .project-list .stats,
 .project-list .percent {
     width:70px;
@@ -727,4 +728,8 @@ table.table-result th {
 table.table-result td {
     border-top:1px solid #ddd;
     padding:10px 0 10px 0;
+}
+
+.auditors a {
+    text-decoration:none;
 }
