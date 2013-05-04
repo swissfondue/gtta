@@ -31,7 +31,8 @@
 
             <div class="control-group">
                 <div class="controls">
-                    <button type="submit" class="btn"><?php echo Yii::t('app', 'Login'); ?></button>
+                    <button type="submit" class="btn"><?php echo Yii::t('app', 'Login'); ?></button>&nbsp;
+                    <a class="btn" href="<?php echo $this->createUrl("account/restore"); ?>"><?php echo Yii::t("app", "Restore Account"); ?></a>
                 </div>
             </div>
         </fieldset>

@@ -12,6 +12,7 @@
  * @property integer $client_id
  * @property string $last_action_time
  * @property boolean $send_notifications
+ * @property string $password_reset_code
  */
 class User extends CActiveRecord
 {
@@ -47,7 +48,7 @@ class User extends CActiveRecord
 	{
 		return array(
             array( 'email, password, role', 'required' ),
-            array( 'email, password, name', 'length', 'max' => 1000 ),
+            array( 'email, password, name, password_reset_code', 'length', 'max' => 1000 ),
             array( 'role', 'in', 'range' => array( self::ROLE_ADMIN, self::ROLE_USER, self::ROLE_CLIENT ) ),
             array( 'client_id, last_action_time, send_notifications', 'safe' ),
 		);

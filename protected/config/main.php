@@ -43,7 +43,9 @@ return array(
             'rules'          => array(
                 // account
                 '<action:(login|logout)>' => 'app/<action>',
-                'account'                 => 'account/edit',
+                'account' => 'account/edit',
+                'account/restore' => 'account/restore',
+                'account/restore/<code:[a-z\d]+>' => 'account/changepassword',
 
                 // misc
                 'app/l10n.js'     => 'app/l10n',
