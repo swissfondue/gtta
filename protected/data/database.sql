@@ -612,7 +612,7 @@ ALTER SEQUENCE login_history_id_seq OWNED BY login_history.id;
 -- Name: login_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('login_history_id_seq', 46, true);
+SELECT pg_catalog.setval('login_history_id_seq', 48, true);
 
 
 --
@@ -1831,12 +1831,12 @@ COPY checks (id, check_control_id, name, background_info, hints, advanced, autom
 47	12	CMS check			f	t	cms_detection.py	f	http	80		1			2	47
 48	10	yay			f	f		f		\N		1			2	48
 49	13	hh			f	f		f		\N		1			2	49
-46	10	Scan Somethingh	<b>Background Info:</b><br>The http-server headers often leak information about servertype and versions. In our check we request the server via http 1.0 with and without host-header to check for misconfigured vhosts and via a usual http 1.1-request. Having the servertype and version an attacker can start investigating if there are known exploits for that specific version. This helps the attacker to prepare all targeted attacks. We will look specifically for the following tags:<br><br><ul><li>Server: A name for the server including sometimes the version.</li><li>Via: Informs the client of proxies through which the response was sent.</li><li>X-Powered-By: specifies the technology (e.g. ASP.NET, PHP, JBoss) supporting the web application (version details are often in X-Runtime, X-Version, or X-AspNet-Version)</li></ul>	<span>HELO MYDOMAIN<br></span><ol><li>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;</li><li>RCPT TO :&lt;InternalName2@domain.ch&gt;</li></ol><span>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br></span><ul><li>\r\nFROM: InternalName1</li><li>TO: InternalName2</li></ul><span><span>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br></span></span><ul><li>\r\nInfoguard AG</li></ul>	f	t	w3af_get_mails.py	t		\N	<span>HELO MYDOMAIN<br></span><ul><li>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;</li><li>RCPT TO :&lt;InternalName2@domain.ch&gt;</li></ul><span>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br></span><ol><li>\r\nFROM: InternalName1</li><li>TO: InternalName2</li></ol><span><span>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	1			2	46
 3	1	DNS AFXR	hey <b>fuck \\' sss</b><br><b>How are you?<br></b>sd<br><b></b>1. this is some kind of list<br>2. lololo upup up<br>sdfa<br>asdf<br>asdf<br>sdd<br>sdf<br>sdf	jjj<br>what the fuck did you do?	f	t	dns_afxr.pl	f		\N	No more no more	1			2	7
 50	1	DNS TEST	test		f	f		f		\N		1			2	50
 45	1	DNS A (Non-Recursive)			f	t	dns_a_nr.py	f		\N		1			2	3
 1	1	DNS A	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.		f	t	dns_a.py	f		\N		1			2	0
 6	1	DNS Hosting	hello		f	t	dns_hosting.py	f		\N		1			2	9
+46	10	Scan Somethingh	<b>Background Info:</b><br>The http-server headers often leak information about servertype and versions. In our check we request the server via http 1.0 with and without host-header to check for misconfigured vhosts and via a usual http 1.1-request. Having the servertype and version an attacker can start investigating if there are known exploits for that specific version. This helps the attacker to prepare all targeted attacks. We will look specifically for the following tags:<br><br><ul><li>Server: A name for the server including sometimes the version.</li><li>Via: Informs the client of proxies through which the response was sent.</li><li>X-Powered-By: specifies the technology (e.g. ASP.NET, PHP, JBoss) supporting the web application (version details are often in X-Runtime, X-Version, or X-AspNet-Version)</li></ul>	<span>HELO MYDOMAIN<br></span><ol><li>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;</li><li>RCPT TO :&lt;InternalName2@domain.ch&gt;</li></ol><span>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br></span><ul><li>\r\nFROM: InternalName1</li><li>TO: InternalName2</li></ul><span><span>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br></span></span><ul><li>\r\nInfoguard AG</li></ul>	f	t	test.py	t		\N	<span>HELO MYDOMAIN<br></span><ul><li>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;</li><li>RCPT TO :&lt;InternalName2@domain.ch&gt;</li></ul><span>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br></span><ol><li>\r\nFROM: InternalName1</li><li>TO: InternalName2</li></ol><span><span>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	1			2	46
 \.
 
 
@@ -2022,6 +2022,8 @@ COPY login_history (id, user_id, user_name, create_time) FROM stdin;
 44	1	Oliver Muenchow	2013-05-05 02:32:43.503971
 45	1	Oliver Muenchow	2013-05-05 02:39:20.934522
 46	1	Oliver Muenchow	2013-05-05 02:43:44.088959
+47	1	Oliver Muenchow	2013-05-05 13:02:39.753248
+48	1	Oliver Muenchow	2013-05-05 15:14:46.241212
 \.
 
 
@@ -2240,72 +2242,31 @@ COPY risk_templates_l10n (risk_template_id, language_id, name) FROM stdin;
 --
 
 COPY sessions (id, expire, data) FROM stdin;
-39k2en1t3gqo7udh2jlgpk5tr6      	1367709311	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-vct1tpc9k9mkhu3ajosh3jeir6      	1367707455	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-7mil5cjt9ja5rf90iu7dhg3me1      	1367707472	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-afflc04eiiqe1aen9gian99i54      	1367710271	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-k71stg07lqs364gmo1p0umm3l6      	1367707580	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-ikoobm2ol40difhs5sadcl3i55      	1367710307	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-utmsa2u8of3k6hqpscg3crf2o5      	1367710359	CJsD3bCC_iSfctRmc2sXxiqY2IF5VnZeA_2p7tCx6hyqLsXvIB5P_omM7ruKd2KaSiIkczKCooN3HC7LXTW93MDayQkTbXqa-QvuePT3cGlMonPNCC4GX4eVCg0x33kqYWZu_1cE80aGSBWRM-J47NtLbddp-TANOtP_3szSVouN6Vs_c6jmSOSjKqKMo1ve
-4fla3bk46630hrb1lq81of9fg5      	1367707697	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-klue333t8r4huc14nr5p6435t0      	1367710364	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-809aucm940ev20na153pc02dp1      	1367710595	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-jfmldo9v2lnok6mk1ckhiab286      	1367710630	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-b787b7eilnqnp8edd6i6p4v014      	1367710695	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-9o5vo6u91bdllrvaf91ccutvj5      	1367709088	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-qgn690tso1qduj0fp5forlblo1      	1367710764	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-1kii3lmjjbmnsj4lmnlb73at46      	1367710806	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-m68uqu5l80nhf6bmo3mf3bbdr0      	1367710879	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-rtr93ihtpprvs3fuqrcf2o3rj5      	1367711005	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-die4ol1turbdn8mbmd50p642t2      	1367711024	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-a450363h4d3477rsc4s2eh1a70      	1367707462	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-qlvgk7k56l7smsa5rt4jisdht4      	1367707477	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-t70kfvtdae057nrvu4gj08h5p7      	1367707592	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-n7neiji8bgirc21kd48u48jp53      	1367707702	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-eib5tg9e5d13sbac442frc06p4      	1367709157	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-cdgcr6e7370gb666onrd1tcc54      	1367709652	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-rqn0lll1o0ica6bp868hboacb3      	1367710294	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-ceis34a5uo5u0ju0ujh16dsjd7      	1367710318	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-l9u8sudf0q02uvuroul8fqq3f1      	1367710811	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-bccljabigojfonqvias6aq4ic4      	1367710880	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-ln10lab55q2pgcffug9cdo7r82      	1367711008	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-vojkd637uvv9l8u3obori1sph4      	1367710607	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-sledd5sbjk186252ibchib54g2      	1367711027	CJsD3bCC_iSfctRmc2sXxiqY2IF5VnZeA_2p7tCx6hyqLsXvIB5P_omM7ruKd2KaSiIkczKCooN3HC7LXTW93MDayQkTbXqa-QvuePT3cGlMonPNCC4GX4eVCg0x33kqYWZu_1cE80aGSBWRM-J47NtLbddp-TANOtP_3szSVouN6Vs_c6jmSOSjKqKMo1ve
-408fo3l533db1ndtcnctm8qq97      	1367710635	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-str1lrkiqul20svvhpanpubup5      	1367710756	CJsD3bCC_iSfctRmc2sXxiqY2IF5VnZeA_2p7tCx6hyqLsXvIB5P_omM7ruKd2KaSiIkczKCooN3HC7LXTW93MDayQkTbXqa-QvuePT3cGlMonPNCC4GX4eVCg0x33kqYWZu_1cE80aGSBWRM-J47NtLbddp-TANOtP_3szSVouN6Vs_c6jmSOSjKqKMo1ve
-i4omeholn1igu71lgk26pkgn36      	1367710756	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-bfu750uqu5hgh8kpimte8r4lu1      	1367710772	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-57oei84sgg12023si5tk7q81u0      	1367707467	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-0p0m2j588rn39tlcoqcoqgb1h6      	1367707569	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-rgi2u9h9girvvoingq16sgbhn5      	1367707647	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-brof5dfm839pgpss428rcm8ms0      	1367708700	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-dddk8c57l2iegpq5mc3rjj7647      	1367709216	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-5k9895sagdctmc4gh91ig8gup2      	1367709688	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-2n3s148btmdsrg8fo3i4dre2j5      	1367710295	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-aq1615u19j5utb68bmfm3i37v1      	1367710359	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-l6qrotv3alvdt768031i6031l3      	1367710368	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-o412g52pkkdd73st566ur7e697      	1367710613	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-gmjieeobnjahapa4eqgfd07vc7      	1367710678	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-f69j6446uld6vdhajl7qgu4nu3      	1367711015	CJsD3bCC_iSfctRmc2sXxiqY2IF5VnZeA_2p7tCx6hyqLsXvIB5P_omM7ruKd2KaSiIkczKCooN3HC7LXTW93MDayQkTbXqa-QvuePT3cGlMonPNCC4GX4eVCg0x33kqYWZu_1cE80aGSBWRM-J47NtLbddp-TANOtP_3szSVouN6Vs_c6jmSOSjKqKMo1ve
-jc5cm51svf89ti81h6ov56bfo6      	1367711015	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-bsk109hgnshidergc7cs4ett33      	1367711027	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-2lgmk9sm4slku92bijjs901lc4      	1367710819	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-a1vlub6ad7gp19lsfnkbk54nq7      	1367710883	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-h86a6l5nfadlfu3n213lfoj3e7      	1367710375	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-vl2odk602hupti8jmtnn14jnk7      	1367710617	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-5oblt6hb5stt3a8du14ph0ik97      	1367710686	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-qcqvm3s5fetck8kod1mucl4aq6      	1367710761	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-tdgf845cktfjp0o2k4vs23aj25      	1367710804	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-e5sv47keu0jr01epdcpv73er57      	1367710877	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-bm7r08uu7pp0ba8n5rivmlpvb0      	1367707432	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-314ikmvh99ofn6k1tutrvujmq5      	1367707470	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-i1a43q45no53m6hqhuc2qnvgj4      	1367707574	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-48e1i0o0isngn7ll0jismni1h6      	1367707666	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-393i636r1jsabf7gg1lvtb2bu3      	1367708709	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-urcmnmhqosl08ifam2vc0lmfe0      	1367709271	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-ea3rr3foa4umklgj14hpumcek2      	1367709692	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-94uiv3d2jkmklbh7qc3vbou262      	1367710297	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-5dqkluuja8acerotojcra2tcg3      	1367710890	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+k66ggbpoi9batdih8ktk4g7la4      	1367759710	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+gfo39ingvm1amsg1kat90e04s3      	1367757731	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+64nss2d1evfdaaqrobpkrute41      	1367759482	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+1llk0tjmgaas4r8p936pd402i2      	1367759721	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+arslpeu023e7m1dujcgp8an0e2      	1367759619	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+aeluterhpsrmol913mbr6fd6f1      	1367759737	NQ1qsPftHzwYq8FCTnCTcIu6PvwKSml3-8jiOKgk_jioRFpW71XGMx9bvj5-TYBmbn73BS3gu-kWgzMkHckejbDaxEE9E9JypzXUyWK_nk2qN5ePnoO2r4-ORKSxG8sIeNpbPulYxGi8mvpafWC4d1ioxJPWy-HC6pmi_Coi4yr-2_ch3xEvSA4TtXK9KWpiS0MTwVQNa4atrGnAu804LCEv38zXMG3dZnKV0yiO5cl0PJE10y0IidjKJV36oKA2sJtCyudx9WFWZ3OEw3gV8MfaCEsCP1JJ4V4W89opSym_6PzMKURLKDsWIeOTwglEpVqiimnXJqJC0HRDdac31g..
+c2gm3p2o2mic98fi8sfc932nk1      	1367759529	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+ltilit4oh0a7fuiarq3cgi0n00      	1367758558	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+m4jsugpkkoq2m50ljej4ho38s0      	1367759483	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+gqmblg11rjrdsrmdj2ptt0qaf5      	1367759532	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+o1lj077urp3kaq4u6jc8k7usm0      	1367759629	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+nk80e6if8a90ebi56oflf415e2      	1367759712	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+cbhdqk9g4rq98so2kqbn74uci0      	1367759727	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+g4kam3uq9u693p2jlk9nr25ta4      	1367758558	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+rom0dduatu0g78517fbo0e2ir0      	1367759488	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+gllar90pib5620esfr1d4nbek6      	1367759532	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+c2nbg9k8jf3el5jtpg3b3p8i86      	1367759651	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+o5s15p8jsedhadf5fsd782mmr2      	1367759713	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+k7f8q29majeap7f9iojomdatg5      	1367759737	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+d45lfssi9i27802dqjr6ih7iq5      	1367757731	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+6o008emuli0bt6tjmrttngpd31      	1367758566	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+q30kau23bs84b23t03r6kk0i96      	1367759493	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+h73mqeb9ufqv3hd7rs36nkp091      	1367759597	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+bn7asvo7vgmo9gqn201b6qm4f6      	1367759658	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+90fjr9lj7aiut691ap7rog06o4      	1367759718	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
 \.
 
 
@@ -2332,6 +2293,7 @@ COPY target_check_attachments (target_id, check_id, name, type, path, size) FROM
 --
 
 COPY target_check_categories (target_id, check_category_id, advanced, check_count, finished_count, low_risk_count, med_risk_count, high_risk_count, info_count) FROM stdin;
+1	9	t	2	1	0	0	0	1
 1	6	t	18	2	0	0	0	0
 2	3	t	4	0	0	0	0	0
 1	8	t	0	0	0	0	0	0
@@ -2343,7 +2305,6 @@ COPY target_check_categories (target_id, check_category_id, advanced, check_coun
 1	2	t	1	1	0	0	0	1
 1	11	t	1	1	0	0	0	0
 2	6	t	18	5	0	2	0	2
-1	9	t	2	2	1	0	0	1
 1	1	t	17	15	0	3	0	0
 4	1	t	17	0	0	0	0	0
 5	1	t	17	0	0	0	0	0
@@ -2423,7 +2384,7 @@ COPY target_checks (target_id, check_id, result, target_file, rating, started, p
 1	16		39e7de7a2aad466f032a8a2f65d894c712d9f1b66651983c9969e44d3d26fa63	\N	2013-01-24 06:11:06.556805	\N	finished	82ebe7c26d634ad9f23b5ae5ecb12a4f8f80c178e633601916c2b51735860bb2	1	\N	\N	netprotect.ch	1	<gtta-table><columns><column width="0.3" name="Domain"/><column width="0.2" name="IP"/><column width="0.2" name="Whois"/><column width="0.3" name="Title"/></columns><row><cell>netprotect.com</cell><cell>54.243.62.158</cell><cell>NETPROTECT.COM</cell><cell>Unblock Us - smarter faster VPN</cell></row><row><cell>netprotect.info</cell><cell>82.98.86.173</cell><cell>na</cell><cell>netprotect.info - ÑÑÐ¾ Ð½Ð°Ð¸Ð»ÑÑÑÐ¸Ð¹ Ð¸ÑÑÐ¾ÑÐ½Ð¸Ðº Ð¸Ð½ÑÐ¾ÑÐ¼Ð°ÑÐ¸Ð¸ Ð¿Ð¾ ÑÐµÐ¼Ðµ netprotect. Ð­ÑÐ¾Ñ Ð²ÐµÐ±-ÑÐ°Ð¹Ñ Ð¿ÑÐ¾Ð´Ð°ÐµÑÑÑ</cell></row><row><cell>netprotect.net</cell><cell>208.91.197.54</cell><cell>NETPROTECT.NET</cell><cell>Loading...</cell></row><row><cell>netprotect.org</cell><cell>64.95.64.218</cell><cell>Buydomains.com</cell><cell>N/A</cell></row><row><cell>netprotect.ws</cell><cell>64.70.19.198</cell><cell>N/A</cell><cell>Find what you are looking for...</cell></row></gtta-table>
 1	1	kkkk	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1	<gtta-table>\n    <columns>\n        <column name="Value" width="0.3"/>\n        <column name="Name" width="0.3"/>\n        <column name="Data" width="0.4"/>\n    </columns>\n    <row>\n        <cell>1</cell>\n        <cell>1</cell>\n        <cell>1</cell>\n    </row>\n    <row>\n        <cell>1</cell>\n        <cell>1</cell>\n        <cell>1</cell>\n    </row>\n    <row>\n        <cell>1</cell>\n        <cell>1</cell>\n        <cell>1</cell>\n    </row>\n</gtta-table>
 1	45	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1	\N
-1	46	w3af configuration errors:\n\nError while reading plugin options.\nThere was an error while importing plugins.discovery.halberd: "No module named shell".\n\nUnexpected end of script\n	7e392158a8cef25a48c51dc025382122caa04b7ee0f9abacc4d876e45e62b341	low_risk	2013-01-24 06:20:33.419926	\N	finished	2492cafeb2e0f1dafaa81e0fbb35065316626ab28204bf63f545bbaa4bd64217	1	\N	\N	netprotect.ch	1	\N
+1	46	\n	896996d050a9d84c568b8d6aa3020f72abfc9a86b3ec556c38cd351ba25e96dc	\N	2013-05-05 16:15:30.903981	\N	finished	ee172921f8d4365a452b17800aa7d70f78571be4b65f585bbf3620f0ffea2916	1	\N	\N	netprotect.ch	1	\N
 1	15		cf3067eb8f2c87ca32d5dcb8f99d51a3bd1241c63b4d60ea9d273e66d8412f1d	\N	2013-01-24 06:15:02.631314	\N	finished	aa3754015e2174188254e999ebde44af5ad7304677cb66d8f4231e0b90394206	1	\N	\N	netprotect.ch	1	<gtta-table><columns><column width="0.5" name="Domain"/><column width="0.5" name="IP"/></columns><row><cell>dev.netprotect.ch</cell><cell>81.6.58.118</cell></row><row><cell>Wildcard DNS: 15 hostname(s)</cell><cell>213.239.210.108</cell></row></gtta-table>
 1	10	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1	\N
 1	3	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1	\N
@@ -2467,7 +2428,7 @@ COPY targets (id, project_id, host, description) FROM stdin;
 COPY users (id, email, password, name, client_id, role, last_action_time, send_notifications, password_reset_code, password_reset_time) FROM stdin;
 3	erbol@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		2	client	2013-05-04 18:02:54.270777	f	abd9aeef114d88f28ac0ad83fecb70c25a7e22500872eab947ade90244889ee9	\N
 4	bob@bob.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Anton Belousov	\N	user	2013-05-04 18:23:59.902642	f	\N	\N
-1	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-05-05 02:43:47.392555	t	\N	2013-05-05 02:41:23.449866
+1	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-05-05 16:15:37.727447	t	\N	2013-05-05 02:41:23.449866
 \.
 
 
