@@ -2057,12 +2057,28 @@ class ProjectController extends Controller
                     $table->parse($check->targetChecks[0]->table_result);
                 }
 
+                $attachmentList = array();
+                $attachments = TargetCheckAttachment::model()->findAllByAttributes(array(
+                    "target_id" => $target->id,
+                    "check_id" => $check->id
+                ));
+
+                foreach ($attachments as $attachment) {
+                    $attachmentList[] = array(
+                        "name" => CHtml::encode($attachment->name),
+                        "path" => $attachment->path,
+                        "url" => $this->createUrl('project/attachment', array('path' => $attachment->path)),
+                    );
+                }
+
                 $checkData[] = array(
                     'id'          => $check->id,
                     'result'      => $check->targetChecks[0]->result,
                     'tableResult' => $table ? $this->renderPartial('/project/target/check/tableresult', array( 'table' => $table ), true) : '',
                     'finished'    => $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED,
-                    'time'        => $time
+                    'time'        => $time,
+                    'attachmentControlUrl' => $this->createUrl('project/controlattachment'),
+                    'attachments' => $attachmentList
                 );
             }
 

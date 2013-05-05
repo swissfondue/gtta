@@ -108,5 +108,6 @@ return array(
         'yiicPath' => dirname(__FILE__).'/../',
 
         'timeZone' => $mainConfig['params']['timeZone'],
+        'attachments' => $mainConfig['params']['attachments'],
     ),
 );

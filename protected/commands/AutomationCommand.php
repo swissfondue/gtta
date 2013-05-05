@@ -38,7 +38,7 @@ class AutomationCommand extends ConsoleCommand
 
         foreach ($checks as $check)
         {
-            $fileOutput = NULL;
+            $fileOutput = null;
 
             if ($check->pid)
             {
@@ -48,7 +48,7 @@ class AutomationCommand extends ConsoleCommand
 
             $check->result = $fileOutput ? $fileOutput : 'No output.';
             $check->status = TargetCheck::STATUS_FINISHED;
-            $check->pid    = NULL;
+            $check->pid    = null;
 
             $check->save();
         }
@@ -73,7 +73,7 @@ class AutomationCommand extends ConsoleCommand
             // if task died for some reason
             if (!$this->_isRunning($check->pid))
             {
-                $check->pid = NULL;
+                $check->pid = null;
 
                 if (!$check->result)
                     $check->result = 'No output.';
@@ -191,6 +191,166 @@ class AutomationCommand extends ConsoleCommand
     }
 
     /**
+     * Send notification
+     * @param $check
+     * @param $target
+     */
+    private function _sendNotification($check, $target) {
+        $user = User::model()->findByPk($check->user_id);
+
+        if ($user->send_notifications) {
+            $email = new Email();
+            $email->user_id = $user->id;
+
+            $email->subject = Yii::t('app', '{checkName} check has been finished', array(
+                '{checkName}' => $check->check->localizedName
+            ));
+
+            $email->content = $this->render(
+                'application.views.email.check',
+
+                array(
+                    'userName'   => $user->name ? CHtml::encode($user->name) : $user->email,
+                    'projectId'  => $target->project_id,
+                    'targetId'   => $target->id,
+                    'categoryId' => $check->check->control->check_category_id,
+                    'checkId'    => $check->check_id,
+                    'checkName'  => $check->check->localizedName,
+                    'targetHost' => $target->host
+                ),
+
+                true
+            );
+
+            $email->save();
+        }
+    }
+
+    /**
+     * Create check files
+     * @param $check
+     * @param $interpreter
+     * @return array
+     */
+    private function _createCheckFiles($check, $interpreter) {
+        $tempPath = Yii::app()->params['automation']['tempPath'];
+        $scriptsPath = Yii::app()->params['automation']['scriptsPath'];
+
+        // create target file
+        $targetFile = fopen($tempPath . '/' . $check->target_file, 'w');
+
+        // base data
+        fwrite($targetFile, ($check->override_target ? $check->override_target : $target->host) . "\n");
+        fwrite($targetFile, $check->protocol       . "\n");
+        fwrite($targetFile, $check->port           . "\n");
+        fwrite($targetFile, $check->language->code . "\n");
+
+        // directories
+        fwrite($targetFile, $scriptsPath . "\n");
+        fwrite($targetFile, $tempPath    . "\n");
+        fwrite($targetFile, $interpreter['path']     . "\n");
+        fwrite($targetFile, $interpreter['basePath'] . "\n");
+
+        fclose($targetFile);
+
+        // create empty result file
+        $resultFile = fopen($tempPath . '/' . $check->result_file, 'w');
+        fclose($resultFile);
+
+        // create input files
+        $inputs = TargetCheckInput::model()->with('input')->findAllByAttributes(
+            array(
+                'target_id' => $check->target_id,
+                'check_id'  => $check->check_id,
+            ),
+            array(
+                'order' => 'input.sort_order ASC'
+            )
+        );
+
+        $inputFiles = array();
+
+        foreach ($inputs as $input)
+        {
+            $input->file = $this->_generateFileName();
+            $input->save();
+
+            $value = '';
+
+            if ($input->input->type == CheckInput::TYPE_FILE)
+            {
+                if ($input->value)
+                    $value = $input->input->getFileData();
+            }
+            else
+                $value = $input->value;
+
+            $inputFile = fopen($tempPath . '/' . $input->file, 'w');
+            fwrite($inputFile, $value . "\n");
+            fclose($inputFile);
+
+            $inputFiles[] = $input->file;
+        }
+
+        return $inputFiles;
+    }
+
+    /**
+     * Get tables from response
+     */
+    private function _getTables(&$check) {
+        $tablePos = strpos($check->result, '<' . ResultTable::TAG_MAIN);
+
+        if ($tablePos !== false) {
+            $check->table_result = substr($check->result, $tablePos);
+            $check->result = substr($check->result, 0, $tablePos);
+        }
+    }
+
+    /**
+     * Get images from response
+     */
+    private function _getImages(&$check) {
+        $imagePos = strpos($check->result, "<" . AttachedImage::TAG_MAIN);
+
+        while ($imagePos !== false) {
+            $imageEndPos = strpos($check->result, ">", $imagePos);
+
+            if ($imageEndPos === false) {
+                break;
+            }
+
+            $imageTag = substr($check->result, $imagePos, $imageEndPos + 1 - $imagePos);
+            $check->result = substr($check->result, 0, $imagePos) . substr($check->result, $imageEndPos + 1);
+
+            $image = new AttachedImage();
+            $image->parse($imageTag);
+
+            if ($image->src) {
+                $fileInfo = finfo_open();
+                $mimeType = finfo_file($fileInfo, $image->src, FILEINFO_MIME_TYPE);
+
+                $attachment = new TargetCheckAttachment();
+                $attachment->check_id = $check->check_id;
+                $attachment->target_id = $check->target_id;
+                $attachment->name = basename($image->src);
+                $attachment->type = $mimeType;
+                $attachment->size = filesize($image->src);
+                $attachment->path = hash('sha256', $image->src . rand() . time());
+                $attachment->save();
+
+                if (!@copy($image->src, Yii::app()->params['attachments']['path'] . '/' . $attachment->path)) {
+                    $attachment->delete();
+                }
+
+                //@unlink($image->src);
+            }
+
+            $imagePos = strpos($check->result, "<" . AttachedImage::TAG_MAIN);
+        }
+    }
+
+    /**
      * Check starter.
      */
     private function _startCheck($targetId, $checkId)
@@ -241,62 +401,7 @@ class AutomationCommand extends ConsoleCommand
             $check->result_file = $this->_generateFileName();
             $check->save();
 
-            // create target file
-            $targetFile = fopen($tempPath . '/' . $check->target_file, 'w');
-
-            // base data
-            fwrite($targetFile, ($check->override_target ? $check->override_target : $target->host) . "\n");
-            fwrite($targetFile, $check->protocol       . "\n");
-            fwrite($targetFile, $check->port           . "\n");
-            fwrite($targetFile, $check->language->code . "\n");
-
-            // directories
-            fwrite($targetFile, $scriptsPath . "\n");
-            fwrite($targetFile, $tempPath    . "\n");
-            fwrite($targetFile, $interpreter['path']     . "\n");
-            fwrite($targetFile, $interpreter['basePath'] . "\n");
-
-            fclose($targetFile);
-
-            // create empty result file
-            $resultFile = fopen($tempPath . '/' . $check->result_file, 'w');
-            fclose($resultFile);
-
-            // create input files
-            $inputs = TargetCheckInput::model()->with('input')->findAllByAttributes(
-                array(
-                    'target_id' => $targetId,
-                    'check_id'  => $checkId,
-                ),
-                array(
-                    'order' => 'input.sort_order ASC'
-                )
-            );
-
-            $inputFiles = array();
-
-            foreach ($inputs as $input)
-            {
-                $input->file = $this->_generateFileName();
-                $input->save();
-
-                $value = '';
-
-                if ($input->input->type == CheckInput::TYPE_FILE)
-                {
-                    if ($input->value)
-                        $value = $input->input->getFileData();
-                }
-                else
-                    $value = $input->value;
-
-                $inputFile = fopen($tempPath . '/' . $input->file, 'w');
-                fwrite($inputFile, $value . "\n");
-                fclose($inputFile);
-
-                $inputFiles[] = $input->file;
-            }
-
+            $inputFiles = $this->_createCheckFiles($check, $interpreter);
             chdir($scriptsPath);
 
             $command = array(
@@ -321,19 +426,14 @@ class AutomationCommand extends ConsoleCommand
                 'check_id'  => $checkId
             ));
 
-            $check->pid    = NULL;
+            $check->pid    = null;
             $check->result = $fileOutput ? $fileOutput : implode("\n", $output);
 
             if (!$check->result)
                 $check->result = Yii::t('app', 'No output.');
 
-            $tablePos = strpos($check->result, '<' . ResultTable::TAG_MAIN);
-
-            if ($tablePos !== false)
-            {
-                $check->table_result = substr($check->result, $tablePos);
-                $check->result = substr($check->result, 0, $tablePos);
-            }
+            $this->_getTables($check);
+            $this->_getImages($check);
 
             $check->status = TargetCheck::STATUS_FINISHED;
             $check->save();
@@ -343,37 +443,8 @@ class AutomationCommand extends ConsoleCommand
             $started  = new DateTime($check->started);
             $interval = time() - $started->getTimestamp();
 
-            if ($interval > Yii::app()->params['automation']['minNotificationInterval'])
-            {
-                $user = User::model()->findByPk($check->user_id);
-
-                if ($user->send_notifications)
-                {
-                    $email = new Email();
-                    $email->user_id = $user->id;
-
-                    $email->subject = Yii::t('app', '{checkName} check has been finished', array(
-                        '{checkName}' => $check->check->localizedName
-                    ));
-
-                    $email->content = $this->render(
-                        'application.views.email.check',
-
-                        array(
-                            'userName'   => $user->name ? CHtml::encode($user->name) : $user->email,
-                            'projectId'  => $target->project_id,
-                            'targetId'   => $target->id,
-                            'categoryId' => $check->check->control->check_category_id,
-                            'checkId'    => $check->check_id,
-                            'checkName'  => $check->check->localizedName,
-                            'targetHost' => $target->host
-                        ),
-
-                        true
-                    );
-
-                    $email->save();
-                }
+            if ($interval > Yii::app()->params['automation']['minNotificationInterval']) {
+                $this->_sendNotification($check, $target);
             }
         }
         catch (Exception $e)

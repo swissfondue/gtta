@@ -481,9 +481,9 @@
 
                                         <div class="upload-message hide" id="upload-message-<?php echo $check->id; ?>"><?php echo Yii::t('app', 'Uploading...'); ?></div>
 
-                                        <?php if ($check->targetCheckAttachments): ?>
-                                            <table class="table attachment-list">
-                                                <tbody>
+                                        <table class="table attachment-list<?php if (!$check->targetCheckAttachments) echo ' hide'; ?>">
+                                            <tbody>
+                                                <?php if ($check->targetCheckAttachments): ?>
                                                     <?php foreach ($check->targetCheckAttachments as $attachment): ?>
                                                         <tr data-path="<?php echo $attachment->path; ?>" data-control-url="<?php echo $this->createUrl('project/controlattachment'); ?>">
                                                             <td class="name">
@@ -494,9 +494,9 @@
                                                             </td>
                                                         </tr>
                                                     <?php endforeach; ?>
-                                                </tbody>
-                                            </table>
-                                        <?php endif; ?>
+                                                <?php endif; ?>
+                                            </tbody>
+                                        </table>
                                     </td>
                                 </tr>
                                 <tr>

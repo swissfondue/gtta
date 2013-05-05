@@ -46,7 +46,7 @@ function User()
          * Update status of running checks.
          */
         this.update = function (url) {
-            var i;
+            var i, k;
 
             if (this.runningChecks.length > 0)
                 _check.updateIteration++;
@@ -126,7 +126,54 @@ function User()
                                 $('#TargetCheckEditForm_' + check.id + '_result').val(check.result);
                                 $('div.check-form[data-id="' + check.id + '"] div.table-result').html(check.tableResult);
 
-                                for (var k = 0; k < _check.runningChecks.length; k++)
+                                // attachments
+                                if (check.attachments.length > 0) {
+                                    var table, tbody;
+
+                                    table = $('div.check-form[data-id="' + check.id + '"] .attachment-list');
+                                    tbody = table.find("tbody");
+                                    tbody.find("tr").remove();
+
+                                    for (k = 0; k < check.attachments.length; k++) {
+                                        var tr, attachment;
+
+                                        attachment = check.attachments[k];
+                                        tr = $("<tr>");
+
+                                        tr.attr("data-path", attachment.path);
+                                        tr.attr("data-control-url", check.attachmentControlUrl);
+
+                                        tr.append(
+                                            $("<td>")
+                                                .addClass("name")
+                                                .append(
+                                                    $("<a>")
+                                                        .attr("href", attachment.url)
+                                                        .html(attachment.name)
+                                                )
+                                        );
+
+                                        tr.append(
+                                            $("<td>")
+                                                .addClass("actions")
+                                                .append(
+                                                    $("<a>")
+                                                        .attr("href", "#del")
+                                                        .attr("title", system.translate("Delete"))
+                                                        .html('<i class="icon icon-remove"></i>')
+                                                        .click(function () {
+                                                            user.check.delAttachment(attachment.path);
+                                                        })
+                                                )
+                                        );
+
+                                        tbody.append(tr);
+                                    }
+
+                                    table.show();
+                                }
+
+                                for (k = 0; k < _check.runningChecks.length; k++)
                                 {
                                     var innerCheck = _check.runningChecks[k];
 
@@ -629,7 +676,7 @@ function User()
                             $('tr[data-path=' + path + ']').remove();
 
                             if ($('tbody > tr', table).length == 0)
-                                table.remove();
+                                table.hide();
                         });
                     }
                 },
