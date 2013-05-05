@@ -733,3 +733,10 @@ table.table-result td {
 .auditors a {
     text-decoration:none;
 }
+
+.input-group {
+    width:150px;
+    float:left;
+    margin-right:10px;
+    margin-bottom:5px;
+}

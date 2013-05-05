@@ -264,6 +264,7 @@ return array(
     // parameters
 	'params' => array(
         'entriesPerPage' => 10,
+        'maxCheckboxes' => 3,
 
         'fonts' => array(
             'path' => dirname(__FILE__).DIRECTORY_SEPARATOR.'../../fonts',
