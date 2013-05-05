@@ -71,6 +71,11 @@ class ReportTemplateEditForm extends LocalizedFormModel
     public $lowDescription;
 
     /**
+     * @var string footer.
+     */
+    public $footer;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules()
@@ -78,7 +83,7 @@ class ReportTemplateEditForm extends LocalizedFormModel
 		return array(
 			array( 'name', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
-            array( 'intro, appendix, localizedItems, vulnsIntro, infoChecksIntro, securityLevelIntro, vulnDistributionIntro, reducedIntro, highDescription, medDescription, lowDescription, degreeIntro, riskIntro', 'safe' ),
+            array( 'intro, appendix, localizedItems, vulnsIntro, infoChecksIntro, securityLevelIntro, vulnDistributionIntro, reducedIntro, highDescription, medDescription, lowDescription, degreeIntro, riskIntro, footer', 'safe' ),
 		);
 	}
     
@@ -101,6 +106,7 @@ class ReportTemplateEditForm extends LocalizedFormModel
             'lowDescription'        => Yii::t('app', 'Low Risk Description'),
             'degreeIntro'           => Yii::t('app', 'Degree of Fulfillment Introduction'),
             'riskIntro'             => Yii::t('app', 'Risk Matrix Introduction'),
+            'footer'                => Yii::t('app', 'Footer'),
 		);
 	}
 }

@@ -170,6 +170,16 @@
                                         <?php endif; ?>
                                     </div>
                                 </div>
+
+                                <div class="control-group <?php if ($model->getError('footer')) echo 'error'; ?>">
+                                    <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_footer"><?php echo Yii::t('app', 'Footer'); ?></label>
+                                    <div class="controls">
+                                        <input type="text" class="input-xlarge" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_footer" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][footer]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['footer']) : ''; ?>">
+                                        <?php if ($model->getError('footer')): ?>
+                                            <p class="help-block"><?php echo $model->getError('footer'); ?></p>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -177,8 +187,6 @@
                     <hr>
 
                     <?php if (!$template->isNewRecord): ?>
-                        <hr>
-
                         <div class="control-group">
                             <label class="control-label"><?php echo Yii::t('app', 'Header Image'); ?></label>
                             <div class="controls form-text">

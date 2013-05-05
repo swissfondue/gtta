@@ -19,6 +19,7 @@
  * @property string $med_description
  * @property string $degree_intro
  * @property string $risk_intro
+ * @property string $footer
  */
 class ReportTemplateL10n extends CActiveRecord
 {   

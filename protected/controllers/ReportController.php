@@ -10,7 +10,7 @@ class ReportController extends Controller
     private $fontSize;
     private $fontFamily;
     private $thinBorder, $thinBorderTL, $thinBorderBR;
-    private $h1Font, $h2Font, $h3Font, $textFont, $boldFont, $linkFont, $smallBoldFont;
+    private $h1Font, $h2Font, $h3Font, $textFont, $boldFont, $linkFont, $footerFont, $smallBoldFont;
     private $titlePar, $h3Par, $centerPar, $leftPar, $noPar;
     private $docWidth;
     private $project;
@@ -566,6 +566,8 @@ class ReportController extends Controller
         $this->h3Font->setBold();
 
         $this->textFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
+
+        $this->footerFont = new PHPRtfLite_Font(round($model->fontSize * 0.6), $model->fontFamily);
 
         $this->boldFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
         $this->boldFont->setBold();
@@ -1417,9 +1419,10 @@ class ReportController extends Controller
 
         // footer
         $footer = $section->addFooter();
-        $footer->writeText(Yii::t('app', 'Penetration Test Report') . ': ' . $project->name . ' / ' . $project->year . ', ', $this->textFont, $this->noPar);
+        $footer->writeText($template->localizedFooter, $this->footerFont, $this->noPar);
+        $footer->writeText(Yii::t('app', 'Penetration Test Report') . ': ' . $project->name . ' / ' . $project->year . ', ', $this->footerFont, $this->noPar);
         $footer->writePlainRtfCode(
-            '\fs' . ($this->textFont->getSize() * 2) . ' \f' . $this->textFont->getFontIndex() . ' ' .
+            '\fs' . ($this->footerFont->getSize() * 2) . ' \f' . $this->footerFont->getFontIndex() . ' ' .
              Yii::t('app', 'page {page} of {numPages}',
             array(
                 '{page}'     => '{\field{\*\fldinst {PAGE}}{\fldrslt {1}}}',

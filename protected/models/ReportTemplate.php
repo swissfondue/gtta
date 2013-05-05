@@ -20,6 +20,7 @@
  * @property string $med_description
  * @property string $degree_intro
  * @property string $risk_intro
+ * @property string $footer
  */
 class ReportTemplate extends CActiveRecord
 {   
@@ -206,5 +207,16 @@ class ReportTemplate extends CActiveRecord
             return $this->l10n[0]->low_description != NULL ? $this->l10n[0]->low_description : $this->low_description;
 
         return $this->low_description;
+    }
+
+    /**
+     * @return string localized footer
+     */
+    public function getLocalizedFooter()
+    {
+        if ($this->l10n && count($this->l10n) > 0)
+            return $this->l10n[0]->footer != NULL ? $this->l10n[0]->footer : $this->footer;
+
+        return $this->footer;
     }
 }

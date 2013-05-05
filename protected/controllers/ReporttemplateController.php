@@ -112,6 +112,7 @@ class ReporttemplateController extends Controller
             $model->highDescription = $template->high_description;
             $model->medDescription = $template->med_description;
             $model->lowDescription = $template->low_description;
+            $model->footer = $template->footer;
 
             $templateL10n = ReportTemplateL10n::model()->findAllByAttributes(array(
                 'report_template_id' => $template->id
@@ -132,6 +133,7 @@ class ReporttemplateController extends Controller
                 $model->localizedItems[$tl->language_id]['highDescription'] = $tl->high_description;
                 $model->localizedItems[$tl->language_id]['medDescription'] = $tl->med_description;
                 $model->localizedItems[$tl->language_id]['lowDescription'] = $tl->low_description;
+                $model->localizedItems[$tl->language_id]['footer'] = $tl->footer;
             }
         }
 
@@ -152,6 +154,7 @@ class ReporttemplateController extends Controller
             $model->highDescription = $model->defaultL10n($languages, 'highDescription');
             $model->medDescription = $model->defaultL10n($languages, 'medDescription');
             $model->lowDescription = $model->defaultL10n($languages, 'lowDescription');
+            $model->footer = $model->defaultL10n($languages, 'footer');
 
 			if ($model->validate())
             {
@@ -168,6 +171,7 @@ class ReporttemplateController extends Controller
                 $template->high_description = $model->highDescription;
                 $template->med_description = $model->medDescription;
                 $template->low_description = $model->lowDescription;
+                $template->footer = $model->footer;
                 $template->save();
 
                 foreach ($model->localizedItems as $languageId => $value)
@@ -223,6 +227,9 @@ class ReporttemplateController extends Controller
                     if ($value['lowDescription'] == '')
                         $value['lowDescription'] = NULL;
 
+                    if ($value['footer'] == '')
+                        $value['footer'] = NULL;
+
                     $templateL10n->name = $value['name'];
                     $templateL10n->intro = $value['intro'];
                     $templateL10n->appendix = $value['appendix'];
@@ -236,6 +243,7 @@ class ReporttemplateController extends Controller
                     $templateL10n->high_description = $value['highDescription'];
                     $templateL10n->med_description = $value['medDescription'];
                     $templateL10n->low_description = $value['lowDescription'];
+                    $templateL10n->footer = $value['footer'];
 
                     $templateL10n->save();
                 }

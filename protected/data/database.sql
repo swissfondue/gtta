@@ -232,7 +232,7 @@ ALTER SEQUENCE check_inputs_id_seq OWNED BY check_inputs.id;
 -- Name: check_inputs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_inputs_id_seq', 47, true);
+SELECT pg_catalog.setval('check_inputs_id_seq', 58, true);
 
 
 --
@@ -612,7 +612,7 @@ ALTER SEQUENCE login_history_id_seq OWNED BY login_history.id;
 -- Name: login_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('login_history_id_seq', 48, true);
+SELECT pg_catalog.setval('login_history_id_seq', 49, true);
 
 
 --
@@ -892,7 +892,8 @@ CREATE TABLE report_templates (
     med_description character varying,
     low_description character varying,
     degree_intro character varying,
-    risk_intro character varying
+    risk_intro character varying,
+    footer character varying
 );
 
 
@@ -945,7 +946,8 @@ CREATE TABLE report_templates_l10n (
     med_description character varying,
     low_description character varying,
     degree_intro character varying,
-    risk_intro character varying
+    risk_intro character varying,
+    footer character varying
 );
 
 
@@ -1638,6 +1640,17 @@ COPY check_inputs (id, check_id, name, description, sort_order, value, type) FRO
 43	1	Text Field		1	Some Default Value	0
 46	41	Admin Logins		0		4
 47	41	Adobe xml		1		4
+48	46	Test File		0		4
+49	46	Second File		1		4
+50	46	Cool stuff		2		4
+51	46	Gangnam		3		4
+52	46	Yay		4		4
+53	46	Yaka Waka	123123	5	sdfsdf	0
+54	46	asdfasdf		6	1	2
+55	46	Kuka		7	asdfasdf	2
+56	46	Suka		8		2
+58	46	Kaka		10	kkj	2
+57	46	Shmaka		9	124234	2
 \.
 
 
@@ -1732,6 +1745,28 @@ COPY check_inputs_l10n (check_input_id, language_id, name, description) FROM std
 46	2	\N	\N
 47	1	Adobe xml	\N
 47	2	\N	\N
+48	1	Test File	\N
+48	2	\N	\N
+49	1	Second File	\N
+49	2	\N	\N
+50	1	Cool stuff	\N
+50	2	\N	\N
+51	1	Gangnam	\N
+51	2	\N	\N
+52	1	Yay	\N
+52	2	\N	\N
+53	1	Yaka Waka	123123
+53	2	\N	\N
+54	1	asdfasdf	\N
+54	2	\N	\N
+55	1	Kuka	\N
+55	2	\N	\N
+56	1	Suka	\N
+56	2	\N	\N
+58	1	Kaka	\N
+58	2	\N	\N
+57	1	Shmaka	\N
+57	2	\N	\N
 \.
 
 
@@ -2024,6 +2059,7 @@ COPY login_history (id, user_id, user_name, create_time) FROM stdin;
 46	1	Oliver Muenchow	2013-05-05 02:43:44.088959
 47	1	Oliver Muenchow	2013-05-05 13:02:39.753248
 48	1	Oliver Muenchow	2013-05-05 15:14:46.241212
+49	1	Oliver Muenchow	2013-05-05 21:53:34.830308
 \.
 
 
@@ -2127,9 +2163,9 @@ COPY report_template_summary_l10n (report_template_summary_id, language_id, summ
 -- Data for Name: report_templates; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY report_templates (id, name, header_image_path, header_image_type, intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro) FROM stdin;
-3	Yay ;)	\N	\N					\N	\N	\N	\N	\N	\N	\N	\N
-1	Test Template	0caf7534e0fee7a603c2948652ab8de6815ccea0b277340d7122269f4a847c89	image/png	Test Template Intro<br><ul><li>The client is: {client}</li><li>The project is: {project}</li><li>Project year:&nbsp;<b>{year}</b></li></ul>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br><ol><li>Date from: {date.from}</li><li>Date to: {date.to}</li></ol>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}<br>This text goes after the list of targets.<br><b>well done<br><br>S-tats<br>{target.stats}<br><br>And here is a list of targets with controls lol:<br></b>{target.weakest}<br><b><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b><b>Here go top 5 vulns:<br></b>{vuln.list}<b><br></b>well done	Test Template Appendix<br><ol><li>one</li><li>two</li><li>three</li></ol>	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}<br><br><ul><li>hello</li><li>wtf is that</li></ul>No way<br><ol><li>one list</li><li>two lists</li></ol>	test one two&nbsp;{targets}<br><br>vuln distribution<br><br>with<br><ul><li>some</li><li>list</li></ul>	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}<br><br><ol><li>degree</li><li>list</li></ol>	risk&nbsp;targets {targets}<br><br>risk<br><ul><li>matrix</li><li>list</li></ul>
+COPY report_templates (id, name, header_image_path, header_image_type, intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro, footer) FROM stdin;
+3	Yay ;)	\N	\N					\N	\N	\N	\N	\N	\N	\N	\N	\N
+1	Test Template	0caf7534e0fee7a603c2948652ab8de6815ccea0b277340d7122269f4a847c89	image/png	Test Template Intro<br><ul><li>The client is: {client}</li><li>The project is: {project}</li><li>Project year:&nbsp;<b>{year}</b></li></ul>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br><ol><li>Date from: {date.from}</li><li>Date to: {date.to}</li></ol>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}<br>This text goes after the list of targets.<br><b>well done<br><br>S-tats<br>{target.stats}<br><br>And here is a list of targets with controls lol:<br></b>{target.weakest}<br><b><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b><b>Here go top 5 vulns:<br></b>{vuln.list}<b><br></b>well done	Test Template Appendix<br><ol><li>one</li><li>two</li><li>three</li></ol>	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}<br><br><ul><li>hello</li><li>wtf is that</li></ul>No way<br><ol><li>one list</li><li>two lists</li></ol>	test one two&nbsp;{targets}<br><br>vuln distribution<br><br>with<br><ul><li>some</li><li>list</li></ul>	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}<br><br><ol><li>degree</li><li>list</li></ol>	risk&nbsp;targets {targets}<br><br>risk<br><ul><li>matrix</li><li>list</li></ul>	\N
 \.
 
 
@@ -2137,11 +2173,11 @@ COPY report_templates (id, name, header_image_path, header_image_type, intro, ap
 -- Data for Name: report_templates_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY report_templates_l10n (report_template_id, language_id, name, intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro) FROM stdin;
-3	1	Yay ;)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-3	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1	2	zzz	Testen Templaten Intro	Testen Templaten Appendix	Worlda	\N	test eins zwei&nbsp;{targets}	test eins zwei&nbsp;{targets}	\N	\N	\N	\N	\N	\N
-1	1	Test Template	Test Template Intro<br><ul><li>The client is: {client}</li><li>The project is: {project}</li><li>Project year:&nbsp;<b>{year}</b></li></ul>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br><ol><li>Date from: {date.from}</li><li>Date to: {date.to}</li></ol>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}<br>This text goes after the list of targets.<br><b>well done<br><br>S-tats<br>{target.stats}<br><br>And here is a list of targets with controls lol:<br></b>{target.weakest}<br><b><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b><b>Here go top 5 vulns:<br></b>{vuln.list}<b><br></b>well done	Test Template Appendix<br><ol><li>one</li><li>two</li><li>three</li></ol>	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}<br><br><ul><li>hello</li><li>wtf is that</li></ul>No way<br><ol><li>one list</li><li>two lists</li></ol>	test one two&nbsp;{targets}<br><br>vuln distribution<br><br>with<br><ul><li>some</li><li>list</li></ul>	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}<br><br><ol><li>degree</li><li>list</li></ol>	risk&nbsp;targets {targets}<br><br>risk<br><ul><li>matrix</li><li>list</li></ul>
+COPY report_templates_l10n (report_template_id, language_id, name, intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro, footer) FROM stdin;
+3	1	Yay ;)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+3	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+1	2	zzz	Testen Templaten Intro	Testen Templaten Appendix	Worlda	\N	test eins zwei&nbsp;{targets}	test eins zwei&nbsp;{targets}	\N	\N	\N	\N	\N	\N	\N
+1	1	Test Template	Test Template Intro<br><ul><li>The client is: {client}</li><li>The project is: {project}</li><li>Project year:&nbsp;<b>{year}</b></li></ul>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br><ol><li>Date from: {date.from}</li><li>Date to: {date.to}</li></ol>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}<br>This text goes after the list of targets.<br><b>well done<br><br>S-tats<br>{target.stats}<br><br>And here is a list of targets with controls lol:<br></b>{target.weakest}<br><b><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b><b>Here go top 5 vulns:<br></b>{vuln.list}<b><br></b>well done	Test Template Appendix<br><ol><li>one</li><li>two</li><li>three</li></ol>	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}<br><br><ul><li>hello</li><li>wtf is that</li></ul>No way<br><ol><li>one list</li><li>two lists</li></ol>	test one two&nbsp;{targets}<br><br>vuln distribution<br><br>with<br><ul><li>some</li><li>list</li></ul>	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}<br><br><ol><li>degree</li><li>list</li></ol>	risk&nbsp;targets {targets}<br><br>risk<br><ul><li>matrix</li><li>list</li></ul>	\N
 \.
 
 
@@ -2242,31 +2278,12 @@ COPY risk_templates_l10n (risk_template_id, language_id, name) FROM stdin;
 --
 
 COPY sessions (id, expire, data) FROM stdin;
-k66ggbpoi9batdih8ktk4g7la4      	1367759710	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-gfo39ingvm1amsg1kat90e04s3      	1367757731	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-64nss2d1evfdaaqrobpkrute41      	1367759482	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-1llk0tjmgaas4r8p936pd402i2      	1367759721	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-arslpeu023e7m1dujcgp8an0e2      	1367759619	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-aeluterhpsrmol913mbr6fd6f1      	1367759737	NQ1qsPftHzwYq8FCTnCTcIu6PvwKSml3-8jiOKgk_jioRFpW71XGMx9bvj5-TYBmbn73BS3gu-kWgzMkHckejbDaxEE9E9JypzXUyWK_nk2qN5ePnoO2r4-ORKSxG8sIeNpbPulYxGi8mvpafWC4d1ioxJPWy-HC6pmi_Coi4yr-2_ch3xEvSA4TtXK9KWpiS0MTwVQNa4atrGnAu804LCEv38zXMG3dZnKV0yiO5cl0PJE10y0IidjKJV36oKA2sJtCyudx9WFWZ3OEw3gV8MfaCEsCP1JJ4V4W89opSym_6PzMKURLKDsWIeOTwglEpVqiimnXJqJC0HRDdac31g..
-c2gm3p2o2mic98fi8sfc932nk1      	1367759529	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-ltilit4oh0a7fuiarq3cgi0n00      	1367758558	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-m4jsugpkkoq2m50ljej4ho38s0      	1367759483	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-gqmblg11rjrdsrmdj2ptt0qaf5      	1367759532	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-o1lj077urp3kaq4u6jc8k7usm0      	1367759629	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-nk80e6if8a90ebi56oflf415e2      	1367759712	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-cbhdqk9g4rq98so2kqbn74uci0      	1367759727	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-g4kam3uq9u693p2jlk9nr25ta4      	1367758558	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-rom0dduatu0g78517fbo0e2ir0      	1367759488	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-gllar90pib5620esfr1d4nbek6      	1367759532	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-c2nbg9k8jf3el5jtpg3b3p8i86      	1367759651	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-o5s15p8jsedhadf5fsd782mmr2      	1367759713	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-k7f8q29majeap7f9iojomdatg5      	1367759737	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-d45lfssi9i27802dqjr6ih7iq5      	1367757731	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-6o008emuli0bt6tjmrttngpd31      	1367758566	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-q30kau23bs84b23t03r6kk0i96      	1367759493	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-h73mqeb9ufqv3hd7rs36nkp091      	1367759597	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-bn7asvo7vgmo9gqn201b6qm4f6      	1367759658	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
-90fjr9lj7aiut691ap7rog06o4      	1367759718	xVmPKMuobDurd2x7OpPqvKcoeMd7uzENavZu4y_5hksOt_Ya_F3DwBbcTfrpNEpcrKtt1TQSDiqG2o0lf2VDq16dKPMy4BR7tnZQf4vkynOwnV0cWtGYRwOjt4GxY0dc
+s0lugsg4b22moc52v8esea0u10      	1367781406	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+aeluterhpsrmol913mbr6fd6f1      	1367780009	oF98Yqlv89ec-uP9O6BXJHRxWVMuZWTjwqhJDbW8H4gTvSd8PbIsDJXm-KjXUqSQaTuI6Jrj177enhZbFWxVY1T0hnuoAel8zmj1NCkyAy-QUnBhEzRtn2wd-Q1gLGLSsc4W1P1VLPkXmOeGFRz30zFXHMh3Ngzh7LJs1_kzhP5N2jGBfLb3OV2-jnpSO5Fn9UJ5CF9d38XzISoxPgpY7g..
+t8vuqsusj1mgrmvo3mqap7htu6      	1367781408	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+ini9b0leu31bpapjkef7r69sc0      	1367780009	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+ffhc0ntar3en1kahj0gjoiamn6      	1367781408	-jFSpYCFVl5dmbOoaJP3sUHDx09X91sKun8mAfi9TKwHEOfz24Kqsts7prYgHkzo07jiRzonUEH7nUBawFd_He7zyNeMhMNKu5s9vLahU3JJO2K3xPb1azjHaq9BZj3Dn5PMMyye0rx2mhWcOy1VpJpUIfrzQU8rqxFzJknq0OTwG3R8DjQaXQgGTT5r3kz9t7gqWVSjJZrg8fTHuetvgco8fZmCrHct8rDPYfYG0F76VDUiZXGwDNelHrCwQcmkHyMJZhE4d_UAp3yeICf0YwmLMmgvVQzCo8kq9gfD3WhM_0Mx8nsZ4XengpP2zsZt-Ol3x7Y64JECQEEY0sLJhQ..
+a3fjag1t2ldugs1hebkmuiu1i0      	1367780015	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
 \.
 
 
@@ -2426,9 +2443,9 @@ COPY targets (id, project_id, host, description) FROM stdin;
 --
 
 COPY users (id, email, password, name, client_id, role, last_action_time, send_notifications, password_reset_code, password_reset_time) FROM stdin;
+1	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-05-05 22:16:48.383653	t	\N	2013-05-05 02:41:23.449866
 3	erbol@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		2	client	2013-05-04 18:02:54.270777	f	abd9aeef114d88f28ac0ad83fecb70c25a7e22500872eab947ade90244889ee9	\N
 4	bob@bob.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Anton Belousov	\N	user	2013-05-04 18:23:59.902642	f	\N	\N
-1	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-05-05 16:15:37.727447	t	\N	2013-05-05 02:41:23.449866
 \.
 
 
