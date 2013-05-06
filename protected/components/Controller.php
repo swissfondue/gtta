@@ -35,6 +35,20 @@ class Controller extends CController
 
         $this->_requestTime  = microtime(true);
         $this->breadcrumbs[] = array(Yii::t('app', 'Home'), $this->createUrl('app/index'));
+
+        $system = System::model()->findAll();
+
+        if ($system) {
+            $system = $system[0];
+        } else {
+            $system = new System();
+        }
+
+        if (!$system->timezone) {
+            $system->timezone = "Europe/Zurich";
+        }
+
+        date_default_timezone_set($system->timezone);
     }
 
     /**

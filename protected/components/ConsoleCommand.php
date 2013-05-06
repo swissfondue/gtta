@@ -6,6 +6,25 @@
 class ConsoleCommand extends CConsoleCommand
 {
     /**
+     * Init a command object.
+     */
+    public function init() {
+        $system = System::model()->findAll();
+
+        if ($system) {
+            $system = $system[0];
+        } else {
+            $system = new System();
+        }
+
+        if (!$system->timezone) {
+            $system->timezone = "Europe/Zurich";
+        }
+
+        date_default_timezone_set($system->timezone);
+    }
+
+    /**
      * Renders a template.
      */
     protected function render($template, $data = array())

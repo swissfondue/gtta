@@ -6,6 +6,7 @@
  * The followings are the available columns in table 'system':
  * @property integer $id
  * @property string $backup
+ * @property string $timezone
  */
 class System extends CActiveRecord
 {
@@ -33,7 +34,7 @@ class System extends CActiveRecord
 	public function rules()
 	{
 		return array(
-            array( 'backup', 'safe' ),
+            array('backup, timezone', 'safe'),
 		);
 	}
 }

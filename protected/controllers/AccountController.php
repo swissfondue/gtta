@@ -69,7 +69,6 @@ class AccountController extends Controller
             'model' => $model,
             'user'  => $user
         ));
-
     }
 
     /**

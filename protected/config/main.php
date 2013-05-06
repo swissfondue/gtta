@@ -115,6 +115,9 @@ return array(
                 'client/<id:\d+>/logo'     => 'client/logo',
                 'client/logo/control'      => 'client/controllogo',
 
+                // settings
+                'settings' => 'settings/edit',
+
                 // checks
                 'checks/<page:\d+>'         => 'check/index',
                 'checks'                    => 'check/index',
@@ -318,7 +321,6 @@ return array(
         ),
 
         'tmpPath'            => '/tmp',
-        'timeZone'           => GTTA_PRODUCTION ? 'Europe/Zurich' : 'Europe/Moscow',
         'collapseCheckCount' => 20,
 
         'automation' => array(

@@ -438,8 +438,6 @@ class AutomationCommand extends ConsoleCommand
             $check->status = TargetCheck::STATUS_FINISHED;
             $check->save();
 
-            date_default_timezone_set(Yii::app()->params['timeZone']);
-
             $started  = new DateTime($check->started);
             $interval = time() - $started->getTimestamp();
 

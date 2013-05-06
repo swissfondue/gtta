@@ -69,6 +69,8 @@
                                         <b class="caret"></b>
                                     </a>
                                     <ul class="dropdown-menu">
+                                        <li <?php if (Yii::app()->controller->id == 'settings') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('settings/edit'); ?>"><?php echo Yii::t('app', 'Settings'); ?></a></li>
+                                        <li class="divider"></li>
                                         <li <?php if (Yii::app()->controller->id == 'check') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('check/index'); ?>"><?php echo Yii::t('app', 'Checks'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'reference') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('reference/index'); ?>"><?php echo Yii::t('app', 'References'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'user') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('user/index'); ?>"><?php echo Yii::t('app', 'Users'); ?></a></li>
