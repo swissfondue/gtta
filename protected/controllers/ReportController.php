@@ -803,7 +803,11 @@ class ReportController extends Controller
                             $table->getCell($row, 1)->setBorder($this->thinBorder);
                             $table->setFontForCellRange($this->boldFont, $row, 1, $row, 1);
                             $table->setBackgroundForCellRange('#F0F0F0', $row, 1, $row, 1);
-                            $table->writeToCell($row, 1, $check['name']);
+
+                            $table->getCell($row, 1)->writeBookmark(
+                                'check_' . $target['id'] . '_' . $check['id'],
+                                $check['name']
+                            );
 
                             $row++;
 
@@ -1143,6 +1147,7 @@ class ReportController extends Controller
         foreach ($targets as $target)
         {
             $targetData = array(
+                'id'            => $target->id,
                 'host'          => $target->host,
                 'description'   => $target->description,
                 'rating'        => 0.0,
@@ -1279,6 +1284,7 @@ class ReportController extends Controller
                     foreach ($checks as $check)
                     {
                         $checkData = array(
+                            'id'               => $check->id,
                             'name'             => $check->localizedName,
                             'background'       => $this->_prepareProjectReportText($check->localizedBackgroundInfo),
                             'question'         => $this->_prepareProjectReportText($check->localizedQuestion),
@@ -1357,13 +1363,15 @@ class ReportController extends Controller
                         if (in_array($check->targetChecks[0]->rating, array( TargetCheck::RATING_HIGH_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_LOW_RISK )))
                             $reducedChecks[] = array(
                                 'target' => array(
-                                    'host'        => $target->host,
+                                    'id' => $target->id,
+                                    'host' => $target->host,
                                     'description' => $target->description
                                 ),
-                                'name'     => $checkData['name'],
+                                'id' => $checkData['id'],
+                                'name' => $checkData['name'],
                                 'question' => $checkData['question'],
                                 'solution' => $checkData['solutions'] ? implode("\n", $checkData['solutions']) : Yii::t('app', 'N/A'),
-                                'rating'   => $check->targetChecks[0]->rating,
+                                'rating' => $check->targetChecks[0]->rating,
                             );
 
                         $controlData['rating']  += $checkData['rating'];
@@ -1886,7 +1894,11 @@ class ReportController extends Controller
 
                 foreach ($reducedChecks as $check)
                 {
-                    $table->getCell($row, 1)->writeText($check['target']['host'], $this->textFont);
+                    $table->getCell($row, 1)->writeHyperLink(
+                        '#check_' . $check['target']['id'] . '_' . $check['id'],
+                        $check['target']['host'],
+                        $this->textFont
+                    );
 
                     if ($check['target']['description'])
                     {
@@ -1894,7 +1906,8 @@ class ReportController extends Controller
                         $table->getCell($row, 1)->writeText($check['target']['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
                     }
 
-                    $table->getCell($row, 2)->writeText(
+                    $table->getCell($row, 2)->writeHyperLink(
+                        '#check_' . $check['target']['id'] . '_' . $check['id'],
                         $check['name'],
                         $this->textFont,
                         $this->noPar
