@@ -40,10 +40,13 @@ class AutomationCommand extends ConsoleCommand
         {
             $fileOutput = null;
 
-            if ($check->pid)
-            {
+            if ($check->pid) {
+                $fileName = Yii::app()->params['automation']['tempPath'] . '/' . $check->result_file;
                 $this->_killProcess($check->pid);
-                $fileOutput = file_get_contents(Yii::app()->params['automation']['tempPath'] . '/' . $check->result_file);
+
+                if (file_exists($fileName)) {
+                    $fileOutput = file_get_contents($fileName);
+                }
             }
 
             $check->result = $fileOutput ? $fileOutput : 'No output.';
@@ -67,7 +70,13 @@ class AutomationCommand extends ConsoleCommand
 
         foreach ($checks as $check)
         {
-            $fileOutput    = file_get_contents(Yii::app()->params['automation']['tempPath'] . '/' . $check->result_file);
+            $fileOutput = null;
+            $fileName = Yii::app()->params['automation']['tempPath'] . '/' . $check->result_file;
+
+            if (file_exists($fileName)) {
+                $fileOutput = file_get_contents($fileName);
+            }
+
             $check->result = $fileOutput;
 
             // if task died for some reason
@@ -232,7 +241,7 @@ class AutomationCommand extends ConsoleCommand
      * @param $interpreter
      * @return array
      */
-    private function _createCheckFiles($check, $interpreter) {
+    private function _createCheckFiles($check, $interpreter, $target) {
         $tempPath = Yii::app()->params['automation']['tempPath'];
         $scriptsPath = Yii::app()->params['automation']['scriptsPath'];
 
@@ -401,7 +410,7 @@ class AutomationCommand extends ConsoleCommand
             $check->result_file = $this->_generateFileName();
             $check->save();
 
-            $inputFiles = $this->_createCheckFiles($check, $interpreter);
+            $inputFiles = $this->_createCheckFiles($check, $interpreter, $target);
             chdir($scriptsPath);
 
             $command = array(
