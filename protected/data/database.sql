@@ -612,7 +612,7 @@ ALTER SEQUENCE login_history_id_seq OWNED BY login_history.id;
 -- Name: login_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('login_history_id_seq', 49, true);
+SELECT pg_catalog.setval('login_history_id_seq', 63, true);
 
 
 --
@@ -1093,7 +1093,8 @@ ALTER TABLE public.sessions OWNER TO gtta;
 
 CREATE TABLE system (
     id bigint NOT NULL,
-    backup timestamp without time zone
+    backup timestamp without time zone,
+    timezone character varying(1000)
 );
 
 
@@ -1281,7 +1282,7 @@ ALTER SEQUENCE targets_id_seq OWNED BY targets.id;
 -- Name: targets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('targets_id_seq', 6, true);
+SELECT pg_catalog.setval('targets_id_seq', 7, true);
 
 
 --
@@ -1298,7 +1299,9 @@ CREATE TABLE users (
     last_action_time timestamp without time zone,
     send_notifications boolean DEFAULT false NOT NULL,
     password_reset_code character varying(1000),
-    password_reset_time timestamp(6) without time zone
+    password_reset_time timestamp(6) without time zone,
+    show_reports boolean DEFAULT false NOT NULL,
+    show_details boolean DEFAULT false NOT NULL
 );
 
 
@@ -2060,6 +2063,20 @@ COPY login_history (id, user_id, user_name, create_time) FROM stdin;
 47	1	Oliver Muenchow	2013-05-05 13:02:39.753248
 48	1	Oliver Muenchow	2013-05-05 15:14:46.241212
 49	1	Oliver Muenchow	2013-05-05 21:53:34.830308
+50	1	Oliver Muenchow	2013-05-06 07:06:26.488798
+51	1	Oliver Muenchow	2013-05-06 09:46:18.608852
+52	1	Oliver Muenchow	2013-05-06 11:20:56.444186
+53	1	Oliver Muenchow	2013-05-07 00:02:45.951627
+54	3	erbol@gmail.com	2013-05-07 01:09:45.207636
+55	1	Oliver Muenchow	2013-05-10 14:15:49.369777
+56	1	Oliver Muenchow	2013-05-12 14:14:48.709753
+57	3	erbol@gmail.com	2013-05-12 14:20:55.225847
+58	1	Oliver Muenchow	2013-05-12 14:21:22.705745
+59	3	erbol@gmail.com	2013-05-12 14:21:38.308358
+60	1	Oliver Muenchow	2013-05-12 14:43:57.73245
+61	1	Oliver Muenchow	2013-05-12 14:44:13.23226
+62	3	erbol@gmail.com	2013-05-12 14:44:26.724086
+63	3	erbol@gmail.com	2013-05-13 04:24:57.650017
 \.
 
 
@@ -2081,7 +2098,6 @@ COPY project_details (id, project_id, subject, content) FROM stdin;
 COPY project_users (project_id, user_id, admin) FROM stdin;
 13	1	t
 1	3	f
-2	3	f
 13	4	f
 \.
 
@@ -2165,7 +2181,7 @@ COPY report_template_summary_l10n (report_template_summary_id, language_id, summ
 
 COPY report_templates (id, name, header_image_path, header_image_type, intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro, footer) FROM stdin;
 3	Yay ;)	\N	\N					\N	\N	\N	\N	\N	\N	\N	\N	\N
-1	Test Template	0caf7534e0fee7a603c2948652ab8de6815ccea0b277340d7122269f4a847c89	image/png	Test Template Intro<br><ul><li>The client is: {client}</li><li>The project is: {project}</li><li>Project year:&nbsp;<b>{year}</b></li></ul>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br><ol><li>Date from: {date.from}</li><li>Date to: {date.to}</li></ol>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}<br>This text goes after the list of targets.<br><b>well done<br><br>S-tats<br>{target.stats}<br><br>And here is a list of targets with controls lol:<br></b>{target.weakest}<br><b><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b><b>Here go top 5 vulns:<br></b>{vuln.list}<b><br></b>well done	Test Template Appendix<br><ol><li>one</li><li>two</li><li>three</li></ol>	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}<br><br><ul><li>hello</li><li>wtf is that</li></ul>No way<br><ol><li>one list</li><li>two lists</li></ol>	test one two&nbsp;{targets}<br><br>vuln distribution<br><br>with<br><ul><li>some</li><li>list</li></ul>	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}<br><br><ol><li>degree</li><li>list</li></ol>	risk&nbsp;targets {targets}<br><br>risk<br><ul><li>matrix</li><li>list</li></ul>	\N
+1	Test Template	0caf7534e0fee7a603c2948652ab8de6815ccea0b277340d7122269f4a847c89	image/png	Test Template Intro<br><ul><li>The client is: {client}</li><li>The project is: {project}</li><li>Project year:&nbsp;<b>{year}</b></li></ul>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br><ol><li>Date from: {date.from}</li><li>Date to: {date.to}</li></ol>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}<br>This text goes after the list of targets.<br><b>well done<br><br>S-tats<br>{target.stats}<br><br>And here is a list of targets with controls lol:<br></b>{target.weakest}<br><b><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b><b>Here go top 5 vulns:<br></b>{vuln.list}<b><br></b>well done	Test Template Appendix<br><ol><li>one</li><li>two</li><li>three</li></ol>	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}<br><br><ul><li>hello</li><li>wtf is that</li></ul>No way<br><ol><li>one list</li><li>two lists</li></ol>	test one two&nbsp;{targets}<br><br>vuln distribution<br><br>with<br><ul><li>some</li><li>list</li></ul>	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}<br><br><ol><li>degree</li><li>list</li></ol>	risk&nbsp;targets {targets}<br><br>risk<br><ul><li>matrix</li><li>list</li></ul>	1234 67 890 00 fuck
 \.
 
 
@@ -2176,8 +2192,8 @@ COPY report_templates (id, name, header_image_path, header_image_type, intro, ap
 COPY report_templates_l10n (report_template_id, language_id, name, intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro, footer) FROM stdin;
 3	1	Yay ;)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 3	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-1	2	zzz	Testen Templaten Intro	Testen Templaten Appendix	Worlda	\N	test eins zwei&nbsp;{targets}	test eins zwei&nbsp;{targets}	\N	\N	\N	\N	\N	\N	\N
-1	1	Test Template	Test Template Intro<br><ul><li>The client is: {client}</li><li>The project is: {project}</li><li>Project year:&nbsp;<b>{year}</b></li></ul>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br><ol><li>Date from: {date.from}</li><li>Date to: {date.to}</li></ol>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}<br>This text goes after the list of targets.<br><b>well done<br><br>S-tats<br>{target.stats}<br><br>And here is a list of targets with controls lol:<br></b>{target.weakest}<br><b><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b><b>Here go top 5 vulns:<br></b>{vuln.list}<b><br></b>well done	Test Template Appendix<br><ol><li>one</li><li>two</li><li>three</li></ol>	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}<br><br><ul><li>hello</li><li>wtf is that</li></ul>No way<br><ol><li>one list</li><li>two lists</li></ol>	test one two&nbsp;{targets}<br><br>vuln distribution<br><br>with<br><ul><li>some</li><li>list</li></ul>	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}<br><br><ol><li>degree</li><li>list</li></ol>	risk&nbsp;targets {targets}<br><br>risk<br><ul><li>matrix</li><li>list</li></ul>	\N
+1	2	zzz	Testen Templaten Intro	Testen Templaten Appendix	Worlda	\N	test eins zwei&nbsp;{targets}	test eins zwei&nbsp;{targets}	\N	\N	\N	\N	\N	\N	deutsche footer
+1	1	Test Template	Test Template Intro<br><ul><li>The client is: {client}</li><li>The project is: {project}</li><li>Project year:&nbsp;<b>{year}</b></li></ul>Project deadline: {deadline}<br>Project admin: {admin}<br>Project rating: {rating}<br><ol><li>Date from: {date.from}</li><li>Date to: {date.to}</li></ol>Targets: {targets}<br><br><b>Here's a list of targets:</b><br>{target.list}<br>This text goes after the list of targets.<br><b>well done<br><br>S-tats<br>{target.stats}<br><br>And here is a list of targets with controls lol:<br></b>{target.weakest}<br><b><br></b>number of checks: {checks} (info: {checks.info}, low: {checks.lo}, med: {checks.med}, high: {checks.hi})<br><b><br></b><b>Here go top 5 vulns:<br></b>{vuln.list}<b><br></b>well done	Test Template Appendix<br><ol><li>one</li><li>two</li><li>three</li></ol>	World&nbsp;{client}	Info Checks go here ;)&nbsp;{client}	test one two {targets}<br><br><ul><li>hello</li><li>wtf is that</li></ul>No way<br><ol><li>one list</li><li>two lists</li></ol>	test one two&nbsp;{targets}<br><br>vuln distribution<br><br>with<br><ul><li>some</li><li>list</li></ul>	reduced targets {targets}	high risk&nbsp;targets {targets}	med risk&nbsp;targets {targets}	low risk&nbsp;targets {targets}	degree&nbsp;targets {targets}<br><br><ol><li>degree</li><li>list</li></ol>	risk&nbsp;targets {targets}<br><br>risk<br><ul><li>matrix</li><li>list</li></ul>	1234 67 890 00 fuck
 \.
 
 
@@ -2278,12 +2294,42 @@ COPY risk_templates_l10n (risk_template_id, language_id, name) FROM stdin;
 --
 
 COPY sessions (id, expire, data) FROM stdin;
-s0lugsg4b22moc52v8esea0u10      	1367781406	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-aeluterhpsrmol913mbr6fd6f1      	1367780009	oF98Yqlv89ec-uP9O6BXJHRxWVMuZWTjwqhJDbW8H4gTvSd8PbIsDJXm-KjXUqSQaTuI6Jrj177enhZbFWxVY1T0hnuoAel8zmj1NCkyAy-QUnBhEzRtn2wd-Q1gLGLSsc4W1P1VLPkXmOeGFRz30zFXHMh3Ngzh7LJs1_kzhP5N2jGBfLb3OV2-jnpSO5Fn9UJ5CF9d38XzISoxPgpY7g..
-t8vuqsusj1mgrmvo3mqap7htu6      	1367781408	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-ini9b0leu31bpapjkef7r69sc0      	1367780009	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-ffhc0ntar3en1kahj0gjoiamn6      	1367781408	-jFSpYCFVl5dmbOoaJP3sUHDx09X91sKun8mAfi9TKwHEOfz24Kqsts7prYgHkzo07jiRzonUEH7nUBawFd_He7zyNeMhMNKu5s9vLahU3JJO2K3xPb1azjHaq9BZj3Dn5PMMyye0rx2mhWcOy1VpJpUIfrzQU8rqxFzJknq0OTwG3R8DjQaXQgGTT5r3kz9t7gqWVSjJZrg8fTHuetvgco8fZmCrHct8rDPYfYG0F76VDUiZXGwDNelHrCwQcmkHyMJZhE4d_UAp3yeICf0YwmLMmgvVQzCo8kq9gfD3WhM_0Mx8nsZ4XengpP2zsZt-Ol3x7Y64JECQEEY0sLJhQ..
-a3fjag1t2ldugs1hebkmuiu1i0      	1367780015	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+03uml9mubc59lv8m2u7i5h8661      	1368408396	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+fqf2ogfclrvn08alv1jgjgh5e7      	1368408531	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+mamor66g2tus9cls5lvvd4fgp3      	1368408539	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+rijf35dueateisoigfsfjk5hv3      	1368408582	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+10j1no4p02qm4up7o63uho8q76      	1368408920	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+mffqgckv7i372qirkhfbmo11q1      	1368408958	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+ss3tnk9s4boubfm6cbnmqca1s2      	1368408976	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+dgv8ho1uv0kq9tpthh3cl5j4v0      	1368408287	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+bajnqv4p1ucavuf3spkfn4dd43      	1368408309	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+n1ti8759cv1d4m92jruovnjkc4      	1368408978	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+521q48t81g2ko66cum4ok6uev5      	1368408407	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+a6cgmtaip5bq9v1p7dajcrlo25      	1368408534	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+2qlr6fog288b7ricis2c5d6mv7      	1368408541	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+tps0abejkhv1aadhke9psock53      	1368408584	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+mo34ogq96h0ed5hg4v3kchk3a1      	1368408923	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+trbaopsj87ahn113kr62p62ii3      	1368408960	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+vk0748hngegiuta8j9qcb20v87      	1368408975	AR_uZV4L6DvmRJgNkpdRjxkzZ5xBFeDKa481yZwstztw1H023jXfdVpiKU4ht5Hipf3zWdtJdrg_XctDjtOUfEF-1bwbtJsBFuMlmXwJ0gEH9QPG1f1dOBlCVsbrEL5aatY4htOu7eDfw_qtb97818qkGAtPhMrGfk6saO28FXO6JWJ6NDTYGEz8jN-iE5b6mTmSDC2T2-bv0B1HYHZLTTRr1RD0h1WRfW0iKhKTQ0Sgo7WN5APcWcqf2qDZVaBayu2Jiono6e-PtQ4T8yWJqBDVk5otO2fylrQvdZRiT0EkwQGk-eT7nKLCQak9uuE4dCZL_xwu_UPP3dv13MRMMxPgYTVsy-kyXaoBkFxCAKnaOeO5C9VO_onsPB4pHTUQR8V48SC9CvsDDmMGUzYBazaxqrJHZOiSWCYiJXZNEu0.
+u8q22ri0b42gcm609rumcnmej7      	1368408314	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+5amgr4jlhs5fvbv9ln3d76s9k2      	1368408410	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+lajitkhvtvc3em4ebjbetoqib2      	1368408537	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+v93v2q5acsel53k232hqt5e0v6      	1368408542	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+1f60t9bptvlqhad7u3ivvfsld6      	1368408770	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+suuaq8lbt7nsoj715lcfr856i5      	1368408928	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+8hn3i0c748ftpefg1jk4j70mk5      	1368408962	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+uae8opdicn9uho1d5cfqsp9kh6      	1368408985	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+ar8koio9o50mjsaroo7fr8o726      	1368408298	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+s8siqe4b6ed5usas2pos3ta3c5      	1368408316	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+qqfolm0snv3oe36be5t0qeiq10      	1368408414	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+bjpnp5f2c60d1m8sn863hpp765      	1368408538	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+anrdochdgr9g0evlr1flr13sb0      	1368408543	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+p81gdjqthfj6g350k30sf096m2      	1368408774	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+blmmpk53v606419ummr0ks4im1      	1368408930	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+bu6bv946jn45pid1l7ev6hooh5      	1368408973	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+tifckv17q9qf6gpiupasf77q80      	1368408988	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+tc2fv7e34jcmgtefrabrmcjas0      	1368408286	_fuig2EDXY-SG7U5skAM1p3jokeeJyDxm2A2lzm1q_CxKqUaD8glq2NVdFoKJeUS-nvbANcAPKp2pled3J1mzEkMWPGbho6PoQnphP9mUd0GUGKJuqQN32fZrzj1gCdaEnS8fTsJ-EhnjMrWgGDupT51nY5WpOg8JfGpBEnCQboQIN8PvMRnLvqcmHR_uQ_fXxfaM04WKNAslt_s3RyTkA..
+aoa91mcmm3bb5n0d1k04bpi6k7      	1368408301	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
 \.
 
 
@@ -2291,8 +2337,8 @@ a3fjag1t2ldugs1hebkmuiu1i0      	1367780015	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXS
 -- Data for Name: system; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY system (id, backup) FROM stdin;
-1	2012-11-21 17:55:00.535688
+COPY system (id, backup, timezone) FROM stdin;
+1	2012-11-21 17:55:00.535688	Europe/Zurich
 \.
 
 
@@ -2311,6 +2357,7 @@ COPY target_check_attachments (target_id, check_id, name, type, path, size) FROM
 
 COPY target_check_categories (target_id, check_category_id, advanced, check_count, finished_count, low_risk_count, med_risk_count, high_risk_count, info_count) FROM stdin;
 1	9	t	2	1	0	0	0	1
+7	1	t	17	1	0	0	0	0
 1	6	t	18	2	0	0	0	0
 2	3	t	4	0	0	0	0	0
 1	8	t	0	0	0	0	0	0
@@ -2348,12 +2395,27 @@ COPY target_check_inputs (target_id, check_input_id, value, file, check_id) FROM
 1	46	1	ca9b973efccbd438b561c0bbe293d5d8aa65bac36d2462c8d9112dccdc7175f1	41
 1	47	0	fa650a3dca3d2e54caaf729e55f2a7a278db85450b48c212cd011b17f4123c3c	41
 1	12	\N	\N	13
+1	48	0	1b2ff1f4be468757d37653c8a8d783a1718ebcf85853206314062b1f9a387a47	46
+1	49	0	0e20fedc2ebaa186018a65c6f99f9e0c2825e604e428bf3fb628c790d61648c3	46
+1	50	0	772449b5dc286ddad9d278b69b4c43ee3b321e9af9d1e759295bcea59a27903b	46
+1	51	0	e1a03ebbc1b7a80cfe03f4039c896abd4c2a24428301a29eeb17466c66897ec1	46
 1	11	\N	ab5cc45403bbbf854133a57dd176be8a79aea45e9b9107d45eb634ac763ea322	12
+1	52	0	26a42fe3d37cfb7a78f2829b02c65fb0dc6a46b7bc4b6dc275ab86a1cc2595c2	46
+1	53	sdfsdf	112eabfee5d18c154167958897b0a669aa17c372b654820615c839a0ff5b5531	46
+1	54	0	85f14afb07ca1856394103c673e29e1d85c6978ba8e23d66dcf5d71e25d3addb	46
+1	55	0	da8d32fc4a97e555126d07344c0de56bbdf3748235c76652d3488cccbe146f2d	46
+1	56	0	81f97fda1f738f66f3d358b5fd240b40de926ef8f9357932a6e20b32cb1aee9d	46
+1	57	0	fa00f703f15692c2bfbdf8aee7f8b1ec550ce9b237205c3873669492508c13c3	46
 1	8	10	a93b7ccbb92e169a839b12760bd3ea2df83e9fb57f69629d887962f0136672fc	8
 1	9	10	c3aaa0222672bd78ce935654e50172da8374d6a2366d4896cd6e111375b3480a	8
 1	10	1	f6d144ffb1ee26991b62293e5c059cc598e5e2c00fdbfc15fee0831e989c8385	8
 1	14	0	e2d4e99aedc6467c533ceb9c476dfb64b1767bdc8f86f8ed4cba103d488b4cec	16
 1	13	0	77cceff0199091fdf1e9e51e7a0c66602a5e9379db0ac1f19efa623362c983cd	15
+1	58	0	26e9992405cf4af800ed2414479ed87bb454feed917b42378d7d836321b8bd68	46
+7	1	asdfasdf	fdc23d613eaa4a8c4decc337a9041a19dfee2bdd5120af70d1ab451bd12c6268	1
+7	43	Some Default Value	3c48c889db7c9820d96e613d5c7022cb2330cf1500a153e1c285b807e4907e37	1
+7	44	hellooo	6ed92a6c70cf95eb72f3e04df7db15b30c5226f7700c44f1b71d0bb20d0e786b	1
+7	45	kindamultiplevaluestoselect	6e3ba614bab81da75f2c72da79a90d328f09f8e8e7dc41a1239fa10c6a01fbd0	1
 \.
 
 
@@ -2401,12 +2463,14 @@ COPY target_checks (target_id, check_id, result, target_file, rating, started, p
 1	16		39e7de7a2aad466f032a8a2f65d894c712d9f1b66651983c9969e44d3d26fa63	\N	2013-01-24 06:11:06.556805	\N	finished	82ebe7c26d634ad9f23b5ae5ecb12a4f8f80c178e633601916c2b51735860bb2	1	\N	\N	netprotect.ch	1	<gtta-table><columns><column width="0.3" name="Domain"/><column width="0.2" name="IP"/><column width="0.2" name="Whois"/><column width="0.3" name="Title"/></columns><row><cell>netprotect.com</cell><cell>54.243.62.158</cell><cell>NETPROTECT.COM</cell><cell>Unblock Us - smarter faster VPN</cell></row><row><cell>netprotect.info</cell><cell>82.98.86.173</cell><cell>na</cell><cell>netprotect.info - ÑÑÐ¾ Ð½Ð°Ð¸Ð»ÑÑÑÐ¸Ð¹ Ð¸ÑÑÐ¾ÑÐ½Ð¸Ðº Ð¸Ð½ÑÐ¾ÑÐ¼Ð°ÑÐ¸Ð¸ Ð¿Ð¾ ÑÐµÐ¼Ðµ netprotect. Ð­ÑÐ¾Ñ Ð²ÐµÐ±-ÑÐ°Ð¹Ñ Ð¿ÑÐ¾Ð´Ð°ÐµÑÑÑ</cell></row><row><cell>netprotect.net</cell><cell>208.91.197.54</cell><cell>NETPROTECT.NET</cell><cell>Loading...</cell></row><row><cell>netprotect.org</cell><cell>64.95.64.218</cell><cell>Buydomains.com</cell><cell>N/A</cell></row><row><cell>netprotect.ws</cell><cell>64.70.19.198</cell><cell>N/A</cell><cell>Find what you are looking for...</cell></row></gtta-table>
 1	1	kkkk	\N	med_risk	\N	\N	finished	\N	1	\N	\N	\N	1	<gtta-table>\n    <columns>\n        <column name="Value" width="0.3"/>\n        <column name="Name" width="0.3"/>\n        <column name="Data" width="0.4"/>\n    </columns>\n    <row>\n        <cell>1</cell>\n        <cell>1</cell>\n        <cell>1</cell>\n    </row>\n    <row>\n        <cell>1</cell>\n        <cell>1</cell>\n        <cell>1</cell>\n    </row>\n    <row>\n        <cell>1</cell>\n        <cell>1</cell>\n        <cell>1</cell>\n    </row>\n</gtta-table>
 1	45	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1	\N
-1	46	\n	896996d050a9d84c568b8d6aa3020f72abfc9a86b3ec556c38cd351ba25e96dc	\N	2013-05-05 16:15:30.903981	\N	finished	ee172921f8d4365a452b17800aa7d70f78571be4b65f585bbf3620f0ffea2916	1	\N	\N	netprotect.ch	1	\N
+1	46	TypeError: main() takes exactly 1 argument (12 given)\n	56ee3e7ede0b52eb03a4032f1816fc25f5194777d91e1f21b623aed6ab03ac5b	\N	2013-05-07 00:05:51.479232	\N	finished	deac86f1e15c8a5ccdfd693cb1e1167c3ecfb5f8d01ffb92fc4dd5b7a9a4f5f6	1	\N	\N	netprotect.ch	1	\N
 1	15		cf3067eb8f2c87ca32d5dcb8f99d51a3bd1241c63b4d60ea9d273e66d8412f1d	\N	2013-01-24 06:15:02.631314	\N	finished	aa3754015e2174188254e999ebde44af5ad7304677cb66d8f4231e0b90394206	1	\N	\N	netprotect.ch	1	<gtta-table><columns><column width="0.5" name="Domain"/><column width="0.5" name="IP"/></columns><row><cell>dev.netprotect.ch</cell><cell>81.6.58.118</cell></row><row><cell>Wildcard DNS: 15 hostname(s)</cell><cell>213.239.210.108</cell></row></gtta-table>
 1	10	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1	\N
 1	3	No output.	\N	\N	\N	\N	finished	\N	1	\N	\N	\N	1	\N
 1	27	tried 879 time(s) with 0 successful time(s)\n	d1ed11b5e9259aa95e347e6cfb242c6f29264193deff6dca98e7fd06e1ec0ca4	\N	2013-01-21 01:52:55.779798	\N	finished	30a05cb7ef48b856ec5256e9ee09e294c7a9fe0776f94879bc71ee50c2a2be63	1	\N	\N	onexchanger.com	1	\N
+7	3	DNS Servers for demonstratr.com:\n\tdns5.registrar-servers.com\n\tdns1.registrar-servers.com\n\tdns2.registrar-servers.com\n\tdns3.registrar-servers.com\n\tdns4.registrar-servers.com\n\tTesting dns5.registrar-servers.com\n\t\tRequest timed out or transfer not allowed.\n\tTesting dns1.registrar-servers.com\n\t\tRequest timed out or transfer not allowed.\n\tTesting dns2.registrar-servers.com\n\t\tRequest timed out or transfer not allowed.\n\tTesting dns3.registrar-servers.com\n\t\tRequest timed out or transfer not allowed.\n\tTesting dns4.registrar-servers.com\n\t\tRequest timed out or transfer not allowed.\n	acd1a6ae78a46ad070f4f2be1a97e0ae12c86e74869e88f7b9fcdf80563005f5	\N	2013-05-10 14:38:09.774509	\N	finished	ab7f25ec81dd9dcf0c7810262144b4f3ab43b67b03b5978ea7ce556711d5e292	1	\N	\N	\N	1	\N
 1	41	**** running Interesting files and dirs scanner ****\n+ interesting Files And Dirs takes awhile....\n+ interesting File or Dir Found: "/logon.php\r"\n+ Item "/logon.php\r" contains header: "Content-Length: 0" MAYBE a False Positive or is empty!\n+ interesting File or Dir Found: "/backend.php\r"\n+ Item "/backend.php\r" contains header: "Content-Length: 0" MAYBE a False Positive or is empty!\n+ interesting File or Dir Found: "/"\n	6b645ef5542a30fab667de4727ebeee69906af3bac2de527b3689cbd1e24d4dd	\N	2013-02-09 07:20:37.218053	\N	finished	a4664d7394c7d9a5948b7189a0172e319ab95c0e36892980421848a3fa8dcf10	1	\N	\N	demonstratr.com	1	\N
+7	1	TypeError: main() takes exactly 2 arguments (5 given)\n	14431c701c36525cb3eca2e89d4e804c1cbf6c2c1b581446767182e3e4c288e7	\N	2013-05-10 14:37:39.681385	\N	finished	342a17e59544412e93e4deb3a34679878075332f4c8c1d6bfb744dd6476df37a	1	\N	\N	\N	1	\N
 \.
 
 
@@ -2421,6 +2485,7 @@ COPY target_references (target_id, reference_id) FROM stdin;
 4	1
 5	1
 6	1
+7	1
 \.
 
 
@@ -2435,6 +2500,7 @@ COPY targets (id, project_id, host, description) FROM stdin;
 2	1	test.com	\N
 6	6	test.com	\N
 1	1	google.com	Main Webserver
+7	1	demonstratr.com	
 \.
 
 
@@ -2442,10 +2508,10 @@ COPY targets (id, project_id, host, description) FROM stdin;
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY users (id, email, password, name, client_id, role, last_action_time, send_notifications, password_reset_code, password_reset_time) FROM stdin;
-1	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-05-05 22:16:48.383653	t	\N	2013-05-05 02:41:23.449866
-3	erbol@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		2	client	2013-05-04 18:02:54.270777	f	abd9aeef114d88f28ac0ad83fecb70c25a7e22500872eab947ade90244889ee9	\N
-4	bob@bob.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Anton Belousov	\N	user	2013-05-04 18:23:59.902642	f	\N	\N
+COPY users (id, email, password, name, client_id, role, last_action_time, send_notifications, password_reset_code, password_reset_time, show_reports, show_details) FROM stdin;
+4	bob@bob.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Anton Belousov	\N	user	2013-05-04 18:23:59.902642	f	\N	\N	f	f
+3	erbol@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		2	client	2013-05-13 04:36:15.676483	f	abd9aeef114d88f28ac0ad83fecb70c25a7e22500872eab947ade90244889ee9	\N	t	t
+1	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-05-12 14:44:22.485837	t	\N	2013-05-05 02:41:23.449866	f	f
 \.
 
 

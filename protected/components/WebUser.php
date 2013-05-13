@@ -13,7 +13,7 @@ class WebUser extends CWebUser
     /**
      * Load model.
      */
-    protected function loadUserModel()
+    protected function _loadUserModel()
     {
         if ($this->isGuest)
             return;
@@ -32,7 +32,7 @@ class WebUser extends CWebUser
         if ($this->isGuest)
             return null;
 
-        $this->loadUserModel();
+        $this->_loadUserModel();
 
         return $this->_model->role;
     }
@@ -45,9 +45,35 @@ class WebUser extends CWebUser
         if ($this->isGuest)
             return null;
 
-        $this->loadUserModel();
+        $this->_loadUserModel();
 
         return $this->_model->client_id;
+    }
+
+    /**
+     * Get show reports
+     */
+    public function getShowReports() {
+        if ($this->isGuest) {
+            return null;
+        }
+
+        $this->_loadUserModel();
+
+        return $this->_model->show_reports;
+    }
+
+    /**
+     * Get show details
+     */
+    public function getShowDetails() {
+        if ($this->isGuest) {
+            return null;
+        }
+
+        $this->_loadUserModel();
+
+        return $this->_model->show_details;
     }
 
     /**
@@ -58,7 +84,7 @@ class WebUser extends CWebUser
         if ($this->isGuest)
             return null;
 
-        $this->loadUserModel();
+        $this->_loadUserModel();
 
         $this->_model->last_action_time = new CDbExpression('NOW()');
         $this->_model->save();

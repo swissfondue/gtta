@@ -28,6 +28,7 @@ class ReportController extends Controller
 		return array(
             'https',
 			'checkAuth',
+            'showReports',
 		);
 	}
 

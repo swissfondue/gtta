@@ -1,14 +1,17 @@
-<div class="active-header">
-    <div class="pull-right">
-        <ul class="nav nav-pills">
-            <li class="active"><a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
-            <li><a href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
-        </ul>
+<?php if (User::checkRole(User::ROLE_USER)): ?>
+    <div class="active-header">
+        <div class="pull-right">
+            <ul class="nav nav-pills">
+                <li class="active"><a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
+                <li><a href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+            </ul>
+        </div>
+
+        <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
     </div>
-
+<?php else: ?>
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
-</div>
-
+<?php endif; ?>
 <hr>
 
 <div class="container">
@@ -22,7 +25,9 @@
                             <th class="stats"><?php echo Yii::t('app', 'Risk Stats'); ?></th>
                             <th class="percent"><?php echo Yii::t('app', 'Completed'); ?></th>
                             <th class="check-count"><?php echo Yii::t('app', 'Checks'); ?></th>
-                            <th class="actions">&nbsp;</th>
+                            <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                <th class="actions">&nbsp;</th>
+                            <?php endif; ?>
                         </tr>
                         <?php foreach ($categories as $category): ?>
                             <tr>
@@ -49,9 +54,11 @@
                                         echo $checkCount;
                                     ?>
                                 </td>
-                                <td class="actions">
-                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="category.del(<?php echo $category->check_category_id; ?>);"><i class="icon icon-remove"></i></a>
-                                </td>
+                                <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                    <td class="actions">
+                                        <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="category.del(<?php echo $category->check_category_id; ?>);"><i class="icon icon-remove"></i></a>
+                                    </td>
+                                <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

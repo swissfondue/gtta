@@ -2,32 +2,35 @@
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.iframe-transport.js"></script>
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.fileupload.js"></script>
 
-<div class="pull-right buttons">
-    <div class="btn-group" data-toggle="buttons-radio">
-        <button class="btn <?php if (!$category->advanced) echo 'active'; ?>" onclick="user.check.setAdvanced('<?php echo $this->createUrl('project/savecategory', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>', 0);"><?php echo Yii::t('app', 'Basic'); ?></button>
-        <button class="btn <?php if ($category->advanced)  echo 'active'; ?>" onclick="user.check.setAdvanced('<?php echo $this->createUrl('project/savecategory', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>', 1);"><?php echo Yii::t('app', 'Advanced'); ?></button>
+<?php if (User::checkRole(User::ROLE_USER)): ?>
+    <div class="pull-right buttons">
+        <div class="btn-group" data-toggle="buttons-radio">
+            <button class="btn <?php if (!$category->advanced) echo 'active'; ?>" onclick="user.check.setAdvanced('<?php echo $this->createUrl('project/savecategory', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>', 0);"><?php echo Yii::t('app', 'Basic'); ?></button>
+            <button class="btn <?php if ($category->advanced)  echo 'active'; ?>" onclick="user.check.setAdvanced('<?php echo $this->createUrl('project/savecategory', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>', 1);"><?php echo Yii::t('app', 'Advanced'); ?></button>
+        </div>
     </div>
-</div>
 
-<div class="pull-right buttons">
-    <a class="btn" href="#expand-all" onclick="user.check.expandAll();"><i class="icon icon-arrow-down"></i> <?php echo Yii::t('app', 'Expand'); ?></a>&nbsp;
-    <a class="btn" href="#collapse-all" onclick="user.check.collapseAll();"><i class="icon icon-arrow-up"></i> <?php echo Yii::t('app', 'Collapse'); ?></a>&nbsp;
+    <div class="pull-right buttons">
+        <a class="btn" href="#expand-all" onclick="user.check.expandAll();"><i class="icon icon-arrow-down"></i> <?php echo Yii::t('app', 'Expand'); ?></a>&nbsp;
+        <a class="btn" href="#collapse-all" onclick="user.check.collapseAll();"><i class="icon icon-arrow-up"></i> <?php echo Yii::t('app', 'Collapse'); ?></a>&nbsp;
 
-    <?php
-        $hasAutomated = false;
+        <?php
+            $hasAutomated = false;
 
-        foreach ($checks as $check)
-            if ($check->automated)
-            {
-                $hasAutomated = true;
-                break;
-            }
+            foreach ($checks as $check)
+                if ($check->automated)
+                {
+                    $hasAutomated = true;
+                    break;
+                }
 
-        if ($hasAutomated):
-    ?>
-        <a class="btn" href="#start-all" onclick="user.check.startAll();"><i class="icon icon-play"></i> <?php echo Yii::t('app', 'Start'); ?></a>
-    <?php endif; ?>
-</div>
+            if ($hasAutomated):
+        ?>
+            <a class="btn" href="#start-all" onclick="user.check.startAll();"><i class="icon icon-play"></i> <?php echo Yii::t('app', 'Start'); ?></a>
+        <?php endif; ?>
+    </div>
+<?php endif; ?>
+
 <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 
 <hr>
@@ -97,8 +100,13 @@
                             <tbody>
                                 <tr>
                                     <td class="name">
-                                        <a href="#check-<?php echo $check->id; ?>" onclick="user.check.toggle(<?php echo $check->id; ?>);"><?php echo CHtml::encode($check->localizedName); ?></a>
-                                        <?php if ($check->automated): ?>
+                                        <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                            <a href="#check-<?php echo $check->id; ?>" onclick="user.check.toggle(<?php echo $check->id; ?>);"><?php echo CHtml::encode($check->localizedName); ?></a>
+                                        <?php else: ?>
+                                            <a href="#check-<?php echo $check->id; ?>" onclick="client.check.toggle(<?php echo $check->id; ?>);"><?php echo CHtml::encode($check->localizedName); ?></a>
+                                        <?php endif; ?>
+
+                                        <?php if ($check->automated && User::checkRole(User::ROLE_USER)): ?>
                                             <i class="icon-cog" title="<?php echo Yii::t('app', 'Automated'); ?>"></i>
                                         <?php endif; ?>
                                         <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
@@ -155,24 +163,26 @@
                                             &nbsp;
                                         <?php endif; ?>
                                     </td>
-                                    <td class="actions">
-                                        <?php if ($check->automated): ?>
-                                            <?php if (!$check->targetChecks || $check->targetChecks && in_array($check->targetChecks[0]->status, array( TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED ))): ?>
-                                                <a href="#start" title="<?php echo Yii::t('app', 'Start'); ?>" onclick="user.check.start(<?php echo $check->id; ?>);"><i class="icon icon-play"></i></a>
-                                            <?php elseif ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS): ?>
-                                                <a href="#stop" title="<?php echo Yii::t('app', 'Stop'); ?>" onclick="user.check.stop(<?php echo $check->id; ?>);"><i class="icon icon-stop"></i></a>
-                                            <?php else: ?>
-                                                <span class="disabled"><i class="icon icon-stop" title="<?php echo Yii::t('app', 'Stop'); ?>"></i></span>
+                                    <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                        <td class="actions">
+                                            <?php if ($check->automated): ?>
+                                                <?php if (!$check->targetChecks || $check->targetChecks && in_array($check->targetChecks[0]->status, array( TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED ))): ?>
+                                                    <a href="#start" title="<?php echo Yii::t('app', 'Start'); ?>" onclick="user.check.start(<?php echo $check->id; ?>);"><i class="icon icon-play"></i></a>
+                                                <?php elseif ($check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS): ?>
+                                                    <a href="#stop" title="<?php echo Yii::t('app', 'Stop'); ?>" onclick="user.check.stop(<?php echo $check->id; ?>);"><i class="icon icon-stop"></i></a>
+                                                <?php else: ?>
+                                                    <span class="disabled"><i class="icon icon-stop" title="<?php echo Yii::t('app', 'Stop'); ?>"></i></span>
+                                                <?php endif; ?>
+                                                &nbsp;
                                             <?php endif; ?>
-                                            &nbsp;
-                                        <?php endif; ?>
 
-                                        <?php if ($check->targetChecks && in_array($check->targetChecks[0]->status, array( TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED ))): ?>
-                                            <a href="#reset" title="<?php echo Yii::t('app', 'Reset'); ?>" onclick="user.check.reset(<?php echo $check->id; ?>);"><i class="icon icon-refresh"></i></a>
-                                        <?php else: ?>
-                                            <span class="disabled"><i class="icon icon-refresh" title="<?php echo Yii::t('app', 'Reset'); ?>"></i></span>
-                                        <?php endif; ?>
-                                    </td>
+                                            <?php if ($check->targetChecks && in_array($check->targetChecks[0]->status, array( TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED ))): ?>
+                                                <a href="#reset" title="<?php echo Yii::t('app', 'Reset'); ?>" onclick="user.check.reset(<?php echo $check->id; ?>);"><i class="icon icon-refresh"></i></a>
+                                            <?php else: ?>
+                                                <span class="disabled"><i class="icon icon-refresh" title="<?php echo Yii::t('app', 'Reset'); ?>"></i></span>
+                                            <?php endif; ?>
+                                        </td>
+                                    <?php endif; ?>
                                 </tr>
                             </tbody>
                         </table>
@@ -239,7 +249,7 @@
                                             <?php echo Yii::t('app', 'Override Target'); ?>
                                         </th>
                                         <td>
-                                            <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[overrideTarget]" id="TargetCheckEditForm_<?php echo $check->id; ?>_overrideTarget" value="<?php if ($check->targetChecks) echo CHtml::encode($check->targetChecks[0]->override_target); ?>" <?php if ($check->isRunning) echo 'readonly'; ?>>
+                                            <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[overrideTarget]" id="TargetCheckEditForm_<?php echo $check->id; ?>_overrideTarget" value="<?php if ($check->targetChecks) echo CHtml::encode($check->targetChecks[0]->override_target); ?>" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'readonly'; ?>>
                                         </td>
                                     </tr>
                                     <?php if ($check->protocol): ?>
@@ -248,7 +258,7 @@
                                                 <?php echo Yii::t('app', 'Protocol'); ?>
                                             </th>
                                             <td>
-                                                <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[protocol]" id="TargetCheckEditForm_<?php echo $check->id; ?>_protocol" value="<?php echo CHtml::encode($check->targetChecks ? $check->targetChecks[0]->protocol : $check->protocol); ?>" <?php if ($check->isRunning) echo 'readonly'; ?>>
+                                                <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[protocol]" id="TargetCheckEditForm_<?php echo $check->id; ?>_protocol" value="<?php echo CHtml::encode($check->targetChecks ? $check->targetChecks[0]->protocol : $check->protocol); ?>" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'readonly'; ?>>
                                             </td>
                                         </tr>
                                     <?php endif; ?>
@@ -258,12 +268,12 @@
                                                 <?php echo Yii::t('app', 'Port'); ?>
                                             </th>
                                             <td>
-                                                <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[port]" id="TargetCheckEditForm_<?php echo $check->id; ?>_port" value="<?php echo $check->targetChecks ? $check->targetChecks[0]->port : $check->port; ?>" <?php if ($check->isRunning) echo 'readonly'; ?>>
+                                                <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[port]" id="TargetCheckEditForm_<?php echo $check->id; ?>_port" value="<?php echo $check->targetChecks ? $check->targetChecks[0]->port : $check->port; ?>" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'readonly'; ?>>
                                             </td>
                                         </tr>
                                     <?php endif; ?>
                                 <?php endif; ?>
-                                <?php if ($check->inputs && $check->automated): ?>
+                                <?php if ($check->inputs && $check->automated && User::checkRole(User::ROLE_USER)): ?>
                                     <?php
                                         $groups = array();
                                         $group = array();
@@ -420,7 +430,7 @@
                                         <?php echo Yii::t('app', 'Result'); ?>
                                     </th>
                                     <td>
-                                        <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->isRunning) echo 'readonly'; ?>><?php if ($check->targetChecks) echo $check->targetChecks[0]->result; ?></textarea>
+                                        <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'readonly'; ?>><?php if ($check->targetChecks) echo $check->targetChecks[0]->result; ?></textarea>
 
                                         <div class="table-result">
                                             <?php
@@ -434,7 +444,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <?php if ($check->results): ?>
+                                <?php if ($check->results && User::checkRole(User::ROLE_USER)): ?>
                                     <tr>
                                         <th>
                                             <?php echo Yii::t('app', 'Insert Result'); ?>
@@ -469,7 +479,7 @@
                                                     <li>
                                                         <div class="solution-header">
                                                             <label class="radio">
-                                                                <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="radio" value="0" <?php if ($check->isRunning) echo 'disabled'; ?> <?php if (!$check->targetCheckSolutions) echo 'checked'; ?>>
+                                                                <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="radio" value="0" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'disabled'; ?> <?php if (!$check->targetCheckSolutions) echo 'checked'; ?>>
                                                                 <?php echo Yii::t('app', 'None'); ?>
                                                             </label>
                                                         </div>
@@ -491,15 +501,19 @@
                                                             ?>
                                                             <?php if ($check->multiple_solutions): ?>
                                                                 <label class="checkbox">
-                                                                    <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="checkbox" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning) echo 'disabled'; ?>>
+                                                                    <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="checkbox" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'disabled'; ?>>
                                                             <?php else: ?>
                                                                 <label class="radio">
-                                                                    <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="radio" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning) echo 'disabled'; ?>>
+                                                                    <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="radio" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'disabled'; ?>>
                                                             <?php endif; ?>
                                                                 <?php echo CHtml::encode($solution->localizedTitle); ?>
 
                                                                 <span class="solution-control" data-id="<?php echo $solution->id; ?>">
-                                                                    <a href="#solution" onclick="user.check.expandSolution(<?php echo $solution->id; ?>);"><i class="icon-chevron-down"></i></a>
+                                                                    <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                                                        <a href="#solution" onclick="user.check.expandSolution(<?php echo $solution->id; ?>);"><i class="icon-chevron-down"></i></a>
+                                                                    <?php else: ?>
+                                                                        <a href="#solution" onclick="client.check.expandSolution(<?php echo $solution->id; ?>);"><i class="icon-chevron-down"></i></a>
+                                                                    <?php endif; ?>
                                                                 </span>
                                                             </label>
                                                         </div>
@@ -513,36 +527,38 @@
                                         </td>
                                     </tr>
                                 <?php endif; ?>
-                                <tr>
-                                    <th>
-                                        <?php echo Yii::t('app', 'Attachments'); ?>
-                                    </th>
-                                    <td class="text">
-                                        <div class="file-input" id="upload-link-<?php echo $check->id; ?>">
-                                            <a href="#attachment"><?php echo Yii::t('app', 'New Attachment'); ?></a>
-                                            <input type="file" name="TargetCheckAttachmentUploadForm[attachment]" data-id="<?php echo $check->id; ?>" data-upload-url="<?php echo $this->createUrl('project/uploadattachment', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>">
-                                        </div>
+                                <?php if (User::checkRole(User::ROLE_USER) || $check->targetCheckAttachments): ?>
+                                    <tr>
+                                        <th>
+                                            <?php echo Yii::t('app', 'Attachments'); ?>
+                                        </th>
+                                        <td class="text">
+                                            <div class="file-input" id="upload-link-<?php echo $check->id; ?>">
+                                                <a href="#attachment"><?php echo Yii::t('app', 'New Attachment'); ?></a>
+                                                <input type="file" name="TargetCheckAttachmentUploadForm[attachment]" data-id="<?php echo $check->id; ?>" data-upload-url="<?php echo $this->createUrl('project/uploadattachment', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>">
+                                            </div>
 
-                                        <div class="upload-message hide" id="upload-message-<?php echo $check->id; ?>"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+                                            <div class="upload-message hide" id="upload-message-<?php echo $check->id; ?>"><?php echo Yii::t('app', 'Uploading...'); ?></div>
 
-                                        <table class="table attachment-list<?php if (!$check->targetCheckAttachments) echo ' hide'; ?>">
-                                            <tbody>
-                                                <?php if ($check->targetCheckAttachments): ?>
-                                                    <?php foreach ($check->targetCheckAttachments as $attachment): ?>
-                                                        <tr data-path="<?php echo $attachment->path; ?>" data-control-url="<?php echo $this->createUrl('project/controlattachment'); ?>">
-                                                            <td class="name">
-                                                                <a href="<?php echo $this->createUrl('project/attachment', array( 'path' => $attachment->path )); ?>"><?php echo CHtml::encode($attachment->name); ?></a>
-                                                            </td>
-                                                            <td class="actions">
-                                                                <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="user.check.delAttachment('<?php echo $attachment->path; ?>');"><i class="icon icon-remove"></i></a>
-                                                            </td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
-                                                <?php endif; ?>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
+                                            <table class="table attachment-list<?php if (!$check->targetCheckAttachments) echo ' hide'; ?>">
+                                                <tbody>
+                                                    <?php if ($check->targetCheckAttachments): ?>
+                                                        <?php foreach ($check->targetCheckAttachments as $attachment): ?>
+                                                            <tr data-path="<?php echo $attachment->path; ?>" data-control-url="<?php echo $this->createUrl('project/controlattachment'); ?>">
+                                                                <td class="name">
+                                                                    <a href="<?php echo $this->createUrl('project/attachment', array( 'path' => $attachment->path )); ?>"><?php echo CHtml::encode($attachment->name); ?></a>
+                                                                </td>
+                                                                <td class="actions">
+                                                                    <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="user.check.delAttachment('<?php echo $attachment->path; ?>');"><i class="icon icon-remove"></i></a>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
                                 <tr>
                                     <th>
                                         <?php echo Yii::t('app', 'Result Rating'); ?>
@@ -552,7 +568,7 @@
                                             <?php foreach(array( TargetCheck::RATING_NONE, TargetCheck::RATING_HIDDEN, TargetCheck::RATING_INFO, TargetCheck::RATING_LOW_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_HIGH_RISK ) as $rating): ?>
                                                 <li>
                                                     <label class="radio">
-                                                        <input type="radio" name="TargetCheckEditForm_<?php echo $check->id; ?>[rating]" value="<?php echo $rating; ?>" <?php if (($check->targetChecks && $check->targetChecks[0]->rating == $rating) || ($rating == TargetCheck::RATING_NONE && (!$check->targetChecks || !$check->targetChecks[0]->rating))) echo 'checked'; ?> <?php if ($check->isRunning) echo 'disabled'; ?>>
+                                                        <input type="radio" name="TargetCheckEditForm_<?php echo $check->id; ?>[rating]" value="<?php echo $rating; ?>" <?php if (($check->targetChecks && $check->targetChecks[0]->rating == $rating) || ($rating == TargetCheck::RATING_NONE && (!$check->targetChecks || !$check->targetChecks[0]->rating))) echo 'checked'; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'disabled'; ?>>
                                                         <?php echo $ratings[$rating]; ?>
                                                     </label>
                                                 </li>
@@ -560,15 +576,17 @@
                                         </ul>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>&nbsp;</td>
-                                    <td>
-                                        <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, false);" <?php if ($check->isRunning) echo 'disabled'; ?>><?php echo Yii::t('app', 'Save'); ?></button>&nbsp;
-                                        <?php if ($counter < count($checks) - 1): ?>
-                                            <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, true);" <?php if ($check->isRunning) echo 'disabled'; ?>><?php echo Yii::t('app', 'Save & Next'); ?></button>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
+                                <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                    <tr>
+                                        <td>&nbsp;</td>
+                                        <td>
+                                            <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, false);" <?php if ($check->isRunning) echo 'disabled'; ?>><?php echo Yii::t('app', 'Save'); ?></button>&nbsp;
+                                            <?php if ($counter < count($checks) - 1): ?>
+                                                <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, true);" <?php if ($check->isRunning) echo 'disabled'; ?>><?php echo Yii::t('app', 'Save & Next'); ?></button>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>

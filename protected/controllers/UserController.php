@@ -72,13 +72,14 @@ class UserController extends Controller
 
 		$model = new UserEditForm($id ? UserEditForm::EDIT_USER_SCENARIO : UserEditForm::ADD_USER_SCENARIO);
 
-        if (!$newRecord)
-        {
-            $model->email    = $user->email;
-            $model->name     = $user->name;
-            $model->role     = $user->role;
+        if (!$newRecord) {
+            $model->email = $user->email;
+            $model->name = $user->name;
+            $model->role = $user->role;
             $model->clientId = $user->client_id;
             $model->sendNotifications = $user->send_notifications;
+            $model->showReports = $user->show_reports;
+            $model->showDetails = $user->show_details;
         }
 
 		// collect user input data
@@ -92,6 +93,14 @@ class UserController extends Controller
 
                 if ($user->role == User::ROLE_CLIENT || !isset($_POST['UserEditForm']['sendNotifications']))
                     $model->sendNotifications = false;
+
+                if (!isset($_POST['UserEditForm']['showDetails'])) {
+                    $model->showDetails = false;
+                }
+
+                if (!isset($_POST['UserEditForm']['showReports'])) {
+                    $model->showReports = false;
+                }
 
                 if (!$checkEmail || $checkEmail->id == $user->id)
                 {
@@ -113,6 +122,14 @@ class UserController extends Controller
 
                     if ($model->password)
                         $user->password = hash('sha256', $model->password);
+
+                    if ($user->role == User::ROLE_CLIENT) {
+                        $user->show_details = $model->showDetails;
+                        $user->show_reports = $model->showReports;
+                    } else {
+                        $user->show_details = false;
+                        $user->show_reports = false;
+                    }
 
                     $user->save();
 

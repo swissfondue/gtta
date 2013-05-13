@@ -42,7 +42,7 @@
                         <?php foreach ($targets as $target): ?>
                             <tr data-id="<?php echo $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controltarget'); ?>">
                                 <td class="target">
-                                    <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                    <?php if (User::checkRole(User::ROLE_USER) || Yii::app()->user->getShowDetails()): ?>
                                         <a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo CHtml::encode($target->host); ?></a>
                                     <?php else: ?>
                                         <?php echo CHtml::encode($target->host); ?>
@@ -55,7 +55,7 @@
                                     <div class="categories">
                                         <?php if ($target->categories): ?>
                                             <?php foreach ($target->categories as $category): ?>
-                                                <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                                <?php if (User::checkRole(User::ROLE_USER) || Yii::app()->user->getShowDetails()): ?>
                                                     <a href="<?php echo $this->createUrl('project/checks', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->id )); ?>"><span class="label label-target-category"><?php echo CHtml::encode($category->localizedName); ?></span></a>
                                                 <?php else: ?>
                                                     <span class="label label-target-category"><?php echo CHtml::encode($category->localizedName); ?></span>

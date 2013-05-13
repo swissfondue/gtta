@@ -118,4 +118,26 @@ class Controller extends CController
 
         $filterChain->run();
     }
+
+    /**
+     * Show reports filter.
+     */
+    public function filterShowReports($filterChain) {
+        if (User::checkRole(User::ROLE_CLIENT) && !Yii::app()->user->getShowReports()) {
+            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+        }
+
+        $filterChain->run();
+    }
+
+    /**
+     * Show details filter.
+     */
+    public function filterShowDetails($filterChain) {
+        if (User::checkRole(User::ROLE_CLIENT) && !Yii::app()->user->getShowDetails()) {
+            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+        }
+
+        $filterChain->run();
+    }
 }

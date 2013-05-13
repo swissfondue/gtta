@@ -36,11 +36,18 @@ function Admin()
         /**
          * Display/hide client field.
          */
-        this.toggleClientField = function () {
-            if ($('#UserEditForm_role').val() == 'client')
+        this.toggleClientFields = function () {
+            if ($('#UserEditForm_role').val() == 'client') {
                 $('#client-input').show();
-            else
+                $('#show-details').show();
+                $('#show-reports').show();
+                $('#send-notifications').hide();
+            } else {
                 $('#client-input').hide();
+                $('#show-details').hide();
+                $('#show-reports').hide();
+                $('#send-notifications').show();
+            }
         };
 
         /**

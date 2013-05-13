@@ -37,19 +37,10 @@
             </div>
         </div>
 
-        <?php if (!$user->isNewRecord && $user->role != User::ROLE_CLIENT): ?>
-            <div class="control-group">
-                <label class="control-label" for="UserEditForm_sendNotifications"><?php echo Yii::t('app', 'Send Notifications'); ?></label>
-                <div class="controls">
-                    <input type="checkbox" id="UserEditForm_sendNotifications" name="UserEditForm[sendNotifications]" value="1" <?php if ($model->sendNotifications) echo 'checked="checked"'; ?>>
-                </div>
-            </div>
-        <?php endif; ?>
-
         <div class="control-group <?php if ($model->getError('role')) echo 'error'; ?>">
             <label class="control-label" for="UserEditForm_role"><?php echo Yii::t('app', 'Role'); ?></label>
             <div class="controls">
-                <select class="input-xlarge" id="UserEditForm_role" name="UserEditForm[role]" onchange="admin.user.toggleClientField();">
+                <select class="input-xlarge" id="UserEditForm_role" name="UserEditForm[role]" onchange="admin.user.toggleClientFields();">
                     <?php foreach ($roles as $k => $v): ?>
                         <option value="<?php echo $k; ?>" <?php if ($k == $model->role) echo 'selected'; ?>><?php echo CHtml::encode($v); ?></option>
                     <?php endforeach; ?>
@@ -92,6 +83,27 @@
                 <?php if ($model->getError('passwordConfirmation')): ?>
                     <p class="help-block"><?php echo $model->getError('passwordConfirmation'); ?></p>
                 <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($model->role == User::ROLE_CLIENT) echo 'hide'; ?>" id="send-notifications">
+            <label class="control-label" for="UserEditForm_sendNotifications"><?php echo Yii::t('app', 'Send Notifications'); ?></label>
+            <div class="controls">
+                <input type="checkbox" id="UserEditForm_sendNotifications" name="UserEditForm[sendNotifications]" value="1" <?php if ($model->sendNotifications) echo 'checked="checked"'; ?>>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($model->role != User::ROLE_CLIENT) echo 'hide'; ?>" id="show-reports">
+            <label class="control-label" for="UserEditForm_showReports"><?php echo Yii::t('app', 'Show Reports'); ?></label>
+            <div class="controls">
+                <input type="checkbox" id="UserEditForm_showReports" name="UserEditForm[showReports]" value="1" <?php if ($model->showReports) echo 'checked="checked"'; ?>>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($model->role != User::ROLE_CLIENT) echo 'hide'; ?>" id="show-details">
+            <label class="control-label" for="UserEditForm_showDetails"><?php echo Yii::t('app', 'Show Details'); ?></label>
+            <div class="controls">
+                <input type="checkbox" id="UserEditForm_showDetails" name="UserEditForm[showDetails]" value="1" <?php if ($model->showDetails) echo 'checked="checked"'; ?>>
             </div>
         </div>
 

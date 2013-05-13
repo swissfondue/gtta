@@ -46,7 +46,17 @@ class UserEditForm extends CFormModel
      */
     public $clientId;
 
-	/**
+    /**
+     * @var boolean show reports.
+     */
+    public $showReports;
+
+    /**
+     * @var boolean show details.
+     */
+    public $showDetails;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules()
@@ -59,7 +69,7 @@ class UserEditForm extends CFormModel
             array( 'passwordConfirmation', 'compare', 'compareAttribute' => 'password' ),
             array( 'password', 'safe', 'on' => self::EDIT_USER_SCENARIO ),
             array( 'role', 'in', 'range' => array( User::ROLE_ADMIN, User::ROLE_CLIENT, User::ROLE_USER ) ),
-            array( 'sendNotifications', 'boolean' ),
+            array( 'sendNotifications, showReports, showDetails', 'boolean' ),
             array( 'clientId', 'checkClient' ),
 		);
 	}
@@ -77,6 +87,8 @@ class UserEditForm extends CFormModel
             'sendNotifications'    => Yii::t('app', 'Send Notifications'),
             'role'                 => Yii::t('app', 'Role'),
             'clientId'             => Yii::t('app', 'Client'),
+            'showReports'          => Yii::t('app', 'Show Reports'),
+            'showDetails'          => Yii::t('app', 'Show Details'),
 		);
 	}
 
