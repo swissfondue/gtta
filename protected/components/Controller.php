@@ -63,14 +63,32 @@ class Controller extends CController
     /**
      * If user is not authenticated, redirect to the login page.
      */
-    public function filterCheckAuth($filterChain)
-    {
+    public function filterCheckAuth($filterChain) {
         Yii::app()->user->loginUrl = $this->createUrl('app/login');
 
-        if (Yii::app()->user->isGuest)
-        {
+        if (Yii::app()->user->isGuest) {
             Yii::app()->user->loginRequired();
             return;
+        }
+
+        if (Yii::app()->user->getCertificateRequired()) {
+            $serial = Yii::app()->user->getCertificateSerial();
+            $issuer = Yii::app()->user->getCertificateIssuer();
+            $email = Yii::app()->user->getEmail();
+
+            if ($serial &&
+                $issuer && (
+                    !isset($_SERVER["SSL_CLIENT_VERIFY"]) || $_SERVER["SSL_CLIENT_VERIFY"] != "SUCCESS" ||
+                    !isset($_SERVER["SSL_CLIENT_M_SERIAL"]) || $serial != $_SERVER["SSL_CLIENT_M_SERIAL"] ||
+                    !isset($_SERVER["SSL_CLIENT_I_DN"]) || $issuer != $_SERVER["SSL_CLIENT_I_DN"] ||
+                    !isset($_SERVER["SSL_CLIENT_S_DN_Email"]) || $email != $_SERVER["SSL_CLIENT_S_DN_Email"]
+                )
+            ) {
+                Yii::app()->user->logout();
+		        $this->redirect(Yii::app()->homeUrl);
+
+                return;
+            }
         }
 
         // update last action time for logged in users

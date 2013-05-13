@@ -107,6 +107,25 @@
             </div>
         </div>
 
+        <div class="control-group">
+            <label class="control-label"><?php echo Yii::t('app', 'Current Certificate'); ?></label>
+            <div class="controls form-text">
+                <?php if ($user->certificate_serial): ?>
+                    <?php echo $user->certificate_serial; ?>
+                <?php else: ?>
+                    <?php echo Yii::t('app', 'N/A'); ?>
+                <?php endif; ?>
+                <a href="<?php echo $this->createUrl('user/certificate', array('id' => $user->id)); ?>" title="<?php echo Yii::t('app', 'Generate New'); ?>"><i class="icon icon-refresh"></i></a>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="UserEditForm_certificateRequired"><?php echo Yii::t('app', 'Certificate Required'); ?></label>
+            <div class="controls">
+                <input type="checkbox" id="UserEditForm_certificateRequired" name="UserEditForm[certificateRequired]" value="1" <?php if ($model->certificateRequired) echo 'checked="checked"'; ?>>
+            </div>
+        </div>
+
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>
         </div>

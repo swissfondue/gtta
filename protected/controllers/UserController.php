@@ -80,6 +80,7 @@ class UserController extends Controller
             $model->sendNotifications = $user->send_notifications;
             $model->showReports = $user->show_reports;
             $model->showDetails = $user->show_details;
+            $model->certificateRequired = $user->certificate_required;
         }
 
 		// collect user input data
@@ -102,12 +103,17 @@ class UserController extends Controller
                     $model->showReports = false;
                 }
 
+                if (!isset($_POST['UserEditForm']['certificateRequired'])) {
+                    $model->certificateRequired = false;
+                }
+
                 if (!$checkEmail || $checkEmail->id == $user->id)
                 {
                     $user->email = $model->email;
                     $user->name  = $model->name;
                     $user->role  = $model->role;
                     $user->send_notifications = $model->sendNotifications;
+                    $user->certificate_required = $model->certificateRequired;
 
                     // delete all projects from this client account
                     if (!$newRecord && $user->role == User::ROLE_CLIENT && $model->clientId != $user->client_id)
@@ -486,5 +492,12 @@ class UserController extends Controller
         }
 
         echo $response->serialize();
+    }
+
+    /**
+     * Generate certificate
+     */
+    public function actionCertificate($id) {
+        Certificate::generate($id);
     }
 }

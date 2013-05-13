@@ -12,7 +12,7 @@ class AccountController extends Controller
 	{
 		return array(
             'https',
-			'checkAuth + edit',
+			'checkAuth + edit, certificate',
 		);
 	}
 
@@ -27,6 +27,7 @@ class AccountController extends Controller
         $model->email = $user->email;
         $model->name = $user->name;
         $model->sendNotifications = $user->send_notifications;
+        $model->certificateRequired = $user->certificate_required;
 
         // collect user input data
 		if (isset($_POST['AccountEditForm']))
@@ -35,6 +36,10 @@ class AccountController extends Controller
 
             if (Yii::app()->user->role == User::ROLE_CLIENT || !isset($_POST['AccountEditForm']['sendNotifications']))
                 $model->sendNotifications = false;
+
+            if (!isset($_POST['AccountEditForm']['certificateRequired'])) {
+                $model->certificateRequired = false;
+            }
 
 			if ($model->validate())
             {
@@ -45,6 +50,7 @@ class AccountController extends Controller
                     $user->email = $model->email;
                     $user->name = $model->name;
                     $user->send_notifications = $model->sendNotifications;
+                    $user->certificate_required = $model->certificateRequired;
 
                     if ($model->password)
                         $user->password = hash('sha256', $model->password);
@@ -164,5 +170,12 @@ class AccountController extends Controller
             'model' => $model,
             'user'  => $user
         ));
+    }
+
+    /**
+     * Generate certificate
+     */
+    public function actionCertificate() {
+        Certificate::generate(Yii::app()->user->id);
     }
 }

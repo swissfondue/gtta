@@ -44,6 +44,7 @@ return array(
                 // account
                 '<action:(login|logout)>' => 'app/<action>',
                 'account' => 'account/edit',
+                'account/certificate' => 'account/certificate',
                 'account/restore' => 'account/restore',
                 'account/restore/<code:[a-z\d]+>' => 'account/changepassword',
 
@@ -212,6 +213,7 @@ return array(
                 'user/<id:\d+>/edit' => 'user/edit',
                 'user/new'           => 'user/edit',
                 'user/control'       => 'user/control',
+                'user/<id:\d+>/certificate' => 'user/certificate',
 
                 // user projects
                 'user/<id:\d+>/projects/<page:\d+>' => 'user/projects',

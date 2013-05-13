@@ -89,4 +89,56 @@ class WebUser extends CWebUser
         $this->_model->last_action_time = new CDbExpression('NOW()');
         $this->_model->save();
     }
+
+    /**
+     * Get certificate required.
+     */
+    public function getCertificateRequired() {
+        if ($this->isGuest) {
+            return null;
+        }
+
+        $this->_loadUserModel();
+
+        return $this->_model->certificate_required;
+    }
+
+    /**
+     * Get certificate serial number.
+     */
+    public function getCertificateSerial() {
+        if ($this->isGuest) {
+            return null;
+        }
+
+        $this->_loadUserModel();
+
+        return $this->_model->certificate_serial;
+    }
+
+    /**
+     * Get certificate issuer DN.
+     */
+    public function getCertificateIssuer() {
+        if ($this->isGuest) {
+            return null;
+        }
+
+        $this->_loadUserModel();
+
+        return $this->_model->certificate_issuer;
+    }
+
+    /**
+     * Get email.
+     */
+    public function getEmail() {
+        if ($this->isGuest) {
+            return null;
+        }
+
+        $this->_loadUserModel();
+
+        return $this->_model->email;
+    }
 }

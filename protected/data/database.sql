@@ -612,7 +612,7 @@ ALTER SEQUENCE login_history_id_seq OWNED BY login_history.id;
 -- Name: login_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('login_history_id_seq', 63, true);
+SELECT pg_catalog.setval('login_history_id_seq', 91, true);
 
 
 --
@@ -1301,7 +1301,10 @@ CREATE TABLE users (
     password_reset_code character varying(1000),
     password_reset_time timestamp(6) without time zone,
     show_reports boolean DEFAULT false NOT NULL,
-    show_details boolean DEFAULT false NOT NULL
+    show_details boolean DEFAULT false NOT NULL,
+    certificate_required boolean DEFAULT false NOT NULL,
+    certificate_serial character varying(1000),
+    certificate_issuer character varying(1000)
 );
 
 
@@ -2077,6 +2080,34 @@ COPY login_history (id, user_id, user_name, create_time) FROM stdin;
 61	1	Oliver Muenchow	2013-05-12 14:44:13.23226
 62	3	erbol@gmail.com	2013-05-12 14:44:26.724086
 63	3	erbol@gmail.com	2013-05-13 04:24:57.650017
+64	1	Oliver Muenchow	2013-05-13 04:42:46.659082
+65	1	Oliver Muenchow	2013-05-13 06:49:37.443378
+66	1	Oliver Muenchow	2013-05-13 06:53:20.382185
+67	1	Oliver Muenchow	2013-05-13 06:54:03.532392
+68	1	Oliver Muenchow	2013-05-13 06:54:10.715511
+69	1	Oliver Muenchow	2013-05-13 06:54:37.632413
+70	1	Oliver Muenchow	2013-05-13 06:55:04.648358
+71	1	Oliver Muenchow	2013-05-13 06:55:31.848323
+72	1	Oliver Muenchow	2013-05-13 06:58:00.675492
+73	1	Oliver Muenchow	2013-05-13 06:58:32.454467
+74	1	Oliver Muenchow	2013-05-13 06:58:59.610713
+75	1	Oliver Muenchow	2013-05-13 06:59:09.381016
+76	1	Oliver Muenchow	2013-05-13 07:01:11.860036
+77	3	erbol@gmail.com	2013-05-13 07:01:16.27627
+78	1	Oliver Muenchow	2013-05-13 07:09:00.013513
+79	1	Oliver Muenchow	2013-05-13 07:09:00.126513
+80	1	Oliver Muenchow	2013-05-13 07:14:06.042734
+81	1	Oliver Muenchow	2013-05-13 07:14:35.116576
+82	1	Oliver Muenchow	2013-05-13 07:16:55.641998
+83	1	Oliver Muenchow	2013-05-13 09:40:00.374686
+84	1	Oliver Muenchow	2013-05-13 09:50:50.611682
+85	1	Oliver Muenchow	2013-05-13 14:30:44.956955
+86	1	Oliver Muenchow	2013-05-13 14:51:24.786528
+87	1	Oliver Muenchow	2013-05-13 14:52:51.947255
+88	1	Oliver Muenchow	2013-05-13 15:43:56.439016
+89	1	Oliver Muenchow	2013-05-13 15:45:52.856195
+90	3	erbol@gmail.com	2013-05-13 15:54:37.959878
+91	1	Oliver Muenchow	2013-05-13 15:54:51.981638
 \.
 
 
@@ -2294,42 +2325,45 @@ COPY risk_templates_l10n (risk_template_id, language_id, name) FROM stdin;
 --
 
 COPY sessions (id, expire, data) FROM stdin;
-03uml9mubc59lv8m2u7i5h8661      	1368408396	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-fqf2ogfclrvn08alv1jgjgh5e7      	1368408531	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-mamor66g2tus9cls5lvvd4fgp3      	1368408539	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-rijf35dueateisoigfsfjk5hv3      	1368408582	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-10j1no4p02qm4up7o63uho8q76      	1368408920	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-mffqgckv7i372qirkhfbmo11q1      	1368408958	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-ss3tnk9s4boubfm6cbnmqca1s2      	1368408976	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-dgv8ho1uv0kq9tpthh3cl5j4v0      	1368408287	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-bajnqv4p1ucavuf3spkfn4dd43      	1368408309	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-n1ti8759cv1d4m92jruovnjkc4      	1368408978	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-521q48t81g2ko66cum4ok6uev5      	1368408407	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-a6cgmtaip5bq9v1p7dajcrlo25      	1368408534	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-2qlr6fog288b7ricis2c5d6mv7      	1368408541	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-tps0abejkhv1aadhke9psock53      	1368408584	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-mo34ogq96h0ed5hg4v3kchk3a1      	1368408923	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-trbaopsj87ahn113kr62p62ii3      	1368408960	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-vk0748hngegiuta8j9qcb20v87      	1368408975	AR_uZV4L6DvmRJgNkpdRjxkzZ5xBFeDKa481yZwstztw1H023jXfdVpiKU4ht5Hipf3zWdtJdrg_XctDjtOUfEF-1bwbtJsBFuMlmXwJ0gEH9QPG1f1dOBlCVsbrEL5aatY4htOu7eDfw_qtb97818qkGAtPhMrGfk6saO28FXO6JWJ6NDTYGEz8jN-iE5b6mTmSDC2T2-bv0B1HYHZLTTRr1RD0h1WRfW0iKhKTQ0Sgo7WN5APcWcqf2qDZVaBayu2Jiono6e-PtQ4T8yWJqBDVk5otO2fylrQvdZRiT0EkwQGk-eT7nKLCQak9uuE4dCZL_xwu_UPP3dv13MRMMxPgYTVsy-kyXaoBkFxCAKnaOeO5C9VO_onsPB4pHTUQR8V48SC9CvsDDmMGUzYBazaxqrJHZOiSWCYiJXZNEu0.
-u8q22ri0b42gcm609rumcnmej7      	1368408314	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-5amgr4jlhs5fvbv9ln3d76s9k2      	1368408410	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-lajitkhvtvc3em4ebjbetoqib2      	1368408537	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-v93v2q5acsel53k232hqt5e0v6      	1368408542	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-1f60t9bptvlqhad7u3ivvfsld6      	1368408770	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-suuaq8lbt7nsoj715lcfr856i5      	1368408928	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-8hn3i0c748ftpefg1jk4j70mk5      	1368408962	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-uae8opdicn9uho1d5cfqsp9kh6      	1368408985	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-ar8koio9o50mjsaroo7fr8o726      	1368408298	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-s8siqe4b6ed5usas2pos3ta3c5      	1368408316	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-qqfolm0snv3oe36be5t0qeiq10      	1368408414	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-bjpnp5f2c60d1m8sn863hpp765      	1368408538	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-anrdochdgr9g0evlr1flr13sb0      	1368408543	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-p81gdjqthfj6g350k30sf096m2      	1368408774	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-blmmpk53v606419ummr0ks4im1      	1368408930	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-bu6bv946jn45pid1l7ev6hooh5      	1368408973	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-tifckv17q9qf6gpiupasf77q80      	1368408988	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
-tc2fv7e34jcmgtefrabrmcjas0      	1368408286	_fuig2EDXY-SG7U5skAM1p3jokeeJyDxm2A2lzm1q_CxKqUaD8glq2NVdFoKJeUS-nvbANcAPKp2pled3J1mzEkMWPGbho6PoQnphP9mUd0GUGKJuqQN32fZrzj1gCdaEnS8fTsJ-EhnjMrWgGDupT51nY5WpOg8JfGpBEnCQboQIN8PvMRnLvqcmHR_uQ_fXxfaM04WKNAslt_s3RyTkA..
-aoa91mcmm3bb5n0d1k04bpi6k7      	1368408301	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+e5454s5gutcmjqrj9n3j7idn82      	1368449153	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+l5pt2fufuf3gmjh87rt2kg83f7      	1368449277	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+r88tj3lv5kj9uauotj3t4fnun7      	1368448935	CJsD3bCC_iSfctRmc2sXxiqY2IF5VnZeA_2p7tCx6hyqLsXvIB5P_omM7ruKd2KaSiIkczKCooN3HC7LXTW93MDayQkTbXqa-QvuePT3cGlMonPNCC4GX4eVCg0x33kqYWZu_1cE80aGSBWRM-J47NtLbddp-TANOtP_3szSVouN6Vs_c6jmSOSjKqKMo1ve
+6dgqlm4p6747ju08ple68sp617      	1368448936	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+kd54slge4n6gmjodfg2s1gukh3      	1368449574	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+113av8dq8lkfe0ggibnqp28cs1      	1368449607	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+dqrbi1p08a8aoss6krj08uicn3      	1368449633	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+3agihq3i7drc9e24jat9j968d7      	1368448796	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+pin42732sbqs9lhfkfsjuvkba6      	1368448880	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+madvu36lvsat7m7mku3skft6h7      	1368449692	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+33qfeamja7qbqvanuu047if8t1      	1368449119	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+ulrmli2o78ipcidufjjmts8tc2      	1368449135	CJsD3bCC_iSfctRmc2sXxiqY2IF5VnZeA_2p7tCx6hyqLsXvIB5P_omM7ruKd2KaSiIkczKCooN3HC7LXTW93MDayQkTbXqa-QvuePT3cGlMonPNCC4GX4eVCg0x33kqYWZu_1cE80aGSBWRM-J47NtLbddp-TANOtP_3szSVouN6Vs_c6jmSOSjKqKMo1ve
+d7m5cu8kbgsjh13cn2u0ot4p71      	1368448790	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+3ecdla4qfhf6uu3sn5f0vpi5f1      	1368448798	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+0u76lvvvrf8fmcusk7ojk6fjq7      	1368448829	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+911n3u6jt7aah26do35k5ljj03      	1368448898	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+f9u11td55g8pn0q2fcevc5ekf0      	1368448976	CJsD3bCC_iSfctRmc2sXxiqY2IF5VnZeA_2p7tCx6hyqLsXvIB5P_omM7ruKd2KaSiIkczKCooN3HC7LXTW93MDayQkTbXqa-QvuePT3cGlMonPNCC4GX4eVCg0x33kqYWZu_1cE80aGSBWRM-J47NtLbddp-TANOtP_3szSVouN6Vs_c6jmSOSjKqKMo1ve
+qb39qo1ckf62fdi55n2qvq1b34      	1368449037	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+6rkvf19un4c0uv7anmvps6jfk0      	1368449055	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+f3fqo8j3c9890q29sisbdk3v81      	1368449137	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+2huc79lt11sjdriohvgv33k905      	1368449272	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+v86rodrr02ahb48fadru137ht6      	1368449302	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+js7gppv89c5n8v0va7fb8t6li7      	1368449576	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+6rcunj03jct0q5ol76rel0a9u7      	1368449610	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+b8ucocb72ck11cu5qp2qt0qr22      	1368449638	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+ne1nle40kh20eoppheef37ufn1      	1368449682	CJsD3bCC_iSfctRmc2sXxiqY2IF5VnZeA_2p7tCx6hyqLsXvIB5P_omM7ruKd2KaSiIkczKCooN3HC7LXTW93MDayQkTbXqa-QvuePT3cGlMonPNCC4GX4eVCg0x33kqYWZu_1cE80aGSBWRM-J47NtLbddp-TANOtP_3szSVouN6Vs_c6jmSOSjKqKMo1ve
+2o03al2ild4l3avlbmo5vk9ea0      	1368449304	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+f9qr81opvs53a5ofl442jm27q7      	1368448877	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+00nsnan9l17g1g2mkebn12kj82      	1368448909	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+nvpivfbkanm0osmfp0657tnpu0      	1368448977	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+o6inf0p168295ti93rhsd3no35      	1368449042	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+3fbhtsummliof6e6scq2lme1m1      	1368449069	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+u4cokf1fpnfiojg1vnuvq25n36      	1368449692	1EMemBcjRdMW4pcki32GpeMU8ETWFLSj8VdxToABIzBzIA7aXlNqWVr1Q5GfXUKQFQpRGRADk9Y-A9Yh6HJqhgWyCSWkuhPoErCGfqIOpmwCEiBEzOT86VUtgouKD2v59Njn3Ve6v8X3adaK96t6Z5KmgqPYIJn954oXSQSBn3J7JZYW7lxYo8pffPjepG-BTT9Im4ZJGRddwYdXCFExn8ze9N1oaG1vvkikO9EKlZV4rP8FZSLqjXLhbFvybJPYkfL2SU_6MSbkbFb2bB23s92lyH9OOj6axLomcJoy0cQETiljquHQ9mXW7zV_10c5MlHP5YNOdk_OE1xV6S6jCeimr0OQ-R_ayAnn1r6FQRNgEdhl9ZcfLtzfyO7SYXmBOUedM6lxTW_k4gaiS0y_wg..
+ggjq37ruthusir558qvnsdc7j4      	1368449579	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+a1fjshfa1o1c2599k3bj9o85s3      	1368448793	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+9r39i32knpjjf3l2suprk38bk6      	1368449274	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+473pa2jvk400piarehj5icm6o0      	1368448800	kFn7jtWlPizlOfh_7_VoqwRqg6lO-cQ8ypXShW8YgYXER7Ui-KLaPPy9AeSks7fw6p8M-7vS2tHhOpUdHMe8SRD14sDp6ZQbFQ0Oj15okCmvK1QpIaYe1CwR9msQagZX
+1qadgk2vkgiiult8anm3qop6n7      	1368449638	CJsD3bCC_iSfctRmc2sXxiqY2IF5VnZeA_2p7tCx6hyqLsXvIB5P_omM7ruKd2KaSiIkczKCooN3HC7LXTW93MDayQkTbXqa-QvuePT3cGlMonPNCC4GX4eVCg0x33kqYWZu_1cE80aGSBWRM-J47NtLbddp-TANOtP_3szSVouN6Vs_c6jmSOSjKqKMo1ve
+v0g1j7saupc8p1uf283520kl40      	1368449670	CJsD3bCC_iSfctRmc2sXxiqY2IF5VnZeA_2p7tCx6hyqLsXvIB5P_omM7ruKd2KaSiIkczKCooN3HC7LXTW93MDayQkTbXqa-QvuePT3cGlMonPNCC4GX4eVCg0x33kqYWZu_1cE80aGSBWRM-J47NtLbddp-TANOtP_3szSVouN6Vs_c6jmSOSjKqKMo1ve
 \.
 
 
@@ -2508,10 +2542,10 @@ COPY targets (id, project_id, host, description) FROM stdin;
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY users (id, email, password, name, client_id, role, last_action_time, send_notifications, password_reset_code, password_reset_time, show_reports, show_details) FROM stdin;
-4	bob@bob.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Anton Belousov	\N	user	2013-05-04 18:23:59.902642	f	\N	\N	f	f
-3	erbol@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		2	client	2013-05-13 04:36:15.676483	f	abd9aeef114d88f28ac0ad83fecb70c25a7e22500872eab947ade90244889ee9	\N	t	t
-1	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-05-12 14:44:22.485837	t	\N	2013-05-05 02:41:23.449866	f	f
+COPY users (id, email, password, name, client_id, role, last_action_time, send_notifications, password_reset_code, password_reset_time, show_reports, show_details, certificate_required, certificate_serial, certificate_issuer) FROM stdin;
+3	erbol@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		2	client	2013-05-13 15:54:42.63288	f	abd9aeef114d88f28ac0ad83fecb70c25a7e22500872eab947ade90244889ee9	\N	t	t	t	FDC71CACAFD354F3	/C=CH/ST=Zurich/L=Zurich/O=GTTA/CN=GTTA
+1	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-05-13 15:54:52.269224	t	\N	2013-05-05 02:41:23.449866	f	f	t	FDC71CACAFD354F2	/C=CH/ST=Zurich/L=Zurich/O=GTTA/CN=GTTA
+4	bob@bob.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Anton Belousov	\N	user	2013-05-04 18:23:59.902642	f	\N	\N	f	f	f	\N	\N
 \.
 
 

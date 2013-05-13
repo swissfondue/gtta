@@ -16,6 +16,9 @@
  * @property string $password_reset_time
  * @property boolean $show_reports
  * @property boolean $show_details
+ * @property boolean $certificate_required
+ * @property boolean $certificate_serial
+ * @property boolean $certificate_issuer
  */
 class User extends CActiveRecord
 {
@@ -53,7 +56,7 @@ class User extends CActiveRecord
             array( 'email, password, role', 'required' ),
             array( 'email, password, name, password_reset_code', 'length', 'max' => 1000 ),
             array( 'role', 'in', 'range' => array( self::ROLE_ADMIN, self::ROLE_USER, self::ROLE_CLIENT ) ),
-            array( 'client_id, last_action_time, send_notifications, show_details, show_reports, password_reset_time', 'safe' ),
+            array( 'client_id, last_action_time, send_notifications, show_details, show_reports, password_reset_time, certificate_required, certificate_serial, certificate_issuer', 'safe' ),
 		);
 	}
 

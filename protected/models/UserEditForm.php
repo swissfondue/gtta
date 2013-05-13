@@ -57,6 +57,11 @@ class UserEditForm extends CFormModel
     public $showDetails;
 
     /**
+     * @var boolean certificate required.
+     */
+    public $certificateRequired;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules()
@@ -69,7 +74,7 @@ class UserEditForm extends CFormModel
             array( 'passwordConfirmation', 'compare', 'compareAttribute' => 'password' ),
             array( 'password', 'safe', 'on' => self::EDIT_USER_SCENARIO ),
             array( 'role', 'in', 'range' => array( User::ROLE_ADMIN, User::ROLE_CLIENT, User::ROLE_USER ) ),
-            array( 'sendNotifications, showReports, showDetails', 'boolean' ),
+            array( 'sendNotifications, showReports, showDetails, certificateRequired', 'boolean' ),
             array( 'clientId', 'checkClient' ),
 		);
 	}
@@ -89,6 +94,7 @@ class UserEditForm extends CFormModel
             'clientId'             => Yii::t('app', 'Client'),
             'showReports'          => Yii::t('app', 'Show Reports'),
             'showDetails'          => Yii::t('app', 'Show Details'),
+            'certificateRequired'  => Yii::t('app', 'Certificate Required'),
 		);
 	}
 

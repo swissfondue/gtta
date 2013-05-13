@@ -21,6 +21,11 @@ class AccountEditForm extends CFormModel
     public $sendNotifications;
 
     /**
+     * @var boolean certificate required.
+     */
+    public $certificateRequired;
+
+    /**
      * @var string user's new password.
      */
     public $password;
@@ -40,7 +45,7 @@ class AccountEditForm extends CFormModel
 			array( 'email', 'required' ),
             array( 'passwordConfirmation', 'compare', 'compareAttribute' => 'password' ),
             array( 'email, name', 'length', 'max' => 1000 ),
-            array( 'sendNotifications', 'boolean' ),
+            array( 'sendNotifications, certificateRequired', 'boolean' ),
             array( 'password', 'safe' ),
 		);
 	}
@@ -56,6 +61,7 @@ class AccountEditForm extends CFormModel
             'sendNotifications'    => Yii::t('app', 'Send Notifications'),
 			'password'             => Yii::t('app', 'Password'),
             'passwordConfirmation' => Yii::t('app', 'Password Confirmation'),
+            'certificateRequired'  => Yii::t('app', 'Certificate Required'),
 		);
 	}
 }
