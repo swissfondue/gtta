@@ -154,13 +154,20 @@ return array(
                 'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/solution/<solution:\d+>/edit' => 'check/editsolution',
                 'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/solution/new'                 => 'check/editsolution',
                 'check/control/check/solution/control'                                                => 'check/controlsolution',
-                
+
+                // check scripts
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/scripts/<page:\d+>'       => 'check/scripts',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/scripts'                  => 'check/scripts',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/script/<script:\d+>/edit' => 'check/editscript',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/script/new'               => 'check/editscript',
+                'check/control/check/script/control'                                              => 'check/controlscript',
+
                 // check inputs
-                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/inputs/<page:\d+>'      => 'check/inputs',
-                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/inputs'                 => 'check/inputs',
-                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/input/<input:\d+>/edit' => 'check/editinput',
-                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/input/new'              => 'check/editinput',
-                'check/control/check/input/control'                                             => 'check/controlinput',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/script/<script:\d+>/inputs/<page:\d+>'      => 'check/inputs',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/script/<script:\d+>/inputs'                 => 'check/inputs',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/script/<script:\d+>/input/<input:\d+>/edit' => 'check/editinput',
+                'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/script/<script:\d+>/input/new'              => 'check/editinput',
+                'check/control/check/input/control' => 'check/controlinput',
 
                 // references
                 'references/<page:\d+>'   => 'reference/index',

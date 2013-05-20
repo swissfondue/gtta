@@ -14,8 +14,8 @@ class CheckController extends Controller
             'https',
 			'checkAuth',
             'checkAdmin',
-            'ajaxOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput',
-            'postOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput',
+            'ajaxOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput, controlscript',
+            'postOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput, controlscript',
 		);
 	}
 
@@ -291,7 +291,11 @@ class CheckController extends Controller
                 'controls' => array(
                     'with' => array(
                         'checks' => array(
-                            'with' => 'inputs'
+                            'with' => array(
+                                'scripts' => array(
+                                    'with' => 'inputs'
+                                )
+                            )
                         )
                     )
                 )
@@ -303,12 +307,19 @@ class CheckController extends Controller
             switch ($model->operation)
             {
                 case 'delete':
-                    foreach ($category->controls as $control)
-                        foreach ($control->checks as $check)
-                            if ($check->automated)
-                                foreach ($check->inputs as $input)
-                                    if ($input->type == CheckInput::TYPE_FILE)
-                                        $input->deleteFile();
+                    foreach ($category->controls as $control) {
+                        foreach ($control->checks as $check) {
+                            if ($check->automated) {
+                                foreach ($check->scripts as $script) {
+                                    foreach ($script->inputs as $input) {
+                                        if ($input->type == CheckInput::TYPE_FILE) {
+                                            $input->deleteFile();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     $category->delete();
                     break;
@@ -522,7 +533,11 @@ class CheckController extends Controller
             $id      = $model->id;
             $control = CheckControl::model()->with(array(
                 'checks' => array(
-                    'with' => 'inputs'
+                    'with' => array(
+                        'scripts' => array(
+                            'with' => 'inputs'
+                        )
+                    )
                 )
             ))->findByPk($id);
 
@@ -532,11 +547,17 @@ class CheckController extends Controller
             switch ($model->operation)
             {
                 case 'delete':
-                    foreach ($control->checks as $check)
-                        if ($check->automated)
-                            foreach ($check->inputs as $input)
-                                if ($input->type == CheckInput::TYPE_FILE)
-                                    $input->deleteFile();
+                    foreach ($control->checks as $check) {
+                        if ($check->automated) {
+                            foreach ($check->scripts as $script) {
+                                foreach ($script->inputs as $input) {
+                                    if ($input->type == CheckInput::TYPE_FILE) {
+                                        $input->deleteFile();
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     $control->delete();
                     break;
@@ -987,10 +1008,15 @@ class CheckController extends Controller
             switch ($model->operation)
             {
                 case 'delete':
-                    if ($check->automated)
-                        foreach ($check->inputs as $input)
-                            if ($input->type == CheckInput::TYPE_FILE)
-                                $input->deleteFile();
+                    if ($check->automated) {
+                        foreach ($check->scripts as $script) {
+                            foreach ($script->inputs as $input) {
+                                if ($input->type == CheckInput::TYPE_FILE) {
+                                    $input->deleteFile();
+                                }
+                            }
+                        }
+                    }
 
                     $check->delete();
                     TargetCheckCategory::updateAllStats();
@@ -1734,9 +1760,9 @@ class CheckController extends Controller
     }
 
     /**
-     * Display a list of check inputs.
+     * Display a list of check scripts.
      */
-	public function actionInputs($id, $control, $check, $page=1)
+	public function actionScripts($id, $control, $check, $page=1)
 	{
         $id      = (int) $id;
         $control = (int) $control;
@@ -1795,8 +1821,279 @@ class CheckController extends Controller
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->order  = 't.id ASC';
+        $criteria->addColumnCondition(array('check_id' => $check->id));
+
+        $check_scripts = CheckScript::model()->findAll($criteria);
+        $scriptCount = CheckScript::model()->count($criteria);
+        $paginator = new Paginator($scriptCount, $page);
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
+        $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
+        $this->breadcrumbs[] = array($check->localizedName, $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Scripts'), '');
+
+        // display the page
+        $this->pageTitle = $check->localizedName;
+		$this->render('control/check/script/index', array(
+            'scripts'  => $check_scripts,
+            'p'        => $paginator,
+            'check'    => $check,
+            'category' => $category,
+            'control'  => $control,
+        ));
+	}
+
+    /**
+     * Check script edit page.
+     */
+	public function actionEditScript($id, $control, $check, $script=0)
+	{
+        $id        = (int) $id;
+        $control   = (int) $control;
+        $check     = (int) $check;
+        $script    = (int) $script;
+        $newRecord = false;
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
+        $category = CheckCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByPk($id);
+
+        if (!$category)
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+
+        $control = CheckControl::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByAttributes(array(
+            'id'                => $control,
+            'check_category_id' => $category->id
+        ));
+
+        if (!$control)
+            throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+
+        $check = Check::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByAttributes(array(
+            'id' => $check,
+            'check_control_id' => $control->id
+        ));
+
+        if (!$check)
+            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+
+        if ($script)
+        {
+            $script = CheckScript::model()->findByAttributes(array(
+                'id' => $script,
+                'check_id' => $check->id
+            ));
+
+            if (!$script)
+                throw new CHttpException(404, Yii::t('app', 'Script not found.'));
+        }
+        else
+        {
+            $script = new CheckScript();
+            $newRecord = true;
+        }
+
+		$model = new CheckScriptEditForm();
+
+        if (!$newRecord) {
+            $model->name = $script->name;
+        }
+
+		// collect user input data
+		if (isset($_POST['CheckScriptEditForm']))
+		{
+			$model->attributes = $_POST['CheckScriptEditForm'];
+
+			if ($model->validate()) {
+                $script->check_id = $check->id;
+                $script->name = $model->name;
+                $script->save();
+
+                Yii::app()->user->setFlash('success', Yii::t('app', 'Script saved.'));
+
+                $script->refresh();
+
+                if ($newRecord) {
+                    $this->redirect(array('check/editscript', 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id));
+                }
+            }
+            else
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+		}
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
+        $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
+        $this->breadcrumbs[] = array($check->localizedName, $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Scripts'), $this->createUrl('check/scripts', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
+        $this->breadcrumbs[] = $newRecord ? array(Yii::t('app', 'New Script'), '') : array($script->name, '');
+
+		// display the page
+        $this->pageTitle = $newRecord ? Yii::t('app', 'New Script') : $script->name;
+		$this->render('control/check/script/edit', array(
+            'model'    => $model,
+            'category' => $category,
+            'control'  => $control,
+            'check'    => $check,
+            'script'   => $script,
+        ));
+	}
+
+    /**
+     * Script control function.
+     */
+    public function actionControlScript()
+    {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate())
+            {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $id = $model->id;
+            $script = CheckScript::model()->findByPk($id);
+
+            if ($script === null)
+                throw new CHttpException(404, Yii::t('app', 'Script not found.'));
+
+            switch ($model->operation)
+            {
+                case 'delete':
+                    foreach ($script->inputs as $input) {
+                        if ($input->type == CheckInput::TYPE_FILE) {
+                            $input->deleteFile();
+                        }
+                    }
+
+                    $script->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Display a list of check inputs.
+     */
+	public function actionInputs($id, $control, $check, $script, $page=1)
+	{
+        $id      = (int) $id;
+        $control = (int) $control;
+        $check   = (int) $check;
+        $script  = (int) $script;
+        $page    = (int) $page;
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language)
+            $language = $language->id;
+
+        $category = CheckCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByPk($id);
+
+        if (!$category)
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+
+        $control = CheckControl::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByAttributes(array(
+            'id'                => $control,
+            'check_category_id' => $category->id
+        ));
+
+        if (!$control)
+            throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+
+        $check = Check::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByAttributes(array(
+            'id'               => $check,
+            'check_control_id' => $control->id
+        ));
+
+        if (!$check)
+            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+
+        $script = CheckScript::model()->findByAttributes(array(
+            'id' => $script,
+            'check_id' => $check->id
+        ));
+
+        if (!$script) {
+            throw new CHttpException(404, Yii::t('app', 'Script not found.'));
+        }
+
+        if ($page < 1)
+            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+
+        $criteria = new CDbCriteria();
+        $criteria->limit  = Yii::app()->params['entriesPerPage'];
+        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
         $criteria->order  = 't.sort_order ASC';
-        $criteria->addColumnCondition(array( 'check_id' => $check->id ));
+        $criteria->addColumnCondition(array('check_script_id' => $script->id));
 
         $check_inputs = CheckInput::model()->with(array(
             'l10n' => array(
@@ -1813,16 +2110,19 @@ class CheckController extends Controller
         $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
         $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
         $this->breadcrumbs[] = array($check->localizedName, $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Scripts'), $this->createUrl('check/scripts', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
+        $this->breadcrumbs[] = array($script->name, $this->createUrl('check/editscript', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id )));
         $this->breadcrumbs[] = array(Yii::t('app', 'Inputs'), '');
 
         // display the page
-        $this->pageTitle = $check->localizedName;
-		$this->render('control/check/input/index', array(
+        $this->pageTitle = $script->name;
+		$this->render('control/check/script/input/index', array(
             'inputs'   => $check_inputs,
             'p'        => $paginator,
             'check'    => $check,
             'category' => $category,
             'control'  => $control,
+            'script'   => $script,
             'types'    => array(
                 CheckInput::TYPE_TEXT     => Yii::t('app', 'Text'),
                 CheckInput::TYPE_TEXTAREA => Yii::t('app', 'Textarea'),
@@ -1836,12 +2136,13 @@ class CheckController extends Controller
     /**
      * Check input edit page.
      */
-	public function actionEditInput($id, $control, $check, $input=0)
+	public function actionEditInput($id, $control, $check, $script, $input=0)
 	{
         $id        = (int) $id;
         $control   = (int) $control;
         $check     = (int) $check;
         $input     = (int) $input;
+        $script    = (int) $script;
         $newRecord = false;
 
         $language = Language::model()->findByAttributes(array(
@@ -1890,6 +2191,11 @@ class CheckController extends Controller
         if (!$check)
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
 
+        $script = CheckScript::model()->findByAttributes(array(
+            'id' => $script,
+            'check_id' => $check->id
+        ));
+
         if ($input)
         {
             $input = CheckInput::model()->with(array(
@@ -1899,8 +2205,8 @@ class CheckController extends Controller
                     'params'   => array( 'language_id' => $language )
                 )
             ))->findByAttributes(array(
-                'id'       => $input,
-                'check_id' => $check->id
+                'id' => $input,
+                'check_script_id' => $script->id
             ));
 
             if (!$input)
@@ -1908,7 +2214,7 @@ class CheckController extends Controller
         }
         else
         {
-            $input     = new CheckInput();
+            $input = new CheckInput();
             $newRecord = true;
         }
 
@@ -1943,7 +2249,7 @@ class CheckController extends Controller
             // increment last sort_order, if any
             $criteria = new CDbCriteria();
             $criteria->select = 'MAX(sort_order) as max_sort_order';
-            $criteria->addColumnCondition(array( 'check_id' => $check->id ));
+            $criteria->addColumnCondition(array('check_script_id' => $script->id));
 
             $maxOrder = CheckInput::model()->find($criteria);
 
@@ -1960,7 +2266,7 @@ class CheckController extends Controller
 
 			if ($model->validate())
             {
-                $input->check_id    = $check->id;
+                $input->check_script_id = $script->id;
                 $input->name        = $model->name;
                 $input->description = $model->description;
                 $input->value       = $model->value;
@@ -2005,7 +2311,7 @@ class CheckController extends Controller
                 $input->refresh();
 
                 if ($newRecord)
-                    $this->redirect(array( 'check/editinput', 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'input' => $input->id ));
+                    $this->redirect(array( 'check/editinput', 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id, 'input' => $input->id ));
             }
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
@@ -2015,7 +2321,9 @@ class CheckController extends Controller
         $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
         $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
         $this->breadcrumbs[] = array($check->localizedName, $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
-        $this->breadcrumbs[] = array(Yii::t('app', 'Inputs'), $this->createUrl('check/inputs', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Scripts'), $this->createUrl('check/scripts', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
+        $this->breadcrumbs[] = array($script->name, $this->createUrl('check/editscript', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Inputs'), $this->createUrl('check/inputs', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id )));
 
         if ($newRecord)
             $this->breadcrumbs[] = array(Yii::t('app', 'New Input'), '');
@@ -2024,12 +2332,13 @@ class CheckController extends Controller
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Input') : $input->localizedName;
-		$this->render('control/check/input/edit', array(
+		$this->render('control/check/script/input/edit', array(
             'model'     => $model,
             'category'  => $category,
             'control'   => $control,
             'check'     => $check,
             'input'     => $input,
+            'script'    => $script,
             'languages' => $languages,
             'types'     => array(
                 CheckInput::TYPE_TEXT     => Yii::t('app', 'Text'),

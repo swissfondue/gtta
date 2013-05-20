@@ -5,7 +5,7 @@
  *
  * The followings are the available columns in table 'check_inputs':
  * @property integer $id
- * @property integer $check_id
+ * @property integer $check_script_id
  * @property string $name
  * @property string $description
  * @property string $value
@@ -53,7 +53,7 @@ class CheckInput extends CActiveRecord
 	public function rules()
 	{
 		return array(
-            array( 'check_id, name', 'required' ),
+            array( 'check_script_id, name', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
             array( 'sort_order', 'numerical', 'integerOnly' => true, 'min' => 0 ),
             array( 'type', 'in', 'range' => array(
@@ -73,9 +73,9 @@ class CheckInput extends CActiveRecord
 	public function relations()
 	{
 		return array(
-            'l10n'         => array( self::HAS_MANY,   'CheckInputL10n',   'check_input_id' ),
-            'check'        => array( self::BELONGS_TO, 'Check',            'check_id' ),
-            'targetInputs' => array( self::HAS_MANY,   'TargetCheckInput', 'check_input_id' ),
+            'l10n' => array(self::HAS_MANY, 'CheckInputL10n', 'check_input_id'),
+            'script' => array(self::BELONGS_TO, 'CheckScript', 'check_script_id'),
+            'targetInputs' => array(self::HAS_MANY, 'TargetCheckInput', 'check_input_id'),
 		);
 	}
 
