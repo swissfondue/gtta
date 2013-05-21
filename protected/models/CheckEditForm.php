@@ -86,7 +86,6 @@ class CheckEditForm extends LocalizedFormModel
             array( 'port', 'numerical', 'integerOnly' => true, 'min' => 0, 'max' => 1000 ),
             array( 'advanced, automated, multipleSolutions', 'boolean' ),
             array( 'localizedItems, backgroundInfo, hints, question', 'safe' ),
-            array( 'automated', 'checkScript' ),
             array( 'referenceUrl', 'url', 'defaultScheme' => 'http' ),
             array( 'referenceId, effort', 'numerical', 'integerOnly' => true ),
             array( 'referenceId', 'checkReference' ),
