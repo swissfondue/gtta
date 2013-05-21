@@ -1062,8 +1062,85 @@ class CheckController extends Controller
                 }
 
                 // scripts
+                foreach ($src->scripts as $script) {
+                    $newScript = new CheckScript();
+                    $newScript->check_id = $dst->id;
+                    $newScript->name = $script->name;
+                    $newScript->save();
+
+                    foreach ($script->inputs as $input) {
+                        $newInput = new CheckInput();
+                        $newInput->check_script_id = $newScript->id;
+                        $newInput->name = $input->name;
+                        $newInput->description = $input->description;
+                        $newInput->value = $input->value;
+                        $newInput->sort_order = $input->sort_order;
+                        $newInput->max_sort_order = $input->max_sort_order;
+                        $newInput->type = $input->type;
+                        $newInput->save();
+
+                        $l10ns = CheckInputL10n::model()->findAllByAttributes(array(
+                            "check_input_id" => $input->id
+                        ));
+
+                        foreach ($l10ns as $l10n) {
+                            $newL10n = new CheckInputL10n();
+                            $newL10n->check_input_id = $newInput->id;
+                            $newL10n->language_id = $l10n->language_id;
+                            $newL10n->name = $l10n->name;
+                            $newL10n->description = $l10n->description;
+                            $newL10n->save();
+                        }
+                    }
+                }
+
                 // results
+                foreach ($src->results as $result) {
+                    $newResult = new CheckResult();
+                    $newResult->check_id = $dst->id;
+                    $newResult->title = $result->title;
+                    $newResult->result = $result->result;
+                    $newResult->sort_order = $result->sort_order;
+                    $newResult->max_sort_order = $result->max_sort_order;
+                    $newResult->save();
+                    
+                    $l10ns = CheckResultL10n::model()->findAllByAttributes(array(
+                        "check_result_id" => $result->id
+                    ));
+
+                    foreach ($l10ns as $l10n) {
+                        $newL10n = new CheckResultL10n();
+                        $newL10n->check_result_id = $newResult->id;
+                        $newL10n->language_id = $l10n->language_id;
+                        $newL10n->title = $l10n->title;
+                        $newL10n->result = $l10n->result;
+                        $newL10n->save();
+                    }
+                }
+
                 // solutions
+                foreach ($src->solutions as $solution) {
+                    $newSolution = new CheckSolution();
+                    $newSolution->check_id = $dst->id;
+                    $newSolution->title = $solution->title;
+                    $newSolution->solution = $solution->solution;
+                    $newSolution->sort_order = $solution->sort_order;
+                    $newSolution->max_sort_order = $solution->max_sort_order;
+                    $newSolution->save();
+
+                    $l10ns = CheckSolutionL10n::model()->findAllByAttributes(array(
+                        "check_solution_id" => $solution->id
+                    ));
+
+                    foreach ($l10ns as $l10n) {
+                        $newL10n = new CheckSolutionL10n();
+                        $newL10n->check_solution_id = $newSolution->id;
+                        $newL10n->language_id = $l10n->language_id;
+                        $newL10n->title = $l10n->title;
+                        $newL10n->solution = $l10n->solution;
+                        $newL10n->save();
+                    }
+                }
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check copied.'));
                 $this->redirect(array('check/editcheck', 'id' => $dst->control->check_category_id, 'control' => $dst->check_control_id, 'check' => $dst->id));

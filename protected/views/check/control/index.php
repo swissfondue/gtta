@@ -7,7 +7,7 @@
     </div>
 
     <div class="pull-right buttons">
-        <a class="btn" href="<?php echo $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id )) ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New Check'); ?></a>
+        <a class="btn" href="<?php echo $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id )) ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New Check'); ?></a>&nbsp;
         <a class="btn" href="<?php echo $this->createUrl('check/copycheck', array( 'id' => $category->id, 'control' => $control->id )) ?>"><i class="icon icon-retweet"></i> <?php echo Yii::t('app', 'Copy Check'); ?></a>
     </div>
 
