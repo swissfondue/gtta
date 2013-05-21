@@ -12,7 +12,6 @@
  * @property string $question
  * @property boolean $advanced
  * @property boolean $automated
- * @property string $script
  * @property boolean $multiple_solutions
  * @property string $protocol
  * @property integer $port
@@ -52,7 +51,7 @@ class Check extends CActiveRecord
 	{
 		return array(
             array( 'name, check_control_id, sort_order', 'required' ),
-            array( 'name, script, protocol, reference_code, reference_url', 'length', 'max' => 1000 ),
+            array( 'name, protocol, reference_code, reference_url', 'length', 'max' => 1000 ),
             array( 'check_control_id, reference_id, port, effort, sort_order', 'numerical', 'integerOnly' => true ),
             array( 'advanced, automated, multiple_solutions', 'boolean' ),
 		);

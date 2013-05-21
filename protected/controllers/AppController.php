@@ -258,6 +258,31 @@ class AppController extends Controller
 
                     break;
 
+                case 'control-check-list':
+                    $control = CheckControl::model()->findByPk($model->id);
+
+                    if (!$control)
+                        throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+
+                    $checks = Check::model()->with(array(
+                        'l10n' => array(
+                            'alias'    => 'l10n_c',
+                            'joinType' => 'LEFT JOIN',
+                            'on'       => 'l10n_c.language_id = :language_id',
+                            'params'   => array( 'language_id' => $language )
+                        )
+                    ))->findAllByAttributes(array(
+                        'check_control_id' => $control->id
+                    ));
+
+                    foreach ($checks as $check)
+                        $objects[] = array(
+                            'id'   => $check->id,
+                            'name' => $check->localizedName,
+                        );
+
+                    break;
+
                 case 'target-check-list':
                     $targets = explode(',', $model->id);
 

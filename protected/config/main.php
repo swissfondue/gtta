@@ -139,6 +139,7 @@ return array(
                 // checks
                 'check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/edit' => 'check/editcheck',
                 'check/<id:\d+>/control/<control:\d+>/check/new'              => 'check/editcheck',
+                'check/<id:\d+>/control/<control:\d+>/check/copy'             => 'check/copycheck',
                 'check/control/check/control'                                 => 'check/controlcheck',
 
                 // check results

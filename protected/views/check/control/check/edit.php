@@ -151,16 +151,6 @@
             </div>
         </div>
 
-        <div class="control-group <?php if (!$model->automated) echo 'hide'; ?> <?php if ($model->getError('script')) echo 'error'; ?>" id="script-input">
-            <label class="control-label" for="CheckEditForm_script"><?php echo Yii::t('app', 'Script'); ?></label>
-            <div class="controls">
-                <input type="text" class="input-xlarge" id="CheckEditForm_script" name="CheckEditForm[script]" value="<?php echo CHtml::encode($model->script); ?>">
-                <?php if ($model->getError('script')): ?>
-                    <p class="help-block"><?php echo $model->getError('script'); ?></p>
-                <?php endif; ?>
-            </div>
-        </div>
-
         <div class="control-group">
             <label class="control-label" for="CheckEditForm_advanced"><?php echo Yii::t('app', 'Advanced'); ?></label>
             <div class="controls">

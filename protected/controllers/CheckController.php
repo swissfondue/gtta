@@ -788,7 +788,6 @@ class CheckController extends Controller
             $model->backgroundInfo    = $check->background_info;
             $model->hints             = $check->hints;
             $model->question          = $check->question;
-            $model->script            = $check->script;
             $model->advanced          = $check->advanced;
             $model->automated         = $check->automated;
             $model->protocol          = $check->protocol;
@@ -849,7 +848,6 @@ class CheckController extends Controller
                 $check->background_info    = $model->backgroundInfo;
                 $check->hints              = $model->hints;
                 $check->question           = $model->question;
-                $check->script             = $model->script;
                 $check->advanced           = $model->advanced;
                 $check->automated          = $model->automated;
                 $check->multiple_solutions = $model->multipleSolutions;
@@ -971,6 +969,156 @@ class CheckController extends Controller
             'references' => $references,
             'categories' => $categories,
             'efforts'    => array( 2, 5, 20, 40, 60, 120 ),
+        ));
+	}
+
+    /**
+     * Check copy page.
+     */
+	public function actionCopyCheck($id, $control)
+	{
+        $id = (int) $id;
+        $control = (int) $control;
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        $category = CheckCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByPk($id);
+
+        if (!$category) {
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+        }
+
+        $control = CheckControl::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findByAttributes(array(
+            'id'                => $control,
+            'check_category_id' => $category->id
+        ));
+
+        if (!$control) {
+            throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+        }
+
+		$model = new CheckCopyForm();
+
+		// collect user input data
+		if (isset($_POST['CheckCopyForm'])) {
+			$model->attributes = $_POST['CheckCopyForm'];
+
+			if ($model->validate()) {
+                $src = Check::model()->findByPk($model->id);
+                $dst = new Check();
+
+                $dst->check_control_id = $control->id;
+                $dst->name = $src->name . ' (' . Yii::t('app', 'Copy') . ')';
+                $dst->background_info = $src->background_info;
+                $dst->hints = $src->hints;
+                $dst->question = $src->question;
+                $dst->advanced = $src->advanced;
+                $dst->automated = $src->automated;
+                $dst->multiple_solutions = $src->multiple_solutions;
+                $dst->protocol = $src->protocol;
+                $dst->port = $src->port;
+                $dst->reference_id = $src->reference_id;
+                $dst->reference_code = $src->reference_code;
+                $dst->reference_url = $src->reference_url;
+                $dst->effort = $src->effort;
+                $dst->sort_order = 0;
+                $dst->save();
+
+                $dst->sort_order = $dst->id;
+                $dst->save();
+
+                // copy l10n
+                $l10ns = CheckL10n::model()->findAllByAttributes(array(
+                    "check_id" => $src->id
+                ));
+
+                foreach ($l10ns as $l10n) {
+                    $newL10n = new CheckL10n();
+                    $newL10n->check_id = $dst->id;
+                    $newL10n->language_id = $l10n->language_id;
+                    $newL10n->name = $l10n->name . ' (' . Yii::t('app', 'Copy') . ')';
+                    $newL10n->background_info = $l10n->background_info;
+                    $newL10n->hints = $l10n->hints;
+                    $newL10n->question = $l10n->question;
+                    $newL10n->save();
+                }
+
+                // scripts
+                // results
+                // solutions
+
+                Yii::app()->user->setFlash('success', Yii::t('app', 'Check copied.'));
+                $this->redirect(array('check/editcheck', 'id' => $dst->control->check_category_id, 'control' => $dst->check_control_id, 'check' => $dst->id));
+            } else {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+            }
+		}
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
+        $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Copy Check'), '');
+
+        $categories = CheckCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            ),
+
+            'controls' => array(
+                'joinType' => 'LEFT JOIN',
+                'with'     => array(
+                    'l10n' => array(
+                        'alias'    => 'l10n_c',
+                        'joinType' => 'LEFT JOIN',
+                        'on'       => 'l10n_c.language_id = :language_id',
+                        'params'   => array( 'language_id' => $language )
+                    )
+                )
+            )
+        ))->findAllByAttributes(
+            array(),
+            array( 'order' => 'COALESCE(l10n.name, t.name) ASC' )
+        );
+
+        $checks = Check::model()->with(array(
+            'l10n' => array(
+                'alias'    => 'l10n_c',
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'l10n_c.language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findAllByAttributes(array(
+            'check_control_id' => $control->id
+        ));
+
+		// display the page
+        $this->pageTitle = Yii::t('app', 'Copy Check');
+		$this->render('control/check/copy', array(
+            'model'      => $model,
+            'category'   => $category,
+            'control'    => $control,
+            'checks'     => $checks,
+            'categories' => $categories,
         ));
 	}
 
@@ -1161,6 +1309,7 @@ class CheckController extends Controller
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
         $criteria->order  = 't.sort_order ASC';
         $criteria->addColumnCondition(array( 'check_id' => $check->id ));
+        $criteria->together = true;
 
         $check_results = CheckResult::model()->with(array(
             'l10n' => array(

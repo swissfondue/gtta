@@ -25,6 +25,24 @@ function Admin()
             else
                 $('#script-input').hide();
         };
+
+        /**
+         * Load checks
+         */
+        this.loadChecks = function () {
+            var control = $('#CheckCopyForm_controlId').val();
+
+            $('#CheckCopyForm_id').find("option:gt(0)").remove();
+
+            system.control.loadObjects(control, 'control-check-list', function (data) {
+                if (data && data.objects.length) {
+                    for (var i = 0; i < data.objects.length; i++) {
+                        var item = data.objects[i];
+                        $('#CheckCopyForm_id').append($("<option>").attr("value", item.id).html(item.name));
+                    }
+                }
+            });
+        };
     };
 
     /**
