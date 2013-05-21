@@ -49,7 +49,11 @@ class AutomationCommand extends ConsoleCommand
                 }
             }
 
-            $check->result = $fileOutput ? $fileOutput : 'No output.';
+            if (!$check->result) {
+                $check->result = '';
+            }
+
+            $check->result .= $fileOutput ? $fileOutput : 'No output.';
             $check->status = TargetCheck::STATUS_FINISHED;
             $check->pid    = null;
 
@@ -70,22 +74,22 @@ class AutomationCommand extends ConsoleCommand
 
         foreach ($checks as $check)
         {
-            $fileOutput = null;
+            /*$fileOutput = null;
             $fileName = Yii::app()->params['automation']['tempPath'] . '/' . $check->result_file;
 
             if (file_exists($fileName)) {
                 $fileOutput = file_get_contents($fileName);
             }
 
-            $check->result = $fileOutput;
+            $check->result = $fileOutput;*/
 
             // if task died for some reason
-            if (!$this->_isRunning($check->pid))
-            {
+            if (!$this->_isRunning($check->pid)) {
                 $check->pid = null;
 
-                if (!$check->result)
+                if (!$check->result) {
                     $check->result = 'No output.';
+                }
 
                 $check->status = TargetCheck::STATUS_FINISHED;
             }
@@ -239,9 +243,11 @@ class AutomationCommand extends ConsoleCommand
      * Create check files
      * @param $check
      * @param $interpreter
+     * @param $target
+     * @param $script
      * @return array
      */
-    private function _createCheckFiles($check, $interpreter, $target) {
+    private function _createCheckFiles($check, $interpreter, $target, $script) {
         $tempPath = Yii::app()->params['automation']['tempPath'];
         $scriptsPath = Yii::app()->params['automation']['scriptsPath'];
 
@@ -266,33 +272,42 @@ class AutomationCommand extends ConsoleCommand
         $resultFile = fopen($tempPath . '/' . $check->result_file, 'w');
         fclose($resultFile);
 
-        // create input files
-        $inputs = TargetCheckInput::model()->with('input')->findAllByAttributes(
-            array(
-                'target_id' => $check->target_id,
-                'check_id'  => $check->check_id,
-            ),
-            array(
-                'order' => 'input.sort_order ASC'
-            )
-        );
+        $inputs = CheckInput::model()->findAllByAttributes(array(
+            'check_script_id' => $script->id
+        ));
 
+        $inputIds = array();
+
+        foreach ($inputs as $input) {
+            $inputIds[] = $input->id;
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(array(
+            'target_id' => $check->target_id,
+            'check_id'  => $check->check_id,
+        ));
+
+        $criteria->addInCondition('check_input_id', $inputIds);
+        $criteria->order = 'input.sort_order ASC';
+
+        // create input files
+        $inputs = TargetCheckInput::model()->with('input')->findAll($criteria);
         $inputFiles = array();
 
-        foreach ($inputs as $input)
-        {
+        foreach ($inputs as $input) {
             $input->file = $this->_generateFileName();
             $input->save();
 
             $value = '';
 
-            if ($input->input->type == CheckInput::TYPE_FILE)
-            {
-                if ($input->value)
+            if ($input->input->type == CheckInput::TYPE_FILE) {
+                if ($input->value) {
                     $value = $input->input->getFileData();
-            }
-            else
+                }
+            } else {
                 $value = $input->value;
+            }
 
             $inputFile = fopen($tempPath . '/' . $input->file, 'w');
             fwrite($inputFile, $value . "\n");
@@ -352,7 +367,7 @@ class AutomationCommand extends ConsoleCommand
                     $attachment->delete();
                 }
 
-                //@unlink($image->src);
+                @unlink($image->src);
             }
 
             $imagePos = strpos($check->result, "<" . AttachedImage::TAG_MAIN);
@@ -373,8 +388,9 @@ class AutomationCommand extends ConsoleCommand
 
         $target = Target::model()->findByPk($targetId);
 
-        if (!$check)
+        if (!$check) {
             return;
+        }
 
         $language = $check->language;
 
@@ -387,77 +403,90 @@ class AutomationCommand extends ConsoleCommand
 
         $tempPath    = Yii::app()->params['automation']['tempPath'];
         $scriptsPath = Yii::app()->params['automation']['scriptsPath'];
+        $scripts = $check->check->scripts;
 
-        try
-        {
-            if (!file_exists($scriptsPath . '/' . $check->check->script))
-                throw new Exception(Yii::t('app', 'Script file not found.'));
+        foreach ($scripts as $script) {
+            if (!$check->result) {
+                $check->result = '';
+            } else {
+                $check->result .= "\n";
+            }
 
-            $script       = $check->check->script;
-            $extension    = pathinfo($script, PATHINFO_EXTENSION);
-            $interpreter  = null;
-            $interpreters = Yii::app()->params['automation']['interpreters'];
+            $check->result .= $script->name . "\n" . str_repeat("-", strlen($script->name)) . "\n";
 
-            if (isset($interpreters[$extension]))
-                $interpreter = $interpreters[$extension];
+            try {
+                if (!file_exists($scriptsPath . '/' . $script->name)) {
+                    throw new Exception(Yii::t('app', 'Script file not found.'));
+                }
 
-            if (!$interpreter || !file_exists($interpreter['path']))
-                throw new Exception(Yii::t('app', 'Interpreter not found.'));
+                $extension    = pathinfo($script->name, PATHINFO_EXTENSION);
+                $interpreter  = null;
+                $interpreters = Yii::app()->params['automation']['interpreters'];
 
-            $check->pid         = posix_getpgid(getmypid());
-            $check->started     = new CDbExpression('NOW()');
-            $check->target_file = $this->_generateFileName();
-            $check->result_file = $this->_generateFileName();
-            $check->save();
+                if (isset($interpreters[$extension]))
+                    $interpreter = $interpreters[$extension];
 
-            $inputFiles = $this->_createCheckFiles($check, $interpreter, $target);
-            chdir($scriptsPath);
+                if (!$interpreter || !file_exists($interpreter['path']))
+                    throw new Exception(Yii::t('app', 'Interpreter not found.'));
 
-            $command = array(
-                $interpreter['path'],
-                $script,
-                $tempPath . '/' . $check->target_file,
-                $tempPath . '/' . $check->result_file,
-            );
+                $check->pid         = posix_getpgid(getmypid());
+                $check->started     = new CDbExpression('NOW()');
+                $check->target_file = $this->_generateFileName();
+                $check->result_file = $this->_generateFileName();
+                $check->save();
 
-            foreach ($inputFiles as $input)
-                $command[] = $tempPath . '/' . $input;
+                $inputFiles = $this->_createCheckFiles($check, $interpreter, $target, $script);
+                chdir($scriptsPath);
 
-            $command = implode(' ', $command);
+                $command = array(
+                    $interpreter['path'],
+                    $script->name,
+                    $tempPath . '/' . $check->target_file,
+                    $tempPath . '/' . $check->result_file,
+                );
 
-            $output = array();
-            exec($command . ' 2>&1', $output);
+                foreach ($inputFiles as $input) {
+                    $command[] = $tempPath . '/' . $input;
+                }
 
-            $fileOutput = file_get_contents($tempPath . '/' . $check->result_file);
+                $command = implode(' ', $command);
 
-            $check = TargetCheck::model()->findByAttributes(array(
-                'target_id' => $targetId,
-                'check_id'  => $checkId
-            ));
+                $output = array();
+                exec($command . ' 2>&1', $output);
 
-            $check->pid    = null;
-            $check->result = $fileOutput ? $fileOutput : implode("\n", $output);
+                $fileOutput = file_get_contents($tempPath . '/' . $check->result_file);
+                $check->refresh();
+                $check->pid = null;
 
-            if (!$check->result)
-                $check->result = Yii::t('app', 'No output.');
+                /*if (!$check->result) {
+                    $check->result = '';
+                } else {
+                    $check->result .= "\n";
+                }*/
 
-            $this->_getTables($check);
-            $this->_getImages($check);
+                $check->result .= $fileOutput ? $fileOutput : implode("\n", $output);
 
-            $check->status = TargetCheck::STATUS_FINISHED;
-            $check->save();
+                if (!$check->result) {
+                    $check->result = Yii::t('app', 'No output.');
+                }
 
-            $started  = new DateTime($check->started);
-            $interval = time() - $started->getTimestamp();
+                $this->_getTables($check);
+                $this->_getImages($check);
+                $check->save();
 
-            if ($interval > Yii::app()->params['automation']['minNotificationInterval']) {
-                $this->_sendNotification($check, $target);
+                $started  = new DateTime($check->started);
+                $interval = time() - $started->getTimestamp();
+
+                if ($interval > Yii::app()->params['automation']['minNotificationInterval']) {
+                    $this->_sendNotification($check, $target);
+                }
+            } catch (Exception $e) {
+                $check->automationError($e->getMessage());
             }
         }
-        catch (Exception $e)
-        {
-            $check->automationError($e->getMessage());
-        }
+
+        $check->status = TargetCheck::STATUS_FINISHED;
+        $check->save();
     }
     
     /**

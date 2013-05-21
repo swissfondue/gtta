@@ -741,3 +741,12 @@ table.table-result td {
     margin-right:10px;
     margin-bottom:5px;
 }
+
+.script-inputs {
+    border-bottom:1px solid #999 !important;
+}
+
+.script-inputs th {
+    text-align:left !important;
+    background-color:#ddd !important;
+}

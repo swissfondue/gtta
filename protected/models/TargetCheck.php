@@ -116,7 +116,13 @@ class TargetCheck extends CActiveRecord
             '{code}' => $uniqueHash
         ));
 
-        $this->result = $message;
+        if (!$this->result) {
+            $this->result = '';
+        } else {
+            $this->result .= "\n";
+        }
+
+        $this->result .= $message;
         $this->status = TargetCheck::STATUS_FINISHED;
         $this->save();
     }

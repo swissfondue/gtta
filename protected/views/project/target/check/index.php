@@ -273,156 +273,171 @@
                                         </tr>
                                     <?php endif; ?>
                                 <?php endif; ?>
-                                <?php if ($check->inputs && $check->automated && User::checkRole(User::ROLE_USER)): ?>
-                                    <?php
-                                        $groups = array();
-                                        $group = array();
-
-                                        if (count($check->inputs) > Yii::app()->params["maxCheckboxes"]) {
-                                            foreach ($check->inputs as $input) {
-                                                if (!in_array($input->type, array(CheckInput::TYPE_CHECKBOX, CheckInput::TYPE_FILE))) {
-                                                    if (count($group) > Yii::app()->params["maxCheckboxes"]) {
-                                                        $groups[] = $group;
-                                                    }
-
-                                                    $group = array();
-                                                    continue;
-                                                }
-
-                                                $group[] = $input->id;
-                                            }
-                                        }
-
-                                        if (count($group) > Yii::app()->params["maxCheckboxes"]) {
-                                            $groups[] = $group;
-                                        }
-                                    ?>
-                                    <?php foreach ($check->inputs as $input): ?>
+                                <?php if ($check->scripts && $check->automated && User::checkRole(User::ROLE_USER)): ?>
+                                    <?php foreach ($check->scripts as $script): ?>
                                         <?php
-                                            $currentGroup = false;
-                                            $position = false;
-
-                                            foreach ($groups as $group) {
-                                                $position = array_search($input->id, $group);
-
-                                                if ($position !== false) {
-                                                    $currentGroup = $group;
-                                                    break;
-                                                }
+                                            if (!$script->inputs) {
+                                                continue;
                                             }
-
-                                            if ($currentGroup === false || $position === 0):
                                         ?>
-                                            <tr>
+                                        <?php if (count($check->scripts) > 1): ?>
+                                            <tr class="script-inputs">
                                                 <th>
-                                                    <?php if ($currentGroup === false): ?>
-                                                        <?php echo CHtml::encode($input->localizedName); ?>
-                                                    <?php else: ?>
-                                                        <?php echo Yii::t("app", "Input Group"); ?>
-                                                    <?php endif; ?>
+                                                    <?php echo CHtml::encode($script->name); ?>
                                                 </th>
-                                                <td>
-                                        <?php endif; ?>
-
-                                        <?php if ($input->type == CheckInput::TYPE_TEXT): ?>
-                                            <?php
-                                                $value = '';
-
-                                                if ($input->targetInputs)
-                                                    foreach ($input->targetInputs as $inputValue)
-                                                        if ($inputValue->check_input_id == $input->id)
-                                                        {
-                                                            $value = $inputValue->value;
-                                                            break;
-                                                        }
-
-                                                if ($value == NULL && $input->value != NULL)
-                                                    $value = $input->value;
-
-                                                if ($value != NULL)
-                                                    $value = CHtml::encode($value);
-                                            ?>
-                                            <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?> value="<?php echo $value; ?>">
-                                        <?php elseif ($input->type == CheckInput::TYPE_TEXTAREA): ?>
-                                            <?php
-                                                $value = '';
-
-                                                if ($input->targetInputs)
-                                                    foreach ($input->targetInputs as $inputValue)
-                                                        if ($inputValue->check_input_id == $input->id)
-                                                        {
-                                                            $value = $inputValue->value;
-                                                            break;
-                                                        }
-
-                                                if ($value == NULL && $input->value != NULL)
-                                                    $value = $input->value;
-
-                                                if ($value != NULL)
-                                                    $value = CHtml::encode($value);
-                                            ?>
-                                            <textarea wrap="off" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" rows="2" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?>><?php echo $value; ?></textarea>
-                                        <?php elseif (in_array($input->type, array(CheckInput::TYPE_CHECKBOX, CheckInput::TYPE_FILE))): ?>
-                                            <?php
-                                                $value = '';
-
-                                                if ($input->targetInputs)
-                                                    foreach ($input->targetInputs as $inputValue)
-                                                        if ($inputValue->check_input_id == $input->id)
-                                                        {
-                                                            $value = $inputValue->value;
-                                                            break;
-                                                        }
-                                            ?>
-                                            <?php if ($currentGroup !== false): ?>
-                                                <div class="input-group">
-                                                    <label>
-                                            <?php endif; ?>
-
-                                            <input type="checkbox" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?> value="1"<?php if ($value) echo ' checked'; ?>>
-
-                                            <?php if ($currentGroup !== false): ?>
-                                                        <?php echo CHtml::encode($input->localizedName); ?>
-                                                    </label>
-                                                </div>
-                                            <?php endif; ?>
-                                        <?php elseif ($input->type == CheckInput::TYPE_RADIO): ?>
-                                            <?php
-                                                $value = '';
-
-                                                if ($input->targetInputs)
-                                                    foreach ($input->targetInputs as $inputValue)
-                                                        if ($inputValue->check_input_id == $input->id)
-                                                        {
-                                                            $value = $inputValue->value;
-                                                            break;
-                                                        }
-
-                                                $radioBoxes = explode("\n", str_replace("\r", '', $input->value));
-                                            ?>
-
-                                            <ul class="radio-input">
-                                                <?php foreach ($radioBoxes as $radio): ?>
-                                                    <li>
-                                                        <label class="radio">
-                                                            <input name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" type="radio" value="<?php echo CHtml::encode($radio); ?>" <?php if ($check->isRunning) echo 'disabled'; ?> <?php if ($value == $radio) echo ' checked'; ?>>
-                                                            <?php echo CHtml::encode($radio); ?>
-                                                        </label>
-                                                    </li>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                        <?php endif; ?>
-
-                                        <?php if ($input->localizedDescription && $currentGroup === false): ?>
-                                            <p class="help-block">
-                                                <?php echo CHtml::encode($input->localizedDescription); ?>
-                                            </p>
-                                        <?php endif; ?>
-
-                                        <?php if ($currentGroup === false || $position === count($currentGroup) - 1): ?>
-                                                </td>
+                                                <td>&nbsp;</td>
                                             </tr>
                                         <?php endif; ?>
+                                        <?php
+                                            $groups = array();
+                                            $group = array();
+
+                                            if (count($script->inputs) > Yii::app()->params["maxCheckboxes"]) {
+                                                foreach ($script->inputs as $input) {
+                                                    if (!in_array($input->type, array(CheckInput::TYPE_CHECKBOX, CheckInput::TYPE_FILE))) {
+                                                        if (count($group) > Yii::app()->params["maxCheckboxes"]) {
+                                                            $groups[] = $group;
+                                                        }
+
+                                                        $group = array();
+                                                        continue;
+                                                    }
+
+                                                    $group[] = $input->id;
+                                                }
+                                            }
+
+                                            if (count($group) > Yii::app()->params["maxCheckboxes"]) {
+                                                $groups[] = $group;
+                                            }
+                                        ?>
+                                        <?php foreach ($script->inputs as $input): ?>
+                                            <?php
+                                                $currentGroup = false;
+                                                $position = false;
+
+                                                foreach ($groups as $group) {
+                                                    $position = array_search($input->id, $group);
+
+                                                    if ($position !== false) {
+                                                        $currentGroup = $group;
+                                                        break;
+                                                    }
+                                                }
+
+                                                if ($currentGroup === false || $position === 0):
+                                            ?>
+                                                <tr>
+                                                    <th>
+                                                        <?php if ($currentGroup === false): ?>
+                                                            <?php echo CHtml::encode($input->localizedName); ?>
+                                                        <?php else: ?>
+                                                            <?php echo Yii::t("app", "Input Group"); ?>
+                                                        <?php endif; ?>
+                                                    </th>
+                                                    <td>
+                                            <?php endif; ?>
+
+                                            <?php if ($input->type == CheckInput::TYPE_TEXT): ?>
+                                                <?php
+                                                    $value = '';
+
+                                                    if ($input->targetInputs)
+                                                        foreach ($input->targetInputs as $inputValue)
+                                                            if ($inputValue->check_input_id == $input->id)
+                                                            {
+                                                                $value = $inputValue->value;
+                                                                break;
+                                                            }
+
+                                                    if ($value == NULL && $input->value != NULL)
+                                                        $value = $input->value;
+
+                                                    if ($value != NULL)
+                                                        $value = CHtml::encode($value);
+                                                ?>
+                                                <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?> value="<?php echo $value; ?>">
+                                            <?php elseif ($input->type == CheckInput::TYPE_TEXTAREA): ?>
+                                                <?php
+                                                    $value = '';
+
+                                                    if ($input->targetInputs)
+                                                        foreach ($input->targetInputs as $inputValue)
+                                                            if ($inputValue->check_input_id == $input->id)
+                                                            {
+                                                                $value = $inputValue->value;
+                                                                break;
+                                                            }
+
+                                                    if ($value == NULL && $input->value != NULL)
+                                                        $value = $input->value;
+
+                                                    if ($value != NULL)
+                                                        $value = CHtml::encode($value);
+                                                ?>
+                                                <textarea wrap="off" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" class="max-width" rows="2" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?>><?php echo $value; ?></textarea>
+                                            <?php elseif (in_array($input->type, array(CheckInput::TYPE_CHECKBOX, CheckInput::TYPE_FILE))): ?>
+                                                <?php
+                                                    $value = '';
+
+                                                    if ($input->targetInputs)
+                                                        foreach ($input->targetInputs as $inputValue)
+                                                            if ($inputValue->check_input_id == $input->id)
+                                                            {
+                                                                $value = $inputValue->value;
+                                                                break;
+                                                            }
+                                                ?>
+                                                <?php if ($currentGroup !== false): ?>
+                                                    <div class="input-group">
+                                                        <label>
+                                                <?php endif; ?>
+
+                                                <input type="checkbox" name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" id="TargetCheckEditForm_<?php echo $check->id; ?>_inputs_<?php echo $input->id; ?>" <?php if ($check->isRunning) echo 'readonly'; ?> value="1"<?php if ($value) echo ' checked'; ?>>
+
+                                                <?php if ($currentGroup !== false): ?>
+                                                            <?php echo CHtml::encode($input->localizedName); ?>
+                                                        </label>
+                                                    </div>
+                                                <?php endif; ?>
+                                            <?php elseif ($input->type == CheckInput::TYPE_RADIO): ?>
+                                                <?php
+                                                    $value = '';
+
+                                                    if ($input->targetInputs)
+                                                        foreach ($input->targetInputs as $inputValue)
+                                                            if ($inputValue->check_input_id == $input->id)
+                                                            {
+                                                                $value = $inputValue->value;
+                                                                break;
+                                                            }
+
+                                                    $radioBoxes = explode("\n", str_replace("\r", '', $input->value));
+                                                ?>
+
+                                                <ul class="radio-input">
+                                                    <?php foreach ($radioBoxes as $radio): ?>
+                                                        <li>
+                                                            <label class="radio">
+                                                                <input name="TargetCheckEditForm_<?php echo $check->id; ?>[inputs][<?php echo $input->id; ?>]" type="radio" value="<?php echo CHtml::encode($radio); ?>" <?php if ($check->isRunning) echo 'disabled'; ?> <?php if ($value == $radio) echo ' checked'; ?>>
+                                                                <?php echo CHtml::encode($radio); ?>
+                                                            </label>
+                                                        </li>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                            <?php endif; ?>
+
+                                            <?php if ($input->localizedDescription && $currentGroup === false): ?>
+                                                <p class="help-block">
+                                                    <?php echo CHtml::encode($input->localizedDescription); ?>
+                                                </p>
+                                            <?php endif; ?>
+
+                                            <?php if ($currentGroup === false || $position === count($currentGroup) - 1): ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                                 <tr>

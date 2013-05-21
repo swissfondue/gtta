@@ -744,7 +744,7 @@ function User()
                             system.translate('Reset') + '"></i></span>'
                         );
 
-                        $('#TargetCheckEditForm_' + id + '_result').val('');
+                        //$('#TargetCheckEditForm_' + id + '_result').val('');
                         $('div.table-result', row).html('');
 
                         _check.setLoading(id);

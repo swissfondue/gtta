@@ -995,23 +995,28 @@ class ProjectController extends Controller
                 'on'       => 'tas.target_id = :target_id',
                 'params'   => array( 'target_id' => $target->id ),
             ),
-            'inputs' => array(
+            'scripts' => array(
                 'joinType' => 'LEFT JOIN',
-                'with'     => array(
-                    'targetInputs' => array(
-                        'alias'    => 'tis',
+                'with' => array(
+                    'inputs' => array(
                         'joinType' => 'LEFT JOIN',
-                        'on'       => 'tis.target_id = :target_id',
-                        'params'   => array( 'target_id' => $target->id )
+                        'with'     => array(
+                            'targetInputs' => array(
+                                'alias'    => 'tis',
+                                'joinType' => 'LEFT JOIN',
+                                'on'       => 'tis.target_id = :target_id',
+                                'params'   => array( 'target_id' => $target->id )
+                            ),
+                            'l10n' => array(
+                                'alias'    => 'l10n_i',
+                                'joinType' => 'LEFT JOIN',
+                                'on'       => 'l10n_i.language_id = :language_id',
+                                'params'   => array( 'language_id' => $language )
+                            )
+                        ),
+                        'order' => 'inputs.sort_order ASC'
                     ),
-                    'l10n' => array(
-                        'alias'    => 'l10n_i',
-                        'joinType' => 'LEFT JOIN',
-                        'on'       => 'l10n_i.language_id = :language_id',
-                        'params'   => array( 'language_id' => $language )
-                    )
-                ),
-                'order' => 'inputs.sort_order ASC'
+                )
             ),
             'results' => array(
                 'joinType' => 'LEFT JOIN',
@@ -1288,12 +1293,10 @@ class ProjectController extends Controller
                 }
 
             // add inputs
-            if ($model->inputs && $check->automated)
-                foreach ($model->inputs as $inputId => $inputValue)
-                {
+            if ($model->inputs && $check->automated) {
+                foreach ($model->inputs as $inputId => $inputValue) {
                     $input = CheckInput::model()->findByAttributes(array(
-                        'id'       => $inputId,
-                        'check_id' => $check->id
+                        'id' => $inputId,
                     ));
 
                     if (!$input)
@@ -1309,6 +1312,7 @@ class ProjectController extends Controller
                     $input->value          = $inputValue;
                     $input->save();
                 }
+            }
 
             $response->addData('rating', $targetCheck->rating);
 
@@ -1864,7 +1868,6 @@ class ProjectController extends Controller
                     ));
 
                     $targetCheck->status  = TargetCheck::STATUS_IN_PROGRESS;
-                    $targetCheck->result  = null;
                     $targetCheck->rating  = null;
                     $targetCheck->started = null;
                     $targetCheck->pid     = null;
@@ -1918,24 +1921,28 @@ class ProjectController extends Controller
                     $inputValues = array();
 
                     // get default input values
-                    if ($check->automated)
-                    {
-                        $inputs = CheckInput::model()->with(array(
-                            'l10n' => array(
-                                'alias'    => 'l10n_i',
-                                'joinType' => 'LEFT JOIN',
-                                'on'       => 'l10n_i.language_id = :language_id',
-                                'params'   => array( 'language_id' => $language->id )
-                            )
-                        ))->findAllByAttributes(array(
+                    if ($check->automated) {
+                        $scripts = CheckScript::model()->findAllByAttributes(array(
                             'check_id' => $check->id
                         ));
 
-                        foreach ($inputs as $input)
+                        $scriptIds = array();
+
+                        foreach ($scripts as $script) {
+                            $scriptIds[] = $script->id;
+                        }
+
+                        $criteria = new CDbCriteria();
+                        $criteria->addInCondition("check_script_id", $scriptIds);
+
+                        $inputs = CheckInput::model()->findAll($criteria);
+
+                        foreach ($inputs as $input) {
                             $inputValues[] = array(
                                 'id'    => 'TargetCheckEditForm_' . $check->id . '_inputs_' . $input->id,
                                 'value' => $input->value
                             );
+                        }
                     }
 
                     $response->addData('inputs', $inputValues);
