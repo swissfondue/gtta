@@ -11,6 +11,8 @@
  * @property string $deadline
  * @property string $status
  * @property string $vuln_overdue
+ * @property boolean $guided_test
+ * @property integer $guided_test_step
  */
 class Project extends CActiveRecord
 {
@@ -62,10 +64,12 @@ class Project extends CActiveRecord
 	public function rules()
 	{
 		return array(
-            array( 'name, year', 'required' ),
-            array( 'name', 'length', 'max' => 1000 ),
-            array( 'year', 'length', 'max' => 4 ),
-            array( 'status', 'in', 'range' => array( self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_FINISHED ) ),
+            array('name, year', 'required'),
+            array('name', 'length', 'max' => 1000),
+            array('year', 'length', 'max' => 4),
+            array('guided_test', 'boolean'),
+            array('guided_test_step', 'numerical', 'integerOnly' => true, 'min' => 0),
+            array('status', 'in', 'range' => array(self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_FINISHED)),
 		);
 	}
 

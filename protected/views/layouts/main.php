@@ -77,6 +77,7 @@
                                         <li <?php if (Yii::app()->controller->id == 'reference') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('reference/index'); ?>"><?php echo Yii::t('app', 'References'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'user') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('user/index'); ?>"><?php echo Yii::t('app', 'Users'); ?></a></li>
                                         <li class="divider"></li>
+                                        <li <?php if (Yii::app()->controller->id == 'gt') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('gt/index'); ?>"><?php echo Yii::t('app', 'Guided Test Templates'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'reporttemplate') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('reporttemplate/index'); ?>"><?php echo Yii::t('app', 'Report Templates'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'risk') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('risk/index'); ?>"><?php echo Yii::t('app', 'Risk Matrix Templates'); ?></a></li>
                                         <li class="divider"></li>
@@ -160,12 +161,9 @@
             </footer>
         </div>
         <script>
-            try
-            {
+            try {
                 console.log('Page generated in', <?php echo $this->_requestTime; ?>, 'seconds');
-            }
-            catch (e)
-            {
+            } catch (e) {
                 // pass
             }
         </script>

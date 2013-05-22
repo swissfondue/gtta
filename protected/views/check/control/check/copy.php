@@ -9,7 +9,7 @@
         <div class="control-group">
             <label class="control-label" for="CheckCopyForm_controlId"><?php echo Yii::t('app', 'Control'); ?></label>
             <div class="controls">
-                <select class="input-xlarge" id="CheckCopyForm_controlId" onchange="admin.check.loadChecks(this);">
+                <select class="input-xlarge" id="CheckCopyForm_controlId" onchange="admin.check.loadChecks($(this), $('#CheckCopyForm_id'));">
                     <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                     <?php foreach ($categories as $cat): ?>
                         <?php foreach ($cat->controls as $ctrl): ?>

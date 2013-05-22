@@ -232,7 +232,7 @@ ALTER SEQUENCE check_inputs_id_seq OWNED BY check_inputs.id;
 -- Name: check_inputs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_inputs_id_seq', 61, true);
+SELECT pg_catalog.setval('check_inputs_id_seq', 64, true);
 
 
 --
@@ -289,7 +289,7 @@ ALTER SEQUENCE check_results_id_seq OWNED BY check_results.id;
 -- Name: check_results_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_results_id_seq', 5, true);
+SELECT pg_catalog.setval('check_results_id_seq', 6, true);
 
 
 --
@@ -344,7 +344,7 @@ ALTER SEQUENCE check_scripts_id_seq OWNED BY check_scripts.id;
 -- Name: check_scripts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('check_scripts_id_seq', 45, true);
+SELECT pg_catalog.setval('check_scripts_id_seq', 48, true);
 
 
 --
@@ -455,7 +455,7 @@ ALTER SEQUENCE checks_id_seq OWNED BY checks.id;
 -- Name: checks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('checks_id_seq', 50, true);
+SELECT pg_catalog.setval('checks_id_seq', 56, true);
 
 
 --
@@ -572,6 +572,225 @@ SELECT pg_catalog.setval('emails_id_seq', 17, true);
 
 
 --
+-- Name: gt_categories; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE TABLE gt_categories (
+    id bigint NOT NULL,
+    name character varying(1000) NOT NULL
+);
+
+
+ALTER TABLE public.gt_categories OWNER TO gtta;
+
+--
+-- Name: gt_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
+--
+
+CREATE SEQUENCE gt_categories_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.gt_categories_id_seq OWNER TO gtta;
+
+--
+-- Name: gt_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
+--
+
+ALTER SEQUENCE gt_categories_id_seq OWNED BY gt_categories.id;
+
+
+--
+-- Name: gt_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('gt_categories_id_seq', 2, true);
+
+
+--
+-- Name: gt_categories_l10n; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE TABLE gt_categories_l10n (
+    gt_category_id bigint NOT NULL,
+    language_id bigint NOT NULL,
+    name character varying(1000)
+);
+
+
+ALTER TABLE public.gt_categories_l10n OWNER TO gtta;
+
+--
+-- Name: gt_module_checks; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE TABLE gt_module_checks (
+    id bigint NOT NULL,
+    gt_module_id bigint NOT NULL,
+    check_id bigint NOT NULL,
+    description character varying,
+    target_description character varying(1000),
+    sort_order integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public.gt_module_checks OWNER TO gtta;
+
+--
+-- Name: gt_module_checks_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
+--
+
+CREATE SEQUENCE gt_module_checks_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.gt_module_checks_id_seq OWNER TO gtta;
+
+--
+-- Name: gt_module_checks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
+--
+
+ALTER SEQUENCE gt_module_checks_id_seq OWNED BY gt_module_checks.id;
+
+
+--
+-- Name: gt_module_checks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('gt_module_checks_id_seq', 6, true);
+
+
+--
+-- Name: gt_module_checks_l10n; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE TABLE gt_module_checks_l10n (
+    gt_module_check_id bigint NOT NULL,
+    language_id bigint NOT NULL,
+    description character varying,
+    target_description character varying
+);
+
+
+ALTER TABLE public.gt_module_checks_l10n OWNER TO gtta;
+
+--
+-- Name: gt_modules; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE TABLE gt_modules (
+    id bigint NOT NULL,
+    gt_type_id bigint NOT NULL,
+    name character varying(1000) NOT NULL
+);
+
+
+ALTER TABLE public.gt_modules OWNER TO gtta;
+
+--
+-- Name: gt_modules_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
+--
+
+CREATE SEQUENCE gt_modules_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.gt_modules_id_seq OWNER TO gtta;
+
+--
+-- Name: gt_modules_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
+--
+
+ALTER SEQUENCE gt_modules_id_seq OWNED BY gt_modules.id;
+
+
+--
+-- Name: gt_modules_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('gt_modules_id_seq', 4, true);
+
+
+--
+-- Name: gt_modules_l10n; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE TABLE gt_modules_l10n (
+    gt_module_id bigint NOT NULL,
+    language_id bigint NOT NULL,
+    name character varying(1000)
+);
+
+
+ALTER TABLE public.gt_modules_l10n OWNER TO gtta;
+
+--
+-- Name: gt_types; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE TABLE gt_types (
+    id bigint NOT NULL,
+    gt_category_id bigint NOT NULL,
+    name character varying(1000) NOT NULL
+);
+
+
+ALTER TABLE public.gt_types OWNER TO gtta;
+
+--
+-- Name: gt_types_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
+--
+
+CREATE SEQUENCE gt_types_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.gt_types_id_seq OWNER TO gtta;
+
+--
+-- Name: gt_types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
+--
+
+ALTER SEQUENCE gt_types_id_seq OWNED BY gt_types.id;
+
+
+--
+-- Name: gt_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
+--
+
+SELECT pg_catalog.setval('gt_types_id_seq', 8, true);
+
+
+--
+-- Name: gt_types_l10n; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE TABLE gt_types_l10n (
+    gt_type_id bigint NOT NULL,
+    language_id bigint NOT NULL,
+    name character varying(1000)
+);
+
+
+ALTER TABLE public.gt_types_l10n OWNER TO gtta;
+
+--
 -- Name: languages; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -652,7 +871,7 @@ ALTER SEQUENCE login_history_id_seq OWNED BY login_history.id;
 -- Name: login_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('login_history_id_seq', 93, true);
+SELECT pg_catalog.setval('login_history_id_seq', 100, true);
 
 
 --
@@ -721,7 +940,9 @@ CREATE TABLE projects (
     deadline date NOT NULL,
     name character varying(1000) NOT NULL,
     status project_status DEFAULT 'open'::project_status NOT NULL,
-    vuln_overdue date
+    vuln_overdue date,
+    guided_test boolean DEFAULT false NOT NULL,
+    guided_test_step integer DEFAULT 0 NOT NULL
 );
 
 
@@ -1445,6 +1666,34 @@ ALTER TABLE ONLY emails ALTER COLUMN id SET DEFAULT nextval('emails_id_seq'::reg
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
 
+ALTER TABLE ONLY gt_categories ALTER COLUMN id SET DEFAULT nextval('gt_categories_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_module_checks ALTER COLUMN id SET DEFAULT nextval('gt_module_checks_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_modules ALTER COLUMN id SET DEFAULT nextval('gt_modules_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_types ALTER COLUMN id SET DEFAULT nextval('gt_types_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
+--
+
 ALTER TABLE ONLY languages ALTER COLUMN id SET DEFAULT nextval('languages_id_seq'::regclass);
 
 
@@ -1702,6 +1951,9 @@ COPY check_inputs (id, name, description, sort_order, value, type, check_script_
 46	Admin Logins		0		4	32
 1	Hostname X		0	asdfasdf	0	42
 61	Hostname		0		0	45
+62	Hostname X		0	asdfasdf	0	46
+63	Hostname		0		0	47
+64	Show All		0	0	0	48
 \.
 
 
@@ -1786,6 +2038,10 @@ COPY check_inputs_l10n (check_input_id, language_id, name, description) FROM std
 42	2	\N	\N
 61	1	Hostname	\N
 61	2	\N	\N
+62	1	Hostname X	\N
+62	2	\N	\N
+63	1	Hostname	\N
+63	2	\N	\N
 46	1	Admin Logins	\N
 46	2	\N	\N
 47	1	Adobe xml	\N
@@ -1814,6 +2070,8 @@ COPY check_inputs_l10n (check_input_id, language_id, name, description) FROM std
 57	2	\N	\N
 1	1	Hostname X	\N
 1	2	\N	\N
+64	1	Show All	\N
+64	2	\N	\N
 \.
 
 
@@ -1825,6 +2083,7 @@ COPY check_results (id, check_id, result, sort_order, title) FROM stdin;
 3	3	Resulten	1	Test Deutsche
 2	3	Here is no formatting at all - because this field is plain text. Please humble with that.\r\n\r\nLine span.	0	Test English
 5	46	zzz & xxx <a> lolo	0	xxx
+6	55	Test	0	Testx
 \.
 
 
@@ -1839,6 +2098,8 @@ COPY check_results_l10n (check_result_id, language_id, result, title) FROM stdin
 2	2	Result ' Pizda Dzhigurda (de)	Zuzuz
 5	1	zzz & xxx <a> lolo	xxx
 5	2	\N	\N
+6	1	Test	Testx
+6	2	\N	\N
 \.
 
 
@@ -1892,6 +2153,9 @@ COPY check_scripts (id, check_id, name) FROM stdin;
 44	46	test.py
 42	1	dns_a.py
 45	1	dns_a_nr.py
+46	55	dns_a.py
+47	55	dns_a_nr.py
+48	56	dns_hosting.py
 \.
 
 
@@ -1925,6 +2189,7 @@ COPY check_solutions_l10n (check_solution_id, language_id, solution, title) FROM
 --
 
 COPY checks (id, check_control_id, name, background_info, hints, advanced, automated, multiple_solutions, protocol, port, question, reference_id, reference_code, reference_url, effort, sort_order) FROM stdin;
+54	1	DNS A (Copy)	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.		f	t	f		\N		1			2	54
 17	2	FTP Bruteforce			f	t	f		\N		1			2	17
 18	3	SMTP Banner			f	t	f		\N		1			2	18
 19	3	SMTP DNSBL			f	t	f		\N		1			2	19
@@ -1966,12 +2231,14 @@ COPY checks (id, check_control_id, name, background_info, hints, advanced, autom
 47	12	CMS check			f	t	f	http	80		1			2	47
 48	10	yay			f	f	f		\N		1			2	48
 49	13	hh			f	f	f		\N		1			2	49
+55	1	DNS A (Copy)	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.		f	t	f		\N		1			2	55
 3	1	DNS AFXR	hey <b>fuck \\' sss</b><br><b>How are you?<br></b>sd<br><b></b>1. this is some kind of list<br>2. lololo upup up<br>sdfa<br>asdf<br>asdf<br>sdd<br>sdf<br>sdf	jjj<br>what the fuck did you do?	f	t	f		\N	No more no more	1			2	7
 50	1	DNS TEST	test		f	f	f		\N		1			2	50
 45	1	DNS A (Non-Recursive)			f	t	f		\N		1			2	3
+6	1	DNS Hosting	hello		f	t	f	adfasd	\N		1			2	9
 1	1	DNS A	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.		f	t	f		\N		1			2	0
-6	1	DNS Hosting	hello		f	t	f		\N		1			2	9
 46	10	Scan Somethingh	<b>Background Info:</b><br>The http-server headers often leak information about servertype and versions. In our check we request the server via http 1.0 with and without host-header to check for misconfigured vhosts and via a usual http 1.1-request. Having the servertype and version an attacker can start investigating if there are known exploits for that specific version. This helps the attacker to prepare all targeted attacks. We will look specifically for the following tags:<br><br><ul><li>Server: A name for the server including sometimes the version.</li><li>Via: Informs the client of proxies through which the response was sent.</li><li>X-Powered-By: specifies the technology (e.g. ASP.NET, PHP, JBoss) supporting the web application (version details are often in X-Runtime, X-Version, or X-AspNet-Version)</li></ul>	<span>HELO MYDOMAIN<br></span><ol><li>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;</li><li>RCPT TO :&lt;InternalName2@domain.ch&gt;</li></ol><span>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br></span><ul><li>\r\nFROM: InternalName1</li><li>TO: InternalName2</li></ul><span><span>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br></span></span><ul><li>\r\nInfoguard AG</li></ul>	f	t	t		\N	<span>HELO MYDOMAIN<br></span><ul><li>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;</li><li>RCPT TO :&lt;InternalName2@domain.ch&gt;</li></ul><span>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br></span><ol><li>\r\nFROM: InternalName1</li><li>TO: InternalName2</li></ol><span><span>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>	1			2	46
+56	1	DNS Hosting (Copy)	hello		f	t	f	adfasd	\N		1			2	56
 \.
 
 
@@ -2058,13 +2325,13 @@ COPY checks_l10n (check_id, language_id, name, background_info, hints, reference
 14	2	\N	\N	\N	\N	\N
 45	1	DNS A (Non-Recursive)	\N	\N	\N	\N
 45	2	\N	\N	\N	\N	\N
-6	1	DNS Hosting	hello	\N	\N	\N
-6	2	\N	\N	\N	\N	\N
 3	1	DNS AFXR	hey <b>fuck \\' sss</b><br><b>How are you?<br></b>sd<br><b></b>1. this is some kind of list<br>2. lololo upup up<br>sdfa<br>asdf<br>asdf<br>sdd<br>sdf<br>sdf	jjj<br>what the fuck did you do?	\N	No more no more
 3	2	ZXZXZXX	meowsfvfd<br>sdfsdf<br>sdf<br>sdf<br>sd<br>f<br>sdf<br>sd<br>f<br>sd<br>f<br>sdf	piu<i> poiu</i>	\N	\N
 1	1	DNS A	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.	\N	\N	\N
 1	2	ZZZ	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.	\N	\N	\N
 46	2	\N	\N	\N	\N	\N
+6	1	DNS Hosting	hello	\N	\N	\N
+6	2	\N	\N	\N	\N	\N
 50	1	DNS TEST	test	\N	\N	\N
 47	1	CMS check	\N	\N	\N	\N
 50	2	\N	\N	\N	\N	\N
@@ -2074,6 +2341,12 @@ COPY checks_l10n (check_id, language_id, name, background_info, hints, reference
 49	1	hh	\N	\N	\N	\N
 49	2	\N	\N	\N	\N	\N
 46	1	Scan Somethingh	<b>Background Info:</b><br>The http-server headers often leak information about servertype and versions. In our check we request the server via http 1.0 with and without host-header to check for misconfigured vhosts and via a usual http 1.1-request. Having the servertype and version an attacker can start investigating if there are known exploits for that specific version. This helps the attacker to prepare all targeted attacks. We will look specifically for the following tags:<br><br><ul><li>Server: A name for the server including sometimes the version.</li><li>Via: Informs the client of proxies through which the response was sent.</li><li>X-Powered-By: specifies the technology (e.g. ASP.NET, PHP, JBoss) supporting the web application (version details are often in X-Runtime, X-Version, or X-AspNet-Version)</li></ul>	<span>HELO MYDOMAIN<br></span><ol><li>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;</li><li>RCPT TO :&lt;InternalName2@domain.ch&gt;</li></ol><span>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br></span><ul><li>\r\nFROM: InternalName1</li><li>TO: InternalName2</li></ul><span><span>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br></span></span><ul><li>\r\nInfoguard AG</li></ul>	\N	<span>HELO MYDOMAIN<br></span><ul><li>\r\nMAIL FROM:&lt;InternalName1@domain.ch&gt;</li><li>RCPT TO :&lt;InternalName2@domain.ch&gt;</li></ul><span>\r\nREPLY-TO:&lt;infoguard@netprotect.ch)<br>\r\nData<br>\r\n<br></span><ol><li>\r\nFROM: InternalName1</li><li>TO: InternalName2</li></ol><span><span>\r\nSubject: Infoguard Test <br>\r\n<br>\r\nGruezi!<br>\r\n<br>\r\n</span><span>Dies ist ein Mail Spoofing Check von Infoguard. Wir\r\nversuchen dabei von extern auf dem Mailserver des Kunden zu verbinden und im\r\nNamen eines existierenden internen Mitarbeiters A eine Mail an einen internen\r\nMitarbeiter B zu senden. Bitte um kurze Rueckbestaetigung, falls diese Mail\r\nangekommen ist (infoguard@netprotect.ch). <br>\r\n<br>\r\n</span><span>Gruss<br>\r\nInfoguard AG</span></span>
+54	1	DNS A (Copy)	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.	\N	\N	\N
+54	2	ZZZ (Copy)	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.	\N	\N	\N
+55	1	DNS A (Copy)	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.	\N	\N	\N
+55	2	ZZZ (Copy)	blabla <a target="_blank" rel="nofollow" href="http://google.com">google.com</a><br><br>some shit<br><br>\r\n\r\n<a target="_blank" rel="nofollow" href="http://google.com">yay</a>.	\N	\N	\N
+56	1	DNS Hosting (Copy)	hello	\N	\N	\N
+56	2	 (Copy)	\N	\N	\N	\N
 \.
 
 
@@ -2093,6 +2366,91 @@ COPY clients (id, name, country, state, city, address, postcode, website, contac
 --
 
 COPY emails (id, user_id, subject, content, attempts, sent) FROM stdin;
+\.
+
+
+--
+-- Data for Name: gt_categories; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY gt_categories (id, name) FROM stdin;
+2	Technical Test
+\.
+
+
+--
+-- Data for Name: gt_categories_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY gt_categories_l10n (gt_category_id, language_id, name) FROM stdin;
+2	1	Technical Test
+2	2	\N
+\.
+
+
+--
+-- Data for Name: gt_module_checks; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY gt_module_checks (id, gt_module_id, check_id, description, target_description, sort_order) FROM stdin;
+4	4	1			0
+6	4	3			1
+\.
+
+
+--
+-- Data for Name: gt_module_checks_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY gt_module_checks_l10n (gt_module_check_id, language_id, description, target_description) FROM stdin;
+4	1	\N	\N
+4	2	\N	\N
+6	1	\N	\N
+6	2	\N	\N
+\.
+
+
+--
+-- Data for Name: gt_modules; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY gt_modules (id, gt_type_id, name) FROM stdin;
+3	7	Internal Penetration Test
+4	7	External Penetration Test
+\.
+
+
+--
+-- Data for Name: gt_modules_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY gt_modules_l10n (gt_module_id, language_id, name) FROM stdin;
+3	1	Internal Penetration Test
+3	2	\N
+4	1	External Penetration Test
+4	2	\N
+\.
+
+
+--
+-- Data for Name: gt_types; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY gt_types (id, gt_category_id, name) FROM stdin;
+7	2	Network Based
+8	2	System Based
+\.
+
+
+--
+-- Data for Name: gt_types_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY gt_types_l10n (gt_type_id, language_id, name) FROM stdin;
+7	1	Network Based
+7	2	\N
+8	1	System Based
+8	2	\N
 \.
 
 
@@ -2204,6 +2562,13 @@ COPY login_history (id, user_id, user_name, create_time) FROM stdin;
 91	1	Oliver Muenchow	2013-05-13 15:54:51.981638
 92	1	Oliver Muenchow	2013-05-21 03:19:49.267786
 93	1	Oliver Muenchow	2013-05-21 06:39:23.414544
+94	1	Oliver Muenchow	2013-05-21 17:54:52.59129
+95	1	Oliver Muenchow	2013-05-22 04:50:21.244905
+96	1	Oliver Muenchow	2013-05-22 11:46:33.133179
+97	1	Oliver Muenchow	2013-05-22 13:30:32.315321
+98	1	Oliver Muenchow	2013-05-22 18:35:13.894266
+99	1	Oliver Muenchow	2013-05-22 21:38:19.855895
+100	1	Oliver Muenchow	2013-05-23 00:52:35.79066
 \.
 
 
@@ -2233,19 +2598,19 @@ COPY project_users (project_id, user_id, admin) FROM stdin;
 -- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY projects (id, client_id, year, deadline, name, status, vuln_overdue) FROM stdin;
-6	1	2012	2012-09-21	aaa	in_progress	\N
-3	1	2012	2012-09-21	xxx	open	\N
-4	2	2012	2012-09-21	yyy	open	\N
-8	2	2012	2012-09-21	ccc	open	\N
-9	2	2012	2012-09-21	fff	open	\N
-10	1	2012	2012-09-21	ddd	open	\N
-11	2	2012	2012-09-21	eee	open	\N
-12	2	2013	2012-09-21	kokokoko	open	\N
-5	1	2012	2012-09-21	zzz	finished	\N
-2	2	2012	2012-07-29	Fuck	finished	\N
-1	2	2012	2012-07-27	Test	in_progress	2012-09-28
-13	4	2012	2013-02-09	Buka	open	\N
+COPY projects (id, client_id, year, deadline, name, status, vuln_overdue, guided_test, guided_test_step) FROM stdin;
+6	1	2012	2012-09-21	aaa	in_progress	\N	f	0
+3	1	2012	2012-09-21	xxx	open	\N	f	0
+4	2	2012	2012-09-21	yyy	open	\N	f	0
+8	2	2012	2012-09-21	ccc	open	\N	f	0
+9	2	2012	2012-09-21	fff	open	\N	f	0
+10	1	2012	2012-09-21	ddd	open	\N	f	0
+11	2	2012	2012-09-21	eee	open	\N	f	0
+12	2	2013	2012-09-21	kokokoko	open	\N	f	0
+5	1	2012	2012-09-21	zzz	finished	\N	f	0
+2	2	2012	2012-07-29	Fuck	finished	\N	f	0
+1	2	2012	2012-07-27	Test	in_progress	2012-09-28	f	0
+13	4	2012	2013-02-09	Buka	open	\N	f	0
 \.
 
 
@@ -2421,24 +2786,64 @@ COPY risk_templates_l10n (risk_template_id, language_id, name) FROM stdin;
 --
 
 COPY sessions (id, expire, data) FROM stdin;
-q0lplqc8iddola8uev85hv6lm1      	1369107659	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-7uqkdl7v2ghmbke2104dacuha6      	1369108439	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-7j4l57j4hgb6sshjutvc3ik5k5      	1369107552	4bd35ae92c3475779675ebe8ae66f2fd__returnUrl|s:1:"/";4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-mm64aflv9165u1gg5osmab3uo3      	1369107574	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-2k1vau5n39lvdldqrla7i782p3      	1369107670	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-mb95l34nhkgrgrn0ae0pk334f6      	1369108442	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-24a3l0932gdf79mupac9iuvg10      	1369107553	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-rum3q2nmfc8f8mkua93p2c3o57      	1369107581	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-5epglrasdfsglnf6fct1hs0n44      	1369107768	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-3omcqj4omtnubgqubbu76r9rm0      	1369108444	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-gj3a2p3acdh85lce6vogc6e1p7      	1369107556	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-8cpcldj5audne6s2l562h7m9s7      	1369107582	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-i19uladhkr4pbusgq4rluomuo5      	1369107773	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-j7glepc7hbs7kurq40671pb9l4      	1369108446	4bd35ae92c3475779675ebe8ae66f2fd__returnUrl|s:1:"/";4bd35ae92c3475779675ebe8ae66f2fd__id|i:1;4bd35ae92c3475779675ebe8ae66f2fd__name|s:26:"erbol.turburgaev@gmail.com";4bd35ae92c3475779675ebe8ae66f2fd__states|a:0:{}4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-mdinpg0a30ik18ejnfc8d228t7      	1369108446	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-13i003cprli3h0rjhrrrgopk71      	1369107776	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-lffrhep0vim6fmaek5941qqcs6      	1369108436	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-r17b99mpe2nllbv8ffrm6terh0      	1369107564	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+950kon5ui2fgevdkdidvuf2mg4      	1369260704	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+ll666h9n92gdvpmmiruedr82d4      	1369262330	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+2ungcb53v5debv4bummo4bjnm5      	1369262352	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+uhiqlpq3s91g9d9omvjqvt05o4      	1369262450	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+lgiao770p56rj3p08ae2f1lhf2      	1369262470	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+hn0lsbtisil3caeaqbr85ap3i2      	1369262485	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+ke6osa9ocai9imrcupqs4ge025      	1369262507	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+vmcpcepu8edno8f6qg1714h7s5      	1369259556	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+hlpirr0igtdim33rpt8rr2sgd1      	1369259604	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+gq4rvr5bdlo5jiep4oh90p07n3      	1369262522	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+8784g8unoo96qi4pt2vuu2sgk0      	1369262558	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+ctan0bsuqk3o9u35t3n7836d23      	1369262725	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+67b8a775uv1rgrgefkf44f6k42      	1369262319	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+v2ct93j1h28377hqvc5sgnhl44      	1369262340	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+a5boe6a4qdc3h2bjvnhdepbfg0      	1369262424	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+2rrd3bpn7qg8h7bl3atsc8i107      	1369262453	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+a9sno6ofp9fvsh0k1l9bf9p1d2      	1369262474	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+56rrdeq4hovsr6th0vtdom2t61      	1369262486	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+mucikood86tra7cjk4od2bo725      	1369262509	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+522f9avb9l62m8a9mk1rrnqsb0      	1369262524	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+1h66l95vor26alv39s8jhnqi41      	1369259560	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+5uni2u1vv6vtqb34u0rdg1ad06      	1369259750	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+8nlehia8njmoakrbd6djfua1e3      	1369262633	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+2ovij7sumbflg8li5lf5dnbej4      	1369262321	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+b7bo8fq2imqh2bh6dc3qjknai4      	1369262342	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+s5bsbf2msoh16oklnbges2vnk6      	1369262426	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+q8ja1apmm745t6cj28e0himkg7      	1369259551	4bd35ae92c3475779675ebe8ae66f2fd__returnUrl|s:30:"/gt-template/2/type/7/module/2";4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+mccs3ek8r5d2s8d8m478dcpoc5      	1369259572	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+n43ahp0jrbk3hgn2dpst8d8bg4      	1369259967	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+nosqp44vk4d7rocfiqth275ps5      	1369262461	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+lt8onld0elu4mfufmbp2rvn1s1      	1369262478	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+112j6f5hbqul7e7d92a6ij9bu1      	1369262496	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+210a9krr1gmuen4hc3gd2etb43      	1369262511	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+keje3tbmvi1n0kr53n7kvglaf0      	1369262535	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+2r75jqdvik7p0ek6mrfham2g44      	1369262637	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+470vsp17vfc3gdesmklmbua1o7      	1369262322	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+73hsquvptfnqvh0f08iiloqan6      	1369262344	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+f43ttjblevt6bqn14aqbv2cqf5      	1369262427	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+le8kepe13oua1jjgel99lnofj0      	1369262463	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+2qhpoml7d3abhm7g712b1vnkj1      	1369262479	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+jdssdtrg95ml2i7d2mb20andf5      	1369262498	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+p0bqkj465gqrvtip9ukohrbe82      	1369259552	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+e9kcit6pg1d2fv7bbd731j22f6      	1369259595	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+uj3k51rkhl28nkt94cikb4q0k4      	1369260611	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+ib2paibprq1etaaiespjprphv2      	1369262518	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+kbksk0mr5spehps8hdpjmnqh41      	1369262539	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+pmbica15edgb6jpocra8d75ue5      	1369262706	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+mfbvh94futb9ukrfj2p6v7oqq0      	1369262464	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+or3m67fopg67poc4mvbu34c083      	1369262324	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+pmuttd1cso6fdiu7aj0o9213p4      	1369262709	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+8dpl8fh6n232m7ml0m92p4dl45      	1369262519	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+37iing4setii8m9b9t39q66us5      	1369262350	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+7k4k9fb3ui4jaefib39hradbq6      	1369262724	4bd35ae92c3475779675ebe8ae66f2fd__returnUrl|s:30:"/gt-template/2/type/7/module/2";4bd35ae92c3475779675ebe8ae66f2fd__id|i:1;4bd35ae92c3475779675ebe8ae66f2fd__name|s:26:"erbol.turburgaev@gmail.com";4bd35ae92c3475779675ebe8ae66f2fd__states|a:0:{}4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+sh6k65mblvq6l89ls4p9pvc896      	1369262483	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+kopi6ihssj3l71chvotohsri63      	1369259602	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+41f0blulee8a5g5v1k4mqunfb2      	1369262541	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+cs1pl1na1520ad8ah70m1vo0g1      	1369262499	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+ucplevj0k6t34r2gilte9nptu7      	1369262448	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
 \.
 
 
@@ -2465,7 +2870,9 @@ COPY target_check_attachments (target_id, check_id, name, type, path, size) FROM
 --
 
 COPY target_check_categories (target_id, check_category_id, advanced, check_count, finished_count, low_risk_count, med_risk_count, high_risk_count, info_count) FROM stdin;
-1	9	t	2	1	0	0	0	1
+1	11	t	1	1	0	0	0	0
+2	6	t	18	5	0	2	0	2
+1	9	t	2	2	0	0	0	1
 1	6	t	18	2	0	0	0	0
 2	3	t	4	0	0	0	0	0
 1	8	t	0	0	0	0	0	0
@@ -2475,12 +2882,10 @@ COPY target_check_categories (target_id, check_category_id, advanced, check_coun
 1	10	t	0	0	0	0	0	0
 6	6	t	18	3	0	1	0	2
 1	2	t	1	1	0	0	0	1
-1	11	t	1	1	0	0	0	0
-2	6	t	18	5	0	2	0	2
-1	1	t	17	15	0	3	0	0
-4	1	t	17	0	0	0	0	0
-5	1	t	17	0	0	0	0	0
-7	1	t	17	1	0	0	0	0
+7	1	t	19	2	0	0	0	0
+1	1	t	19	15	0	3	0	0
+4	1	t	19	0	0	0	0	0
+5	1	t	19	0	0	0	0	0
 \.
 
 
@@ -2613,9 +3018,9 @@ COPY targets (id, project_id, host, description) FROM stdin;
 --
 
 COPY users (id, email, password, name, client_id, role, last_action_time, send_notifications, password_reset_code, password_reset_time, show_reports, show_details, certificate_required, certificate_serial, certificate_issuer) FROM stdin;
+1	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-05-23 01:45:24.607147	t	\N	2013-05-05 02:41:23.449866	f	f	t	FDC71CACAFD354F2	/C=CH/ST=Zurich/L=Zurich/O=GTTA/CN=GTTA
 3	erbol@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		2	client	2013-05-13 15:54:42.63288	f	abd9aeef114d88f28ac0ad83fecb70c25a7e22500872eab947ade90244889ee9	\N	t	t	t	FDC71CACAFD354F3	/C=CH/ST=Zurich/L=Zurich/O=GTTA/CN=GTTA
 4	bob@bob.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Anton Belousov	\N	user	2013-05-04 18:23:59.902642	f	\N	\N	f	f	f	\N	\N
-1	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-05-21 06:54:06.074699	t	\N	2013-05-05 02:41:23.449866	f	f	t	FDC71CACAFD354F2	/C=CH/ST=Zurich/L=Zurich/O=GTTA/CN=GTTA
 \.
 
 
@@ -2737,6 +3142,70 @@ ALTER TABLE ONLY clients
 
 ALTER TABLE ONLY emails
     ADD CONSTRAINT emails_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gt_categories_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
+--
+
+ALTER TABLE ONLY gt_categories_l10n
+    ADD CONSTRAINT gt_categories_l10n_pkey PRIMARY KEY (gt_category_id, language_id);
+
+
+--
+-- Name: gt_categories_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
+--
+
+ALTER TABLE ONLY gt_categories
+    ADD CONSTRAINT gt_categories_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gt_module_checks_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
+--
+
+ALTER TABLE ONLY gt_module_checks_l10n
+    ADD CONSTRAINT gt_module_checks_l10n_pkey PRIMARY KEY (gt_module_check_id, language_id);
+
+
+--
+-- Name: gt_module_checks_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
+--
+
+ALTER TABLE ONLY gt_module_checks
+    ADD CONSTRAINT gt_module_checks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gt_modules_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
+--
+
+ALTER TABLE ONLY gt_modules_l10n
+    ADD CONSTRAINT gt_modules_l10n_pkey PRIMARY KEY (gt_module_id, language_id);
+
+
+--
+-- Name: gt_modules_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
+--
+
+ALTER TABLE ONLY gt_modules
+    ADD CONSTRAINT gt_modules_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gt_types_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
+--
+
+ALTER TABLE ONLY gt_types_l10n
+    ADD CONSTRAINT gt_types_l10n_pkey PRIMARY KEY (gt_type_id, language_id);
+
+
+--
+-- Name: gt_types_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
+--
+
+ALTER TABLE ONLY gt_types
+    ADD CONSTRAINT gt_types_pkey PRIMARY KEY (id);
 
 
 --
@@ -3010,6 +3479,41 @@ CREATE UNIQUE INDEX checks_id_key ON checks USING btree (id);
 
 
 --
+-- Name: gt_categories_id_key; Type: INDEX; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE UNIQUE INDEX gt_categories_id_key ON gt_categories USING btree (id);
+
+
+--
+-- Name: gt_module_checks_id_key; Type: INDEX; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE UNIQUE INDEX gt_module_checks_id_key ON gt_module_checks USING btree (id);
+
+
+--
+-- Name: gt_modules_id_key; Type: INDEX; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE UNIQUE INDEX gt_modules_id_key ON gt_modules USING btree (id);
+
+
+--
+-- Name: gt_types_id_key; Type: INDEX; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE UNIQUE INDEX gt_types_id_key ON gt_types USING btree (id);
+
+
+--
+-- Name: languages_id_key; Type: INDEX; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE UNIQUE INDEX languages_id_key ON languages USING btree (id);
+
+
+--
 -- Name: check_categories_l10n_check_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
@@ -3167,6 +3671,102 @@ ALTER TABLE ONLY checks
 
 ALTER TABLE ONLY emails
     ADD CONSTRAINT emails_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: gt_categories_l10n_gt_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_categories_l10n
+    ADD CONSTRAINT gt_categories_l10n_gt_category_id_fkey FOREIGN KEY (gt_category_id) REFERENCES gt_categories(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: gt_categories_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_categories_l10n
+    ADD CONSTRAINT gt_categories_l10n_language_id_fkey FOREIGN KEY (language_id) REFERENCES languages(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: gt_module_checks_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_module_checks
+    ADD CONSTRAINT gt_module_checks_check_id_fkey FOREIGN KEY (check_id) REFERENCES checks(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: gt_module_checks_gt_module_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_module_checks
+    ADD CONSTRAINT gt_module_checks_gt_module_id_fkey FOREIGN KEY (gt_module_id) REFERENCES gt_modules(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: gt_module_checks_l10n_gt_module_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_module_checks_l10n
+    ADD CONSTRAINT gt_module_checks_l10n_gt_module_check_id_fkey FOREIGN KEY (gt_module_check_id) REFERENCES gt_module_checks(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: gt_module_checks_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_module_checks_l10n
+    ADD CONSTRAINT gt_module_checks_l10n_language_id_fkey FOREIGN KEY (language_id) REFERENCES languages(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: gt_modules_gt_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_modules
+    ADD CONSTRAINT gt_modules_gt_type_id_fkey FOREIGN KEY (gt_type_id) REFERENCES gt_types(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: gt_modules_l10n_gt_module_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_modules_l10n
+    ADD CONSTRAINT gt_modules_l10n_gt_module_id_fkey FOREIGN KEY (gt_module_id) REFERENCES gt_modules(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: gt_modules_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_modules_l10n
+    ADD CONSTRAINT gt_modules_l10n_language_id_fkey FOREIGN KEY (language_id) REFERENCES languages(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: gt_types_gt_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_types
+    ADD CONSTRAINT gt_types_gt_category_id_fkey FOREIGN KEY (gt_category_id) REFERENCES gt_categories(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: gt_types_l10n_gt_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_types_l10n
+    ADD CONSTRAINT gt_types_l10n_gt_type_id_fkey FOREIGN KEY (gt_type_id) REFERENCES gt_types(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: gt_types_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_types_l10n
+    ADD CONSTRAINT gt_types_l10n_language_id_fkey FOREIGN KEY (language_id) REFERENCES languages(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

@@ -177,6 +177,36 @@ return array(
                 'reference/new'           => 'reference/edit',
                 'reference/control'       => 'reference/control',
 
+                // guided test templates
+                'gt-templates/<page:\d+>' => 'gt/index',
+                'gt-templates' => 'gt/index',
+                'gt-template/<id:\d+>/<page:\d+>' => 'gt/view',
+                'gt-template/<id:\d+>' => 'gt/view',
+                'gt-template/<id:\d+>/edit' => 'gt/edit',
+                'gt-template/new' => 'gt/edit',
+                'gt-template/control' => 'gt/control',
+
+                // guided test types
+                'gt-template/<id:\d+>/type/<type:\d+>/<page:\d+>' => 'gt/viewtype',
+                'gt-template/<id:\d+>/type/<type:\d+>' => 'gt/viewtype',
+                'gt-template/<id:\d+>/type/<type:\d+>/edit' => 'gt/edittype',
+                'gt-template/<id:\d+>/type/new' => 'gt/edittype',
+                'gt-template/type/control' => 'gt/controltype',
+
+                // guided test modules
+                'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/<page:\d+>' => 'gt/viewmodule',
+                'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>' => 'gt/viewmodule',
+                'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/edit' => 'gt/editmodule',
+                'gt-template/<id:\d+>/type/<type:\d+>/module/new' => 'gt/editmodule',
+                'gt-template/type/module/control' => 'gt/controlmodule',
+
+                // guided test module checks
+                'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>/<page:\d+>' => 'gt/viewcheck',
+                'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>' => 'gt/viewcheck',
+                'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>/edit' => 'gt/editcheck',
+                'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/new' => 'gt/editcheck',
+                'gt-template/type/module/check/control' => 'gt/controlcheck',
+
                 // report templates
                 'report-templates/<page:\d+>'   => 'reporttemplate/index',
                 'report-templates'              => 'reporttemplate/index',
