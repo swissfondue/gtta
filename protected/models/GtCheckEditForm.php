@@ -3,7 +3,7 @@
 /**
  * This is the model class for GT module check edit form.
  */
-class GtModuleCheckEditForm extends LocalizedFormModel
+class GtCheckEditForm extends LocalizedFormModel
 {
     /**
      * @var string description.

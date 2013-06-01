@@ -96,7 +96,8 @@ class AccountController extends Controller
 			if ($model->validate()) {
                 $user = User::model()->findByAttributes(array('email' => $model->email));
                 $user->password_reset_code = hash('sha256', $user->email . time() . rand());
-                $user->password_reset_time = new CDbExpression("NOW()");
+                $now = new DateTime();
+                $user->password_reset_time = $now->format("Y-m-d H:i:s");
                 $user->save();
 
                 $email = new Email();
@@ -139,9 +140,11 @@ class AccountController extends Controller
         }
 
         $model = new AccountRestoreForm(AccountRestoreForm::RESET_PASSWORD_SCENARIO);
+        $now = new DateTime();
+
         $user = User::model()->find(array(
-            "condition" => "password_reset_code = :code AND password_reset_time + INTERVAL '10 MINUTES' >= NOW()",
-            "params" => array("code" => $code)
+            "condition" => "password_reset_code = :code AND password_reset_time + INTERVAL '10 MINUTES' >= :time",
+            "params" => array("code" => $code, "time" => $now->format("Y-m-d H:i:s"))
         ));
 
         if (!$user) {

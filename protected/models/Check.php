@@ -126,6 +126,6 @@ class Check extends CActiveRecord
      */
     public function getIsRunning()
     {
-        return $this->automated && $this->targetChecks && in_array($this->targetChecks[0]->status, array( TargetCheck::STATUS_IN_PROGRESS, TargetCheck::STATUS_STOP ));
+        return $this->automated && $this->targetChecks && in_array($this->targetChecks[0]->status, array(TargetCheck::STATUS_IN_PROGRESS, TargetCheck::STATUS_STOP));
     }
 }

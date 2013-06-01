@@ -202,7 +202,8 @@ class BackupController extends Controller
         else
             $system = new System();
 
-        $system->backup = new CDbExpression('NOW()');
+        $now = new DateTime();
+        $system->backup = $now->format("Y-m-d H:i:s");
         $system->save();
 
         // give user a file

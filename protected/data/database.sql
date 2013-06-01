@@ -568,7 +568,7 @@ ALTER SEQUENCE emails_id_seq OWNED BY emails.id;
 -- Name: emails_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('emails_id_seq', 17, true);
+SELECT pg_catalog.setval('emails_id_seq', 18, true);
 
 
 --
@@ -625,10 +625,10 @@ CREATE TABLE gt_categories_l10n (
 ALTER TABLE public.gt_categories_l10n OWNER TO gtta;
 
 --
--- Name: gt_module_checks; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+-- Name: gt_checks; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
-CREATE TABLE gt_module_checks (
+CREATE TABLE gt_checks (
     id bigint NOT NULL,
     gt_module_id bigint NOT NULL,
     check_id bigint NOT NULL,
@@ -638,13 +638,13 @@ CREATE TABLE gt_module_checks (
 );
 
 
-ALTER TABLE public.gt_module_checks OWNER TO gtta;
+ALTER TABLE public.gt_checks OWNER TO gtta;
 
 --
--- Name: gt_module_checks_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
+-- Name: gt_checks_id_seq; Type: SEQUENCE; Schema: public; Owner: gtta
 --
 
-CREATE SEQUENCE gt_module_checks_id_seq
+CREATE SEQUENCE gt_checks_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
@@ -652,35 +652,35 @@ CREATE SEQUENCE gt_module_checks_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.gt_module_checks_id_seq OWNER TO gtta;
+ALTER TABLE public.gt_checks_id_seq OWNER TO gtta;
 
 --
--- Name: gt_module_checks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
+-- Name: gt_checks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: gtta
 --
 
-ALTER SEQUENCE gt_module_checks_id_seq OWNED BY gt_module_checks.id;
-
-
---
--- Name: gt_module_checks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
---
-
-SELECT pg_catalog.setval('gt_module_checks_id_seq', 6, true);
+ALTER SEQUENCE gt_checks_id_seq OWNED BY gt_checks.id;
 
 
 --
--- Name: gt_module_checks_l10n; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+-- Name: gt_checks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-CREATE TABLE gt_module_checks_l10n (
-    gt_module_check_id bigint NOT NULL,
+SELECT pg_catalog.setval('gt_checks_id_seq', 8, true);
+
+
+--
+-- Name: gt_checks_l10n; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE TABLE gt_checks_l10n (
+    gt_check_id bigint NOT NULL,
     language_id bigint NOT NULL,
     description character varying,
     target_description character varying
 );
 
 
-ALTER TABLE public.gt_module_checks_l10n OWNER TO gtta;
+ALTER TABLE public.gt_checks_l10n OWNER TO gtta;
 
 --
 -- Name: gt_modules; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
@@ -720,7 +720,7 @@ ALTER SEQUENCE gt_modules_id_seq OWNED BY gt_modules.id;
 -- Name: gt_modules_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('gt_modules_id_seq', 4, true);
+SELECT pg_catalog.setval('gt_modules_id_seq', 5, true);
 
 
 --
@@ -871,7 +871,7 @@ ALTER SEQUENCE login_history_id_seq OWNED BY login_history.id;
 -- Name: login_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gtta
 --
 
-SELECT pg_catalog.setval('login_history_id_seq', 100, true);
+SELECT pg_catalog.setval('login_history_id_seq', 108, true);
 
 
 --
@@ -917,6 +917,88 @@ SELECT pg_catalog.setval('project_details_id_seq', 4, true);
 
 
 --
+-- Name: project_gt_check_attachments; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE TABLE project_gt_check_attachments (
+    project_id bigint NOT NULL,
+    gt_check_id bigint NOT NULL,
+    name character varying(1000) NOT NULL,
+    type character varying(1000) NOT NULL,
+    path character varying(1000) NOT NULL,
+    size bigint DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public.project_gt_check_attachments OWNER TO gtta;
+
+--
+-- Name: project_gt_check_inputs; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE TABLE project_gt_check_inputs (
+    project_id bigint NOT NULL,
+    gt_check_id bigint NOT NULL,
+    check_input_id bigint NOT NULL,
+    value character varying,
+    file character varying(1000)
+);
+
+
+ALTER TABLE public.project_gt_check_inputs OWNER TO gtta;
+
+--
+-- Name: project_gt_check_solutions; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE TABLE project_gt_check_solutions (
+    project_id bigint NOT NULL,
+    gt_check_id bigint NOT NULL,
+    check_solution_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.project_gt_check_solutions OWNER TO gtta;
+
+--
+-- Name: project_gt_checks; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE TABLE project_gt_checks (
+    project_id bigint NOT NULL,
+    gt_check_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    language_id bigint NOT NULL,
+    target character varying(1000),
+    port integer,
+    protocol character varying(1000),
+    target_file character varying(1000),
+    result_file character varying(1000),
+    result character varying,
+    table_result character varying,
+    started timestamp without time zone,
+    pid bigint,
+    rating check_rating,
+    status check_status
+);
+
+
+ALTER TABLE public.project_gt_checks OWNER TO gtta;
+
+--
+-- Name: project_gt_modules; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE TABLE project_gt_modules (
+    project_id bigint NOT NULL,
+    gt_module_id bigint NOT NULL,
+    sort_order integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public.project_gt_modules OWNER TO gtta;
+
+--
 -- Name: project_users; Type: TABLE; Schema: public; Owner: gtta; Tablespace: 
 --
 
@@ -941,8 +1023,7 @@ CREATE TABLE projects (
     name character varying(1000) NOT NULL,
     status project_status DEFAULT 'open'::project_status NOT NULL,
     vuln_overdue date,
-    guided_test boolean DEFAULT false NOT NULL,
-    guided_test_step integer DEFAULT 0 NOT NULL
+    guided_test boolean DEFAULT false NOT NULL
 );
 
 
@@ -1673,7 +1754,7 @@ ALTER TABLE ONLY gt_categories ALTER COLUMN id SET DEFAULT nextval('gt_categorie
 -- Name: id; Type: DEFAULT; Schema: public; Owner: gtta
 --
 
-ALTER TABLE ONLY gt_module_checks ALTER COLUMN id SET DEFAULT nextval('gt_module_checks_id_seq'::regclass);
+ALTER TABLE ONLY gt_checks ALTER COLUMN id SET DEFAULT nextval('gt_checks_id_seq'::regclass);
 
 
 --
@@ -2389,24 +2470,30 @@ COPY gt_categories_l10n (gt_category_id, language_id, name) FROM stdin;
 
 
 --
--- Data for Name: gt_module_checks; Type: TABLE DATA; Schema: public; Owner: gtta
+-- Data for Name: gt_checks; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY gt_module_checks (id, gt_module_id, check_id, description, target_description, sort_order) FROM stdin;
+COPY gt_checks (id, gt_module_id, check_id, description, target_description, sort_order) FROM stdin;
 4	4	1			0
 6	4	3			1
+7	5	13			0
+8	5	17			1
 \.
 
 
 --
--- Data for Name: gt_module_checks_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
+-- Data for Name: gt_checks_l10n; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY gt_module_checks_l10n (gt_module_check_id, language_id, description, target_description) FROM stdin;
+COPY gt_checks_l10n (gt_check_id, language_id, description, target_description) FROM stdin;
 4	1	\N	\N
 4	2	\N	\N
 6	1	\N	\N
 6	2	\N	\N
+7	1	\N	\N
+7	2	\N	\N
+8	1	\N	\N
+8	2	\N	\N
 \.
 
 
@@ -2417,6 +2504,7 @@ COPY gt_module_checks_l10n (gt_module_check_id, language_id, description, target
 COPY gt_modules (id, gt_type_id, name) FROM stdin;
 3	7	Internal Penetration Test
 4	7	External Penetration Test
+5	8	OS Tests
 \.
 
 
@@ -2429,6 +2517,8 @@ COPY gt_modules_l10n (gt_module_id, language_id, name) FROM stdin;
 3	2	\N
 4	1	External Penetration Test
 4	2	\N
+5	1	OS Tests
+5	2	\N
 \.
 
 
@@ -2569,6 +2659,14 @@ COPY login_history (id, user_id, user_name, create_time) FROM stdin;
 98	1	Oliver Muenchow	2013-05-22 18:35:13.894266
 99	1	Oliver Muenchow	2013-05-22 21:38:19.855895
 100	1	Oliver Muenchow	2013-05-23 00:52:35.79066
+101	1	Oliver Muenchow	2013-05-23 04:20:05.404432
+102	1	Oliver Muenchow	2013-05-23 15:10:18.450919
+103	1	Oliver Muenchow	2013-05-24 04:14:08.627662
+104	1	Oliver Muenchow	2013-05-24 16:10:35.56003
+105	1	Oliver Muenchow	2013-05-24 20:37:26.399811
+106	1	Oliver Muenchow	2013-05-25 02:39:58.116332
+107	1	Oliver Muenchow	2013-05-25 08:09:36.693424
+108	1	Oliver Muenchow	2013-05-25 17:31:13.70335
 \.
 
 
@@ -2580,6 +2678,46 @@ COPY project_details (id, project_id, subject, content) FROM stdin;
 2	1	hello	world
 3	2	kekek	kkk\r\n
 4	1	yaya	aazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzzaazzzzzzzzzzzzzz
+\.
+
+
+--
+-- Data for Name: project_gt_check_attachments; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY project_gt_check_attachments (project_id, gt_check_id, name, type, path, size) FROM stdin;
+\.
+
+
+--
+-- Data for Name: project_gt_check_inputs; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY project_gt_check_inputs (project_id, gt_check_id, check_input_id, value, file) FROM stdin;
+\.
+
+
+--
+-- Data for Name: project_gt_check_solutions; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY project_gt_check_solutions (project_id, gt_check_id, check_solution_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: project_gt_checks; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY project_gt_checks (project_id, gt_check_id, user_id, language_id, target, port, protocol, target_file, result_file, result, table_result, started, pid, rating, status) FROM stdin;
+\.
+
+
+--
+-- Data for Name: project_gt_modules; Type: TABLE DATA; Schema: public; Owner: gtta
+--
+
+COPY project_gt_modules (project_id, gt_module_id, sort_order) FROM stdin;
 \.
 
 
@@ -2598,19 +2736,19 @@ COPY project_users (project_id, user_id, admin) FROM stdin;
 -- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: gtta
 --
 
-COPY projects (id, client_id, year, deadline, name, status, vuln_overdue, guided_test, guided_test_step) FROM stdin;
-6	1	2012	2012-09-21	aaa	in_progress	\N	f	0
-3	1	2012	2012-09-21	xxx	open	\N	f	0
-4	2	2012	2012-09-21	yyy	open	\N	f	0
-8	2	2012	2012-09-21	ccc	open	\N	f	0
-9	2	2012	2012-09-21	fff	open	\N	f	0
-10	1	2012	2012-09-21	ddd	open	\N	f	0
-11	2	2012	2012-09-21	eee	open	\N	f	0
-12	2	2013	2012-09-21	kokokoko	open	\N	f	0
-5	1	2012	2012-09-21	zzz	finished	\N	f	0
-2	2	2012	2012-07-29	Fuck	finished	\N	f	0
-1	2	2012	2012-07-27	Test	in_progress	2012-09-28	f	0
-13	4	2012	2013-02-09	Buka	open	\N	f	0
+COPY projects (id, client_id, year, deadline, name, status, vuln_overdue, guided_test) FROM stdin;
+6	1	2012	2012-09-21	aaa	in_progress	\N	f
+3	1	2012	2012-09-21	xxx	open	\N	f
+4	2	2012	2012-09-21	yyy	open	\N	f
+9	2	2012	2012-09-21	fff	open	\N	f
+10	1	2012	2012-09-21	ddd	open	\N	f
+11	2	2012	2012-09-21	eee	open	\N	f
+12	2	2013	2012-09-21	kokokoko	open	\N	f
+5	1	2012	2012-09-21	zzz	finished	\N	f
+2	2	2012	2012-07-29	Fuck	finished	\N	f
+1	2	2012	2012-07-27	Test	in_progress	2012-09-28	f
+13	4	2012	2013-02-09	Buka	open	\N	f
+8	2	2012	2012-09-21	ccc	open	\N	t
 \.
 
 
@@ -2786,64 +2924,10 @@ COPY risk_templates_l10n (risk_template_id, language_id, name) FROM stdin;
 --
 
 COPY sessions (id, expire, data) FROM stdin;
-950kon5ui2fgevdkdidvuf2mg4      	1369260704	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-ll666h9n92gdvpmmiruedr82d4      	1369262330	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-2ungcb53v5debv4bummo4bjnm5      	1369262352	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-uhiqlpq3s91g9d9omvjqvt05o4      	1369262450	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-lgiao770p56rj3p08ae2f1lhf2      	1369262470	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-hn0lsbtisil3caeaqbr85ap3i2      	1369262485	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-ke6osa9ocai9imrcupqs4ge025      	1369262507	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-vmcpcepu8edno8f6qg1714h7s5      	1369259556	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-hlpirr0igtdim33rpt8rr2sgd1      	1369259604	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-gq4rvr5bdlo5jiep4oh90p07n3      	1369262522	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-8784g8unoo96qi4pt2vuu2sgk0      	1369262558	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-ctan0bsuqk3o9u35t3n7836d23      	1369262725	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-67b8a775uv1rgrgefkf44f6k42      	1369262319	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-v2ct93j1h28377hqvc5sgnhl44      	1369262340	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-a5boe6a4qdc3h2bjvnhdepbfg0      	1369262424	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-2rrd3bpn7qg8h7bl3atsc8i107      	1369262453	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-a9sno6ofp9fvsh0k1l9bf9p1d2      	1369262474	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-56rrdeq4hovsr6th0vtdom2t61      	1369262486	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-mucikood86tra7cjk4od2bo725      	1369262509	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-522f9avb9l62m8a9mk1rrnqsb0      	1369262524	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-1h66l95vor26alv39s8jhnqi41      	1369259560	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-5uni2u1vv6vtqb34u0rdg1ad06      	1369259750	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-8nlehia8njmoakrbd6djfua1e3      	1369262633	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-2ovij7sumbflg8li5lf5dnbej4      	1369262321	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-b7bo8fq2imqh2bh6dc3qjknai4      	1369262342	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-s5bsbf2msoh16oklnbges2vnk6      	1369262426	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-q8ja1apmm745t6cj28e0himkg7      	1369259551	4bd35ae92c3475779675ebe8ae66f2fd__returnUrl|s:30:"/gt-template/2/type/7/module/2";4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-mccs3ek8r5d2s8d8m478dcpoc5      	1369259572	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-n43ahp0jrbk3hgn2dpst8d8bg4      	1369259967	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-nosqp44vk4d7rocfiqth275ps5      	1369262461	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-lt8onld0elu4mfufmbp2rvn1s1      	1369262478	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-112j6f5hbqul7e7d92a6ij9bu1      	1369262496	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-210a9krr1gmuen4hc3gd2etb43      	1369262511	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-keje3tbmvi1n0kr53n7kvglaf0      	1369262535	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-2r75jqdvik7p0ek6mrfham2g44      	1369262637	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-470vsp17vfc3gdesmklmbua1o7      	1369262322	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-73hsquvptfnqvh0f08iiloqan6      	1369262344	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-f43ttjblevt6bqn14aqbv2cqf5      	1369262427	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-le8kepe13oua1jjgel99lnofj0      	1369262463	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-2qhpoml7d3abhm7g712b1vnkj1      	1369262479	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-jdssdtrg95ml2i7d2mb20andf5      	1369262498	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-p0bqkj465gqrvtip9ukohrbe82      	1369259552	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-e9kcit6pg1d2fv7bbd731j22f6      	1369259595	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-uj3k51rkhl28nkt94cikb4q0k4      	1369260611	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-ib2paibprq1etaaiespjprphv2      	1369262518	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-kbksk0mr5spehps8hdpjmnqh41      	1369262539	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-pmbica15edgb6jpocra8d75ue5      	1369262706	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-mfbvh94futb9ukrfj2p6v7oqq0      	1369262464	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-or3m67fopg67poc4mvbu34c083      	1369262324	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-pmuttd1cso6fdiu7aj0o9213p4      	1369262709	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-8dpl8fh6n232m7ml0m92p4dl45      	1369262519	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-37iing4setii8m9b9t39q66us5      	1369262350	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-7k4k9fb3ui4jaefib39hradbq6      	1369262724	4bd35ae92c3475779675ebe8ae66f2fd__returnUrl|s:30:"/gt-template/2/type/7/module/2";4bd35ae92c3475779675ebe8ae66f2fd__id|i:1;4bd35ae92c3475779675ebe8ae66f2fd__name|s:26:"erbol.turburgaev@gmail.com";4bd35ae92c3475779675ebe8ae66f2fd__states|a:0:{}4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-sh6k65mblvq6l89ls4p9pvc896      	1369262483	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-kopi6ihssj3l71chvotohsri63      	1369259602	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-41f0blulee8a5g5v1k4mqunfb2      	1369262541	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-cs1pl1na1520ad8ah70m1vo0g1      	1369262499	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
-ucplevj0k6t34r2gilte9nptu7      	1369262448	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+1gv3cgjro2gk9h0qrdov30mrs1      	1369492273	4bd35ae92c3475779675ebe8ae66f2fd__returnUrl|s:10:"/project/8";4bd35ae92c3475779675ebe8ae66f2fd__id|i:1;4bd35ae92c3475779675ebe8ae66f2fd__name|s:26:"erbol.turburgaev@gmail.com";4bd35ae92c3475779675ebe8ae66f2fd__states|a:0:{}4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+lhk9mtp029ckuqag3v8jibtil3      	1369492274	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+59s2rpbrirnmbr9q6hk4389fi6      	1369492269	4bd35ae92c3475779675ebe8ae66f2fd__returnUrl|s:10:"/project/8";4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
+87q14rivcvoqm079b5shdqoqk1      	1369492270	4bd35ae92c3475779675ebe8ae66f2fdYii.CWebUser.flashcounters|a:0:{}
 \.
 
 
@@ -2872,7 +2956,6 @@ COPY target_check_attachments (target_id, check_id, name, type, path, size) FROM
 COPY target_check_categories (target_id, check_category_id, advanced, check_count, finished_count, low_risk_count, med_risk_count, high_risk_count, info_count) FROM stdin;
 1	11	t	1	1	0	0	0	0
 2	6	t	18	5	0	2	0	2
-1	9	t	2	2	0	0	0	1
 1	6	t	18	2	0	0	0	0
 2	3	t	4	0	0	0	0	0
 1	8	t	0	0	0	0	0	0
@@ -2886,6 +2969,7 @@ COPY target_check_categories (target_id, check_category_id, advanced, check_coun
 1	1	t	19	15	0	3	0	0
 4	1	t	19	0	0	0	0	0
 5	1	t	19	0	0	0	0	0
+1	9	t	2	2	0	0	0	1
 \.
 
 
@@ -3018,9 +3102,9 @@ COPY targets (id, project_id, host, description) FROM stdin;
 --
 
 COPY users (id, email, password, name, client_id, role, last_action_time, send_notifications, password_reset_code, password_reset_time, show_reports, show_details, certificate_required, certificate_serial, certificate_issuer) FROM stdin;
-1	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-05-23 01:45:24.607147	t	\N	2013-05-05 02:41:23.449866	f	f	t	FDC71CACAFD354F2	/C=CH/ST=Zurich/L=Zurich/O=GTTA/CN=GTTA
 3	erbol@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3		2	client	2013-05-13 15:54:42.63288	f	abd9aeef114d88f28ac0ad83fecb70c25a7e22500872eab947ade90244889ee9	\N	t	t	t	FDC71CACAFD354F3	/C=CH/ST=Zurich/L=Zurich/O=GTTA/CN=GTTA
 4	bob@bob.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Anton Belousov	\N	user	2013-05-04 18:23:59.902642	f	\N	\N	f	f	f	\N	\N
+1	erbol.turburgaev@gmail.com	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Oliver Muenchow	\N	admin	2013-05-25 17:31:13.848497	t	\N	2013-05-24 16:02:29.309728	f	f	f	FDC71CACAFD354F2	/C=CH/ST=Zurich/L=Zurich/O=GTTA/CN=GTTA
 \.
 
 
@@ -3164,15 +3248,15 @@ ALTER TABLE ONLY gt_categories
 -- Name: gt_module_checks_l10n_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
 
-ALTER TABLE ONLY gt_module_checks_l10n
-    ADD CONSTRAINT gt_module_checks_l10n_pkey PRIMARY KEY (gt_module_check_id, language_id);
+ALTER TABLE ONLY gt_checks_l10n
+    ADD CONSTRAINT gt_module_checks_l10n_pkey PRIMARY KEY (gt_check_id, language_id);
 
 
 --
 -- Name: gt_module_checks_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
 --
 
-ALTER TABLE ONLY gt_module_checks
+ALTER TABLE ONLY gt_checks
     ADD CONSTRAINT gt_module_checks_pkey PRIMARY KEY (id);
 
 
@@ -3246,6 +3330,38 @@ ALTER TABLE ONLY login_history
 
 ALTER TABLE ONLY project_details
     ADD CONSTRAINT project_details_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: project_gt_check_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
+--
+
+ALTER TABLE ONLY project_gt_check_attachments
+    ADD CONSTRAINT project_gt_check_attachments_pkey PRIMARY KEY (path);
+
+
+--
+-- Name: project_gt_check_solutions_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
+--
+
+ALTER TABLE ONLY project_gt_check_solutions
+    ADD CONSTRAINT project_gt_check_solutions_pkey PRIMARY KEY (project_id, gt_check_id, check_solution_id);
+
+
+--
+-- Name: project_gt_checks_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
+--
+
+ALTER TABLE ONLY project_gt_checks
+    ADD CONSTRAINT project_gt_checks_pkey PRIMARY KEY (project_id, gt_check_id);
+
+
+--
+-- Name: project_gt_modules_pkey; Type: CONSTRAINT; Schema: public; Owner: gtta; Tablespace: 
+--
+
+ALTER TABLE ONLY project_gt_modules
+    ADD CONSTRAINT project_gt_modules_pkey PRIMARY KEY (project_id, gt_module_id);
 
 
 --
@@ -3465,10 +3581,24 @@ ALTER TABLE ONLY users
 
 
 --
+-- Name: check_inputs_id_key; Type: INDEX; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE UNIQUE INDEX check_inputs_id_key ON check_inputs USING btree (id);
+
+
+--
 -- Name: check_scripts_id_key; Type: INDEX; Schema: public; Owner: gtta; Tablespace: 
 --
 
 CREATE UNIQUE INDEX check_scripts_id_key ON check_scripts USING btree (id);
+
+
+--
+-- Name: check_solutions_id_key; Type: INDEX; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE UNIQUE INDEX check_solutions_id_key ON check_solutions USING btree (id);
 
 
 --
@@ -3489,7 +3619,7 @@ CREATE UNIQUE INDEX gt_categories_id_key ON gt_categories USING btree (id);
 -- Name: gt_module_checks_id_key; Type: INDEX; Schema: public; Owner: gtta; Tablespace: 
 --
 
-CREATE UNIQUE INDEX gt_module_checks_id_key ON gt_module_checks USING btree (id);
+CREATE UNIQUE INDEX gt_module_checks_id_key ON gt_checks USING btree (id);
 
 
 --
@@ -3511,6 +3641,20 @@ CREATE UNIQUE INDEX gt_types_id_key ON gt_types USING btree (id);
 --
 
 CREATE UNIQUE INDEX languages_id_key ON languages USING btree (id);
+
+
+--
+-- Name: projects_id_key; Type: INDEX; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE UNIQUE INDEX projects_id_key ON projects USING btree (id);
+
+
+--
+-- Name: users_id_key; Type: INDEX; Schema: public; Owner: gtta; Tablespace: 
+--
+
+CREATE UNIQUE INDEX users_id_key ON users USING btree (id);
 
 
 --
@@ -3690,35 +3834,35 @@ ALTER TABLE ONLY gt_categories_l10n
 
 
 --
--- Name: gt_module_checks_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+-- Name: gt_checks_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
-ALTER TABLE ONLY gt_module_checks
-    ADD CONSTRAINT gt_module_checks_check_id_fkey FOREIGN KEY (check_id) REFERENCES checks(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: gt_module_checks_gt_module_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
---
-
-ALTER TABLE ONLY gt_module_checks
-    ADD CONSTRAINT gt_module_checks_gt_module_id_fkey FOREIGN KEY (gt_module_id) REFERENCES gt_modules(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY gt_checks
+    ADD CONSTRAINT gt_checks_check_id_fkey FOREIGN KEY (check_id) REFERENCES checks(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- Name: gt_module_checks_l10n_gt_module_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+-- Name: gt_checks_gt_module_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
-ALTER TABLE ONLY gt_module_checks_l10n
-    ADD CONSTRAINT gt_module_checks_l10n_gt_module_check_id_fkey FOREIGN KEY (gt_module_check_id) REFERENCES gt_module_checks(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY gt_checks
+    ADD CONSTRAINT gt_checks_gt_module_id_fkey FOREIGN KEY (gt_module_id) REFERENCES gt_modules(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- Name: gt_module_checks_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+-- Name: gt_checks_l10n_gt_module_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
 --
 
-ALTER TABLE ONLY gt_module_checks_l10n
-    ADD CONSTRAINT gt_module_checks_l10n_language_id_fkey FOREIGN KEY (language_id) REFERENCES languages(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY gt_checks_l10n
+    ADD CONSTRAINT gt_checks_l10n_gt_module_check_id_fkey FOREIGN KEY (gt_check_id) REFERENCES gt_checks(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: gt_checks_l10n_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY gt_checks_l10n
+    ADD CONSTRAINT gt_checks_l10n_language_id_fkey FOREIGN KEY (language_id) REFERENCES languages(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -3783,6 +3927,118 @@ ALTER TABLE ONLY login_history
 
 ALTER TABLE ONLY project_details
     ADD CONSTRAINT project_details_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: project_gt_check_attachments_gt_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY project_gt_check_attachments
+    ADD CONSTRAINT project_gt_check_attachments_gt_check_id_fkey FOREIGN KEY (gt_check_id) REFERENCES gt_checks(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: project_gt_check_attachments_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY project_gt_check_attachments
+    ADD CONSTRAINT project_gt_check_attachments_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: project_gt_check_inputs_check_input_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY project_gt_check_inputs
+    ADD CONSTRAINT project_gt_check_inputs_check_input_id_fkey FOREIGN KEY (check_input_id) REFERENCES check_inputs(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: project_gt_check_inputs_gt_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY project_gt_check_inputs
+    ADD CONSTRAINT project_gt_check_inputs_gt_check_id_fkey FOREIGN KEY (gt_check_id) REFERENCES gt_checks(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: project_gt_check_inputs_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY project_gt_check_inputs
+    ADD CONSTRAINT project_gt_check_inputs_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: project_gt_check_solutions_check_solution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY project_gt_check_solutions
+    ADD CONSTRAINT project_gt_check_solutions_check_solution_id_fkey FOREIGN KEY (check_solution_id) REFERENCES check_solutions(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: project_gt_check_solutions_gt_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY project_gt_check_solutions
+    ADD CONSTRAINT project_gt_check_solutions_gt_check_id_fkey FOREIGN KEY (gt_check_id) REFERENCES gt_checks(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: project_gt_check_solutions_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY project_gt_check_solutions
+    ADD CONSTRAINT project_gt_check_solutions_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: project_gt_checks_gt_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY project_gt_checks
+    ADD CONSTRAINT project_gt_checks_gt_check_id_fkey FOREIGN KEY (gt_check_id) REFERENCES gt_checks(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: project_gt_checks_language_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY project_gt_checks
+    ADD CONSTRAINT project_gt_checks_language_id_fkey FOREIGN KEY (language_id) REFERENCES languages(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: project_gt_checks_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY project_gt_checks
+    ADD CONSTRAINT project_gt_checks_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: project_gt_checks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY project_gt_checks
+    ADD CONSTRAINT project_gt_checks_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: project_gt_modules_gt_module_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY project_gt_modules
+    ADD CONSTRAINT project_gt_modules_gt_module_id_fkey FOREIGN KEY (gt_module_id) REFERENCES gt_modules(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: project_gt_modules_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: gtta
+--
+
+ALTER TABLE ONLY project_gt_modules
+    ADD CONSTRAINT project_gt_modules_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

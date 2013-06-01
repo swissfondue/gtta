@@ -23,6 +23,7 @@ var _messages = {
     'Search...'                                         : '<?php echo Yii::t('app', 'Search...'); ?>',
     'No header image.'                                  : '<?php echo Yii::t('app', 'No header image.'); ?>',
     'No logo.'                                          : '<?php echo Yii::t('app', 'No logo.'); ?>',
+    'No target specified!'                              : '<?php echo Yii::t('app', 'No target specified!'); ?>'
 };
 
 system.l10nMessages = _messages;

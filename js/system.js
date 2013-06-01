@@ -322,18 +322,20 @@ function System()
                         $('#ProjectSelectForm_clientId').prop('disabled', false);
                         $('#ProjectSelectForm_projectId > option:not(:first)').remove();
 
-                        if (data && data.objects.length)
-                        {
-                            for (var i = 0; i < data.objects.length; i++)
+                        if (data && data.objects.length) {
+                            for (var i = 0; i < data.objects.length; i++) {
+                                if (data.objects[i].guided) {
+                                    continue;
+                                }
+
                                 $('<option>')
                                     .val(data.objects[i].id)
                                     .html(data.objects[i].name)
                                     .appendTo('#ProjectSelectForm_projectId');
+                            }
 
                             $('#project-list').show();
-                        }
-                        else
-                        {
+                        } else {
                             $('#client-list').addClass('error');
                             $('#client-list > div > .help-block').show();
                         }
@@ -415,18 +417,20 @@ function System()
                         $('#ProjectReportForm_clientId').prop('disabled', false);
                         $('#ProjectReportForm_projectId > option:not(:first)').remove();
 
-                        if (data && data.objects.length)
-                        {
-                            for (var i = 0; i < data.objects.length; i++)
+                        if (data && data.objects.length) {
+                            for (var i = 0; i < data.objects.length; i++) {
+                                if (data.objects[i].guided) {
+                                    continue;
+                                }
+
                                 $('<option>')
                                     .val(data.objects[i].id)
                                     .html(data.objects[i].name)
                                     .appendTo('#ProjectReportForm_projectId');
+                            }
 
                             $('#project-list').show();
-                        }
-                        else
-                        {
+                        } else {
                             $('#client-list').addClass('error');
                             $('#client-list > div > .help-block').show();
                         }
@@ -589,10 +593,12 @@ function System()
                         $('#ProjectComparisonForm_projectId1 > option:not(:first)').remove();
                         $('#ProjectComparisonForm_projectId2 > option:not(:first)').remove();
 
-                        if (data && data.objects.length)
-                        {
-                            for (var i = 0; i < data.objects.length; i++)
-                            {
+                        if (data && data.objects.length) {
+                            for (var i = 0; i < data.objects.length; i++) {
+                                if (data.objects[i].guided) {
+                                    continue;
+                                }
+
                                 $('<option>')
                                     .val(data.objects[i].id)
                                     .html(data.objects[i].name)
@@ -606,9 +612,7 @@ function System()
 
                             $('#project-list-1').show();
                             $('#project-list-2').show();
-                        }
-                        else
-                        {
+                        } else {
                             $('#client-list').addClass('error');
                             $('#client-list > div > .help-block').show();
                         }
@@ -651,18 +655,20 @@ function System()
                     _system.control.loadObjects(val, 'project-list', function (data) {
                         $('#FulfillmentDegreeForm_projectId > option:not(:first)').remove();
 
-                        if (data && data.objects.length)
-                        {
-                            for (var i = 0; i < data.objects.length; i++)
+                        if (data && data.objects.length) {
+                            for (var i = 0; i < data.objects.length; i++) {
+                                if (data.objects[i].guided) {
+                                    continue;
+                                }
+
                                 $('<option>')
                                     .val(data.objects[i].id)
                                     .html(data.objects[i].name)
                                     .appendTo('#FulfillmentDegreeForm_projectId');
+                            }
 
                             $('#project-list').show();
-                        }
-                        else
-                        {
+                        } else {
                             $('#client-list').addClass('error');
                             $('#client-list > div > .help-block').show();
                         }
@@ -974,18 +980,20 @@ function System()
                 if (val != 0)
                 {
                     _system.control.loadObjects(val, 'project-list', function (data) {
-                        if (data && data.objects.length)
-                        {
-                            for (var i = 0; i < data.objects.length; i++)
+                        if (data && data.objects.length) {
+                            for (var i = 0; i < data.objects.length; i++) {
+                                if (data.objects[i].guided) {
+                                    continue;
+                                }
+
                                 $('<option>')
                                     .val(data.objects[i].id)
                                     .html(data.objects[i].name)
                                     .appendTo('#RiskMatrixForm_projectId');
+                            }
 
                             $('#project-list').show();
-                        }
-                        else
-                        {
+                        } else {
                             $('#client-list').addClass('error');
                             $('#client-list > div > .help-block').show();
                         }
@@ -1104,18 +1112,20 @@ function System()
                         $('#VulnExportReportForm_clientId').prop('disabled', false);
                         $('#VulnExportReportForm_projectId > option:not(:first)').remove();
 
-                        if (data && data.objects.length)
-                        {
-                            for (var i = 0; i < data.objects.length; i++)
+                        if (data && data.objects.length) {
+                            for (var i = 0; i < data.objects.length; i++) {
+                                if (data.objects[i].guided) {
+                                    continue;
+                                }
+
                                 $('<option>')
                                     .val(data.objects[i].id)
                                     .html(data.objects[i].name)
                                     .appendTo('#VulnExportReportForm_projectId');
+                            }
 
                             $('#project-list').show();
-                        }
-                        else
-                        {
+                        } else {
                             $('#client-list').addClass('error');
                             $('#client-list > div > .help-block').show();
                         }

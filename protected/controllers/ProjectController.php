@@ -14,10 +14,10 @@ class ProjectController extends Controller
             'https',
 			'checkAuth',
             'showDetails + target, attachment, checks',
-            'checkUser + edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks',
-            'checkAdmin + control, edit, users, adduser, controluser',
-            'ajaxOnly + savecheck, controlattachment, controlcheck, updatechecks, controluser',
-            'postOnly + savecheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser',
+            'checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, gtcontrolcheck, gtsavecheck, savecheck, gtupdatecheck, gtuploadattachment, gtcontrolattachment',
+            'checkAdmin + edit, users, adduser, controluser',
+            'ajaxOnly + savecheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatecheck, gtcontrolattachment',
+            'postOnly + savecheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatecheck, gtuploadattachment, gtcontrolattachment',
 		);
 	}
 
@@ -141,32 +141,62 @@ class ProjectController extends Controller
             $medRiskCount  = 0;
             $highRiskCount = 0;
 
-            $targets = Target::model()->with(array(
-                'checkCount',
-                'finishedCount',
-                'lowRiskCount',
-                'medRiskCount',
-                'highRiskCount',
-            ))->findAllByAttributes(array(
-                'project_id' => $project->id
-            ));
+            if ($project->guided_test) {
+                $checks = ProjectGtCheck::model()->findAllByAttributes(array(
+                    'project_id' => $project->id
+                ));
 
-            foreach ($targets as $target)
-            {
-                if ($target->checkCount)
-                    $checkCount += $target->checkCount;
+                foreach ($checks as $check) {
+                    $checkCount++;
 
-                if ($target->finishedCount)
-                    $finishedCount += $target->finishedCount;
+                    if ($check->status == ProjectGtCheck::STATUS_FINISHED) {
+                        $finishedCount++;
+                    }
 
-                if ($target->lowRiskCount)
-                    $lowRiskCount += $target->lowRiskCount;
+                    switch ($check->rating) {
+                        case ProjectGtCheck::RATING_LOW_RISK:
+                            $lowRiskCount++;
+                            break;
 
-                if ($target->medRiskCount)
-                    $medRiskCount += $target->medRiskCount;
+                        case ProjectGtCheck::RATING_MED_RISK:
+                            $medRiskCount++;
+                            break;
 
-                if ($target->highRiskCount)
-                    $highRiskCount += $target->highRiskCount;
+                        case ProjectGtCheck::RATING_HIGH_RISK:
+                            $highRiskCount++;
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            } else {
+                $targets = Target::model()->with(array(
+                    'checkCount',
+                    'finishedCount',
+                    'lowRiskCount',
+                    'medRiskCount',
+                    'highRiskCount',
+                ))->findAllByAttributes(array(
+                    'project_id' => $project->id
+                ));
+
+                foreach ($targets as $target) {
+                    if ($target->checkCount)
+                        $checkCount += $target->checkCount;
+
+                    if ($target->finishedCount)
+                        $finishedCount += $target->finishedCount;
+
+                    if ($target->lowRiskCount)
+                        $lowRiskCount += $target->lowRiskCount;
+
+                    if ($target->medRiskCount)
+                        $medRiskCount += $target->medRiskCount;
+
+                    if ($target->highRiskCount)
+                        $highRiskCount += $target->highRiskCount;
+                }
             }
 
             $projectStats[$project->id] = array(
@@ -196,36 +226,18 @@ class ProjectController extends Controller
 	}
 
     /**
-     * Display a list of targets.
+     * Display a standard project page
      */
-	public function actionView($id, $page=1)
-	{
-        $id   = (int) $id;
-        $page = (int) $page;
-
-        $project = Project::model()->with(array(
-            'details' => array(
-                'order' => 'subject ASC'
-            )
-        ))->findByPk($id);
-
-        if (!$project)
-            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
-
-        if (!$project->checkPermission())
-            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
-
-        if ($page < 1)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
-
+    private function _viewStandard($project, $page) {
         $client = Client::model()->findByPk($project->client_id);
 
         $language = Language::model()->findByAttributes(array(
             'code' => Yii::app()->language
         ));
 
-        if ($language)
+        if ($language) {
             $language = $language->id;
+        }
 
         $criteria = new CDbCriteria();
         $criteria->limit  = Yii::app()->params['entriesPerPage'];
@@ -238,8 +250,9 @@ class ProjectController extends Controller
         $targets = Target::model()->findAll($criteria);
         $targetIds = array();
 
-        foreach ($targets as $target)
+        foreach ($targets as $target) {
             $targetIds[] = $target->id;
+        }
 
         $newCriteria = new CDbCriteria();
         $newCriteria->order  = 't.host ASC';
@@ -304,6 +317,236 @@ class ProjectController extends Controller
                 TargetCheck::COLUMN_RATING          => Yii::t('app', 'Rating'),
             )
         ));
+    }
+
+    /**
+     * Get GT check.
+     */
+    private function _getGtStep($project, $step) {
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(array('project_id' => $project->id));
+        $criteria->order = "t.sort_order ASC";
+        $criteria->together = true;
+
+        $modules = ProjectGtModule::model()->with(array(
+            'module' => array(
+                'with' => array(
+                    'checks' => array(
+                        'order' => 'checks.sort_order ASC'
+                    )
+                )
+            )
+        ))->findAll($criteria);
+
+        $currentStep = null;
+
+        if ($step >= 0) {
+            foreach ($modules as $module) {
+                foreach ($module->module->checks as $check) {
+                    if ($step == 0) {
+                        $currentStep = array($module, $check);
+                        $step--;
+
+                        break;
+                    }
+
+                    $step--;
+
+                    if ($step < 0) {
+                        break;
+                    }
+                }
+
+                if ($step < 0) {
+                    break;
+                }
+            }
+        }
+
+        return $currentStep;
+    }
+
+    /**
+     * Display a guided test-enabled project page
+     */
+    private function _viewGuidedTest($project) {
+        $client = Client::model()->findByPk($project->client_id);
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        $modules = ProjectGtModule::model()->findAllByAttributes(array('project_id' => $project->id));
+        $moduleIds = array();
+
+        foreach ($modules as $module) {
+            $moduleIds[] = $module->gt_module_id;
+        }
+
+        $model = new ProjectGtForm();
+
+        if (isset($_POST["ProjectGtForm"])) {
+            $model->attributes = $_POST['ProjectGtForm'];
+
+			if ($model->validate()) {
+                $moduleIds = array();
+                $oldModuleIds = array();
+
+                $modules = ProjectGtModule::model()->findAllByAttributes(array(
+                    'project_id' => $project->id
+                ));
+
+                foreach ($modules as $module) {
+                    $oldModuleIds[] = $module->gt_module_id;
+                }
+
+                if ($model->modules) {
+                    foreach ($model->modules as $moduleId => $value) {
+                        $moduleIds[] = $moduleId;
+                    }
+                }
+
+                $newModuleIds = array_diff($moduleIds, $oldModuleIds);
+                $delModuleIds = array_diff($oldModuleIds, $moduleIds);
+
+                // delete old modules
+                $criteria = new CDbCriteria();
+                $criteria->addInCondition('gt_module_id', $delModuleIds);
+                $checks = GtCheck::model()->findAll($criteria);
+
+                $checkIds = array();
+
+                foreach ($checks as $check) {
+                    $checkIds[] = $check->id;
+                }
+
+                $checkCriteria = new CDbCriteria();
+                $checkCriteria->addInCondition('gt_check_id', $checkIds);
+                $checkCriteria->addColumnCondition(array('project_id' => $project->id));
+
+                ProjectGtCheckAttachment::model()->deleteAll($checkCriteria);
+                ProjectGtCheckInput::model()->deleteAll($checkCriteria);
+                ProjectGtCheckSolution::model()->deleteAll($checkCriteria);
+                ProjectGtCheck::model()->deleteAll($checkCriteria);
+
+                $criteria->addColumnCondition(array('project_id' => $project->id));
+                ProjectGtModule::model()->deleteAll($criteria);
+
+                $criteria = new CDbCriteria();
+                $criteria->select = 'MAX(sort_order) as max_sort_order';
+                $criteria->addColumnCondition(array('project_id' => $project->id));
+
+                $maxOrder = ProjectGtModule::model()->find($criteria);
+                $sortOrder = 0;
+
+                if ($maxOrder && $maxOrder->max_sort_order !== null) {
+                    $sortOrder = $maxOrder->max_sort_order + 1;
+                }
+
+                // create new ones
+                foreach ($newModuleIds as $id) {
+                    $module = new ProjectGtModule();
+                    $module->project_id = $project->id;
+                    $module->gt_module_id = $id;
+                    $module->sort_order = $sortOrder;
+                    $module->save();
+
+                    $sortOrder++;
+                }
+
+                Yii::app()->user->setFlash('success', Yii::t('app', 'Project saved.'));
+            } else {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+            }
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->order = 'COALESCE(l10n.name, t.name) ASC';;
+        $criteria->together = true;
+
+        $categories = GtCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on' => 'language_id = :language_id',
+                'params' => array('language_id' => $language)
+            ),
+            'types' => array(
+                'with' => array(
+                    'l10n' => array(
+                        'alias' => 'l10n_t',
+                        'joinType' => 'LEFT JOIN',
+                        'on' => 'l10n_t.language_id = :language_id',
+                        'params' => array('language_id' => $language),
+                    ),
+                    'modules' => array(
+                        'with' => array(
+                            'l10n' => array(
+                                'alias' => 'l10n_m',
+                                'joinType' => 'LEFT JOIN',
+                                'on' => 'l10n_m.language_id = :language_id',
+                                'params' => array('language_id' => $language),
+                            )
+                        ),
+                        'order' => 'COALESCE(l10n_m.name, modules.name) ASC',
+                    )
+                ),
+                'order' => 'COALESCE(l10n_t.name, types.name) ASC',
+            )
+        ))->findAll($criteria);
+
+        $nextStep = $this->_getGtStep($project, 0);
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array($project->name, '');
+
+        // display the page
+        $this->pageTitle = $project->name;
+		$this->render('gt/index', array(
+            'project'  => $project,
+            'client'   => $client,
+            'categories' => $categories,
+            'statuses' => array(
+                Project::STATUS_OPEN        => Yii::t('app', 'Open'),
+                Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
+                Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
+            ),
+            'modules' => $moduleIds,
+            'nextStep' => $nextStep,
+        ));
+    }
+
+    /**
+     * Display a list of targets.
+     */
+	public function actionView($id, $page=1)
+	{
+        $id = (int) $id;
+        $page = (int) $page;
+
+        $project = Project::model()->with(array(
+            'details' => array(
+                'order' => 'subject ASC'
+            )
+        ))->findByPk($id);
+
+        if (!$project)
+            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+        if (!$project->checkPermission())
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
+        if ($page < 1)
+            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+
+        if ($project->guided_test) {
+            $this->_viewGuidedTest($project);
+        } else {
+            $this->_viewStandard($project, $page);
+        }
 	}
 
     /**
@@ -553,6 +796,194 @@ class ProjectController extends Controller
             'detail'  => $detail
         ));
 	}
+
+    /**
+     * Check form for GT.
+     */
+    public function actionGt($id) {
+        $id = (int) $id;
+        $project = Project::model()->findByPk($id);
+
+        if (!$project) {
+            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+        }
+
+        if (!$project->guided_test || !$project->checkPermission()) {
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+        }
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        $cookies = Yii::app()->request->cookies;
+        $step = isset($cookies['gt_step']) ? $cookies['gt_step']->value : 0;
+        $stepObject = $this->_getGtStep($project, $step);
+
+        if (!$stepObject) {
+            $step = 0;
+            $stepObject = $this->_getGtStep($project, 0);
+
+            if (!$stepObject) {
+                throw new CHttpException(404, Yii::t('app', 'Step not found.'));
+            }
+        }
+
+        list($module, $check) = $stepObject;
+
+        $module = ProjectGtModule::model()->with(array(
+            'module' => array(
+                'with' => array(
+                    'l10n' => array(
+                        'joinType' => 'LEFT JOIN',
+                        'on' => 'language_id = :language_id',
+                        'params' => array('language_id' => $language)
+                    )
+                )
+            )
+        ))->findByAttributes(array(
+            'project_id' => $project->id,
+            'gt_module_id' => $module->gt_module_id
+        ));
+
+        if (!$module) {
+            throw new CHttpException(404, Yii::t('app', 'Module not found.'));
+        }
+
+        $check = GtCheck::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on' => 'language_id = :language_id',
+                'params' => array('language_id' => $language)
+            ),
+            'check' => array(
+                'with' => array(
+                    '_reference',
+                    'l10n' => array(
+                        'alias' => 'l10n_c',
+                        'joinType' => 'LEFT JOIN',
+                        'on' => 'l10n_c.language_id = :language_id',
+                        'params' => array('language_id' => $language)
+                    ),
+                    'scripts' => array(
+                        'with' => array(
+                            'inputs' => array(
+                                'with' => array(
+                                    'l10n' => array(
+                                        'alias' => 'l10n_i',
+                                        'joinType' => 'LEFT JOIN',
+                                        'on' => 'l10n_i.language_id = :language_id',
+                                        'params' => array('language_id' => $language)
+                                    ),
+                                    'projectInputs' => array(
+                                        'joinType' => 'LEFT JOIN',
+                                        'on' => '"projectInputs".project_id = :project_id AND "projectInputs".gt_check_id = :check_id',
+                                        'params' => array('project_id' => $project->id, 'check_id' => $check->id)
+                                    ),
+                                ),
+                                'order' => 'inputs.sort_order ASC',
+                            )
+                        )
+                    ),
+                    'results' => array(
+                        'with' => array(
+                            'l10n' => array(
+                                'alias' => 'l10n_r',
+                                'joinType' => 'LEFT JOIN',
+                                'on' => 'l10n_r.language_id = :language_id',
+                                'params' => array('language_id' => $language)
+                            ),
+                        ),
+                        'order' => 'results.sort_order ASC'
+                    ),
+                    'solutions' => array(
+                        'with' => array(
+                            'l10n' => array(
+                                'alias' => 'l10n_s',
+                                'joinType' => 'LEFT JOIN',
+                                'on' => 'l10n_s.language_id = :language_id',
+                                'params' => array('language_id' => $language)
+                            ),
+                        ),
+                        'order' => 'solutions.sort_order ASC'
+                    ),
+                )
+            ),
+            'projectChecks' => array(
+                'alias' => 'pcs',
+                'joinType' => 'LEFT JOIN',
+                'on' => 'pcs.project_id = :project_id',
+                'params' => array('project_id' => $project->id)
+            ),
+            'projectCheckSolutions' => array(
+                'alias' => 'pss',
+                'joinType' => 'LEFT JOIN',
+                'on' => 'pss.project_id = :project_id',
+                'params' => array('project_id' => $project->id)
+            ),
+            'projectCheckAttachments' => array(
+                'alias' => 'pas',
+                'joinType' => 'LEFT JOIN',
+                'on' => 'pas.project_id = :project_id',
+                'params' => array('project_id' => $project->id),
+            ),
+        ))->findByAttributes(array(
+            'id' => $check->id,
+            'gt_module_id' => $module->gt_module_id
+        ));
+
+        if (!$check) {
+            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+        }
+
+        $modules = ProjectGtModule::model()->with(array(
+            'module' => array(
+                'with' => 'checkCount'
+            )
+        ))->findAllByAttributes(array(
+            'project_id' => $project->id
+        ));
+
+        $checkCount = 0;
+
+        foreach ($modules as $mod) {
+            $checkCount += $mod->module->checkCount;
+        }
+
+        $client = Client::model()->findByPk($project->client_id);
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Guided Test'), '');
+
+        // display the page
+        $this->pageTitle = Yii::t('app', 'Guided Test');
+		$this->render('gt/check', array(
+            'project' => $project,
+            'client' => $client,
+            'module' => $module,
+            'check' => $check,
+            'ratings' => array(
+                ProjectGtCheck::RATING_NONE => Yii::t('app', 'None'),
+                ProjectGtCheck::RATING_HIDDEN => Yii::t('app', 'Hidden'),
+                ProjectGtCheck::RATING_INFO => Yii::t('app', 'Info'),
+                ProjectGtCheck::RATING_LOW_RISK => Yii::t('app', 'Low Risk'),
+                ProjectGtCheck::RATING_MED_RISK => Yii::t('app', 'Med Risk'),
+                ProjectGtCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
+            ),
+            'statuses' => array(
+                Project::STATUS_OPEN => Yii::t('app', 'Open'),
+                Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
+                Project::STATUS_FINISHED => Yii::t('app', 'Finished'),
+            ),
+            'step' => $step + 1,
+            'checkCount' => $checkCount
+        ));
+    }
 
     /**
      * Display a list of check categories.
@@ -1225,19 +1656,19 @@ class ProjectController extends Controller
                 ));
 
             if (!$model->overrideTarget)
-                $model->overrideTarget = NULL;
+                $model->overrideTarget = null;
 
             if (!$model->protocol)
-                $model->protocol = NULL;
+                $model->protocol = null;
 
             if (!$model->port)
-                $model->port = NULL;
+                $model->port = null;
 
             if ($model->result == '')
-                $model->result = NULL;
+                $model->result = null;
 
             if ($model->rating == '' || $model->rating == TargetCheck::RATING_NONE)
-                $model->rating = NULL;
+                $model->rating = null;
 
             $targetCheck->user_id         = Yii::app()->user->id;
             $targetCheck->language_id     = $language->id;
@@ -1303,7 +1734,7 @@ class ProjectController extends Controller
                         throw new CHttpException(404, Yii::t('app', 'Input not found.'));
 
                     if ($inputValue == '')
-                        $inputValue = NULL;
+                        $inputValue = null;
 
                     $input = new TargetCheckInput();
                     $input->target_id      = $target->id;
@@ -1403,17 +1834,14 @@ class ProjectController extends Controller
     {
         $response = new AjaxResponse();
 
-        try
-        {
+        try {
             $model = new EntryControlForm();
             $model->attributes = $_POST['EntryControlForm'];
 
-            if (!$model->validate())
-            {
+            if (!$model->validate()) {
                 $errorText = '';
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -1421,28 +1849,46 @@ class ProjectController extends Controller
                 throw new Exception($errorText);
             }
 
-            $id      = $model->id;
+            $id = $model->id;
             $project = Project::model()->findByPk($id);
 
-            if ($project === null)
+            if ($project === null) {
                 throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+            }
 
-            if (!$project->checkPermission())
+            if (!$project->checkPermission()) {
                 throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
 
-            switch ($model->operation)
-            {
+            switch ($model->operation) {
                 case 'delete':
+                    if (User::checkRole(User::ROLE_ADMIN)) {
+                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                    }
+
                     $project->delete();
+                    break;
+
+                case 'gt':
+                    if (count($project->targets) > 0 || count($project->modules) > 0) {
+                        throw new CHttpException(403, Yii::t('app', 'Project is not empty.'));
+                    }
+
+                    if ($project->guided_test) {
+                        $project->guided_test = false;
+                    } else {
+                        $project->guided_test = true;
+                    }
+
+                    $project->save();
+
                     break;
 
                 default:
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -1657,6 +2103,85 @@ class ProjectController extends Controller
     }
 
     /**
+     * Upload attachment function for GT.
+     */
+    function actionGtUploadAttachment($id, $module, $check)
+    {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $module = (int) $module;
+            $check = (int) $check;
+
+            $module = (int) $module;
+            $check = (int) $check;
+
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+            }
+
+            if (!$project->guided_test || !$project->checkPermission()) {
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
+
+            $module = ProjectGtModule::model()->findByAttributes(array(
+                'project_id' => $project->id,
+                'gt_module_id' => $module
+            ));
+
+            if (!$module) {
+                throw new CHttpException(404, Yii::t('app', 'Module not found.'));
+            }
+
+            $check = GtCheck::model()->with('check')->findByAttributes(array(
+                'id' => $check,
+                'gt_module_id' => $module->gt_module_id
+            ));
+
+            if (!$check) {
+                throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+            }
+
+            $model = new ProjectGtCheckAttachmentUploadForm();
+            $model->attachment = CUploadedFile::getInstanceByName('ProjectGtCheckAttachmentUploadForm[attachment]');
+
+            if (!$model->validate()) {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $attachment = new ProjectGtCheckAttachment();
+            $attachment->project_id = $project->id;
+            $attachment->gt_check_id = $check->id;
+            $attachment->name = $model->attachment->name;
+            $attachment->type = $model->attachment->type;
+            $attachment->size = $model->attachment->size;
+            $attachment->path = hash('sha256', $attachment->name . rand() . time());
+            $attachment->save();
+
+            $model->attachment->saveAs(Yii::app()->params['attachments']['path'] . '/' . $attachment->path);
+
+            $response->addData('name', CHtml::encode($attachment->name));
+            $response->addData('url', $this->createUrl('project/gtattachment', array('path' => $attachment->path)));
+            $response->addData('path', $attachment->path);
+            $response->addData('controlUrl', $this->createUrl('project/gtcontrolattachment'));
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
      * Control attachment.
      */
     public function actionControlAttachment()
@@ -1717,6 +2242,58 @@ class ProjectController extends Controller
     }
 
     /**
+     * Control GT attachment.
+     */
+    public function actionGtControlAttachment()
+    {
+        $response = new AjaxResponse();
+
+        try {
+            $model = new ProjectGtCheckAttachmentControlForm();
+            $model->attributes = $_POST['ProjectGtCheckAttachmentControlForm'];
+
+            if (!$model->validate()) {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $path = $model->path;
+            $attachment = ProjectGtCheckAttachment::model()->with('project')->findByAttributes(array(
+                'path' => $path
+            ));
+
+            if ($attachment === null) {
+                throw new CHttpException(404, Yii::t('app', 'Attachment not found.'));
+            }
+
+            if (!$attachment->project->guided_test || !$attachment->project->checkPermission()) {
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
+
+            switch ($model->operation) {
+                case 'delete':
+                    $attachment->delete();
+                    @unlink(Yii::app()->params['attachments']['path'] . '/' . $attachment->path);
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
      * Get attachment.
      */
     public function actionAttachment($path)
@@ -1739,6 +2316,47 @@ class ProjectController extends Controller
 
         if (!file_exists($filePath))
             throw new CHttpException(404, Yii::t('app', 'Attachment not found.'));
+
+        // give user a file
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . str_replace('"', '', $attachment->name) . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . $attachment->size);
+
+        ob_clean();
+        flush();
+
+        readfile($filePath);
+
+        exit();
+    }
+
+    /**
+     * Get GT attachment.
+     */
+    public function actionGtAttachment($path)
+    {
+        $attachment = ProjectGtCheckAttachment::model()->with('project')->findByAttributes(array(
+            'path' => $path
+        ));
+
+        if ($attachment === null) {
+            throw new CHttpException(404, Yii::t('app', 'Attachment not found.'));
+        }
+
+        if (!$attachment->project->guided_test || !$attachment->project->checkPermission()) {
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+        }
+
+        $filePath = Yii::app()->params['attachments']['path'] . '/' . $attachment->path;
+
+        if (!file_exists($filePath)) {
+            throw new CHttpException(404, Yii::t('app', 'Attachment not found.'));
+        }
 
         // give user a file
         header('Content-Description: File Transfer');
@@ -1965,6 +2583,394 @@ class ProjectController extends Controller
     }
 
     /**
+     * Control GT check function.
+     */
+    public function actionGtControlCheck($id, $module, $check)
+    {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $module = (int) $module;
+            $check = (int) $check;
+
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+            }
+
+            if (!$project->guided_test || !$project->checkPermission()) {
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
+
+            $module = ProjectGtModule::model()->findByAttributes(array(
+                'project_id' => $project->id,
+                'gt_module_id' => $module
+            ));
+
+            if (!$module) {
+                throw new CHttpException(404, Yii::t('app', 'Module not found.'));
+            }
+
+            $check = GtCheck::model()->with('check')->findByAttributes(array(
+                'id' => $check,
+                'gt_module_id' => $module->gt_module_id
+            ));
+
+            if (!$check) {
+                throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+            }
+
+            $language = Language::model()->findByAttributes(array(
+                'code' => Yii::app()->language
+            ));
+
+            if (!$language) {
+                $language = Language::model()->findByAttributes(array(
+                    'default' => true
+                ));
+            }
+
+            $projectCheck = ProjectGtCheck::model()->findByAttributes(array(
+                'project_id' => $project->id,
+                'gt_check_id'  => $check->id
+            ));
+
+            if (!$projectCheck) {
+                $projectCheck = new ProjectGtCheck();
+                $projectCheck->project_id = $project->id;
+                $projectCheck->gt_check_id = $check->id;
+                $projectCheck->user_id = Yii::app()->user->id;
+                $projectCheck->language_id = $language->id;
+            }
+
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate()) {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $cookies = Yii::app()->request->cookies;
+            $step = isset($cookies['gt_step']) ? $cookies['gt_step']->value : 0;
+
+            switch ($model->operation) {
+                case 'start':
+                    if (!in_array($projectCheck->status, array(ProjectGtCheck::STATUS_OPEN, ProjectGtCheck::STATUS_FINISHED))) {
+                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                    }
+
+                    // delete solutions
+                    ProjectGtCheckSolution::model()->deleteAllByAttributes(array(
+                        'project_id' => $project->id,
+                        'gt_check_id' => $check->id
+                    ));
+
+                    $projectCheck->status = ProjectGtCheck::STATUS_IN_PROGRESS;
+                    $projectCheck->rating = null;
+                    $projectCheck->started = null;
+                    $projectCheck->pid = null;
+                    $projectCheck->save();
+
+                    break;
+
+                case 'stop':
+                    if ($projectCheck->status != ProjectGtCheck::STATUS_IN_PROGRESS) {
+                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                    }
+
+                    $projectCheck->status = ProjectGtCheck::STATUS_STOP;
+                    $projectCheck->save();
+
+                    break;
+
+                case 'reset':
+                    if (!in_array($projectCheck->status, array(ProjectGtCheck::STATUS_OPEN, ProjectGtCheck::STATUS_FINISHED))) {
+                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                    }
+
+                    // delete solutions
+                    ProjectGtCheckSolution::model()->deleteAllByAttributes(array(
+                        'project_id' => $project->id,
+                        'gt_check_id' => $check->id
+                    ));
+
+                    // delete inputs
+                    ProjectGtCheckInput::model()->deleteAllByAttributes(array(
+                        'project_id' => $project->id,
+                        'gt_check_id' => $check->id
+                    ));
+
+                    // delete files
+                    ProjectGtCheckAttachment::model()->deleteAllByAttributes(array(
+                        'project_id' => $project->id,
+                        'gt_check_id' => $check->id
+                    ));
+
+                    $projectCheck->delete();
+
+                    $response->addData('automated', $check->check->automated);
+                    $response->addData('protocol', $check->check->protocol);
+                    $response->addData('port', $check->check->port);
+
+                    $inputValues = array();
+
+                    // get default input values
+                    if ($check->check->automated) {
+                        $scripts = CheckScript::model()->findAllByAttributes(array(
+                            'check_id' => $check->check_id
+                        ));
+
+                        $scriptIds = array();
+
+                        foreach ($scripts as $script) {
+                            $scriptIds[] = $script->id;
+                        }
+
+                        $criteria = new CDbCriteria();
+                        $criteria->addInCondition("check_script_id", $scriptIds);
+
+                        $inputs = CheckInput::model()->findAll($criteria);
+
+                        foreach ($inputs as $input) {
+                            $inputValues[] = array(
+                                'id' => 'ProjectGtCheckEditForm_inputs_' . $input->id,
+                                'value' => $input->value
+                            );
+                        }
+                    }
+
+                    $response->addData('inputs', $inputValues);
+
+                    break;
+
+                case 'gt-next':
+                    $stepObject = $this->_getGtStep($project, $step + 1);
+
+                    if ($stepObject) {
+                        $step++;
+                    }
+
+                    $response->addData('step', $step);
+
+                    break;
+
+                case 'gt-prev':
+                    $stepObject = $this->_getGtStep($project, $step - 1);
+
+                    if ($stepObject) {
+                        $step--;
+                    } else {
+                        $step = 0;
+                    }
+
+                    $response->addData('step', $step);
+
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Save GT check.
+     */
+    public function actionGtSaveCheck($id, $module, $check)
+    {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $module = (int) $module;
+            $check = (int) $check;
+
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+            }
+
+            if (!$project->guided_test || !$project->checkPermission()) {
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
+
+            $module = ProjectGtModule::model()->findByAttributes(array(
+                'project_id' => $project->id,
+                'gt_module_id' => $module
+            ));
+
+            if (!$module) {
+                throw new CHttpException(404, Yii::t('app', 'Module not found.'));
+            }
+
+            $check = GtCheck::model()->with('check')->findByAttributes(array(
+                'id' => $check,
+                'gt_module_id' => $module->gt_module_id
+            ));
+
+            if (!$check) {
+                throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+            }
+
+            $language = Language::model()->findByAttributes(array(
+                'code' => Yii::app()->language
+            ));
+
+            if (!$language) {
+                $language = Language::model()->findByAttributes(array(
+                    'default' => true
+                ));
+            }
+
+            $projectCheck = ProjectGtCheck::model()->findByAttributes(array(
+                'project_id' => $project->id,
+                'gt_check_id'  => $check->id
+            ));
+
+            if (!$projectCheck) {
+                $projectCheck = new ProjectGtCheck();
+                $projectCheck->project_id = $project->id;
+                $projectCheck->gt_check_id = $check->id;
+                $projectCheck->user_id = Yii::app()->user->id;
+                $projectCheck->language_id = $language->id;
+                $projectCheck->status = ProjectGtCheck::STATUS_OPEN;
+            }
+
+            $model = new ProjectGtCheckEditForm();
+            $model->attributes = $_POST['ProjectGtCheckEditForm'];
+
+            if (!$model->validate()) {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            if (!$model->target) {
+                $model->target = null;
+            }
+
+            if (!$model->protocol) {
+                $model->protocol = null;
+            }
+
+            if (!$model->port) {
+                $model->port = null;
+            }
+
+            if ($model->result == '') {
+                $model->result = null;
+            }
+
+            if ($model->rating == '' || $model->rating == ProjectGtCheck::RATING_NONE) {
+                $model->rating = null;
+            }
+
+            $projectCheck->user_id = Yii::app()->user->id;
+            $projectCheck->language_id = $language->id;
+            $projectCheck->target = $model->target;
+            $projectCheck->protocol = $model->protocol;
+            $projectCheck->port = $model->port;
+            $projectCheck->result = $model->result;
+            $projectCheck->status = $model->rating ? ProjectGtCheck::STATUS_FINISHED : $projectCheck->status;
+            $projectCheck->rating = $model->rating;
+            $projectCheck->save();
+
+            // delete solutions
+            ProjectGtCheckSolution::model()->deleteAllByAttributes(array(
+                'project_id' => $project->id,
+                'gt_check_id' => $check->id
+            ));
+
+            // delete inputs
+            ProjectGtCheckInput::model()->deleteAllByAttributes(array(
+                'project_id' => $project->id,
+                'gt_check_id' => $check->id
+            ));
+
+            // add solutions
+            if ($model->solutions) {
+                foreach ($model->solutions as $solutionId) {
+                    // reset solution
+                    if (!$solutionId) {
+                        break;
+                    }
+
+                    $solution = CheckSolution::model()->findByAttributes(array(
+                        'id' => $solutionId,
+                        'check_id' => $check->id
+                    ));
+
+                    if (!$solution) {
+                        throw new CHttpException(404, Yii::t('app', 'Solution not found.'));
+                    }
+
+                    $solution = new ProjectGtCheckSolution();
+                    $solution->project_id = $project->id;
+                    $solution->check_solution_id = $solutionId;
+                    $solution->gt_check_id = $check->id;
+                    $solution->save();
+                }
+            }
+
+            // add inputs
+            if ($model->inputs && $check->check->automated) {
+                foreach ($model->inputs as $inputId => $inputValue) {
+                    $input = CheckInput::model()->findByAttributes(array(
+                        'id' => $inputId,
+                    ));
+
+                    if (!$input) {
+                        throw new CHttpException(404, Yii::t('app', 'Input not found.'));
+                    }
+
+                    if ($inputValue == '') {
+                        $inputValue = null;
+                    }
+
+                    $input = new ProjectGtCheckInput();
+                    $input->project_id = $project->id;
+                    $input->check_input_id = $inputId;
+                    $input->gt_check_id = $check->id;
+                    $input->value = $inputValue;
+                    $input->save();
+                }
+            }
+
+            $response->addData('rating', $projectCheck->rating);
+
+            if ($project->status == Project::STATUS_OPEN) {
+                $project->status = Project::STATUS_IN_PROGRESS;
+                $project->save();
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
      * Update checks function.
      */
     public function actionUpdateChecks($id, $target, $category)
@@ -2052,7 +3058,7 @@ class ProjectController extends Controller
                 $time = $check->targetChecks[0]->started;
 
                 if ($time)
-                    $time = time() - strtotime($time);
+                    $time = mktime() - strtotime($time);
                 else
                     $time = -1;
 
@@ -2090,6 +3096,101 @@ class ProjectController extends Controller
             }
 
             $response->addData('checks', $checkData);
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Update GT check function.
+     */
+    public function actionGtUpdateCheck($id, $module, $check)
+    {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $module = (int) $module;
+            $check = (int) $check;
+
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+            }
+
+            if (!$project->guided_test || !$project->checkPermission()) {
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
+
+            $module = ProjectGtModule::model()->findByAttributes(array(
+                'project_id' => $project->id,
+                'gt_module_id' => $module
+            ));
+
+            if (!$module) {
+                throw new CHttpException(404, Yii::t('app', 'Module not found.'));
+            }
+
+            $check = GtCheck::model()->with('check')->findByAttributes(array(
+                'id' => $check,
+                'gt_module_id' => $module->gt_module_id
+            ));
+
+            if (!$check) {
+                throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+            }
+
+            $projectCheck = ProjectGtCheck::model()->findByAttributes(array(
+                'project_id' => $project->id,
+                'gt_check_id'  => $check->id
+            ));
+
+            if ($projectCheck->started) {
+                $time = new DateTime($projectCheck->started);
+                $now = new DateTime();
+
+                $time = $now->format("U") - $time->format("U");
+            } else {
+                $time = -1;
+            }
+
+            $table = null;
+
+            if ($projectCheck->table_result) {
+                $table = new ResultTable();
+                $table->parse($projectCheck->table_result);
+            }
+
+            $attachmentList = array();
+            $attachments = ProjectGtCheckAttachment::model()->findAllByAttributes(array(
+                "project_id" => $project->id,
+                "gt_check_id" => $check->id
+            ));
+
+            foreach ($attachments as $attachment) {
+                $attachmentList[] = array(
+                    "name" => CHtml::encode($attachment->name),
+                    "path" => $attachment->path,
+                    "url" => $this->createUrl('project/attachment', array('path' => $attachment->path)),
+                );
+            }
+
+            $checkData = array(
+                'id' => $check->id,
+                'result' => $projectCheck->result,
+                'tableResult' => $table ? $this->renderPartial('/project/gt/tableresult', array('table' => $table), true) : '',
+                'finished' => $projectCheck->status == ProjectGtCheck::STATUS_FINISHED,
+                'time' => $time,
+                'attachmentControlUrl' => $this->createUrl('project/gtcontrolattachment'),
+                'attachments' => $attachmentList
+            );
+
+            $response->addData('check', $checkData);
         }
         catch (Exception $e)
         {

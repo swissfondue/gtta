@@ -11,16 +11,13 @@
             <?php if (User::checkRole(User::ROLE_ADMIN) || User::checkRole(User::ROLE_CLIENT)): ?>
                 <li><a href="<?php echo $this->createUrl('project/details', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Details'); ?></a></li>
             <?php endif; ?>
-
-            <li><a href="<?php echo $this->createUrl('vulntracker/vulns', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Vulnerabilities'); ?></a></li>
         </ul>
     </div>
 
     <div class="pull-right buttons">
         <?php if (User::checkRole(User::ROLE_USER)): ?>
-            <a class="btn" href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id )); ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New Target'); ?></a>&nbsp;
-            <?php if (count($project->targets) == 0): ?>
-                <a class="btn" href="#gt" onclick="user.project.toggleGuidedTest('<?php echo $this->createUrl('project/control'); ?>', <?php echo $project->id; ?>);"><i class="icon icon-hand-right"></i> <?php echo Yii::t('app', 'Guided Test'); ?></a>
+            <?php if (count($project->modules) == 0): ?>
+                <a class="btn" href="#gt" onclick="user.project.toggleGuidedTest('<?php echo $this->createUrl('project/control'); ?>', <?php echo $project->id; ?>);"><i class="icon icon-wrench"></i> <?php echo Yii::t('app', 'Standard Mode'); ?></a>
             <?php endif; ?>
         <?php endif; ?>
     </div>
@@ -33,100 +30,68 @@
 <div class="container">
     <div class="row">
         <div class="span8">
-            <?php if (count($targets) > 0): ?>
-                <table class="table target-list">
-                    <tbody>
-                        <tr>
-                            <th class="target"><?php echo Yii::t('app', 'Target'); ?></th>
-                            <th class="stats"><?php echo Yii::t('app', 'Risk Stats'); ?></th>
-                            <th class="percent"><?php echo Yii::t('app', 'Completed'); ?></th>
-                            <th class="check-count"><?php echo Yii::t('app', 'Checks'); ?></th>
-                            <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
-                                <th class="actions">&nbsp;</th>
-                            <?php endif; ?>
-                        </tr>
-                        <?php foreach ($targets as $target): ?>
-                            <tr data-id="<?php echo $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controltarget'); ?>">
-                                <td class="target">
-                                    <?php if (User::checkRole(User::ROLE_USER) || Yii::app()->user->getShowDetails()): ?>
-                                        <a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo CHtml::encode($target->host); ?></a>
-                                    <?php else: ?>
-                                        <?php echo CHtml::encode($target->host); ?>
-                                    <?php endif; ?>
+            <div class="gt-category-header-bold">
+                <?php echo Yii::t('app', 'Category'); ?>
+            </div>
 
-                                    <?php if ($target->description): ?>
-                                        / <span class="description"><?php echo CHtml::encode($target->description); ?></span>
-                                    <?php endif; ?>
+            <form class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
+                <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
+                <input type="hidden" value="0" name="ProjectGtForm[tmp]">
 
-                                    <div class="categories">
-                                        <?php if ($target->categories): ?>
-                                            <?php foreach ($target->categories as $category): ?>
-                                                <?php if (User::checkRole(User::ROLE_USER) || Yii::app()->user->getShowDetails()): ?>
-                                                    <a href="<?php echo $this->createUrl('project/checks', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->id )); ?>"><span class="label label-target-category"><?php echo CHtml::encode($category->localizedName); ?></span></a>
+                <fieldset>
+                    <?php if (count($categories) > 0): ?>
+                        <?php foreach ($categories as $category): ?>
+                            <?php if (count($category->types)): ?>
+                                <div class="gt-category-header" data-id="<?php echo $category->id; ?>">
+                                    <a href="#toggle" onclick="user.gtSelector.categoryToggle(<?php echo $category->id; ?>);">
+                                        <?php echo CHtml::encode($category->localizedName); ?>
+                                    </a>
+                                </div>
+                                <div class="gt-category-content hide" data-id="<?php echo $category->id; ?>">
+                                    <?php if (count($category->types) > 0): ?>
+                                        <?php foreach ($category->types as $type): ?>
+                                            <div class="gt-category-type-header" data-id="<?php echo $type->id; ?>">
+                                                <a href="#toggle" onclick="user.gtSelector.typeToggle(<?php echo $type->id; ?>);">
+                                                    <?php echo CHtml::encode($type->localizedName); ?>
+                                                </a>
+                                            </div>
+                                            <div class="gt-category-type-content hide" data-id="<?php echo $type->id; ?>">
+                                                <?php if (count($type->modules) > 0): ?>
+                                                    <?php foreach ($type->modules as $module): ?>
+                                                        <div class="gt-category-type-module">
+                                                            <label>
+                                                                <input type="checkbox" name="ProjectGtForm[modules][<?php echo $module->id; ?>]" value="1" <?php if (in_array($module->id, $modules)) echo "checked"; ?>>
+                                                                <?php echo CHtml::encode($module->localizedName); ?>
+                                                            </label>
+                                                        </div>
+                                                    <?php endforeach; ?>
                                                 <?php else: ?>
-                                                    <span class="label label-target-category"><?php echo CHtml::encode($category->localizedName); ?></span>
+                                                    <div class="gt-category-type-module-header">
+                                                        <?php echo Yii::t('app', 'No modules yet.'); ?>
+                                                    </div>
                                                 <?php endif; ?>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            <?php echo Yii::t('app', 'No categories yet.'); ?>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
-                                <td class="stats">
-                                    <span class="high-risk"><?php echo $target->highRiskCount ? $target->highRiskCount : 0; ?></span> /
-                                    <span class="med-risk"><?php echo $target->medRiskCount ? $target->medRiskCount: 0; ?></span> /
-                                    <span class="low-risk"><?php echo $target->lowRiskCount ? $target->lowRiskCount : 0; ?></span> /
-                                    <span class="info"><?php echo $target->infoCount ? $target->infoCount : 0; ?></span>
-                                </td>
-                                <td class="percent">
-                                    <?php
-                                        $finished = $target->finishedCount;
-
-                                        if (!$finished)
-                                            $finished = 0;
-
-                                        echo $target->checkCount ? sprintf('%.0f', ($finished / $target->checkCount) * 100) : '0';
-                                    ?>%
-                                    /
-                                    <?php echo $finished; ?>
-                                </td>
-                                <td>
-                                    <?php
-                                        $checkCount = 0;
-
-                                        foreach ($target->categories as $category)
-                                            foreach ($category->controls as $control)
-                                                $checkCount += $control->checkCount;
-
-                                        echo $checkCount;
-                                    ?>
-                                </td>
-                                <?php if (User::checkRole(User::ROLE_USER)): ?>
-                                    <td class="actions">
-                                        <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $target->id; ?>);"><i class="icon icon-remove"></i></a>
-                                    </td>
-                                <?php endif; ?>
-                            </tr>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <div class="gt-category-type-header">
+                                            <?php echo Yii::t('app', 'No types yet.'); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
                         <?php endforeach; ?>
-                    </tbody>
-                </table>
+                    <?php else: ?>
+                        <?php echo Yii::t('app', 'No categories yet.'); ?>
+                    <?php endif; ?>
 
-                <?php if ($p->pageCount > 1): ?>
-                    <div class="pagination">
-                        <ul>
-                            <li <?php if (!$p->prevPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id, 'page' => $p->prevPage ? $p->prevPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Previous Page'); ?>">&laquo;</a></li>
-                            <?php for ($i = 1; $i <= $p->pageCount; $i++): ?>
-                                <li <?php if ($i == $p->page) echo 'class="active"'; ?>>
-                                    <a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id, 'page' => $i )); ?>"><?php echo $i; ?></a>
-                                </li>
-                            <?php endfor; ?>
-                            <li <?php if (!$p->nextPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id, 'page' => $p->nextPage ? $p->nextPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Next Page'); ?>">&raquo;</a></li>
-                        </ul>
+                    <div class="form-actions">
+                        <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>&nbsp;
+                        <?php if ($nextStep): ?>
+                            <a class="btn" href="<?php echo $this->createUrl('project/gt', array('id' => $project->id)); ?>"><?php echo Yii::t('app', 'Start'); ?></a>
+                        <?php endif; ?>
                     </div>
-                <?php endif; ?>
-            <?php else: ?>
-                <?php echo Yii::t('app', 'No targets yet.'); ?>
-            <?php endif; ?>
+                </fieldset>
+            </form>
         </div>
         <div class="span4">
             <div id="project-info-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-info');"><i class="icon-chevron-up"></i></div>

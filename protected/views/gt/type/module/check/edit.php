@@ -21,16 +21,16 @@
             <?php foreach ($languages as $language): ?>
                 <div class="tab-pane<?php if ($language->default) echo ' active'; ?>" id="<?php echo CHtml::encode($language->code); ?>">
                     <div class="control-group">
-                        <label class="control-label" for="GtModuleCheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_description"><?php echo Yii::t('app', 'Description'); ?></label>
+                        <label class="control-label" for="GtCheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_description"><?php echo Yii::t('app', 'Description'); ?></label>
                         <div class="controls">
-                            <textarea class="wysiwyg" id="GtModuleCheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_description" name="GtModuleCheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][description]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['description']) : ''; ?></textarea>
+                            <textarea class="wysiwyg" id="GtCheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_description" name="GtCheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][description]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['description']) : ''; ?></textarea>
                         </div>
                     </div>
 
                     <div class="control-group">
-                        <label class="control-label" for="GtModuleCheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_targetDescription"><?php echo Yii::t('app', 'Target Description'); ?></label>
+                        <label class="control-label" for="GtCheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_targetDescription"><?php echo Yii::t('app', 'Target Description'); ?></label>
                         <div class="controls">
-                            <textarea class="wysiwyg" id="GtModuleCheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_targetDescription" name="GtModuleCheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][targetDescription]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['targetDescription']) : ''; ?></textarea>
+                            <textarea class="wysiwyg" id="GtCheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_targetDescription" name="GtCheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][targetDescription]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['targetDescription']) : ''; ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -42,9 +42,9 @@
         </div>
         
         <div class="control-group">
-            <label class="control-label" for="GtModuleCheckEditForm_controlId"><?php echo Yii::t('app', 'Control'); ?></label>
+            <label class="control-label" for="GtCheckEditForm_controlId"><?php echo Yii::t('app', 'Control'); ?></label>
             <div class="controls">
-                <select class="input-xlarge" id="GtModuleCheckEditForm_controlId" onchange="admin.check.loadChecks($(this), $('#GtModuleCheckEditForm_checkId'));">
+                <select class="input-xlarge" id="GtCheckEditForm_controlId" onchange="admin.check.loadChecks($(this), $('#GtCheckEditForm_checkId'));">
                     <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                     <?php foreach ($categories as $cat): ?>
                         <?php foreach ($cat->controls as $ctrl): ?>
@@ -56,9 +56,9 @@
         </div>
 
         <div class="control-group <?php if ($model->getError('checkId')) echo 'error'; ?>" id="check-selector">
-            <label class="control-label" for="GtModuleCheckEditForm_checkId"><?php echo Yii::t('app', 'Check'); ?></label>
+            <label class="control-label" for="GtCheckEditForm_checkId"><?php echo Yii::t('app', 'Check'); ?></label>
             <div class="controls">
-                <select class="input-xlarge" id="GtModuleCheckEditForm_checkId" name="GtModuleCheckEditForm[checkId]">
+                <select class="input-xlarge" id="GtCheckEditForm_checkId" name="GtCheckEditForm[checkId]">
                     <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                     <?php foreach ($checks as $check): ?>
                         <option value="<?php echo $check->id; ?>" <?php if ($model->checkId == $check->id) echo "selected"; ?>><?php echo CHtml::encode($check->localizedName); ?></option>
@@ -75,9 +75,9 @@
         </div>
 
         <div class="control-group <?php if ($model->getError('sortOrder')) echo 'error'; ?>">
-            <label class="control-label" for="GtModuleCheckEditForm_sortOrder"><?php echo Yii::t('app', 'Sort Order'); ?></label>
+            <label class="control-label" for="GtCheckEditForm_sortOrder"><?php echo Yii::t('app', 'Sort Order'); ?></label>
             <div class="controls">
-                <input type="text" class="input-xlarge" id="GtModuleCheckEditForm_sortOrder" name="GtModuleCheckEditForm[sortOrder]" value="<?php echo $model->sortOrder ? $model->sortOrder : 0; ?>">
+                <input type="text" class="input-xlarge" id="GtCheckEditForm_sortOrder" name="GtCheckEditForm[sortOrder]" value="<?php echo $model->sortOrder ? $model->sortOrder : 0; ?>">
                 <?php if ($model->getError('sortOrder')): ?>
                     <p class="help-block"><?php echo $model->getError('sortOrder'); ?></p>
                 <?php endif; ?>

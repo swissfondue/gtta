@@ -116,7 +116,8 @@ class VulntrackerCommand extends ConsoleCommand
                     $email->save();
                 }
 
-                $project->vuln_overdue = new CDbExpression('NOW()');
+                $now = new DateTime();
+                $project->vuln_overdue = $now->format("Y-m-d");
                 $project->save();
             }
         }

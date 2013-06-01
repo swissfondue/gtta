@@ -1048,7 +1048,7 @@ class ReportController extends Controller
             return;
         }
 
-        if (!$project->checkPermission())
+        if ($project->guided_test || !$project->checkPermission())
         {
             Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
             return;
@@ -2190,7 +2190,7 @@ class ReportController extends Controller
             return;
         }
 
-        if (!$project1->checkPermission())
+        if ($project1->guided_test || !$project1->checkPermission())
         {
             Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
             return;
@@ -2207,7 +2207,7 @@ class ReportController extends Controller
             return;
         }
 
-        if (!$project2->checkPermission())
+        if ($project2->guided_test || !$project2->checkPermission())
         {
             Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
             return;
@@ -2536,7 +2536,7 @@ class ReportController extends Controller
                 return;
             }
 
-            if (!$project->checkPermission())
+            if ($project->guided_test || !$project->checkPermission())
             {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
                 return;
@@ -2958,7 +2958,7 @@ class ReportController extends Controller
                 return;
             }
 
-            if (!$project->checkPermission())
+            if ($project->guided_test || !$project->checkPermission())
             {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
                 return;
@@ -3473,7 +3473,7 @@ class ReportController extends Controller
             return;
         }
 
-        if (!$project->checkPermission())
+        if ($project->guided_test || !$project->checkPermission())
         {
             Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
             return;

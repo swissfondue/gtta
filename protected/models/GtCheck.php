@@ -1,9 +1,9 @@
 <?php
 
 /**
- * This is the model class for table "gt_module_checks".
+ * This is the model class for table "gt_checks".
  *
- * The followings are the available columns in table 'gt_module_checks':
+ * The followings are the available columns in table 'gt_checks':
  * @property integer $id
  * @property integer $gt_module_id
  * @property integer $check_id
@@ -12,7 +12,7 @@
  * @property string $target_description
  * @property integer $max_sort_order
  */
-class GtModuleCheck extends CActiveRecord
+class GtCheck extends CActiveRecord
 {
     /**
      * @var integer max sort order.
@@ -22,7 +22,7 @@ class GtModuleCheck extends CActiveRecord
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
-	 * @return GtModuleCheck the static model class
+	 * @return GtCheck the static model class
 	 */
 	public static function model($className=__CLASS__)
 	{
@@ -34,7 +34,7 @@ class GtModuleCheck extends CActiveRecord
 	 */
 	public function tableName()
 	{
-		return 'gt_module_checks';
+		return 'gt_checks';
 	}
 
 	/**
@@ -54,9 +54,13 @@ class GtModuleCheck extends CActiveRecord
 	public function relations()
 	{
 		return array(
-            'l10n' => array(self::HAS_MANY, 'GtModuleCheckL10n', 'gt_module_check_id'),
+            'l10n' => array(self::HAS_MANY, 'GtCheckL10n', 'gt_check_id'),
             'module' => array(self::BELONGS_TO, 'GtModule', 'gt_module_id'),
             'check' => array(self::BELONGS_TO, 'Check', 'check_id'),
+            'projectChecks' => array(self::HAS_MANY, 'ProjectGtCheck', 'gt_check_id'),
+            'projectCheckInputs' => array(self::HAS_MANY, 'ProjectGtCheckInput', 'gt_check_id'),
+            'projectCheckSolutions' => array(self::HAS_MANY, 'ProjectGtCheckSolution', 'gt_check_id'),
+            'projectCheckAttachments' => array(self::HAS_MANY, 'ProjectGtCheckAttachment', 'gt_check_id'),
 		);
 	}
 
@@ -66,7 +70,7 @@ class GtModuleCheck extends CActiveRecord
     public function getLocalizedDescription()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->description != NULL ? $this->l10n[0]->description : $this->description;
+            return $this->l10n[0]->description != null ? $this->l10n[0]->description : $this->description;
 
         return $this->description;
     }
@@ -77,8 +81,22 @@ class GtModuleCheck extends CActiveRecord
     public function getLocalizedTargetDescription()
     {
         if ($this->l10n && count($this->l10n) > 0)
-            return $this->l10n[0]->target_description != NULL ? $this->l10n[0]->target_description : $this->target_description;
+            return $this->l10n[0]->target_description != null ? $this->l10n[0]->target_description : $this->target_description;
 
         return $this->target_description;
+    }
+
+    /**
+     * @return boolean is running.
+     */
+    public function getIsRunning()
+    {
+        return
+            $this->check->automated &&
+            $this->projectChecks &&
+            in_array($this->projectChecks[0]->status, array(
+                ProjectGtCheck::STATUS_IN_PROGRESS,
+                ProjectGtCheck::STATUS_STOP
+            ));
     }
 }

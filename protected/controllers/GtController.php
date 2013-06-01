@@ -792,7 +792,7 @@ class GtController extends Controller
         $criteria->addColumnCondition(array('gt_module_id' => $module->id));
         $criteria->together = true;
 
-        $checks = GtModuleCheck::model()->with(array(
+        $checks = GtCheck::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
                 'on'       => 'language_id = :language_id',
@@ -810,7 +810,7 @@ class GtController extends Controller
             )
         ))->findAll($criteria);
 
-        $checkCount = GtModuleCheck::model()->count($criteria);
+        $checkCount = GtCheck::model()->count($criteria);
         $paginator = new Paginator($checkCount, $page);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Guided Test Templates'), $this->createUrl('gt/index'));
@@ -891,7 +891,7 @@ class GtController extends Controller
         }
 
         if ($check) {
-            $check = GtModuleCheck::model()->with(array(
+            $check = GtCheck::model()->with(array(
                 'l10n' => array(
                     'joinType' => 'LEFT JOIN',
                     'on'       => 'language_id = :language_id',
@@ -906,13 +906,13 @@ class GtController extends Controller
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
             }
         } else {
-            $check = new GtModuleCheck();
+            $check = new GtCheck();
             $newRecord = true;
         }
 
         $languages = Language::model()->findAll();
 
-		$model = new GtModuleCheckEditForm();
+		$model = new GtCheckEditForm();
         $model->localizedItems = array();
         $controlId = null;
 
@@ -922,8 +922,8 @@ class GtController extends Controller
             $model->sortOrder = $check->sort_order;
             $model->checkId = $check->check_id;
 
-            $checkL10n = GtModuleCheckL10n::model()->findAllByAttributes(array(
-                'gt_module_check_id' => $check->id
+            $checkL10n = GtCheckL10n::model()->findAllByAttributes(array(
+                'gt_check_id' => $check->id
             ));
 
             foreach ($checkL10n as $cl) {
@@ -938,7 +938,7 @@ class GtController extends Controller
             $criteria->select = 'MAX(sort_order) as max_sort_order';
             $criteria->addColumnCondition(array('gt_module_id' => $module->id));
 
-            $maxOrder = GtModuleCheck::model()->find($criteria);
+            $maxOrder = GtCheck::model()->find($criteria);
 
             if ($maxOrder && $maxOrder->max_sort_order !== null) {
                 $model->sortOrder = $maxOrder->max_sort_order + 1;
@@ -946,13 +946,13 @@ class GtController extends Controller
         }
 
 		// collect user input data
-		if (isset($_POST['GtModuleCheckEditForm'])) {
-			$model->attributes = $_POST['GtModuleCheckEditForm'];
+		if (isset($_POST['GtCheckEditForm'])) {
+			$model->attributes = $_POST['GtCheckEditForm'];
             $model->description = $model->defaultL10n($languages, 'description');
             $model->targetDescription = $model->defaultL10n($languages, 'target_description');
 
 			if ($model->validate()) {
-                $testCheck = GtModuleCheck::model()->findByAttributes(array(
+                $testCheck = GtCheck::model()->findByAttributes(array(
                     'gt_module_id' => $module->id,
                     'check_id' => $model->checkId
                 ));
@@ -966,14 +966,14 @@ class GtController extends Controller
                     $check->save();
 
                     foreach ($model->localizedItems as $languageId => $value) {
-                        $checkL10n = GtModuleCheckL10n::model()->findByAttributes(array(
-                            'gt_module_check_id' => $check->id,
+                        $checkL10n = GtCheckL10n::model()->findByAttributes(array(
+                            'gt_check_id' => $check->id,
                             'language_id' => $languageId
                         ));
 
                         if (!$checkL10n) {
-                            $checkL10n = new GtModuleCheckL10n();
-                            $checkL10n->gt_module_check_id = $check->id;
+                            $checkL10n = new GtCheckL10n();
+                            $checkL10n->gt_check_id = $check->id;
                             $checkL10n->language_id = $languageId;
                         }
 
@@ -1102,7 +1102,7 @@ class GtController extends Controller
             }
 
             $id = $model->id;
-            $check = GtModuleCheck::model()->findByPk($id);
+            $check = GtCheck::model()->findByPk($id);
 
             if ($check === null) {
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));

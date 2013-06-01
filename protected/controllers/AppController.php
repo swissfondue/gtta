@@ -202,11 +202,13 @@ class AppController extends Controller
                 case 'project-list':
                     $client = Client::model()->findByPk($model->id);
 
-                    if (!$client)
+                    if (!$client) {
                         throw new CHttpException(404, Yii::t('app', 'Client not found.'));
+                    }
 
-                    if (!$client->checkPermission())
+                    if (!$client->checkPermission()) {
                         throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                    }
 
                     $criteria = new CDbCriteria();
                     $criteria->order = 't.name ASC, t.year ASC';
@@ -228,11 +230,13 @@ class AppController extends Controller
                             ),
                         ))->findAll($criteria);
 
-                    foreach ($projects as $project)
+                    foreach ($projects as $project) {
                         $objects[] = array(
                             'id'   => $project->id,
                             'name' => CHtml::encode($project->name) . ' (' . $project->year . ')',
+                            'guided' => $project->guided_test
                         );
+                    }
 
                     break;
 

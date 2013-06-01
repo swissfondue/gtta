@@ -140,8 +140,12 @@ class MonitorController extends Controller
      */
     public function actionSessions()
     {
+        $interval = new DateTime();
+        $interval->sub(new DateInterval("PT10M"));
+
         $criteria = new CDbCriteria();
-        $criteria->addCondition("t.last_action_time > NOW() - INTERVAL '10 MINUTES'");
+        $criteria->addCondition("t.last_action_time > :interval");
+        $criteria->params = array('interval' => $interval->format("Y-m-d H:i:s"));
         $criteria->order = 't.role ASC, t.name ASC, t.email ASC';
 
         $users = User::model()->findAll($criteria);

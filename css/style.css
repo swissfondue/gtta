@@ -495,12 +495,12 @@ table.process-monitor .actions {
     margin-bottom:10px;
 }
 
-.risk-category-category-header, .risk-category-control-header {
+.risk-category-category-header, .risk-category-control-header, .gt-category-header, .gt-category-type-header {
     border-top:1px solid #ddd;
     padding:8px;
 }
 
-.risk-category-category-header-bold {
+.risk-category-category-header-bold, .gt-category-header-bold {
     padding:8px;
     font-weight:bold;
 }
@@ -509,12 +509,12 @@ table.process-monitor .actions {
     font-weight:normal;
 }
 
-.risk-category-category-content {
+.risk-category-category-content, .gt-category-content {
     padding-left:20px;
     border-top:1px solid #ddd;
 }
 
-.risk-category-control-header:first-child {
+.risk-category-control-header:first-child, .gt-category-type-header:first-child {
     border-top:none;
 }
 
@@ -533,9 +533,7 @@ div.risk-category-check-header:first-child {
     border-top:none;
 }
 
-
-
-div.risk-category-check-content {
+div.risk-category-check-content, .gt-category-type-content {
     background-color:#f0f0f0;
     padding:8px;
     margin:0;
@@ -749,4 +747,17 @@ table.table-result td {
 .script-inputs th {
     text-align:left !important;
     background-color:#ddd !important;
+}
+
+.gt-check .module-header {
+    padding:8px;
+    font-weight:bold;
+}
+
+.gt-check .module-header span {
+    color:#999;
+}
+
+.gt-check .check-description {
+    padding:8px;
 }

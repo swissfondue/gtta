@@ -1,26 +1,25 @@
 <?php
 
 /**
- * Automation class.
+ * GT Automation class.
  */
-class AutomationCommand extends ConsoleCommand
+class GtautomationCommand extends ConsoleCommand
 {
     /**
      * Process starting checks.
      */
     private function _processStartingChecks()
     {
-        $checks = TargetCheck::model()->findAllByAttributes(array(
-            'status' => TargetCheck::STATUS_IN_PROGRESS,
-            'pid'    => null
+        $checks = ProjectGtCheck::model()->findAllByAttributes(array(
+            'status' => ProjectGtCheck::STATUS_IN_PROGRESS,
+            'pid' => null
         ));
 
-        foreach ($checks as $check)
-        {
+        foreach ($checks as $check) {
             $this->_backgroundExec(
                 Yii::app()->params['yiicPath'] . '/' .
                 ( $this->_isWindows() ? 'yiic.bat' : 'yiic' ) .
-                ' automation ' . $check->target_id . ' ' . $check->check_id
+                ' gtautomation ' . $check->project_id . ' ' . $check->gt_check_id
             );
         }
     }
@@ -32,12 +31,11 @@ class AutomationCommand extends ConsoleCommand
     {
         $criteria = new CDbCriteria();
         $criteria->addCondition('status = :status');
-        $criteria->params = array( 'status' => TargetCheck::STATUS_STOP );
+        $criteria->params = array('status' => ProjectGtCheck::STATUS_STOP);
 
-        $checks = TargetCheck::model()->findAll($criteria);
+        $checks = ProjectGtCheck::model()->findAll($criteria);
 
-        foreach ($checks as $check)
-        {
+        foreach ($checks as $check) {
             $fileOutput = null;
 
             if ($check->pid) {
@@ -54,9 +52,8 @@ class AutomationCommand extends ConsoleCommand
             }
 
             $check->result .= $fileOutput ? $fileOutput : 'No output.';
-            $check->status = TargetCheck::STATUS_FINISHED;
-            $check->pid    = null;
-
+            $check->status = ProjectGtCheck::STATUS_FINISHED;
+            $check->pid = null;
             $check->save();
         }
     }
@@ -68,21 +65,11 @@ class AutomationCommand extends ConsoleCommand
     {
         $criteria = new CDbCriteria();
         $criteria->addCondition('pid IS NOT NULL');
-        $criteria->addInCondition('status', array( TargetCheck::STATUS_IN_PROGRESS, TargetCheck::STATUS_STOP ));
+        $criteria->addInCondition('status', array(ProjectGtCheck::STATUS_IN_PROGRESS, ProjectGtCheck::STATUS_STOP));
 
-        $checks = TargetCheck::model()->findAll($criteria);
+        $checks = ProjectGtCheck::model()->findAll($criteria);
 
-        foreach ($checks as $check)
-        {
-            /*$fileOutput = null;
-            $fileName = Yii::app()->params['automation']['tempPath'] . '/' . $check->result_file;
-
-            if (file_exists($fileName)) {
-                $fileOutput = file_get_contents($fileName);
-            }
-
-            $check->result = $fileOutput;*/
-
+        foreach ($checks as $check) {
             // if task died for some reason
             if (!$this->_isRunning($check->pid)) {
                 $check->pid = null;
@@ -91,7 +78,7 @@ class AutomationCommand extends ConsoleCommand
                     $check->result = 'No output.';
                 }
 
-                $check->status = TargetCheck::STATUS_FINISHED;
+                $check->status = ProjectGtCheck::STATUS_FINISHED;
             }
 
             $check->save();
@@ -103,8 +90,7 @@ class AutomationCommand extends ConsoleCommand
      */
     private function _isRunning($pid)
     {
-        if ($this->_isWindows())
-        {
+        if ($this->_isWindows()) {
             $output = array();
             exec('tasklist.exe', $output);
 
@@ -122,9 +108,7 @@ class AutomationCommand extends ConsoleCommand
             }
 
             return false;
-        }
-        else
-        {
+        } else {
             $data = shell_exec('ps ax -o  "%p %r" | grep ' . $pid);
 
             if (!$data)
@@ -177,25 +161,26 @@ class AutomationCommand extends ConsoleCommand
     {
         $name = null;
 
-        while (true)
-        {
+        while (true) {
             $name = hash('sha256', rand() . time() . rand());
 
-            $check = TargetCheckInput::model()->findByAttributes(array(
+            $check = ProjectGtCheckInput::model()->findByAttributes(array(
                 'file' => $name
             ));
 
-            if ($check)
+            if ($check) {
                 continue;
+            }
 
             $criteria = new CDbCriteria();
             $criteria->addCondition('target_file = :file OR result_file = :file');
-            $criteria->params = array( 'file' => $name );
+            $criteria->params = array('file' => $name);
 
-            $check = TargetCheck::model()->find($criteria);
+            $check = ProjectGtCheck::model()->find($criteria);
 
-            if ($check)
+            if ($check) {
                 continue;
+            }
 
             break;
         }
@@ -204,50 +189,14 @@ class AutomationCommand extends ConsoleCommand
     }
 
     /**
-     * Send notification
-     * @param $check
-     * @param $target
-     */
-    private function _sendNotification($check, $target) {
-        $user = User::model()->findByPk($check->user_id);
-
-        if ($user->send_notifications) {
-            $email = new Email();
-            $email->user_id = $user->id;
-
-            $email->subject = Yii::t('app', '{checkName} check has been finished', array(
-                '{checkName}' => $check->check->localizedName
-            ));
-
-            $email->content = $this->render(
-                'application.views.email.check',
-
-                array(
-                    'userName'   => $user->name ? CHtml::encode($user->name) : $user->email,
-                    'projectId'  => $target->project_id,
-                    'targetId'   => $target->id,
-                    'categoryId' => $check->check->control->check_category_id,
-                    'checkId'    => $check->check_id,
-                    'checkName'  => $check->check->localizedName,
-                    'targetHost' => $target->host
-                ),
-
-                true
-            );
-
-            $email->save();
-        }
-    }
-
-    /**
      * Create check files
      * @param $check
+     * @param $project
      * @param $interpreter
-     * @param $target
      * @param $script
      * @return array
      */
-    private function _createCheckFiles($check, $interpreter, $target, $script) {
+    private function _createCheckFiles($check, $interpreter, $script) {
         $tempPath = Yii::app()->params['automation']['tempPath'];
         $scriptsPath = Yii::app()->params['automation']['scriptsPath'];
 
@@ -255,15 +204,15 @@ class AutomationCommand extends ConsoleCommand
         $targetFile = fopen($tempPath . '/' . $check->target_file, 'w');
 
         // base data
-        fwrite($targetFile, ($check->override_target ? $check->override_target : $target->host) . "\n");
-        fwrite($targetFile, $check->protocol       . "\n");
-        fwrite($targetFile, $check->port           . "\n");
+        fwrite($targetFile, $check->target . "\n");
+        fwrite($targetFile, $check->protocol . "\n");
+        fwrite($targetFile, $check->port . "\n");
         fwrite($targetFile, $check->language->code . "\n");
 
         // directories
         fwrite($targetFile, $scriptsPath . "\n");
-        fwrite($targetFile, $tempPath    . "\n");
-        fwrite($targetFile, $interpreter['path']     . "\n");
+        fwrite($targetFile, $tempPath . "\n");
+        fwrite($targetFile, $interpreter['path'] . "\n");
         fwrite($targetFile, $interpreter['basePath'] . "\n");
 
         fclose($targetFile);
@@ -284,15 +233,15 @@ class AutomationCommand extends ConsoleCommand
 
         $criteria = new CDbCriteria();
         $criteria->addColumnCondition(array(
-            'target_id' => $check->target_id,
-            'check_id'  => $check->check_id,
+            'project_id' => $check->project_id,
+            'gt_check_id' => $check->gt_check_id,
         ));
 
         $criteria->addInCondition('check_input_id', $inputIds);
         $criteria->order = 'input.sort_order ASC';
 
         // create input files
-        $inputs = TargetCheckInput::model()->with('input')->findAll($criteria);
+        $inputs = ProjectGtCheckInput::model()->with('input')->findAll($criteria);
         $inputFiles = array();
 
         foreach ($inputs as $input) {
@@ -354,9 +303,9 @@ class AutomationCommand extends ConsoleCommand
                 $fileInfo = finfo_open();
                 $mimeType = finfo_file($fileInfo, $image->src, FILEINFO_MIME_TYPE);
 
-                $attachment = new TargetCheckAttachment();
-                $attachment->check_id = $check->check_id;
-                $attachment->target_id = $check->target_id;
+                $attachment = new ProjectGtCheckAttachment();
+                $attachment->gt_check_id = $check->gt_check_id;
+                $attachment->project_id = $check->project_id;
                 $attachment->name = basename($image->src);
                 $attachment->type = $mimeType;
                 $attachment->size = filesize($image->src);
@@ -377,16 +326,16 @@ class AutomationCommand extends ConsoleCommand
     /**
      * Check starter.
      */
-    private function _startCheck($targetId, $checkId)
+    private function _startCheck($projectId, $checkId)
     {
-        $check = TargetCheck::model()->with('check', 'language')->findByAttributes(array(
-            'status'    => TargetCheck::STATUS_IN_PROGRESS,
-            'pid'       => null,
-            'target_id' => $targetId,
-            'check_id'  => $checkId
+        $check = ProjectGtCheck::model()->with('check', 'language')->findByAttributes(array(
+            'status' => TargetCheck::STATUS_IN_PROGRESS,
+            'pid' => null,
+            'project_id' => $projectId,
+            'gt_check_id' => $checkId
         ));
 
-        $target = Target::model()->findByPk($targetId);
+        $project = Project::model()->findByPk($projectId);
 
         if (!$check) {
             return;
@@ -394,16 +343,17 @@ class AutomationCommand extends ConsoleCommand
 
         $language = $check->language;
 
-        if (!$language)
+        if (!$language) {
             $language = Language::model()->findByAttributes(array(
                 'default' => true
             ));
+        }
 
         Yii::app()->language = $language->code;
 
-        $tempPath    = Yii::app()->params['automation']['tempPath'];
+        $tempPath = Yii::app()->params['automation']['tempPath'];
         $scriptsPath = Yii::app()->params['automation']['scriptsPath'];
-        $scripts = $check->check->scripts;
+        $scripts = $check->check->check->scripts;
 
         foreach ($scripts as $script) {
             if (!$check->result) {
@@ -419,15 +369,17 @@ class AutomationCommand extends ConsoleCommand
                     throw new Exception(Yii::t('app', 'Script file not found.'));
                 }
 
-                $extension    = pathinfo($script->name, PATHINFO_EXTENSION);
-                $interpreter  = null;
+                $extension = pathinfo($script->name, PATHINFO_EXTENSION);
+                $interpreter = null;
                 $interpreters = Yii::app()->params['automation']['interpreters'];
 
-                if (isset($interpreters[$extension]))
+                if (isset($interpreters[$extension])) {
                     $interpreter = $interpreters[$extension];
+                }
 
-                if (!$interpreter || !file_exists($interpreter['path']))
+                if (!$interpreter || !file_exists($interpreter['path'])) {
                     throw new Exception(Yii::t('app', 'Interpreter not found.'));
+                }
 
                 $now = new DateTime();
                 $check->pid = posix_getpgid(getmypid());
@@ -436,7 +388,7 @@ class AutomationCommand extends ConsoleCommand
                 $check->result_file = $this->_generateFileName();
                 $check->save();
 
-                $inputFiles = $this->_createCheckFiles($check, $interpreter, $target, $script);
+                $inputFiles = $this->_createCheckFiles($check, $interpreter, $script);
                 chdir($scriptsPath);
 
                 $command = array(
@@ -458,13 +410,6 @@ class AutomationCommand extends ConsoleCommand
                 $fileOutput = file_get_contents($tempPath . '/' . $check->result_file);
                 $check->refresh();
                 $check->pid = null;
-
-                /*if (!$check->result) {
-                    $check->result = '';
-                } else {
-                    $check->result .= "\n";
-                }*/
-
                 $check->result .= $fileOutput ? $fileOutput : implode("\n", $output);
 
                 if (!$check->result) {
@@ -474,13 +419,6 @@ class AutomationCommand extends ConsoleCommand
                 $this->_getTables($check);
                 $this->_getImages($check);
                 $check->save();
-
-                $started  = new DateTime($check->started);
-                $interval = time() - $started->getTimestamp();
-
-                if ($interval > Yii::app()->params['automation']['minNotificationInterval']) {
-                    $this->_sendNotification($check, $target);
-                }
             } catch (Exception $e) {
                 $check->automationError($e->getMessage());
             }
@@ -497,21 +435,20 @@ class AutomationCommand extends ConsoleCommand
     public function run($args)
     {
         // start checks
-        if (count($args) > 0)
-        {
-            if (count($args) != 2)
-            {
+        if (count($args) > 0) {
+            if (count($args) != 2) {
                 echo 'Invalid number of arguments.' . "\n";
                 exit();
             }
 
-            $targetId = (int) $args[0];
-            $checkId  = (int) $args[1];
+            $projectId = (int) $args[0];
+            $checkId = (int) $args[1];
 
-            if ($targetId && $checkId)
-                $this->_startCheck($targetId, $checkId);
-            else
+            if ($projectId && $checkId) {
+                $this->_startCheck($projectId, $checkId);
+            } else {
                 echo 'Invalid arguments.' . "\n";
+            }
 
             exit();
         }
@@ -519,10 +456,8 @@ class AutomationCommand extends ConsoleCommand
         // one instance check
         $fp = fopen(Yii::app()->params['automation']['lockFile'], 'w');
         
-        if (flock($fp, LOCK_EX | LOCK_NB))
-        {
-            for ($i = 0; $i < 10; $i++)
-            {
+        if (flock($fp, LOCK_EX | LOCK_NB)) {
+            for ($i = 0; $i < 10; $i++) {
                 $this->_processStartingChecks();
                 $this->_processStoppingChecks();
                 $this->_processRunningChecks();

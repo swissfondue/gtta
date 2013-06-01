@@ -12,7 +12,6 @@
  * @property string $status
  * @property string $vuln_overdue
  * @property boolean $guided_test
- * @property integer $guided_test_step
  */
 class Project extends CActiveRecord
 {
@@ -68,7 +67,6 @@ class Project extends CActiveRecord
             array('name', 'length', 'max' => 1000),
             array('year', 'length', 'max' => 4),
             array('guided_test', 'boolean'),
-            array('guided_test_step', 'numerical', 'integerOnly' => true, 'min' => 0),
             array('status', 'in', 'range' => array(self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_FINISHED)),
 		);
 	}
@@ -79,11 +77,12 @@ class Project extends CActiveRecord
 	public function relations()
 	{
 		return array(
-			'client'        => array( self::BELONGS_TO, 'Client',        'client_id' ),
-            'details'       => array( self::HAS_MANY,   'ProjectDetail', 'project_id' ),
-            'users'         => array( self::MANY_MANY,  'User',          'project_users(project_id, user_id)' ),
-            'project_users' => array( self::HAS_MANY,   'ProjectUser',   'project_id' ),
-            'targets'       => array( self::HAS_MANY,   'Target',        'project_id' ),
+			'client' => array(self::BELONGS_TO, 'Client', 'client_id'),
+            'details' => array(self::HAS_MANY, 'ProjectDetail', 'project_id'),
+            'users' => array(self::MANY_MANY, 'User', 'project_users(project_id, user_id)'),
+            'project_users' => array(self::HAS_MANY, 'ProjectUser', 'project_id'),
+            'targets' => array(self::HAS_MANY, 'Target', 'project_id'),
+            'modules' => array(self::HAS_MANY, 'ProjectGtModule', 'project_id'),
 		);
 	}
 

@@ -86,7 +86,22 @@ class WebUser extends CWebUser
 
         $this->_loadUserModel();
 
-        $this->_model->last_action_time = new CDbExpression('NOW()');
+        $system = System::model()->findAll();
+
+        if ($system) {
+            $system = $system[0];
+        } else {
+            $system = new System();
+        }
+
+        if (!$system->timezone) {
+            $system->timezone = "Europe/Zurich";
+        }
+
+        date_default_timezone_set($system->timezone);
+
+        $now = new DateTime();
+        $this->_model->last_action_time = $now->format("Y-m-d H:i:s");
         $this->_model->save();
     }
 

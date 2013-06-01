@@ -34,7 +34,7 @@ class UserIdentity extends CUserIdentity
             'email' => $this->email,
         ));
 
-        if ($user->certificate_required) {
+        if ($user && $user->certificate_required) {
             $serial = $user->certificate_serial;
             $issuer = $user->certificate_issuer;
             $email = $user->email;

@@ -46,9 +46,9 @@ class GtModule extends CActiveRecord
 	{
 		return array(
             'l10n' => array(self::HAS_MANY, 'GtModuleL10n', 'gt_module_id'),
-            'checks' => array(self::HAS_MANY, 'GtModuleCheck', 'gt_module_id'),
+            'checks' => array(self::HAS_MANY, 'GtCheck', 'gt_module_id'),
             'type' => array(self::BELONGS_TO, 'GtType', 'gt_type_id'),
-            'moduleCount' => array(self::STAT, 'GtModule', 'gt_module_id'),
+            'checkCount' => array(self::STAT, 'GtCheck', 'gt_module_id'),
 		);
 	}
 

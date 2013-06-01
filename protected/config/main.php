@@ -61,6 +61,15 @@ return array(
                 'project/new'                 => 'project/edit',
                 'project/control'             => 'project/control',
 
+                // guided test
+                'project/<id:\d+>/gt' => 'project/gt',
+                'project/<id:\d+>/gt/module/<module:\d+>/check/<check:\d+>/control' => 'project/gtcontrolcheck',
+                'project/<id:\d+>/gt/module/<module:\d+>/check/<check:\d+>/save' => 'project/gtsavecheck',
+                'project/<id:\d+>/gt/module/<module:\d+>/check/<check:\d+>/update' => 'project/gtupdatecheck',
+                'project/<id:\d+>/gt/module/<module:\d+>/check/<check:\d+>/attachment/new' => 'project/gtuploadattachment',
+                'project/gt-attachment/<path:[a-z\d]+>/download' => 'project/gtattachment',
+                'project/gt-attachment/control' => 'project/gtcontrolattachment',
+
                 // project details
                 'project/<id:\d+>/details/<page:\d+>'       => 'project/details',
                 'project/<id:\d+>/details'                  => 'project/details',
