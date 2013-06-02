@@ -1,4 +1,17 @@
-<h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+<div class="active-header">
+    <?php if (!$check->isNewRecord && $check->gt_dependency_processor_id): ?>
+        <div class="pull-right">
+            <ul class="nav nav-pills">
+                <li class="active"><a href="<?php echo $this->createUrl('gt/editcheck', array('id' => $category->id, 'type' => $type->id, 'module' => $module->id, 'check' => $check->id)); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+                <li><a href="<?php echo $this->createUrl('gt/dependencies', array('id' => $category->id, 'type' => $type->id, 'module' => $module->id, 'check' => $check->id)); ?>"><?php echo Yii::t('app', 'Dependencies'); ?></a></li>
+            </ul>
+        </div>
+    <?php endif; ?>
+
+    <h1>
+        <?php echo CHtml::encode($this->pageTitle); ?>
+    </h1>
+</div>
 
 <hr>
 
@@ -80,6 +93,21 @@
                 <input type="text" class="input-xlarge" id="GtCheckEditForm_sortOrder" name="GtCheckEditForm[sortOrder]" value="<?php echo $model->sortOrder ? $model->sortOrder : 0; ?>">
                 <?php if ($model->getError('sortOrder')): ?>
                     <p class="help-block"><?php echo $model->getError('sortOrder'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($model->getError('dependencyProcessorId')) echo 'error'; ?>" id="check-selector">
+            <label class="control-label" for="GtCheckEditForm_dependencyProcessorId"><?php echo Yii::t('app', 'Dependency Processor'); ?></label>
+            <div class="controls">
+                <select class="input-xlarge" id="GtCheckEditForm_dependencyProcessorId" name="GtCheckEditForm[dependencyProcessorId]">
+                    <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
+                    <?php foreach ($processors as $processor): ?>
+                        <option value="<?php echo $processor->id; ?>" <?php if ($model->dependencyProcessorId == $processor->id) echo "selected"; ?>><?php echo CHtml::encode($processor->name); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if ($model->getError('dependencyProcessorId')): ?>
+                    <p class="help-block"><?php echo $model->getError('dependencyProcessorId'); ?></p>
                 <?php endif; ?>
             </div>
         </div>

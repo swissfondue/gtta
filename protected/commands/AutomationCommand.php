@@ -326,7 +326,11 @@ class AutomationCommand extends ConsoleCommand
         $tablePos = strpos($check->result, '<' . ResultTable::TAG_MAIN);
 
         if ($tablePos !== false) {
-            $check->table_result = substr($check->result, $tablePos);
+            if (!$check->table_result) {
+                $check->table_result = "";
+            }
+
+            $check->table_result .= substr($check->result, $tablePos);
             $check->result = substr($check->result, 0, $tablePos);
         }
     }

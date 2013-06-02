@@ -921,6 +921,7 @@ class GtController extends Controller
             $model->targetDescription = $check->target_description;
             $model->sortOrder = $check->sort_order;
             $model->checkId = $check->check_id;
+            $model->dependencyProcessorId = $check->gt_dependency_processor_id;
 
             $checkL10n = GtCheckL10n::model()->findAllByAttributes(array(
                 'gt_check_id' => $check->id
@@ -963,6 +964,7 @@ class GtController extends Controller
                     $check->sort_order = $model->sortOrder;
                     $check->description = $model->description;
                     $check->target_description = $model->targetDescription;
+                    $check->gt_dependency_processor_id = $model->dependencyProcessorId;
                     $check->save();
 
                     foreach ($model->localizedItems as $languageId => $value) {
@@ -1064,6 +1066,10 @@ class GtController extends Controller
             array( 'order' => 'COALESCE(l10n.name, t.name) ASC' )
         );
 
+        $criteria = new CDbCriteria();
+        $criteria->order = 'name ASC';
+        $processors = GtDependencyProcessor::model()->findAll($criteria);
+
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Check') : $checkName;
 		$this->render('type/module/check/edit', array(
@@ -1075,9 +1081,387 @@ class GtController extends Controller
             'languages' => $languages,
             'categories' => $categories,
             'checks' => $checks,
-            'controlId' => $controlId
+            'controlId' => $controlId,
+            'processors' => $processors
         ));
 	}
+
+    /**
+     * Display a list of GT dependencies.
+     */
+	public function actionDependencies($id, $type, $module, $check, $page=1)
+	{
+        $id = (int) $id;
+        $type = (int) $type;
+        $module = (int) $module;
+        $check = (int) $check;
+        $page = (int) $page;
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        $category = GtCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array('language_id' => $language)
+            )
+        ))->findByPk($id);
+
+        if (!$category) {
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+        }
+
+        $type = GtType::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array('language_id' => $language)
+            )
+        ))->findByAttributes(array(
+            'id' => $type,
+            'gt_category_id' => $category->id
+        ));
+
+        if (!$type) {
+            throw new CHttpException(404, Yii::t('app', 'Type not found.'));
+        }
+
+        $module = GtModule::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array('language_id' => $language)
+            )
+        ))->findByAttributes(array(
+            'id' => $module,
+            'gt_type_id' => $type->id
+        ));
+
+        if (!$module) {
+            throw new CHttpException(404, Yii::t('app', 'Module not found.'));
+        }
+
+        $check = GtCheck::model()->with(array(
+            'check' => array(
+                'l10n' => array(
+                    'joinType' => 'LEFT JOIN',
+                    'on' => 'language_id = :language_id',
+                    'params' => array('language_id' => $language)
+                )
+            )
+        ))->findByAttributes(array(
+            'id' => $check,
+            'gt_module_id' => $module->id
+        ));
+
+        if (!$check) {
+            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+        }
+
+        if ($page < 1) {
+            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->limit  = Yii::app()->params['entriesPerPage'];
+        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->order  = 't.id ASC';
+        $criteria->addColumnCondition(array('gt_check_id' => $check->id));
+        $criteria->together = true;
+
+        $dependencies = GtCheckDependency::model()->with(array(
+            'module' => array(
+                'with' => array(
+                    'l10n' => array(
+                        'joinType' => 'LEFT JOIN',
+                        'on' => 'language_id = :language_id',
+                        'params' => array('language_id' => $language)
+                    ),
+                )
+            )
+        ))->findAll($criteria);
+
+        $dependencyCount = GtCheckDependency::model()->count($criteria);
+        $paginator = new Paginator($dependencyCount, $page);
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Guided Test Templates'), $this->createUrl('gt/index'));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('gt/view', array('id' => $category->id)));
+        $this->breadcrumbs[] = array($type->localizedName, $this->createUrl('gt/viewtype', array('id' => $category->id, 'type' => $type->id)));
+        $this->breadcrumbs[] = array($module->localizedName, $this->createUrl('gt/viewmodule', array('id' => $category->id, 'type' => $type->id, 'module' => $module->id)));
+        $this->breadcrumbs[] = array($check->check->localizedName, $this->createUrl('gt/editcheck', array('id' => $category->id, 'type' => $type->id, 'module' => $module->id, 'check' => $check->id)));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Dependencies'), '');
+
+        // display the page
+        $this->pageTitle = $check->check->localizedName;
+		$this->render('type/module/check/dependency/index', array(
+            'dependencies' => $dependencies,
+            'p' => $paginator,
+            'category' => $category,
+            'type' => $type,
+            'module' => $module,
+            'check' => $check,
+        ));
+	}
+
+    /**
+     * Dependency edit page.
+     */
+	public function actionEditDependency($id, $type, $module, $check, $dependency=0)
+	{
+        $id = (int) $id;
+        $type = (int) $type;
+        $module = (int) $module;
+        $check = (int) $check;
+        $dependency = (int) $dependency;
+        $newRecord = false;
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        $category = GtCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array('language_id' => $language)
+            )
+        ))->findByPk($id);
+
+        if (!$category) {
+            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+        }
+
+        $type = GtType::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array('language_id' => $language)
+            )
+        ))->findByAttributes(array(
+            'id' => $type,
+            'gt_category_id' => $category->id
+        ));
+
+        if (!$type) {
+            throw new CHttpException(404, Yii::t('app', 'Type not found.'));
+        }
+
+        $module = GtModule::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on' => 'language_id = :language_id',
+                'params' => array('language_id' => $language)
+            )
+        ))->findByAttributes(array(
+            'id' => $module,
+            'gt_type_id' => $type->id
+        ));
+
+        if (!$module) {
+            throw new CHttpException(404, Yii::t('app', 'Module not found.'));
+        }
+
+        $check = GtCheck::model()->with(array(
+            'check' => array(
+                'l10n' => array(
+                    'joinType' => 'LEFT JOIN',
+                    'on' => 'language_id = :language_id',
+                    'params' => array('language_id' => $language)
+                )
+            )
+        ))->findByAttributes(array(
+            'id' => $check,
+            'gt_module_id' => $module->id
+        ));
+
+        if (!$check) {
+            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+        }
+
+        if ($dependency) {
+            $dependency = GtCheckDependency::model()->with(array(
+                'module' => array(
+                    'with' => array(
+                        'l10n' => array(
+                            'joinType' => 'LEFT JOIN',
+                            'on' => 'language_id = :language_id',
+                            'params' => array('language_id' => $language)
+                        )
+                    )
+                )
+            ))->findByAttributes(array(
+                'id' => $dependency,
+                'gt_check_id' => $check->id
+            ));
+
+            if (!$dependency) {
+                throw new CHttpException(404, Yii::t('app', 'Dependency not found.'));
+            }
+        } else {
+            $dependency = new GtCheckDependency();
+            $newRecord = true;
+        }
+
+		$model = new GtCheckDependencyEditForm();
+
+        if (!$newRecord) {
+            $model->moduleId = $dependency->gt_module_id;
+            $model->condition = $dependency->condition;
+        }
+
+		// collect user input data
+		if (isset($_POST['GtCheckDependencyEditForm'])) {
+			$model->attributes = $_POST['GtCheckDependencyEditForm'];
+
+			if ($model->validate()) {
+                $dependency->gt_check_id = $check->id;
+                $dependency->gt_module_id = $model->moduleId;
+                $dependency->condition = $model->condition;
+                $dependency->save();
+
+                Yii::app()->user->setFlash('success', Yii::t('app', 'Dependency saved.'));
+                $dependency->refresh();
+
+                if ($newRecord) {
+                    $this->redirect(array('gt/editdependency', 'id' => $category->id, 'type' => $type->id, 'module' => $module->id, 'check' => $check->id, 'dependency' => $dependency->id));
+                }
+            } else {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+            }
+		}
+
+        $criteria = new CDbCriteria();
+        $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
+        $criteria->together = true;
+
+        $categories = GtCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on' => 'language_id = :language_id',
+                'params' => array('language_id' => $language)
+            )
+        ))->findAll($criteria);
+
+        $types = array();
+        $modules = array();
+        $categoryId = null;
+        $typeId = null;
+        $moduleId = null;
+
+        if (!$newRecord) {
+            $moduleId = $dependency->gt_module_id;
+
+            $typeData = GtType::model()->findByPk($dependency->module->gt_type_id);
+            $typeId = $typeData->id;
+            $categoryId = $typeData->gt_category_id;
+
+            $criteria = new CDbCriteria();
+            $criteria->addColumnCondition(array('gt_category_id' => $typeData->gt_category_id));
+            $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
+            $criteria->together = true;
+
+            $types = GtType::model()->with(array(
+                'l10n' => array(
+                    'joinType' => 'LEFT JOIN',
+                    'on' => 'language_id = :language_id',
+                    'params' => array('language_id' => $language)
+                )
+            ))->findAll($criteria);
+
+            $criteria = new CDbCriteria();
+            $criteria->addColumnCondition(array('gt_type_id' => $typeData->id));
+            $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
+            $criteria->together = true;
+
+            $modules = GtModule::model()->with(array(
+                'l10n' => array(
+                    'joinType' => 'LEFT JOIN',
+                    'on' => 'language_id = :language_id',
+                    'params' => array('language_id' => $language)
+                )
+            ))->findAll($criteria);
+        }
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Guided Test Templates'), $this->createUrl('gt/index'));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('gt/view', array('id' => $category->id)));
+        $this->breadcrumbs[] = array($type->localizedName, $this->createUrl('gt/viewtype', array('id' => $category->id, 'type' => $type->id)));
+        $this->breadcrumbs[] = array($module->localizedName, $this->createUrl('gt/viewmodule', array('id' => $category->id, 'type' => $type->id, 'module' => $module->id)));
+        $this->breadcrumbs[] = array($check->check->localizedName, $this->createUrl('gt/editcheck', array('id' => $category->id, 'type' => $type->id, 'module' => $module->id, 'check' => $check->id)));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Dependencies'), $this->createUrl('gt/dependencies', array('id' => $category->id, 'type' => $type->id, 'module' => $module->id, 'check' => $check->id)));
+        $this->breadcrumbs[] = $newRecord ? array(Yii::t('app', 'New Dependency'), '') : array($dependency->module->localizedName, '');
+
+		// display the page
+        $this->pageTitle = $newRecord ? Yii::t('app', 'New Dependency') : $dependency->module->localizedName;
+		$this->render('type/module/check/dependency/edit', array(
+            'model' => $model,
+            'category' => $category,
+            'type' => $type,
+            'module' => $module,
+            'check' => $check,
+            'dependency' => $dependency,
+            'categories' => $categories,
+            'types' => $types,
+            'modules' => $modules,
+            'categoryId' => $categoryId,
+            'typeId' => $typeId,
+            'moduleId' => $moduleId,
+        ));
+	}
+
+    /**
+     * Dependency control function.
+     */
+    public function actionControlDependency()
+    {
+        $response = new AjaxResponse();
+
+        try {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate()) {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $id = $model->id;
+            $dependency = GtCheckDependency::model()->findByPk($id);
+
+            if ($dependency === null) {
+                throw new CHttpException(404, Yii::t('app', 'Dependency not found.'));
+            }
+
+            switch ($model->operation) {
+                case 'delete':
+                    $dependency->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
 
     /**
      * Check control function.

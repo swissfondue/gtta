@@ -21,65 +21,76 @@ class ResultTable
     const ATTR_WIDTH = 'width';
 
     /**
-     * @var integer row count
+     * @var array tables.
      */
-    public $rowCount = 0;
-
-    /**
-     * @var integer column count
-     */
-    public $columnCount = 0;
-
-    /**
-     * @var array column details
-     */
-    public $columns = array();
-
-    /**
-     * @var array cell data
-     */
-    public $data = array();
+    private $_tables;
 
     /**
      * Parse
      */
     public function parse($content)
     {
-        $table = new SimpleXMLElement($content);
+        $document = new SimpleXMLElement("<document>" . $content . "</document>");
+        $tableList = $document->{self::TAG_MAIN};
 
-        $columns = $table->{self::TAG_COLUMNS};
-
-        if (!$columns)
+        if (!$tableList) {
             throw new Exception();
+        }
 
-        $columns = $columns->{self::TAG_COLUMN};
-
-        if (!$columns)
-            throw new Exception();
-
-        $this->columnCount = count($columns);
-
-        // TODO: add total width control here
-        foreach ($columns as $column)
-            $this->columns[] = array(
-                'name'  => $column[self::ATTR_NAME],
-                'width' => $column[self::ATTR_WIDTH]
+        foreach ($tableList as $table) {
+            $tableData = array(
+                'columnCount' => 0,
+                'rowCount' => 0,
+                'columns' => array(),
+                'data' => array(),
             );
 
-        $rows = $table->{self::TAG_ROW};
-        $this->rowCount = count($rows);
+            $columns = $table->{self::TAG_COLUMNS};
 
-        foreach ($rows as $row)
-        {
-            $cells = array();
+            if (!$columns) {
+                throw new Exception();
+            }
 
-            $columns = $row->{self::TAG_CELL};
+            $columns = $columns->{self::TAG_COLUMN};
 
-            foreach ($columns as $column)
-                $cells[] = $column;
+            if (!$columns) {
+                throw new Exception();
+            }
 
-            if ($cells)
-                $this->data[] = $cells;
+            $tableData['columnCount'] = count($columns);
+
+            // TODO: add total width control here
+            foreach ($columns as $column) {
+                $tableData['columns'][] = array(
+                    'name'  => $column[self::ATTR_NAME],
+                    'width' => $column[self::ATTR_WIDTH]
+                );
+            }
+
+            $rows = $table->{self::TAG_ROW};
+            $tableData['rowCount'] = count($rows);
+
+            foreach ($rows as $row) {
+                $cells = array();
+                $columns = $row->{self::TAG_CELL};
+
+                foreach ($columns as $column) {
+                    $cells[] = $column;
+                }
+
+                if ($cells) {
+                    $tableData['data'][] = $cells;
+                }
+            }
+
+            $this->_tables[] = $tableData;
         }
+    }
+
+    /**
+     * Get tables
+     */
+    public function getTables() {
+        return $this->_tables;
     }
 }

@@ -842,6 +842,28 @@ class ProjectController extends Controller
                         'joinType' => 'LEFT JOIN',
                         'on' => 'language_id = :language_id',
                         'params' => array('language_id' => $language)
+                    ),
+                    'suggestedTargets' => array(
+                        'alias' => 'st',
+                        'on' => 'st.project_id = :project_id AND st.approved',
+                        'params' => array('project_id' => $project->id),
+                        'with' => array(
+                            'check' => array(
+                                'alias' => 'gt_check',
+                                'with' => array(
+                                    'check' => array(
+                                        'with' => array(
+                                            'l10n' => array(
+                                                'alias' => 'l10n_cc',
+                                                'joinType' => 'LEFT JOIN',
+                                                'on' => 'l10n_cc.language_id = :language_id',
+                                                'params' => array('language_id' => $language)
+                                            ),
+                                        )
+                                    )
+                                )
+                            )
+                        )
                     )
                 )
             )
@@ -930,6 +952,24 @@ class ProjectController extends Controller
                 'joinType' => 'LEFT JOIN',
                 'on' => 'pas.project_id = :project_id',
                 'params' => array('project_id' => $project->id),
+            ),
+            'suggestedTargets' => array(
+                'alias' => 'sgt',
+                'joinType' => 'LEFT JOIN',
+                'on' => 'sgt.project_id = :project_id',
+                'params' => array('project_id' => $project->id),
+                'with' => array(
+                    'module' => array(
+                        'with' => array(
+                            'l10n' => array(
+                                'alias' => 'l10n_sgt_m',
+                                'joinType' => 'LEFT JOIN',
+                                'on' => 'l10n_sgt_m.language_id = :language_id',
+                                'params' => array('language_id' => $language)
+                            ),
+                        )
+                    )
+                )
             ),
         ))->findByAttributes(array(
             'id' => $check->id,
@@ -2280,6 +2320,84 @@ class ProjectController extends Controller
                 case 'delete':
                     $attachment->delete();
                     @unlink(Yii::app()->params['attachments']['path'] . '/' . $attachment->path);
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Control GT target.
+     */
+    public function actionGtControlTarget()
+    {
+        $response = new AjaxResponse();
+
+        try {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate()) {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $target = ProjectGtSuggestedTarget::model()->with('project')->findByPk($model->id);
+
+            if ($target === null) {
+                throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+            }
+
+            if (!$target->project->guided_test || !$target->project->checkPermission()) {
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
+
+            switch ($model->operation) {
+                case 'approve':
+                    $target->approved = true;
+                    $target->save();
+
+                    $module = ProjectGtModule::model()->findByAttributes(array(
+                        'project_id' => $target->project_id,
+                        'gt_module_id' => $target->gt_module_id
+                    ));
+
+                    if (!$module) {
+                        $criteria = new CDbCriteria();
+                        $criteria->select = 'MAX(sort_order) as max_sort_order';
+                        $criteria->addColumnCondition(array('project_id' => $target->project_id));
+
+                        $maxOrder = ProjectGtModule::model()->find($criteria);
+                        $sortOrder = 0;
+
+                        if ($maxOrder && $maxOrder->max_sort_order !== null) {
+                            $sortOrder = $maxOrder->max_sort_order + 1;
+                        }
+
+                        $module = new ProjectGtModule();
+                        $module->project_id = $target->project_id;
+                        $module->gt_module_id = $target->gt_module_id;
+                        $module->sort_order = $sortOrder;
+                        $module->save();
+                    }
+
+                    break;
+
+                case 'delete':
+                    $target->delete();
                     break;
 
                 default:

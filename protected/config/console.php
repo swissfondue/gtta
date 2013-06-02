@@ -14,6 +14,7 @@ return array(
 	'import' => array(
 		'application.models.*',
 		'application.components.*',
+        'application.components.processors.*',
         'ext.yii-mail.YiiMailMessage',
 	),
 

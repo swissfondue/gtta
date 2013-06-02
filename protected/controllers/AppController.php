@@ -384,6 +384,60 @@ class AppController extends Controller
 
                     break;
 
+                case 'gt-type-list':
+                    $category = GtCategory::model()->findByPk($model->id);
+
+                    if (!$category) {
+                        throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+                    }
+
+                    $types = GtType::model()->with(array(
+                        'l10n' => array(
+                            'alias' => 'l10n',
+                            'joinType' => 'LEFT JOIN',
+                            'on' => 'language_id = :language_id',
+                            'params' => array('language_id' => $language)
+                        )
+                    ))->findAllByAttributes(array(
+                        'gt_category_id' => $category->id
+                    ));
+
+                    foreach ($types as $type) {
+                        $objects[] = array(
+                            'id' => $type->id,
+                            'name' => $type->localizedName,
+                        );
+                    }
+
+                    break;
+
+                case 'gt-module-list':
+                    $type = GtType::model()->findByPk($model->id);
+
+                    if (!$type) {
+                        throw new CHttpException(404, Yii::t('app', 'Type not found.'));
+                    }
+
+                    $modules = GtModule::model()->with(array(
+                        'l10n' => array(
+                            'alias' => 'l10n',
+                            'joinType' => 'LEFT JOIN',
+                            'on' => 'language_id = :language_id',
+                            'params' => array('language_id' => $language)
+                        )
+                    ))->findAllByAttributes(array(
+                        'gt_type_id' => $type->id
+                    ));
+
+                    foreach ($modules as $module) {
+                        $objects[] = array(
+                            'id' => $module->id,
+                            'name' => $module->localizedName,
+                        );
+                    }
+
+                    break;
+
                 default:
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;

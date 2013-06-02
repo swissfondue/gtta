@@ -13,6 +13,7 @@ return array(
 	'import' => array(
 		'application.models.*',
 		'application.components.*',
+        'application.components.processors.*',
         'application.extensions.PHPRtfLite.*',
         'application.extensions.PHPRtfLite.PHPRtfLite.*',
 	),
@@ -69,6 +70,7 @@ return array(
                 'project/<id:\d+>/gt/module/<module:\d+>/check/<check:\d+>/attachment/new' => 'project/gtuploadattachment',
                 'project/gt-attachment/<path:[a-z\d]+>/download' => 'project/gtattachment',
                 'project/gt-attachment/control' => 'project/gtcontrolattachment',
+                'project/gt-target/control' => 'project/gtcontroltarget',
 
                 // project details
                 'project/<id:\d+>/details/<page:\d+>'       => 'project/details',
@@ -210,11 +212,15 @@ return array(
                 'gt-template/type/module/control' => 'gt/controlmodule',
 
                 // guided test module checks
-                'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>/<page:\d+>' => 'gt/viewcheck',
-                'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>' => 'gt/viewcheck',
                 'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>/edit' => 'gt/editcheck',
                 'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/new' => 'gt/editcheck',
                 'gt-template/type/module/check/control' => 'gt/controlcheck',
+
+                // guided test check dependencies
+                'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>/dependencies/<page:\d+>' => 'gt/dependencies',
+                'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>/dependencies' => 'gt/dependencies',
+                'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>/dependency/<dependency:\d+>/edit' => 'gt/editdependency',
+                'gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>/dependency/new' => 'gt/editdependency',
 
                 // report templates
                 'report-templates/<page:\d+>'   => 'reporttemplate/index',

@@ -548,8 +548,56 @@
                     </tbody>
                 </table>
             </div>
+
+            <?php if (User::checkRole(User::ROLE_USER)): ?>
+                <div class="suggested-targets <?php if (!$check->suggestedTargets) echo 'hide'; ?>">
+                    <div class="suggested-targets-header <?php if (!$check->suggestedTargets) echo 'hide'; ?>">
+                        <?php echo Yii::t('app', 'Suggested Targets'); ?>
+                    </div>
+
+                    <div class="suggested-targets-body">
+                        <table class="table suggested-target-list">
+                            <tbody>
+                                <?php if ($check->suggestedTargets): ?>
+                                    <?php foreach ($check->suggestedTargets as $target): ?>
+                                        <tr data-id="<?php echo $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/gtcontroltarget'); ?>">
+                                            <td class="target">
+                                                <?php echo CHtml::encode($target->target); ?> /
+                                                <a href="#"><?php echo CHtml::encode($target->module->localizedName); ?></a>
+                                            </td>
+                                            <td class="actions">
+                                                <?php if (!$target->approved): ?>
+                                                    <a href="#approve" id="approve-link" title="<?php echo Yii::t('app', 'Approve'); ?>" onclick="user.gtCheck.approveTarget('<?php echo $target->id; ?>');"><i class="icon icon-ok"></i></a>&nbsp;
+                                                <?php endif; ?>
+
+                                                <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="user.gtCheck.delTarget('<?php echo $target->id; ?>');"><i class="icon icon-remove"></i></a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
         <div class="span4">
+            <?php if ($module->module->suggestedTargets): ?>
+                <div id="suggested-targets-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#suggested-targets');"><i class="icon-chevron-up"></i></div>
+                <h3><a href="#toggle" onclick="system.toggleBlock('#suggested-targets');"><?php echo Yii::t('app', 'Suggested Targets'); ?></a></h3>
+
+                <div class="info-block" id="suggested-targets">
+                    <ul class="suggested-targets">
+                        <?php foreach ($module->module->suggestedTargets as $target): ?>
+                            <li>
+                                <?php echo CHtml::encode($target->target); ?> /
+                                <a href="#"><?php echo CHtml::encode($target->check->check->localizedName); ?></a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
             <div id="project-info-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-info');"><i class="icon-chevron-up"></i></div>
             <h3><a href="#toggle" onclick="system.toggleBlock('#project-info');"><?php echo Yii::t('app', 'Project Information'); ?></a></h3>
 

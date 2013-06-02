@@ -275,7 +275,11 @@ class GtautomationCommand extends ConsoleCommand
         $tablePos = strpos($check->result, '<' . ResultTable::TAG_MAIN);
 
         if ($tablePos !== false) {
-            $check->table_result = substr($check->result, $tablePos);
+            if (!$check->table_result) {
+                $check->table_result = "";
+            }
+
+            $check->table_result .= substr($check->result, $tablePos);
             $check->result = substr($check->result, 0, $tablePos);
         }
     }
@@ -328,14 +332,19 @@ class GtautomationCommand extends ConsoleCommand
      */
     private function _startCheck($projectId, $checkId)
     {
-        $check = ProjectGtCheck::model()->with('check', 'language')->findByAttributes(array(
+        $check = ProjectGtCheck::model()->with(array(
+            'check' => array(
+                'with' => array(
+                    'processor'
+                )
+            ),
+            'language'
+        ))->findByAttributes(array(
             'status' => TargetCheck::STATUS_IN_PROGRESS,
             'pid' => null,
             'project_id' => $projectId,
             'gt_check_id' => $checkId
         ));
-
-        $project = Project::model()->findByPk($projectId);
 
         if (!$check) {
             return;
@@ -419,6 +428,22 @@ class GtautomationCommand extends ConsoleCommand
                 $this->_getTables($check);
                 $this->_getImages($check);
                 $check->save();
+
+                // process dependencies
+                if ($check->result && $check->check->processor) {
+                    $processor = $check->check->processor->name;
+
+                    $classNameParts = explode("-", $processor);
+                    $classNameParts[] = "processor";
+                    $className = "";
+
+                    foreach ($classNameParts as $part) {
+                        $className .= ucfirst($part);
+                    }
+
+                    $processor = new $className();
+                    $processor->process($check);
+                }
             } catch (Exception $e) {
                 $check->automationError($e->getMessage());
             }

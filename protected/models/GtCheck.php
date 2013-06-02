@@ -11,6 +11,7 @@
  * @property string $description
  * @property string $target_description
  * @property integer $max_sort_order
+ * @property integer $gt_dependency_processor_id
  */
 class GtCheck extends CActiveRecord
 {
@@ -44,7 +45,7 @@ class GtCheck extends CActiveRecord
 	{
 		return array(
             array('gt_module_id, check_id, sort_order', 'required'),
-            array('gt_module_id, check_id, sort_order', 'numerical', 'integerOnly' => true),
+            array('gt_module_id, check_id, sort_order, gt_dependency_processor_id', 'numerical', 'integerOnly' => true),
 		);
 	}
 
@@ -61,6 +62,9 @@ class GtCheck extends CActiveRecord
             'projectCheckInputs' => array(self::HAS_MANY, 'ProjectGtCheckInput', 'gt_check_id'),
             'projectCheckSolutions' => array(self::HAS_MANY, 'ProjectGtCheckSolution', 'gt_check_id'),
             'projectCheckAttachments' => array(self::HAS_MANY, 'ProjectGtCheckAttachment', 'gt_check_id'),
+            'processor' => array(self::BELONGS_TO, 'GtDependencyProcessor', 'gt_dependency_processor_id'),
+            'dependencies' => array(self::HAS_MANY, 'GtCheckDependency', 'gt_check_id'),
+            'suggestedTargets' => array(self::HAS_MANY, 'ProjectGtSuggestedTarget', 'gt_check_id'),
 		);
 	}
 

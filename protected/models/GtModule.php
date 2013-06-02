@@ -49,6 +49,7 @@ class GtModule extends CActiveRecord
             'checks' => array(self::HAS_MANY, 'GtCheck', 'gt_module_id'),
             'type' => array(self::BELONGS_TO, 'GtType', 'gt_type_id'),
             'checkCount' => array(self::STAT, 'GtCheck', 'gt_module_id'),
+            'suggestedTargets' => array(self::HAS_MANY, 'ProjectGtSuggestedTarget', 'gt_module_id'),
 		);
 	}
 

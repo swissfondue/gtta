@@ -555,6 +555,49 @@ function Admin()
             _process._control(targetId.toString() + '-' + checkId.toString(), 'stop');
         };
     };
+
+    /**
+     * GT check object.
+     */
+    this.gtCheck = new function () {
+        var _gtCheck = this;
+
+        /**
+         * Load types
+         */
+        this.loadTypes = function (obj, target) {
+            var category = obj.val();
+
+            target.find("option:gt(0)").remove();
+
+            system.control.loadObjects(category, 'gt-type-list', function (data) {
+                if (data && data.objects.length) {
+                    for (var i = 0; i < data.objects.length; i++) {
+                        var item = data.objects[i];
+                        target.append($("<option>").attr("value", item.id).html(item.name));
+                    }
+                }
+            });
+        };
+
+        /**
+         * Load modules
+         */
+        this.loadModules = function (obj, target) {
+            var type = obj.val();
+
+            target.find("option:gt(0)").remove();
+
+            system.control.loadObjects(type, 'gt-module-list', function (data) {
+                if (data && data.objects.length) {
+                    for (var i = 0; i < data.objects.length; i++) {
+                        var item = data.objects[i];
+                        target.append($("<option>").attr("value", item.id).html(item.name));
+                    }
+                }
+            });
+        };
+    };
 }
 
 var admin = new Admin();

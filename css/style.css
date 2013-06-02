@@ -145,7 +145,8 @@ hr {
     text-align:right;
 }
 
-.check-list .actions {
+.check-list .actions,
+.suggested-target-list .actions {
     width:60px;
     text-align:right;
 }
@@ -749,7 +750,7 @@ table.table-result td {
     background-color:#ddd !important;
 }
 
-.gt-check .module-header {
+.gt-check .module-header, .suggested-targets .suggested-targets-header {
     padding:8px;
     font-weight:bold;
 }
@@ -760,4 +761,10 @@ table.table-result td {
 
 .gt-check .check-description {
     padding:8px;
+}
+
+.info-block .suggested-targets {
+    list-style:none;
+    padding:0;
+    margin:0;
 }
