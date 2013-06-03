@@ -1,5 +1,5 @@
 <div class="active-header">
-    <?php if (!$type->isNewRecord): ?>
+    <?php if (!$module->isNewRecord): ?>
         <div class="pull-right">
             <ul class="nav nav-pills">
                 <li><a href="<?php echo $this->createUrl('gt/viewmodule', array('id' => $category->id, 'type' => $type->id, 'module' => $module->id)); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
