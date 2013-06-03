@@ -1902,7 +1902,7 @@ class ProjectController extends Controller
 
             switch ($model->operation) {
                 case 'delete':
-                    if (User::checkRole(User::ROLE_ADMIN)) {
+                    if (!User::checkRole(User::ROLE_ADMIN)) {
                         throw new CHttpException(403, Yii::t('app', 'Access denied.'));
                     }
 
