@@ -14,10 +14,10 @@ class ProjectController extends Controller
             'https',
 			'checkAuth',
             'showDetails + target, attachment, checks',
-            'checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, gtcontrolcheck, gtsavecheck, savecheck, gtupdatecheck, gtuploadattachment, gtcontrolattachment',
+            'checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, gtcontrolcheck, gtsavecheck, savecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment',
             'checkAdmin + edit, users, adduser, controluser',
-            'ajaxOnly + savecheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatecheck, gtcontrolattachment',
-            'postOnly + savecheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatecheck, gtuploadattachment, gtcontrolattachment',
+            'ajaxOnly + savecheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtcontrolattachment',
+            'postOnly + savecheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment',
 		);
 	}
 
@@ -3226,7 +3226,7 @@ class ProjectController extends Controller
     /**
      * Update GT check function.
      */
-    public function actionGtUpdateCheck($id, $module, $check)
+    public function actionGtUpdateChecks($id, $module, $check)
     {
         $response = new AjaxResponse();
 
@@ -3254,7 +3254,35 @@ class ProjectController extends Controller
                 throw new CHttpException(404, Yii::t('app', 'Module not found.'));
             }
 
-            $check = GtCheck::model()->with('check')->findByAttributes(array(
+            $language = Language::model()->findByAttributes(array(
+                'code' => Yii::app()->language
+            ));
+
+            if ($language) {
+                $language = $language->id;
+            }
+
+            $check = GtCheck::model()->with(array(
+                'check',
+                'suggestedTargets' => array(
+                    'alias' => 'sgt',
+                    'joinType' => 'LEFT JOIN',
+                    'on' => 'sgt.project_id = :project_id',
+                    'params' => array('project_id' => $project->id),
+                    'with' => array(
+                        'module' => array(
+                            'with' => array(
+                                'l10n' => array(
+                                    'alias' => 'l10n_sgt_m',
+                                    'joinType' => 'LEFT JOIN',
+                                    'on' => 'l10n_sgt_m.language_id = :language_id',
+                                    'params' => array('language_id' => $language)
+                                ),
+                            )
+                        )
+                    )
+                )
+            ))->findByAttributes(array(
                 'id' => $check,
                 'gt_module_id' => $module->gt_module_id
             ));
@@ -3298,6 +3326,19 @@ class ProjectController extends Controller
                 );
             }
 
+            $targetList = array();
+
+            foreach ($check->suggestedTargets as $target) {
+                $targetList[] = array(
+                    "id" => $target->id,
+                    "host" => $target->target,
+                    "module" => array(
+                        "name" => $target->module->localizedName,
+                        "id" => $target->gt_module_id
+                    )
+                );
+            }
+
             $checkData = array(
                 'id' => $check->id,
                 'result' => $projectCheck->result,
@@ -3305,7 +3346,9 @@ class ProjectController extends Controller
                 'finished' => $projectCheck->status == ProjectGtCheck::STATUS_FINISHED,
                 'time' => $time,
                 'attachmentControlUrl' => $this->createUrl('project/gtcontrolattachment'),
-                'attachments' => $attachmentList
+                'attachments' => $attachmentList,
+                'targetControlUrl' => $this->createUrl('project/gtcontroltarget'),
+                'targets' => $targetList,
             );
 
             $response->addData('check', $checkData);

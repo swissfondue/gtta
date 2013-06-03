@@ -968,7 +968,7 @@ function User()
          * Update status of running checks.
          */
         this.update = function (url) {
-            var i, k, check, headingRow, minutes, seconds, time;
+            var i, k, check, headingRow, minutes, seconds;
 
             if (_gtCheck.runningCheck) {
                 _gtCheck.updateIteration++;
@@ -1021,7 +1021,7 @@ function User()
                         data = data.data;
 
                         if (data.check) {
-                            var check;
+                            var check, table, tbody, tr, attachment, target;
 
                             check = data.check;
 
@@ -1030,15 +1030,11 @@ function User()
 
                             // attachments
                             if (check.attachments.length > 0) {
-                                var table, tbody;
-
                                 table = $('div.check-form .attachment-list');
                                 tbody = table.find("tbody");
                                 tbody.find("tr").remove();
 
                                 for (k = 0; k < check.attachments.length; k++) {
-                                    var tr, attachment;
-
                                     attachment = check.attachments[k];
                                     tr = $("<tr>");
 
@@ -1064,7 +1060,7 @@ function User()
                                                     .attr("title", system.translate("Delete"))
                                                     .html('<i class="icon icon-remove"></i>')
                                                     .click(function () {
-                                                        user.check.delAttachment(attachment.path);
+                                                        user.gtCheck.delAttachment(attachment.path);
                                                     })
                                             )
                                     );
@@ -1073,6 +1069,57 @@ function User()
                                 }
 
                                 table.show();
+                            }
+
+                            // targets
+                            if (check.targets.length > 0) {
+                                table = $('.suggested-target-list');
+                                tbody = table.find("tbody");
+                                tbody.find("tr").remove();
+
+                                for (k = 0; k < check.targets.length; k++) {
+                                    target = check.targets[k];
+                                    tr = $("<tr>");
+
+                                    tr.attr("data-id", target.id);
+                                    tr.attr("data-control-url", check.targetControlUrl);
+
+                                    tr.append(
+                                        $("<td>")
+                                            .addClass("target")
+                                            .append(target.host + " / ")
+                                            .append(
+                                                $("<a>")
+                                                    .attr("href", "#")
+                                                    .html(target.module.name)
+                                            )
+                                    );
+
+                                    tr.append(
+                                        $("<td>")
+                                            .addClass("actions")
+                                            .append(
+                                                $("<a>")
+                                                    .attr("id", "approve-link")
+                                                    .attr("href", "#approve")
+                                                    .attr("title", system.translate("Approve"))
+                                                    .attr("onclick", "user.gtCheck.approveTarget(" + target.id + ");")
+                                                    .html('<i class="icon icon-ok"></i>')
+                                            )
+                                            .append("&nbsp;")
+                                            .append(
+                                                $("<a>")
+                                                    .attr("href", "#del")
+                                                    .attr("title", system.translate("Delete"))
+                                                    .attr("onclick", "user.gtCheck.delTarget(" + target.id + ");")
+                                                    .html('<i class="icon icon-remove"></i>')
+                                            )
+                                    );
+
+                                    tbody.append(tr);
+                                }
+
+                                table.parent().parent().show();
                             }
 
                             if (_gtCheck.runningCheck) {

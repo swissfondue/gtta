@@ -35,7 +35,7 @@
                     </div>
                 <?php endif; ?>
 
-                <div class="check-header">
+                <div class="check-header <?php if ($check->isRunning) echo 'in-progress'; ?>">
                     <table class="check-header">
                         <tbody>
                             <tr>
@@ -551,7 +551,7 @@
 
             <?php if (User::checkRole(User::ROLE_USER)): ?>
                 <div class="suggested-targets <?php if (!$check->suggestedTargets) echo 'hide'; ?>">
-                    <div class="suggested-targets-header <?php if (!$check->suggestedTargets) echo 'hide'; ?>">
+                    <div class="suggested-targets-header">
                         <?php echo Yii::t('app', 'Suggested Targets'); ?>
                     </div>
 
@@ -847,7 +847,7 @@
             <?php endif; ?>
 
             setTimeout(function () {
-                user.gtCheck.update('<?php echo $this->createUrl('project/gtupdatecheck', array('id' => $project->id, 'module' => $module->gt_module_id, 'check' => $check->id)); ?>');
+                user.gtCheck.update('<?php echo $this->createUrl('project/gtupdatechecks', array('id' => $project->id, 'module' => $module->gt_module_id, 'check' => $check->id)); ?>');
             }, 1000);
         });
     </script>
