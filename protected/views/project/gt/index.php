@@ -30,68 +30,68 @@
 <div class="container">
     <div class="row">
         <div class="span8">
-            <div class="gt-category-header-bold">
-                <?php echo Yii::t('app', 'Category'); ?>
-            </div>
+            <?php if (count($categories) > 0): ?>
+                <div class="gt-category-header-bold">
+                    <?php echo Yii::t('app', 'Category'); ?>
+                </div>
 
-            <form class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
-                <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
-                <input type="hidden" value="0" name="ProjectGtForm[tmp]">
+                <form class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
+                    <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
+                    <input type="hidden" value="0" name="ProjectGtForm[tmp]">
 
-                <fieldset>
-                    <?php if (count($categories) > 0): ?>
-                        <?php foreach ($categories as $category): ?>
-                            <?php if (count($category->types)): ?>
-                                <div class="gt-category-header" data-id="<?php echo $category->id; ?>">
-                                    <a href="#toggle" onclick="user.gtSelector.categoryToggle(<?php echo $category->id; ?>);">
-                                        <?php echo CHtml::encode($category->localizedName); ?>
-                                    </a>
-                                </div>
-                                <div class="gt-category-content hide" data-id="<?php echo $category->id; ?>">
-                                    <?php if (count($category->types) > 0): ?>
-                                        <?php foreach ($category->types as $type): ?>
-                                            <div class="gt-category-type-header" data-id="<?php echo $type->id; ?>">
-                                                <a href="#toggle" onclick="user.gtSelector.typeToggle(<?php echo $type->id; ?>);">
-                                                    <?php echo CHtml::encode($type->localizedName); ?>
-                                                </a>
-                                            </div>
-                                            <div class="gt-category-type-content hide" data-id="<?php echo $type->id; ?>">
-                                                <?php if (count($type->modules) > 0): ?>
-                                                    <?php foreach ($type->modules as $module): ?>
-                                                        <div class="gt-category-type-module">
-                                                            <label>
-                                                                <input type="checkbox" name="ProjectGtForm[modules][<?php echo $module->id; ?>]" value="1" <?php if (in_array($module->id, $modules)) echo "checked"; ?>>
-                                                                <?php echo CHtml::encode($module->localizedName); ?>
-                                                            </label>
+                    <fieldset>
+                            <?php foreach ($categories as $category): ?>
+                                <?php if (count($category->types)): ?>
+                                    <div class="gt-category-header" data-id="<?php echo $category->id; ?>">
+                                        <a href="#toggle" onclick="user.gtSelector.categoryToggle(<?php echo $category->id; ?>);">
+                                            <?php echo CHtml::encode($category->localizedName); ?>
+                                        </a>
+                                    </div>
+                                    <div class="gt-category-content hide" data-id="<?php echo $category->id; ?>">
+                                        <?php if (count($category->types) > 0): ?>
+                                            <?php foreach ($category->types as $type): ?>
+                                                <div class="gt-category-type-header" data-id="<?php echo $type->id; ?>">
+                                                    <a href="#toggle" onclick="user.gtSelector.typeToggle(<?php echo $type->id; ?>);">
+                                                        <?php echo CHtml::encode($type->localizedName); ?>
+                                                    </a>
+                                                </div>
+                                                <div class="gt-category-type-content hide" data-id="<?php echo $type->id; ?>">
+                                                    <?php if (count($type->modules) > 0): ?>
+                                                        <?php foreach ($type->modules as $module): ?>
+                                                            <div class="gt-category-type-module">
+                                                                <label>
+                                                                    <input type="checkbox" name="ProjectGtForm[modules][<?php echo $module->id; ?>]" value="1" <?php if (in_array($module->id, $modules)) echo "checked"; ?>>
+                                                                    <?php echo CHtml::encode($module->localizedName); ?>
+                                                                </label>
+                                                            </div>
+                                                        <?php endforeach; ?>
+                                                    <?php else: ?>
+                                                        <div class="gt-category-type-module-header">
+                                                            <?php echo Yii::t('app', 'No modules yet.'); ?>
                                                         </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    <div class="gt-category-type-module-header">
-                                                        <?php echo Yii::t('app', 'No modules yet.'); ?>
-                                                    </div>
-                                                <?php endif; ?>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <div class="gt-category-type-header">
+                                                <?php echo Yii::t('app', 'No types yet.'); ?>
                                             </div>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <div class="gt-category-type-header">
-                                            <?php echo Yii::t('app', 'No types yet.'); ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <?php echo Yii::t('app', 'No categories yet.'); ?>
-                    <?php endif; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
 
-                    <div class="form-actions">
-                        <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>&nbsp;
-                        <?php if ($nextStep): ?>
-                            <a class="btn" href="<?php echo $this->createUrl('project/gt', array('id' => $project->id)); ?>"><?php echo Yii::t('app', 'Start'); ?></a>
-                        <?php endif; ?>
-                    </div>
-                </fieldset>
-            </form>
+                        <div class="form-actions">
+                            <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>&nbsp;
+                            <?php if ($nextStep): ?>
+                                <a class="btn" href="<?php echo $this->createUrl('project/gt', array('id' => $project->id)); ?>"><?php echo Yii::t('app', 'Start'); ?></a>
+                            <?php endif; ?>
+                        </div>
+                    </fieldset>
+                </form>
+            <?php else: ?>
+                <?php echo Yii::t('app', 'No categories yet.'); ?>
+            <?php endif; ?>
         </div>
         <div class="span4">
             <div id="project-info-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-info');"><i class="icon-chevron-up"></i></div>
