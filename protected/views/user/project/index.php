@@ -64,19 +64,7 @@
                     </tbody>
                 </table>
 
-                <?php if ($p->pageCount > 1): ?>
-                    <div class="pagination">
-                        <ul>
-                            <li <?php if (!$p->prevPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('user/projects', array( 'id' => $user->id, 'page' => $p->prevPage ? $p->prevPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Previous Page'); ?>">&laquo;</a></li>
-                            <?php for ($i = 1; $i <= $p->pageCount; $i++): ?>
-                                <li <?php if ($i == $p->page) echo 'class="active"'; ?>>
-                                    <a href="<?php echo $this->createUrl('user/projects', array( 'id' => $user->id, 'page' => $i )); ?>"><?php echo $i; ?></a>
-                                </li>
-                            <?php endfor; ?>
-                            <li <?php if (!$p->nextPage) echo 'class="disabled"'; ?>><a href="<?php echo $this->createUrl('user/projects', array( 'id' => $user->id, 'page' => $p->nextPage ? $p->nextPage : $p->page )); ?>" title="<?php echo Yii::t('app', 'Next Page'); ?>">&raquo;</a></li>
-                        </ul>
-                    </div>
-                <?php endif; ?>
+                <?php echo $this->renderPartial('/layouts/partial/pagination', array('p' => $p, 'url' => 'user/projects', 'params' => array('id' => $user->id))); ?>
             <?php else: ?>
                 <?php echo Yii::t('app', 'No projects yet.'); ?>
             <?php endif; ?>

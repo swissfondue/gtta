@@ -49,7 +49,7 @@
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <?php echo Yii::t('app', 'No running processes.'); ?>
+                <?php echo Yii::t('app', 'No active sessions.'); ?>
             <?php endif; ?>
         </div>
     </div>
