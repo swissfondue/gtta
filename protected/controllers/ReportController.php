@@ -1969,6 +1969,38 @@ class ReportController extends Controller
         {
             foreach ($template->sections as $scn)
             {
+                // check if section has checks in it
+                $checkCount = 0;
+
+                foreach ($data as $target) {
+                    foreach ($target['categories'] as $cat) {
+                        if ($cat['id'] != $scn->check_category_id) {
+                            continue;
+                        }
+
+                        foreach ($cat['controls'] as $ctrl) {
+                            foreach ($ctrl['checks'] as $check) {
+                                if ($check['separate']) {
+                                    $checkCount++;
+                                    break;
+                                }
+                            }
+
+                            if ($checkCount > 0) {
+                                break;
+                            }
+                        }
+                    }
+
+                    if ($checkCount > 0) {
+                        break;
+                    }
+                }
+
+                if ($checkCount == 0) {
+                    continue;
+                }
+
                 $this->toc->writeHyperLink(
                     '#vulns_section_' . $subsectionNumber,
                     '    ' . $sectionNumber . '.' . $subsectionNumber . '. ' . $scn->localizedTitle . "\n",
