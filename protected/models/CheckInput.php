@@ -111,23 +111,22 @@ class CheckInput extends CActiveRecord
         if ($this->type != self::TYPE_FILE)
             throw new Exception('Invalid check input type');
 
-        $check = Check::model()->findByPk($this->check_id);
-        $extPos = strpos($check->script, '.py');
+        $script = CheckScript::model()->findByPk($this->check_script_id);
+        $extPos = strpos($script->name, '.py');
 
         if ($extPos === false)
-            $extPos = strpos($check->script, '.pl');
+            $extPos = strpos($script->name, '.pl');
 
         if ($extPos === false)
             return '';
 
-        $scriptName = substr($check->script, 0, $extPos);
+        $scriptName = substr($script->name, 0, $extPos);
         $fileName = preg_replace('/[^a-zA-Z0-9]/', '_', $this->name) . '.txt';
         $filePath = Yii::app()->params['automation']['scriptsPath'] . '/' . $scriptName . '_files/' . $fileName;
 
         $content = '';
 
-        if (file_exists($filePath) && filesize($filePath))
-        {
+        if (file_exists($filePath) && filesize($filePath)) {
             $fp = fopen($filePath, 'r');
             $content = fread($fp, filesize($filePath));
             fclose($fp);
@@ -145,16 +144,16 @@ class CheckInput extends CActiveRecord
         if ($this->type != self::TYPE_FILE)
             throw new Exception('Invalid check input type');
 
-        $check = Check::model()->findByPk($this->check_id);
-        $extPos = strpos($check->script, '.py');
+        $script = CheckScript::model()->findByPk($this->check_script_id);
+        $extPos = strpos($script->name, '.py');
 
         if ($extPos === false)
-            $extPos = strpos($check->script, '.pl');
+            $extPos = strpos($script->name, '.pl');
 
         if ($extPos === false)
             return;
 
-        $scriptName = substr($check->script, 0, $extPos);
+        $scriptName = substr($script->name, 0, $extPos);
         $fileName = preg_replace('/[^a-zA-Z0-9]/', '_', $this->name) . '.txt';
         $scriptDir = Yii::app()->params['automation']['scriptsPath'] . '/' . $scriptName . '_files';
         $filePath =  $scriptDir . '/' . $fileName;
@@ -175,16 +174,16 @@ class CheckInput extends CActiveRecord
         if ($this->type != self::TYPE_FILE)
             throw new Exception('Invalid check input type');
 
-        $check = Check::model()->findByPk($this->check_id);
-        $extPos = strpos($check->script, '.py');
+        $script = CheckScript::model()->findByPk($this->check_script_id);
+        $extPos = strpos($script->name, '.py');
 
         if ($extPos === false)
-            $extPos = strpos($check->script, '.pl');
+            $extPos = strpos($script->name, '.pl');
 
         if ($extPos === false)
             return;
 
-        $scriptName = substr($check->script, 0, $extPos);
+        $scriptName = substr($script->name, 0, $extPos);
         $fileName = preg_replace('/[^a-zA-Z0-9]/', '_', $this->name) . '.txt';
         $filePath = Yii::app()->params['automation']['scriptsPath'] . '/' . $scriptName . '_files/' . $fileName;
 
