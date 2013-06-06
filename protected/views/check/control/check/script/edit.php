@@ -1,10 +1,12 @@
 <div class="active-header">
-    <div class="pull-right">
-        <ul class="nav nav-pills">
-            <li class="active"><a href="<?php echo $this->createUrl('check/editscript', array('id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id)); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
-            <li><a href="<?php echo $this->createUrl('check/inputs', array('id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id)); ?>"><?php echo Yii::t('app', 'Inputs'); ?></a></li>
-        </ul>
-    </div>
+    <?php if (!$script->isNewRecord): ?>
+        <div class="pull-right">
+            <ul class="nav nav-pills">
+                <li class="active"><a href="<?php echo $this->createUrl('check/editscript', array('id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id)); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+                <li><a href="<?php echo $this->createUrl('check/inputs', array('id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id)); ?>"><?php echo Yii::t('app', 'Inputs'); ?></a></li>
+            </ul>
+        </div>
+    <?php endif; ?>
 
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 </div>
