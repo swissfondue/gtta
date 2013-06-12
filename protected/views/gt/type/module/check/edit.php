@@ -101,7 +101,7 @@
             <label class="control-label" for="GtCheckEditForm_dependencyProcessorId"><?php echo Yii::t('app', 'Dependency Processor'); ?></label>
             <div class="controls">
                 <select class="input-xlarge" id="GtCheckEditForm_dependencyProcessorId" name="GtCheckEditForm[dependencyProcessorId]">
-                    <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
+                    <option value="0"><?php echo Yii::t('app', 'N/A'); ?></option>
                     <?php foreach ($processors as $processor): ?>
                         <option value="<?php echo $processor->id; ?>" <?php if ($model->dependencyProcessorId == $processor->id) echo "selected"; ?>><?php echo CHtml::encode($processor->name); ?></option>
                     <?php endforeach; ?>

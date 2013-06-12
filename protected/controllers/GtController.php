@@ -953,6 +953,10 @@ class GtController extends Controller
             $model->targetDescription = $model->defaultL10n($languages, 'target_description');
 
 			if ($model->validate()) {
+                if (!$model->dependencyProcessorId) {
+                    $model->dependencyProcessorId = null;
+                }
+
                 $testCheck = GtCheck::model()->findByAttributes(array(
                     'gt_module_id' => $module->id,
                     'check_id' => $model->checkId
