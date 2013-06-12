@@ -2876,6 +2876,8 @@ class ProjectController extends Controller
 
                     if ($stepObject) {
                         $step++;
+                    } else {
+                        $step = 0;
                     }
 
                     $response->addData('step', $step);
