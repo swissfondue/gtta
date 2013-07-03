@@ -1358,7 +1358,7 @@ class ReportController extends Controller
 
                         if ($check->targetCheckAttachments)
                             foreach ($check->targetCheckAttachments as $attachment)
-                                if (in_array($attachment->type, array( 'image/jpeg', 'image/png', 'image/gif' )))
+                                if (in_array($attachment->type, array( 'image/jpeg', 'image/png', 'image/gif', 'image/pjpeg' )))
                                     $checkData['images'][] = Yii::app()->params['attachments']['path'] . '/' . $attachment->path;
 
                         if (in_array($check->targetChecks[0]->rating, array( TargetCheck::RATING_HIGH_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_LOW_RISK )))
