@@ -23,26 +23,35 @@
                         <?php foreach ($checks as $check): ?>
                             <tr<?php if (User::checkRole(User::ROLE_USER) && $check->vuln && $check->vuln->overdued && $check->vuln->status == TargetCheckVuln::STATUS_OPEN) echo ' class="delete-row"'; ?>>
                                 <td class="check">
-                                    <?php if ($project->checkAdmin()): ?>
-                                        <a href="<?php echo $this->createUrl('vulntracker/edit', array( 'id' => $project->id, 'target' => $check->target_id, 'check' => $check->check_id )); ?>"><?php echo CHtml::encode($check->check->localizedName); ?></a>
-                                    <?php else: ?>
-                                        <?php echo CHtml::encode($check->check->localizedName); ?>
-                                    <?php endif; ?>
-
-                                    <div class="description">
-                                        <?php if (User::checkRole(User::ROLE_USER)): ?>
-                                            <a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $check->target_id )); ?>"><?php echo CHtml::encode($check->target->host); ?></a>
-
-                                            <span>|</span>
-
-                                            <a href="<?php echo $this->createUrl('project/checks', array('id' => $project->id, 'target' => $check->target_id, 'category' => $check->check->control->check_category_id)); ?>#check-<?php echo $check->check_id; ?>">
-                                                <?php echo CHtml::encode($check->check->control->category->localizedName); ?> /
-                                                <?php echo CHtml::encode($check->check->control->localizedName); ?>
-                                            </a>
+                                    <?php if ($project->guided_test): ?>
+                                        <?php if ($project->checkAdmin()): ?>
+                                            <a href="<?php echo $this->createUrl('vulntracker/edit', array('id' => $project->id, 'target' => '0', 'check' => $check->gt_check_id)); ?>"><?php echo CHtml::encode($check->check->check->localizedName); ?></a>
                                         <?php else: ?>
-                                            <?php echo CHtml::encode($check->target->host); ?>
+                                            <?php echo CHtml::encode($check->check->check->localizedName); ?>
                                         <?php endif; ?>
-                                    </div>
+
+                                        <div class="description">
+                                            <?php if ($check->target): ?>
+                                                <?php echo CHtml::encode($check->target); ?>
+                                            <?php else: ?>
+                                                <?php echo Yii::t('app', 'N/A'); ?>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <?php if ($project->checkAdmin()): ?>
+                                            <a href="<?php echo $this->createUrl('vulntracker/edit', array('id' => $project->id, 'target' => $check->target_id, 'check' => $check->check_id)); ?>"><?php echo CHtml::encode($check->check->localizedName); ?></a>
+                                        <?php else: ?>
+                                            <?php echo CHtml::encode($check->check->localizedName); ?>
+                                        <?php endif; ?>
+
+                                        <div class="description">
+                                            <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                                <a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $check->target_id )); ?>"><?php echo CHtml::encode($check->target->host); ?></a>
+                                            <?php else: ?>
+                                                <?php echo CHtml::encode($check->target->host); ?>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </td>
                                 <?php if (User::checkRole(User::ROLE_USER)): ?>
                                     <td class="assigned">
@@ -61,17 +70,16 @@
                                 <?php if (User::checkRole(User::ROLE_CLIENT)): ?>
                                     <td class="rating">
                                         <?php
-                                            switch ($check->rating)
-                                            {
-                                                case TargetChecK::RATING_LOW_RISK:
+                                            switch ($check->rating) {
+                                                case TargetCheck::RATING_LOW_RISK:
                                                     echo '<span class="label label-low-risk">' . $ratings[TargetCheck::RATING_LOW_RISK] . '</span>';
                                                     break;
 
-                                                case TargetChecK::RATING_MED_RISK:
+                                                case TargetCheck::RATING_MED_RISK:
                                                     echo '<span class="label label-med-risk">' . $ratings[TargetCheck::RATING_MED_RISK] . '</span>';
                                                     break;
 
-                                                case TargetChecK::RATING_HIGH_RISK:
+                                                case TargetCheck::RATING_HIGH_RISK:
                                                     echo '<span class="label label-high-risk">' . $ratings[TargetCheck::RATING_HIGH_RISK] . '</span>';
                                                     break;
                                             }
@@ -82,8 +90,7 @@
                                     <?php
                                         $status = $check->vuln ? $check->vuln->status : TargetCheckVuln::STATUS_OPEN;
 
-                                        switch ($status)
-                                        {
+                                        switch ($status) {
                                             case TargetCheckVuln::STATUS_OPEN:
                                                 echo '<span class="label">' . $statuses[$status] . '</span>';
                                                 break;

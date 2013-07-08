@@ -309,25 +309,19 @@ function System()
             $('#project-list > div > .help-block').hide();
             $('#client-list > div > .help-block').hide();
 
-            if (e.id == 'ProjectSelectForm_clientId')
-            {
+            if (e.id == 'ProjectSelectForm_clientId') {
                 val = $('#ProjectSelectForm_clientId').val();
 
                 $('#project-list').hide();
                 $('.form-actions > button[type="submit"]').prop('disabled', true);
 
-                if (val != 0)
-                {
+                if (val != 0) {
                     _system.control.loadObjects(val, 'project-list', function (data) {
                         $('#ProjectSelectForm_clientId').prop('disabled', false);
                         $('#ProjectSelectForm_projectId > option:not(:first)').remove();
 
                         if (data && data.objects.length) {
                             for (var i = 0; i < data.objects.length; i++) {
-                                if (data.objects[i].guided) {
-                                    continue;
-                                }
-
                                 $('<option>')
                                     .val(data.objects[i].id)
                                     .html(data.objects[i].name)
@@ -341,25 +335,9 @@ function System()
                         }
                     });
                 }
-            }
-            else if (e.id == 'ProjectSelectForm_projectId')
-            {
+            } else if (e.id == 'ProjectSelectForm_projectId') {
                 val = $('#ProjectSelectForm_projectId').val();
-
-                $('.form-actions > button[type="submit"]').prop('disabled', true);
-
-                if (val != 0)
-                {
-                    _system.control.loadObjects(val, 'target-list', function (data) {
-                        if (data && data.objects.length)
-                            $('.form-actions > button[type="submit"]').prop('disabled', false);
-                        else
-                        {
-                            $('#project-list').addClass('error');
-                            $('#project-list > div > .help-block').show();
-                        }
-                    });
-                }
+                $('.form-actions > button[type="submit"]').prop('disabled', val == 0);
             }
         };
     };

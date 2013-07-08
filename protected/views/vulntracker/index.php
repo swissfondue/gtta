@@ -27,7 +27,6 @@
                 <select class="input-xlarge" id="ProjectSelectForm_projectId" name="ProjectSelectForm[projectId]" onchange="system.vuln.projectSelectFormChange(this);">
                     <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                 </select>
-                <p class="help-block hide"><?php echo Yii::t('app', 'This project has no targets.'); ?></p>
             </div>
         </div>
 

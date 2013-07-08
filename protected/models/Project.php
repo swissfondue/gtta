@@ -83,6 +83,7 @@ class Project extends CActiveRecord
             'project_users' => array(self::HAS_MANY, 'ProjectUser', 'project_id'),
             'targets' => array(self::HAS_MANY, 'Target', 'project_id'),
             'modules' => array(self::HAS_MANY, 'ProjectGtModule', 'project_id'),
+            'gtChecks' => array(self::HAS_MANY, 'ProjectGtCheck', 'project_id'),
 		);
 	}
 
