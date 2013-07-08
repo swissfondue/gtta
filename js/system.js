@@ -1071,8 +1071,7 @@ function System()
             $('#client-list > div > .help-block').hide();
             $('.form-actions > button[type="submit"]').prop('disabled', true);
 
-            if (e.id == 'VulnExportReportForm_clientId')
-            {
+            if (e.id == 'VulnExportReportForm_clientId') {
                 val = $('#VulnExportReportForm_clientId').val();
 
                 $('#project-list').hide();
@@ -1084,20 +1083,16 @@ function System()
                 $('input[name="VulnExportReportForm[ratings][]"]').prop('checked', true);
                 $('input[name="VulnExportReportForm[columns][]"]').prop('checked', true);
 
-                if (val != 0)
-                {
+                if (val != 0) {
                     _system.control.loadObjects(val, 'project-list', function (data) {
                         $('#VulnExportReportForm_clientId').prop('disabled', false);
                         $('#VulnExportReportForm_projectId > option:not(:first)').remove();
 
                         if (data && data.objects.length) {
                             for (var i = 0; i < data.objects.length; i++) {
-                                if (data.objects[i].guided) {
-                                    continue;
-                                }
-
                                 $('<option>')
                                     .val(data.objects[i].id)
+                                    .attr("data-guided", data.objects[i].guided ? 1 : 0)
                                     .html(data.objects[i].name)
                                     .appendTo('#VulnExportReportForm_projectId');
                             }
@@ -1109,9 +1104,7 @@ function System()
                         }
                     });
                 }
-            }
-            else if (e.id == 'VulnExportReportForm_projectId')
-            {
+            } else if (e.id == 'VulnExportReportForm_projectId') {
                 val = $('#VulnExportReportForm_projectId').val();
 
                 $('#target-list').hide();
@@ -1122,76 +1115,70 @@ function System()
                 $('input[name="VulnExportReportForm[ratings][]"]').prop('checked', true);
                 $('input[name="VulnExportReportForm[columns][]"]').prop('checked', true);
 
-                if (val != 0)
-                {
-                    _system.control.loadObjects(val, 'target-list', function (data) {
-                        $('#target-list > .controls > .report-target-list > li').remove();
+                if (val != 0) {
+                    var guided = parseInt($('#VulnExportReportForm_projectId option:selected').attr("data-guided"));
 
-                        if (data && data.objects.length)
-                        {
-                            for (var i = 0; i < data.objects.length; i++)
-                            {
-                                var li    = $('<li>'),
-                                    label = $('<label>'),
-                                    input = $('<input>');
+                    if (guided) {
+                        console.log("guided");
+                        $('#report-details').show();
+                        $('.form-actions > button[type="submit"]').prop('disabled', false);
+                    } else {
+                        _system.control.loadObjects(val, 'target-list', function (data) {
+                            $('#target-list > .controls > .report-target-list > li').remove();
 
-                                input
-                                    .attr('type', 'checkbox')
-                                    .prop('checked', true)
-                                    .attr('id', 'VulnExportReportForm_targetIds_' + data.objects[i].id)
-                                    .attr('name', 'VulnExportReportForm[targetIds][]')
-                                    .val(data.objects[i].id)
-                                    .click(function () {
-                                        system.report.vulnExportFormChange(this);
-                                    })
-                                    .appendTo(label);
+                            if (data && data.objects.length) {
+                                for (var i = 0; i < data.objects.length; i++) {
+                                    var li    = $('<li>'),
+                                        label = $('<label>'),
+                                        input = $('<input>');
 
-                                label
-                                    .append(' ' + data.objects[i].host)
-                                    .appendTo(li);
+                                    input
+                                        .attr('type', 'checkbox')
+                                        .prop('checked', true)
+                                        .attr('id', 'VulnExportReportForm_targetIds_' + data.objects[i].id)
+                                        .attr('name', 'VulnExportReportForm[targetIds][]')
+                                        .val(data.objects[i].id)
+                                        .click(function () {
+                                            system.report.vulnExportFormChange(this);
+                                        })
+                                        .appendTo(label);
 
-                                $('#target-list > .controls > .report-target-list').append(li);
+                                    label
+                                        .append(' ' + data.objects[i].host)
+                                        .appendTo(li);
+
+                                    $('#target-list > .controls > .report-target-list').append(li);
+                                }
+
+                                $('#target-list').show();
+                                $('#report-details').show();
+                                $('.form-actions > button[type="submit"]').prop('disabled', false);
+                            } else {
+                                $('#project-list').addClass('error');
+                                $('#project-list > div > .help-block').show();
                             }
-
-                            $('#target-list').show();
-                            $('#report-details').show();
-                            $('.form-actions > button[type="submit"]').prop('disabled', false);
-                        }
-                        else
-                        {
-                            $('#project-list').addClass('error');
-                            $('#project-list > div > .help-block').show();
-                        }
-                    });
+                        });
+                    }
                 }
-            }
-            else if (e.id.match(/^VulnExportReportForm_targetIds_/i))
-            {
+            } else if (e.id.match(/^VulnExportReportForm_targetIds_/i)) {
                 $('#report-details').hide();
 
-                if ($('.report-target-list input:checked').length > 0)
-                {
+                if ($('.report-target-list input:checked').length > 0) {
                     $('#report-details').show();
 
                     if ($('input[name="VulnExportReportForm[ratings][]"]:checked').length > 0 &&
-                        $('input[name="VulnExportReportForm[columns][]"]:checked').length > 0)
-                    {
+                        $('input[name="VulnExportReportForm[columns][]"]:checked').length > 0) {
                         $('.form-actions > button[type="submit"]').prop('disabled', false);
                         $('#report-details').show();
                     }
-                }
-                else
-                {
+                } else {
                     // clear columns
                     $('input[name="VulnExportReportForm[header]"]').prop('checked', true);
                     $('input[name="VulnExportReportForm[ratings][]"]').prop('checked', true);
                     $('input[name="VulnExportReportForm[columns][]"]').prop('checked', true);
                 }
-            }
-            else
-            {
-                if ($('input[name="VulnExportReportForm[ratings][]"]:checked').length > 0 &&
-                    $('input[name="VulnExportReportForm[columns][]"]:checked').length > 0)
+            } else if ($('input[name="VulnExportReportForm[ratings][]"]:checked').length > 0 &&
+                $('input[name="VulnExportReportForm[columns][]"]:checked').length > 0) {
                     $('.form-actions > button[type="submit"]').prop('disabled', false);
             }
         };

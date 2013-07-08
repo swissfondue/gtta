@@ -3493,31 +3493,12 @@ class ReportController extends Controller
     }
 
     /**
-     * Generate vulnerabilities report.
+     * Vulnerability export
+     * @param $project
+     * @param $language
+     * @param $model
      */
-    private function _generateVulnExportReport($model)
-    {
-        $project = Project::model()->findByPk($model->projectId);
-
-        if (!$project)
-        {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
-            return;
-        }
-
-        if ($project->guided_test || !$project->checkPermission())
-        {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
-            return;
-        }
-
-        $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
-        ));
-
-        if ($language)
-            $language = $language->id;
-
+    private function _projectVulnExport($project, $language, $model) {
         $criteria = new CDbCriteria();
         $criteria->addColumnCondition(array(
             'project_id' => $project->id
@@ -3527,63 +3508,27 @@ class ReportController extends Controller
 
         $targets = Target::model()->findAll($criteria);
 
-        if (!$targets)
-        {
+        if (!$targets) {
             Yii::app()->user->setFlash('error', Yii::t('app', 'Targets not found.'));
-            return;
+            return array();
         }
 
-        $data   = array();
-        $header = array();
-
-        if ($model->header)
-        {
-            if (in_array(TargetCheck::COLUMN_TARGET, $model->columns))
-                $header[TargetCheck::COLUMN_TARGET] = Yii::t('app', 'Target');
-
-            if (in_array(TargetCheck::COLUMN_NAME, $model->columns))
-                $header[TargetCheck::COLUMN_NAME] = Yii::t('app', 'Name');
-
-            if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns))
-                $header[TargetCheck::COLUMN_REFERENCE] = Yii::t('app', 'Reference');
-
-            if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns))
-                $header[TargetCheck::COLUMN_BACKGROUND_INFO] = Yii::t('app', 'Background Info');
-
-            if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns))
-                $header[TargetCheck::COLUMN_QUESTION] = Yii::t('app', 'Question');
-
-            if (in_array(TargetCheck::COLUMN_RESULT, $model->columns))
-                $header[TargetCheck::COLUMN_RESULT] = Yii::t('app', 'Result');
-
-            if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns))
-                $header[TargetCheck::COLUMN_SOLUTION] = Yii::t('app', 'Solution');
-
-            if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $model->columns))
-                $header[TargetCheck::COLUMN_ASSIGNED_USER] = Yii::t('app', 'Assigned');
-
-            if (in_array(TargetCheck::COLUMN_RATING, $model->columns))
-                $header[TargetCheck::COLUMN_RATING] = Yii::t('app', 'Rating');
-
-            if (in_array(TargetCheck::COLUMN_STATUS, $model->columns))
-                $header[TargetCheck::COLUMN_STATUS] = Yii::t('app', 'Status');
-        }
+        $data = array();
 
         $ratings = array(
-            TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
-            TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
-            TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
-            TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
+            TargetCheck::RATING_HIDDEN => Yii::t('app', 'Hidden'),
+            TargetCheck::RATING_INFO => Yii::t('app', 'Info'),
+            TargetCheck::RATING_LOW_RISK => Yii::t('app', 'Low Risk'),
+            TargetCheck::RATING_MED_RISK => Yii::t('app', 'Med Risk'),
             TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
         );
 
         $statuses = array(
-            TargetCheckVuln::STATUS_OPEN     => Yii::t('app', 'Open'),
+            TargetCheckVuln::STATUS_OPEN => Yii::t('app', 'Open'),
             TargetCheckVuln::STATUS_RESOLVED => Yii::t('app', 'Resolved'),
         );
 
-        foreach ($targets as $target)
-        {
+        foreach ($targets as $target) {
             // get all references (they are the same across all target categories)
             $referenceIds = array();
 
@@ -3591,11 +3536,13 @@ class ReportController extends Controller
                 'target_id' => $target->id
             ));
 
-            if (!$references)
+            if (!$references) {
                 continue;
+            }
 
-            foreach ($references as $reference)
+            foreach ($references as $reference) {
                 $referenceIds[] = $reference->reference_id;
+            }
 
             // get all categories
             $categories = TargetCheckCategory::model()->with('category')->findAllByAttributes(
@@ -3603,22 +3550,22 @@ class ReportController extends Controller
                 array( 'order'     => 'category.name ASC' )
             );
 
-            if (!$categories)
+            if (!$categories) {
                 continue;
+            }
 
-            foreach ($categories as $category)
-            {
+            foreach ($categories as $category) {
                 // get all controls
                 $controls = CheckControl::model()->findAllByAttributes(
                     array( 'check_category_id' => $category->check_category_id ),
                     array( 'order'             => 't.sort_order ASC' )
                 );
 
-                if (!$controls)
+                if (!$controls) {
                     continue;
+                }
 
-                foreach ($controls as $control)
-                {
+                foreach ($controls as $control) {
                     $criteria = new CDbCriteria();
                     $criteria->order = 't.sort_order ASC';
                     $criteria->addInCondition('t.reference_id', $referenceIds);
@@ -3627,8 +3574,9 @@ class ReportController extends Controller
                     ));
                     $criteria->together = true;
 
-                    if (!$category->advanced)
+                    if (!$category->advanced) {
                         $criteria->addCondition('t.advanced = FALSE');
+                    }
 
                     $checks = Check::model()->with(array(
                         'l10n' => array(
@@ -3673,70 +3621,291 @@ class ReportController extends Controller
                         '_reference'
                     ))->findAll($criteria);
 
-                    if (!$checks)
+                    if (!$checks) {
                         continue;
+                    }
 
-                    foreach ($checks as $check)
-                    {
-                        if (!in_array($check->targetChecks[0]->rating, $model->ratings))
+                    foreach ($checks as $check) {
+                        if (!in_array($check->targetChecks[0]->rating, $model->ratings)) {
                             continue;
+                        }
 
                         $row = array();
 
-                        if (in_array(TargetCheck::COLUMN_TARGET, $model->columns))
+                        if (in_array(TargetCheck::COLUMN_TARGET, $model->columns)) {
                             $row[TargetCheck::COLUMN_TARGET] = $target->host;
+                        }
 
-                        if (in_array(TargetCheck::COLUMN_NAME, $model->columns))
+                        if (in_array(TargetCheck::COLUMN_NAME, $model->columns)) {
                             $row[TargetCheck::COLUMN_NAME] = $check->localizedName;
+                        }
 
-                        if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns))
-                            $row[TargetCheck::COLUMN_REFERENCE] = $check->_reference->name . ( $check->reference_code ? '-' . $check->reference_code : '' );
+                        if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns)) {
+                            $row[TargetCheck::COLUMN_REFERENCE] = $check->_reference->name .
+                                ($check->reference_code ? '-' . $check->reference_code : '');
+                        }
 
-                        if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns))
+                        if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
                             $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($check->localizedBackgroundInfo);
+                        }
 
-                        if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns))
+                        if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns)) {
                             $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareVulnExportText($check->localizedQuestion);
+                        }
 
-                        if (in_array(TargetCheck::COLUMN_RESULT, $model->columns))
+                        if (in_array(TargetCheck::COLUMN_RESULT, $model->columns)) {
                             $row[TargetCheck::COLUMN_RESULT] = $check->targetChecks[0]->result;
+                        }
 
-                        if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns))
-                        {
+                        if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns)) {
                             $solutions = array();
 
-                            foreach ($check->targetCheckSolutions as $solution)
+                            foreach ($check->targetCheckSolutions as $solution) {
                                 $solutions[] = $this->_prepareVulnExportText($solution->solution->localizedSolution);
+                            }
 
                             $row[TargetCheck::COLUMN_SOLUTION] = implode("\n", $solutions);
                         }
 
-                        if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $model->columns))
-                        {
+                        if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $model->columns)) {
                             $user = $check->targetChecks[0] && $check->targetChecks[0]->vuln && $check->targetChecks[0]->vuln->user ? $check->targetChecks[0]->vuln->user : null;
 
-                            if ($user)
+                            if ($user) {
                                 $row[TargetCheck::COLUMN_ASSIGNED_USER] = $user->name ? $user->name : $user->email;
-                            else
+                            } else {
                                 $row[TargetCheck::COLUMN_ASSIGNED_USER] = '';
+                            }
                         }
 
-                        if (in_array(TargetCheck::COLUMN_RATING, $model->columns))
+                        if (in_array(TargetCheck::COLUMN_RATING, $model->columns)) {
                             $row[TargetCheck::COLUMN_RATING] = $ratings[$check->targetChecks[0]->rating];
+                        }
 
-                        if (in_array(TargetCheck::COLUMN_STATUS, $model->columns))
-                        {
+                        if (in_array(TargetCheck::COLUMN_STATUS, $model->columns)) {
                             $vuln = $check->targetChecks[0] && $check->targetChecks[0]->vuln ? $check->targetChecks[0]->vuln : null;
-
-                            if ($vuln)
-                                $row[TargetCheck::COLUMN_STATUS] = $statuses[$vuln->status];
-                            else
-                                $row[TargetCheck::COLUMN_STATUS] = $statuses[TargetCheckVuln::STATUS_OPEN];
+                            $row[TargetCheck::COLUMN_STATUS] = $statuses[$vuln ? $vuln->status : TargetCheckVuln::STATUS_OPEN];
                         }
 
                         $data[] = $row;
                     }
                 }
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Vulnerability export for GT projects
+     * @param $project
+     * @param $language
+     * @param $model
+     */
+    private function _gtProjectVulnExport($project, $language, $model) {
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(array(
+            't.project_id' => $project->id
+        ));
+        $criteria->order = 'target ASC';
+
+        $gtChecks = ProjectGtCheck::model()->with(array(
+            'check' => array(
+                'with' => array(
+                    'check' => array(
+                        'alias' => 'innerCheck',
+                        'with' => array(
+                            'l10n' => array(
+                                'joinType' => 'LEFT JOIN',
+                                'on' => 'l10n.language_id = :language_id',
+                                'params' => array('language_id' => $language)
+                            ),
+                            '_reference',
+                        ),
+                    ),
+                ),
+            ),
+            'solutions' => array(
+                'joinType' => 'LEFT JOIN',
+                'with' => array(
+                    'solution' => array(
+                        'joinType' => 'LEFT JOIN',
+                        'with' => array(
+                            'l10n' => array(
+                                'alias' => 's_l10n',
+                                'on' => 's_l10n.language_id = :language_id',
+                                'params' => array('language_id' => $language)
+                            )
+                        )
+                    )
+                )
+            ),
+            'vuln' => array(
+                'with' => 'user'
+            )
+        ))->findAll($criteria);
+
+        if (!$gtChecks) {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Checks not found.'));
+            return array();
+        }
+
+        $data = array();
+
+        $ratings = array(
+            TargetCheck::RATING_HIDDEN => Yii::t('app', 'Hidden'),
+            TargetCheck::RATING_INFO => Yii::t('app', 'Info'),
+            TargetCheck::RATING_LOW_RISK => Yii::t('app', 'Low Risk'),
+            TargetCheck::RATING_MED_RISK => Yii::t('app', 'Med Risk'),
+            TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
+        );
+
+        $statuses = array(
+            TargetCheckVuln::STATUS_OPEN => Yii::t('app', 'Open'),
+            TargetCheckVuln::STATUS_RESOLVED => Yii::t('app', 'Resolved'),
+        );
+
+        foreach ($gtChecks as $check) {
+            if (!in_array($check->rating, $model->ratings)) {
+                continue;
+            }
+
+            $row = array();
+            $innerCheck = $check->check->check;
+
+            if (in_array(TargetCheck::COLUMN_TARGET, $model->columns)) {
+                $row[TargetCheck::COLUMN_TARGET] = $check->target;
+            }
+
+            if (in_array(TargetCheck::COLUMN_NAME, $model->columns)) {
+                $row[TargetCheck::COLUMN_NAME] = $innerCheck->localizedName;
+            }
+
+            if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns)) {
+                $row[TargetCheck::COLUMN_REFERENCE] = $innerCheck->_reference->name .
+                    ($innerCheck->reference_code ? '-' . $innerCheck->reference_code : '');
+            }
+
+            if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
+                $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($innerCheck->localizedBackgroundInfo);
+            }
+
+            if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns)) {
+                $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareVulnExportText($innerCheck->localizedQuestion);
+            }
+
+            if (in_array(TargetCheck::COLUMN_RESULT, $model->columns)) {
+                $row[TargetCheck::COLUMN_RESULT] = $check->result;
+            }
+
+            if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns)) {
+                $solutions = array();
+
+                foreach ($check->solutions as $solution) {
+                    $solutions[] = $this->_prepareVulnExportText($solution->solution->localizedSolution);
+                }
+
+                $row[TargetCheck::COLUMN_SOLUTION] = implode("\n", $solutions);
+            }
+
+            if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $model->columns)) {
+                $user = $check->vuln && $check->vuln->user ? $check->vuln->user : null;
+
+                if ($user) {
+                    $row[TargetCheck::COLUMN_ASSIGNED_USER] = $user->name ? $user->name : $user->email;
+                } else {
+                    $row[TargetCheck::COLUMN_ASSIGNED_USER] = '';
+                }
+            }
+
+            if (in_array(TargetCheck::COLUMN_RATING, $model->columns)) {
+                $row[TargetCheck::COLUMN_RATING] = $ratings[$check->rating];
+            }
+
+            if (in_array(TargetCheck::COLUMN_STATUS, $model->columns)) {
+                $row[TargetCheck::COLUMN_STATUS] = $statuses[$check->vuln ? $check->vuln->status : TargetCheckVuln::STATUS_OPEN];
+            }
+
+            $data[] = $row;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Generate vulnerabilities report.
+     */
+    private function _generateVulnExportReport($model) {
+        $project = Project::model()->findByPk($model->projectId);
+
+        if (!$project) {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
+            return;
+        }
+
+        if (!$project->checkPermission()) {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
+            return;
+        }
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        if ($project->guided_test) {
+            $data = $this->_gtProjectVulnExport($project, $language, $model);
+        } else {
+            $data = $this->_projectVulnExport($project, $language, $model);
+        }
+
+        if (!$data) {
+            return;
+        }
+
+        $header = array();
+
+        if ($model->header) {
+            if (in_array(TargetCheck::COLUMN_TARGET, $model->columns)) {
+                $header[TargetCheck::COLUMN_TARGET] = Yii::t('app', 'Target');
+            }
+
+            if (in_array(TargetCheck::COLUMN_NAME, $model->columns)) {
+                $header[TargetCheck::COLUMN_NAME] = Yii::t('app', 'Name');
+            }
+
+            if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns)) {
+                $header[TargetCheck::COLUMN_REFERENCE] = Yii::t('app', 'Reference');
+            }
+
+            if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
+                $header[TargetCheck::COLUMN_BACKGROUND_INFO] = Yii::t('app', 'Background Info');
+            }
+
+            if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns)) {
+                $header[TargetCheck::COLUMN_QUESTION] = Yii::t('app', 'Question');
+            }
+
+            if (in_array(TargetCheck::COLUMN_RESULT, $model->columns)) {
+                $header[TargetCheck::COLUMN_RESULT] = Yii::t('app', 'Result');
+            }
+
+            if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns)) {
+                $header[TargetCheck::COLUMN_SOLUTION] = Yii::t('app', 'Solution');
+            }
+
+            if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $model->columns)) {
+                $header[TargetCheck::COLUMN_ASSIGNED_USER] = Yii::t('app', 'Assigned');
+            }
+
+            if (in_array(TargetCheck::COLUMN_RATING, $model->columns)) {
+                $header[TargetCheck::COLUMN_RATING] = Yii::t('app', 'Rating');
+            }
+
+            if (in_array(TargetCheck::COLUMN_STATUS, $model->columns)) {
+                $header[TargetCheck::COLUMN_STATUS] = Yii::t('app', 'Status');
             }
         }
 
@@ -3764,17 +3933,14 @@ class ReportController extends Controller
         $row  = 1;
         $cols = range('A', 'Z');
 
-        if ($header)
-        {
+        if ($header) {
             $col = 0;
 
-            foreach ($header as $type => $value)
-            {
+            foreach ($header as $type => $value) {
                 $sheet->getCell($cols[$col] . $row)->setValue($value);
                 $width = 0;
 
-                switch ($type)
-                {
+                switch ($type) {
                     case TargetCheck::COLUMN_BACKGROUND_INFO:
                     case TargetCheck::COLUMN_QUESTION:
                     case TargetCheck::COLUMN_RESULT:
@@ -3806,7 +3972,7 @@ class ReportController extends Controller
         }
 
         $lastCol = $cols[count($header) - 1];
-        $range   = 'A1:' . $lastCol . '1';
+        $range = 'A1:' . $lastCol . '1';
 
         $sheet
             ->getStyle($range)
@@ -3827,12 +3993,10 @@ class ReportController extends Controller
 
         $sheet->getRowDimension(1)->setRowHeight(40);
 
-        foreach ($data as $dataRow)
-        {
+        foreach ($data as $dataRow) {
             $col = 0;
 
-            foreach ($dataRow as $type => $value)
-            {
+            foreach ($dataRow as $type => $value) {
                 $sheet->getCell($cols[$col] . $row)->setValue("\n" . $value . "\n");
 
                 $sheet
@@ -3897,35 +4061,35 @@ class ReportController extends Controller
     /**
      * Show vulnerability export report form.
      */
-    public function actionVulnExport()
-    {
+    public function actionVulnExport() {
         $model = new VulnExportReportForm();
 
-        if (isset($_POST['VulnExportReportForm']))
-        {
+        if (isset($_POST['VulnExportReportForm'])) {
             $model->attributes = $_POST['VulnExportReportForm'];
             $model->header = isset($_POST['VulnExportReportForm']['header']);
 
-            if ($model->validate())
+            if ($model->validate()) {
                 $this->_generateVulnExportReport($model);
-            else
+            } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+            }
         }
 
         $criteria = new CDbCriteria();
         $criteria->order = 't.name ASC';
 
-        if (!User::checkRole(User::ROLE_ADMIN))
-        {
+        if (!User::checkRole(User::ROLE_ADMIN)) {
             $projects = ProjectUser::model()->with('project')->findAllByAttributes(array(
                 'user_id' => Yii::app()->user->id
             ));
 
             $clientIds = array();
 
-            foreach ($projects as $project)
-                if (!in_array($project->project->client_id, $clientIds))
+            foreach ($projects as $project) {
+                if (!in_array($project->project->client_id, $clientIds)) {
                     $clientIds[] = $project->project->client_id;
+                }
+            }
 
             $criteria->addInCondition('id', $clientIds);
         }
