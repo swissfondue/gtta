@@ -620,27 +620,22 @@ function System()
             $('#project-list > div > .help-block').hide();
             $('#client-list > div > .help-block').hide();
 
-            if (e.id == 'FulfillmentDegreeForm_clientId')
-            {
+            if (e.id == 'FulfillmentDegreeForm_clientId') {
                 val = $('#FulfillmentDegreeForm_clientId').val();
 
                 $('#project-list').hide();
                 $('#target-list').hide();
                 $('.form-actions > button[type="submit"]').prop('disabled', true);
 
-                if (val != 0)
-                {
+                if (val != 0) {
                     _system.control.loadObjects(val, 'project-list', function (data) {
                         $('#FulfillmentDegreeForm_projectId > option:not(:first)').remove();
 
                         if (data && data.objects.length) {
                             for (var i = 0; i < data.objects.length; i++) {
-                                if (data.objects[i].guided) {
-                                    continue;
-                                }
-
                                 $('<option>')
                                     .val(data.objects[i].id)
+                                    .attr("data-guided", data.objects[i].guided ? 1 : 0)
                                     .html(data.objects[i].name)
                                     .appendTo('#FulfillmentDegreeForm_projectId');
                             }
@@ -652,61 +647,59 @@ function System()
                         }
                     });
                 }
-            }
-            else if (e.id == 'FulfillmentDegreeForm_projectId')
-            {
+            } else if (e.id == 'FulfillmentDegreeForm_projectId') {
                 val = $('#FulfillmentDegreeForm_projectId').val();
 
                 $('#target-list').hide();
                 $('.form-actions > button[type="submit"]').prop('disabled', true);
 
-                if (val != 0)
-                {
-                    _system.control.loadObjects(val, 'target-list', function (data) {
-                        $('#target-list > .controls > .report-target-list > li').remove();
+                if (val != 0) {
+                    var guided = parseInt($('#FulfillmentDegreeForm_projectId option:selected').attr("data-guided"));
 
-                        if (data && data.objects.length)
-                        {
-                            for (var i = 0; i < data.objects.length; i++)
-                            {
-                                var li    = $('<li>'),
-                                    label = $('<label>'),
-                                    input = $('<input>');
+                    if (guided) {
+                        $('.form-actions > button[type="submit"]').prop('disabled', false);
+                    } else {
+                        _system.control.loadObjects(val, 'target-list', function (data) {
+                            $('#target-list > .controls > .report-target-list > li').remove();
 
-                                input
-                                    .attr('type', 'checkbox')
-                                    .prop('checked', true)
-                                    .attr('name', 'FulfillmentDegreeForm[targetIds][]')
-                                    .val(data.objects[i].id)
-                                    .click(function () {
-                                        user.report.fulfillmentFormChange(this);
-                                    })
-                                    .appendTo(label);
+                            if (data && data.objects.length) {
+                                for (var i = 0; i < data.objects.length; i++) {
+                                    var li    = $('<li>'),
+                                        label = $('<label>'),
+                                        input = $('<input>');
 
-                                label
-                                    .append(' ' + data.objects[i].host)
-                                    .appendTo(li);
+                                    input
+                                        .attr('type', 'checkbox')
+                                        .prop('checked', true)
+                                        .attr('name', 'FulfillmentDegreeForm[targetIds][]')
+                                        .val(data.objects[i].id)
+                                        .click(function () {
+                                            user.report.fulfillmentFormChange(this);
+                                        })
+                                        .appendTo(label);
 
-                                $('#target-list > .controls > .report-target-list').append(li);
+                                    label
+                                        .append(' ' + data.objects[i].host)
+                                        .appendTo(li);
+
+                                    $('#target-list > .controls > .report-target-list').append(li);
+                                }
+
+                                $('#target-list').show();
+                                $('.form-actions > button[type="submit"]').prop('disabled', false);
+                            } else {
+                                $('#project-list').addClass('error');
+                                $('#project-list > div > .help-block').show();
                             }
-
-                            $('#target-list').show();
-                            $('.form-actions > button[type="submit"]').prop('disabled', false);
-                        }
-                        else
-                        {
-                            $('#project-list').addClass('error');
-                            $('#project-list > div > .help-block').show();
-                        }
-                    });
+                        });
+                    }
                 }
-            }
-            else
-            {
-                if ($('.report-target-list input:checked').length == 0)
+            } else {
+                if ($('.report-target-list input:checked').length == 0) {
                     $('.form-actions > button[type="submit"]').prop('disabled', true);
-                else
+                } else {
                     $('.form-actions > button[type="submit"]').prop('disabled', false);
+                }
             }
         };
 
@@ -1119,7 +1112,6 @@ function System()
                     var guided = parseInt($('#VulnExportReportForm_projectId option:selected').attr("data-guided"));
 
                     if (guided) {
-                        console.log("guided");
                         $('#report-details').show();
                         $('.form-actions > button[type="submit"]').prop('disabled', false);
                     } else {

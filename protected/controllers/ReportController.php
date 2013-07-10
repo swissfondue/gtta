@@ -2536,73 +2536,32 @@ class ReportController extends Controller
     /**
      * Sort controls.
      */
-    public static function sortControls($a, $b)
-    {
+    public static function sortControls($a, $b) {
         return $a['degree'] > $b['degree'];
     }
 
     /**
-     * Generate a Degree of Fulfillment report
+     * Fulfillment report
+     * @param $fullReport
+     * @param $findWeakest
+     * @param $model
+     * @param $language
+     * @return array
      */
-    private function _generateFulfillmentDegreeReport($model = null, $findWeakest = false, &$section = null, $sectionNumber = null)
-    {
-        $fullReport = true;
+    private function _fulfillmentReport($fullReport, $findWeakest, $model, $language) {
+        $data = array();
 
-        if (!$section)
-            $fullReport = false;
-
-        if (!$fullReport && !$findWeakest)
-        {
-            $clientId  = $model->clientId;
-            $projectId = $model->projectId;
-            $targetIds = $model->targetIds;
-
-            $project = Project::model()->findByAttributes(array(
-                'client_id' => $clientId,
-                'id'        => $projectId
-            ));
-
-            if ($project === null)
-            {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
-                return;
-            }
-
-            if ($project->guided_test || !$project->checkPermission())
-            {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
-                return;
-            }
-
-            if (!$targetIds || !count($targetIds))
-            {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
-                return;
-            }
-
+        if (!$fullReport && !$findWeakest) {
             $criteria = new CDbCriteria();
-            $criteria->addInCondition('id', $targetIds);
-            $criteria->addColumnCondition(array( 'project_id' => $project->id ));
+            $criteria->addInCondition('id', $model->targetIds);
+            $criteria->addColumnCondition(array('project_id' => $model->projectId));
             $criteria->order = 't.host ASC';
             $targets = Target::model()->findAll($criteria);
-        }
-        else
-        {
-            $project = $this->project['project'];
+        } else {
             $targets = $this->project['targets'];
         }
 
-        $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
-        ));
-
-        if ($language)
-            $language = $language->id;
-
-        $data = array();
-
-        foreach ($targets as $target)
-        {
+        foreach ($targets as $target) {
             $targetData = array(
                 'id'          => $target->id,
                 'host'        => $target->host,
@@ -2617,8 +2576,9 @@ class ReportController extends Controller
                 'target_id' => $target->id
             ));
 
-            foreach ($references as $reference)
+            foreach ($references as $reference) {
                 $referenceIds[] = $reference->reference_id;
+            }
 
             // get all categories
             $categories = TargetCheckCategory::model()->with(array(
@@ -2636,8 +2596,7 @@ class ReportController extends Controller
                 array( 'order'     => 'COALESCE(l10n.name, category.name) ASC' )
             );
 
-            foreach ($categories as $category)
-            {
+            foreach ($categories as $category) {
                 // get all controls
                 $controls = CheckControl::model()->with(array(
                     'l10n' => array(
@@ -2650,11 +2609,11 @@ class ReportController extends Controller
                     array( 'order'             => 't.sort_order ASC' )
                 );
 
-                if (!$controls)
+                if (!$controls) {
                     continue;
+                }
 
-                foreach ($controls as $control)
-                {
+                foreach ($controls as $control) {
                     $controlData = array(
                         'name'   => $category->category->localizedName . ' / ' . $control->localizedName,
                         'degree' => 0.0,
@@ -2667,8 +2626,9 @@ class ReportController extends Controller
                         't.check_control_id' => $control->id
                     ));
 
-                    if (!$category->advanced)
+                    if (!$category->advanced) {
                         $criteria->addCondition('t.advanced = FALSE');
+                    }
 
                     $checks = Check::model()->with(array(
                         'targetChecks' => array(
@@ -2682,13 +2642,12 @@ class ReportController extends Controller
                         ),
                     ))->findAll($criteria);
 
-                    if (!$checks)
+                    if (!$checks) {
                         continue;
+                    }
 
-                    foreach ($checks as $check)
-                    {
-                        switch ($check->targetChecks[0]->rating)
-                        {
+                    foreach ($checks as $check) {
+                        switch ($check->targetChecks[0]->rating) {
                             case TargetCheck::RATING_HIDDEN:
                             case TargetCheck::RATING_INFO:
                                 $controlData['degree'] += 0;
@@ -2708,7 +2667,7 @@ class ReportController extends Controller
                         }
                     }
 
-                    $maxDegree             = count($checks) * 3;
+                    $maxDegree = count($checks) * 3;
                     $controlData['degree'] = round(100 - $controlData['degree'] / $maxDegree * 100);
 
                     $targetData['controls'][] = $controlData;
@@ -2718,8 +2677,186 @@ class ReportController extends Controller
             $data[] = $targetData;
         }
 
-        if (!$fullReport && !$findWeakest)
-        {
+        return $data;
+    }
+
+    /**
+     * Fulfillment report for GT
+     * @param $fullReport
+     * @param $findWeakest
+     * @param $model
+     * @param $language
+     * @return array
+     */
+    private function _gtFulfillmentReport($fullReport, $findWeakest, $model, $language) {
+        $data = array();
+
+        if (!$fullReport && !$findWeakest) {
+            $targets = array();
+
+            $criteria = new CDbCriteria();
+            $criteria->addColumnCondition(array('project_id' => $model->projectId));
+            $criteria->order = 'target ASC';
+
+            $checks = ProjectGtCheck::model()->findAll($criteria);
+
+            foreach ($checks as $check) {
+                if (!$check->target) {
+                    continue;
+                }
+
+                if (!in_array($check->target, $targets)) {
+                    $targets[] = $check->target;
+                }
+            }
+        } else {
+            $targets = $this->project['targets'];
+        }
+
+
+        foreach ($targets as $target) {
+            $targetData = array(
+                'host' => $target,
+                'description' => "",
+                'controls' => array(),
+            );
+
+            // get all checks
+            $criteria = new CDBCriteria();
+            $criteria->addColumnCondition(array(
+                "project_id" => $model->projectId,
+                "target" => $target,
+                "status" => ProjectGtCheck::STATUS_FINISHED,
+            ));
+
+            $checks = ProjectGtCheck::model()->with(array(
+                'check' => array(
+                    'with' => array(
+                        'check' => array(
+                            'alias' => 'innerCheck',
+                            'with' => array(
+                                'l10n' => array(
+                                    'joinType' => 'LEFT JOIN',
+                                    'on' => 'l10n.language_id = :language_id',
+                                    'params' => array('language_id' => $language)
+                                ),
+                                'control' => array(
+                                    'with' => array(
+                                        'l10n' => array(
+                                            'alias' => 'c_l10n',
+                                            'joinType' => 'LEFT JOIN',
+                                            'on' => 'c_l10n.language_id = :language_id',
+                                            'params' => array('language_id' => $language)
+                                        ),
+                                        'category' => array(
+                                            'with' => array(
+                                                'l10n' => array(
+                                                    'alias' => 'ca_l10n',
+                                                    'joinType' => 'LEFT JOIN',
+                                                    'on' => 'ca_l10n.language_id = :language_id',
+                                                    'params' => array('language_id' => $language)
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            ))->findAll($criteria);
+
+            $controls = array();
+
+            foreach ($checks as $check) {
+                $innerCheck = $check->check->check;
+
+                if (!array_key_exists($innerCheck->check_control_id, $controls)) {
+                    $controls[$innerCheck->check_control_id] = array(
+                        "name" => $innerCheck->control->category->localizedName . ' / ' . $innerCheck->control->localizedName,
+                        "degree" => 0.0,
+                        "count" => 0,
+                    );
+                }
+
+                switch ($check->rating) {
+                    case ProjectGtCheck::RATING_HIDDEN:
+                    case ProjectGtCheck::RATING_INFO:
+                        $controls[$innerCheck->check_control_id]['degree'] += 0;
+                        break;
+
+                    case ProjectGtCheck::RATING_LOW_RISK:
+                        $controls[$innerCheck->check_control_id]['degree'] += 1;
+                        break;
+
+                    case ProjectGtCheck::RATING_MED_RISK:
+                        $controls[$innerCheck->check_control_id]['degree'] += 2;
+                        break;
+
+                    case ProjectGtCheck::RATING_HIGH_RISK:
+                        $controls[$innerCheck->check_control_id]['degree'] += 3;
+                        break;
+                }
+
+                $controls[$innerCheck->check_control_id]["count"]++;
+            }
+
+            foreach ($controls as $control) {
+                $maxDegree = $control["count"] * 3;
+                $control["degree"] = round(100 - $control['degree'] / $maxDegree * 100);
+                $targetData["controls"][] = $control;
+            }
+
+            $data[] = $targetData;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Generate a Degree of Fulfillment report
+     */
+    private function _generateFulfillmentDegreeReport($model = null, $findWeakest = false, &$section = null, $sectionNumber = null) {
+        $fullReport = true;
+
+        if (!$section) {
+            $fullReport = false;
+        }
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+
+        if (!$fullReport && !$findWeakest) {
+            $project = Project::model()->findByAttributes(array(
+                'client_id' => $model->clientId,
+                'id' => $model->projectId
+            ));
+
+            if ($project === null) {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
+                return;
+            }
+
+            if (!$project->checkPermission()) {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
+                return;
+            }
+
+            if (!$project->guided_test && (!$model->targetIds || !count($model->targetIds))) {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
+                return;
+            }
+        } else {
+            $project = $this->project['project'];
+        }
+
+        if (!$fullReport && !$findWeakest) {
             $this->_rtfSetup($model);
             $section = $this->rtf->addSection();
 
@@ -2740,33 +2877,37 @@ class ReportController extends Controller
             $section->writeText("\n\n");
         }
 
+        if ($project->guided_test) {
+            $data = $this->_gtFulfillmentReport($fullReport, $findWeakest, $model, $language);
+        } else {
+            $data = $this->_fulfillmentReport($fullReport, $findWeakest, $model, $language);
+        }
+
         $targetNumber = 1;
 
-        if ($findWeakest)
+        if ($findWeakest) {
             $this->project['weakestControls'] = array();
+        }
 
-        foreach ($data as $target)
-        {
+        foreach ($data as $target) {
             // dry run - just fill in the data
-            if ($findWeakest)
-            {
+            if ($findWeakest) {
                 $degree = 100.0;
                 $weakest = null;
 
-                foreach ($target['controls'] as $control)
-                    if ($control['degree'] < $degree)
-                    {
+                foreach ($target['controls'] as $control) {
+                    if ($control['degree'] < $degree) {
                         $weakest = $control;
                         $degree = $control['degree'];
                     }
+                }
 
                 $this->project['weakestControls'][$target['id']] = $weakest;
 
                 continue;
             }
 
-            if ($fullReport)
-            {
+            if ($fullReport) {
                 $this->toc->writeHyperLink(
                     '#degree_' . $targetNumber,
                     '        ' . $sectionNumber . '.' . $targetNumber . '. ' . $target['host'],
@@ -2779,8 +2920,7 @@ class ReportController extends Controller
                     $this->boldFont
                 );
 
-                if ($target['description'])
-                {
+                if ($target['description']) {
                     $font = new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090');
 
                     $this->toc->writeText(' / ', $this->textFont);
@@ -2793,18 +2933,15 @@ class ReportController extends Controller
 
                     $section->writeText(' / ', $this->textFont);
                     $section->writeText($target['description'], $font);
-                }
-                else
+                } else {
                     $this->toc->writeText("\n");
+                }
 
                 $targetNumber++;
-            }
-            else
-            {
+            } else {
                 $section->writeText($target['host'], $this->h3Font);
 
-                if ($target['description'])
-                {
+                if ($target['description']) {
                     $section->writeText(' / ', $this->h3Font);
                     $section->writeText($target['description'], new PHPRtfLite_Font($this->h3Font->getSize(), $this->fontFamily, '#909090'));
                 }
@@ -2812,8 +2949,7 @@ class ReportController extends Controller
 
             $section->writeText("\n");
 
-            if (!count($target['controls']))
-            {
+            if (!count($target['controls'])) {
                 $section->writeText("\n", $this->textFont);
                 $section->writeText(Yii::t('app', 'No checks.') . "\n\n", $this->textFont);
                 continue;
@@ -2845,8 +2981,7 @@ class ReportController extends Controller
 
             usort($target['controls'], array('ReportController', 'sortControls'));
 
-            foreach ($target['controls'] as $control)
-            {
+            foreach ($target['controls'] as $control) {
                 $table->addRow();
                 $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                 $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
@@ -2869,8 +3004,7 @@ class ReportController extends Controller
             $table->setFontForCellRange($this->textFont, 1, 1, count($target['controls']) + 1, 2);
         }
 
-        if (!$fullReport && !$findWeakest)
-        {
+        if (!$fullReport && !$findWeakest) {
             $fileName = Yii::t('app', 'Degree of Fulfillment') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
             $hashName = hash('sha256', rand() . time() . $fileName);
             $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
@@ -2903,30 +3037,31 @@ class ReportController extends Controller
     {
         $model = new FulfillmentDegreeForm();
 
-        if (isset($_POST['FulfillmentDegreeForm']))
-        {
+        if (isset($_POST['FulfillmentDegreeForm'])) {
             $model->attributes = $_POST['FulfillmentDegreeForm'];
 
-            if ($model->validate())
+            if ($model->validate()) {
                 $this->_generateFulfillmentDegreeReport($model);
-            else
+            } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+            }
         }
 
         $criteria = new CDbCriteria();
         $criteria->order = 't.name ASC';
 
-        if (!User::checkRole(User::ROLE_ADMIN))
-        {
+        if (!User::checkRole(User::ROLE_ADMIN)) {
             $projects = ProjectUser::model()->with('project')->findAllByAttributes(array(
                 'user_id' => Yii::app()->user->id
             ));
 
             $clientIds = array();
 
-            foreach ($projects as $project)
-                if (!in_array($project->project->client_id, $clientIds))
+            foreach ($projects as $project) {
+                if (!in_array($project->project->client_id, $clientIds)) {
                     $clientIds[] = $project->project->client_id;
+                }
+            }
 
             $criteria->addInCondition('id', $clientIds);
         }
