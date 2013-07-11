@@ -290,6 +290,14 @@ class AppController extends Controller
                 case 'target-check-list':
                     $targets = explode(',', $model->id);
 
+                    $ratings = array(
+                        TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
+                        TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
+                        TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
+                        TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
+                        TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
+                    );
+
                     foreach ($targets as $target)
                     {
                         $target = (int) $target;
@@ -313,14 +321,6 @@ class AppController extends Controller
 
                         $categories = TargetCheckCategory::model()->findAllByAttributes(
                             array( 'target_id' => $target->id  )
-                        );
-
-                        $ratings = array(
-                            TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
-                            TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
-                            TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
-                            TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
-                            TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
                         );
 
                         $targetData = array(
@@ -380,6 +380,98 @@ class AppController extends Controller
                         }
 
                         $objects[] = $targetData;
+                    }
+
+                    break;
+
+                case 'gt-target-check-list':
+                    $project = Project::model()->findByPk($model->id);
+
+                    if (!$project) {
+                        throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+                    }
+
+                    if (!$project->guided_test || !$project->checkPermission()) {
+                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                    }
+
+                    $targets = array();
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addColumnCondition(array('project_id' => $project->id));
+                    $criteria->order = 'target ASC';
+
+                    $checks = ProjectGtCheck::model()->findAll($criteria);
+
+                    foreach ($checks as $check) {
+                        if (!$check->target) {
+                            continue;
+                        }
+
+                        if (!in_array($check->target, $targets)) {
+                            $targets[] = $check->target;
+                        }
+                    }
+
+                    $targetId = 1;
+
+                    $ratings = array(
+                        ProjectGtCheck::RATING_HIDDEN => Yii::t('app', 'Hidden'),
+                        ProjectGtCheck::RATING_INFO => Yii::t('app', 'Info'),
+                        ProjectGtCheck::RATING_LOW_RISK => Yii::t('app', 'Low Risk'),
+                        ProjectGtCheck::RATING_MED_RISK => Yii::t('app', 'Med Risk'),
+                        ProjectGtCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
+                    );
+
+                    foreach ($targets as $target) {
+                        $targetData = array(
+                            'id' => $targetId,
+                            'host' => $target,
+                            'description' => "",
+                            'checks' => array()
+                        );
+
+                        // get all checks
+                        $criteria = new CDBCriteria();
+                        $criteria->addColumnCondition(array(
+                            "project_id" => $project->id,
+                            "target" => $target,
+                            "status" => ProjectGtCheck::STATUS_FINISHED,
+                        ));
+
+                        $criteria->addInCondition("rating", array(
+                            ProjectGtCheck::RATING_HIGH_RISK,
+                            ProjectGtCheck::RATING_MED_RISK,
+                        ));
+
+                        $checks = ProjectGtCheck::model()->with(array(
+                            'check' => array(
+                                'with' => array(
+                                    'check' => array(
+                                        'alias' => 'innerCheck',
+                                        'with' => array(
+                                            'l10n' => array(
+                                                'joinType' => 'LEFT JOIN',
+                                                'on' => 'l10n.language_id = :language_id',
+                                                'params' => array('language_id' => $language)
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ))->findAll($criteria);
+
+                        foreach ($checks as $check) {
+                            $targetData['checks'][] = array(
+                                'id' => $check->gt_check_id,
+                                'ratingName' => $ratings[$check->rating],
+                                'rating' => $check->rating,
+                                'name' => CHtml::encode($check->check->check->localizedName),
+                            );
+                        }
+
+                        $objects[] = $targetData;
+                        $targetId++;
                     }
 
                     break;

@@ -3033,8 +3033,7 @@ class ReportController extends Controller
     /**
      * Show degree of fulfillment report form.
      */
-    public function actionFulfillment()
-    {
+    public function actionFulfillment() {
         $model = new FulfillmentDegreeForm();
 
         if (isset($_POST['FulfillmentDegreeForm'])) {
@@ -3079,125 +3078,52 @@ class ReportController extends Controller
     }
 
     /**
-     * Generate risk matrix report.
+     * Risk matrix report
+     * @param $fullReport
+     * @param $model
+     * @param $risks
+     * @param $language
+     * @return array
      */
-    private function _generateRiskMatrixReport($model, &$section = null, $sectionNumber = null)
-    {
-        $fullReport = true;
+    private function _riskMatrixReport($fullReport, $model, $risks, $language) {
+        $data = array();
 
-        if (!$section)
-            $fullReport = false;
-
-        $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
-        ));
-
-        if ($language)
-            $language = $language->id;
-
-        $matrix = $model->matrix;
-
-        if (!$fullReport)
-        {
-            $templateId = $model->templateId;
-            $clientId   = $model->clientId;
-            $projectId  = $model->projectId;
-            $targetIds  = $model->targetIds;
-
-            $template = RiskTemplate::model()->findByAttributes(array(
-                'id' => $templateId
-            ));
-
-            if ($template === null)
-            {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Template not found.'));
-                return;
-            }
-
-            $project = Project::model()->findByAttributes(array(
-                'client_id' => $clientId,
-                'id'        => $projectId
-            ));
-
-            if ($project === null)
-            {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
-                return;
-            }
-
-            if ($project->guided_test || !$project->checkPermission())
-            {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
-                return;
-            }
-
-            if (!$targetIds || !count($targetIds))
-            {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
-                return;
-            }
-
+        if (!$fullReport) {
             $criteria = new CDbCriteria();
-            $criteria->addInCondition('id', $targetIds);
-            $criteria->addColumnCondition(array( 'project_id' => $project->id ));
+            $criteria->addInCondition('id', $model->targetIds);
+            $criteria->addColumnCondition(array('project_id' => $model->projectId));
             $criteria->order = 't.host ASC';
             $targets = Target::model()->findAll($criteria);
-        }
-        else
-        {
-            $template = RiskTemplate::model()->findByAttributes(array(
-                'id' => $model->templateId
-            ));
-
-            if ($template === null)
-            {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Template not found.'));
-                return;
-            }
-
+        } else {
             $targets = $this->project['targets'];
-            $project = $this->project['project'];
         }
 
-        $risks = RiskCategory::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
-            )
-        ))->findAllByAttributes(
-            array( 'risk_template_id' => $template->id ),
-            array( 'order' => 'COALESCE(l10n.name, t.name) ASC' )
-        );
-
-        $data  = array();
-
-        foreach ($targets as $target)
-        {
-            $mtrx         = array();
+        foreach ($targets as $target) {
+            $mtrx = array();
             $referenceIds = array();
 
             $references = TargetReference::model()->findAllByAttributes(array(
                 'target_id' => $target->id
             ));
 
-            foreach ($references as $reference)
+            foreach ($references as $reference) {
                 $referenceIds[] = $reference->reference_id;
+            }
 
             $categories = TargetCheckCategory::model()->findAllByAttributes(
-                array( 'target_id' => $target->id  )
+                array('target_id' => $target->id )
             );
 
-            foreach ($categories as $category)
-            {
+            foreach ($categories as $category) {
                 $controlIds = array();
 
                 $controls = CheckControl::model()->findAllByAttributes(array(
                     'check_category_id' => $category->check_category_id
                 ));
 
-                foreach ($controls as $control)
+                foreach ($controls as $control) {
                     $controlIds[] = $control->id;
+                }
 
                 $criteria = new CDbCriteria();
                 $criteria->order = 't.sort_order ASC';
@@ -3205,8 +3131,9 @@ class ReportController extends Controller
                 $criteria->addInCondition('t.check_control_id', $controlIds);
                 $criteria->together = true;
 
-                if (!$category->advanced)
+                if (!$category->advanced) {
                     $criteria->addCondition('t.advanced = FALSE');
+                }
 
                 $checks = Check::model()->with(array(
                     'l10n' => array(
@@ -3227,46 +3154,225 @@ class ReportController extends Controller
                     )
                 ))->findAll($criteria);
 
-                foreach ($checks as $check)
-                {
-                    if (!isset($matrix[$target->id][$check->id]))
+                foreach ($checks as $check) {
+                    if (!isset($model->matrix[$target->id][$check->id])) {
                         continue;
+                    }
 
                     $ctr = 0;
 
-                    foreach ($risks as $riskId => $risk)
-                    {
+                    foreach ($risks as $riskId => $risk) {
                         $ctr++;
 
-                        if (!isset($matrix[$target->id][$check->id][$risk->id]))
+                        if (!isset($model->matrix[$target->id][$check->id][$risk->id])) {
                             continue;
+                        }
 
                         $riskName = 'R' . $ctr;
 
-                        $damage     = $matrix[$target->id][$check->id][$risk->id]['damage']     - 1;
-                        $likelihood = $matrix[$target->id][$check->id][$risk->id]['likelihood'] - 1;
+                        $damage = $model->matrix[$target->id][$check->id][$risk->id]['damage'] - 1;
+                        $likelihood = $model->matrix[$target->id][$check->id][$risk->id]['likelihood'] - 1;
 
-                        if (!isset($mtrx[$damage]))
+                        if (!isset($mtrx[$damage])) {
                             $mtrx[$damage] = array();
+                        }
 
-                        if (!isset($mtrx[$damage][$likelihood]))
+                        if (!isset($mtrx[$damage][$likelihood])) {
                             $mtrx[$damage][$likelihood] = array();
+                        }
 
-                        if (!in_array($riskName, $mtrx[$damage][$likelihood]))
+                        if (!in_array($riskName, $mtrx[$damage][$likelihood])) {
                             $mtrx[$damage][$likelihood][] = $riskName;
+                        }
                     }
                 }
             }
 
             $data[] = array(
-                'host'        => $target->host,
+                'host' => $target->host,
                 'description' => $target->description,
-                'matrix'      => $mtrx
+                'matrix' => $mtrx
             );
         }
 
-        if (!$fullReport)
-        {
+        return $data;
+    }
+
+    /**
+     * Risk matrix report for GT projects
+     * @param $fullReport
+     * @param $model
+     * @param $risks
+     * @return array
+     */
+    private function _gtRiskMatrixReport($fullReport, $model, $risks) {
+        $data = array();
+
+        if (!$fullReport) {
+            $targets = array();
+
+            $criteria = new CDbCriteria();
+            $criteria->addColumnCondition(array('project_id' => $model->projectId));
+            $criteria->order = 'target ASC';
+
+            $checks = ProjectGtCheck::model()->findAll($criteria);
+
+            foreach ($checks as $check) {
+                if (!$check->target) {
+                    continue;
+                }
+
+                if (!in_array($check->target, $targets)) {
+                    $targets[] = $check->target;
+                }
+            }
+        } else {
+            $targets = $this->project['targets'];
+        }
+
+        $targetId = 1;
+
+        foreach ($targets as $target) {
+            $mtrx = array();
+
+            $criteria = new CDbCriteria();
+            $criteria->addColumnCondition(array(
+                "project_id" => $model->projectId,
+                "target" => $target,
+                "status" => ProjectGtCheck::STATUS_FINISHED,
+            ));
+
+            $criteria->addInCondition("rating", array(
+                ProjectGtCheck::RATING_HIGH_RISK,
+                ProjectGtCheck::RATING_MED_RISK,
+            ));
+
+            $checks = ProjectGtCheck::model()->findAll($criteria);
+
+            foreach ($checks as $check) {
+                $innerCheck = $check->check->check;
+                if (!isset($model->matrix[$targetId][$check->gt_check_id])) {
+                    continue;
+                }
+
+                $ctr = 0;
+
+                foreach ($risks as $riskId => $risk) {
+                    $ctr++;
+
+                    if (!isset($model->matrix[$targetId][$check->gt_check_id][$risk->id])) {
+                        continue;
+                    }
+
+                    $riskName = 'R' . $ctr;
+
+                    $damage = $model->matrix[$targetId][$check->gt_check_id][$risk->id]['damage'] - 1;
+                    $likelihood = $model->matrix[$targetId][$check->gt_check_id][$risk->id]['likelihood'] - 1;
+
+                    if (!isset($mtrx[$damage])) {
+                        $mtrx[$damage] = array();
+                    }
+
+                    if (!isset($mtrx[$damage][$likelihood])) {
+                        $mtrx[$damage][$likelihood] = array();
+                    }
+
+                    if (!in_array($riskName, $mtrx[$damage][$likelihood])) {
+                        $mtrx[$damage][$likelihood][] = $riskName;
+                    }
+                }
+            }
+
+            $data[] = array(
+                'host' => $target,
+                'description' => "",
+                'matrix' => $mtrx
+            );
+
+            $targetId++;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Generate risk matrix report.
+     */
+    private function _generateRiskMatrixReport($model, &$section = null, $sectionNumber = null) {
+        $fullReport = true;
+
+        if (!$section) {
+            $fullReport = false;
+        }
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        if (!$fullReport) {
+            $template = RiskTemplate::model()->findByAttributes(array(
+                'id' => $model->templateId
+            ));
+
+            if ($template === null) {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Template not found.'));
+                return;
+            }
+
+            $project = Project::model()->findByAttributes(array(
+                'client_id' => $model->clientId,
+                'id' => $model->projectId
+            ));
+
+            if ($project === null) {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
+                return;
+            }
+
+            if (!$project->checkPermission()) {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
+                return;
+            }
+
+            if (!$project->guided_test && (!$model->targetIds || !count($model->targetIds))) {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
+                return;
+            }
+        } else {
+            $template = RiskTemplate::model()->findByAttributes(array(
+                'id' => $model->templateId
+            ));
+
+            if ($template === null) {
+                Yii::app()->user->setFlash('error', Yii::t('app', 'Template not found.'));
+                return;
+            }
+
+            $project = $this->project['project'];
+        }
+
+        $risks = RiskCategory::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findAllByAttributes(
+            array('risk_template_id' => $template->id),
+            array('order' => 'COALESCE(l10n.name, t.name) ASC')
+        );
+
+        if ($project->guided_test) {
+            $data = $this->_gtRiskMatrixReport($fullReport, $model, $risks);
+        } else {
+            $data = $this->_riskMatrixReport($fullReport, $model, $risks, $language);
+        }
+
+        if (!$fullReport) {
             $this->_rtfSetup($model);
             $section = $this->rtf->addSection();
 
@@ -3296,12 +3402,12 @@ class ReportController extends Controller
         $table->setBorderForCellRange($this->thinBorder, 1, 1, count($risks) + 1, 2);
 
         // set paddings
-        for ($row = 1; $row <= count($risks) + 1; $row++)
-            for ($col = 1; $col <= 2; $col++)
-            {
+        for ($row = 1; $row <= count($risks) + 1; $row++) {
+            for ($col = 1; $col <= 2; $col++) {
                 $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                 $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
             }
+        }
 
         $row = 1;
 
@@ -3311,8 +3417,7 @@ class ReportController extends Controller
         $row++;
         $ctr = 0;
 
-        foreach ($risks as $risk)
-        {
+        foreach ($risks as $risk) {
             $ctr++;
 
             $table->writeToCell($row, 1, 'R' . $ctr);
@@ -3321,18 +3426,15 @@ class ReportController extends Controller
             $row++;
         }
 
-        if (!$fullReport)
-        {
+        if (!$fullReport) {
             $section->writeText(Yii::t('app', 'Targets'), $this->h3Font, $this->h3Par);
             $section->writeText("\n\n", $this->textFont);
         }
 
         $targetNumber = 1;
 
-        foreach ($data as $target)
-        {
-            if ($fullReport)
-            {
+        foreach ($data as $target) {
+            if ($fullReport) {
                 $this->toc->writeHyperLink(
                     '#risk_matrix_' . $targetNumber,
                     '        ' . $sectionNumber . '.' . $targetNumber . '. ' . $target['host'],
@@ -3345,8 +3447,7 @@ class ReportController extends Controller
                     $this->boldFont
                 );
 
-                if ($target['description'])
-                {
+                if ($target['description']) {
                     $font = new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090');
 
                     $this->toc->writeText(' / ', $this->textFont);
@@ -3359,18 +3460,15 @@ class ReportController extends Controller
 
                     $section->writeText(' / ', $this->textFont);
                     $section->writeText($target['description'], $font);
-                }
-                else
+                } else {
                     $this->toc->writeText("\n");
+                }
 
                 $targetNumber++;
-            }
-            else
-            {
+            } else {
                 $section->writeText($target['host'], $this->boldFont);
 
-                if ($target['description'])
-                {
+                if ($target['description']) {
                     $section->writeText(' / ', $this->textFont);
                     $section->writeText($target['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
                 }
@@ -3378,8 +3476,7 @@ class ReportController extends Controller
 
             $section->writeText("\n");
 
-            if (!$target['matrix'])
-            {
+            if (!$target['matrix']) {
                 $section->writeText("\n", $this->textFont);
                 $section->writeText(Yii::t('app', 'No checks.') . "\n\n", $this->textFont);
                 continue;
@@ -3405,13 +3502,11 @@ class ReportController extends Controller
             $table->writeToCell(5, 1, Yii::t('app', 'Likelihood') . ' &rarr;');
 
             // set paddings
-            for ($row = 1; $row <= 5; $row++)
-                for ($col = 1; $col <= 5; $col++)
-                {
+            for ($row = 1; $row <= 5; $row++) {
+                for ($col = 1; $col <= 5; $col++) {
                     $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
 
-                    if ($col == 1 || $row == 5)
-                    {
+                    if ($col == 1 || $row == 5) {
                         $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
                         $table->getCell($row, $col)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
 
@@ -3423,27 +3518,29 @@ class ReportController extends Controller
 
                     $bgColor = '#CCFFBB';
 
-                    if (($row == 1 && $col >= 3) || ($row == 2 && $col >= 4) || ($row == 3 && $col >= 5))
+                    if (($row == 1 && $col >= 3) || ($row == 2 && $col >= 4) || ($row == 3 && $col >= 5)) {
                         $bgColor = '#FFBBBB';
+                    }
 
                     $table->getCell($row, $col)->setBackgroundColor($bgColor);
                 }
+            }
 
             $matrix = $target['matrix'];
 
-            for ($damage = 0; $damage < 4; $damage++)
-                for ($likelihood = 0; $likelihood < 4; $likelihood++)
-                {
-                    if (!isset($matrix[$damage][$likelihood]))
+            for ($damage = 0; $damage < 4; $damage++) {
+                for ($likelihood = 0; $likelihood < 4; $likelihood++) {
+                    if (!isset($matrix[$damage][$likelihood])) {
                         continue;
+                    }
 
                     $text = implode(', ', $matrix[$damage][$likelihood]);
                     $table->writeToCell(4 - $damage, $likelihood + 2, $text);
                 }
+            }
         }
 
-        if (!$fullReport)
-        {
+        if (!$fullReport) {
             $fileName = Yii::t('app', 'Risk Matrix') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
             $hashName = hash('sha256', rand() . time() . $fileName);
             $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
@@ -3472,35 +3569,34 @@ class ReportController extends Controller
     /**
      * Show risk matrix report form.
      */
-    public function actionRiskMatrix()
-    {
+    public function actionRiskMatrix() {
         $model = new RiskMatrixForm();
 
-        if (isset($_POST['RiskMatrixForm']))
-        {
+        if (isset($_POST['RiskMatrixForm'])) {
             $model->attributes = $_POST['RiskMatrixForm'];
 
-            if ($model->validate())
+            if ($model->validate()) {
                 $this->_generateRiskMatrixReport($model);
-
-            else
+            } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+            }
         }
 
         $criteria = new CDbCriteria();
         $criteria->order = 't.name ASC';
 
-        if (!User::checkRole(User::ROLE_ADMIN))
-        {
+        if (!User::checkRole(User::ROLE_ADMIN)) {
             $projects = ProjectUser::model()->with('project')->findAllByAttributes(array(
                 'user_id' => Yii::app()->user->id
             ));
 
             $clientIds = array();
 
-            foreach ($projects as $project)
-                if (!in_array($project->project->client_id, $clientIds))
+            foreach ($projects as $project) {
+                if (!in_array($project->project->client_id, $clientIds)) {
                     $clientIds[] = $project->project->client_id;
+                }
+            }
 
             $criteria->addInCondition('id', $clientIds);
         }
@@ -3513,18 +3609,19 @@ class ReportController extends Controller
             'code' => Yii::app()->language
         ));
 
-        if ($language)
+        if ($language) {
             $language = $language->id;
+        }
 
         $templates = RiskTemplate::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
                 'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+                'params'   => array('language_id' => $language)
             )
         ))->findAllByAttributes(
             array(),
-            array( 'order' => 'COALESCE(l10n.name, t.name) ASC' )
+            array('order' => 'COALESCE(l10n.name, t.name) ASC')
         );
 
         // display the report generation form

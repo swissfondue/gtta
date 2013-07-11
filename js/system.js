@@ -461,7 +461,7 @@ function System()
                             $('#target-list').show();
 
                             if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0)
-                                _report._refreshChecks(true);
+                                _report._refreshChecks(true, false);
 
                             _report._projectFormSwitchButton();
                         }
@@ -476,7 +476,7 @@ function System()
             else if (e.id.match(/^ProjectReportForm_targetIds_/i))
             {
                 if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0)
-                    _report._refreshChecks(true);
+                    _report._refreshChecks(true, false);
 
                 _report._projectFormSwitchButton();
             }
@@ -531,7 +531,7 @@ function System()
                             _report._riskMatrixCategories = data.objects;
 
                             if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0)
-                                _report._refreshChecks(true);
+                                _report._refreshChecks(true, false);
 
                             _report._projectFormSwitchButton();
                         }
@@ -706,8 +706,8 @@ function System()
         /**
          * Refresh check list.
          */
-        this._refreshChecks = function (projectReport) {
-            var targets, delTargets, addTargets, i, k, id, targetIds, target;
+        this._refreshChecks = function (projectReport, guidedTest) {
+            var targets, delTargets, addTargets, i, k, id, target;
 
             $('.form-actions > button[type="submit"]').prop('disabled', true);
 
@@ -718,22 +718,25 @@ function System()
             addTargets = [];
             delTargets = [];
 
-            for (i = 0; i < targets.length; i++)
-                if ($.inArray(targets[i], _report._riskMatrixTargets) == -1)
+            for (i = 0; i < targets.length; i++) {
+                if ($.inArray(targets[i], _report._riskMatrixTargets) == -1) {
                     addTargets.push(targets[i]);
+                }
+            }
 
-            for (i = 0; i < _report._riskMatrixTargets.length; i++)
-                if ($.inArray(_report._riskMatrixTargets[i], targets) == -1)
+            for (i = 0; i < _report._riskMatrixTargets.length; i++) {
+                if ($.inArray(_report._riskMatrixTargets[i], targets) == -1) {
                     delTargets.push(_report._riskMatrixTargets[i]);
+                }
+            }
 
-            for (i = 0; i < delTargets.length; i++)
-            {
-                for (k = 0; k < _report._riskMatrixTargets.length; k++)
-                    if (_report._riskMatrixTargets[k] == delTargets[i])
-                    {
+            for (i = 0; i < delTargets.length; i++) {
+                for (k = 0; k < _report._riskMatrixTargets.length; k++) {
+                    if (_report._riskMatrixTargets[k] == delTargets[i]) {
                         _report._riskMatrixTargets.splice(k, 1);
                         break;
                     }
+                }
 
                 id = delTargets[i];
 
@@ -742,24 +745,30 @@ function System()
                         $('.report-target-header[data-id=' + id + ']').remove();
                         $('.report-target-content[data-id=' + id + ']').remove();
 
-                        if (_report._riskMatrixTargets.length == 0)
+                        if (_report._riskMatrixTargets.length == 0) {
                             $('#check-list').slideUp('fast');
+                        }
                     });
                 });
             }
 
-            if (addTargets.length > 0)
-            {
-                targetIds = addTargets.join(',');
+            if (guidedTest || addTargets.length > 0) {
+                var param, cmd;
 
-                _system.control.loadObjects(targetIds, 'target-check-list', function (data) {
+                if (guidedTest) {
+                    param = $('#RiskMatrixForm_projectId').val();
+                    cmd = 'gt-target-check-list';
+                } else {
+                    param = addTargets.join(',');
+                    cmd = 'target-check-list';
+                }
+
+                _system.control.loadObjects(param, cmd, function (data) {
                     var targetHeader, targetDiv, category, categoryDiv, check, checkDiv, i, k, j, rating, risk, field,
                         checked, damage, likelihood;
 
-                    if (data && data.objects.length)
-                    {
-                        for (i = 0; i < data.objects.length; i++)
-                        {
+                    if (data && data.objects.length) {
+                        for (i = 0; i < data.objects.length; i++) {
                             target = data.objects[i];
 
                             targetHeader = $('<div>')
@@ -773,16 +782,15 @@ function System()
                                 .addClass('report-target-content')
                                 .addClass('hide');
 
-                            if (target.checks.length)
-                            {
-                                for (k = 0; k < target.checks.length; k++)
-                                {
+                            if (target.checks.length) {
+                                for (k = 0; k < target.checks.length; k++) {
                                     check = target.checks[k];
 
-                                    if (check.rating == _system.RATING_HIGH_RISK)
+                                    if (check.rating == _system.RATING_HIGH_RISK) {
                                         rating = '<span class="label label-high-risk">' + check.ratingName + '</span>';
-                                    else if (check.rating == _system.RATING_MED_RISK)
+                                    } else if (check.rating == _system.RATING_MED_RISK) {
                                         rating = '<span class="label label-med-risk">' + check.ratingName + '</span>';
+                                    }
 
                                     $('<div>')
                                         .attr('data-id', check.id)
@@ -799,16 +807,14 @@ function System()
                                         .attr('data-id', check.id)
                                         .addClass('report-check-content');
 
-                                    for (j = 0; j < _report._riskMatrixCategories.length; j++)
-                                    {
-                                        damage     = 1;
+                                    for (j = 0; j < _report._riskMatrixCategories.length; j++) {
+                                        damage = 1;
                                         likelihood = 1;
 
                                         risk = _report._riskMatrixCategories[j];
 
-                                        if (check.id in risk.checks)
-                                        {
-                                            damage     = risk.checks[check.id].damage;
+                                        if (check.id in risk.checks) {
+                                            damage = risk.checks[check.id].damage;
                                             likelihood = risk.checks[check.id].likelihood;
                                         }
 
@@ -862,15 +868,16 @@ function System()
                                     });
                                 });
 
-                                if (!$('#check-list').is(':visible'))
+                                if (!$('#check-list').is(':visible')) {
                                     $('#check-list').slideDown('fast');
-                            }
-                            else if (projectReport)
+                                }
+                            } else if (projectReport) {
                                 _report._projectFormSwitchButton();
+                            }
                         }
-                    }
-                    else if (projectReport)
+                    } else if (projectReport) {
                         _report._projectFormSwitchButton();
+                    }
                 });
             }
         };
@@ -890,8 +897,7 @@ function System()
             $('#project-list > div > .help-block').hide();
             $('#template-list > div > .help-block').hide();
 
-            if (e.id == 'RiskMatrixForm_templateId')
-            {
+            if (e.id == 'RiskMatrixForm_templateId') {
                 val = $('#RiskMatrixForm_templateId').val();
 
                 $('#client-list').hide();
@@ -913,24 +919,18 @@ function System()
                 $('.report-target-header').remove();
                 $('.report-target-content').remove();
 
-                if (val != 0)
-                {
+                if (val != 0) {
                     _system.control.loadObjects(val, 'category-list', function (data) {
-                        if (data && data.objects.length)
-                        {
+                        if (data && data.objects.length) {
                             _report._riskMatrixCategories = data.objects;
                             $('#client-list').show();
-                        }
-                        else
-                        {
+                        } else {
                             $('#template-list').addClass('error');
                             $('#template-list > div > .help-block').show();
                         }
                     });
                 }
-            }
-            else if (e.id == 'RiskMatrixForm_clientId')
-            {
+            } else if (e.id == 'RiskMatrixForm_clientId') {
                 val = $('#RiskMatrixForm_clientId').val();
 
                 $('#project-list').hide();
@@ -948,17 +948,13 @@ function System()
                 $('.report-target-header').remove();
                 $('.report-target-content').remove();
 
-                if (val != 0)
-                {
+                if (val != 0) {
                     _system.control.loadObjects(val, 'project-list', function (data) {
                         if (data && data.objects.length) {
                             for (var i = 0; i < data.objects.length; i++) {
-                                if (data.objects[i].guided) {
-                                    continue;
-                                }
-
                                 $('<option>')
                                     .val(data.objects[i].id)
+                                    .attr("data-guided", data.objects[i].guided ? 1 : 0)
                                     .html(data.objects[i].name)
                                     .appendTo('#RiskMatrixForm_projectId');
                             }
@@ -970,9 +966,7 @@ function System()
                         }
                     });
                 }
-            }
-            else if (e.id == 'RiskMatrixForm_projectId')
-            {
+            } else if (e.id == 'RiskMatrixForm_projectId') {
                 val = $('#RiskMatrixForm_projectId').val();
 
                 $('#target-list').hide();
@@ -986,49 +980,48 @@ function System()
                 $('.report-target-header').remove();
                 $('.report-target-content').remove();
 
-                if (val != 0)
-                {
-                    _system.control.loadObjects(val, 'target-list', function (data) {
-                        if (data && data.objects.length)
-                        {
-                            for (var i = 0; i < data.objects.length; i++)
-                            {
-                                var li    = $('<li>'),
-                                    label = $('<label>'),
-                                    input = $('<input>');
+                if (val != 0) {
+                    var guided = parseInt($('#RiskMatrixForm_projectId option:selected').attr("data-guided"));
 
-                                input
-                                    .attr('type', 'checkbox')
-                                    .prop('checked', true)
-                                    .attr('id', 'RiskMatrixForm_targetIds_' + data.objects[i].id)
-                                    .attr('name', 'RiskMatrixForm[targetIds][]')
-                                    .val(data.objects[i].id)
-                                    .click(function () {
-                                        system.report.riskMatrixFormChange(this);
-                                    })
-                                    .appendTo(label);
+                    if (guided) {
+                        _report._refreshChecks(false, true);
+                    } else {
+                        _system.control.loadObjects(val, 'target-list', function (data) {
+                            if (data && data.objects.length) {
+                                for (var i = 0; i < data.objects.length; i++) {
+                                    var li    = $('<li>'),
+                                        label = $('<label>'),
+                                        input = $('<input>');
 
-                                label
-                                    .append(' ' + data.objects[i].host)
-                                    .appendTo(li);
+                                    input
+                                        .attr('type', 'checkbox')
+                                        .prop('checked', true)
+                                        .attr('id', 'RiskMatrixForm_targetIds_' + data.objects[i].id)
+                                        .attr('name', 'RiskMatrixForm[targetIds][]')
+                                        .val(data.objects[i].id)
+                                        .click(function () {
+                                            system.report.riskMatrixFormChange(this);
+                                        })
+                                        .appendTo(label);
 
-                                $('#target-list > .controls > .report-target-list').append(li);
+                                    label
+                                        .append(' ' + data.objects[i].host)
+                                        .appendTo(li);
+
+                                    $('#target-list > .controls > .report-target-list').append(li);
+                                }
+
+                                $('#target-list').show();
+                                _report._refreshChecks(false, false);
+                            } else {
+                                $('#project-list').addClass('error');
+                                $('#project-list > div > .help-block').show();
                             }
-
-                            $('#target-list').show();
-                            _report._refreshChecks();
-                        }
-                        else
-                        {
-                            $('#project-list').addClass('error');
-                            $('#project-list > div > .help-block').show();
-                        }
-                    });
+                        });
+                    }
                 }
-            }
-            else if (e.id.match(/^RiskMatrixForm_targetIds_/i))
-            {
-                _report._refreshChecks();
+            } else if (e.id.match(/^RiskMatrixForm_targetIds_/i)) {
+                _report._refreshChecks(false, false);
             }
         };
 
