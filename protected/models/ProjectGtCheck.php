@@ -85,6 +85,7 @@ class ProjectGtCheck extends CActiveRecord
             'user' => array(self::BELONGS_TO, 'User', 'user_id'),
             'vuln' => array(self::HAS_ONE, 'ProjectGtCheckVuln', array('project_id', 'gt_check_id')),
             'solutions' => array(self::HAS_MANY, 'ProjectGtCheckSolution', array('project_id', 'gt_check_id')),
+            'attachments' => array(self::HAS_MANY, 'ProjectGtCheckAttachment', array('project_id', 'gt_check_id')),
 		);
 	}
 
