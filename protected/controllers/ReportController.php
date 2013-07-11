@@ -2627,72 +2627,29 @@ class ReportController extends Controller
     }
 
     /**
-     * Generate comparison report.
+     * Comparison report
+     * @param $project1
+     * @param $project2
+     * @return array
+     * @throws CHttpException
      */
-    private function _generateComparisonReport($model)
-    {
-        $clientId   = $model->clientId;
-        $projectId1 = $model->projectId1;
-        $projectId2 = $model->projectId2;
-
-        $project1 = Project::model()->findByAttributes(array(
-            'client_id' => $clientId,
-            'id'        => $projectId1
-        ));
-
-        if ($project1 === null)
-        {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'First project not found.'));
-            return;
-        }
-
-        if ($project1->guided_test || !$project1->checkPermission())
-        {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
-            return;
-        }
-
-        $project2 = Project::model()->findByAttributes(array(
-            'client_id' => $clientId,
-            'id'        => $projectId2
-        ));
-
-        if ($project2 === null)
-        {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Second project not found.'));
-            return;
-        }
-
-        if ($project2->guided_test || !$project2->checkPermission())
-        {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
-            return;
-        }
-
-        $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
-        ));
-
-        if ($language)
-            $language = $language->id;
-
+    private function _comparisonReport($project1, $project2) {
         $targets1 = Target::model()->findAllByAttributes(
-            array( 'project_id' => $project1->id ),
-            array( 'order'      => 't.host ASC'  )
+            array('project_id' => $project1->id),
+            array('order' => 't.host ASC')
         );
 
         $targets2 = Target::model()->findAllByAttributes(
-            array( 'project_id' => $project2->id ),
-            array( 'order'      => 't.host ASC'  )
+            array('project_id' => $project2->id),
+            array('order' => 't.host ASC')
         );
 
         // find corresponding targets
         $data = array();
 
-        foreach ($targets1 as $target1)
-            foreach ($targets2 as $target2)
-                if ($target2->host == $target1->host)
-                {
+        foreach ($targets1 as $target1) {
+            foreach ($targets2 as $target2) {
+                if ($target2->host == $target1->host) {
                     $data[] = array(
                         $target1,
                         $target2
@@ -2700,22 +2657,23 @@ class ReportController extends Controller
 
                     break;
                 }
+            }
+        }
 
-        if (!$data)
+        if (!$data) {
             throw new CHttpException(404, Yii::t('app', 'No targets to compare.'));
+        }
 
         $targetsData = array();
 
-        foreach ($data as $targets)
-        {
+        foreach ($data as $targets) {
             $targetData = array(
-                'host'    => $targets[0]->host,
+                'host' => $targets[0]->host,
                 'ratings' => array()
             );
 
-            foreach ($targets as $target)
-            {
-                $rating     = 0;
+            foreach ($targets as $target) {
+                $rating = 0;
                 $checkCount = 0;
 
                 // get all categories
@@ -2730,27 +2688,29 @@ class ReportController extends Controller
                     'target_id' => $target->id
                 ));
 
-                foreach ($references as $reference)
+                foreach ($references as $reference) {
                     $referenceIds[] = $reference->reference_id;
+                }
 
-                foreach ($categories as $category)
-                {
+                foreach ($categories as $category) {
                     $controls = CheckControl::model()->findAllByAttributes(array(
                         'check_category_id' => $category->check_category_id
                     ));
 
                     $controlIds = array();
 
-                    foreach ($controls as $control)
+                    foreach ($controls as $control) {
                         $controlIds[] = $control->id;
+                    }
 
                     $criteria = new CDbCriteria();
 
                     $criteria->addInCondition('reference_id', $referenceIds);
                     $criteria->addInCondition('check_control_id', $controlIds);
 
-                    if (!$category->advanced)
+                    if (!$category->advanced) {
                         $criteria->addCondition('advanced = FALSE');
+                    }
 
                     $checks = Check::model()->with(array(
                         'targetChecks' => array(
@@ -2765,13 +2725,12 @@ class ReportController extends Controller
                         ),
                     ))->findAll($criteria);
 
-                    if (!$checks)
+                    if (!$checks) {
                         continue;
+                    }
 
-                    foreach ($checks as $check)
-                    {
-                        switch ($check->targetChecks[0]->rating)
-                        {
+                    foreach ($checks as $check) {
+                        switch ($check->targetChecks[0]->rating) {
                             case TargetCheck::RATING_INFO:
                                 $rating += 1;
                                 break;
@@ -2793,13 +2752,193 @@ class ReportController extends Controller
                     }
                 }
 
-                if ($checkCount)
+                if ($checkCount) {
                     $rating /= $checkCount;
+                }
 
                 $targetData['ratings'][] = $rating;
             }
 
             $targetsData[] = $targetData;
+        }
+
+        return $targetsData;
+    }
+
+    /**
+     * Get GT project targets
+     * @param $projectId
+     * @return array
+     */
+    private function _getGtTargets($projectId) {
+        $targets = array();
+
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(array('project_id' => $projectId));
+        $criteria->order = 'target ASC';
+
+        $checks = ProjectGtCheck::model()->findAll($criteria);
+
+        foreach ($checks as $check) {
+            if (!$check->target) {
+                continue;
+            }
+
+            if (!in_array($check->target, $targets)) {
+                $targets[] = $check->target;
+            }
+        }
+
+        return $targets;
+    }
+
+    /**
+     * Comparison report for GT projects
+     * @param $project1
+     * @param $project2
+     * @return array
+     * @throws CHttpException
+     */
+    private function _gtComparisonReport($project1, $project2) {
+        $targets1 = $this->_getGtTargets($project1->id);
+        $targets2 = $this->_getGtTargets($project2->id);
+
+        // find corresponding targets
+        $data = array();
+
+        foreach ($targets1 as $target1) {
+            foreach ($targets2 as $target2) {
+                if ($target2 == $target1) {
+                    $data[] = array(
+                        array(
+                            "target" => $target1,
+                            "project" => $project1
+                        ),
+                        array(
+                            "target" => $target2,
+                            "project" => $project2
+                        ),
+                    );
+
+                    break;
+                }
+            }
+        }
+
+        if (!$data) {
+            throw new CHttpException(404, Yii::t('app', 'No targets to compare.'));
+        }
+
+        $targetsData = array();
+
+        foreach ($data as $targets) {
+            $targetData = array(
+                'host' => $targets[0]["target"],
+                'ratings' => array()
+            );
+
+            foreach ($targets as $target) {
+                $rating = 0;
+                $checkCount = 0;
+
+                // get all checks
+                $criteria = new CDBCriteria();
+                $criteria->addCondition("project_id = :project AND target = :target AND status = :status AND rating != :hidden");
+                $criteria->params = array(
+                    "project" => $target["project"]->id,
+                    "target" => $target["target"],
+                    "status" => ProjectGtCheck::STATUS_FINISHED,
+                    "hidden" => ProjectGtCheck::RATING_HIDDEN,
+                );
+
+                $checks = ProjectGtCheck::model()->findAll($criteria);
+
+                if (!$checks) {
+                    continue;
+                }
+
+                foreach ($checks as $check) {
+                    switch ($check->rating) {
+                        case ProjectGtCheck::RATING_INFO:
+                            $rating += 1;
+                            break;
+
+                        case ProjectGtCheck::RATING_LOW_RISK:
+                            $rating += 2;
+                            break;
+
+                        case ProjectGtCheck::RATING_MED_RISK:
+                            $rating += 3;
+                            break;
+
+                        case ProjectGtCheck::RATING_HIGH_RISK:
+                            $rating += 4;
+                            break;
+                    }
+
+                    $checkCount++;
+                }
+
+                if ($checkCount) {
+                    $rating /= $checkCount;
+                }
+
+                $targetData['ratings'][] = $rating;
+            }
+
+            $targetsData[] = $targetData;
+        }
+
+        return $targetsData;
+    }
+
+    /**
+     * Generate comparison report.
+     */
+    private function _generateComparisonReport($model) {
+        $clientId = $model->clientId;
+        $projectId1 = $model->projectId1;
+        $projectId2 = $model->projectId2;
+
+        $project1 = Project::model()->findByAttributes(array(
+            'client_id' => $clientId,
+            'id'        => $projectId1
+        ));
+
+        if ($project1 === null) {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'First project not found.'));
+            return;
+        }
+
+        if (!$project1->checkPermission()) {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
+            return;
+        }
+
+        $project2 = Project::model()->findByAttributes(array(
+            'client_id' => $clientId,
+            'id'        => $projectId2
+        ));
+
+        if ($project2 === null) {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Second project not found.'));
+            return;
+        }
+
+        if (!$project2->checkPermission()) {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
+            return;
+        }
+
+        if ($project1->guided_test != $project2->guided_test) {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Guided Test projects can be compared only to Guided Test projects.'));
+            return;
+        }
+
+        if ($project1->guided_test) {
+            $targetsData = $this->_gtComparisonReport($project1, $project2);
+        } else {
+            $targetsData = $this->_comparisonReport($project1, $project2);
         }
 
         $this->_rtfSetup($model);
@@ -2812,7 +2951,7 @@ class ReportController extends Controller
             '\fs' . ($this->textFont->getSize() * 2) . ' \f' . $this->textFont->getFontIndex() . ' ' .
              Yii::t('app', 'page {page} of {numPages}',
             array(
-                '{page}'     => '{\field{\*\fldinst {PAGE}}{\fldrslt {1}}}',
+                '{page}' => '{\field{\*\fldinst {PAGE}}{\fldrslt {1}}}',
                 '{numPages}' => '{\field{\*\fldinst {NUMPAGES}}{\fldrslt {1}}}'
             )
         ));
@@ -2833,12 +2972,18 @@ class ReportController extends Controller
         $table->setFirstRowAsHeader();
 
         // set paddings
-        for ($row = 1; $row <= count($targetsData) + 1; $row++)
-            for ($col = 1; $col <= 3; $col++)
-            {
-                $table->getCell($row, $col)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
+        for ($row = 1; $row <= count($targetsData) + 1; $row++) {
+            for ($col = 1; $col <= 3; $col++) {
+                $table->getCell($row, $col)->setCellPaddings(
+                    $model->cellPadding,
+                    $model->cellPadding,
+                    $model->cellPadding,
+                    $model->cellPadding
+                );
+
                 $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
             }
+        }
 
         $table->writeToCell(1, 1, Yii::t('app', 'Target'));
         $table->writeToCell(1, 2, $project1->name . ' (' . $project1->year . ')');
@@ -2846,8 +2991,7 @@ class ReportController extends Controller
 
         $row = 2;
 
-        foreach ($targetsData as $target)
-        {
+        foreach ($targetsData as $target) {
             $table->writeToCell($row, 1, $target['host']);
             $table->addImageToCell($row, 2, $this->_generateRatingImage($target['ratings'][0]), null, $this->docWidth * 0.30);
             $table->addImageToCell($row, 3, $this->_generateRatingImage($target['ratings'][1]), null, $this->docWidth * 0.30);
@@ -2885,46 +3029,45 @@ class ReportController extends Controller
     /**
      * Show comparison report form.
      */
-    public function actionComparison()
-    {
+    public function actionComparison() {
         $model = new ProjectComparisonForm();
 
-        if (isset($_POST['ProjectComparisonForm']))
-        {
+        if (isset($_POST['ProjectComparisonForm'])) {
             $model->attributes = $_POST['ProjectComparisonForm'];
 
-            if ($model->validate())
+            if ($model->validate()) {
                 $this->_generateComparisonReport($model);
-            else
+            } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+            }
         }
 
         $criteria = new CDbCriteria();
         $criteria->order = 't.name ASC';
 
-        if (!User::checkRole(User::ROLE_ADMIN))
-        {
+        if (!User::checkRole(User::ROLE_ADMIN)) {
             $projects = ProjectUser::model()->with('project')->findAllByAttributes(array(
                 'user_id' => Yii::app()->user->id
             ));
 
             $clientIds = array();
 
-            foreach ($projects as $project)
-                if (!in_array($project->project->client_id, $clientIds))
+            foreach ($projects as $project) {
+                if (!in_array($project->project->client_id, $clientIds)) {
                     $clientIds[] = $project->project->client_id;
+                }
+            }
 
             $criteria->addInCondition('id', $clientIds);
         }
 
         $clients = Client::model()->findAll($criteria);
-
         $this->breadcrumbs[] = array(Yii::t('app', 'Projects Comparison'), '');
 
         // display the report generation form
         $this->pageTitle = Yii::t('app', 'Projects Comparison');
 		$this->render('comparison', array(
-            'model'   => $model,
+            'model' => $model,
             'clients' => $clients
         ));
     }
@@ -3114,25 +3257,9 @@ class ReportController extends Controller
      */
     private function _gtFulfillmentReport($fullReport, $findWeakest, $model, $language) {
         $data = array();
-        $targets = array();
 
         $projectId = ($fullReport || $findWeakest) ? $this->project['project']->id : $model->projectId;
-        $criteria = new CDbCriteria();
-        $criteria->addColumnCondition(array('project_id' => $projectId));
-        $criteria->order = 'target ASC';
-
-        $checks = ProjectGtCheck::model()->findAll($criteria);
-
-        foreach ($checks as $check) {
-            if (!$check->target) {
-                continue;
-            }
-
-            if (!in_array($check->target, $targets)) {
-                $targets[] = $check->target;
-            }
-        }
-
+        $targets = $this->_getGtTargets($projectId);
         $targetId = 1;
 
         foreach ($targets as $target) {
@@ -3629,25 +3756,9 @@ class ReportController extends Controller
      */
     private function _gtRiskMatrixReport($fullReport, $model, $risks) {
         $data = array();
-        $targets = array();
 
         $projectId = $fullReport ? $this->project['project']->id : $model->projectId;
-        $criteria = new CDbCriteria();
-        $criteria->addColumnCondition(array('project_id' => $projectId));
-        $criteria->order = 'target ASC';
-
-        $checks = ProjectGtCheck::model()->findAll($criteria);
-
-        foreach ($checks as $check) {
-            if (!$check->target) {
-                continue;
-            }
-
-            if (!in_array($check->target, $targets)) {
-                $targets[] = $check->target;
-            }
-        }
-
+        $targets = $this->_getGtTargets($projectId);
         $targetId = 1;
 
         foreach ($targets as $target) {

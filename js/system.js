@@ -542,38 +542,34 @@ function System()
          * Comparison form has been changed.
          */
         this.comparisonFormChange = function (e) {
-            var val, val1, val2;
+            var val;
 
             $('#client-list').removeClass('error');
             $('#client-list > div > .help-block').hide();
 
-            if (e.id == 'ProjectComparisonForm_clientId')
-            {
+            if (e.id == 'ProjectComparisonForm_clientId') {
                 val = $('#ProjectComparisonForm_clientId').val();
 
                 $('#project-list-1').hide();
                 $('#project-list-2').hide();
                 $('.form-actions > button[type="submit"]').prop('disabled', true);
 
-                if (val != 0)
-                {
+                if (val != 0) {
                     _system.control.loadObjects(val, 'project-list', function (data) {
                         $('#ProjectComparisonForm_projectId1 > option:not(:first)').remove();
                         $('#ProjectComparisonForm_projectId2 > option:not(:first)').remove();
 
                         if (data && data.objects.length) {
                             for (var i = 0; i < data.objects.length; i++) {
-                                if (data.objects[i].guided) {
-                                    continue;
-                                }
-
                                 $('<option>')
                                     .val(data.objects[i].id)
+                                    .attr("data-guided", data.objects[i].guided ? 1 : 0)
                                     .html(data.objects[i].name)
                                     .appendTo('#ProjectComparisonForm_projectId1');
 
                                 $('<option>')
                                     .val(data.objects[i].id)
+                                    .attr("data-guided", data.objects[i].guided ? 1 : 0)
                                     .html(data.objects[i].name)
                                     .appendTo('#ProjectComparisonForm_projectId2');
                             }
@@ -586,16 +582,19 @@ function System()
                         }
                     });
                 }
-            }
-            else if (e.id == 'ProjectComparisonForm_projectId1' || e.id == 'ProjectComparisonForm_projectId2')
-            {
-                val1 = $('#ProjectComparisonForm_projectId1').val();
-                val2 = $('#ProjectComparisonForm_projectId2').val();
+            } else if (e.id == 'ProjectComparisonForm_projectId1' || e.id == 'ProjectComparisonForm_projectId2') {
+                var project1 = $('#ProjectComparisonForm_projectId1'),
+                    project2 = $('#ProjectComparisonForm_projectId2');
 
                 $('.form-actions > button[type="submit"]').prop('disabled', true);
 
-                if (val1 != 0 && val2 != 0 && val1 != val2)
+                if (project1.val() != 0 &&
+                    project2.val() != 0 &&
+                    project1.val() != project2.val() &&
+                    project1.find("option:selected").attr("data-guided") == project2.find("option:selected").attr("data-guided")
+                ) {
                     $('.form-actions > button[type="submit"]').prop('disabled', false);
+                }
             }
         };
 
