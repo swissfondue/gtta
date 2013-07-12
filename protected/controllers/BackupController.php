@@ -61,6 +61,7 @@ class BackupController extends Controller
         'project_gt_check_attachments',
         'project_gt_check_inputs',
         'project_gt_check_solutions',
+        'project_gt_check_vulns',
         'project_gt_suggested_targets',
     );
 
