@@ -12,6 +12,7 @@ return array(
 
     // autoloading model and component classes
 	'import' => array(
+        'application.forms.*',
 		'application.models.*',
 		'application.components.*',
         'application.components.processors.*',
