@@ -33,6 +33,19 @@
                             <th class="check-count"><?php echo Yii::t('app', 'Checks'); ?></th>
                             <th class="actions">&nbsp;</th>
                         </tr>
+                        <?php if ($p->page == 1): ?>
+                            <tr>
+                                <td class="name">
+                                    <a href="<?php echo $this->createUrl("check/incoming"); ?>"><?php echo Yii::t("app", "Incoming Checks"); ?></a>
+                                </td>
+                                <td>
+                                    <?php echo $incomingCount; ?>
+                                </td>
+                                <td class="actions">
+                                    &nbsp;
+                                </td>
+                            </tr>
+                        <?php endif; ?>
                         <?php foreach ($categories as $category): ?>
                             <tr data-id="<?php echo $category->id; ?>" data-control-url="<?php echo $this->createUrl('check/control'); ?>">
                                 <td class="name">

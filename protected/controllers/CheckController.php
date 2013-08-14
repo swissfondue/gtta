@@ -75,14 +75,19 @@ class CheckController extends Controller
 
         $count = Check::model()->count();
 
+        $criteria = new CDbCriteria();
+        $criteria->addCondition("check_control_id IS NULL");
+        $incomingCount = Check::model()->count($criteria);
+
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), '');
 
         // display the page
         $this->pageTitle = Yii::t('app', 'Checks');
 		$this->render('index', array(
-            'categories' => $categories,
-            'p'          => $paginator,
-            'count'      => $count
+            "categories" => $categories,
+            "p" => $paginator,
+            "count" => $count,
+            "incomingCount" => $incomingCount,
         ));
 	}
 
@@ -714,66 +719,219 @@ class CheckController extends Controller
 	}
 
     /**
+     * Display a list of incoming checks
+     */
+	public function actionIncoming($page=1) {
+        $page = (int) $page;
+
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        if ($page < 1) {
+            throw new CHttpException(404, Yii::t("app", "Page not found."));
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->limit = Yii::app()->params["entriesPerPage"];
+        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->order = "t.sort_order ASC";
+        $criteria->addCondition("check_control_id IS NULL");
+        $criteria->together = true;
+
+        $checks = Check::model()->with(array(
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array("language_id" => $language)
+            )
+        ))->findAll($criteria);
+
+        $checkCount = Check::model()->count($criteria);
+        $paginator = new Paginator($checkCount, $page);
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Checks"), $this->createUrl("check/index"));
+        $this->breadcrumbs[] = array(Yii::t("app", "Incoming Checks"), "");
+
+        // display the page
+        $this->pageTitle = Yii::t("app", "Incoming Checks");
+		$this->render("incoming/index", array(
+            "checks" => $checks,
+            "p" => $paginator,
+        ));
+	}
+
+    /**
+     * Incoming check edit page.
+     */
+	public function actionEditIncoming($id) {
+        $id = (int) $id;
+        $newRecord = false;
+
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->together = true;
+        $criteria->addCondition("check_control_id IS NULL");
+        $criteria->addColumnCondition(array("id" => $id));
+
+        $check = Check::model()->with(array(
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array("language_id" => $language)
+            )
+        ))->find($criteria);
+
+        if (!$check) {
+            throw new CHttpException(404, Yii::t("app", "Check not found."));
+        }
+
+		$model = new IncomingCheckEditForm();
+
+		// collect user input data
+		if (isset($_POST["IncomingCheckEditForm"])) {
+			$model->attributes = $_POST["IncomingCheckEditForm"];
+
+			if ($model->validate()) {
+                $check->check_control_id = $model->controlId;
+                $check->save();
+
+                $control = CheckControl::model()->findByPk($model->controlId);
+
+                $targetCheckCategories = TargetCheckCategory::model()->findAllByAttributes(array(
+                    "check_category_id" => $control->check_category_id
+                ));
+
+                foreach ($targetCheckCategories as $targetCheckCategory) {
+                    $targetCheckCategory->updateStats();
+                }
+
+                Yii::app()->user->setFlash("success", Yii::t("app", "Check saved."));
+                $check->refresh();
+
+                $this->redirect(array(
+                    "check/editcheck",
+                    "id" => $check->control->check_category_id,
+                    "control" => $check->check_control_id,
+                    "check" => $check->id
+                ));
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+		}
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Checks"), $this->createUrl("check/index"));
+        $this->breadcrumbs[] = array(Yii::t("app", "Incoming Checks"), $this->createUrl("check/incoming"));
+        $this->breadcrumbs[] = array($check->localizedName, "");
+
+        $categories = CheckCategory::model()->with(array(
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array("language_id" => $language)
+            ),
+
+            "controls" => array(
+                "joinType" => "LEFT JOIN",
+                "with"     => array(
+                    "l10n" => array(
+                        "alias" => "l10n_c",
+                        "joinType" => "LEFT JOIN",
+                        "on" => "l10n_c.language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                )
+            )
+        ))->findAllByAttributes(
+            array(),
+            array("order" => "COALESCE(l10n.name, t.name) ASC")
+        );
+
+		// display the page
+        $this->pageTitle = $check->localizedName;
+		$this->render("incoming/edit", array(
+            "model" => $model,
+            "check" => $check,
+            "categories" => $categories,
+        ));
+	}
+
+    /**
      * Check edit page.
      */
-	public function actionEditCheck($id, $control, $check=0)
-	{
-        $id        = (int) $id;
-        $control   = (int) $control;
-        $check     = (int) $check;
+	public function actionEditCheck($id, $control, $check=0) {
+        $id = (int) $id;
+        $control = (int) $control;
+        $check = (int) $check;
         $newRecord = false;
 
         $language = Language::model()->findByAttributes(array(
             'code' => Yii::app()->language
         ));
 
-        if ($language)
+        if ($language) {
             $language = $language->id;
+        }
 
         $category = CheckCategory::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+                'on' => 'language_id = :language_id',
+                'params' => array('language_id' => $language)
             )
         ))->findByPk($id);
 
-        if (!$category)
+        if (!$category) {
             throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+        }
 
         $control = CheckControl::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+                'on' => 'language_id = :language_id',
+                'params' => array('language_id' => $language)
             )
         ))->findByAttributes(array(
             'id'                => $control,
             'check_category_id' => $category->id
         ));
 
-        if (!$control)
+        if (!$control) {
             throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+        }
 
-        if ($check)
-        {
+        if ($check) {
+            $criteria = new CDbCriteria();
+            $criteria->together = true;
+            $criteria->addColumnCondition(array(
+                "id" => $check,
+                "check_control_id" => $control->id
+            ));
+
             $check = Check::model()->with(array(
                 'l10n' => array(
                     'joinType' => 'LEFT JOIN',
-                    'on'       => 'language_id = :language_id',
-                    'params'   => array( 'language_id' => $language )
+                    'on' => 'language_id = :language_id',
+                    'params' => array('language_id' => $language)
                 )
-            ))->findByAttributes(array(
-                'id'               => $check,
-                'check_control_id' => $control->id
-            ));
+            ))->find($criteria);
 
-            if (!$check)
+            if (!$check) {
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
-        }
-        else
-        {
-            $check     = new Check();
+            }
+        } else {
+            $check = new Check();
             $newRecord = true;
         }
 
@@ -782,124 +940,126 @@ class CheckController extends Controller
 		$model = new CheckEditForm();
         $model->localizedItems = array();
 
-        if (!$newRecord)
-        {
-            $model->name              = $check->name;
-            $model->backgroundInfo    = $check->background_info;
-            $model->hints             = $check->hints;
-            $model->question          = $check->question;
-            $model->advanced          = $check->advanced;
-            $model->automated         = $check->automated;
-            $model->protocol          = $check->protocol;
-            $model->port              = $check->port;
+        if (!$newRecord) {
+            $model->name = $check->name;
+            $model->backgroundInfo = $check->background_info;
+            $model->hints = $check->hints;
+            $model->question = $check->question;
+            $model->advanced = $check->advanced;
+            $model->automated = $check->automated;
+            $model->protocol = $check->protocol;
+            $model->port = $check->port;
             $model->multipleSolutions = $check->multiple_solutions;
-            $model->referenceId       = $check->reference_id;
-            $model->referenceCode     = $check->reference_code;
-            $model->referenceUrl      = $check->reference_url;
-            $model->effort            = $check->effort;
-            $model->controlId         = $check->check_control_id;
+            $model->referenceId = $check->reference_id;
+            $model->referenceCode = $check->reference_code;
+            $model->referenceUrl = $check->reference_url;
+            $model->effort = $check->effort;
+            $model->controlId = $check->check_control_id;
 
             $checkL10n = CheckL10n::model()->findAllByAttributes(array(
                 'check_id' => $check->id
             ));
 
-            foreach ($checkL10n as $cl)
-            {
+            foreach ($checkL10n as $cl) {
                 $i = array();
 
-                $i['name']           = $cl->name;
+                $i['name'] = $cl->name;
                 $i['backgroundInfo'] = $cl->background_info;
-                $i['hints']          = $cl->hints;
-                $i['question']       = $cl->question;
+                $i['hints'] = $cl->hints;
+                $i['question'] = $cl->question;
 
                 $model->localizedItems[$cl->language_id] = $i;
             }
-        }
-        else
+        } else {
             $model->controlId = $control->id;
+        }
 
 		// collect user input data
-		if (isset($_POST['CheckEditForm']))
-		{
+		if (isset($_POST['CheckEditForm'])) {
 			$model->attributes = $_POST['CheckEditForm'];
 
-            $model->name           = $model->defaultL10n($languages, 'name');
+            $model->name = $model->defaultL10n($languages, 'name');
             $model->backgroundInfo = $model->defaultL10n($languages, 'backgroundInfo');
-            $model->hints          = $model->defaultL10n($languages, 'hints');
-            $model->question       = $model->defaultL10n($languages, 'question');
+            $model->hints = $model->defaultL10n($languages, 'hints');
+            $model->question = $model->defaultL10n($languages, 'question');
 
-            if (!isset($_POST['CheckEditForm']['advanced']))
+            if (!isset($_POST['CheckEditForm']['advanced'])) {
                 $model->advanced = false;
+            }
 
-            if (!isset($_POST['CheckEditForm']['automated']))
+            if (!isset($_POST['CheckEditForm']['automated'])) {
                 $model->automated = false;
+            }
 
-            if (!isset($_POST['CheckEditForm']['multipleSolutions']))
+            if (!isset($_POST['CheckEditForm']['multipleSolutions'])) {
                 $model->multipleSolutions = false;
+            }
 
-			if ($model->validate())
-            {
+			if ($model->validate()) {
                 $redirect = false;
 
-                if ($model->controlId != $check->check_control_id || $newRecord)
+                if ($model->controlId != $check->check_control_id || $newRecord) {
                     $redirect = true;
+                }
 
-                $check->name               = $model->name;
-                $check->background_info    = $model->backgroundInfo;
-                $check->hints              = $model->hints;
-                $check->question           = $model->question;
-                $check->advanced           = $model->advanced;
-                $check->automated          = $model->automated;
+                $check->name = $model->name;
+                $check->background_info = $model->backgroundInfo;
+                $check->hints = $model->hints;
+                $check->question = $model->question;
+                $check->advanced = $model->advanced;
+                $check->automated = $model->automated;
                 $check->multiple_solutions = $model->multipleSolutions;
-                $check->protocol           = $model->protocol;
-                $check->port               = $model->port;
-                $check->check_control_id   = $model->controlId;
-                $check->reference_id       = $model->referenceId;
-                $check->reference_code     = $model->referenceCode;
-                $check->reference_url      = $model->referenceUrl;
-                $check->effort             = $model->effort;
+                $check->protocol = $model->protocol;
+                $check->port = $model->port;
+                $check->check_control_id = $model->controlId;
+                $check->reference_id = $model->referenceId;
+                $check->reference_code = $model->referenceCode;
+                $check->reference_url = $model->referenceUrl;
+                $check->effort = $model->effort;
 
                 $check->save();
 
-                if ($newRecord)
-                {
+                if ($newRecord) {
                     $check->sort_order = $check->id;
                     $check->save();
                 }
 
-                if (!$newRecord)
+                if (!$newRecord) {
                     TargetCheckCategory::updateAllStats();
+                }
 
-                foreach ($model->localizedItems as $languageId => $value)
-                {
+                foreach ($model->localizedItems as $languageId => $value) {
                     $checkL10n = CheckL10n::model()->findByAttributes(array(
-                        'check_id'    => $check->id,
+                        'check_id' => $check->id,
                         'language_id' => $languageId
                     ));
 
-                    if (!$checkL10n)
-                    {
+                    if (!$checkL10n) {
                         $checkL10n = new CheckL10n();
-                        $checkL10n->check_id    = $check->id;
+                        $checkL10n->check_id = $check->id;
                         $checkL10n->language_id = $languageId;
                     }
 
-                    if ($value['name'] == '')
+                    if ($value['name'] == '') {
                         $value['name'] = null;
+                    }
 
-                    if ($value['backgroundInfo'] == '')
+                    if ($value['backgroundInfo'] == '') {
                         $value['backgroundInfo'] = null;
+                    }
 
-                    if ($value['hints'] == '')
+                    if ($value['hints'] == '') {
                         $value['hints'] = null;
+                    }
 
-                    if ($value['question'] == '')
+                    if ($value['question'] == '') {
                         $value['question'] = null;
+                    }
 
-                    $checkL10n->name            = $value['name'];
+                    $checkL10n->name = $value['name'];
                     $checkL10n->background_info = $value['backgroundInfo'];
-                    $checkL10n->hints           = $value['hints'];
-                    $checkL10n->question        = $value['question'];
+                    $checkL10n->hints = $value['hints'];
+                    $checkL10n->question = $value['question'];
                     $checkL10n->save();
                 }
 
@@ -907,68 +1067,76 @@ class CheckController extends Controller
                     'check_category_id' => $category->id
                 ));
 
-                foreach ($targetCheckCategories as $targetCheckCategory)
+                foreach ($targetCheckCategories as $targetCheckCategory) {
                     $targetCheckCategory->updateStats();
+                }
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check saved.'));
 
                 $check->refresh();
 
-                if ($redirect)
-                    $this->redirect(array( 'check/editcheck', 'id' => $check->control->check_category_id, 'control' => $check->check_control_id, 'check' => $check->id ));
-            }
-            else
+                if ($redirect) {
+                    $this->redirect(array(
+                        'check/editcheck',
+                        'id' => $check->control->check_category_id,
+                        'control' => $check->check_control_id,
+                        'check' => $check->id
+                    ));
+                }
+            } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+            }
 		}
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
-        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
-        $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array('id' => $category->id)));
+        $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array('id' => $category->id, 'control' => $control->id)));
 
-        if ($newRecord)
+        if ($newRecord) {
             $this->breadcrumbs[] = array(Yii::t('app', 'New Check'), '');
-        else
+        } else {
             $this->breadcrumbs[] = array($check->localizedName, '');
+        }
 
         $references = Reference::model()->findAllByAttributes(
             array(),
-            array( 'order' => 't.name ASC' )
+            array('order' => 't.name ASC')
         );
 
         $categories = CheckCategory::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+                'on' => 'language_id = :language_id',
+                'params' => array('language_id' => $language)
             ),
 
             'controls' => array(
                 'joinType' => 'LEFT JOIN',
                 'with'     => array(
                     'l10n' => array(
-                        'alias'    => 'l10n_c',
+                        'alias' => 'l10n_c',
                         'joinType' => 'LEFT JOIN',
-                        'on'       => 'l10n_c.language_id = :language_id',
-                        'params'   => array( 'language_id' => $language )
+                        'on' => 'l10n_c.language_id = :language_id',
+                        'params' => array('language_id' => $language)
                     )
                 )
             )
         ))->findAllByAttributes(
             array(),
-            array( 'order' => 'COALESCE(l10n.name, t.name) ASC' )
+            array('order' => 'COALESCE(l10n.name, t.name) ASC')
         );
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Check') : $check->localizedName;
 		$this->render('control/check/edit', array(
-            'model'      => $model,
-            'category'   => $category,
-            'control'    => $control,
-            'check'      => $check,
-            'languages'  => $languages,
+            'model' => $model,
+            'category' => $category,
+            'control' => $control,
+            'check' => $check,
+            'languages' => $languages,
             'references' => $references,
             'categories' => $categories,
-            'efforts'    => array( 2, 5, 20, 40, 60, 120 ),
+            'efforts' => array(2, 5, 20, 40, 60, 120),
         ));
 	}
 

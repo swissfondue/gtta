@@ -26,7 +26,15 @@ class m130811_153033_1 extends CDbMigration {
      * @return bool
      */
 	public function safeDown() {
-		echo "m130811_153033_1 does not support migration down.\n";
+		$this->dropColumn("system", "workstation_id");
+        $this->dropColumn("system", "workstation_key");
+        $this->dropColumn("system", "version");
+        $this->dropColumn("system", "version_description");
+        $this->dropColumn("system", "update_version");
+        $this->dropColumn("system", "update_description");
+        $this->dropColumn("system", "update_check_time");
+        $this->dropColumn("system", "update_time");
+
 		return false;
 	}
 }
