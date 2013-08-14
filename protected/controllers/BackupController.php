@@ -222,14 +222,8 @@ class BackupController extends Controller
 
         $zip->close();
 
-        $system = System::model()->findAll();
-
-        if ($system)
-            $system = $system[0];
-        else
-            $system = new System();
-
         $now = new DateTime();
+        $system = System::model()->findByPk(1);
         $system->backup = $now->format("Y-m-d H:i:s");
         $system->save();
 
@@ -272,16 +266,15 @@ class BackupController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Backup canceled.'));
         }
 
-        $system   = System::model()->findAll();
         $backedUp = '';
+        $system = System::model()->findByPk(1);
 
-        if ($system)
-        {
-            $backedUp = new DateTime($system[0]->backup);
+        if ($system->backup) {
+            $backedUp = new DateTime($system->backup);
             $backedUp = $backedUp->format('d.m.Y H:i');
-        }
-        else
+        } else {
             $backedUp = Yii::t('app', 'Never');
+        }
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Backup'), '');
 

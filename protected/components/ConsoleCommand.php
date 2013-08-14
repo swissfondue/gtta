@@ -9,13 +9,7 @@ class ConsoleCommand extends CConsoleCommand
      * Init a command object.
      */
     public function init() {
-        $system = System::model()->findAll();
-
-        if ($system) {
-            $system = $system[0];
-        } else {
-            $system = new System();
-        }
+        $system = System::model()->findByPk(1);
 
         if (!$system->timezone) {
             $system->timezone = "Europe/Zurich";

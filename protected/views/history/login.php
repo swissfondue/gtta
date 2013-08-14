@@ -15,7 +15,7 @@
                         <?php foreach ($entries as $entry): ?>
                             <tr>
                                 <td class="time">
-                                    <?php echo substr($entry->create_time, 0, strpos($entry->create_time, '.')); ?>
+                                    <?php echo DateTimeFormat::toISO($entry->create_time); ?>
                                 </td>
                                 <td class="name">
                                     <?php if ($entry->user): ?>

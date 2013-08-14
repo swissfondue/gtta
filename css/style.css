@@ -768,3 +768,19 @@ table.table-result td {
     padding:0;
     margin:0;
 }
+
+.pre {
+    font-family:monospace;
+    white-space:pre;
+    padding:5px 10px 5px 10px;
+    margin:5px 0 5px 0;
+    border-left:5px solid #eee;
+    background-color:#fafafa;
+    font-size:90%;
+    color:#666;
+}
+
+.small-block {
+    font-size:80%;
+    color:#999;
+}

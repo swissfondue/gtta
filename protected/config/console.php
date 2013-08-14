@@ -8,13 +8,14 @@ return array(
 	'name'     => 'GTTA',
 
     // preloading components
-	'preload' => array( 'log' ),
+	'preload' => array('log'),
 
     // autoloading model and component classes
 	'import' => array(
         'application.forms.*',
 		'application.models.*',
 		'application.components.*',
+        'application.components.formats.*',
         'application.components.processors.*',
         'ext.yii-mail.YiiMailMessage',
 	),
@@ -78,6 +79,10 @@ return array(
             'lockFile' => '/tmp/gtta.vulntracker',
         ),
 
+        "check-update" => array(
+            "lockFile" => "/tmp/gtta.check-update",
+        ),
+
         // checks automation
         'automation' => array(
             'minNotificationInterval' => 5 * 60, // 5 minutes
@@ -102,12 +107,20 @@ return array(
             )
         ),
 
-        // file cleaner
-        'cleaner' => array(
-            'lockFile' => '/tmp/gtta.cleaner',
-        ),
-
         'yiicPath' => dirname(__FILE__).'/../',
         'attachments' => $mainConfig['params']['attachments'],
+    ),
+    
+    "commandMap" => array(
+        "migrate" => array(
+            "class" => "system.cli.commands.MigrateCommand",
+            "migrationPath" => "application.migrations",
+            "migrationTable" => "migrations",
+            "connectionID" => "db",
+            "templateFile" => "application.migrations.template",
+        ),
+        "checkupdate" => array(
+            "class" => "application.commands.CheckUpdateCommand",
+        ),
     ),
 );

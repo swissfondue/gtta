@@ -23,14 +23,7 @@ class SettingsController extends Controller
 	public function actionEdit()
 	{
         $model = new SettingsEditForm();
-        $system = System::model()->findAll();
-
-        if ($system) {
-            $system = $system[0];
-        } else {
-            $system = new System();
-        }
-
+        $system = System::model()->findByPk(1);
         $model->timezone = $system->timezone;
 
         // collect form input data

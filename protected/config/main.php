@@ -14,6 +14,7 @@ return array(
         'application.forms.*',
 		'application.models.*',
 		'application.components.*',
+        'application.components.formats.*',
         'application.components.processors.*',
         'application.extensions.PHPRtfLite.*',
         'application.extensions.PHPRtfLite.PHPRtfLite.*',
@@ -130,6 +131,9 @@ return array(
 
                 // settings
                 'settings' => 'settings/edit',
+
+                // update
+                'update' => 'update/index',
 
                 // checks
                 'checks/<page:\d+>'         => 'check/index',
