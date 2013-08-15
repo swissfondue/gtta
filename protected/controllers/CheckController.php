@@ -770,7 +770,6 @@ class CheckController extends Controller
      */
 	public function actionEditIncoming($id) {
         $id = (int) $id;
-        $newRecord = false;
 
         $language = Language::model()->findByAttributes(array(
             "code" => Yii::app()->language
