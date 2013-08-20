@@ -54,16 +54,25 @@ class UpdateCommand extends ConsoleCommand {
      * @param $targetVersion
      */
     private function _copyFiles($targetVersion) {
-        $srcDir = Yii::app()->params["update"]["directory"] . "/" . self::EXTRACTED_DIRECTORY;
-        $dstDir = Yii::app()->params["update"]["versions"] . "/" . $targetVersion;
+        $params = Yii::app()->params["update"];
+        $srcDir = $params["directory"] . "/" . self::EXTRACTED_DIRECTORY;
+        $dstDir = $params["versions"] . "/" . $targetVersion;
 
         $this->_copyRecursive($srcDir . "/" . self::WEB_DIRECTORY, $dstDir . "/" . self::WEB_DIRECTORY);
         $this->_copyRecursive($srcDir . "/" . self::SCRIPTS_DIRECTORY, $dstDir . "/" . self::SCRIPTS_DIRECTORY);
 
-        $this->_chmod($dstDir . "/" . self::WEB_DIRECTORY . "/protected/runtime", 0770);
-        $this->_chmod($dstDir . "/" . self::WEB_DIRECTORY . "/protected/yiic", 0750);
+        $protectedDir = $dstDir . "/" . self::WEB_DIRECTORY . "/protected";
 
+        $this->_chmod($protectedDir . "/yiic", 0750);
         $this->_runCommand(sprintf("chown -R %s:%s %s", self::GTTA_USER, self::GTTA_GROUP, $dstDir));
+
+        // update configuration
+        $this->_runCommand(sprintf(
+            "python %s %s %s/config/",
+            $params["deployScript"],
+            $params["deployConfig"],
+            $protectedDir
+        ));
     }
 
     /**
