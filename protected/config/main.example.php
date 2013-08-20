@@ -1,9 +1,9 @@
 <?php
 
-define("YII_DEBUG", $DEPLOY_BASE_DEBUG);
-define("YII_TRACE_LEVEL", 3);
-define("BASE_DIR", "/opt/gtta");
-define("VERSION_DIR", BASE_DIR . "/current");
+defined("YII_DEBUG") || define("YII_DEBUG", $DEPLOY_BASE_DEBUG);
+defined("YII_TRACE_LEVEL") || define("YII_TRACE_LEVEL", 3);
+defined("BASE_DIR") || define("BASE_DIR", "/opt/gtta");
+defined("VERSION_DIR") || define("VERSION_DIR", BASE_DIR . "/current");
 
 // main Web application configuration
 return array(
