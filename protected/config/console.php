@@ -32,11 +32,11 @@ return array(
             "logging" => false,
             "dryRun" => false,
             "transportOptions" => array(
-                "host" => "##SMTP_SERVER##",
-                "port" => "##SMTP_PORT##",
-                "username" => "##SMTP_LOGIN##",
-                "password" => "##SMTP_PASSWORD##",
-                "encryption" => "##SMTP_ENCRYPTION##",
+                "host" => "$DEPLOY_SMTP_SERVER",
+                "port" => "$DEPLOY_SMTP_PORT",
+                "username" => "$DEPLOY_SMTP_LOGIN",
+                "password" => "$DEPLOY_SMTP_PASSWORD",
+                "encryption" => "$DEPLOY_SMTP_ENCRYPTION",
             )
         ),
 
@@ -59,7 +59,7 @@ return array(
         // email sender
         "email" => array(
             "lockFile" => "/tmp/gtta.email",
-            "systemEmail" => "##EMAIL##",
+            "systemEmail" => "$DEPLOY_SMTP_EMAIL",
             "maxAttempts" => 3,
         ),
 
