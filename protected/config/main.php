@@ -1,10 +1,14 @@
 <?php
 
+define("BASE_DIR", "/opt/gtta");
+define("VERSION_DIR", BASE_DIR . "/current");
+
 // main Web application configuration
 return array(
-	"basePath" => dirname(__FILE__).DIRECTORY_SEPARATOR."..",
+	"basePath" => dirname(__FILE__) . "/..",
 	"name"     => "GTTA",
     "charset"  => "utf-8",
+    "runtimePath" => BASE_DIR . "/runtime",
 
 	// preloading components
 	"preload" => array( "log" ),
@@ -336,11 +340,11 @@ return array(
         "maxCheckboxes" => 3,
 
         "fonts" => array(
-            "path" => dirname(__FILE__).DIRECTORY_SEPARATOR."../../fonts",
+            "path" => dirname(__FILE__) . "/../../fonts",
         ),
 
         "attachments" => array(
-            "path"    => dirname(__FILE__).DIRECTORY_SEPARATOR."../../files/attachments",
+            "path" => BASE_DIR . "/files/attachments",
             "maxSize" => 100 * 1024 * 1024, // 100 megabytes
         ),
 
@@ -349,7 +353,7 @@ return array(
         ),
 
         "clientLogos" => array(
-            "path" => dirname(__FILE__).DIRECTORY_SEPARATOR."../../files/logos",
+            "path" => BASE_DIR . "/files/logos",
             "maxSize" => 10 * 1024 * 1024, // 10 megabytes
         ),
 
@@ -381,7 +385,7 @@ return array(
             "maxCellPadding" => 5.0,
 
             "headerImages" => array(
-                "path"    => dirname(__FILE__).DIRECTORY_SEPARATOR."../../files/header-images",
+                "path"    => BASE_DIR . "/files/header-images",
                 "maxSize" => 10 * 1024 * 1024, // 10 megabytes
             ),
         ),
@@ -390,7 +394,7 @@ return array(
         "collapseCheckCount" => 20,
 
         "automation" => array(
-            "scriptsPath" => dirname(__FILE__).DIRECTORY_SEPARATOR."../../../scripts",
+            "scriptsPath" => VERSION_DIR . "/scripts",
         ),
     ),
 
