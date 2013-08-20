@@ -23,33 +23,21 @@ return array(
 
 	// application components
 	"components" => array(
-		"db" => array(
-			"connectionString" => $mainConfig["components"]["db"]["connectionString"],
-			"username" => $mainConfig["components"]["db"]["username"],
-			"password" => $mainConfig["components"]["db"]["password"],
-			"charset" => $mainConfig["components"]["db"]["charset"],
-		),
+		"db" => $mainConfig["components"]["db"],
 
         "mail" => array(
-            "class"         => "ext.yii-mail.YiiMail",
+            "class" => "ext.yii-mail.YiiMail",
             "transportType" => "smtp",
-            "viewPath"      => "application.views.mail",
-            "logging"       => false,
-            "dryRun"        => false,
-            "transportOptions" => GTTA_PRODUCTION ? array(
-                    "host"         => "mailbak.netprotect.ch",
-                    "port"         => 25,
-                    "username"     => "web365p2",
-                    "password"     => "babuschka",
-                    "encryption"   => "",
-                ) :
-                array(
-                    "host"         => "smtp.yandex.ru",
-                    "port"         => 465,
-                    "username"     => "gtta.test@yandex.ru",
-                    "password"     => "123321",
-                    "encryption"   => "ssl",
-                ),
+            "viewPath" => "application.views.mail",
+            "logging" => false,
+            "dryRun" => false,
+            "transportOptions" => array(
+                "host" => "##SMTP_SERVER##",
+                "port" => "##SMTP_PORT##",
+                "username" => "##SMTP_LOGIN##",
+                "password" => "##SMTP_PASSWORD##",
+                "encryption" => "##SMTP_ENCRYPTION##",
+            )
         ),
 
         "urlManager" => $mainConfig["components"]["urlManager"],
@@ -70,8 +58,8 @@ return array(
     "params" => array(
         // email sender
         "email" => array(
-            "lockFile"    => "/tmp/gtta.email",
-            "systemEmail" => GTTA_PRODUCTION ? "gtta@netprotect.ch" : "gtta.test@yandex.ru",
+            "lockFile" => "/tmp/gtta.email",
+            "systemEmail" => "##EMAIL##",
             "maxAttempts" => 3,
         ),
 

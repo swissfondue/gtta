@@ -1,16 +1,7 @@
 <?php
 
-defined('GTTA_PRODUCTION') or define('GTTA_PRODUCTION', false);
-defined('GTTA_VIRTUAL') or define('GTTA_VIRTUAL', false);
-
-// change the following paths if necessary
-$yii=dirname(__FILE__).'/protected/framework/yii.php';
-$config=dirname(__FILE__).'/protected/config/main.php';
-
-// remove the following lines when in production mode
-defined('YII_DEBUG') or define('YII_DEBUG', !GTTA_PRODUCTION);
-// specify how many levels of call stack should be shown in each log message
-defined('YII_TRACE_LEVEL') or define('YII_TRACE_LEVEL',3);
+$yii = dirname(__FILE__) . "/protected/framework/yii.php";
+$config = dirname(__FILE__) . "/protected/config/main.php";
 
 require_once($yii);
 Yii::createWebApplication($config)->run();

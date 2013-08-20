@@ -1,17 +1,19 @@
 <?php
 
+define("YII_DEBUG", "##DEBUG##");
+define("YII_TRACE_LEVEL", 3);
 define("BASE_DIR", "/opt/gtta");
 define("VERSION_DIR", BASE_DIR . "/current");
 
 // main Web application configuration
 return array(
 	"basePath" => dirname(__FILE__) . "/..",
-	"name"     => "GTTA",
-    "charset"  => "utf-8",
+	"name"  => "GTTA",
+    "charset" => "utf-8",
     "runtimePath" => BASE_DIR . "/runtime",
 
 	// preloading components
-	"preload" => array( "log" ),
+	"preload" => array("log"),
 
 	// autoloading model and component classes
 	"import" => array(
@@ -27,11 +29,11 @@ return array(
 	// application components
 	"components" => array(
         "session" => array(
-            "class"                  => "CDbHttpSession",
-            "sessionTableName"       => "sessions",
-            "connectionID"           => "db",
+            "class" => "CDbHttpSession",
+            "sessionTableName" => "sessions",
+            "connectionID" => "db",
             "autoCreateSessionTable" => true,
-            "timeout"                => 60 * 60, // 1 hour
+            "timeout" => 60 * 60, // 1 hour
         ),
 
         "request" => array(
@@ -39,15 +41,15 @@ return array(
         ),
 
 		"user" => array(
-            "class"           => "WebUser",
+            "class" => "WebUser",
             "autoUpdateFlash" => true,
 		),
 
 		"urlManager" => array(
-            "baseUrl"        => GTTA_PRODUCTION ? ( GTTA_VIRTUAL ? "https://gtta.box" : "https://gtta.kicks-ass.net" ) : "https://gtta.local",
-			"urlFormat"      => "path",
+            "baseUrl" => "##BASE_URL##",
+			"urlFormat" => "path",
             "showScriptName" => false,
-            "rules"          => array(
+            "rules"  => array(
                 // account
                 "<action:(login|logout)>" => "app/<action>",
                 "account" => "account/edit",
@@ -307,9 +309,9 @@ return array(
 
         "db" => array(
 			"connectionString" => "pgsql:host=localhost;port=5432;dbname=gtta",
-			"username"         => "gtta",
-			"password"         => GTTA_VIRTUAL ? "3yNeMw4sMaj6TC8gJ2Ecvh2GF" : "123",
-			"charset"          => "utf8",
+			"username" => "gtta",
+			"password" => "##DATABASE_PASSWORD##",
+			"charset" => "utf8",
 		),
 
 		"errorHandler" => array(
@@ -320,16 +322,9 @@ return array(
 			"class"  => "CLogRouter",
 			"routes" => array(
 				array(
-					"class"  => "CFileLogRoute",
+					"class" => "CFileLogRoute",
 					"levels" => "error, warning",
 				),
-                /*array(
-                    "class"   => "CProfileLogRoute",
-                    "enabled" => true,
-                ),
-                array(
-                    "class" => "CWebLogRoute",
-                ),*/
 			),
 		),
 	),
