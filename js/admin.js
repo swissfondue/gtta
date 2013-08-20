@@ -598,6 +598,64 @@ function Admin()
             });
         };
     };
+
+    /**
+     * Update object.
+     */
+    this.update = new function () {
+        var _update = this;
+
+        /**
+         * Refresh status
+         */
+        this.update = function (url) {
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data: {
+                    YII_CSRF_TOKEN: system.csrf
+                },
+
+                success: function (data, textStatus) {
+                    $('.loader-image').hide();
+
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
+                        return;
+                    }
+
+                    data = data.data;
+
+                    if (data.updating) {
+                        setTimeout(function () {
+                            _update.update(url);
+                        }, 5000);
+                    } else {
+                        location.reload();
+                    }
+                },
+
+                error: function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+
+                    if (textStatus == "timeout") {
+                        setTimeout(function () {
+                            _update.update(url);
+                        }, 5000);
+                    } else {
+                        system.showMessage("error", system.translate("Request failed, please try again."));
+                    }
+                },
+
+                beforeSend: function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+    };
 }
 
 var admin = new Admin();

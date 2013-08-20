@@ -17,7 +17,7 @@ class {ClassName} extends CDbMigration {
      * @return bool
      */
     public function safeDown() {
-		echo "{ClassName} does not support migration down.\\n";
+		echo "{ClassName} does not support migration down.\n";
 		return false;
 	}
 }

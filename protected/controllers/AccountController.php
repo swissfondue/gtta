@@ -179,6 +179,6 @@ class AccountController extends Controller
      * Generate certificate
      */
     public function actionCertificate() {
-        Certificate::generate(Yii::app()->user->id);
+        OpenSSL::generateUserCertificate(Yii::app()->user->id);
     }
 }

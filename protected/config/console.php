@@ -79,8 +79,16 @@ return array(
             'lockFile' => '/tmp/gtta.vulntracker',
         ),
 
-        "check-update" => array(
+        "checkupdate" => array(
             "lockFile" => "/tmp/gtta.check-update",
+        ),
+
+        "update" => array(
+            "lockFile" => "/tmp/gtta.update",
+            "keyFile" => "/opt/gtta/security/keys/update-server.key",
+            "directory" => "/tmp/gtta-update",
+            "versions" => "/opt/gtta/versions",
+            "currentVersionLink" => "/opt/gtta/current",
         ),
 
         // checks automation

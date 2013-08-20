@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Certificate class
+ * OpenSSL interface class
  */
-class Certificate {
+class OpenSSL {
     /**
-     * Generate certificate
+     * Generate user certificate
      * @param $userId
      */
-    public static function generate($userId) {
+    public static function generateUserCertificate($userId) {
         $user = User::model()->findByPk($userId);
 
         $fileName = md5($user->id . time() . rand());
@@ -86,5 +86,22 @@ class Certificate {
         }
 
         exit(0);
+    }
+
+    /**
+     * Check file signature with given key
+     * @param $filePath
+     * @param $sigPath
+     * @param $keyPath
+     */
+    public static function checkFileSignature($filePath, $sigPath, $keyPath) {
+        $output = null;
+        $result = null;
+
+        exec("openssl dgst -sha1 -verify $keyPath -signature $sigPath $filePath", $output, $result);
+
+        if ($result !== 0) {
+            throw new Exception("Unable to check signature or signature is not valid");
+        }
     }
 }

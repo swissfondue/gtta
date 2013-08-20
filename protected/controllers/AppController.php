@@ -89,10 +89,9 @@ class AppController extends Controller
                 ));
             }
 
-            if (Yii::app()->request->isAjaxRequest)
+            if (Yii::app()->request->isAjaxRequest) {
                 echo $message;
-            else
-            {
+            } else {
                 $this->pageTitle = Yii::t('app', 'Error {code}', array( '{code}' => $error['code'] ));
                 $this->render('error', array(
                     'message' => $message

@@ -2,8 +2,27 @@
 
 <hr>
 
+<?php if ($system->update_version && $forbidUpdate): ?>
+    <div class="form-description">
+        <?php echo $forbidMessage; ?>
+    </div>
+<?php endif; ?>
+
+<?php if ($updating): ?>
+    <div class="form-description">
+        <?php
+            echo Yii::t(
+                "app",
+                "Updating GTTA to version {version}. This may take up to several minutes.",
+                array("{version}" => $system->update_version)
+            );
+        ?>
+    </div>
+<?php endif; ?>
+
 <form id="update-form" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
+    <input type="hidden" value="1" name="UpdateForm[proceed]">
 
     <fieldset>
         <div class="control-group">
@@ -42,7 +61,9 @@
                         <a href="#toggle" class="info" onclick="system.toggleBlock('#update-description');" title="<?php echo Yii::t("app", "Description"); ?>"><i class="icon icon-question-sign"></i></a>
                     <?php endif; ?>
 
-                    <a href="#update" title="<?php echo Yii::t("app", "Update"); ?>" onclick="$('#update-form').submit();"><i class="icon icon-refresh"></i></a>
+                    <?php if (!$forbidUpdate && !$updating): ?>
+                        <a href="#update" title="<?php echo Yii::t("app", "Update"); ?>" onclick="$('#update-form').submit();"><i class="icon icon-refresh"></i></a>
+                    <?php endif; ?>
                 <?php else: ?>
                     <?php echo Yii::t("app", "N/A"); ?>
                 <?php endif; ?>
@@ -61,3 +82,11 @@
         </div>
     </fieldset>
 </form>
+
+<?php if ($updating): ?>
+    <script>
+        $(function () {
+            admin.update.update("<?php echo $this->createUrl("update/status"); ?>");
+        });
+    </script>
+<?php endif; ?>

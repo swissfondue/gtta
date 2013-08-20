@@ -18,9 +18,7 @@ class AutomationCommand extends ConsoleCommand
         foreach ($checks as $check)
         {
             $this->_backgroundExec(
-                Yii::app()->params['yiicPath'] . '/' .
-                ( $this->_isWindows() ? 'yiic.bat' : 'yiic' ) .
-                ' automation ' . $check->target_id . ' ' . $check->check_id
+                Yii::app()->params['yiicPath'] . '/yiic automation ' . $check->target_id . ' ' . $check->check_id
             );
         }
     }
@@ -96,78 +94,6 @@ class AutomationCommand extends ConsoleCommand
 
             $check->save();
         }
-    }
-
-    /**
-     * Check if process with given PID is running.
-     */
-    private function _isRunning($pid)
-    {
-        if ($this->_isWindows())
-        {
-            $output = array();
-            exec('tasklist.exe', $output);
-
-            foreach ($output as $line)
-            {
-                if (strpos('Image Name', $line) === 0 || strpos('===', $line) === 0)
-                    continue;
-
-                $matches = false;
-
-                preg_match('/(.*)\s+(\d+).*$/', $line);
-
-                if ($matches[2] == $pid)
-                    return true;
-            }
-
-            return false;
-        }
-        else
-        {
-            $data = shell_exec('ps ax -o  "%p %r" | grep ' . $pid);
-
-            if (!$data)
-                return false;
-
-            $data = explode("\n", $data);
-
-            if (count($data) >= 2)
-                return true;
-
-            return false;
-        }
-    }
-
-    /**
-     * Kill process.
-     */
-    private function _killProcess($pid)
-    {
-        exec($this->_isWindows() ? 'taskkill /PID ' . $pid . ' /F /T' : 'kill -9 -' . $pid);
-        return $this->_isRunning($pid);
-    }
-
-    /**
-     * Check OS.
-     */
-    private function _isWindows()
-    {
-        return substr(php_uname(), 0, 7) == 'Windows';
-    }
-
-    /**
-     * Run a background command.
-     */
-    private function _backgroundExec($cmd)
-    {
-        if ($this->_isWindows())
-        {
-            $shell = new COM('WScript.Shell');
-            $shell->Run($cmd, 0, false);
-        }
-        else
-            exec($cmd . ' > /dev/null 2>&1 &');
     }
 
     /**

@@ -498,6 +498,6 @@ class UserController extends Controller
      * Generate certificate
      */
     public function actionCertificate($id) {
-        Certificate::generate($id);
+        OpenSSL::generateUserCertificate($id);
     }
 }

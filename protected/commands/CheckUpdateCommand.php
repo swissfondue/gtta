@@ -16,7 +16,7 @@ class CheckUpdateCommand extends ConsoleCommand {
         if ($result->update !== null && $result->update->version != $system->update_version) {
             $system->update_version = $result->update->version;
             $system->update_description = $result->update->description;
-            $system->update_check_time = new CDbExpression('NOW()');
+            $system->update_check_time = new CDbExpression("NOW()");
             $system->save();
         }
     }
@@ -26,7 +26,7 @@ class CheckUpdateCommand extends ConsoleCommand {
      * @param array $args list of command-line arguments.
      */
     public function run($args) {
-        $fp = fopen(Yii::app()->params['check-update']['lockFile'], "w");
+        $fp = fopen(Yii::app()->params["checkupdate"]["lockFile"], "w");
 
         if (flock($fp, LOCK_EX)) {
             try {

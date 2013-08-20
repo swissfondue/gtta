@@ -15,8 +15,19 @@
  * @property string $update_description
  * @property string $update_check_time
  * @property string $update_time
+ * @property integer $status
+ * @property integer $update_pid
  */
 class System extends CActiveRecord {
+    /**
+     * Statuses
+     */
+    const STATUS_IDLE = 0;
+    const STATUS_RUNNING = 100;
+    const STATUS_BACKING_UP = 200;
+    const STATUS_UPDATING = 210;
+    const STATUS_LICENSE_EXPIRED = 500;
+
     /**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -33,13 +44,28 @@ class System extends CActiveRecord {
 		return "system";
 	}
 
+    /**
+     * Get valid statuses
+     * @return array
+     */
+    public static function validStatuses() {
+        return array(
+            self::STATUS_IDLE,
+            self::STATUS_RUNNING,
+            self::STATUS_BACKING_UP,
+            self::STATUS_UPDATING,
+            self::STATUS_LICENSE_EXPIRED,
+        );
+    }
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
 		return array(
             array("workstation_id, workstation_key, version, update_version, update_description, version_description", "length", "max" => 1000),
-            array("backup, timezone, update_check_time, update_time", "safe"),
+            array("status", "in", "range" => self::validStatuses()),
+            array("backup, timezone, update_check_time, update_time, update_pid", "safe"),
 		);
 	}
 }

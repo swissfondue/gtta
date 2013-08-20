@@ -71,9 +71,6 @@
                                         <b class="caret"></b>
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li <?php if (Yii::app()->controller->id == 'settings') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('settings/edit'); ?>"><?php echo Yii::t('app', 'Settings'); ?></a></li>
-                                        <li <?php if (Yii::app()->controller->id == 'update') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('update/index'); ?>"><?php echo Yii::t('app', 'Update'); ?></a></li>
-                                        <li class="divider"></li>
                                         <li <?php if (Yii::app()->controller->id == 'check') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('check/index'); ?>"><?php echo Yii::t('app', 'Checks'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'reference') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('reference/index'); ?>"><?php echo Yii::t('app', 'References'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'user') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('user/index'); ?>"><?php echo Yii::t('app', 'Users'); ?></a></li>
@@ -82,13 +79,15 @@
                                         <li <?php if (Yii::app()->controller->id == 'reporttemplate') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('reporttemplate/index'); ?>"><?php echo Yii::t('app', 'Report Templates'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'risk') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('risk/index'); ?>"><?php echo Yii::t('app', 'Risk Matrix Templates'); ?></a></li>
                                         <li class="divider"></li>
+                                        <li <?php if (Yii::app()->controller->id == 'monitor' && Yii::app()->controller->action->id == 'processes') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('monitor/processes'); ?>"><?php echo Yii::t('app', 'Running Processes'); ?></a></li>
+                                        <li <?php if (Yii::app()->controller->id == 'monitor' && Yii::app()->controller->action->id == 'sessions') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('monitor/sessions'); ?>"><?php echo Yii::t('app', 'Active Sessions'); ?></a></li>
+                                        <li <?php if (Yii::app()->controller->id == 'history' && Yii::app()->controller->action->id == 'logins') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('history/logins'); ?>"><?php echo Yii::t('app', 'Login History'); ?></a></li>
+                                        <li class="divider"></li>
                                         <li <?php if (Yii::app()->controller->id == 'backup' && Yii::app()->controller->action->id == 'backup') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('backup/backup'); ?>"><?php echo Yii::t('app', 'Backup'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'backup' && Yii::app()->controller->action->id == 'restore') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('backup/restore'); ?>"><?php echo Yii::t('app', 'Restore'); ?></a></li>
                                         <li class="divider"></li>
-                                        <li <?php if (Yii::app()->controller->id == 'monitor' && Yii::app()->controller->action->id == 'processes') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('monitor/processes'); ?>"><?php echo Yii::t('app', 'Running Processes'); ?></a></li>
-                                        <li <?php if (Yii::app()->controller->id == 'monitor' && Yii::app()->controller->action->id == 'sessions') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('monitor/sessions'); ?>"><?php echo Yii::t('app', 'Active Sessions'); ?></a></li>
-                                        <li class="divider"></li>
-                                        <li <?php if (Yii::app()->controller->id == 'history' && Yii::app()->controller->action->id == 'logins') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('history/logins'); ?>"><?php echo Yii::t('app', 'Login History'); ?></a></li>
+                                        <li <?php if (Yii::app()->controller->id == 'update') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('update/index'); ?>"><?php echo Yii::t('app', 'Update'); ?></a></li>
+                                        <li <?php if (Yii::app()->controller->id == 'settings') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('settings/edit'); ?>"><?php echo Yii::t('app', 'Settings'); ?></a></li>
                                     </ul>
                                 </li>
                             <?php endif; ?>

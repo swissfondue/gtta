@@ -4,8 +4,8 @@
  * API client class
  */
 class ApiClient {
-    const URL = "http://gtta-server.local/api/status";
-    const TIMEOUT = 10;
+    const URL = "http://gtta-server.local/api";
+    const TIMEOUT = 3600;
     const WORKSTATION_ID_HEADER = "X_WORKSTATION_ID";
     const WORKSTATION_KEY_HEADER = "X_WORKSTATION_KEY";
     const PARAM_VERSION = "version";
@@ -25,14 +25,17 @@ class ApiClient {
 
     /**
      * Send API request
+     * @param string $url
      * @param array|null $postFields
+     * @param string|null $destFilePath
      * @return string response
      */
-    private function _sendRequest($postFields = null) {
+    private function _sendRequest($url, $postFields=null, $destFilePath=null) {
         $curl = curl_init();
+        $outFile = null;
 
         $options = array(
-            CURLOPT_URL => self::URL,
+            CURLOPT_URL => sprintf("%s/%s", self::URL, $url),
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => self::TIMEOUT,
             CURLOPT_HTTPHEADER => array(
@@ -40,6 +43,21 @@ class ApiClient {
                 self::WORKSTATION_KEY_HEADER . ": " . $this->key,
             ),
         );
+
+        if ($destFilePath !== null) {
+            if (file_exists($destFilePath)) {
+                @unlink($destFilePath);
+            }
+
+            $outFile = fopen($destFilePath, "wb");
+
+            if ($outFile === false) {
+                throw new Exception("Unable to open file for writing: $destFilePath");
+            }
+
+            $options[CURLOPT_RETURNTRANSFER] = false;
+            $options[CURLOPT_FILE] = $outFile;
+        }
 
         if ($postFields !== null) {
             $options += array(
@@ -50,6 +68,10 @@ class ApiClient {
 
         curl_setopt_array($curl, $options);
         $result = curl_exec($curl);
+
+        if ($outFile !== false) {
+            @fclose($outFile);
+        }
 
         if ($result === false) {
             throw new Exception("Error connecting to server: " . curl_error($curl));
@@ -81,7 +103,25 @@ class ApiClient {
      * @return mixed response
      */
     public function setStatus($version) {
-        $response = $this->_sendRequest(array(self::PARAM_VERSION => $version));
+        $response = $this->_sendRequest("status", array(self::PARAM_VERSION => $version));
         return $this->_parseResponse($response);
+    }
+
+    /**
+     * Get update archive and save it to the file specified
+     * @param $version
+     * @param $pathToSave
+     */
+    public function getUpdateArchive($version, $pathToSave) {
+        $this->_sendRequest("update/$version/zip", null, $pathToSave);
+    }
+
+    /**
+     * Get update signature and save it to the file specified
+     * @param $version
+     * @param $pathToSave
+     */
+    public function getUpdateSignature($version, $pathToSave) {
+        $this->_sendRequest("update/$version/sig", null, $pathToSave);
     }
 }
