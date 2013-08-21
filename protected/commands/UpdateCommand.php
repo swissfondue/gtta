@@ -220,6 +220,12 @@ class UpdateCommand extends ConsoleCommand {
             if ($this->_isRunning($system->update_pid)) {
                 return;
             }
+
+            $system->update_pid = null;
+            $system->status = System::STATUS_IDLE;
+            $system->save();
+
+            return;
         }
 
         $system->update_pid = posix_getpgid(getmypid());
