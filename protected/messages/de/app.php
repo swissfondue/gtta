@@ -19,13 +19,13 @@
  * @version $Id: $
  */
 return array (
-  'Checked at' => '',
-  'Incoming Checks' => '',
-  'The system has been backed up more than 24 hours ago. Please download a backup before updating the system.' => '',
-  'The system is busy. Please make sure that all running tasks are finished before updating the system.' => '',
-  'Update' => '',
-  'Updated at' => '',
-  'Updating GTTA to version {version}. This may take up to several minutes.' => '',
+  'Checked at' => 'Überprüft am',
+  'Incoming Checks' => 'Eingehende Checks',
+  'The system has been backed up more than 24 hours ago. Please download a backup before updating the system.' => 'Das System wurde zuletzt vor mehr als 24 Stunden gesichert. Bitte erstellen Sie eine Sicherungskopie bevor Sie das System updaten.',
+  'The system is busy. Please make sure that all running tasks are finished before updating the system.' => 'Das System ist beschäftigt. Bitte stellen Sie sicher, dass alle Prozesse beendet sind bevor Sie den Update durchführen',
+  'Update' => 'Update',
+  'Updated at' => 'Updated um',
+  'Updating GTTA to version {version}. This may take up to several minutes.' => 'Updating GTTA zu Version {version}. This wird einige Minuten in Anspruch nehmen.',
   'Access denied.' => 'Zugriff verboten.',
   'Account' => 'Konto',
   'Account saved.' => 'Konto wurde gespeichert',
