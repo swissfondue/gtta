@@ -11,7 +11,7 @@ class UpdateCommand extends ConsoleCommand {
     const SIGNATURE_FILE = "gtta.sig";
     const WEB_DIRECTORY = "web";
     const SCRIPTS_DIRECTORY = "scripts";
-    const CRONTAB_FILE = "gtta.crontab";
+    const CRONTAB_FILE = "gtta.crontab.txt";
 
     /**
      * Download, check and unpack the update
@@ -125,7 +125,7 @@ class UpdateCommand extends ConsoleCommand {
             self::CRONTAB_FILE
         ));
 
-        $oldCrontab = "/etc/cron.d/" . self::CRONTAB_FILE;
+        $oldCrontab = "/etc/cron.d/gtta";
 
         if (file_exists($oldCrontab)) {
             $this->_unlink($oldCrontab);
