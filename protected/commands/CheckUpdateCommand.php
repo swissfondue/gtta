@@ -13,7 +13,7 @@ class CheckUpdateCommand extends ConsoleCommand {
         $api = new ApiClient($system->workstation_id, $system->workstation_key);
         $result = $api->setStatus($system->version);
 
-        if ($result->update !== null && $result->update->version != $system->update_version) {
+        if ($result->update !== null) {
             $system->update_version = $result->update->version;
             $system->update_description = $result->update->description;
             $system->update_check_time = new CDbExpression("NOW()");
