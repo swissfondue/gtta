@@ -35,6 +35,6 @@ class m130811_153033_1 extends CDbMigration {
         $this->dropColumn("system", "update_check_time");
         $this->dropColumn("system", "update_time");
 
-		return false;
+		return true;
 	}
 }

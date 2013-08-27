@@ -2047,27 +2047,27 @@ class ProjectController extends Controller
     /**
      * Upload attachment function.
      */
-    function actionUploadAttachment($id, $target, $category, $check)
-    {
+    function actionUploadAttachment($id, $target, $category, $check) {
         $response = new AjaxResponse();
 
-        try
-        {
-            $id       = (int) $id;
-            $target   = (int) $target;
+        try {
+            $id = (int) $id;
+            $target = (int) $target;
             $category = (int) $category;
-            $check    = (int) $check;
+            $check = (int) $check;
 
             $project = Project::model()->findByPk($id);
 
-            if (!$project)
+            if (!$project) {
                 throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+            }
 
-            if (!$project->checkPermission())
+            if (!$project->checkPermission()) {
                 throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
 
             $target = Target::model()->findByAttributes(array(
-                'id'         => $target,
+                'id' => $target,
                 'project_id' => $project->id
             ));
 
@@ -2079,8 +2079,9 @@ class ProjectController extends Controller
                 'check_category_id' => $category
             ));
 
-            if (!$category)
+            if (!$category) {
                 throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+            }
 
             $controls = CheckControl::model()->findAllByAttributes(array(
                 'check_category_id' => $category->check_category_id
@@ -2088,8 +2089,9 @@ class ProjectController extends Controller
 
             $controlIds = array();
 
-            foreach ($controls as $control)
+            foreach ($controls as $control) {
                 $controlIds[] = $control->id;
+            }
 
             $criteria = new CDbCriteria();
             $criteria->addInCondition('check_control_id', $controlIds);
@@ -2099,18 +2101,41 @@ class ProjectController extends Controller
 
             $check = Check::model()->find($criteria);
 
-            if (!$check)
+            if (!$check) {
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+            }
+
+            $targetCheck = TargetCheck::model()->findByAttributes(array(
+                'target_id' => $target->id,
+                'check_id' => $check->id
+            ));
+
+            if (!$targetCheck) {
+                $language = Language::model()->findByAttributes(array(
+                    "code" => Yii::app()->language
+                ));
+
+                if (!$language) {
+                    $language = Language::model()->findByAttributes(array(
+                        "default" => true
+                    ));
+                }
+
+                $targetCheck = new TargetCheck();
+                $targetCheck->target_id = $target->id;
+                $targetCheck->check_id = $check->id;
+                $targetCheck->user_id = Yii::app()->user->id;
+                $targetCheck->language_id = $language->id;
+                $targetCheck->save();
+            }
 
             $model = new TargetCheckAttachmentUploadForm();
             $model->attachment = CUploadedFile::getInstanceByName('TargetCheckAttachmentUploadForm[attachment]');
 
-            if (!$model->validate())
-            {
+            if (!$model->validate()) {
                 $errorText = '';
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -2120,22 +2145,20 @@ class ProjectController extends Controller
 
             $attachment = new TargetCheckAttachment();
             $attachment->target_id = $target->id;
-            $attachment->check_id  = $check->id;
-            $attachment->name      = $model->attachment->name;
-            $attachment->type      = $model->attachment->type;
-            $attachment->size      = $model->attachment->size;
-            $attachment->path      = hash('sha256', $attachment->name . rand() . time());
+            $attachment->check_id = $check->id;
+            $attachment->name = $model->attachment->name;
+            $attachment->type = $model->attachment->type;
+            $attachment->size = $model->attachment->size;
+            $attachment->path = hash('sha256', $attachment->name . rand() . time());
             $attachment->save();
 
             $model->attachment->saveAs(Yii::app()->params['attachments']['path'] . '/' . $attachment->path);
 
-            $response->addData('name',       CHtml::encode($attachment->name));
-            $response->addData('url',        $this->createUrl('project/attachment', array( 'path' => $attachment->path )));
-            $response->addData('path',       $attachment->path);
+            $response->addData('name', CHtml::encode($attachment->name));
+            $response->addData('url', $this->createUrl('project/attachment', array( 'path' => $attachment->path )));
+            $response->addData('path', $attachment->path);
             $response->addData('controlUrl', $this->createUrl('project/controlattachment'));
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -2145,8 +2168,7 @@ class ProjectController extends Controller
     /**
      * Upload attachment function for GT.
      */
-    function actionGtUploadAttachment($id, $module, $check)
-    {
+    function actionGtUploadAttachment($id, $module, $check) {
         $response = new AjaxResponse();
 
         try {
@@ -2183,6 +2205,30 @@ class ProjectController extends Controller
 
             if (!$check) {
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+            }
+
+            $projectCheck = ProjectGtCheck::model()->findByAttributes(array(
+                'project_id' => $project->id,
+                'gt_check_id' => $check->id
+            ));
+
+            if (!$projectCheck) {
+                $language = Language::model()->findByAttributes(array(
+                    "code" => Yii::app()->language
+                ));
+
+                if (!$language) {
+                    $language = Language::model()->findByAttributes(array(
+                        "default" => true
+                    ));
+                }
+
+                $projectCheck = new ProjectGtCheck();
+                $projectCheck->project_id = $project->id;
+                $projectCheck->gt_check_id = $check->id;
+                $projectCheck->user_id = Yii::app()->user->id;
+                $projectCheck->language_id = $language->id;
+                $projectCheck->save();
             }
 
             $model = new ProjectGtCheckAttachmentUploadForm();
@@ -2621,8 +2667,15 @@ class ProjectController extends Controller
                     break;
 
                 case 'reset':
-                    if (!in_array($targetCheck->status, array( TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED )))
+                    if (!in_array($targetCheck->status, array(TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED))) {
                         throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                    }
+
+                    // delete vulns
+                    TargetCheckVuln::model()->deleteAllByAttributes(array(
+                        'target_id' => $target->id,
+                        'check_id' => $check->id
+                    ));
 
                     // delete solutions
                     TargetCheckSolution::model()->deleteAllByAttributes(array(
@@ -2703,8 +2756,7 @@ class ProjectController extends Controller
     /**
      * Control GT check function.
      */
-    public function actionGtControlCheck($id, $module, $check)
-    {
+    public function actionGtControlCheck($id, $module, $check) {
         $response = new AjaxResponse();
 
         try {
@@ -2815,6 +2867,12 @@ class ProjectController extends Controller
                     if (!in_array($projectCheck->status, array(ProjectGtCheck::STATUS_OPEN, ProjectGtCheck::STATUS_FINISHED))) {
                         throw new CHttpException(403, Yii::t('app', 'Access denied.'));
                     }
+
+                    // delete vulns
+                    ProjectGtCheckVuln::model()->deleteAllByAttributes(array(
+                        'project_id' => $project->id,
+                        'gt_check_id' => $check->id
+                    ));
 
                     // delete solutions
                     ProjectGtCheckSolution::model()->deleteAllByAttributes(array(

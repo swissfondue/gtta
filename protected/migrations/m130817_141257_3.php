@@ -23,6 +23,6 @@ class m130817_141257_3 extends CDbMigration {
 		$this->dropColumn("system", "status");
         $this->dropColumn("system", "update_pid");
 
-		return false;
+		return true;
 	}
 }
