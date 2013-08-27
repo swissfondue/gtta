@@ -3,13 +3,11 @@
 /**
  * GT Automation class.
  */
-class GtautomationCommand extends ConsoleCommand
-{
+class GtautomationCommand extends ConsoleCommand {
     /**
      * Process starting checks.
      */
-    private function _processStartingChecks()
-    {
+    private function _processStartingChecks() {
         $checks = ProjectGtCheck::model()->findAllByAttributes(array(
             'status' => ProjectGtCheck::STATUS_IN_PROGRESS,
             'pid' => null
@@ -17,9 +15,7 @@ class GtautomationCommand extends ConsoleCommand
 
         foreach ($checks as $check) {
             $this->_backgroundExec(
-                Yii::app()->params['yiicPath'] . '/' .
-                ( $this->_isWindows() ? 'yiic.bat' : 'yiic' ) .
-                ' gtautomation ' . $check->project_id . ' ' . $check->gt_check_id
+                Yii::app()->params['yiicPath'] . '/yiic gtautomation ' . $check->project_id . ' ' . $check->gt_check_id
             );
         }
     }
@@ -27,8 +23,7 @@ class GtautomationCommand extends ConsoleCommand
     /**
      * Process stopping checks.
      */
-    private function _processStoppingChecks()
-    {
+    private function _processStoppingChecks() {
         $criteria = new CDbCriteria();
         $criteria->addCondition('status = :status');
         $criteria->params = array('status' => ProjectGtCheck::STATUS_STOP);
@@ -61,8 +56,7 @@ class GtautomationCommand extends ConsoleCommand
     /**
      * Process running checks.
      */
-    private function _processRunningChecks()
-    {
+    private function _processRunningChecks() {
         $criteria = new CDbCriteria();
         $criteria->addCondition('pid IS NOT NULL');
         $criteria->addInCondition('status', array(ProjectGtCheck::STATUS_IN_PROGRESS, ProjectGtCheck::STATUS_STOP));
@@ -86,79 +80,9 @@ class GtautomationCommand extends ConsoleCommand
     }
 
     /**
-     * Check if process with given PID is running.
-     */
-    private function _isRunning($pid)
-    {
-        if ($this->_isWindows()) {
-            $output = array();
-            exec('tasklist.exe', $output);
-
-            foreach ($output as $line)
-            {
-                if (strpos('Image Name', $line) === 0 || strpos('===', $line) === 0)
-                    continue;
-
-                $matches = false;
-
-                preg_match('/(.*)\s+(\d+).*$/', $line);
-
-                if ($matches[2] == $pid)
-                    return true;
-            }
-
-            return false;
-        } else {
-            $data = shell_exec('ps ax -o  "%p %r" | grep ' . $pid);
-
-            if (!$data)
-                return false;
-
-            $data = explode("\n", $data);
-
-            if (count($data) >= 2)
-                return true;
-
-            return false;
-        }
-    }
-
-    /**
-     * Kill process.
-     */
-    private function _killProcess($pid)
-    {
-        exec($this->_isWindows() ? 'taskkill /PID ' . $pid . ' /F /T' : 'kill -9 -' . $pid);
-        return $this->_isRunning($pid);
-    }
-
-    /**
-     * Check OS.
-     */
-    private function _isWindows()
-    {
-        return substr(php_uname(), 0, 7) == 'Windows';
-    }
-
-    /**
-     * Run a background command.
-     */
-    private function _backgroundExec($cmd)
-    {
-        if ($this->_isWindows())
-        {
-            $shell = new COM('WScript.Shell');
-            $shell->Run($cmd, 0, false);
-        }
-        else
-            exec($cmd . ' > /dev/null 2>&1 &');
-    }
-
-    /**
      * Generate a file name for automated checks.
      */
-    private function _generateFileName()
-    {
+    private function _generateFileName() {
         $name = null;
 
         while (true) {
@@ -330,8 +254,7 @@ class GtautomationCommand extends ConsoleCommand
     /**
      * Check starter.
      */
-    private function _startCheck($projectId, $checkId)
-    {
+    private function _startCheck($projectId, $checkId) {
         $check = ProjectGtCheck::model()->with(array(
             'check' => array(
                 'with' => array(
@@ -457,8 +380,7 @@ class GtautomationCommand extends ConsoleCommand
      * Runs the command
      * @param array $args list of command-line arguments.
      */
-    public function run($args)
-    {
+    public function run($args) {
         // start checks
         if (count($args) > 0) {
             if (count($args) != 2) {
