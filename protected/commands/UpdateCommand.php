@@ -11,7 +11,7 @@ class UpdateCommand extends ConsoleCommand {
     const SIGNATURE_FILE = "gtta.sig";
     const WEB_DIRECTORY = "web";
     const SCRIPTS_DIRECTORY = "scripts";
-    const CRONTAB_FILE = "gtta.crontab.txt";
+    const CRONTAB_FILE = "crontab.txt";
 
     /**
      * Download, check and unpack the update
