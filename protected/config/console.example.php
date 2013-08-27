@@ -87,6 +87,7 @@ return array(
             "minNotificationInterval" => 5 * 60, // 5 minutes
 
             "lockFile" => "/tmp/gtta.automation",
+            "gtLockFile" => "/tmp/gtta.gt-automation",
             "tempPath" => BASE_DIR . "/files/automation",
             "scriptsPath" => VERSION_DIR . "/scripts",
 

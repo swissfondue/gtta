@@ -401,7 +401,7 @@ class GtautomationCommand extends ConsoleCommand {
         }
 
         // one instance check
-        $fp = fopen(Yii::app()->params['automation']['lockFile'], 'w');
+        $fp = fopen(Yii::app()->params['automation']['gtLockFile'], 'w');
         
         if (flock($fp, LOCK_EX | LOCK_NB)) {
             for ($i = 0; $i < 10; $i++) {

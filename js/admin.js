@@ -551,8 +551,14 @@ function Admin()
         /**
          * Stop process.
          */
-        this.stop = function (targetId, checkId) {
-            _process._control(targetId.toString() + '-' + checkId.toString(), 'stop');
+        this.stop = function (targetId, checkId, guidedTest) {
+            var id = targetId.toString() + '-' + checkId.toString();
+
+            if (guidedTest) {
+                id = 'gt-' + id;
+            }
+
+            _process._control(id, 'stop');
         };
     };
 
