@@ -19,7 +19,7 @@ class OpenSSL {
         $output = array();
         $return = null;
 
-        exec("openssl genrsa -passout pass:$password -out /tmp/$fileName.key 2048", $output, $return);
+        exec("openssl genrsa -des3 -passout pass:$password -out /tmp/$fileName.key 2048", $output, $return);
 
         if (!$return) {
             $subject = "/CN=$name/emailAddress=$email";
@@ -29,7 +29,11 @@ class OpenSSL {
 
             if (!$return) {
                 unset($output);
-                exec("openssl x509 -req -days 365 -in /tmp/$fileName.csr -CA /opt/gtta/ca/ca.crt -CAkey /opt/gtta/ca/ca.key -CAcreateserial -passin pass:$password -out /tmp/$fileName.crt", $output, $return);
+
+                $ca = Yii::app()->params["security"]["ca"];
+                $caKey = Yii::app()->params["security"]["caKey"];
+
+                exec("openssl x509 -req -days 365 -in /tmp/$fileName.csr -CA $ca -CAkey $caKey -CAcreateserial -out /tmp/$fileName.crt", $output, $return);
 
                 if (!$return) {
                     unset($output);
@@ -93,6 +97,7 @@ class OpenSSL {
      * @param $filePath
      * @param $sigPath
      * @param $keyPath
+     * @throws Exception
      */
     public static function checkFileSignature($filePath, $sigPath, $keyPath) {
         $output = null;

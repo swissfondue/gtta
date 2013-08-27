@@ -391,6 +391,11 @@ return array(
         "automation" => array(
             "scriptsPath" => VERSION_DIR . "/scripts",
         ),
+
+        "security" => array(
+            "ca" => BASE_DIR . "/security/ca/ca.crt",
+            "caKey" => BASE_DIR . "/security/ca/ca.key",
+        ),
     ),
 
     // default controller name
