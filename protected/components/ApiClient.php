@@ -4,7 +4,7 @@
  * API client class
  */
 class ApiClient {
-    const URL = "http://gtta-server.local/api";
+    const URL = "api";
     const TIMEOUT = 3600;
     const WORKSTATION_ID_HEADER = "X_WORKSTATION_ID";
     const WORKSTATION_KEY_HEADER = "X_WORKSTATION_KEY";
@@ -35,7 +35,7 @@ class ApiClient {
         $outFile = null;
 
         $options = array(
-            CURLOPT_URL => sprintf("%s/%s", self::URL, $url),
+            CURLOPT_URL => sprintf("%s/%s/%s", Yii::app()->params["api"]["url"], self::URL, $url),
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => self::TIMEOUT,
             CURLOPT_HTTPHEADER => array(

@@ -109,6 +109,10 @@ return array(
 
         "yiicPath" => dirname(__FILE__) . "/../",
         "attachments" => $mainConfig["params"]["attachments"],
+
+        "api" => array(
+            "url" => "$DEPLOY_API_URL",
+        ),
     ),
     
     "commandMap" => array(
