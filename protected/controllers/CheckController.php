@@ -16,6 +16,7 @@ class CheckController extends Controller
             'checkAdmin',
             'ajaxOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput, controlscript',
             'postOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput, controlscript',
+            "idleOrRunning",
 		);
 	}
 

@@ -14,6 +14,7 @@ class RiskController extends Controller
             'https',
 			'checkAuth',
             'checkAdmin',
+            "idleOrRunning",
 		);
 	}
 

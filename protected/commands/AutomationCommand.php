@@ -8,8 +8,7 @@ class AutomationCommand extends ConsoleCommand
     /**
      * Process starting checks.
      */
-    private function _processStartingChecks()
-    {
+    private function _processStartingChecks() {
         $checks = TargetCheck::model()->findAllByAttributes(array(
             'status' => TargetCheck::STATUS_IN_PROGRESS,
             'pid'    => null
@@ -72,15 +71,6 @@ class AutomationCommand extends ConsoleCommand
 
         foreach ($checks as $check)
         {
-            /*$fileOutput = null;
-            $fileName = Yii::app()->params['automation']['tempPath'] . '/' . $check->result_file;
-
-            if (file_exists($fileName)) {
-                $fileOutput = file_get_contents($fileName);
-            }
-
-            $check->result = $fileOutput;*/
-
             // if task died for some reason
             if (!$this->_isRunning($check->pid)) {
                 $check->pid = null;
@@ -456,6 +446,8 @@ class AutomationCommand extends ConsoleCommand
                 $this->_processStartingChecks();
                 $this->_processStoppingChecks();
                 $this->_processRunningChecks();
+
+                $this->_checkSystemIsRunning();
 
                 sleep(5);
             }

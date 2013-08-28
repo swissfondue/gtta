@@ -3,8 +3,7 @@
 /**
  * Backup controller.
  */
-class BackupController extends Controller
-{
+class BackupController extends Controller {
     private $_tables = array(
         'languages',
         'clients',
@@ -105,7 +104,8 @@ class BackupController extends Controller
 		return array(
             'https',
 			'checkAuth',
-            'checkAdmin'
+            'checkAdmin',
+            "idle",
 		);
 	}
 
@@ -200,47 +200,63 @@ class BackupController extends Controller
 
     /**
      * Backup the system.
+     * @param $system System
      */
-    private function _backup()
-    {
-        $backupName = Yii::app()->name . ' ' . Yii::t('app', 'Backup') . ' ' . date('Ymd-Hi');
-        $backupPath = Yii::app()->params['tmpPath'] . '/' . $backupName . '.zip';
-
-        $zip = new ZipArchive();
-
-        if ($zip->open($backupPath, ZipArchive::CREATE) !== true)
-        {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Error creating archive.'));
-            return;
-        }
-
-        $zip->addEmptyDir($backupName);
-        $zip->addEmptyDir($backupName . '/attachments');
-
-        $this->_backupAttachments($backupName . '/attachments', $zip);
-        $this->_backupDatabase($backupName, $zip);
-
-        $zip->close();
-
-        $now = new DateTime();
-        $system = System::model()->findByPk(1);
-        $system->backup = $now->format("Y-m-d H:i:s");
+    private function _backup($system) {
+        $system->status = System::STATUS_BACKING_UP;
         $system->save();
 
-        // give user a file
-        header('Content-Description: File Transfer');
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="' . $backupName . '.zip"');
-        header('Content-Transfer-Encoding: binary');
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Pragma: public');
-        header('Content-Length: ' . filesize($backupPath));
+        $exception = null;
 
-        ob_clean();
-        flush();
+        try {
+            $backupName = Yii::app()->name . ' ' . Yii::t('app', 'Backup') . ' ' . date('Ymd-Hi');
+            $backupPath = Yii::app()->params['tmpPath'] . '/' . $backupName . '.zip';
 
-        readfile($backupPath);
+            $zip = new ZipArchive();
+
+            if ($zip->open($backupPath, ZipArchive::CREATE) !== true) {
+                throw new Exception("Unable to create backup archive: $backuPath");
+            }
+
+            $zip->addEmptyDir($backupName);
+            $zip->addEmptyDir($backupName . '/attachments');
+
+            $this->_backupAttachments($backupName . '/attachments', $zip);
+            $this->_backupDatabase($backupName, $zip);
+
+            $zip->close();
+
+            $now = new DateTime();
+            $system = System::model()->findByPk(1);
+            $system->backup = $now->format("Y-m-d H:i:s");
+            $system->save();
+
+            // give user a file
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="' . $backupName . '.zip"');
+            header('Content-Transfer-Encoding: binary');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($backupPath));
+
+            ob_clean();
+            flush();
+
+            readfile($backupPath);
+        } catch (Exception $e) {
+            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "application");
+            $exception = $e;
+        }
+
+        // "finally" block
+        $system->status = System::STATUS_IDLE;
+        $system->save();
+
+        if ($exception !== null) {
+            throw $exception;
+        }
 
         exit();
     }
@@ -248,41 +264,46 @@ class BackupController extends Controller
     /**
      * Create a system backup.
      */
-	public function actionBackup()
-	{
-        $criteria = new CDbCriteria();
-        $criteria->addInCondition('status', array(
-            TargetCheck::STATUS_IN_PROGRESS,
-            TargetCheck::STATUS_STOP
-        ));
+	public function actionBackup() {
+        $system = System::model()->findByPk(1);
+        $forbid = false;
+        $forbidMessage = null;
 
-        $runningChecks = TargetCheck::model()->count($criteria);
-
-        if (isset($_POST['BackupForm']))
-        {
-            if (!$runningChecks)
-                $this->_backup();
-            else
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Backup canceled.'));
+        if ($system->status != System::STATUS_IDLE) {
+            $forbid = true;
+            $forbidMessage = Yii::t(
+                "app",
+                "The system is busy. Please make sure that all running tasks are finished before proceeding."
+            );
         }
 
-        $backedUp = '';
-        $system = System::model()->findByPk(1);
+        if (isset($_POST["BackupForm"])) {
+            if ($forbid) {
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
+            }
+
+            try {
+                $this->_backup($system);
+            } catch (Exception $e) {
+                throw new CHttpException(500, Yii::t("app", "Error creating backup."));
+            }
+        }
 
         if ($system->backup) {
             $backedUp = new DateTime($system->backup);
-            $backedUp = $backedUp->format('d.m.Y H:i');
+            $backedUp = $backedUp->format("d.m.Y H:i");
         } else {
-            $backedUp = Yii::t('app', 'Never');
+            $backedUp = Yii::t("app", "Never");
         }
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Backup'), '');
+        $this->breadcrumbs[] = array(Yii::t("app", "Backup"), "");
 
         // display the page
-        $this->pageTitle = Yii::t('app', 'Backup');
-		$this->render('backup', array(
-            'runningChecks' => $runningChecks,
-            'backedUp'      => $backedUp
+        $this->pageTitle = Yii::t("app", "Backup");
+		$this->render("backup", array(
+            "forbid" => $forbid,
+            "forbidMessage" => $forbidMessage,
+            "backedUp" => $backedUp
         ));
     }
 
@@ -294,7 +315,7 @@ class BackupController extends Controller
         foreach ($attachments as $attachment)
         {
             $content = $zip->getFromIndex($attachment['index']);
-            $name    = $attachment['name'];
+            $name = $attachment['name'];
 
             $file = fopen(Yii::app()->params['attachments']['path'] . '/' . $attachment['name'], 'wb');
             fwrite($file, $content);
@@ -342,100 +363,115 @@ class BackupController extends Controller
 
     /**
      * Restore the system.
+     * @param $system System
+     * @param $form RestoreForm
      */
-    private function _restore($model)
-    {
-        $zip = new ZipArchive();
+    private function _restore($system, $form) {
+        $system->status = System::STATUS_RESTORING;
+        $system->save();
 
-        if ($zip->open($model->backup->tempName) !== true)
-        {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Error opening backup file.'));
-            return false;
-        }
+        $exception = null;
 
-        $dbDump      = null;
-        $attachments = array();
+        try {
+            $zip = new ZipArchive();
 
-        // check if archive contains database dump
-        for ($i = 0; $i < $zip->numFiles; $i++)
-        {
-            $stat = $zip->statIndex($i);
-
-            $path = explode('/', $stat['name']);
-            $name = $path[count($path) - 1];
-
-            if ($name == 'database.xml')
-            {
-                $dbDump = $i;
-                continue;
+            if ($zip->open($form->backup->tempName) !== true) {
+                throw new Exception("Unable to open archive");
             }
 
-            if ($path[1] == 'attachments' && count($path) == 3 && $path[2])
-            {
-                $attachments[] = array(
-                    'index' => $i,
-                    'name'  => $name
-                );
+            $dbDump = null;
+            $attachments = array();
 
-                continue;
+            // check if archive contains database dump
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $stat = $zip->statIndex($i);
+
+                $path = explode('/', $stat['name']);
+                $name = $path[count($path) - 1];
+
+                if ($name == 'database.xml') {
+                    $dbDump = $i;
+                    continue;
+                }
+
+                if ($path[1] == 'attachments' && count($path) == 3 && $path[2]) {
+                    $attachments[] = array(
+                        'index' => $i,
+                        'name'  => $name
+                    );
+
+                    continue;
+                }
             }
+
+            if ($dbDump === null) {
+                throw new Exception("Invalid backup file");
+            }
+
+            $this->_restoreAttachments($zip, $attachments);
+            $this->_restoreDatabase($zip, $dbDump);
+
+            $zip->close();
+        } catch (Exception $e) {
+            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "application");
+            $exception = $e;
         }
 
-        if ($dbDump === null)
-        {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Invalid backup file.'));
-            return false;
+        // "finally" block
+        $system->status = System::STATUS_IDLE;
+        $system->save();
+
+        if ($exception) {
+            throw $exception;
         }
-
-        $this->_restoreAttachments($zip, $attachments);
-        $this->_restoreDatabase($zip, $dbDump);
-
-        $zip->close();
-
-        return true;
     }
 
     /**
      * Restore the system from a backup.
      */
-	public function actionRestore()
-	{
-        $criteria = new CDbCriteria();
-        $criteria->addInCondition('status', array(
-            TargetCheck::STATUS_IN_PROGRESS,
-            TargetCheck::STATUS_STOP
-        ));
+	public function actionRestore() {
+        $system = System::model()->findByPk(1);
+        $forbid = false;
+        $forbidMessage = null;
 
-        $runningChecks = TargetCheck::model()->count($criteria);
-        $model         = new RestoreForm();
-
-        if (isset($_POST['RestoreForm']))
-        {
-            $model->attributes = $_POST['RestoreForm'];
-            $model->backup     = CUploadedFile::getInstanceByName('RestoreForm[backup]');
-
-            if (!$runningChecks)
-            {
-                if ($model->validate())
-                {
-                    if ($this->_restore($model))
-                        Yii::app()->user->setFlash('success', Yii::t('app', 'System successfully restored from the backup.'));
-                }
-                else
-                    Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
-            }
-            else
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Restore canceled.'));
-
+        if ($system->status != System::STATUS_IDLE) {
+            $forbid = true;
+            $forbidMessage = Yii::t(
+                "app",
+                "The system is busy. Please make sure that all running tasks are finished before proceeding."
+            );
         }
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Restore'), '');
+        $form = new RestoreForm();
+
+        if (isset($_POST["RestoreForm"])) {
+            if ($forbid) {
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
+            }
+
+            $form->attributes = $_POST["RestoreForm"];
+            $form->backup = CUploadedFile::getInstanceByName("RestoreForm[backup]");
+
+            if ($form->validate()) {
+                try {
+                    $this->_restore($system, $form);
+                    Yii::app()->user->setFlash("success", Yii::t("app", "System successfully restored from the backup."));
+                } catch (Exception $e) {
+                    throw new CHttpException(500, Yii::t("app", "Error restoring backup."));
+                }
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+        }
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Restore"), "");
 
         // display the page
-        $this->pageTitle = Yii::t('app', 'Restore');
-		$this->render('restore', array(
-            'runningChecks' => $runningChecks,
-            'model'         => $model
+        $this->pageTitle = Yii::t("app", "Restore");
+		$this->render("restore", array(
+            "forbid" => $forbid,
+            "forbidMessage" => $forbidMessage,
+            "model" => $form
         ));
     }
 }

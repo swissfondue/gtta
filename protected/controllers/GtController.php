@@ -16,6 +16,7 @@ class GtController extends Controller
             'checkAdmin',
             'ajaxOnly + control, controltype, controlmodule, controlcheck',
             'postOnly + control, controltype, controlmodule, controlcheck',
+            "idleOrRunning",
 		);
 	}
 

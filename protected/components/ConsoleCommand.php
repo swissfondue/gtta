@@ -5,6 +5,11 @@
  */
 class ConsoleCommand extends CConsoleCommand {
     /**
+     * @var $_system System
+     */
+    protected $_system = null;
+
+    /**
      * Init a command object.
      */
     public function init() {
@@ -15,6 +20,7 @@ class ConsoleCommand extends CConsoleCommand {
         }
 
         date_default_timezone_set($system->timezone);
+        $this->_system = $system;
     }
 
     /**
@@ -194,5 +200,33 @@ class ConsoleCommand extends CConsoleCommand {
                 $this->_copy($srcPath, $dstPath);
             }
         }
+    }
+
+    /**
+     * Check system status
+     */
+    protected function _checkSystemIsRunning() {
+        if ($this->_system->status != System::STATUS_RUNNING) {
+            return;
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->addInCondition('status', array(TargetCheck::STATUS_IN_PROGRESS, TargetCheck::STATUS_STOP));
+        $checks = TargetCheck::model()->findAll($criteria);
+
+        if (count($checks) > 0) {
+            return;
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->addInCondition('status', array(ProjectGtCheck::STATUS_IN_PROGRESS, ProjectGtCheck::STATUS_STOP));
+        $checks = ProjectGtCheck::model()->findAll($criteria);
+
+        if (count($checks) > 0) {
+            return;
+        }
+
+        $this->_system->status = System::STATUS_IDLE;
+        $this->_system->save();
     }
 }

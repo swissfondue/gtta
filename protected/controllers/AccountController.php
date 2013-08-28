@@ -13,6 +13,7 @@ class AccountController extends Controller
 		return array(
             'https',
 			'checkAuth + edit, certificate',
+            "idleOrRunning",
 		);
 	}
 

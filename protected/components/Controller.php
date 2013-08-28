@@ -16,10 +16,14 @@ class Controller extends CController
     protected $_requestTime = 0;
 
     /**
+     * @var System system
+     */
+    protected $_system = null;
+
+    /**
      * Controller initialization.
      */
-    function init()
-    {
+    function init() {
         parent::init();
 
         $app  = Yii::app();
@@ -43,12 +47,13 @@ class Controller extends CController
         }
 
         date_default_timezone_set($system->timezone);
+        $this->_system = $system;
     }
 
     /**
      * Render template.
      */
-    public function render($view, $data=NULL, $return=false)
+    public function render($view, $data=null, $return=false)
     {
         $this->_requestTime = microtime(true) - $this->_requestTime;
         return parent::render($view, $data, $return);
@@ -150,6 +155,50 @@ class Controller extends CController
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
         }
 
+        $filterChain->run();
+    }
+
+    private function _checkSystemStatus($allowedStatuses) {
+        if (!is_array($allowedStatuses)) {
+            $allowedStatuses = array($allowedStatuses);
+        }
+
+        if (!in_array($this->_system->status, $allowedStatuses)) {
+            throw new CHttpException(
+                403,
+                $this->_system->getStringStatus() . " " .
+                Yii::t("app", "Please wait until all running tasks are finished before proceeding.")
+            );
+        }
+    }
+
+    /**
+     * Check if system is IDLE or RUNNING
+     * @param $filterChain
+     * @throws CHttpException
+     */
+    public function filterIdleOrRunning($filterChain) {
+        $this->_checkSystemStatus(array(System::STATUS_IDLE, System::STATUS_RUNNING));
+        $filterChain->run();
+    }
+
+    /**
+     * Check if system status is IDLE
+     * @param $filterChain
+     * @throws CHttpException
+     */
+    public function filterIdle($filterChain) {
+        $this->_checkSystemStatus(System::STATUS_IDLE);
+        $filterChain->run();
+    }
+
+    /**
+     * Check if system is IDLE or UPDATING
+     * @param $filterChain
+     * @throws CHttpException
+     */
+    public function filterIdleOrUpdating($filterChain) {
+        $this->_checkSystemStatus(array(System::STATUS_IDLE, System::STATUS_UPDATING));
         $filterChain->run();
     }
 }

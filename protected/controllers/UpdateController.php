@@ -14,6 +14,7 @@ class UpdateController extends Controller {
             "checkAdmin",
             "postOnly + status",
             "ajaxOnly + status",
+            "idleOrUpdating",
 		);
 	}
 
@@ -37,17 +38,17 @@ class UpdateController extends Controller {
                 $backupTime = new DateTime($system->backup);
             }
 
-            if (!$backupTime || $backupTime < $backupLimit) {
+            if ($system->status != System::STATUS_IDLE) {
+                $forbidUpdate = true;
+                $forbidMessage = Yii::t(
+                    "app",
+                    "The system is busy. Please make sure that all running tasks are finished before proceeding."
+                );
+            } else if (!$backupTime || $backupTime < $backupLimit) {
                 $forbidUpdate = true;
                 $forbidMessage = Yii::t(
                     "app",
                     "The system has been backed up more than 24 hours ago. Please download a backup before updating the system."
-                );
-            } else if ($system->status != System::STATUS_IDLE) {
-                $forbidUpdate = true;
-                $forbidMessage = Yii::t(
-                    "app",
-                    "The system is busy. Please make sure that all running tasks are finished before updating the system."
                 );
             }
         }

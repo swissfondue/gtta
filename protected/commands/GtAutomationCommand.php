@@ -409,6 +409,8 @@ class GtautomationCommand extends ConsoleCommand {
                 $this->_processStoppingChecks();
                 $this->_processRunningChecks();
 
+                $this->_checkSystemIsRunning();
+
                 sleep(5);
             }
 

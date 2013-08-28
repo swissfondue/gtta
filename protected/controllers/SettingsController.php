@@ -14,6 +14,7 @@ class SettingsController extends Controller
             'https',
 			'checkAuth',
             'checkAdmin',
+            "idleOrRunning",
 		);
 	}
 

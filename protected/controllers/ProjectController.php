@@ -18,6 +18,7 @@ class ProjectController extends Controller
             'checkAdmin + edit, users, adduser, controluser',
             'ajaxOnly + savecheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtcontrolattachment',
             'postOnly + savecheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment',
+            "idleOrRunning",
 		);
 	}
 
@@ -2649,17 +2650,21 @@ class ProjectController extends Controller
                         'check_id'  => $check->id
                     ));
 
-                    $targetCheck->status  = TargetCheck::STATUS_IN_PROGRESS;
-                    $targetCheck->rating  = null;
+                    $targetCheck->status = TargetCheck::STATUS_IN_PROGRESS;
+                    $targetCheck->rating = null;
                     $targetCheck->started = null;
-                    $targetCheck->pid     = null;
+                    $targetCheck->pid = null;
                     $targetCheck->save();
+
+                    $this->_system->status = System::STATUS_RUNNING;
+                    $this->_system->save();
 
                     break;
 
                 case 'stop':
-                    if ($targetCheck->status != TargetCheck::STATUS_IN_PROGRESS)
+                    if ($targetCheck->status != TargetCheck::STATUS_IN_PROGRESS) {
                         throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                    }
 
                     $targetCheck->status = TargetCheck::STATUS_STOP;
                     $targetCheck->save();
@@ -2850,6 +2855,9 @@ class ProjectController extends Controller
                     $projectCheck->started = null;
                     $projectCheck->pid = null;
                     $projectCheck->save();
+
+                    $this->_system->status = System::STATUS_RUNNING;
+                    $this->_system->save();
 
                     break;
 
