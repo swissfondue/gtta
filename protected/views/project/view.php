@@ -61,10 +61,21 @@
                                     <div class="categories">
                                         <?php if ($target->categories): ?>
                                             <?php foreach ($target->categories as $category): ?>
+                                                <?php
+                                                    $catName = $category->localizedName;
+                                                    $shortened = false;
+
+                                                    if (mb_strlen($catName) > 45) {
+                                                        $catName = mb_substr($catName, 0, 45) . "...";
+                                                        $shortened = true;
+                                                    }
+
+                                                    $catName = CHtml::encode($catName);
+                                                ?>
                                                 <?php if (User::checkRole(User::ROLE_USER) || Yii::app()->user->getShowDetails()): ?>
-                                                    <a href="<?php echo $this->createUrl('project/checks', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->id )); ?>"><span class="label label-target-category"><?php echo CHtml::encode($category->localizedName); ?></span></a>
+                                                    <a href="<?php echo $this->createUrl('project/checks', array('id' => $project->id, 'target' => $target->id, 'category' => $category->id)); ?>"><span class="label label-target-category<?php if ($shortened) echo " shortened"; ?>"<?php if ($shortened) echo " title=\"" . CHtml::encode($category->localizedName) . "\""; ?>><?php echo $catName; ?></span></a>
                                                 <?php else: ?>
-                                                    <span class="label label-target-category"><?php echo CHtml::encode($category->localizedName); ?></span>
+                                                    <span class="label label-target-category<?php if ($shortened) echo " shortened"; ?>"<?php if ($shortened) echo " title=\"" . CHtml::encode($category->localizedName) . "\""; ?>><?php echo $catName; ?></span>
                                                 <?php endif; ?>
                                             <?php endforeach; ?>
                                         <?php else: ?>
@@ -308,3 +319,9 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(".shortened").tooltip({
+        placement:"right"
+    });
+</script>
