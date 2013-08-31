@@ -74,7 +74,7 @@ return array(
 
         "update" => array(
             "lockFile" => "/tmp/gtta.update",
-            "keyFile" => BASE_DIR . "/security/keys/update-server.key",
+            "keyFile" => BASE_DIR . "/security/keys/update-server.pub",
             "directory" => "/tmp/gtta-update",
             "versions" => BASE_DIR . "/versions",
             "currentVersionLink" => BASE_DIR . "/current",
