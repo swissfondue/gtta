@@ -3,8 +3,17 @@
 /**
  * This is the model class for settings edit form.
  */
-class SettingsEditForm extends LocalizedFormModel
-{
+class SettingsEditForm extends CFormModel {
+    /**
+     * @var string workstation id
+     */
+    public $workstationId;
+
+    /**
+     * @var string workstation key
+     */
+    public $workstationKey;
+
     /**
      * @var string timezone
      */
@@ -13,21 +22,23 @@ class SettingsEditForm extends LocalizedFormModel
 	/**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
+	public function rules() {
 		return array(
-			array('timezone', 'required'),
-            array('timezone', 'in', 'range' => array_keys(TimeZones::$zones)),
+			array("workstationId, workstationKey, timezone", "required"),
+            array("timezone", "in", "range" => array_keys(TimeZones::$zones)),
+            array("workstationId", "length", "is" => 36),
+            array("workstationKey", "length", "max" => 1000),
 		);
 	}
     
     /**
 	 * @return array customized attribute labels (name=>label)
 	 */
-	public function attributeLabels()
-	{
+	public function attributeLabels() {
 		return array(
-			'timezone' => Yii::t('app', 'Time Zone'),
+            "workstationId" => Yii::t("app", "Workstation ID"),
+            "workstationKey" => Yii::t("app", "Workstation Key"),
+			"timezone" => Yii::t("app", "Time Zone"),
 		);
 	}
 }
