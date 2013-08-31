@@ -149,6 +149,13 @@
                         system.showMessage('<?php echo $key; ?>', '<?php echo str_replace("'", "\\'", $message); ?>');
                     <?php endforeach; ?>
                 </script>
+            <?php elseif (User::checkRole(User::ROLE_ADMIN) && $this->_system->update_version && (!isset(Yii::app()->request->cookies["update_version"]) || Yii::app()->request->cookies["update_version"]->value != $this->_system->update_version) && Yii::app()->controller->id != 'update'): ?>
+                <div class="message-container">
+                    <div class="alert alert-info">
+                        <?php echo Yii::t("app", "GTTA {version} is available, please update the system.", array("{version}" => $this->_system->update_version)); ?>
+                        <a href="<?php echo $this->createUrl("update/index"); ?>"><?php echo Yii::t("app", "Update now"); ?></a>.
+                    </div>
+                </div>
             <?php endif; ?>
 
             <?php echo $content; ?>

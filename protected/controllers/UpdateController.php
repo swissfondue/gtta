@@ -72,6 +72,16 @@ class UpdateController extends Controller {
             $updating = true;
         }
 
+        $req = Yii::app()->request;
+
+        if ($system->update_version && (!isset($req->cookies["update_version"]) || $req->cookies["update_version"] != $system->update_version)) {
+            $cookie = new CHttpCookie("update_version", $system->update_version);
+            $cookie->path = "/";
+            $cookie->secure = true;
+            $cookie->expire = time() + 60 * 60 * 24 * 30;
+            $req->cookies["update_version"] = $cookie;
+        }
+
         $this->breadcrumbs[] = array(Yii::t("app", "Update"), "");
 
 		// display the page
