@@ -94,28 +94,23 @@ class ConsoleCommand extends CConsoleCommand {
 
     /**
      * Remove directory recursively
-     * @param $dir
+     * @param $path
      */
-    protected function _rmDir($dir) {
-        if (!is_dir($dir)) {
+    protected function _rmDir($path) {
+        if (!is_dir($path)) {
+            @unlink($path);
             return;
         }
 
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::CHILD_FIRST
-        );
-
-        /** @var $item RecursiveDirectoryIterator */
-        foreach ($iterator as $item) {
-            if ($item->isDir()) {
-                @rmdir($item->getPathname());
-            } elseif ($item->isFile() || $item->isLink()) {
-                @unlink($item->getPathname());
+        foreach (scandir($path) as $file) {
+            if ($file == "." || $file == "..") {
+                continue;
             }
+
+            $this->_rmDir($path . "/" . $file);
         }
 
-        @rmdir($dir);
+        @rmdir($path);
     }
 
     /**
@@ -184,18 +179,27 @@ class ConsoleCommand extends CConsoleCommand {
      * @throws Exception
      */
     protected function _copyRecursive($source, $destination) {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::SELF_FIRST
-        );
+        if (!is_dir($source)) {
+            return;
+        }
 
-        foreach ($iterator as $item) {
-            $path = $iterator->getSubPathname();
-            $srcPath = $source . "/" . $path;
-            $dstPath = $destination . "/" . $path;
+        foreach (scandir($source) as $file) {
+            if ($file == "." || $file == "..") {
+                continue;
+            }
 
-            if ($item->isDir()) {
-                $this->_createDir($dstPath, fileperms($srcPath));
+            $srcPath = $source . "/" . $file;
+            $dstPath = $destination . "/" . $file;
+
+            $perms = @fileperms($srcPath);
+
+            if ($perms === false) {
+                continue;
+            }
+
+            if (is_dir($srcPath)) {
+                $this->_createDir($dstPath, $perms);
+                $this->_copyRecursive($srcPath, $dstPath);
             } else {
                 $this->_copy($srcPath, $dstPath);
             }
