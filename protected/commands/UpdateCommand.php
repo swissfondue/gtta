@@ -11,6 +11,7 @@ class UpdateCommand extends ConsoleCommand {
     const SIGNATURE_FILE = "gtta.sig";
     const WEB_DIRECTORY = "web";
     const SCRIPTS_DIRECTORY = "scripts";
+    const TOOLS_DIRECTORY = "tools";
     const CRONTAB_FILE = "crontab.txt";
 
     /**
@@ -60,6 +61,7 @@ class UpdateCommand extends ConsoleCommand {
 
         $this->_copyRecursive($srcDir . "/" . self::WEB_DIRECTORY, $dstDir . "/" . self::WEB_DIRECTORY);
         $this->_copyRecursive($srcDir . "/" . self::SCRIPTS_DIRECTORY, $dstDir . "/" . self::SCRIPTS_DIRECTORY);
+        $this->_copyRecursive($srcDir . "/" . self::TOOLS_DIRECTORY, $dstDir . "/" . self::TOOLS_DIRECTORY);
 
         $protectedDir = $dstDir . "/" . self::WEB_DIRECTORY . "/protected";
 
