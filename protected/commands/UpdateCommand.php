@@ -12,6 +12,9 @@ class UpdateCommand extends ConsoleCommand {
     const WEB_DIRECTORY = "web";
     const SCRIPTS_DIRECTORY = "scripts";
     const TOOLS_DIRECTORY = "tools";
+    const INSTALL_SCRIPTS_DIRECTORY = "install";
+    const INSTALL_SCRIPT = "install.sh";
+    const REVERT_SCRIPT = "revert.sh";
     const CRONTAB_FILE = "crontab.txt";
 
     /**
@@ -66,6 +69,10 @@ class UpdateCommand extends ConsoleCommand {
         $protectedDir = $dstDir . "/" . self::WEB_DIRECTORY . "/protected";
 
         $this->_chmod($protectedDir . "/yiic", 0750);
+        $this->_chmod($dstDir . "/" . self::TOOLS_DIRECTORY . "/backup.sh", 0750);
+        $this->_chmod($dstDir . "/" . self::TOOLS_DIRECTORY . "/setup/system/gtta-init.sh", 0750);
+        $this->_chmod($dstDir . "/" . self::TOOLS_DIRECTORY . "/setup/system/gtta-setup.sh", 0750);
+
         $this->_runCommand(sprintf("chown -R %s:%s %s", self::GTTA_USER, self::GTTA_GROUP, $dstDir));
 
         // update configuration
@@ -75,6 +82,26 @@ class UpdateCommand extends ConsoleCommand {
             $params["deployConfig"],
             $protectedDir
         ));
+    }
+
+    /**
+     * Run install script
+     * @param $targetVersion
+     */
+    private function _runInstallScript($targetVersion) {
+        $scriptPath = implode("/", array(
+            Yii::app()->params["update"]["directory"],
+            self::EXTRACTED_DIRECTORY,
+            self::INSTALL_SCRIPTS_DIRECTORY,
+            self::INSTALL_SCRIPT
+        ));
+
+        if (!file_exists($scriptPath)) {
+            return;
+        }
+
+        $this->_chmod($scriptPath, 0750);
+        $this->_runCommand($scriptPath);
     }
 
     /**
@@ -175,6 +202,25 @@ class UpdateCommand extends ConsoleCommand {
     }
 
     /**
+     * Revert install script
+     */
+    private function _revertInstallScript() {
+        $scriptPath = implode("/", array(
+            Yii::app()->params["update"]["directory"],
+            self::EXTRACTED_DIRECTORY,
+            self::INSTALL_SCRIPTS_DIRECTORY,
+            self::REVERT_SCRIPT
+        ));
+
+        if (!file_exists($scriptPath)) {
+            return;
+        }
+
+        $this->_chmod($scriptPath, 0750);
+        $this->_runCommand($scriptPath);
+    }
+
+    /**
      * Prepare everything for update
      * @param $targetVersion string
      */
@@ -188,6 +234,7 @@ class UpdateCommand extends ConsoleCommand {
         $this->_createDir($versionDir, 0750);
         $this->_createDir($versionDir . "/" . self::WEB_DIRECTORY, 0750);
         $this->_createDir($versionDir . "/" . self::SCRIPTS_DIRECTORY, 0750);
+        $this->_createDir($versionDir . "/" . self::TOOLS_DIRECTORY, 0750);
     }
 
     /**
@@ -244,24 +291,30 @@ class UpdateCommand extends ConsoleCommand {
             try {
                 $this->_getUpdate($targetVersion, $system->workstation_id, $system->workstation_key);
                 $this->_copyFiles($targetVersion);
-                $this->_migrateDatabase($targetVersion);
+                $this->_runInstallScript($targetVersion);
 
                 try {
-                    $this->_runTests();
-                    $this->_updateCrontab();
+                    $this->_migrateDatabase($targetVersion);
 
                     try {
-                        $this->_changeLink($targetVersion);
-                        $this->_deletePreviousVersions();
+                        $this->_runTests();
+                        $this->_updateCrontab();
 
-                        $finished = true;
+                        try {
+                            $this->_changeLink($targetVersion);
+                            $this->_deletePreviousVersions();
+
+                            $finished = true;
+                        } catch (Exception $e) {
+                            $this->_revertCrontab();
+                            throw $e;
+                        }
                     } catch (Exception $e) {
-                        $this->_revertCrontab();
+                        $this->_revertDatabase();
                         throw $e;
                     }
                 } catch (Exception $e) {
-                    $this->_revertDatabase();
-                    throw $e;
+                    $this->_revertInstallScript();
                 }
             } catch (Exception $e) {
                 $exception = $e;
