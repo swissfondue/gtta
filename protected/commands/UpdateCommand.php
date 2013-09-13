@@ -315,6 +315,7 @@ class UpdateCommand extends ConsoleCommand {
                     }
                 } catch (Exception $e) {
                     $this->_revertInstallScript();
+                    throw $e;
                 }
             } catch (Exception $e) {
                 $exception = $e;
