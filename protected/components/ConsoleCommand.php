@@ -88,7 +88,7 @@ class ConsoleCommand extends CConsoleCommand {
         exec($cmd, $output, $result);
 
         if ($result !== 0) {
-            throw new Exception("Invalid result code: $result");
+            throw new Exception("Invalid result code: $result ($cmd)");
         }
     }
 
