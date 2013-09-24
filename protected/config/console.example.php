@@ -78,7 +78,6 @@ return array(
             "directory" => "/tmp/gtta-update",
             "versions" => BASE_DIR . "/versions",
             "currentVersionLink" => BASE_DIR . "/current",
-            "deployScript" => VERSION_DIR . "/tools/deploy/make_config.py",
             "deployConfig" => BASE_DIR . "/config/gtta.ini",
         ),
 

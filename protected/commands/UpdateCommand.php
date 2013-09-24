@@ -16,6 +16,7 @@ class UpdateCommand extends ConsoleCommand {
     const INSTALL_SCRIPT = "install.sh";
     const REVERT_SCRIPT = "revert.sh";
     const CRONTAB_FILE = "crontab.txt";
+    const MAKE_CONFIG_SCRIPT = "make_config.py";
 
     /**
      * Download, check and unpack the update
@@ -78,7 +79,11 @@ class UpdateCommand extends ConsoleCommand {
         // update configuration
         $this->_runCommand(sprintf(
             "python %s %s %s/config/",
-            $params["deployScript"],
+            implode("/", array(
+                $srcDir,
+                self::INSTALL_SCRIPTS_DIRECTORY,
+                self::MAKE_CONFIG_SCRIPT
+            )),
             $params["deployConfig"],
             $protectedDir
         ));
