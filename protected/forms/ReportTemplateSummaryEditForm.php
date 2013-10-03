@@ -31,10 +31,10 @@ class ReportTemplateSummaryEditForm extends LocalizedFormModel
 	public function rules()
 	{
 		return array(
-			array( 'title, ratingFrom, ratingTo', 'required' ),
-            array( 'title', 'length', 'max' => 1000 ),
-            array( 'ratingFrom, ratingTo', 'numerical', 'min' => 0.0, 'max' => 5.0 ),
-            array( 'localizedItems, summary', 'safe' ),
+			array('title, ratingFrom, ratingTo', 'required'),
+            array('title', 'length', 'max' => 1000),
+            array('ratingFrom, ratingTo', 'numerical', 'min' => 0.0),
+            array('localizedItems, summary', 'safe'),
 		);
 	}
     
