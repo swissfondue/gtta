@@ -3,8 +3,7 @@
 /**
  * Report controller.
  */
-class ReportController extends Controller
-{
+class ReportController extends Controller {
     private $rtf;
     private $cellPadding;
     private $fontSize;
@@ -16,15 +15,14 @@ class ReportController extends Controller
     private $project;
     private $toc;
 
-    const NORMAL_VULN_LIST   = 0;
+    const NORMAL_VULN_LIST = 0;
     const APPENDIX_VULN_LIST = 1;
     const SEPARATE_VULN_LIST = 2;
 
     /**
 	 * @return array action filters
 	 */
-	public function filters()
-	{
+	public function filters() {
 		return array(
             'https',
 			'checkAuth',
@@ -36,24 +34,29 @@ class ReportController extends Controller
     /**
      * Normalize X coordinate.
      */
-    private function _normalizeCoord($coord, $min, $max)
-    {
-        if ($coord < $min)
+    private function _normalizeCoord($coord, $min, $max) {
+        if ($coord < $min) {
             $coord = $min;
-        elseif ($coord > $max)
+        } elseif ($coord > $max) {
             $coord = $max;
+        }
 
         return $coord;
     }
 
     /**
      * Rating image.
+     * @param float $rating
+     * @param System $system
      */
-    private function _generateRatingImage($rating)
-    {
-        $image     = imagecreatefrompng(Yii::app()->basePath . '/../images/rating-stripe.png');
-        $lineCoord = round($rating * 40);
-        $color     = imagecolorallocate($image, 0, 0, 0);
+    private function _generateRatingImage($rating, $system = null) {
+        if ($system == null) {
+            $system = System::model()->findByPk(1);
+        }
+
+        $image = imagecreatefrompng(Yii::app()->basePath . '/../images/rating-stripe.png');
+        $lineCoord = round(200 * $rating / $system->report_max_rating);
+        $color = imagecolorallocate($image, 0, 0, 0);
 
         imageline($image, $lineCoord, 0, $lineCoord, 30, $color);
 
@@ -1042,6 +1045,143 @@ class ReportController extends Controller
     }
 
     /**
+     * Get rating for the given check distribution
+     * @param $totalChecks
+     * @param $lowRisk
+     * @param $medRisk
+     * @param $highRisk
+     * @return float rating
+     */
+    private function _getRating($totalChecks, $lowRisk, $medRisk, $highRisk) {
+        $medDamping = 1;
+        $lowDamping = 1;
+        $pedestal = 0;
+        $range = 0;
+
+        if ($totalChecks == 0) {
+            return 0.0;
+        }
+
+        /** @var System $system */
+        $system = System::model()->findByPk(1);
+
+        if ($highRisk > 0) {
+            $pedestal = $system->report_high_pedestal;
+            $medDamping = $system->report_high_damping_med;
+            $lowDamping = $system->report_high_damping_low;
+            $range = $system->report_max_rating - $system->report_high_pedestal;
+        } elseif ($medRisk > 0) {
+            $pedestal = $system->report_med_pedestal;
+            $lowDamping = $system->report_med_damping_low;
+            $range = $system->report_high_pedestal - $system->report_med_pedestal;
+        } elseif ($lowRisk > 0) {
+            $pedestal = $system->report_low_pedestal;
+            $range = $system->report_med_pedestal - $system->report_low_pedestal;
+        }
+
+        $highRisk = $highRisk / $totalChecks * $range;
+        $medRisk = $medRisk / $totalChecks * ($range - $highRisk) * $medDamping;
+        $lowRisk = $lowRisk / $totalChecks * ($range - $highRisk - $medRisk) * $lowDamping;
+        $rating = $highRisk + $medRisk + $lowRisk + $pedestal;
+
+        return $rating;
+    }
+
+    /**
+     * Get rating for checks array
+     * @param array $checks
+     * @return float rating
+     */
+    private function _getChecksRating($checks) {
+        $totalChecks = 0;
+        $lowRisk = 0;
+        $medRisk = 0;
+        $highRisk = 0;
+
+        foreach ($checks as $check) {
+            $totalChecks++;
+
+            switch ($check["rating"]) {
+                case TargetCheck::RATING_NONE:
+                case TargetCheck::RATING_HIDDEN:
+                case TargetCheck::RATING_INFO:
+                    break;
+
+                case TargetCheck::RATING_LOW_RISK:
+                    $lowRisk++;
+                    break;
+
+                case TargetCheck::RATING_MED_RISK:
+                    $medRisk++;
+                    break;
+
+                case TargetChecK::RATING_HIGH_RISK:
+                    $highRisk++;
+                    break;
+            }
+        }
+
+        return $this->_getRating($totalChecks, $lowRisk, $medRisk, $highRisk);
+    }
+
+    /**
+     * Get category rating
+     * @param $category
+     * @return float rating
+     */
+    private function _getCategoryRating($category) {
+        $checks = array();
+
+        foreach ($category["controls"] as $control) {
+            foreach ($control["checks"] as $check) {
+                $checks[] = $check;
+            }
+        }
+
+        return $this->_getChecksRating($checks);
+    }
+
+    /**
+     * Get target rating
+     * @param $target
+     * @return float rating
+     */
+    private function _getTargetRating($target) {
+        $checks = array();
+
+        foreach ($target["categories"] as $category) {
+            foreach ($category["controls"] as $control) {
+                foreach ($control["checks"] as $check) {
+                    $checks[] = $check;
+                }
+            }
+        }
+
+        return $this->_getChecksRating($checks);
+    }
+
+    /**
+     * Get total rating
+     * @param $targets
+     * @return float rating
+     */
+    private function _getTotalRating($targets) {
+        $checks = array();
+
+        foreach ($targets as $target) {
+            foreach ($target["categories"] as $category) {
+                foreach ($category["controls"] as $control) {
+                    foreach ($control["checks"] as $check) {
+                        $checks[] = $check;
+                    }
+                }
+            }
+        }
+
+        return $this->_getChecksRating($checks);
+    }
+
+    /**
      * Project report
      * @param $targetIds
      * @param $templateCategoryIds
@@ -1265,27 +1405,25 @@ class ReportController extends Controller
                             $hasSeparate = true;
                         }
 
+                        $checkData['rating'] = $check->targetChecks[0]->rating;
+
                         switch ($check->targetChecks[0]->rating) {
                             case TargetCheck::RATING_INFO:
-                                $checkData['rating'] = 1;
                                 $checkData['ratingColor'] = '#3A87AD';
                                 $checksInfo++;
                                 break;
 
                             case TargetCheck::RATING_LOW_RISK:
-                                $checkData['rating'] = 2;
                                 $checkData['ratingColor'] = '#53A254';
                                 $checksLow++;
                                 break;
 
                             case TargetCheck::RATING_MED_RISK:
-                                $checkData['rating'] = 3;
                                 $checkData['ratingColor'] = '#DACE2F';
                                 $checksMed++;
                                 break;
 
                             case TargetCheck::RATING_HIGH_RISK:
-                                $checkData['rating'] = 4;
                                 $checkData['ratingColor'] = '#D63515';
                                 $checksHigh++;
                                 break;
@@ -1299,7 +1437,7 @@ class ReportController extends Controller
 
                         if ($check->targetCheckAttachments) {
                             foreach ($check->targetCheckAttachments as $attachment) {
-                                if (in_array($attachment->type, array( 'image/jpeg', 'image/png', 'image/gif', 'image/pjpeg' ))) {
+                                if (in_array($attachment->type, array('image/jpeg', 'image/png', 'image/gif', 'image/pjpeg'))) {
                                     $checkData['images'][] = Yii::app()->params['attachments']['path'] . '/' . $attachment->path;
                                 }
                             }
@@ -1320,29 +1458,22 @@ class ReportController extends Controller
                             );
                         }
 
-                        $controlData['rating']  += $checkData['rating'];
-                        $categoryData['rating'] += $checkData['rating'];
-                        $targetData['rating']   += $checkData['rating'];
-                        $totalRating            += $checkData['rating'];
-
-                        // put checks with RATING_INFO rating to a separate category
                         $controlData['checks'][] = $checkData;
                     }
 
+                    $controlData["rating"] = $this->_getChecksRating($controlData["checks"]);
                     $controlData['checkCount'] = count($checks);
-                    $controlData['rating']    /= $controlData['checkCount'];
-
-                    $categoryData['checkCount'] += $controlData['checkCount'];
-                    $targetData['checkCount']   += $controlData['checkCount'];
-                    $totalCheckCount            += $controlData['checkCount'];
+                    $categoryData['checkCount'] += count($checks);
+                    $targetData['checkCount'] += count($checks);
+                    $totalCheckCount += count($checks);
 
                     if ($controlData['checks']) {
-                        $categoryData['controls'][]  = $controlData;
+                        $categoryData['controls'][] = $controlData;
                     }
                 }
 
                 if ($categoryData['checkCount']) {
-                    $categoryData['rating'] /= $categoryData['checkCount'];
+                    $categoryData['rating'] = $this->_getCategoryRating($categoryData);
 
                     if ($categoryData['controls']) {
                         $targetData['categories'][] = $categoryData;
@@ -1351,14 +1482,14 @@ class ReportController extends Controller
             }
 
             if ($targetData['checkCount']) {
-                $targetData['rating'] /= $targetData['checkCount'];
+                $targetData['rating'] = $this->_getTargetRating($targetData);
             }
 
             $data[] = $targetData;
         }
 
         if ($totalCheckCount) {
-            $totalRating /= $totalCheckCount;
+            $totalRating = $this->_getTotalRating($data);
         }
 
         $this->project['rating'] = $totalRating;
@@ -1640,27 +1771,25 @@ class ReportController extends Controller
                             $hasSeparate = true;
                         }
 
+                        $checkData["rating"] = $check->rating;
+
                         switch ($check->rating) {
                             case TargetCheck::RATING_INFO:
-                                $checkData['rating'] = 1;
                                 $checkData['ratingColor'] = '#3A87AD';
                                 $checksInfo++;
                                 break;
 
                             case TargetCheck::RATING_LOW_RISK:
-                                $checkData['rating'] = 2;
                                 $checkData['ratingColor'] = '#53A254';
                                 $checksLow++;
                                 break;
 
                             case TargetCheck::RATING_MED_RISK:
-                                $checkData['rating'] = 3;
                                 $checkData['ratingColor'] = '#DACE2F';
                                 $checksMed++;
                                 break;
 
                             case TargetCheck::RATING_HIGH_RISK:
-                                $checkData['rating'] = 4;
                                 $checkData['ratingColor'] = '#D63515';
                                 $checksHigh++;
                                 break;
@@ -1695,18 +1824,13 @@ class ReportController extends Controller
                             );
                         }
 
-                        $controlData['rating'] += $checkData['rating'];
-                        $categoryData['rating'] += $checkData['rating'];
-                        $targetData['rating'] += $checkData['rating'];
-                        $totalRating += $checkData['rating'];
-
                         // put checks with RATING_INFO rating to a separate category
                         $controlData['checks'][] = $checkData;
                     }
 
-                    $controlData['checkCount'] = count($checks);
-                    $controlData['rating'] /= $controlData['checkCount'];
+                    $controlData['rating'] = $this->_getChecksRating($controlData["checks"]);
 
+                    $controlData['checkCount'] = count($checks);
                     $categoryData['checkCount'] += $controlData['checkCount'];
                     $targetData['checkCount'] += $controlData['checkCount'];
                     $totalCheckCount += $controlData['checkCount'];
@@ -1717,7 +1841,7 @@ class ReportController extends Controller
                 }
 
                 if ($categoryData['checkCount']) {
-                    $categoryData['rating'] /= $categoryData['checkCount'];
+                    $categoryData['rating'] = $this->_getCategoryRating($categoryData);
 
                     if ($categoryData['controls']) {
                         $targetData['categories'][] = $categoryData;
@@ -1726,7 +1850,7 @@ class ReportController extends Controller
             }
 
             if ($targetData['checkCount']) {
-                $targetData['rating'] /= $targetData['checkCount'];
+                $targetData['rating'] = $this->_getTargetRating($targetData);
             }
 
             $data[] = $targetData;
@@ -1734,7 +1858,7 @@ class ReportController extends Controller
         }
 
         if ($totalCheckCount) {
-            $totalRating /= $totalCheckCount;
+            $totalRating = $this->_getTotalRating($data);
         }
 
         $this->project['rating'] = $totalRating;
@@ -2101,7 +2225,8 @@ class ReportController extends Controller
 
         $subsectionNumber++;
 
-        $section->addImage($this->_generateRatingImage($this->project['rating']), $this->centerPar);
+        $system = System::model()->findByPk(1);
+        $section->addImage($this->_generateRatingImage($this->project['rating'], $system), $this->centerPar);
         $section->writeText('Rating: ' . sprintf('%.2f', $this->project['rating']) . ($summary ? ' (' . $summary->localizedTitle . ')' : '') . "\n", $this->textFont, $this->centerPar);
 
         $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
@@ -2128,18 +2253,17 @@ class ReportController extends Controller
         $table->writeToCell(1, 2, Yii::t('app', 'Rating'));
 
         $row = 2;
+        $system = System::model()->findByPk(1);
 
-        foreach ($data as $target)
-        {
+        foreach ($data as $target) {
             $table->writeToCell($row, 1, $target['host']);
 
-            if ($target['description'])
-            {
+            if ($target['description']) {
                 $table->getCell($row, 1)->writeText(' / ', $this->textFont);
                 $table->getCell($row, 1)->writeText($target['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
             }
 
-            $table->addImageToCell($row, 2, $this->_generateRatingImage($target['rating']), null, $this->docWidth * 0.34);
+            $table->addImageToCell($row, 2, $this->_generateRatingImage($target['rating'], $system), null, $this->docWidth * 0.34);
             $table->writeToCell($row, 3, sprintf('%.2f', $target['rating']));
 
             $table->getCell($row, 2)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
@@ -2693,6 +2817,8 @@ class ReportController extends Controller
                     $referenceIds[] = $reference->reference_id;
                 }
 
+                $checksData = array();
+
                 foreach ($categories as $category) {
                     $controls = CheckControl::model()->findAllByAttributes(array(
                         'check_category_id' => $category->check_category_id
@@ -2720,8 +2846,8 @@ class ReportController extends Controller
                             'on'       => 'tcs.target_id = :target_id AND tcs.status = :status AND tcs.rating != :hidden',
                             'params'   => array(
                                 'target_id' => $target->id,
-                                'status'    => TargetCheck::STATUS_FINISHED,
-                                'hidden'    => TargetCheck::RATING_HIDDEN,
+                                'status' => TargetCheck::STATUS_FINISHED,
+                                'hidden' => TargetCheck::RATING_HIDDEN,
                             ),
                         ),
                     ))->findAll($criteria);
@@ -2731,33 +2857,13 @@ class ReportController extends Controller
                     }
 
                     foreach ($checks as $check) {
-                        switch ($check->targetChecks[0]->rating) {
-                            case TargetCheck::RATING_INFO:
-                                $rating += 1;
-                                break;
-
-                            case TargetCheck::RATING_LOW_RISK:
-                                $rating += 2;
-                                break;
-
-                            case TargetCheck::RATING_MED_RISK:
-                                $rating += 3;
-                                break;
-
-                            case TargetCheck::RATING_HIGH_RISK:
-                                $rating += 4;
-                                break;
-                        }
-
-                        $checkCount++;
+                        $checksData[] = array(
+                            "rating" => $check->targetChecks[0]->rating
+                        );
                     }
                 }
 
-                if ($checkCount) {
-                    $rating /= $checkCount;
-                }
-
-                $targetData['ratings'][] = $rating;
+                $targetData['ratings'][] = $this->_getChecksRating($checksData);
             }
 
             $targetsData[] = $targetData;
@@ -2858,33 +2964,15 @@ class ReportController extends Controller
                     continue;
                 }
 
+                $checksData = array();
+
                 foreach ($checks as $check) {
-                    switch ($check->rating) {
-                        case ProjectGtCheck::RATING_INFO:
-                            $rating += 1;
-                            break;
-
-                        case ProjectGtCheck::RATING_LOW_RISK:
-                            $rating += 2;
-                            break;
-
-                        case ProjectGtCheck::RATING_MED_RISK:
-                            $rating += 3;
-                            break;
-
-                        case ProjectGtCheck::RATING_HIGH_RISK:
-                            $rating += 4;
-                            break;
-                    }
-
-                    $checkCount++;
+                    $checksData[] = array(
+                        "rating" => $check->rating
+                    );
                 }
 
-                if ($checkCount) {
-                    $rating /= $checkCount;
-                }
-
-                $targetData['ratings'][] = $rating;
+                $targetData['ratings'][] = $this->_getChecksRating($checksData);
             }
 
             $targetsData[] = $targetData;
@@ -2991,11 +3079,12 @@ class ReportController extends Controller
         $table->writeToCell(1, 3, $project2->name . ' (' . $project2->year . ')');
 
         $row = 2;
+        $system = System::model()->findByPk(1);
 
         foreach ($targetsData as $target) {
             $table->writeToCell($row, 1, $target['host']);
-            $table->addImageToCell($row, 2, $this->_generateRatingImage($target['ratings'][0]), null, $this->docWidth * 0.30);
-            $table->addImageToCell($row, 3, $this->_generateRatingImage($target['ratings'][1]), null, $this->docWidth * 0.30);
+            $table->addImageToCell($row, 2, $this->_generateRatingImage($target['ratings'][0], $system), null, $this->docWidth * 0.30);
+            $table->addImageToCell($row, 3, $this->_generateRatingImage($target['ratings'][1], $system), null, $this->docWidth * 0.30);
 
             $table->getCell($row, 2)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
             $table->getCell($row, 3)->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);

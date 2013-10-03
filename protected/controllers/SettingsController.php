@@ -21,11 +21,20 @@ class SettingsController extends Controller {
      */
 	public function actionEdit() {
         $form = new SettingsEditForm();
+
+        /** @var System $system  */
         $system = System::model()->findByPk(1);
 
         $form->workstationId = $system->workstation_id;
         $form->workstationKey = $system->workstation_key;
         $form->timezone = $system->timezone;
+        $form->reportLowPedestal = $system->report_low_pedestal;
+        $form->reportMedPedestal = $system->report_med_pedestal;
+        $form->reportHighPedestal = $system->report_high_pedestal;
+        $form->reportMaxRating = $system->report_max_rating;
+        $form->reportMedDampingLow = $system->report_med_damping_low;
+        $form->reportHighDampingLow = $system->report_high_damping_low;
+        $form->reportHighDampingMed = $system->report_high_damping_med;
 
         // collect form input data
 		if (isset($_POST["SettingsEditForm"])) {
@@ -35,6 +44,13 @@ class SettingsController extends Controller {
                 $system->workstation_id = $form->workstationId;
                 $system->workstation_key = $form->workstationKey;
                 $system->timezone = $form->timezone;
+                $system->report_low_pedestal = $form->reportLowPedestal;
+                $system->report_med_pedestal = $form->reportMedPedestal;
+                $system->report_high_pedestal = $form->reportHighPedestal;
+                $system->report_max_rating = $form->reportMaxRating;
+                $system->report_med_damping_low = $form->reportMedDampingLow;
+                $system->report_high_damping_low = $form->reportHighDampingLow;
+                $system->report_high_damping_med = $form->reportHighDampingMed;
                 $system->save();
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "Settings saved."));

@@ -17,6 +17,13 @@
  * @property string $update_time
  * @property integer $status
  * @property integer $update_pid
+ * @property float $report_low_pedestal
+ * @property float $report_med_pedestal
+ * @property float $report_high_pedestal
+ * @property float $report_max_rating
+ * @property float $report_med_damping_low
+ * @property float $report_high_damping_low
+ * @property float $report_high_damping_med
  */
 class System extends CActiveRecord {
     /**
@@ -67,6 +74,7 @@ class System extends CActiveRecord {
 		return array(
             array("workstation_id, workstation_key, version, update_version, update_description, version_description", "length", "max" => 1000),
             array("status", "in", "range" => self::validStatuses()),
+            array("report_low_pedestal, report_med_pedestal, report_high_pedestal, report_max_rating, report_med_damping_low, report_high_damping_low, report_high_damping_med", "numerical", "min" => 0),
             array("backup, timezone, update_check_time, update_time, update_pid", "safe"),
 		);
 	}
