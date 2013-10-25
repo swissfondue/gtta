@@ -279,6 +279,7 @@ function Admin()
                     forceIframeTransport : true,
                     timeout              : 120000,
                     formData             : data,
+                    dropZone:$('input[name^="ReportTemplateHeaderImageUploadForm"]'),
 
                     done : function (e, data) {
                         $('.loader-image').hide();
@@ -393,11 +394,12 @@ function Admin()
                 data['YII_CSRF_TOKEN'] = system.csrf;
 
                 $(this).fileupload({
-                    dataType             : 'json',
-                    url                  : url,
-                    forceIframeTransport : true,
-                    timeout              : 120000,
-                    formData             : data,
+                    dataType: 'json',
+                    url: url,
+                    forceIframeTransport: true,
+                    timeout: 120000,
+                    formData: data,
+                    dropZone:$('input[name^="ClientLogoUploadForm"]'),
 
                     done : function (e, data) {
                         $('.loader-image').hide();

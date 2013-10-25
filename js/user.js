@@ -593,11 +593,12 @@ function User()
                 data['YII_CSRF_TOKEN'] = system.csrf;
 
                 $(this).fileupload({
-                    dataType             : 'json',
-                    url                  : url,
-                    forceIframeTransport : true,
-                    timeout              : 120000,
-                    formData             : data,
+                    dataType: 'json',
+                    url: url,
+                    forceIframeTransport: true,
+                    timeout: 120000,
+                    formData: data,
+                    dropZone:$('input[name^="TargetCheckAttachmentUploadForm"]'),
 
                     done : function (e, data) {
                         $('.loader-image').hide();
@@ -1419,6 +1420,7 @@ function User()
                     forceIframeTransport: true,
                     timeout: 120000,
                     formData: data,
+                    dropZone:$('input[name^="ProjectGtCheckAttachmentUploadForm"]'),
 
                     done : function (e, data) {
                         $('.loader-image').hide();
