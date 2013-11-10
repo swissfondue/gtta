@@ -100,7 +100,7 @@ class MigrateCommand extends CConsoleCommand
 				if($this->migrateUp($migration)===false)
 				{
 					echo "\nMigration failed. All later migrations are canceled.\n";
-					exit(1);
+					return;
 				}
 			}
 			echo "\nMigrated up successfully.\n";
@@ -133,7 +133,7 @@ class MigrateCommand extends CConsoleCommand
 				if($this->migrateDown($migration)===false)
 				{
 					echo "\nMigration failed. All later migrations are canceled.\n";
-					exit(1);
+					return;
 				}
 			}
 			echo "\nMigrated down successfully.\n";
@@ -166,7 +166,7 @@ class MigrateCommand extends CConsoleCommand
 				if($this->migrateDown($migration)===false)
 				{
 					echo "\nMigration failed. All later migrations are canceled.\n";
-                    exit(1);
+					return;
 				}
 			}
 			foreach(array_reverse($migrations) as $migration)
@@ -174,7 +174,7 @@ class MigrateCommand extends CConsoleCommand
 				if($this->migrateUp($migration)===false)
 				{
 					echo "\nMigration failed. All later migrations are canceled.\n";
-                    exit(1);
+					return;
 				}
 			}
 			echo "\nMigration redone successfully.\n";
