@@ -31,6 +31,10 @@ hr {
     margin-right:0;
 }
 
+ul.nav li.dropdown:hover > ul.dropdown-menu {
+    display: block;
+}
+
 .loader-image {
     margin-top:10px;
     margin-right:20px;
