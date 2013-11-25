@@ -197,7 +197,7 @@ class ReportController extends Controller {
         if ($a['rating'] == $b['rating'])
             return 0;
 
-        return $a['rating'] < $b['rating'] ? 1 : -1;
+        return $a['rating'] > $b['rating'] ? 1 : -1;
     }
 
     /**
