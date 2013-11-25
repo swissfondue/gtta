@@ -568,16 +568,16 @@ class ProjectController extends Controller
 
 		$model = new ProjectEditForm(User::checkRole(User::ROLE_ADMIN) ? ProjectEditForm::ADMIN_SCENARIO : ProjectEditForm::USER_SCENARIO);
 
-        if (!$newRecord)
-        {
+        if (!$newRecord) {
             $model->name     = $project->name;
             $model->year     = $project->year;
             $model->status   = $project->status;
             $model->clientId = $project->client_id;
             $model->deadline = $project->deadline;
-        }
-        else
+        } else {
+            $model->year = date("Y");
             $model->deadline = date('Y-m-d');
+        }
 
 		// collect user input data
 		if (isset($_POST['ProjectEditForm']))
