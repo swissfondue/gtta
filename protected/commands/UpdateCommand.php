@@ -63,21 +63,21 @@ class UpdateCommand extends ConsoleCommand {
         $srcDir = $params["directory"] . "/" . self::EXTRACTED_DIRECTORY;
         $dstDir = $params["versions"] . "/" . $targetVersion;
 
-        $this->_copyRecursive($srcDir . "/" . self::WEB_DIRECTORY, $dstDir . "/" . self::WEB_DIRECTORY);
-        $this->_copyRecursive($srcDir . "/" . self::SCRIPTS_DIRECTORY, $dstDir . "/" . self::SCRIPTS_DIRECTORY);
-        $this->_copyRecursive($srcDir . "/" . self::TOOLS_DIRECTORY, $dstDir . "/" . self::TOOLS_DIRECTORY);
+        FileManager::copyRecursive($srcDir . "/" . self::WEB_DIRECTORY, $dstDir . "/" . self::WEB_DIRECTORY);
+        FileManager::copyRecursive($srcDir . "/" . self::SCRIPTS_DIRECTORY, $dstDir . "/" . self::SCRIPTS_DIRECTORY);
+        FileManager::copyRecursive($srcDir . "/" . self::TOOLS_DIRECTORY, $dstDir . "/" . self::TOOLS_DIRECTORY);
 
         $protectedDir = $dstDir . "/" . self::WEB_DIRECTORY . "/protected";
 
-        $this->_chmod($protectedDir . "/yiic", 0750);
-        $this->_chmod($dstDir . "/" . self::TOOLS_DIRECTORY . "/backup.sh", 0750);
-        $this->_chmod($dstDir . "/" . self::TOOLS_DIRECTORY . "/setup/system/gtta-init.sh", 0750);
-        $this->_chmod($dstDir . "/" . self::TOOLS_DIRECTORY . "/setup/system/gtta-setup.sh", 0750);
+        FileManager::chmod($protectedDir . "/yiic", 0750);
+        FileManager::chmod($dstDir . "/" . self::TOOLS_DIRECTORY . "/backup.sh", 0750);
+        FileManager::chmod($dstDir . "/" . self::TOOLS_DIRECTORY . "/setup/system/gtta-init.sh", 0750);
+        FileManager::chmod($dstDir . "/" . self::TOOLS_DIRECTORY . "/setup/system/gtta-setup.sh", 0750);
 
-        $this->_runCommand(sprintf("chown -R %s:%s %s", self::GTTA_USER, self::GTTA_GROUP, $dstDir));
+        ProcessManager::runCommand(sprintf("chown -R %s:%s %s", self::GTTA_USER, self::GTTA_GROUP, $dstDir));
 
         // update configuration
-        $this->_runCommand(sprintf(
+        ProcessManager::runCommand(sprintf(
             "python %s %s %s/config/",
             implode("/", array(
                 $srcDir,
@@ -105,8 +105,8 @@ class UpdateCommand extends ConsoleCommand {
             return;
         }
 
-        $this->_chmod($scriptPath, 0750);
-        $this->_runCommand($scriptPath);
+        FileManager::chmod($scriptPath, 0750);
+        ProcessManager::runCommand($scriptPath);
     }
 
     /**
@@ -129,7 +129,7 @@ class UpdateCommand extends ConsoleCommand {
         }
 
         try {
-            $this->_runCommand("./yiic migrate --interactive=0");
+            ProcessManager::runCommand("./yiic migrate --interactive=0");
         } catch (Exception $e) {
             $exception = $e;
         }
@@ -160,13 +160,10 @@ class UpdateCommand extends ConsoleCommand {
         ));
 
         $oldCrontab = "/etc/cron.d/gtta";
-
-        if (file_exists($oldCrontab)) {
-            $this->_unlink($oldCrontab);
-        }
+        FileManager::unlink($oldCrontab);
 
         if (file_exists($newCrontab)) {
-            $this->_copy($newCrontab, $oldCrontab);
+            FileManager::copy($newCrontab, $oldCrontab);
         }
     }
 
@@ -178,11 +175,8 @@ class UpdateCommand extends ConsoleCommand {
         $versionPath = Yii::app()->params["update"]["versions"] . "/" . $targetVersion;
         $versionLink = Yii::app()->params["update"]["currentVersionLink"];
 
-        if (file_exists($versionLink)) {
-            $this->_unlink($versionLink);
-        }
-
-        $this->_createSymlink($versionLink, $versionPath);
+        FileManager::unlink($versionLink);
+        FileManager::createSymlink($versionLink, $versionPath);
     }
 
     /**
@@ -221,8 +215,8 @@ class UpdateCommand extends ConsoleCommand {
             return;
         }
 
-        $this->_chmod($scriptPath, 0750);
-        $this->_runCommand($scriptPath);
+        FileManager::chmod($scriptPath, 0750);
+        ProcessManager::runCommand($scriptPath);
     }
 
     /**
@@ -233,13 +227,13 @@ class UpdateCommand extends ConsoleCommand {
         $this->_cleanup($targetVersion, false);
 
         $updateDir = Yii::app()->params["update"]["directory"];
-        $this->_createDir($updateDir, 0777);
+        FileManager::createDir($updateDir, 0777);
 
         $versionDir = Yii::app()->params["update"]["versions"] . "/" . $targetVersion;
-        $this->_createDir($versionDir, 0750);
-        $this->_createDir($versionDir . "/" . self::WEB_DIRECTORY, 0750);
-        $this->_createDir($versionDir . "/" . self::SCRIPTS_DIRECTORY, 0750);
-        $this->_createDir($versionDir . "/" . self::TOOLS_DIRECTORY, 0750);
+        FileManager::createDir($versionDir, 0750);
+        FileManager::createDir($versionDir . "/" . self::WEB_DIRECTORY, 0750);
+        FileManager::createDir($versionDir . "/" . self::SCRIPTS_DIRECTORY, 0750);
+        FileManager::createDir($versionDir . "/" . self::TOOLS_DIRECTORY, 0750);
     }
 
     /**
@@ -253,10 +247,10 @@ class UpdateCommand extends ConsoleCommand {
         @unlink($updateDir . "/" . self::ARCHIVE_FILE);
         @unlink($updateDir . "/" . self::SIGNATURE_FILE);
 
-        $this->_rmDir($updateDir);
+        FileManager::rmDir($updateDir);
 
         if (!$finished) {
-            $this->_rmDir(Yii::app()->params["update"]["versions"] . "/" . $targetVersion);
+            FileManager::rmDir(Yii::app()->params["update"]["versions"] . "/" . $targetVersion);
         }
     }
 
@@ -271,7 +265,7 @@ class UpdateCommand extends ConsoleCommand {
         }
 
         if ($system->update_pid != null) {
-            if ($this->_isRunning($system->update_pid)) {
+            if (ProcessManager::isRunning($system->update_pid)) {
                 return;
             }
 
@@ -291,11 +285,11 @@ class UpdateCommand extends ConsoleCommand {
 
         try {
             $this->_setup($targetVersion);
-            $this->_runCommand("/etc/init.d/cron stop");
+            ProcessManager::runCommand("/etc/init.d/cron stop");
 
             try {
                 $this->_getUpdate($targetVersion, $system->workstation_id, $system->workstation_key);
-                $this->_copyFiles($targetVersion);
+                FileManager::copyFiles($targetVersion);
                 $this->_runInstallScript($targetVersion);
 
                 try {
@@ -328,7 +322,7 @@ class UpdateCommand extends ConsoleCommand {
 
             // "finally" block emulation
             try {
-                $this->_runCommand("/etc/init.d/cron start");
+                ProcessManager::runCommand("/etc/init.d/cron start");
             } catch (Exception $e) {
                 // swallow exceptions
             }

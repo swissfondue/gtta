@@ -142,6 +142,17 @@ return array(
                 "update" => "update/index",
                 "update/status" => "update/status",
 
+                // software packages
+                "scripts/<page:\d+>" => "package/index",
+                "scripts" => "package/index",
+                "script/new" => "package/editscript",
+                "libraries/<page:\d+>" => "package/libraries",
+                "libraries" => "package/libraries",
+                "library/new" => "package/editlibrary",
+                "package/<id:\d+>" => "package/view",
+                "package/control" => "package/control",
+                "package/upload" => "package/upload",
+
                 // checks
                 "checks/<page:\d+>"         => "check/index",
                 "checks"                    => "check/index",
@@ -395,6 +406,22 @@ return array(
         "security" => array(
             "ca" => BASE_DIR . "/security/ca/ca.crt",
             "caKey" => BASE_DIR . "/security/ca/ca.key",
+        ),
+
+        "packages" => array(
+            "path" => array(
+                "user" => array(
+                    "scripts" => BASE_DIR . "/scripts",
+                    "libraries" => BASE_DIR . "/scripts/lib",
+                ),
+                "system" => array(
+                    "scripts" => BASE_DIR . "/scripts/system/",
+                    "libraries" => BASE_DIR . "/scripts/system/lib",
+                ),
+            ),
+            "tmpPath" => "/tmp/gtta-package",
+            "maxSize" => 100 * 1024 * 1024, // 100 megabytes
+            "lockFile" => "/tmp/gtta.package",
         ),
     ),
 

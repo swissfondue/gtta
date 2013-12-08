@@ -664,6 +664,94 @@ function Admin()
             });
         };
     };
+
+    /**
+     * Package object.
+     */
+    this.pkg = new function () {
+        var _package = this;
+
+        /**
+         * Initialize the upload form.
+         */
+        this.initUploadForm = function () {
+            $("input[name^=PackageUploadForm]").each(function () {
+                var url = $(this).data("upload-url"), data;
+
+                data = {
+                    "YII_CSRF_TOKEN": system.csrf,
+                    "PackageUploadForm[type]": $(this).data("package-type")
+                };
+
+                $(this).fileupload({
+                    dataType: "json",
+                    url: url,
+                    forceIframeTransport: true,
+                    timeout: 120000,
+                    formData: data,
+                    dropZone:$("input[name^=PackageUploadForm]"),
+
+                    done : function (e, data) {
+                        $(".loader-image").hide();
+                        $(".upload-message").hide();
+                        $(".file-input").show();
+
+                        var json = data.result;
+
+                        if (json.status == "error") {
+                            system.showMessage("error", json.errorText);
+                            return;
+                        }
+
+                        data = json.data;
+
+                        // show package data
+                        $("#PackageEditForm_id").val(data.pkg.id);
+
+                        $("#package_type")
+                            .html(data.pkg.type)
+                            .parent()
+                            .show();
+
+                        $("#package_name")
+                            .html(data.pkg.name)
+                            .parent()
+                            .show();
+
+                        $("#package_version")
+                            .html(data.pkg.version)
+                            .parent()
+                            .show();
+
+                        $("#submit_button").prop("disabled", false);
+                    },
+
+                    fail: function (e, data) {
+                        $("#PackageEditForm_id").val(0);
+                        $(".loader-image").hide();
+                        $(".upload-message").hide();
+                        $(".file-input").show();
+
+                        system.showMessage("error", system.translate("Request failed, please try again."));
+                    },
+
+                    start: function (e) {
+                        $("#PackageEditForm_id").val(0);
+
+                        $(".loader-image").show();
+                        $(".file-input").hide();
+                        $(".upload-message").show();
+
+                        $("#package_type").parent().hide();
+                        $("#package_name").parent().hide();
+                        $("#package_version").parent().hide();
+
+                        $("#submit_button").prop("disabled", true);
+                    }
+                });
+            });
+        };
+    };
 }
 
 var admin = new Admin();

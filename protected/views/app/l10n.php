@@ -23,7 +23,9 @@ var _messages = {
     'Search...'                                         : '<?php echo Yii::t('app', 'Search...'); ?>',
     'No header image.'                                  : '<?php echo Yii::t('app', 'No header image.'); ?>',
     'No logo.'                                          : '<?php echo Yii::t('app', 'No logo.'); ?>',
-    'No target specified!'                              : '<?php echo Yii::t('app', 'No target specified!'); ?>'
+    'No target specified!'                              : '<?php echo Yii::t('app', 'No target specified!'); ?>',
+    "The package is ready to be installed."             : "<?php echo Yii::t("app", "The package is ready to be installed."); ?>",
+    "The package could not be installed."               : "<?php echo Yii::t("app", "The package could not be installed."); ?>"
 };
 
 system.l10nMessages = _messages;

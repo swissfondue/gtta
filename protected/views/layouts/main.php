@@ -65,7 +65,7 @@
                             <?php endif; ?>
 
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
-                                <li class="dropdown <?php if (in_array(Yii::app()->controller->id, array( 'backup', 'check', 'reference', 'risk', 'user' ))) echo 'active'; ?>">
+                                <li class="dropdown <?php if (in_array(Yii::app()->controller->id, array('backup', 'check', 'reference', 'risk', 'user', 'package', 'reporttemplate', 'gt', 'monitor', 'history', 'update', 'settings'))) echo 'active'; ?>">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                         <?php echo Yii::t('app', 'System'); ?>
                                         <b class="caret"></b>
@@ -74,6 +74,7 @@
                                         <li <?php if (Yii::app()->controller->id == 'check') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('check/index'); ?>"><?php echo Yii::t('app', 'Checks'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'reference') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('reference/index'); ?>"><?php echo Yii::t('app', 'References'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'user') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('user/index'); ?>"><?php echo Yii::t('app', 'Users'); ?></a></li>
+                                        <li <?php if (Yii::app()->controller->id == 'package') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('package/index'); ?>"><?php echo Yii::t('app', 'Scripts'); ?></a></li>
                                         <li class="divider"></li>
                                         <li <?php if (Yii::app()->controller->id == 'gt') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('gt/index'); ?>"><?php echo Yii::t('app', 'Guided Test Templates'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'reporttemplate') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('reporttemplate/index'); ?>"><?php echo Yii::t('app', 'Report Templates'); ?></a></li>

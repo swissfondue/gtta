@@ -56,6 +56,8 @@ return array(
 
     // parameters
     "params" => array(
+        "tmpPath" => $mainConfig["params"]["tmpPath"],
+
         // email sender
         "email" => array(
             "lockFile" => "/tmp/gtta.email",
@@ -112,6 +114,8 @@ return array(
         "api" => array(
             "url" => "$DEPLOY_API_URL",
         ),
+
+        "packages" => $mainConfig["params"]["packages"],
     ),
     
     "commandMap" => array(

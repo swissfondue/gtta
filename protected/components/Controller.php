@@ -158,6 +158,11 @@ class Controller extends CController
         $filterChain->run();
     }
 
+    /**
+     * Check if the system is in the requested status
+     * @param $allowedStatuses
+     * @throws CHttpException
+     */
     private function _checkSystemStatus($allowedStatuses) {
         if (!is_array($allowedStatuses)) {
             $allowedStatuses = array($allowedStatuses);

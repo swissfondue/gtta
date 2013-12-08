@@ -99,14 +99,17 @@ function System()
                 success : function (data, textStatus) {
                     $('.loader-image').hide();
 
-                    if (data.status == 'error')
-                    {
+                    if (data.status == 'error') {
                         _system.showMessage('error', data.errorText);
+
+                        if (operation == "delete") {
+                            $("tr[data-id=" + id + "]").removeClass("delete-row");
+                        }
+
                         return;
                     }
 
-                    if (operation == 'delete')
-                    {
+                    if (operation == 'delete') {
                         $('tr[data-id=' + id + ']').fadeOut('slow', undefined, function () {
                             $('tr[data-id=' + id + ']').remove();
                             _system.showMessage('success', _system.translate('Object deleted.'));
@@ -114,9 +117,7 @@ function System()
                             if ($('table.table > tbody > tr').length == 1)
                                 location.reload();
                         });
-                    }
-                    else if (operation == 'up' || operation == 'down')
-                    {
+                    } else if (operation == 'up' || operation == 'down') {
                         location.reload();
                     }
                 },
@@ -124,6 +125,10 @@ function System()
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
                     _system.showMessage('error', _system.translate('Request failed, please try again.'));
+
+                    if (operation == "delete") {
+                        $("tr[data-id=" + id + "]").removeClass("delete-row");
+                    }
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -155,10 +160,11 @@ function System()
             if (
                 confirm(_system.translate('Are you sure that you want to delete this object?')) &&
                 (message == undefined || (message != undefined && confirm(message + '\n\n' + _system.translate('PROCEED AT YOUR OWN RISK!'))))
-            )
+            ) {
                 _system_control._control(id, 'delete');
-            else
+            } else {
                 $('tr[data-id=' + id + ']').removeClass('delete-row');
+            }
         };
 
         /**

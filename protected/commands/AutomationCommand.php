@@ -16,7 +16,7 @@ class AutomationCommand extends ConsoleCommand
 
         foreach ($checks as $check)
         {
-            $this->_backgroundExec(
+            ProcessManager::backgroundExec(
                 Yii::app()->params['yiicPath'] . '/yiic automation ' . $check->target_id . ' ' . $check->check_id
             );
         }
@@ -39,7 +39,7 @@ class AutomationCommand extends ConsoleCommand
 
             if ($check->pid) {
                 $fileName = Yii::app()->params['automation']['tempPath'] . '/' . $check->result_file;
-                $this->_killProcess($check->pid);
+                ProcessManager::killProcess($check->pid);
 
                 if (file_exists($fileName)) {
                     $fileOutput = file_get_contents($fileName);
@@ -72,7 +72,7 @@ class AutomationCommand extends ConsoleCommand
         foreach ($checks as $check)
         {
             // if task died for some reason
-            if (!$this->_isRunning($check->pid)) {
+            if (!ProcessManager::isRunning($check->pid)) {
                 $check->pid = null;
 
                 if (!$check->result) {
