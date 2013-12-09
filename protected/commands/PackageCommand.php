@@ -57,11 +57,15 @@ class PackageCommand extends ConsoleCommand {
         $fp = fopen(Yii::app()->params["packages"]["lockFile"], "w");
 
         if (flock($fp, LOCK_EX | LOCK_NB)) {
-            try {
-                $this->_installPackages();
-                $this->_deletePackages();
-            } catch (Exception $e) {
-                Yii::log($e->getMessage(), CLogger::LEVEL_ERROR);
+            for ($i = 0; $i < 10; $i++) {
+                try {
+                    $this->_installPackages();
+                    $this->_deletePackages();
+                } catch (Exception $e) {
+                    Yii::log($e->getMessage(), CLogger::LEVEL_ERROR);
+                }
+
+                sleep(5);
             }
 
             flock($fp, LOCK_UN);

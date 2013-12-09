@@ -138,7 +138,7 @@ class PackageManager {
                     )
                 )    
             ))->findAllByAttributes(array(
-                "name" => $package->system_name
+                "name" => $package->name
             ));
 
             if (count($checks) > 0) {
@@ -254,8 +254,6 @@ class PackageManager {
      * @throws Exception
      */
     private function _parse($path) {
-        $path = $this->_getRootPath($path);
-
         $description = $path . "/" . self::DESCRIPTION_FILE;
         $entryPoint = null;
 
@@ -522,6 +520,7 @@ class PackageManager {
      * @throws Exception
      */
     private function _validate($packagePath, $strict=true, $allowSystem=false, $allowSameName=false) {
+        $packagePath = $this->_getRootPath($packagePath);
         $package = $this->_parse($packagePath);
         $entryPoint = null;
 
@@ -646,6 +645,7 @@ class PackageManager {
     private function _installSystemDependency($package) {
         try {
             ProcessManager::runCommand("apt-get -y install $package");
+            $this->_checkSystemDependency($package);
         } catch (Exception $e) {
             throw new Exception(
                 Yii::t("app", "Unable to install system dependency: {dependency}.", array("{dependency}" => $package))
@@ -661,6 +661,7 @@ class PackageManager {
     private function _installPythonDependency($package) {
         try {
             ProcessManager::runCommand("pip install $package");
+            $this->_checkPythonDependency($package);
         } catch (Exception $e) {
             throw new Exception(
                 Yii::t("app", "Unable to install python dependency: {dependency}.", array("{dependency}" => $package))
@@ -675,7 +676,8 @@ class PackageManager {
      */
     private function _installPerlDependency($package) {
         try {
-            ProcessManager::runCommand("PERL_MM_USE_DEFAULT=1 perl -MCPAN -e 'install $package'");
+            ProcessManager::runCommand("cpan -D $package && PERL_MM_USE_DEFAULT=1 perl -MCPAN -e 'install $package'");
+            $this->_checkPerlDependency($package);
         } catch (Exception $e) {
             throw new Exception(
                 Yii::t("app", "Unable to install perl dependency: {dependency}.", array("{dependency}" => $package))
@@ -831,7 +833,8 @@ class PackageManager {
      * @return array
      */
     public function getData(Package $package) {
-        $packageData = $this->_parse($package->getPath());
+        $path = $this->_getRootPath($package->getPath());
+        $packageData = $this->_parse($path);
         $packageData["type"] = $this->_getTypeName($packageData["type"]);
 
         $libraries = array();
