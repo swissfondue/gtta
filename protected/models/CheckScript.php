@@ -3,10 +3,10 @@
 /**
  * This is the model class for table "check_scripts".
  *
- * The followings are the available columns in table 'check_scripts':
+ * The followings are the available columns in table "check_scripts":
  * @property integer $id
  * @property integer $check_id
- * @property string $name
+ * @property integer $package_id
  */
 class CheckScript extends CActiveRecord
 {
@@ -25,7 +25,7 @@ class CheckScript extends CActiveRecord
 	 */
 	public function tableName()
 	{
-		return 'check_scripts';
+		return "check_scripts";
 	}
 
 	/**
@@ -34,8 +34,7 @@ class CheckScript extends CActiveRecord
 	public function rules()
 	{
 		return array(
-            array('check_id, name', 'required'),
-            array('name', 'length', 'max' => 1000),
+            array("check_id, package_id", "required"),
 		);
 	}
 
@@ -45,8 +44,9 @@ class CheckScript extends CActiveRecord
 	public function relations()
 	{
 		return array(
-            'check' => array(self::BELONGS_TO, 'Check', 'check_id'),
-            'inputs' => array(self::HAS_MANY, 'CheckInput', 'check_script_id'),
+            "check" => array(self::BELONGS_TO, "Check", "check_id"),
+            "package" => array(self::BELONGS_TO, "Package", "package_id"),
+            "inputs" => array(self::HAS_MANY, "CheckInput", "check_script_id"),
 		);
 	}
 }

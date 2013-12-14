@@ -284,7 +284,6 @@ class GtautomationCommand extends ConsoleCommand {
         Yii::app()->language = $language->code;
 
         $tempPath = Yii::app()->params['automation']['tempPath'];
-        $scriptsPath = Yii::app()->params['automation']['scriptsPath'];
         $scripts = $check->check->check->scripts;
 
         foreach ($scripts as $script) {
@@ -294,23 +293,16 @@ class GtautomationCommand extends ConsoleCommand {
                 $check->result .= "\n";
             }
 
-            $check->result .= $script->name . "\n" . str_repeat("-", strlen($script->name)) . "\n";
+            $package = $script->package;
+            $check->result .= $package->name . "\n" . str_repeat("-", strlen($package->name)) . "\n";
 
             try {
-                if (!file_exists($scriptsPath . '/' . $script->name)) {
-                    throw new Exception(Yii::t('app', 'Script file not found.'));
-                }
+                $pm = new PackageManager();
+                $entryPoint = $pm->getEntryPoint($package);
+                $interpreter = $pm->getInterpreter($package);
 
-                $extension = pathinfo($script->name, PATHINFO_EXTENSION);
-                $interpreter = null;
-                $interpreters = Yii::app()->params['automation']['interpreters'];
-
-                if (isset($interpreters[$extension])) {
-                    $interpreter = $interpreters[$extension];
-                }
-
-                if (!$interpreter || !file_exists($interpreter['path'])) {
-                    throw new Exception(Yii::t('app', 'Interpreter not found.'));
+                foreach ($interpreter["env"] as $env => $value) {
+                    putenv("$env=$value");
                 }
 
                 $now = new DateTime();
@@ -321,14 +313,19 @@ class GtautomationCommand extends ConsoleCommand {
                 $check->save();
 
                 $inputFiles = $this->_createCheckFiles($check, $interpreter, $script);
-                chdir($scriptsPath);
+                chdir($pm->getPath($package));
 
                 $command = array(
-                    $interpreter['path'],
-                    $script->name,
-                    $tempPath . '/' . $check->target_file,
-                    $tempPath . '/' . $check->result_file,
+                    $interpreter["path"]
                 );
+
+                foreach ($interpreter["params"] as $param) {
+                    $command[] = $param;
+                }
+
+                $command[] = $entryPoint;
+                $command[] = $tempPath . '/' . $check->target_file;
+                $command[] = $tempPath . '/' . $check->result_file;
 
                 foreach ($inputFiles as $input) {
                     $command[] = $tempPath . '/' . $input;
@@ -345,7 +342,7 @@ class GtautomationCommand extends ConsoleCommand {
                 $check->result .= $fileOutput ? $fileOutput : implode("\n", $output);
 
                 if (!$check->result) {
-                    $check->result = Yii::t('app', 'No output.');
+                    $check->result = Yii::t("app", "No output.");
                 }
 
                 $this->_getTables($check);

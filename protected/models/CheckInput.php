@@ -13,16 +13,15 @@
  * @property integer $max_sort_order
  * @property string $type
  */
-class CheckInput extends CActiveRecord
-{
+class CheckInput extends CActiveRecord {
     /**
      * Input types.
      */
-    const TYPE_TEXT     = 0;
+    const TYPE_TEXT = 0;
     const TYPE_TEXTAREA = 1;
     const TYPE_CHECKBOX = 2;
-    const TYPE_RADIO    = 3;
-    const TYPE_FILE     = 4;
+    const TYPE_RADIO = 3;
+    const TYPE_FILE = 4;
 
     /**
      * @var integer max sort order.
@@ -34,36 +33,33 @@ class CheckInput extends CActiveRecord
 	 * @param string $className active record class name.
 	 * @return CheckInput the static model class
 	 */
-	public static function model($className=__CLASS__)
-	{
+	public static function model($className=__CLASS__) {
 		return parent::model($className);
 	}
 
 	/**
 	 * @return string the associated database table name
 	 */
-	public function tableName()
-	{
+	public function tableName() {
 		return 'check_inputs';
 	}
 
 	/**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
+	public function rules() {
 		return array(
-            array( 'check_script_id, name', 'required' ),
-            array( 'name', 'length', 'max' => 1000 ),
-            array( 'sort_order', 'numerical', 'integerOnly' => true, 'min' => 0 ),
-            array( 'type', 'in', 'range' => array(
+            array('check_script_id, name', 'required' ),
+            array('name', 'length', 'max' => 1000 ),
+            array('sort_order', 'numerical', 'integerOnly' => true, 'min' => 0 ),
+            array('type', 'in', 'range' => array(
                 self::TYPE_TEXT,
                 self::TYPE_TEXTAREA,
                 self::TYPE_CHECKBOX,
                 self::TYPE_RADIO,
                 self::TYPE_FILE
             )),
-            array( 'description, value', 'safe' ),
+            array('description, value', 'safe'),
 		);
 	}
 
@@ -106,24 +102,16 @@ class CheckInput extends CActiveRecord
      * Get file data
      * @return string
      */
-    public function getFileData()
-    {
-        if ($this->type != self::TYPE_FILE)
+    public function getFileData() {
+        if ($this->type != self::TYPE_FILE) {
             throw new Exception('Invalid check input type');
+        }
 
-        $script = CheckScript::model()->findByPk($this->check_script_id);
-        $extPos = strpos($script->name, '.py');
-
-        if ($extPos === false)
-            $extPos = strpos($script->name, '.pl');
-
-        if ($extPos === false)
-            return '';
-
-        $scriptName = substr($script->name, 0, $extPos);
+        $script = CheckScript::model()->with("package")->findByPk($this->check_script_id);
         $fileName = preg_replace('/[^a-zA-Z0-9]/', '_', $this->name) . '.txt';
-        $filePath = Yii::app()->params['automation']['scriptsPath'] . '/' . $scriptName . '_files/' . $fileName;
 
+        $pm = new PackageManager();
+        $filePath = $pm->getFilesPath($script->package) . "/" . $fileName;
         $content = '';
 
         if (file_exists($filePath) && filesize($filePath)) {
@@ -139,27 +127,21 @@ class CheckInput extends CActiveRecord
      * Set file data
      * @param $data string
      */
-    public function setFileData($data)
-    {
-        if ($this->type != self::TYPE_FILE)
+    public function setFileData($data) {
+        if ($this->type != self::TYPE_FILE) {
             throw new Exception('Invalid check input type');
+        }
 
         $script = CheckScript::model()->findByPk($this->check_script_id);
-        $extPos = strpos($script->name, '.py');
-
-        if ($extPos === false)
-            $extPos = strpos($script->name, '.pl');
-
-        if ($extPos === false)
-            return;
-
-        $scriptName = substr($script->name, 0, $extPos);
         $fileName = preg_replace('/[^a-zA-Z0-9]/', '_', $this->name) . '.txt';
-        $scriptDir = Yii::app()->params['automation']['scriptsPath'] . '/' . $scriptName . '_files';
-        $filePath =  $scriptDir . '/' . $fileName;
 
-        if (!is_dir($scriptDir))
-            @mkdir($scriptDir, 0777, true);
+        $pm = new PackageManager();
+        $filesPath = $pm->getFilesPath($script->package);
+        $filePath =  $filesPath . "/" . $fileName;
+
+        if (!is_dir($filesPath)) {
+            @mkdir($filesPath, 0777, true);
+        }
 
         $fp = fopen($filePath, 'w');
         fwrite($fp, $data);
@@ -169,25 +151,19 @@ class CheckInput extends CActiveRecord
     /**
      * Delete file
      */
-    public function deleteFile()
-    {
-        if ($this->type != self::TYPE_FILE)
+    public function deleteFile() {
+        if ($this->type != self::TYPE_FILE) {
             throw new Exception('Invalid check input type');
+        }
 
         $script = CheckScript::model()->findByPk($this->check_script_id);
-        $extPos = strpos($script->name, '.py');
-
-        if ($extPos === false)
-            $extPos = strpos($script->name, '.pl');
-
-        if ($extPos === false)
-            return;
-
-        $scriptName = substr($script->name, 0, $extPos);
         $fileName = preg_replace('/[^a-zA-Z0-9]/', '_', $this->name) . '.txt';
-        $filePath = Yii::app()->params['automation']['scriptsPath'] . '/' . $scriptName . '_files/' . $fileName;
 
-        if (file_exists($filePath))
+        $pm = new PackageManager();
+        $filePath = $pm->getFilesPath($script->package) . "/" . $fileName;
+
+        if (file_exists($filePath)) {
             @unlink($filePath);
+        }
     }
 }

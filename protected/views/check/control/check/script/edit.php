@@ -17,12 +17,18 @@
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
     <fieldset>
-        <div class="control-group <?php if ($model->getError('name')) echo 'error'; ?>">
-            <label class="control-label" for="CheckScriptEditForm_name"><?php echo Yii::t('app', 'Name'); ?></label>
+        <div class="control-group <?php if ($model->getError('packageId')) echo 'error'; ?>">
+            <label class="control-label" for="CheckScriptEditForm_packageId"><?php echo Yii::t('app', 'Package'); ?></label>
             <div class="controls">
-                <input type="text" class="input-xlarge" id="CheckScriptEditForm_name" name="CheckScriptEditForm[name]" value="<?php echo CHtml::encode($model->name); ?>">
-                <?php if ($model->getError('name')): ?>
-                    <p class="help-block"><?php echo $model->getError('name'); ?></p>
+                <select class="input-xlarge" id="CheckScriptEditForm_packageId" name="CheckScriptEditForm[packageId]">
+                    <option value="0"><?php echo Yii::t("app", "Please select..."); ?></option>
+                        <?php foreach ($packages as $package): ?>
+                            <option value="<?php echo $package->id; ?>" <?php if ($package->id == $model->packageId) echo "selected"; ?>><?php echo CHtml::encode($package->name) . " ". $package->version; ?></option>
+                        <?php endforeach; ?>
+                </select>
+
+                <?php if ($model->getError("packageId")): ?>
+                    <p class="help-block"><?php echo $model->getError("packageId"); ?></p>
                 <?php endif; ?>
             </div>
         </div>

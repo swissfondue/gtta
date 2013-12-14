@@ -85,25 +85,4 @@ class Package extends CActiveRecord {
 
         return $names[$this->status];
     }
-
-    /**
-     * Get path
-     */
-    public function getPath() {
-        $paths = Yii::app()->params["packages"]["path"]["user"];
-
-        if ($this->system) {
-            $paths = Yii::app()->params["packages"]["path"]["system"];
-        }
-
-        $path = null;
-
-        if ($this->type == self::TYPE_LIBRARY) {
-            $path = $paths["libraries"];
-        } else {
-            $path = $paths["scripts"];
-        }
-
-        return $path . "/" . $this->name;
-    }
 }

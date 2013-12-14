@@ -225,7 +225,7 @@
                                 <?php if (count($check->check->scripts) > 1): ?>
                                     <tr class="script-inputs">
                                         <th>
-                                            <?php echo CHtml::encode($script->name); ?>
+                                            <?php echo CHtml::encode($script->package->name); ?>
                                         </th>
                                         <td>&nbsp;</td>
                                     </tr>

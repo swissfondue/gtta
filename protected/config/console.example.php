@@ -95,15 +95,29 @@ return array(
             "interpreters" => array(
                 "py" => array(
                     "path"     => "/usr/bin/python",
-                    "basePath" => "/usr/bin"
+                    "basePath" => "/usr/bin",
+                    "params" => array(),
+                    "env" => array(
+                        "PYTHONPATH" => "/opt/gtta/scripts/lib:/opt/gtta/scripts/system/lib",
+                    ),
                 ),
                 "pl" => array(
-                    "path"     => "/usr/bin/perl",
-                    "basePath" => "/usr/bin"
+                    "path" => "/usr/bin/perl",
+                    "basePath" => "/usr/bin",
+                    "params" => array(
+                        "-I/opt/gtta/scripts/lib",
+                        "-I/opt/gtta/scripts/system/lib",
+                    ),
+                    "env" => array(),
                 ),
                 "rb" => array(
-                    "path"     => "/usr/bin/ruby",
-                    "basePath" => "/usr/bin"
+                    "path" => "/usr/bin/ruby",
+                    "basePath" => "/usr/bin",
+                    "params" => array(
+                        "-I/opt/gtta/scripts/lib",
+                        "-I/opt/gtta/scripts/system/lib",
+                    ),
+                    "env" => array(),
                 )
             )
         ),
@@ -131,3 +145,5 @@ return array(
         ),
     ),
 );
+
+?>

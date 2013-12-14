@@ -42,6 +42,16 @@ class PackageManager {
     }
 
     /**
+     * Get forbidden package names
+     * @return array
+     */
+    private function _getForbiddenPackageNames() {
+        return array(
+            "lib",
+        );
+    }
+
+    /**
      * Get dependency types
      * @return array
      */
@@ -524,6 +534,10 @@ class PackageManager {
         $package = $this->_parse($packagePath);
         $entryPoint = null;
 
+        if (in_array($package[self::SECTION_NAME], $this->_getForbiddenPackageNames())) {
+            throw new Exception(Yii::t("app", "Invalid package name."));
+        }
+
         if (!$allowSameName) {
             $pkg = Package::model()->findByAttributes(array(
                 "type" => $package[self::SECTION_TYPE],
@@ -818,7 +832,7 @@ class PackageManager {
             throw new Exception(Yii::t("app", "System packages cannot be deleted."));
         }
 
-        FileManager::rmDir($package->getPath());
+        FileManager::rmDir($this->getPath($package));
 
         PackageDependency::model()->deleteAllByAttributes(array(
             "from_package_id" => $package->id
@@ -833,7 +847,7 @@ class PackageManager {
      * @return array
      */
     public function getData(Package $package) {
-        $path = $this->_getRootPath($package->getPath());
+        $path = $this->_getRootPath($this->getPath($package));
         $packageData = $this->_parse($path);
         $packageData["type"] = $this->_getTypeName($packageData["type"]);
 
@@ -862,5 +876,82 @@ class PackageManager {
         $packageData["dependencies"]["script"] = $scripts;
 
         return $packageData;
+    }
+
+    /**
+     * Get path
+     * @param Package $package
+     * @return string path
+     */
+    public function getPath(Package $package) {
+        $paths = Yii::app()->params["packages"]["path"]["user"];
+
+        if ($package->system) {
+            $paths = Yii::app()->params["packages"]["path"]["system"];
+        }
+
+        $path = null;
+
+        if ($package->type == self::TYPE_LIBRARY) {
+            $path = $paths["libraries"];
+        } else {
+            $path = $paths["scripts"];
+        }
+
+        return $path . "/" . $package->name;
+    }
+
+    /**
+     * Get files path
+     * @param Package $package
+     * @return string path
+     */
+    public function getFilesPath(Package $package) {
+        return $this->getPath($package);
+    }
+
+    /**
+     * Get package entry point
+     * @param Package $package
+     * @return string entry point
+     */
+    public function getEntryPoint(Package $package) {
+        $entryPoint = null;
+        $path = $this->getPath($package);
+
+        foreach ($this->_getEntryPointNames() as $ep) {
+            if (file_exists($path . "/" . $ep)) {
+                $entryPoint = $ep;
+                break;
+            }
+        }
+
+        if ($entryPoint === null) {
+            throw new Exception(Yii::t("app", "Entry point not found."));
+        }
+
+        return $entryPoint;
+    }
+
+    /**
+     * Get package interpreter
+     * @param Package $package
+     * @return array interpreter
+     */
+    public function getInterpreter(Package $package) {
+        $interpreters = Yii::app()->params["automation"]["interpreters"];
+        $entryPoint = $this->getEntryPoint($package);
+        $extension = pathinfo($entryPoint, PATHINFO_EXTENSION);
+        $interpreter = null;
+
+        if (isset($interpreters[$extension])) {
+            $interpreter = $interpreters[$extension];
+        }
+
+        if (!$interpreter || !file_exists($interpreter["path"])) {
+            throw new Exception(Yii::t("app", "Interpreter not found."));
+        }
+
+        return $interpreter;
     }
 }

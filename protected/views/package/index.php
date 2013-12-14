@@ -67,7 +67,7 @@
                     </tbody>
                 </table>
 
-                <?php echo $this->renderPartial("/layouts/partial/pagination", array("p" => $p, "url" => "package/scripts")); ?>
+                <?php echo $this->renderPartial("/layouts/partial/pagination", array("p" => $p, "url" => "package/index", 'params' => array())); ?>
             <?php else: ?>
                 <?php echo Yii::t("app", "No scripts yet."); ?>
             <?php endif; ?>

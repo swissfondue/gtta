@@ -31,7 +31,7 @@
                         <?php foreach ($scripts as $script): ?>
                             <tr data-id="<?php echo $script->id; ?>" data-control-url="<?php echo $this->createUrl('check/controlscript'); ?>">
                                 <td class="name">
-                                    <a href="<?php echo $this->createUrl('check/editscript', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id )); ?>"><?php echo CHtml::encode($script->name); ?></a>
+                                    <a href="<?php echo $this->createUrl('check/editscript', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id )); ?>"><?php echo CHtml::encode($script->package->name); ?> <?php echo $script->package->version; ?></a>
                                 </td>
                                 <td class="actions">
                                     <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $script->id; ?>);"><i class="icon icon-remove"></i></a>

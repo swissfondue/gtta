@@ -3,8 +3,7 @@
 /**
  * Automation class.
  */
-class AutomationCommand extends ConsoleCommand
-{
+class AutomationCommand extends ConsoleCommand {
     /**
      * Process starting checks.
      */
@@ -321,8 +320,7 @@ class AutomationCommand extends ConsoleCommand
 
         Yii::app()->language = $language->code;
 
-        $tempPath    = Yii::app()->params['automation']['tempPath'];
-        $scriptsPath = Yii::app()->params['automation']['scriptsPath'];
+        $tempPath = Yii::app()->params['automation']['tempPath'];
         $scripts = $check->check->scripts;
 
         foreach ($scripts as $script) {
@@ -332,22 +330,17 @@ class AutomationCommand extends ConsoleCommand
                 $check->result .= "\n";
             }
 
-            $check->result .= $script->name . "\n" . str_repeat("-", strlen($script->name)) . "\n";
+            $package = $script->package;
+            $check->result .= $package->name . "\n" . str_repeat("-", strlen($package->name)) . "\n";
 
             try {
-                if (!file_exists($scriptsPath . '/' . $script->name)) {
-                    throw new Exception(Yii::t('app', 'Script file not found.'));
+                $pm = new PackageManager();
+                $entryPoint = $pm->getEntryPoint($package);
+                $interpreter = $pm->getInterpreter($package);
+
+                foreach ($interpreter["env"] as $env => $value) {
+                    putenv("$env=$value");
                 }
-
-                $extension    = pathinfo($script->name, PATHINFO_EXTENSION);
-                $interpreter  = null;
-                $interpreters = Yii::app()->params['automation']['interpreters'];
-
-                if (isset($interpreters[$extension]))
-                    $interpreter = $interpreters[$extension];
-
-                if (!$interpreter || !file_exists($interpreter['path']))
-                    throw new Exception(Yii::t('app', 'Interpreter not found.'));
 
                 $now = new DateTime();
                 $check->pid = posix_getpgid(getmypid());
@@ -357,14 +350,19 @@ class AutomationCommand extends ConsoleCommand
                 $check->save();
 
                 $inputFiles = $this->_createCheckFiles($check, $interpreter, $target, $script);
-                chdir($scriptsPath);
+                chdir($pm->getPath($package));
 
                 $command = array(
-                    $interpreter['path'],
-                    $script->name,
-                    $tempPath . '/' . $check->target_file,
-                    $tempPath . '/' . $check->result_file,
+                    $interpreter["path"]
                 );
+
+                foreach ($interpreter["params"] as $param) {
+                    $command[] = $param;
+                }
+
+                $command[] = $entryPoint;
+                $command[] = $tempPath . '/' . $check->target_file;
+                $command[] = $tempPath . '/' . $check->result_file;
 
                 foreach ($inputFiles as $input) {
                     $command[] = $tempPath . '/' . $input;
@@ -378,13 +376,6 @@ class AutomationCommand extends ConsoleCommand
                 $fileOutput = file_get_contents($tempPath . '/' . $check->result_file);
                 $check->refresh();
                 $check->pid = null;
-
-                /*if (!$check->result) {
-                    $check->result = '';
-                } else {
-                    $check->result .= "\n";
-                }*/
-
                 $check->result .= $fileOutput ? $fileOutput : implode("\n", $output);
 
                 if (!$check->result) {

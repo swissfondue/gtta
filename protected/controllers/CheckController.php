@@ -1233,7 +1233,7 @@ class CheckController extends Controller
                 foreach ($src->scripts as $script) {
                     $newScript = new CheckScript();
                     $newScript->check_id = $dst->id;
-                    $newScript->name = $script->name;
+                    $newScript->package_id = $src->package_id;
                     $newScript->save();
 
                     foreach ($script->inputs as $input) {
@@ -2218,7 +2218,7 @@ class CheckController extends Controller
         $criteria->order  = 't.id ASC';
         $criteria->addColumnCondition(array('check_id' => $check->id));
 
-        $check_scripts = CheckScript::model()->findAll($criteria);
+        $check_scripts = CheckScript::model()->with("package")->findAll($criteria);
         $scriptCount = CheckScript::model()->count($criteria);
         $paginator = new Paginator($scriptCount, $page);
 
@@ -2232,82 +2232,83 @@ class CheckController extends Controller
         $this->pageTitle = $check->localizedName;
 		$this->render('control/check/script/index', array(
             'scripts'  => $check_scripts,
-            'p'        => $paginator,
-            'check'    => $check,
+            'p'  => $paginator,
+            'check' => $check,
             'category' => $category,
-            'control'  => $control,
+            'control' => $control,
         ));
 	}
 
     /**
      * Check script edit page.
      */
-	public function actionEditScript($id, $control, $check, $script=0)
-	{
-        $id        = (int) $id;
-        $control   = (int) $control;
-        $check     = (int) $check;
-        $script    = (int) $script;
+	public function actionEditScript($id, $control, $check, $script=0) {
+        $id = (int) $id;
+        $control = (int) $control;
+        $check = (int) $check;
+        $script = (int) $script;
         $newRecord = false;
 
         $language = Language::model()->findByAttributes(array(
             'code' => Yii::app()->language
         ));
 
-        if ($language)
+        if ($language) {
             $language = $language->id;
+        }
 
         $category = CheckCategory::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+                'on' => 'language_id = :language_id',
+                'params' => array('language_id' => $language)
             )
         ))->findByPk($id);
 
-        if (!$category)
+        if (!$category) {
             throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+        }
 
         $control = CheckControl::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+                'on' => 'language_id = :language_id',
+                'params' => array('language_id' => $language)
             )
         ))->findByAttributes(array(
-            'id'                => $control,
+            'id' => $control,
             'check_category_id' => $category->id
         ));
 
-        if (!$control)
+        if (!$control) {
             throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+        }
 
         $check = Check::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+                'on' => 'language_id = :language_id',
+                'params' => array('language_id' => $language)
             )
         ))->findByAttributes(array(
             'id' => $check,
             'check_control_id' => $control->id
         ));
 
-        if (!$check)
+        if (!$check) {
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+        }
 
-        if ($script)
-        {
-            $script = CheckScript::model()->findByAttributes(array(
+        if ($script) {
+            $script = CheckScript::model()->with("package")->findByAttributes(array(
                 'id' => $script,
                 'check_id' => $check->id
             ));
 
-            if (!$script)
+            if (!$script) {
                 throw new CHttpException(404, Yii::t('app', 'Script not found.'));
-        }
-        else
-        {
+            }
+        } else {
             $script = new CheckScript();
             $newRecord = true;
         }
@@ -2315,17 +2316,16 @@ class CheckController extends Controller
 		$model = new CheckScriptEditForm();
 
         if (!$newRecord) {
-            $model->name = $script->name;
+            $model->packageId = $script->package_id;
         }
 
 		// collect user input data
-		if (isset($_POST['CheckScriptEditForm']))
-		{
+		if (isset($_POST['CheckScriptEditForm'])) {
 			$model->attributes = $_POST['CheckScriptEditForm'];
 
 			if ($model->validate()) {
                 $script->check_id = $check->id;
-                $script->name = $model->name;
+                $script->package_id = $model->packageId;
                 $script->save();
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Script saved.'));
@@ -2335,26 +2335,36 @@ class CheckController extends Controller
                 if ($newRecord) {
                     $this->redirect(array('check/editscript', 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id));
                 }
-            }
-            else
+            } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+            }
 		}
+
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(array(
+            "type" => Package::TYPE_SCRIPT,
+            "status" => Package::STATUS_INSTALLED
+        ));
+        $criteria->order = "name ASC";
+
+        $packages = Package::model()->findAll($criteria);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
         $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array( 'id' => $category->id )));
         $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
-        $this->breadcrumbs[] = array($check->localizedName, $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
-        $this->breadcrumbs[] = array(Yii::t('app', 'Scripts'), $this->createUrl('check/scripts', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
-        $this->breadcrumbs[] = $newRecord ? array(Yii::t('app', 'New Script'), '') : array($script->name, '');
+        $this->breadcrumbs[] = array($check->localizedName, $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id)));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Scripts'), $this->createUrl('check/scripts', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id)));
+        $this->breadcrumbs[] = $newRecord ? array(Yii::t('app', 'New Script'), '') : array($script->package->name, '');
 
 		// display the page
-        $this->pageTitle = $newRecord ? Yii::t('app', 'New Script') : $script->name;
+        $this->pageTitle = $newRecord ? Yii::t('app', 'New Script') : $script->package->name;
 		$this->render('control/check/script/edit', array(
-            'model'    => $model,
+            'model' => $model,
             'category' => $category,
-            'control'  => $control,
-            'check'    => $check,
-            'script'   => $script,
+            'control' => $control,
+            'check' => $check,
+            'script' => $script,
+            "packages" => $packages,
         ));
 	}
 
@@ -2505,11 +2515,11 @@ class CheckController extends Controller
         $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
         $this->breadcrumbs[] = array($check->localizedName, $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
         $this->breadcrumbs[] = array(Yii::t('app', 'Scripts'), $this->createUrl('check/scripts', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
-        $this->breadcrumbs[] = array($script->name, $this->createUrl('check/editscript', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id )));
+        $this->breadcrumbs[] = array($script->package->name, $this->createUrl('check/editscript', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id )));
         $this->breadcrumbs[] = array(Yii::t('app', 'Inputs'), '');
 
         // display the page
-        $this->pageTitle = $script->name;
+        $this->pageTitle = $script->package->name;
 		$this->render('control/check/script/input/index', array(
             'inputs'   => $check_inputs,
             'p'        => $paginator,
@@ -2716,7 +2726,7 @@ class CheckController extends Controller
         $this->breadcrumbs[] = array($control->localizedName, $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )));
         $this->breadcrumbs[] = array($check->localizedName, $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
         $this->breadcrumbs[] = array(Yii::t('app', 'Scripts'), $this->createUrl('check/scripts', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )));
-        $this->breadcrumbs[] = array($script->name, $this->createUrl('check/editscript', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id )));
+        $this->breadcrumbs[] = array($script->package->name, $this->createUrl('check/editscript', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id )));
         $this->breadcrumbs[] = array(Yii::t('app', 'Inputs'), $this->createUrl('check/inputs', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id )));
 
         if ($newRecord)

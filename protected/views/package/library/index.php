@@ -67,7 +67,7 @@
                     </tbody>
                 </table>
 
-                <?php echo $this->renderPartial("/layouts/partial/pagination", array("p" => $p, "url" => "package/libraries")); ?>
+                <?php echo $this->renderPartial("/layouts/partial/pagination", array("p" => $p, "url" => "package/libraries", 'params' => array())); ?>
             <?php else: ?>
                 <?php echo Yii::t("app", "No libraries yet."); ?>
             <?php endif; ?>
