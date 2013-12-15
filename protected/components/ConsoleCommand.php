@@ -41,6 +41,8 @@ class ConsoleCommand extends CConsoleCommand {
      * Check system status
      */
     protected function _checkSystemIsRunning() {
+        $this->_system->refresh();
+
         if ($this->_system->status != System::STATUS_RUNNING) {
             return;
         }
@@ -61,7 +63,6 @@ class ConsoleCommand extends CConsoleCommand {
             return;
         }
 
-        $this->_system->status = System::STATUS_IDLE;
-        $this->_system->save();
+        SystemManager::updateStatus(System::STATUS_IDLE);
     }
 }

@@ -163,7 +163,9 @@ class Controller extends CController
      * @param $allowedStatuses
      * @throws CHttpException
      */
-    private function _checkSystemStatus($allowedStatuses) {
+    protected function _checkSystemStatus($allowedStatuses) {
+        $this->_system->refresh();
+
         if (!is_array($allowedStatuses)) {
             $allowedStatuses = array($allowedStatuses);
         }
@@ -204,6 +206,16 @@ class Controller extends CController
      */
     public function filterIdleOrUpdating($filterChain) {
         $this->_checkSystemStatus(array(System::STATUS_IDLE, System::STATUS_UPDATING));
+        $filterChain->run();
+    }
+
+    /**
+     * Check if system is IDLE or PACKAGE MANAGER is running
+     * @param $filterChain
+     * @throws CHttpException
+     */
+    public function filterIdleOrPackageManager($filterChain) {
+        $this->_checkSystemStatus(array(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER));
         $filterChain->run();
     }
 }

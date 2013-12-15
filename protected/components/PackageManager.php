@@ -148,7 +148,7 @@ class PackageManager {
                     )
                 )    
             ))->findAllByAttributes(array(
-                "name" => $package->name
+                "package_id" => $package->id
             ));
 
             if (count($checks) > 0) {

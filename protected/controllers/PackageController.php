@@ -14,7 +14,7 @@ class PackageController extends Controller {
             "checkAdmin",
             "ajaxOnly + control",
             "postOnly + control, upload",
-            "idle",
+            "idleOrPackageManager",
 		);
 	}
 
@@ -101,6 +101,15 @@ class PackageController extends Controller {
 			$model->attributes = $_POST["PackageEditForm"];
 
 			if ($model->validate()) {
+                try {
+                    SystemManager::updateStatus(
+                        System::STATUS_PACKAGE_MANAGER,
+                        array(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER)
+                    );
+                } catch (Exception $e) {
+                    throw new CHttpException(403, Yii::t("app", "Access denied."));
+                }
+
                 $pm = new PackageManager();
                 $pm->scheduleForInstallation($model->id);
 
@@ -183,6 +192,15 @@ class PackageController extends Controller {
 
                     if ($pm->hasDependentObjects($package)) {
                         throw new CHttpException(403, Yii::t("app", "This package is required by other objects and cannot be deleted."));
+                    }
+
+                    try {
+                        SystemManager::updateStatus(
+                            System::STATUS_PACKAGE_MANAGER,
+                            array(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER)
+                        );
+                    } catch (Exception $e) {
+                        throw new CHttpException(403, Yii::t("app", "Access denied."));
                     }
 
                     // schedule package for deletion

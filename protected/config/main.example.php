@@ -423,6 +423,8 @@ return array(
             "maxSize" => 100 * 1024 * 1024, // 100 megabytes
             "lockFile" => "/tmp/gtta.package",
         ),
+
+        "systemStatusLock" => "/tmp/gtta-status.lock",
     ),
 
     // default controller name

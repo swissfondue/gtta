@@ -402,11 +402,15 @@ class GtautomationCommand extends ConsoleCommand {
         
         if (flock($fp, LOCK_EX | LOCK_NB)) {
             for ($i = 0; $i < 10; $i++) {
-                $this->_processStartingChecks();
-                $this->_processStoppingChecks();
-                $this->_processRunningChecks();
+                $this->_system->refresh();
 
-                $this->_checkSystemIsRunning();
+                if ($this->_system->status == System::STATUS_RUNNING) {
+                    $this->_processStartingChecks();
+                    $this->_processStoppingChecks();
+                    $this->_processRunningChecks();
+
+                    $this->_checkSystemIsRunning();
+                }
 
                 sleep(5);
             }

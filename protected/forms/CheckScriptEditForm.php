@@ -16,6 +16,7 @@ class CheckScriptEditForm extends LocalizedFormModel {
 		return array(
 			array("packageId", "required"),
             array("packageId", "numerical", "integerOnly" => true),
+            array("packageId", "checkPackage"),
 		);
 	}
     
@@ -31,7 +32,7 @@ class CheckScriptEditForm extends LocalizedFormModel {
     /**
 	 * Checks if script exists.
 	 */
-	public function checkClient($attribute, $params) {
+	public function checkPackage($attribute, $params) {
 		$package = Package::model()->findByAttributes(array(
             "id" => $this->packageId,
             "type" => Package::TYPE_SCRIPT,

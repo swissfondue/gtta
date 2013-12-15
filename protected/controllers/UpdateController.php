@@ -23,7 +23,7 @@ class UpdateController extends Controller {
      */
 	public function actionIndex() {
         $system = System::model()->findByPk(1);
-        $forbidUpdate = false;
+        $forbidUpdate = true;
         $forbidMessage = null;
         $updating = false;
 
@@ -39,17 +39,17 @@ class UpdateController extends Controller {
             }
 
             if ($system->status != System::STATUS_IDLE) {
-                $forbidUpdate = true;
                 $forbidMessage = Yii::t(
                     "app",
                     "The system is busy. Please make sure that all running tasks are finished before proceeding."
                 );
             } else if (!$backupTime || $backupTime < $backupLimit) {
-                $forbidUpdate = true;
                 $forbidMessage = Yii::t(
                     "app",
                     "The system has been backed up more than 24 hours ago. Please download a backup before updating the system."
                 );
+            } else {
+                $forbidUpdate = false;
             }
         }
 
@@ -65,9 +65,11 @@ class UpdateController extends Controller {
                 throw new CHttpException(403, Yii::t("app", "Access denied."));
             }
 
-            $system->status = System::STATUS_UPDATING;
-            $system->update_pid = null;
-            $system->save();
+            try {
+                SystemManager::updateStatus(System::STATUS_UPDATING, System::STATUS_IDLE);
+            } catch (Exception $e) {
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
+            }
 
             $updating = true;
         }

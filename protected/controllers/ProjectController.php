@@ -2650,14 +2650,20 @@ class ProjectController extends Controller
                         'check_id'  => $check->id
                     ));
 
+                    try {
+                        SystemManager::updateStatus(
+                            System::STATUS_RUNNING,
+                            array(System::STATUS_IDLE, System::STATUS_RUNNING)
+                        );
+                    } catch (Exception $e) {
+                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                    }
+
                     $targetCheck->status = TargetCheck::STATUS_IN_PROGRESS;
                     $targetCheck->rating = null;
                     $targetCheck->started = null;
                     $targetCheck->pid = null;
                     $targetCheck->save();
-
-                    $this->_system->status = System::STATUS_RUNNING;
-                    $this->_system->save();
 
                     break;
 
@@ -2850,14 +2856,20 @@ class ProjectController extends Controller
                         'gt_check_id' => $check->id
                     ));
 
+                    try {
+                        SystemManager::updateStatus(
+                            System::STATUS_RUNNING,
+                            array(System::STATUS_IDLE, System::STATUS_RUNNING)
+                        );
+                    } catch (Exception $e) {
+                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                    }
+
                     $projectCheck->status = ProjectGtCheck::STATUS_IN_PROGRESS;
                     $projectCheck->rating = null;
                     $projectCheck->started = null;
                     $projectCheck->pid = null;
                     $projectCheck->save();
-
-                    $this->_system->status = System::STATUS_RUNNING;
-                    $this->_system->save();
 
                     break;
 

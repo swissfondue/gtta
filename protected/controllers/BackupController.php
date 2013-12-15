@@ -1,6 +1,17 @@
 <?php
 
 /**
+ * Stop backup on exit
+ */
+function stopBackupOnExit() {
+    try {
+        SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_BACKING_UP);
+    } catch (Exception $e) {
+        // ok, doesn't matter
+    }
+}
+
+/**
  * Backup controller.
  */
 class BackupController extends Controller {
@@ -203,9 +214,6 @@ class BackupController extends Controller {
      * @param $system System
      */
     private function _backup($system) {
-        $system->status = System::STATUS_BACKING_UP;
-        $system->save();
-
         $exception = null;
 
         try {
@@ -251,8 +259,11 @@ class BackupController extends Controller {
         }
 
         // "finally" block
-        $system->status = System::STATUS_IDLE;
-        $system->save();
+        try {
+            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_BACKING_UP);
+        } catch (Exception $e) {
+            // swallow the exception
+        }
 
         if ($exception !== null) {
             throw $exception;
@@ -279,6 +290,16 @@ class BackupController extends Controller {
 
         if (isset($_POST["BackupForm"])) {
             if ($forbid) {
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
+            }
+
+            try {
+                // just in case
+                @ignore_user_abort(true);
+                @register_shutdown_function("stopBackupOnExit");
+
+                SystemManager::updateStatus(System::STATUS_BACKING_UP, System::STATUS_IDLE);
+            } catch (Exception $e) {
                 throw new CHttpException(403, Yii::t("app", "Access denied."));
             }
 

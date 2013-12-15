@@ -14,7 +14,7 @@ class m131211_130844_8 extends CDbMigration {
             array("core", Package::TYPE_LIBRARY),
             array("cms_explorer", Package::TYPE_LIBRARY),
             array("havester", Package::TYPE_LIBRARY),
-            array("smtp", Package::TYPE_LIBRARY),
+            array("smtp_extension_checker", Package::TYPE_LIBRARY),
             array("spf", Package::TYPE_LIBRARY),
             array("sqid", Package::TYPE_LIBRARY),
             array("sslyze", Package::TYPE_LIBRARY),

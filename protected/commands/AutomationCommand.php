@@ -405,13 +405,10 @@ class AutomationCommand extends ConsoleCommand {
      * Runs the command
      * @param array $args list of command-line arguments.
      */
-    public function run($args)
-    {
+    public function run($args) {
         // start checks
-        if (count($args) > 0)
-        {
-            if (count($args) != 2)
-            {
+        if (count($args) > 0) {
+            if (count($args) != 2) {
                 echo 'Invalid number of arguments.' . "\n";
                 exit();
             }
@@ -419,10 +416,11 @@ class AutomationCommand extends ConsoleCommand {
             $targetId = (int) $args[0];
             $checkId  = (int) $args[1];
 
-            if ($targetId && $checkId)
+            if ($targetId && $checkId) {
                 $this->_startCheck($targetId, $checkId);
-            else
+            } else {
                 echo 'Invalid arguments.' . "\n";
+            }
 
             exit();
         }
@@ -430,15 +428,17 @@ class AutomationCommand extends ConsoleCommand {
         // one instance check
         $fp = fopen(Yii::app()->params['automation']['lockFile'], 'w');
         
-        if (flock($fp, LOCK_EX | LOCK_NB))
-        {
-            for ($i = 0; $i < 10; $i++)
-            {
-                $this->_processStartingChecks();
-                $this->_processStoppingChecks();
-                $this->_processRunningChecks();
+        if (flock($fp, LOCK_EX | LOCK_NB)) {
+            for ($i = 0; $i < 10; $i++) {
+                $this->_system->refresh();
 
-                $this->_checkSystemIsRunning();
+                if ($this->_system->status == System::STATUS_RUNNING) {
+                    $this->_processStartingChecks();
+                    $this->_processStoppingChecks();
+                    $this->_processRunningChecks();
+
+                    $this->_checkSystemIsRunning();
+                }
 
                 sleep(5);
             }

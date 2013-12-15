@@ -130,6 +130,7 @@ return array(
         ),
 
         "packages" => $mainConfig["params"]["packages"],
+        "systemStatusLock" => $mainConfig["params"]["systemStatusLock"],
     ),
     
     "commandMap" => array(

@@ -34,6 +34,7 @@ class System extends CActiveRecord {
     const STATUS_BACKING_UP = 200;
     const STATUS_RESTORING = 205;
     const STATUS_UPDATING = 210;
+    const STATUS_PACKAGE_MANAGER = 215;
     const STATUS_LICENSE_EXPIRED = 500;
 
     /**
@@ -63,6 +64,7 @@ class System extends CActiveRecord {
             self::STATUS_BACKING_UP,
             self::STATUS_RESTORING,
             self::STATUS_UPDATING,
+            self::STATUS_PACKAGE_MANAGER,
             self::STATUS_LICENSE_EXPIRED,
         );
     }
@@ -89,6 +91,7 @@ class System extends CActiveRecord {
             self::STATUS_BACKING_UP => Yii::t("app", "The system is backing up."),
             self::STATUS_RESTORING => Yii::t("app", "The system is restoring."),
             self::STATUS_UPDATING => Yii::t("app", "The system is updating."),
+            self::STATUS_PACKAGE_MANAGER => Yii::t("app", "The system is installing or removing packages."),
         );
 
         return $statuses[$this->status];

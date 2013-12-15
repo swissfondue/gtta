@@ -2,12 +2,6 @@
 
 <hr>
 
-<?php if ($system->update_version && $forbidUpdate): ?>
-    <div class="form-description">
-        <?php echo $forbidMessage; ?>
-    </div>
-<?php endif; ?>
-
 <?php if ($updating): ?>
     <div class="form-description">
         <?php
@@ -17,6 +11,10 @@
                 array("{version}" => $system->update_version)
             );
         ?>
+    </div>
+<?php elseif ($system->update_version && $forbidUpdate): ?>
+    <div class="form-description">
+        <?php echo $forbidMessage; ?>
     </div>
 <?php endif; ?>
 

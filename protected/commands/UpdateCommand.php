@@ -269,9 +269,7 @@ class UpdateCommand extends ConsoleCommand {
                 return;
             }
 
-            $system->update_pid = null;
-            $system->status = System::STATUS_IDLE;
-            $system->save();
+            SystemManager::updateStatus(System::STATUS_IDLE);
 
             return;
         }
@@ -343,10 +341,7 @@ class UpdateCommand extends ConsoleCommand {
         // "finally" block emulation
         try {
             $this->_cleanup($targetVersion, $finished);
-
-            $system->status = System::STATUS_IDLE;
-            $system->update_pid = null;
-            $system->save();
+            SystemManager::updateStatus(System::STATUS_IDLE);
         } catch (Exception $e) {
             // swallow exceptions
         }
