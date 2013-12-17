@@ -110,15 +110,6 @@ return array(
                     ),
                     "env" => array(),
                 ),
-                "rb" => array(
-                    "path" => "/usr/bin/ruby",
-                    "basePath" => "/usr/bin",
-                    "params" => array(
-                        "-I/opt/gtta/scripts/lib",
-                        "-I/opt/gtta/scripts/system/lib",
-                    ),
-                    "env" => array(),
-                )
             )
         ),
 

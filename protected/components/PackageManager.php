@@ -37,7 +37,6 @@ class PackageManager {
         return array(
             "run.py",
             "run.pl",
-            "run.rb"
         );
     }
 
