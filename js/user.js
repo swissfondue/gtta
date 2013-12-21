@@ -791,10 +791,17 @@ function User()
                             $('#TargetCheckEditForm_' + id + '_port').val(data.port);
 
                         // input values
-                        for (var i = 0; i < data.inputs.length; i++)
-                        {
-                            var input = data.inputs[i];
-                            $('#' + input.id).val(input.value);
+                        for (var i = 0; i < data.inputs.length; i++) {
+                            var input, input_obj;
+
+                            input = data.inputs[i];
+                            input_obj = $("#" + input.id);
+
+                            if (input_obj.is(":checkbox") || input_obj.is(":radio")) {
+                                continue;
+                            }
+
+                            input_obj.val(input.value);
                         }
                     }
                     else if (operation == 'stop')
@@ -1674,8 +1681,16 @@ function User()
 
                         // input values
                         for (var i = 0; i < data.inputs.length; i++) {
-                            var input = data.inputs[i];
-                            $('#' + input.id).val(input.value);
+                            var input, input_obj;
+
+                            input = data.inputs[i];
+                            input_obj = $("#" + input.id);
+
+                            if (input_obj.is(":checkbox") || input_obj.is(":radio")) {
+                                continue;
+                            }
+
+                            input_obj.val(input.value);
                         }
                     } else if (operation == 'stop') {
                         $('td.actions', headerRow).html('');

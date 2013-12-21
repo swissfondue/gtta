@@ -214,12 +214,14 @@ class AutomationCommand extends ConsoleCommand {
             $input->file = $this->_generateFileName();
             $input->save();
 
-            $value = '';
+            $value = $input->value;
 
             if ($input->input->type == CheckInput::TYPE_FILE) {
-                if ($input->value) {
-                    $value = $input->input->getFileData();
+                if (!$value) {
+                    continue;
                 }
+
+                $value = $input->input->getFileData();
             } else {
                 $value = $input->value;
             }

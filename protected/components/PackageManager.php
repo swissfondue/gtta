@@ -906,7 +906,7 @@ class PackageManager {
      * @return string path
      */
     public function getFilesPath(Package $package) {
-        return $this->getPath($package);
+        return $this->getPath($package) . "/files";
     }
 
     /**
