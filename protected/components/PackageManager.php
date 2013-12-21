@@ -731,7 +731,22 @@ class PackageManager {
 
             FileManager::rmDir($destinationPath);
             FileManager::createDir($destinationPath, 0755);
+            FileManager::chown($destinationPath, "gtta", "gtta");
             FileManager::copyRecursive($this->_getRootPath($packagePath), $destinationPath);
+
+            // change "files" directory permission
+            try {
+                $filesPath = "$destinationPath/files";
+
+                if (!@is_dir($filesPath)) {
+                    FileManager::createDir($filesPath, 0775);
+                }
+
+                FileManager::chmod($filesPath, 0775);
+                FileManager::chown($filesPath, "gtta", "gtta");
+            } catch (Exception $e) {
+                // pass
+            }
 
             // install dependencies
             $dependencies = $parsedPackage[self::SECTION_DEPENDENCIES];

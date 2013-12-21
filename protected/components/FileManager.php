@@ -50,6 +50,19 @@ class FileManager {
     }
 
     /**
+     * Change owner
+     * @param $path
+     * @param $user
+     * @param $group
+     * @throws Exception
+     */
+    public static function chown($path, $user, $group) {
+        if (!@chown($path, $user) || !@chgrp($path, $group)) {
+            throw new Exception("Error changing owner: $path");
+        }
+    }
+
+    /**
      * Copy file
      * @param $source
      * @param $destination
