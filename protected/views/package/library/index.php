@@ -58,7 +58,7 @@
                                     <span class="label <?php echo $labelClass; ?>"><?php echo $library->statusName; ?></span>
                                 </td>
                                 <td class="actions">
-                                    <?php if (!$library->system && $library->status != Package::STATUS_INSTALL): ?>
+                                    <?php if (!$library->system && $library->status != Package::STATUS_INSTALL && in_array($system->status, array(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER))): ?>
                                         <a href="#del" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="system.control.del(<?php echo $library->id; ?>);"><i class="icon icon-remove"></i></a>
                                     <?php endif; ?>
                                 </td>

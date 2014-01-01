@@ -8,6 +8,15 @@
 
     <div class="pull-right buttons">
         <a class="btn" href="<?php echo $this->createUrl("package/editscript") ?>"><i class="icon icon-plus"></i> <?php echo Yii::t("app", "New Script"); ?></a>&nbsp;
+
+        <?php
+            $disabled = false;
+
+            if (!in_array($system->status, array(System::STATUS_IDLE, System::STATUS_REGENERATE_SANDBOX))) {
+                $disabled = true;
+            }
+        ?>
+        <a class="btn" href="<?php echo $disabled ? "#" : $this->createUrl("package/regenerate"); ?>" <?php if ($disabled) echo "disabled"; ?>><i class="icon icon-refresh"></i> <?php echo Yii::t("app", "Regenerate"); ?></a>
     </div>
 
     <h1>
@@ -58,7 +67,7 @@
                                     <span class="label <?php echo $labelClass; ?>"><?php echo $script->statusName; ?></span>
                                 </td>
                                 <td class="actions">
-                                    <?php if (!$script->system && $script->status != Package::STATUS_INSTALL): ?>
+                                    <?php if (!$script->system && $script->status != Package::STATUS_INSTALL && in_array($system->status, array(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER))): ?>
                                         <a href="#del" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="system.control.del(<?php echo $script->id; ?>);"><i class="icon icon-remove"></i></a>
                                     <?php endif; ?>
                                 </td>

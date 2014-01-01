@@ -78,7 +78,6 @@ class PackageCommand extends ConsoleCommand {
                         } catch (Exception $e) {
                             // swallow exceptions
                         }
-
                     }
                 }
 

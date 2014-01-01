@@ -277,22 +277,7 @@ class BackupController extends Controller {
      */
 	public function actionBackup() {
         $system = System::model()->findByPk(1);
-        $forbid = false;
-        $forbidMessage = null;
-
-        if ($system->status != System::STATUS_IDLE) {
-            $forbid = true;
-            $forbidMessage = Yii::t(
-                "app",
-                "The system is busy. Please make sure that all running tasks are finished before proceeding."
-            );
-        }
-
         if (isset($_POST["BackupForm"])) {
-            if ($forbid) {
-                throw new CHttpException(403, Yii::t("app", "Access denied."));
-            }
-
             try {
                 // just in case
                 @ignore_user_abort(true);
@@ -322,8 +307,6 @@ class BackupController extends Controller {
         // display the page
         $this->pageTitle = Yii::t("app", "Backup");
 		$this->render("backup", array(
-            "forbid" => $forbid,
-            "forbidMessage" => $forbidMessage,
             "backedUp" => $backedUp
         ));
     }
@@ -452,24 +435,9 @@ class BackupController extends Controller {
      */
 	public function actionRestore() {
         $system = System::model()->findByPk(1);
-        $forbid = false;
-        $forbidMessage = null;
-
-        if ($system->status != System::STATUS_IDLE) {
-            $forbid = true;
-            $forbidMessage = Yii::t(
-                "app",
-                "The system is busy. Please make sure that all running tasks are finished before proceeding."
-            );
-        }
-
         $form = new RestoreForm();
 
         if (isset($_POST["RestoreForm"])) {
-            if ($forbid) {
-                throw new CHttpException(403, Yii::t("app", "Access denied."));
-            }
-
             $form->attributes = $_POST["RestoreForm"];
             $form->backup = CUploadedFile::getInstanceByName("RestoreForm[backup]");
 
@@ -490,8 +458,6 @@ class BackupController extends Controller {
         // display the page
         $this->pageTitle = Yii::t("app", "Restore");
 		$this->render("restore", array(
-            "forbid" => $forbid,
-            "forbidMessage" => $forbidMessage,
             "model" => $form
         ));
     }

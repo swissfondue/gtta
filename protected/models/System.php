@@ -35,6 +35,7 @@ class System extends CActiveRecord {
     const STATUS_RESTORING = 205;
     const STATUS_UPDATING = 210;
     const STATUS_PACKAGE_MANAGER = 215;
+    const STATUS_REGENERATE_SANDBOX = 220;
     const STATUS_LICENSE_EXPIRED = 500;
 
     /**
@@ -65,6 +66,7 @@ class System extends CActiveRecord {
             self::STATUS_RESTORING,
             self::STATUS_UPDATING,
             self::STATUS_PACKAGE_MANAGER,
+            self::STATUS_REGENERATE_SANDBOX,
             self::STATUS_LICENSE_EXPIRED,
         );
     }
@@ -92,6 +94,7 @@ class System extends CActiveRecord {
             self::STATUS_RESTORING => Yii::t("app", "The system is restoring."),
             self::STATUS_UPDATING => Yii::t("app", "The system is updating."),
             self::STATUS_PACKAGE_MANAGER => Yii::t("app", "The system is installing or removing packages."),
+            self::STATUS_REGENERATE_SANDBOX => Yii::t("app", "The system is regenerating scripts sandbox."),
         );
 
         return $statuses[$this->status];

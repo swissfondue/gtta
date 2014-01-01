@@ -21,6 +21,7 @@ class PackageManager {
     const DEPENDENCY_TYPE_LIBRARY = "library";
     const DEPENDENCY_TYPE_SCRIPT = "script";
     const DEPENDENCY_TYPE_SYSTEM = "system";
+    const DEPENDENCY_TYPE_DEB = "deb";
     const DEPENDENCY_TYPE_PYTHON = "python";
     const DEPENDENCY_TYPE_PERL = "perl";
     const INPUT_TYPE_TEXT = "text";
@@ -59,6 +60,7 @@ class PackageManager {
             self::DEPENDENCY_TYPE_LIBRARY,
             self::DEPENDENCY_TYPE_SCRIPT,
             self::DEPENDENCY_TYPE_SYSTEM,
+            self::DEPENDENCY_TYPE_DEB,
             self::DEPENDENCY_TYPE_PYTHON,
             self::DEPENDENCY_TYPE_PERL
         );
@@ -211,7 +213,7 @@ class PackageManager {
      * @throws Exception
      */
     private function _checkName($name, $multiLanguage=false) {
-        if (!$multiLanguage && (!is_string($name) || !preg_match('/^[A-Za-z0-9\-_:]+$/', $name))) {
+        if (!$multiLanguage && (!is_string($name) || !preg_match('/^[A-Za-z0-9\-_:\.=]+$/', $name))) {
             throw new InvalidName();
         }
 
@@ -387,6 +389,22 @@ class PackageManager {
             }
         }
 
+        // scan top-level sections
+        $allowedTopLevel = array(
+            self::SECTION_NAME,
+            self::SECTION_TYPE,
+            self::SECTION_SYSTEM,
+            self::SECTION_VERSION,
+            self::SECTION_DEPENDENCIES,
+            self::SECTION_INPUTS,
+        );
+
+        foreach ($package as $key => $value) {
+            if (!in_array($key, $allowedTopLevel)) {
+                throw new Exception(Yii::t("app", "Invalid section: {section}", array("{section}" => $key)));
+            }
+        }
+
         return array(
             self::SECTION_TYPE => $type,
             self::SECTION_NAME => $name,
@@ -394,6 +412,7 @@ class PackageManager {
             self::SECTION_SYSTEM => $system,
             self::SECTION_DEPENDENCIES => $dependencies,
             self::SECTION_INPUTS => $inputs,
+            "path" => $path,
         );
     }
 
@@ -403,11 +422,39 @@ class PackageManager {
      * @throws Exception
      */
     private function _checkSystemDependency($package) {
+        $vm = new VMManager();
+
         try {
-            ProcessManager::runCommand("dpkg --list $package");
+            $vm->runCommand("dpkg --list $package | grep ^ii");
         } catch (Exception $e) {
             throw new Exception(
                 Yii::t("app", "Unsatisfied system dependency: {dependency}.", array("{dependency}" => $package))
+            );
+        }
+    }
+
+    /**
+     * Check if deb package dependency is installed
+     * @param $package
+     * @param $packagePath
+     * @throws Exception
+     */
+    private function _checkDebDependency($package, $packagePath) {
+        $vm = new VMManager();
+
+        try {
+            $name = explode("_", $package);
+            $name = $name[0];
+
+            $requiredVersion = ProcessManager::runCommand("dpkg --info $packagePath/$package | grep Version | cut -d \" \" -f 3");
+            $currentVersion = $vm->runCommand("dpkg-query -W $name | cut -f 2");
+
+            if ($currentVersion != $requiredVersion) {
+                throw new Exception();
+            }
+        } catch (Exception $e) {
+            throw new Exception(
+                Yii::t("app", "Unsatisfied deb dependency: {dependency}.", array("{dependency}" => $package))
             );
         }
     }
@@ -418,8 +465,10 @@ class PackageManager {
      * @throws Exception
      */
     private function _checkPythonDependency($package) {
+        $vm = new VMManager();
+
         try {
-            ProcessManager::runCommand("pip freeze | grep $package==");
+            $vm->runCommand("pip freeze | grep $package");
         } catch (Exception $e) {
             throw new Exception(
                 Yii::t("app", "Unsatisfied python dependency: {dependency}.", array("{dependency}" => $package))
@@ -433,8 +482,10 @@ class PackageManager {
      * @throws Exception
      */
     private function _checkPerlDependency($package) {
+        $vm = new VMManager();
+
         try {
-            ProcessManager::runCommand("perl -M$package -e1");
+            $vm->runCommand("perl -M$package -e1");
         } catch (Exception $e) {
             throw new Exception(
                 Yii::t("app", "Unsatisfied perl dependency: {dependency}.", array("{dependency}" => $package))
@@ -499,6 +550,15 @@ class PackageManager {
                 }
             }
 
+            // deb dependencies
+            $packages = $this->_getSection($dependencies, self::DEPENDENCY_TYPE_DEB, false);
+
+            if ($packages) {
+                foreach ($packages as $pkg) {
+                    $this->_checkDebDependency($pkg, $package["path"]);
+                }
+            }
+
             // python dependencies
             $packages = $this->_getSection($dependencies, self::DEPENDENCY_TYPE_PYTHON, false);
 
@@ -521,16 +581,18 @@ class PackageManager {
 
     /**
      * Validate package by path
-     * @param $packagePath string package path
+     * @param $package mixed package
      * @param $strict boolean strict dependency validation
      * @param $allowSystem boolean
      * @param $allowSameName boolean
      * @return array
      * @throws Exception
      */
-    private function _validate($packagePath, $strict=true, $allowSystem=false, $allowSameName=false) {
-        $packagePath = $this->_getRootPath($packagePath);
-        $package = $this->_parse($packagePath);
+    private function _validate($package, $strict=true, $allowSystem=false, $allowSameName=false) {
+        if (is_object($package) && $package instanceof Package) {
+            $package = $this->_parse($this->getPath($package));
+        }
+
         $entryPoint = null;
 
         if (in_array($package[self::SECTION_NAME], $this->_getForbiddenPackageNames())) {
@@ -554,8 +616,8 @@ class PackageManager {
 
         if ($package[self::SECTION_TYPE] == Package::TYPE_SCRIPT) {
             foreach ($this->_getEntryPointNames() as $ep) {
-                if (file_exists($packagePath . "/" . $ep)) {
-                    $entryPoint = $packagePath . "/" . $ep;
+                if (file_exists($package["path"] . "/" . $ep)) {
+                    $entryPoint = $package["path"] . "/" . $ep;
                     break;
                 }
             }
@@ -583,7 +645,8 @@ class PackageManager {
 
         try {
             $this->_extract($zipPath, $packagePath);
-            $package = $this->_validate($packagePath, false);
+            $package = $this->_parse($this->_getRootPath($packagePath));
+            $this->_validate($package, false);
 
             $pkg = new Package();
             $pkg->file_name = $id;
@@ -628,7 +691,8 @@ class PackageManager {
 
         try {
             $this->_extract($zipPath, $packagePath);
-            $package = $this->_validate($packagePath, false);
+            $package = $this->_parse($this->_getRootPath($packagePath));
+            $this->_validate($package, false);
 
             if ($package[self::SECTION_TYPE] != $model->type) {
                 throw new Exception(Yii::t("app", "Invalid package type."));
@@ -656,12 +720,32 @@ class PackageManager {
      * @throws Exception
      */
     private function _installSystemDependency($package) {
+        $vm = new VMManager();
+
         try {
-            ProcessManager::runCommand("apt-get -y install $package");
+            $vm->runCommand("apt-get -y --no-install-recommends install $package");
             $this->_checkSystemDependency($package);
         } catch (Exception $e) {
             throw new Exception(
                 Yii::t("app", "Unable to install system dependency: {dependency}.", array("{dependency}" => $package))
+            );
+        }
+    }
+
+    /**
+     * Install deb dependency
+     * @param $package
+     * @throws Exception
+     */
+    private function _installDebDependency($package, $packagePath) {
+        $vm = new VMManager();
+
+        try {
+            $vm->runCommand("dpkg --install $packagePath/$package");
+            $this->_checkDebDependency($package, $packagePath);
+        } catch (Exception $e) {
+            throw new Exception(
+                Yii::t("app", "Unable to install deb dependency: {dependency}.", array("{dependency}" => $package))
             );
         }
     }
@@ -672,8 +756,10 @@ class PackageManager {
      * @throws Exception
      */
     private function _installPythonDependency($package) {
+        $vm = new VMManager();
+
         try {
-            ProcessManager::runCommand("pip install $package");
+            $vm->runCommand("pip install $package");
             $this->_checkPythonDependency($package);
         } catch (Exception $e) {
             throw new Exception(
@@ -688,13 +774,63 @@ class PackageManager {
      * @throws Exception
      */
     private function _installPerlDependency($package) {
+        $vm = new VMManager();
+
         try {
-            ProcessManager::runCommand("cpan -D $package && PERL_MM_USE_DEFAULT=1 perl -MCPAN -e 'install $package'");
+            $vm->runCommand("cpan -D $package && PERL_MM_USE_DEFAULT=1 perl -MCPAN -e 'install $package'");
             $this->_checkPerlDependency($package);
         } catch (Exception $e) {
             throw new Exception(
                 Yii::t("app", "Unable to install perl dependency: {dependency}.", array("{dependency}" => $package))
             );
+        }
+    }
+
+    /**
+     * Install dependencies
+     * @param $package mixed parsed package
+     */
+    private function _installDependencies($package) {
+        if (is_object($package) && $package instanceof Package) {
+            $package = $this->_parse($this->getPath($package));
+        }
+
+        $dependencies = $this->_getSection($package, self::SECTION_DEPENDENCIES, false);
+
+        if (!$dependencies) {
+            return;
+        }
+
+        foreach ($dependencies[self::DEPENDENCY_TYPE_SYSTEM] as $dependency) {
+            try {
+                $this->_checkSystemDependency($dependency);
+            } catch (Exception $e) {
+                $this->_installSystemDependency($dependency);
+            }
+        }
+
+        foreach ($dependencies[self::DEPENDENCY_TYPE_DEB] as $dependency) {
+            try {
+                $this->_checkDebDependency($dependency, $package["path"]);
+            } catch (Exception $e) {
+                $this->_installDebDependency($dependency, $package["path"]);
+            }
+        }
+
+        foreach ($dependencies[self::DEPENDENCY_TYPE_PYTHON] as $dependency) {
+            try {
+                $this->_checkPythonDependency($dependency);
+            } catch (Exception $e) {
+                $this->_installPythonDependency($dependency);
+            }
+        }
+
+        foreach ($dependencies[self::DEPENDENCY_TYPE_PERL] as $dependency) {
+            try {
+                $this->_checkPerlDependency($dependency);
+            } catch (Exception $e) {
+                $this->_installPerlDependency($dependency);
+            }
         }
     }
 
@@ -709,26 +845,14 @@ class PackageManager {
         $zipPath = $packageDir . "/" . $package->file_name . ".zip";
         $exception = null;
         $destinationPath = null;
+        $vm = new VMManager();
 
         try {
             $this->_extract($zipPath, $packagePath);
-            $parsedPackage = $this->_validate($packagePath, false, false, true);
-            $destinationPath = Yii::app()->params["packages"]["path"];
+            $parsedPackage = $this->_parse($this->_getRootPath($packagePath));
+            $this->_validate($parsedPackage, false, false, true);
 
-            if ($parsedPackage["system"]) {
-                $destinationPath = $destinationPath["system"];
-            } else {
-                $destinationPath = $destinationPath["user"];
-            }
-
-            if ($parsedPackage["type"] == Package::TYPE_LIBRARY) {
-                $destinationPath = $destinationPath["libraries"];
-            } else {
-                $destinationPath = $destinationPath["scripts"];
-            }
-
-            $destinationPath = $destinationPath . "/" . $parsedPackage["name"];
-
+            $destinationPath = $this->getPath($package);
             FileManager::rmDir($destinationPath);
             FileManager::createDir($destinationPath, 0755);
             FileManager::chown($destinationPath, "gtta", "gtta");
@@ -749,36 +873,16 @@ class PackageManager {
             }
 
             // install dependencies
-            $dependencies = $parsedPackage[self::SECTION_DEPENDENCIES];
-
-            foreach ($dependencies[self::DEPENDENCY_TYPE_SYSTEM] as $dependency) {
-                try {
-                    $this->_checkSystemDependency($dependency);
-                } catch (Exception $e) {
-                    $this->_installSystemDependency($dependency);
-                }
-            }
-
-            foreach ($dependencies[self::DEPENDENCY_TYPE_PYTHON] as $dependency) {
-                try {
-                    $this->_checkPythonDependency($dependency);
-                } catch (Exception $e) {
-                    $this->_installPythonDependency($dependency);
-                }
-            }
-
-            foreach ($dependencies[self::DEPENDENCY_TYPE_PERL] as $dependency) {
-                try {
-                    $this->_checkPerlDependency($dependency);
-                } catch (Exception $e) {
-                    $this->_installPerlDependency($dependency);
-                }
-            }
+            $dependencies = $this->_getSection($parsedPackage, self::SECTION_DEPENDENCIES, false);
+            $this->_installDependencies($parsedPackage);
 
             // validate again
-            $this->_validate($destinationPath, false, false, true);
+            $this->_validate($parsedPackage, true, false, true);
 
-            // install library dependencies
+            // copy check to VM
+            FileManager::copyRecursive($destinationPath, $vm->virtualizePath($destinationPath));
+
+            // create library dependencies
             foreach ($dependencies[self::DEPENDENCY_TYPE_LIBRARY] as $dependency) {
                 $library = Package::model()->findByAttributes(array(
                     "type" => Package::TYPE_LIBRARY,
@@ -797,7 +901,7 @@ class PackageManager {
                 $packageDep->save();
             }
 
-            // install script dependencies
+            // create script dependencies
             foreach ($dependencies[self::DEPENDENCY_TYPE_SCRIPT] as $dependency) {
                 $script = Package::model()->findByAttributes(array(
                     "type" => Package::TYPE_SCRIPT,
@@ -821,7 +925,13 @@ class PackageManager {
             $package->save();
         } catch (Exception $e) {
             $exception = $e;
+
             FileManager::rmDir($destinationPath);
+            FileManager::rmDir($vm->virtualizePath($destinationPath));
+
+            PackageDependency::model()->deleteAllByAttributes(array(
+                "from_package_id" => $package->id
+            ));
         }
 
         FileManager::unlink($zipPath);
@@ -906,7 +1016,7 @@ class PackageManager {
 
         $path = null;
 
-        if ($package->type == self::TYPE_LIBRARY) {
+        if ($package->type == Package::TYPE_LIBRARY) {
             $path = $paths["libraries"];
         } else {
             $path = $paths["scripts"];
@@ -967,5 +1077,35 @@ class PackageManager {
         }
 
         return $interpreter;
+    }
+
+    /**
+     * Parse and install all package dependencies
+     */
+    public function installAllDependencies() {
+        // core package goes first
+        $core = Package::model()->findByAttributes(array(
+            "name" => "core",
+            "type" => Package::TYPE_LIBRARY,
+            "system" => true
+        ));
+
+        if (!$core) {
+            throw new Exception();
+        }
+
+        $this->_installDependencies($core);
+        $this->_validate($core, true, true, true);
+
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(array("status" => Package::STATUS_INSTALLED));
+        $criteria->addNotInCondition("id", array($core->id));
+        $criteria->order = "system DESC, type ASC, name ASC";
+        $packages = Package::model()->findAll($criteria);
+
+        foreach ($packages as $package) {
+            $this->_installDependencies($package);
+            $this->_validate($package, true, true, true);
+        }
     }
 }

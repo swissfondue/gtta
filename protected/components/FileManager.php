@@ -29,10 +29,11 @@ class FileManager {
      * Create directory
      * @param $dir
      * @param $perms
+     * @param $recursive
      * @throws Exception
      */
-    public static function createDir($dir, $perms) {
-        if (!@mkdir($dir, $perms)) {
+    public static function createDir($dir, $perms, $recursive=false) {
+        if (!@mkdir($dir, $perms, $recursive)) {
             throw new Exception("Error creating directory: $dir");
         }
     }

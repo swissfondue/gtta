@@ -83,6 +83,10 @@ return array(
             "deployConfig" => BASE_DIR . "/config/gtta.ini",
         ),
 
+        "regenerate" => array(
+            "lockFile" => "/tmp/gtta.regenerate",
+        ),
+
         // checks automation
         "automation" => array(
             "minNotificationInterval" => 5 * 60, // 5 minutes

@@ -33,12 +33,14 @@ class SystemManager {
             }
 
             flock($fp, LOCK_UN);
+        } else {
+            $error = true;
         }
 
         fclose($fp);
 
         if ($error) {
-            throw new Exception("Error changing system status");
+            throw new Exception("Error changing system status.");
         }
     }
 } 

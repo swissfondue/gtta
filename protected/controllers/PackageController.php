@@ -14,7 +14,9 @@ class PackageController extends Controller {
             "checkAdmin",
             "ajaxOnly + control",
             "postOnly + control, upload",
-            "idleOrPackageManager",
+            "idleOrPackageManager - index, regenerate, libraries, view, regeneratestatus",
+            "idleOrRegenerate + regenerate, regeneratestatus",
+            "idleOrRegenerateOrPackageManager + index, libraries, view",
 		);
 	}
 
@@ -51,6 +53,7 @@ class PackageController extends Controller {
 		$this->render("index", array(
             "scripts" => $scripts,
             "p" => $paginator,
+            "system" => $this->_system,
         ));
 	}
 
@@ -87,6 +90,7 @@ class PackageController extends Controller {
 		$this->render("library/index", array(
             "libraries" => $libraries,
             "p" => $paginator,
+            "system" => $this->_system,
         ));
     }
 
@@ -283,5 +287,44 @@ class PackageController extends Controller {
             "package" => $package,
             "data" => $data
         ));
+    }
+
+    /**
+     * Regenerate.
+     */
+	public function actionRegenerate() {
+        if (isset($_POST["RegenerateForm"])) {
+            try {
+                SystemManager::updateStatus(System::STATUS_REGENERATE_SANDBOX, System::STATUS_IDLE);
+                $this->_system->refresh();
+            } catch (Exception $e) {
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
+            }
+        }
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Scripts"), $this->createUrl("package/index"));
+        $this->breadcrumbs[] = array(Yii::t("app", "Regenerate Sandbox"), "");
+
+        // display the page
+        $this->pageTitle = Yii::t("app", "Regenerate Sandbox");
+		$this->render("regenerate", array(
+            "system" => $this->_system
+        ));
+	}
+
+    /**
+     * Regenerate status page
+     */
+    public function actionRegenerateStatus() {
+        $response = new AjaxResponse();
+
+        try {
+            $system = System::model()->findByPk(1);
+            $response->addData("regenerating", $system->status == System::STATUS_REGENERATE_SANDBOX);
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
     }
 }

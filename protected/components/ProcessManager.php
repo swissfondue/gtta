@@ -57,5 +57,7 @@ class ProcessManager {
         if ($result !== 0) {
             throw new Exception("Invalid result code: $result ($cmd)");
         }
+
+        return $output;
     }
 }

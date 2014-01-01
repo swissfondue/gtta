@@ -38,12 +38,7 @@ class UpdateController extends Controller {
                 $backupTime = new DateTime($system->backup);
             }
 
-            if ($system->status != System::STATUS_IDLE) {
-                $forbidMessage = Yii::t(
-                    "app",
-                    "The system is busy. Please make sure that all running tasks are finished before proceeding."
-                );
-            } else if (!$backupTime || $backupTime < $backupLimit) {
+            if (!$backupTime || $backupTime < $backupLimit) {
                 $forbidMessage = Yii::t(
                     "app",
                     "The system has been backed up more than 24 hours ago. Please download a backup before updating the system."

@@ -218,4 +218,24 @@ class Controller extends CController
         $this->_checkSystemStatus(array(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER));
         $filterChain->run();
     }
+
+    /**
+     * Check if system is IDLE or in VM REGENERATE state
+     * @param $filterChain
+     * @throws CHttpException
+     */
+    public function filterIdleOrRegenerate($filterChain) {
+        $this->_checkSystemStatus(array(System::STATUS_IDLE, System::STATUS_REGENERATE_SANDBOX));
+        $filterChain->run();
+    }
+
+    /**
+     * Check if system is IDLE or in VM REGENERATE state or in PACKAGE MANAGER state
+     * @param $filterChain
+     * @throws CHttpException
+     */
+    public function filterIdleOrRegenerateOrPackageManager($filterChain) {
+        $this->_checkSystemStatus(array(System::STATUS_IDLE, System::STATUS_REGENERATE_SANDBOX, System::STATUS_PACKAGE_MANAGER));
+        $filterChain->run();
+    }
 }

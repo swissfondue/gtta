@@ -751,6 +751,57 @@ function Admin()
                 });
             });
         };
+
+        /**
+         * Regenerate status
+         */
+        this.regenerate = function (url) {
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data: {
+                    YII_CSRF_TOKEN: system.csrf
+                },
+
+                success: function (data, textStatus) {
+                    $('.loader-image').hide();
+
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
+                        return;
+                    }
+
+                    data = data.data;
+
+                    if (data.regenerating) {
+                        setTimeout(function () {
+                            _package.regenerate(url);
+                        }, 5000);
+                    } else {
+                        location.reload();
+                    }
+                },
+
+                error: function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+
+                    if (textStatus == "timeout") {
+                        setTimeout(function () {
+                            _package.regenerate(url);
+                        }, 5000);
+                    } else {
+                        system.showMessage("error", system.translate("Request failed, please try again."));
+                    }
+                },
+
+                beforeSend: function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
     };
 }
 
