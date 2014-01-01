@@ -880,6 +880,7 @@ class PackageManager {
             $this->_validate($parsedPackage, true, false, true);
 
             // copy check to VM
+            FileManager::createDir($vm->virtualizePath($destinationPath), 0755);
             FileManager::copyRecursive($destinationPath, $vm->virtualizePath($destinationPath));
 
             // create library dependencies
