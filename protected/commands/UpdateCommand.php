@@ -255,6 +255,14 @@ class UpdateCommand extends ConsoleCommand {
     }
 
     /**
+     * Regenerate script VM
+     */
+    private function _regenerateVM() {
+        $vm = new VMManager();
+        $vm->regenerate();
+    }
+
+    /**
      * Update
      */
     private function _update() {
@@ -300,6 +308,12 @@ class UpdateCommand extends ConsoleCommand {
                         try {
                             $this->_changeLink($targetVersion);
                             $this->_deletePreviousVersions();
+
+                            try {
+                                $this->_regenerateVM();
+                            } catch (Exception $e) {
+                                // ignore errors during VM regeneration
+                            }
 
                             $finished = true;
                         } catch (Exception $e) {
