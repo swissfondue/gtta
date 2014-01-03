@@ -90,31 +90,10 @@ return array(
         // checks automation
         "automation" => array(
             "minNotificationInterval" => 5 * 60, // 5 minutes
-
             "lockFile" => "/tmp/gtta.automation",
             "gtLockFile" => "/tmp/gtta.gt-automation",
-            "tempPath" => BASE_DIR . "/files/automation",
-            "scriptsPath" => VERSION_DIR . "/scripts",
-
-            "interpreters" => array(
-                "py" => array(
-                    "path"     => "/usr/bin/python",
-                    "basePath" => "/usr/bin",
-                    "params" => array(),
-                    "env" => array(
-                        "PYTHONPATH" => "/opt/gtta/scripts/lib:/opt/gtta/scripts/system/lib",
-                    ),
-                ),
-                "pl" => array(
-                    "path" => "/usr/bin/perl",
-                    "basePath" => "/usr/bin",
-                    "params" => array(
-                        "-I/opt/gtta/scripts/lib",
-                        "-I/opt/gtta/scripts/system/lib",
-                    ),
-                    "env" => array(),
-                ),
-            )
+            "filesPath" => BASE_DIR . "/files",
+            "pidsPath" => "/tmp",
         ),
 
         "yiicPath" => dirname(__FILE__) . "/../",

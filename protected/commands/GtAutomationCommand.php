@@ -21,6 +21,23 @@ class GtautomationCommand extends ConsoleCommand {
     }
 
     /**
+     * Translate pid into the sandbox PID
+     * @param $pid
+     * @return int|null process id
+     */
+    private function _translatePid($pid) {
+        $vm = new VMManager();
+
+        $pidFileName = $vm->virtualizePath(Yii::app()->params['automation']['pidsPath'] . '/' . $pid);
+
+        if (!file_exists($pidFileName)) {
+            return 0;
+        }
+
+        return (int) file_get_contents($pidFileName);
+    }
+
+    /**
      * Process stopping checks.
      */
     private function _processStoppingChecks() {
@@ -32,13 +49,18 @@ class GtautomationCommand extends ConsoleCommand {
 
         foreach ($checks as $check) {
             $fileOutput = null;
+            $vm = new VMManager();
 
             if ($check->pid) {
-                $fileName = Yii::app()->params['automation']['tempPath'] . '/' . $check->result_file;
-                ProcessManager::killProcess($check->pid);
+                $vm->killProcessGroup($this->_translatePid($check->pid));
+                sleep(5);
 
-                if (file_exists($fileName)) {
-                    $fileOutput = file_get_contents($fileName);
+                $outFileName = $vm->virtualizePath(
+                    Yii::app()->params['automation']['filesPath'] . '/' . $check->result_file
+                );
+
+                if (file_exists($outFileName)) {
+                    $fileOutput = file_get_contents($outFileName);
                 }
             }
 
@@ -120,12 +142,12 @@ class GtautomationCommand extends ConsoleCommand {
      * @param $script
      * @return array
      */
-    private function _createCheckFiles($check, $interpreter, $script) {
-        $tempPath = Yii::app()->params['automation']['tempPath'];
-        $scriptsPath = Yii::app()->params['automation']['scriptsPath'];
+    private function _createCheckFiles($check, $script) {
+        $vm = new VMManager();
+        $filesPath = $vm->virtualizePath(Yii::app()->params["automation"]["filesPath"]);
 
         // create target file
-        $targetFile = fopen($tempPath . '/' . $check->target_file, 'w');
+        $targetFile = fopen($filesPath . '/' . $check->target_file, 'w');
 
         // base data
         fwrite($targetFile, $check->target . "\n");
@@ -134,15 +156,12 @@ class GtautomationCommand extends ConsoleCommand {
         fwrite($targetFile, $check->language->code . "\n");
 
         // directories
-        fwrite($targetFile, $scriptsPath . "\n");
-        fwrite($targetFile, $tempPath . "\n");
-        fwrite($targetFile, $interpreter['path'] . "\n");
-        fwrite($targetFile, $interpreter['basePath'] . "\n");
-
+        fwrite($targetFile, "\n");
+        fwrite($targetFile, Yii::app()->params["automation"]["filesPath"] . "\n");
         fclose($targetFile);
 
         // create empty result file
-        $resultFile = fopen($tempPath . '/' . $check->result_file, 'w');
+        $resultFile = fopen($filesPath . '/' . $check->result_file, 'w');
         fclose($resultFile);
 
         $inputs = CheckInput::model()->findAllByAttributes(array(
@@ -182,7 +201,7 @@ class GtautomationCommand extends ConsoleCommand {
                 $value = $input->value;
             }
 
-            $inputFile = fopen($tempPath . '/' . $input->file, 'w');
+            $inputFile = fopen($filesPath . '/' . $input->file, 'w');
             fwrite($inputFile, $value . "\n");
             fclose($inputFile);
 
@@ -283,7 +302,7 @@ class GtautomationCommand extends ConsoleCommand {
 
         Yii::app()->language = $language->code;
 
-        $tempPath = Yii::app()->params['automation']['tempPath'];
+        $filesPath = Yii::app()->params['automation']['filesPath'];
         $scripts = $check->check->check->scripts;
 
         foreach ($scripts as $script) {
@@ -297,14 +316,6 @@ class GtautomationCommand extends ConsoleCommand {
             $check->result .= $package->name . "\n" . str_repeat("-", strlen($package->name)) . "\n";
 
             try {
-                $pm = new PackageManager();
-                $entryPoint = $pm->getEntryPoint($package);
-                $interpreter = $pm->getInterpreter($package);
-
-                foreach ($interpreter["env"] as $env => $value) {
-                    putenv("$env=$value");
-                }
-
                 $now = new DateTime();
                 $check->pid = posix_getpgid(getmypid());
                 $check->started = $now->format("Y-m-d H:i:s");
@@ -312,41 +323,45 @@ class GtautomationCommand extends ConsoleCommand {
                 $check->result_file = $this->_generateFileName();
                 $check->save();
 
-                $inputFiles = $this->_createCheckFiles($check, $interpreter, $script);
-                chdir($pm->getPath($package));
+                $inputFiles = $this->_createCheckFiles($check, $script);
 
                 $command = array(
-                    $interpreter["path"]
+                    "python",
+                    "/opt/gtta/run_script.py",
+                    $package->name,
+                    "--pid=" . $check->pid,
                 );
 
-                foreach ($interpreter["params"] as $param) {
-                    $command[] = $param;
-                }
-
-                $command[] = $entryPoint;
-                $command[] = $tempPath . '/' . $check->target_file;
-                $command[] = $tempPath . '/' . $check->result_file;
+                $command[] = $filesPath . '/' . $check->target_file;
+                $command[] = $filesPath . '/' . $check->result_file;
 
                 foreach ($inputFiles as $input) {
-                    $command[] = $tempPath . '/' . $input;
+                    $command[] = $filesPath . '/' . $input;
                 }
 
-                $command = implode(' ', $command);
+                $vm = new VMManager();
 
-                $output = array();
-                exec($command . ' 2>&1', $output);
+                if ($vm->isRunning()) {
+                    $output = $vm->runCommand(implode(" ", $command), false);
+                    $fileOutput = file_get_contents($vm->virtualizePath($filesPath . '/' . $check->result_file));
+                    $data = $fileOutput ? $fileOutput : $output;
 
-                $fileOutput = file_get_contents($tempPath . '/' . $check->result_file);
-                $check->refresh();
-                $check->pid = null;
-                $check->result .= $fileOutput ? $fileOutput : implode("\n", $output);
+                    $check->refresh();
+                    $check->pid = null;
+                    $check->result .= $data;
 
-                if (!$check->result) {
-                    $check->result = Yii::t("app", "No output.");
+                    if (!$data) {
+                        $check->result .= Yii::t("app", "No output.");
+                    }
+
+                    $this->_getTables($check);
+                    $this->_getImages($check);
+                } else {
+                    $check->refresh();
+                    $check->pid = null;
+                    $check->result .= Yii::t("app", "Sandbox is not running, please regenerate it.") . "\n";
                 }
 
-                $this->_getTables($check);
-                $this->_getImages($check);
                 $check->save();
 
                 // process dependencies

@@ -16,6 +16,7 @@ class VMManager {
     const MEMORY_LIMIT = "1G";
     const OPENVZ_PRIVATE_DIR = "/var/lib/vz/private";
     const TOOLS_DIRECTORY = "tools";
+    const INSTALL_SCRIPTS_DIRECTORY = "install";
     const RUN_SCRIPT = "run_script.py";
 
     /**
@@ -23,7 +24,7 @@ class VMManager {
      * @param $command
      * @param $params
      */
-    private function _command($command, $params=null) {
+    private function _command($command, $params=null, $throwException=true) {
         if (is_array($params)) {
             $newParams = array();
 
@@ -45,7 +46,7 @@ class VMManager {
             $command = "$command $params";
         }
 
-        return ProcessManager::runCommand($command);
+        return ProcessManager::runCommand($command, $throwException);
     }
 
     /**
@@ -63,10 +64,40 @@ class VMManager {
     /**
      * Run command in VM container
      * @param $command
+     * @param $throwException
      * @return string result
      */
-    public function runCommand($command) {
-        return $this->_command("exec", $command);
+    public function runCommand($command, $throwException=true) {
+        return $this->_command("exec", $command, $throwException);
+    }
+
+    /**
+     * Kill process group
+     * @param $groupId integer process group id
+     */
+    public function killProcessGroup($groupId) {
+        if (!$groupId) {
+            return;
+        }
+
+        try {
+            $this->runCommand("kill -9 -" . $groupId);
+        } catch (Exception $e) {
+            // pass
+        }
+    }
+
+    /**
+     * Check if VM is running
+     */
+    public function isRunning() {
+        try {
+            ProcessManager::runCommand("vzctl status  " . self::ID . " | grep running");
+        } catch (Exception $e) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -94,10 +125,11 @@ class VMManager {
         try {
             $nameservers = ProcessManager::runCommand("cat /etc/resolv.conf | grep nameserver | cut -d \" \" -f 2");
 
-            if (!$nameservers || count($nameservers) < 1) {
+            if (!$nameservers) {
                 throw new Exception("No nameservers found");
             }
 
+            $nameservers = explode("\n", $nameservers);
             $nameserver = $nameservers[0];
 
             $this->_command("set", array(
@@ -119,12 +151,16 @@ class VMManager {
             $this->runCommand("echo \"deb http://ftp.de.debian.org/debian wheezy main contrib non-free\" > /etc/apt/sources.list");
             $this->runCommand("echo \"deb http://security.debian.org/ wheezy/updates main contrib non-free\" >> /etc/apt/sources.list");
             $this->runCommand("apt-get -y update");
+
             $scriptsPath = Yii::app()->params["packages"]["path"]["user"]["scripts"];
+            $filesPath = Yii::app()->params["automation"]["filesPath"];
 
             FileManager::createDir($this->virtualizePath($scriptsPath), 0777, true);
+            FileManager::createDir($this->virtualizePath($filesPath), 0777, true);
             FileManager::copyRecursive($scriptsPath, $this->virtualizePath($scriptsPath));
+
             FileManager::copy(
-                implode("/", array(VERSION_DIR, self::TOOLS_DIRECTORY, self::RUN_SCRIPT)),
+                implode("/", array(VERSION_DIR, self::TOOLS_DIRECTORY, self::INSTALL_SCRIPTS_DIRECTORY, self::RUN_SCRIPT)),
                 $this->virtualizePath(BASE_DIR . "/" . self::RUN_SCRIPT)
             );
 
@@ -132,7 +168,7 @@ class VMManager {
             $pm = new PackageManager();
             $pm->installAllDependencies();
         } catch (Exception $e) {
-            //$this->_stopAndDestroy();
+            $this->_stopAndDestroy();
             throw $e;
         }
     }

@@ -46,18 +46,19 @@ class ProcessManager {
     /**
      * Run a command and check its return code
      * @param $cmd
+     * @param $throwException
      * @throws Exception
      */
-    public static function runCommand($cmd) {
-        $output = null;
+    public static function runCommand($cmd, $throwException=true) {
+        $output = array();
         $result = null;
 
         exec($cmd, $output, $result);
 
-        if ($result !== 0) {
+        if ($result !== 0 && $throwException) {
             throw new Exception("Invalid result code: $result ($cmd)");
         }
 
-        return $output;
+        return implode("\n", $output);
     }
 }
