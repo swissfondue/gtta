@@ -27,6 +27,8 @@ class BackupController extends Controller {
         'check_controls_l10n',
         'checks',
         'checks_l10n',
+        'packages',
+        'package_dependencies',
         'check_scripts',
         'check_inputs',
         'check_inputs_l10n',
@@ -80,6 +82,7 @@ class BackupController extends Controller {
         'check_controls_id_seq',
         'check_inputs_id_seq',
         'check_results_id_seq',
+        'packages_id_seq',
         'check_scripts_id_seq',
         'check_solutions_id_seq',
         'checks_id_seq',
@@ -110,8 +113,7 @@ class BackupController extends Controller {
     /**
 	 * @return array action filters
 	 */
-	public function filters()
-	{
+	public function filters() {
 		return array(
             'https',
 			'checkAuth',
@@ -123,23 +125,47 @@ class BackupController extends Controller {
     /**
      * Backup file attachments.
      */
-    private function _backupAttachments($attachmentsPath, $zip)
-    {
+    private function _backupAttachments($attachmentsPath, $zip) {
         $attachments = TargetCheckAttachment::model()->findAll();
 
-        foreach ($attachments as $attachment)
-            if (file_exists(Yii::app()->params['attachments']['path'] . '/' . $attachment->path))
-                $zip->addFile(
+        foreach ($attachments as $attachment) {
+            if (file_exists(Yii::app()->params['attachments']['path'] . '/' . $attachment->path)) {
+                FileManager::zipFile(
+                    $zip,
                     Yii::app()->params['attachments']['path'] . '/' . $attachment->path,
                     $attachmentsPath . '/' . $attachment->path
                 );
+            }
+        }
+    }
+
+    /**
+     * Backup user packages.
+     */
+    private function _backupPackages($packagesPath, $zip) {
+        $packages = Package::model()->findAllByAttributes(array(
+            "system" => false
+        ));
+
+        $pm = new PackageManager();
+
+        foreach ($packages as $package) {
+            $path = $pm->getPath($package);
+            $zipPath = $packagesPath;
+
+            if ($package->type == Package::TYPE_LIBRARY) {
+                $zipPath .= "/lib";
+            }
+
+            $zipPath .= "/" . $package->name;
+            FileManager::zipDirectory($zip, $path, $zipPath);
+        }
     }
 
     /**
 	 * Backup a table.
 	 */
-	private function _backupTable($table)
-	{
+	private function _backupTable($table) {
         $dump = array();
 		$db   = Yii::app()->db;
 		$pdo  = $db->getPdoInstance();
@@ -173,8 +199,7 @@ class BackupController extends Controller {
     /**
      * Backup a sequence value.
      */
-    private function _backupSequence($sequence)
-    {
+    private function _backupSequence($sequence) {
 		$db  = Yii::app()->db;
 		$pdo = $db->getPdoInstance();
         $row = $db->createCommand('SELECT last_value FROM ' . $db->quoteTableName($sequence) . ';')->queryRow();
@@ -191,8 +216,7 @@ class BackupController extends Controller {
     /**
      * Backup database.
      */
-    private function _backupDatabase($dbPath, $zip)
-    {
+    private function _backupDatabase($dbPath, $zip) {
         $dumpPath = Yii::app()->params['tmpPath'] . '/' . hash('sha256', rand() . time());
         $dump     = fopen($dumpPath, 'w');
 
@@ -206,30 +230,34 @@ class BackupController extends Controller {
 
         fclose($dump);
 
-        $zip->addFile($dumpPath, $dbPath . '/database.xml');
+        FileManager::zipFile($zip, $dumpPath, $dbPath . '/database.xml');
     }
 
     /**
      * Backup the system.
      * @param $system System
      */
-    private function _backup($system) {
+    private function _backup() {
         $exception = null;
 
         try {
             $backupName = Yii::app()->name . ' ' . Yii::t('app', 'Backup') . ' ' . date('Ymd-Hi');
-            $backupPath = Yii::app()->params['tmpPath'] . '/' . $backupName . '.zip';
+            $fileName = md5($backupName . rand() . time());
+            $backupPath = Yii::app()->params['tmpPath'] . '/' . $fileName . '.zip';
 
             $zip = new ZipArchive();
 
             if ($zip->open($backupPath, ZipArchive::CREATE) !== true) {
-                throw new Exception("Unable to create backup archive: $backuPath");
+                throw new Exception("Unable to create backup archive: $fileName");
             }
 
             $zip->addEmptyDir($backupName);
             $zip->addEmptyDir($backupName . '/attachments');
+            $zip->addEmptyDir($backupName . '/packages');
+            $zip->addEmptyDir($backupName . '/packages/lib');
 
             $this->_backupAttachments($backupName . '/attachments', $zip);
+            $this->_backupPackages($backupName . '/packages', $zip);
             $this->_backupDatabase($backupName, $zip);
 
             $zip->close();
@@ -253,6 +281,7 @@ class BackupController extends Controller {
             flush();
 
             readfile($backupPath);
+            FileManager::unlink($backupPath);
         } catch (Exception $e) {
             Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "application");
             $exception = $e;
@@ -277,6 +306,7 @@ class BackupController extends Controller {
      */
 	public function actionBackup() {
         $system = System::model()->findByPk(1);
+
         if (isset($_POST["BackupForm"])) {
             try {
                 // just in case
@@ -289,7 +319,7 @@ class BackupController extends Controller {
             }
 
             try {
-                $this->_backup($system);
+                $this->_backup();
             } catch (Exception $e) {
                 throw new CHttpException(500, Yii::t("app", "Error creating backup."));
             }
@@ -314,13 +344,9 @@ class BackupController extends Controller {
     /**
      * Restore the attachments.
      */
-    private function _restoreAttachments($zip, $attachments)
-    {
-        foreach ($attachments as $attachment)
-        {
+    private function _restoreAttachments($zip, $attachments) {
+        foreach ($attachments as $attachment) {
             $content = $zip->getFromIndex($attachment['index']);
-            $name = $attachment['name'];
-
             $file = fopen(Yii::app()->params['attachments']['path'] . '/' . $attachment['name'], 'wb');
             fwrite($file, $content);
             fclose($file);
@@ -367,13 +393,9 @@ class BackupController extends Controller {
 
     /**
      * Restore the system.
-     * @param $system System
      * @param $form RestoreForm
      */
-    private function _restore($system, $form) {
-        $system->status = System::STATUS_RESTORING;
-        $system->save();
-
+    private function _restore($form) {
         $exception = null;
 
         try {
@@ -401,7 +423,7 @@ class BackupController extends Controller {
                 if ($path[1] == 'attachments' && count($path) == 3 && $path[2]) {
                     $attachments[] = array(
                         'index' => $i,
-                        'name'  => $name
+                        'name' => $name
                     );
 
                     continue;
@@ -422,8 +444,11 @@ class BackupController extends Controller {
         }
 
         // "finally" block
-        $system->status = System::STATUS_IDLE;
-        $system->save();
+        try {
+            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_RESTORING);
+        } catch (Exception $e) {
+            // swallow the exception
+        }
 
         if ($exception) {
             throw $exception;
@@ -434,7 +459,6 @@ class BackupController extends Controller {
      * Restore the system from a backup.
      */
 	public function actionRestore() {
-        $system = System::model()->findByPk(1);
         $form = new RestoreForm();
 
         if (isset($_POST["RestoreForm"])) {
@@ -443,7 +467,14 @@ class BackupController extends Controller {
 
             if ($form->validate()) {
                 try {
-                    $this->_restore($system, $form);
+                    @ignore_user_abort(true);
+                    SystemManager::updateStatus(System::STATUS_RESTORING, System::STATUS_IDLE);
+                } catch (Exception $e) {
+                    throw new CHttpException(403, Yii::t("app", "Access denied."));
+                }
+
+                try {
+                    $this->_restore($form);
                     Yii::app()->user->setFlash("success", Yii::t("app", "System successfully restored from the backup."));
                 } catch (Exception $e) {
                     throw new CHttpException(500, Yii::t("app", "Error restoring backup."));

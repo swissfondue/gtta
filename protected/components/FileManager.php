@@ -131,6 +131,45 @@ class FileManager {
     }
 
     /**
+     * Zip directory
+     * @param ZipArchive $zip
+     * @param $source
+     * @param $destination
+     */
+    public static function zipDirectory(ZipArchive $zip, $source, $destination) {
+        if (!is_dir($source)) {
+            return;
+        }
+
+        $zip->addEmptyDir($destination);
+
+        foreach (scandir($source) as $file) {
+            if ($file == "." || $file == "..") {
+                continue;
+            }
+
+            $srcPath = $source . "/" . $file;
+            $dstPath = $destination . "/" . $file;
+
+            if (is_dir($srcPath)) {
+                self::zipDirectory($zip, $srcPath, $dstPath);
+            } else {
+                self::zipFile($zip, $srcPath, $dstPath);
+            }
+        }
+    }
+
+    /**
+     * Zip file
+     * @param ZipArchive $zip
+     * @param $src
+     * @param $dst
+     */
+    public static function zipFile(ZipArchive $zip, $src, $dst) {
+        $zip->addFile($src, $dst);
+    }
+
+    /**
      * Get directory contents
      * @param $source
      * @return array
