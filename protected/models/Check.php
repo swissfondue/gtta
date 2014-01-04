@@ -20,6 +20,7 @@
  * @property string $reference_url
  * @property integer $effort
  * @property integer $sort_order
+ * @property boolean $demo
  */
 class Check extends CActiveRecord
 {
@@ -50,10 +51,10 @@ class Check extends CActiveRecord
 	public function rules()
 	{
 		return array(
-            array( 'name, check_control_id, sort_order', 'required' ),
-            array( 'name, protocol, reference_code, reference_url', 'length', 'max' => 1000 ),
-            array( 'check_control_id, reference_id, port, effort, sort_order', 'numerical', 'integerOnly' => true ),
-            array( 'advanced, automated, multiple_solutions', 'boolean' ),
+            array('name, check_control_id, sort_order', 'required'),
+            array('name, protocol, reference_code, reference_url', 'length', 'max' => 1000),
+            array('check_control_id, reference_id, port, effort, sort_order', 'numerical', 'integerOnly' => true),
+            array('advanced, automated, multiple_solutions, demo', 'boolean'),
 		);
 	}
 
@@ -63,17 +64,17 @@ class Check extends CActiveRecord
 	public function relations()
 	{
 		return array(
-            'l10n'                   => array( self::HAS_MANY,   'CheckL10n',             'check_id' ),
-            'control'                => array( self::BELONGS_TO, 'CheckControl',          'check_control_id' ),
-            '_reference'             => array( self::BELONGS_TO, 'Reference',             'reference_id'     ),
-            'targetChecks'           => array( self::HAS_MANY,   'TargetCheck',           'check_id' ),
-            'targetCheckInputs'      => array( self::HAS_MANY,   'TargetCheckInput',      'check_id' ),
-            'targetCheckSolutions'   => array( self::HAS_MANY,   'TargetCheckSolution',   'check_id' ),
-            'targetCheckAttachments' => array( self::HAS_MANY,   'TargetCheckAttachment', 'check_id' ),
-            'results'                => array( self::HAS_MANY,   'CheckResult',           'check_id' ),
-            'solutions'              => array( self::HAS_MANY,   'CheckSolution',         'check_id' ),
-            'scripts'                => array( self::HAS_MANY,   'CheckScript',           'check_id' ),
-            'riskCategories'         => array( self::HAS_MANY,   'RiskCategoryCheck',     'check_id' ),
+            'l10n' => array(self::HAS_MANY, 'CheckL10n', 'check_id'),
+            'control' => array(self::BELONGS_TO, 'CheckControl', 'check_control_id'),
+            '_reference' => array(self::BELONGS_TO, 'Reference', 'reference_id'),
+            'targetChecks' => array(self::HAS_MANY, 'TargetCheck', 'check_id'),
+            'targetCheckInputs' => array(self::HAS_MANY, 'TargetCheckInput', 'check_id'),
+            'targetCheckSolutions' => array(self::HAS_MANY, 'TargetCheckSolution', 'check_id'),
+            'targetCheckAttachments' => array(self::HAS_MANY, 'TargetCheckAttachment', 'check_id'),
+            'results' => array(self::HAS_MANY, 'CheckResult', 'check_id'),
+            'solutions' => array(self::HAS_MANY, 'CheckSolution', 'check_id'),
+            'scripts' => array(self::HAS_MANY, 'CheckScript', 'check_id'),
+            'riskCategories' => array(self::HAS_MANY, 'RiskCategoryCheck', 'check_id'),
 		);
 	}
 

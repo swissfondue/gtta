@@ -41,8 +41,8 @@ class SettingsController extends Controller {
 			$form->attributes = $_POST["SettingsEditForm"];
 
 			if ($form->validate()) {
-                $system->workstation_id = $form->workstationId;
-                $system->workstation_key = $form->workstationKey;
+                $system->workstation_id = $form->workstationId ? $form->workstationId : null;
+                $system->workstation_key = $form->workstationKey ? $form->workstationKey : null;
                 $system->timezone = $form->timezone;
                 $system->report_low_pedestal = $form->reportLowPedestal;
                 $system->report_med_pedestal = $form->reportMedPedestal;
@@ -51,6 +51,7 @@ class SettingsController extends Controller {
                 $system->report_med_damping_low = $form->reportMedDampingLow;
                 $system->report_high_damping_low = $form->reportHighDampingLow;
                 $system->report_high_damping_med = $form->reportHighDampingMed;
+                $system->demo = true;
                 $system->save();
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "Settings saved."));

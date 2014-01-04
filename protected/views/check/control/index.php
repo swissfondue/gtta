@@ -32,6 +32,7 @@
                             <tr data-id="<?php echo $check->id; ?>" data-control-url="<?php echo $this->createUrl('check/control/check/control'); ?>">
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )); ?>"><?php echo CHtml::encode($check->localizedName); ?></a>
+
                                     <?php if ($check->automated): ?>
                                         <i class="icon-cog" title="<?php echo Yii::t('app', 'Automated'); ?>"></i>
                                     <?php endif; ?>

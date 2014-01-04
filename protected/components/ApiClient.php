@@ -18,7 +18,7 @@ class ApiClient {
      * @param $id
      * @param $key
      */
-    public function __construct($id, $key) {
+    public function __construct($id=null, $key=null) {
         $this->id = $id;
         $this->key = $key;
     }
@@ -96,9 +96,17 @@ class ApiClient {
     }
 
     /**
+     * Register
+     * @param $version
+     * @return mixed response
+     */
+    public function register($version) {
+        $response = $this->_sendRequest("register", array(self::PARAM_VERSION => $version));
+        return $this->_parseResponse($response);
+    }
+
+    /**
      * Set status
-     * @param $id
-     * @param $key
      * @param $version
      * @return mixed response
      */

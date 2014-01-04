@@ -34,7 +34,7 @@ function User()
          * Start all automated checks.
          */
         this.startAll = function () {
-            $('div.check-header[data-type="automated"]').each(function () {
+            $('div.check-header[data-type="automated"][data-limited="0"]').each(function () {
                 var id = $(this).data('id');
 
                 if (!_check.isRunning(id))

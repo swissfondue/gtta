@@ -932,6 +932,7 @@ class CheckController extends Controller
             }
         } else {
             $check = new Check();
+            $check->demo = true;
             $newRecord = true;
         }
 
@@ -976,6 +977,10 @@ class CheckController extends Controller
 
 		// collect user input data
 		if (isset($_POST['CheckEditForm'])) {
+            if ($this->_system->demo && !$check->demo) {
+                throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+            }
+
 			$model->attributes = $_POST['CheckEditForm'];
 
             $model->name = $model->defaultL10n($languages, 'name');
@@ -1191,6 +1196,11 @@ class CheckController extends Controller
 
 			if ($model->validate()) {
                 $src = Check::model()->findByPk($model->id);
+
+                if ($this->_system->demo && !$src->demo) {
+                    throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+                }
+
                 $dst = new Check();
 
                 $dst->check_control_id = $control->id;
@@ -1546,6 +1556,10 @@ class CheckController extends Controller
         if (!$check)
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
 
+        if ($this->_system->demo && !$check->demo) {
+            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+        }
+
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
@@ -1640,6 +1654,14 @@ class CheckController extends Controller
 
         if (!$check)
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+
+        if ($this->_system->demo && !$check->demo) {
+            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+        }
+
+        if ($this->_system->demo && !$check->demo) {
+            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+        }
 
         if ($result)
         {
@@ -1798,10 +1820,14 @@ class CheckController extends Controller
             }
 
             $id     = $model->id;
-            $result = CheckResult::model()->findByPk($id);
+            $result = CheckResult::model()->with("check")->findByPk($id);
 
             if ($result === null)
                 throw new CHttpException(404, Yii::t('app', 'Result not found.'));
+
+            if ($this->_system->demo && !$result->check->demo) {
+                throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+            }
 
             switch ($model->operation)
             {
@@ -1877,6 +1903,10 @@ class CheckController extends Controller
 
         if (!$check)
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+
+        if ($this->_system->demo && !$check->demo) {
+            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+        }
 
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
@@ -2128,11 +2158,15 @@ class CheckController extends Controller
                 throw new Exception($errorText);
             }
 
-            $id       = $model->id;
-            $solution = CheckSolution::model()->findByPk($id);
+            $id = $model->id;
+            $solution = CheckSolution::model()->with("check")->findByPk($id);
 
             if ($solution === null)
                 throw new CHttpException(404, Yii::t('app', 'Solution not found.'));
+
+            if ($this->_system->demo && !$solution->check->demo) {
+                throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+            }
 
             switch ($model->operation)
             {
@@ -2208,6 +2242,10 @@ class CheckController extends Controller
 
         if (!$check)
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+
+        if ($this->_system->demo && !$check->demo) {
+            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+        }
 
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
@@ -2297,6 +2335,10 @@ class CheckController extends Controller
 
         if (!$check) {
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+        }
+
+        if ($this->_system->demo && !$check->demo) {
+            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
         }
 
         if ($script) {
@@ -2394,10 +2436,14 @@ class CheckController extends Controller
             }
 
             $id = $model->id;
-            $script = CheckScript::model()->findByPk($id);
+            $script = CheckScript::model()->with("check")->findByPk($id);
 
             if ($script === null)
                 throw new CHttpException(404, Yii::t('app', 'Script not found.'));
+
+            if ($this->_system->demo && !$script->check->demo) {
+                throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+            }
 
             switch ($model->operation)
             {
@@ -2425,7 +2471,7 @@ class CheckController extends Controller
     }
 
     /**
-     * Display a list of check inputs.
+     * Display a list of script inputs.
      */
 	public function actionInputs($id, $control, $check, $script, $page=1)
 	{
@@ -2480,6 +2526,10 @@ class CheckController extends Controller
 
         if (!$check)
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+
+        if ($this->_system->demo && !$check->demo) {
+            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+        }
 
         $script = CheckScript::model()->findByAttributes(array(
             'id' => $script,
@@ -2594,6 +2644,10 @@ class CheckController extends Controller
 
         if (!$check)
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+
+        if ($this->_system->demo && !$check->demo) {
+            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+        }
 
         $script = CheckScript::model()->findByAttributes(array(
             'id' => $script,
@@ -2784,6 +2838,10 @@ class CheckController extends Controller
 
             if ($input === null)
                 throw new CHttpException(404, Yii::t('app', 'Input not found.'));
+
+            if ($this->_system->demo && !$input->script->check->demo) {
+                throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+            }
 
             switch ($model->operation)
             {

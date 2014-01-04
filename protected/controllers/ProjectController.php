@@ -2599,9 +2599,13 @@ class ProjectController extends Controller
             if (!$check)
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
 
+            if ($this->_system->demo && !$check->demo) {
+                throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+            }
+
             $targetCheck = TargetCheck::model()->findByAttributes(array(
                 'target_id' => $target->id,
-                'check_id'  => $check->id
+                'check_id' => $check->id
             ));
 
             $model = new EntryControlForm();
@@ -2801,6 +2805,10 @@ class ProjectController extends Controller
 
             if (!$check) {
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+            }
+
+            if ($this->_system->demo && !$check->check->demo) {
+                throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
             }
 
             $language = Language::model()->findByAttributes(array(

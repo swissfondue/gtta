@@ -5,20 +5,41 @@
  */
 class CheckUpdateCommand extends ConsoleCommand {
     /**
+     * Register the demo version
+     */
+    private function _register() {
+        $api = new ApiClient();
+        $result = $api->register($this->_system->version);
+
+        if ($result->id && $result->key) {
+            $this->_system->workstation_id = $result->id;
+            $this->_system->workstation_key = $result->key;
+        }
+
+        $this->_system->demo = true;
+        $this->_system->save();
+        $this->_system->refresh();
+    }
+
+    /**
      * Check update
      */
     private function _checkUpdate() {
-        $system = System::model()->findByPk(1);
+        if (!$this->_system->workstation_id && !$this->_system->workstation_key) {
+            $this->_register();
+        }
 
-        $api = new ApiClient($system->workstation_id, $system->workstation_key);
-        $result = $api->setStatus($system->version);
+        $api = new ApiClient($this->_system->workstation_id, $this->_system->workstation_key);
+        $result = $api->setStatus($this->_system->version);
+        $this->_system->demo = $result->demo;
 
         if ($result->update !== null) {
-            $system->update_version = $result->update->version;
-            $system->update_description = $result->update->description;
-            $system->update_check_time = new CDbExpression("NOW()");
-            $system->save();
+            $this->_system->update_version = $result->update->version;
+            $this->_system->update_description = $result->update->description;
+            $this->_system->update_check_time = new CDbExpression("NOW()");
         }
+
+        $this->_system->save();
     }
     
     /**

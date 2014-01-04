@@ -308,6 +308,10 @@ class BackupController extends Controller {
         $system = System::model()->findByPk(1);
 
         if (isset($_POST["BackupForm"])) {
+            if ($this->_system->demo) {
+                throw new CHttpException(403, Yii::t("app", "Backups are not available in the demo version."));
+            }
+
             try {
                 // just in case
                 @ignore_user_abort(true);
@@ -466,6 +470,10 @@ class BackupController extends Controller {
             $form->backup = CUploadedFile::getInstanceByName("RestoreForm[backup]");
 
             if ($form->validate()) {
+                if ($this->_system->demo) {
+                    throw new CHttpException(403, Yii::t("app", "Backups are not available in the demo version."));
+                }
+
                 try {
                     @ignore_user_abort(true);
                     SystemManager::updateStatus(System::STATUS_RESTORING, System::STATUS_IDLE);
