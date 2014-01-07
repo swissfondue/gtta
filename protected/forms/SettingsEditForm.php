@@ -55,6 +55,11 @@ class SettingsEditForm extends CFormModel {
     public $reportHighDampingMed;
 
     /**
+     * @var string copyright text
+     */
+    public $copyright;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
@@ -62,7 +67,7 @@ class SettingsEditForm extends CFormModel {
 			array("timezone", "required"),
             array("timezone", "in", "range" => array_keys(TimeZones::$zones)),
             array("workstationId", "length", "is" => 36),
-            array("workstationKey", "length", "max" => 1000),
+            array("workstationKey, copyright", "length", "max" => 1000),
             array("reportLowPedestal, reportMedPedestal, reportHighPedestal, reportMaxRating, reportMedDampingLow, reportHighDampingLow, reportHighDampingMed", "numerical", "min" => 0),
             array("reportLowPedestal", "compare", "compareAttribute" => "reportMedPedestal", "operator" => "<="),
             array("reportMedPedestal", "compare", "compareAttribute" => "reportHighPedestal", "operator" => "<="),
@@ -85,6 +90,7 @@ class SettingsEditForm extends CFormModel {
             "reportMedDampingLow" => Yii::t("app", "Medium Risk Region: Low Risks"),
             "reportHighDampingLow" => Yii::t("app", "High Risk Region: Low Risks"),
             "reportHighDampingMed" => Yii::t("app", "High Risk Region: Medium Risks"),
+            "copyright" => Yii::t("app", "Copyright"),
 		);
 	}
 }

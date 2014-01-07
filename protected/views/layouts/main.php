@@ -161,10 +161,12 @@
 
             <?php echo $content; ?>
 
+            <div class="clearfix"></div>
+            
             <hr>
             
             <footer>
-                <?php echo Yii::t('app', 'Copyright'); ?> &copy; <?php echo date('Y'); ?> <a href="http://infoguard.com">InfoGuard AG</a><br>
+                <?php echo Yii::t('app', 'Copyright'); ?> &copy; <?php echo date('Y'); ?> <?php echo $this->_system->copyright; ?><br>
                 <?php echo Yii::t('app', 'All Rights Reserved'); ?><br>
             </footer>
         </div>

@@ -1,4 +1,4 @@
-<img src="<?php echo Yii::app()->request->baseUrl; ?>/images/logo.png" class="login-logo">
+<img src="<?php echo $this->createUrl("app/logo"); ?>" class="login-logo">
 
 <div class="login-block">
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>

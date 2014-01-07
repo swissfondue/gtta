@@ -803,6 +803,122 @@ function Admin()
             });
         };
     };
+
+    /**
+     * Settings object.
+     */
+    this.settings = new function () {
+        var _settings = this;
+
+        /**
+         * Initialize logo upload form.
+         */
+        this.initLogoUploadForm = function () {
+            $('input[name^="SystemLogoUploadForm"]').each(function () {
+                var url = $(this).data("upload-url"),
+                    data = {};
+
+                data["YII_CSRF_TOKEN"] = system.csrf;
+
+                $(this).fileupload({
+                    dataType: "json",
+                    url: url,
+                    forceIframeTransport: true,
+                    timeout: 120000,
+                    formData: data,
+                    dropZone: $('input[name^="SystemLogoUploadForm"]'),
+
+                    done : function (e, data) {
+                        $(".loader-image").hide();
+                        $(".upload-message").hide();
+                        $(".file-input").show();
+
+                        var json = data.result;
+
+                        if (json.status == "error") {
+                            system.showMessage("error", json.errorText);
+                            return;
+                        }
+
+                        data = json.data;
+
+                        // refresh the image
+                        var d = new Date();
+                        $(".logo-image > img").attr("src", data.url + "?" + d.getTime());
+                        $(".delete-logo-link").show();
+                    },
+
+                    fail : function (e, data) {
+                        $(".loader-image").hide();
+                        $(".upload-message").hide();
+                        $(".file-input").show();
+                        system.showMessage("error", system.translate("Request failed, please try again."));
+                    },
+
+                    start : function (e) {
+                        $(".loader-image").show();
+                        $(".file-input").hide();
+                        $(".upload-message").show();
+                    }
+                });
+            });
+        };
+
+        /**
+         * Control logo.
+         */
+        this._controlLogo = function(operation) {
+            var url = $(".logo-image").data("control-url");
+
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data: {
+                    "EntryControlForm[operation]": operation,
+                    "EntryControlForm[id]": 1,
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
+                        return;
+                    }
+
+                    data = data.data;
+
+                    if (operation == "delete") {
+                        var d = new Date();
+                        $(".logo-image > img").attr("src", data.url + "?" + d.getTime());
+                        $(".delete-logo-link").hide();
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.showMessage("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
+         * Delete logo.
+         */
+        this.delLogo = function () {
+            if (confirm(system.translate("Are you sure that you want to delete this object?"))) {
+                _settings._controlLogo("delete");
+            }
+        };
+    };
 }
 
 var admin = new Admin();

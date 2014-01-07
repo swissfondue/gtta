@@ -3,16 +3,14 @@
 /**
  * Main app controller.
  */
-class AppController extends Controller
-{
+class AppController extends Controller {
     /**
 	 * @return array action filters
 	 */
-	public function filters()
-	{
+	public function filters() {
 		return array(
             'https',
-			'checkAuth - login, error, maintenance, l10n',
+			'checkAuth - login, error, maintenance, l10n, logo',
             'postOnly + objectList',
             'ajaxOnly + objectList',
 		);
@@ -542,5 +540,34 @@ class AppController extends Controller
         }
 
         echo $response->serialize();
+    }
+
+
+    /**
+     * Get logo.
+     */
+    public function actionLogo() {
+        $filePath = Yii::app()->params["systemLogo"]["path"];
+        $logoType = $this->_system->logo_type;
+
+        if (!file_exists($filePath)) {
+            $filePath = Yii::app()->params["systemLogo"]["defaultPath"];
+            $logoType = "image/png";
+        }
+
+        // give user a file
+        header('Content-Type: ' . $logoType);
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filePath));
+
+        ob_clean();
+        flush();
+
+        readfile($filePath);
+
+        exit();
     }
 }

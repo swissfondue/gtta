@@ -58,8 +58,9 @@ return array(
                 "account/restore/<code:[a-z\d]+>" => "account/changepassword",
 
                 // misc
-                "app/l10n.js"     => "app/l10n",
+                "app/l10n.js" => "app/l10n",
                 "app/object-list" => "app/objectlist",
+                "app/logo" => "app/logo",
 
                 // projects
                 "projects/<page:\d+>"         => "project/index",
@@ -362,6 +363,12 @@ return array(
 
         "clientLogos" => array(
             "path" => BASE_DIR . "/files/logos",
+            "maxSize" => 10 * 1024 * 1024, // 10 megabytes
+        ),
+
+        "systemLogo" => array(
+            "defaultPath" => VERSION_DIR . "/web/images/logo.png",
+            "path" => BASE_DIR . "/files/logos/system",
             "maxSize" => 10 * 1024 * 1024, // 10 megabytes
         ),
 

@@ -1,3 +1,7 @@
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.ui.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.iframe-transport.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.fileupload.js"></script>
+
 <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 
 <hr>
@@ -22,6 +26,35 @@
                 <input type="text" class="input-xlarge" id="SettingsEditForm_workstationKey" name="SettingsEditForm[workstationKey]" value="<?php echo CHtml::encode($form->workstationKey); ?>">
                 <?php if ($form->getError('workstationKey')): ?>
                     <p class="help-block"><?php echo $form->getError('workstationKey'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="control-group">
+            <label class="control-label"><?php echo Yii::t("app", "Logo"); ?></label>
+            <div class="controls form-text">
+                <div class="logo-image" data-control-url="<?php echo $this->createUrl("settings/controllogo"); ?>">
+                    <img src="<?php echo $this->createUrl("app/logo"); ?>">
+                </div>
+                <div class="file-input">
+                    <a href="#logo"><?php echo Yii::t("app", "Upload Logo"); ?></a>
+                    <input type="file" name="SystemLogoUploadForm[image]" data-upload-url="<?php echo $this->createUrl("settings/uploadlogo"); ?>">
+                </div>
+
+                <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+
+                <a class="delete-logo-link <?php if (!$this->_system->logo_type) echo "hide"; ?>" href="#delete-logo" onclick="admin.settings.delLogo();"><?php echo Yii::t("app", "Delete Logo"); ?></a>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($form->getError('copyright')) echo 'error'; ?>">
+            <label class="control-label" for="SettingsEditForm_copyright"><?php echo Yii::t('app', 'Copyright'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="SettingsEditForm_copyright" name="SettingsEditForm[copyright]" value="<?php echo CHtml::encode($form->copyright); ?>">
+                <?php if ($form->getError('copyright')): ?>
+                    <p class="help-block"><?php echo $form->getError('copyright'); ?></p>
                 <?php endif; ?>
             </div>
         </div>
@@ -128,3 +161,9 @@
         </div>
     </fieldset>
 </form>
+
+<script>
+    $(function () {
+        admin.settings.initLogoUploadForm();
+    });
+</script>
