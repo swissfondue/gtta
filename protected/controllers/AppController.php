@@ -68,17 +68,14 @@ class AppController extends Controller {
 	/**
 	 * Exception handler
 	 */
-	public function actionError()
-	{
+	public function actionError() {
 	    $error = Yii::app()->errorHandler->error;
         $this->breadcrumbs[] = array(Yii::t('app', 'Error'), '');
 
-        if ($error)
-	    {
+        if ($error) {
             $message = $error['message'];
 
-            if ($error['code'] == 500)
-            {
+            if ($error['code'] == 500) {
                 $uniqueHash = strtoupper(substr(hash('sha256', time() . rand() . $error['message']), 0, 16));
                 Yii::log($uniqueHash, 'error');
 

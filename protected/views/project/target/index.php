@@ -70,6 +70,43 @@
             <?php endif; ?>
         </div>
         <div class="span4">
+            <?php if ((User::checkRole(User::ROLE_USER) || Yii::app()->user->getShowDetails()) && $quickTargets): ?>
+                <div id="project-quick-nav-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-quick-nav');"><i class="icon-chevron-up"></i></div>
+                <h3><a href="#toggle" onclick="system.toggleBlock('#project-quick-nav');"><?php echo Yii::t('app', 'Quick Navigation'); ?></a></h3>
+
+                <div class="info-block" id="project-quick-nav">
+                    <?php foreach ($quickTargets as $qTarget): ?>
+                        <div class="project-quick-nav">
+                            <div class="target">
+                                <a href="<?php echo $this->createUrl("project/target", array("id" => $project->id, "target" => $qTarget->id)); ?>"><?php echo CHtml::encode($qTarget->host); ?></a>
+                            </div>
+
+                            <?php if ($qTarget->categories): ?>
+                                <div class="categories">
+                                    <?php foreach ($qTarget->categories as $cat): ?>
+                                        <?php
+                                            $catName = $cat->localizedName;
+                                            $shortened = false;
+
+                                            if (mb_strlen($catName) > 45) {
+                                                $catName = mb_substr($catName, 0, 45) . "...";
+                                                $shortened = true;
+                                            }
+
+                                            $catName = CHtml::encode($catName);
+                                        ?>
+
+                                        <a href="<?php echo $this->createUrl("project/checks", array("id" => $project->id, "target" => $qTarget->id, "category" => $cat->id)); ?>"><?php echo $catName; ?></a>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+
+                    <div class="clearfix"></div>
+                </div>
+            <?php endif; ?>
+
             <div id="project-info-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-info');"><i class="icon-chevron-up"></i></div>
             <h3><a href="#toggle" onclick="system.toggleBlock('#project-info');"><?php echo Yii::t('app', 'Project Information'); ?></a></h3>
 

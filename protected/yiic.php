@@ -1,6 +1,7 @@
 <?php
 
-$yiic = dirname(__FILE__) . "/framework/yiic.php";
 $config = dirname(__FILE__) . "/config/console.php";
+$yiic = dirname(__FILE__) . "/framework/yiic.php";
 
+require_once($config);
 require_once($yiic);

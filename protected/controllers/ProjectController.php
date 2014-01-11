@@ -284,7 +284,26 @@ class ProjectController extends Controller
         ))->findAll($newCriteria);
 
         $targetCount = Target::model()->count($criteria);
-        $paginator   = new Paginator($targetCount, $page);
+        $paginator = new Paginator($targetCount, $page);
+
+        $criteria = new CDbCriteria();
+        $criteria->order  = "t.host ASC";
+        $criteria->addCondition("t.project_id = :project_id");
+        $criteria->params = array("project_id" => $project->id);
+        $criteria->together = true;
+
+        $quickTargets = Target::model()->with(array(
+            "categories" => array(
+                "with" => array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    ),
+                ),
+                "order" => "categories.name",
+            )
+        ))->findAll($criteria);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
         $this->breadcrumbs[] = array($project->name, '');
@@ -292,31 +311,32 @@ class ProjectController extends Controller
         // display the page
         $this->pageTitle = $project->name;
 		$this->render('view', array(
-            'project'  => $project,
-            'client'   => $client,
-            'targets'  => $targets,
-            'p'        => $paginator,
-            'statuses' => array(
-                Project::STATUS_OPEN        => Yii::t('app', 'Open'),
-                Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
-                Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
+            "project"  => $project,
+            "client"   => $client,
+            "targets"  => $targets,
+            "p"        => $paginator,
+            "statuses" => array(
+                Project::STATUS_OPEN        => Yii::t("app", "Open"),
+                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
+                Project::STATUS_FINISHED    => Yii::t("app", "Finished"),
             ),
-            'ratings' => array(
-                TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
-                TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
-                TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
-                TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
+            "ratings" => array(
+                TargetCheck::RATING_INFO      => Yii::t("app", "Info"),
+                TargetCheck::RATING_LOW_RISK  => Yii::t("app", "Low Risk"),
+                TargetCheck::RATING_MED_RISK  => Yii::t("app", "Med Risk"),
+                TargetCheck::RATING_HIGH_RISK => Yii::t("app", "High Risk"),
             ),
-            'columns' => array(
-                TargetCheck::COLUMN_TARGET          => Yii::t('app', 'Target'),
-                TargetCheck::COLUMN_NAME            => Yii::t('app', 'Name'),
-                TargetCheck::COLUMN_REFERENCE       => Yii::t('app', 'Reference'),
-                TargetCheck::COLUMN_BACKGROUND_INFO => Yii::t('app', 'Background Info'),
-                TargetCheck::COLUMN_QUESTION        => Yii::t('app', 'Question'),
-                TargetCheck::COLUMN_RESULT          => Yii::t('app', 'Result'),
-                TargetCheck::COLUMN_SOLUTION        => Yii::t('app', 'Solution'),
-                TargetCheck::COLUMN_RATING          => Yii::t('app', 'Rating'),
-            )
+            "columns" => array(
+                TargetCheck::COLUMN_TARGET          => Yii::t("app", "Target"),
+                TargetCheck::COLUMN_NAME            => Yii::t("app", "Name"),
+                TargetCheck::COLUMN_REFERENCE       => Yii::t("app", "Reference"),
+                TargetCheck::COLUMN_BACKGROUND_INFO => Yii::t("app", "Background Info"),
+                TargetCheck::COLUMN_QUESTION        => Yii::t("app", "Question"),
+                TargetCheck::COLUMN_RESULT          => Yii::t("app", "Result"),
+                TargetCheck::COLUMN_SOLUTION        => Yii::t("app", "Solution"),
+                TargetCheck::COLUMN_RATING          => Yii::t("app", "Rating"),
+            ),
+            "quickTargets" => $quickTargets,
         ));
     }
 
@@ -1109,7 +1129,26 @@ class ProjectController extends Controller
         ))->findAll($newCriteria);
 
         $categoryCount = TargetCheckCategory::model()->count($criteria);
-        $paginator     = new Paginator($categoryCount, $page);
+        $paginator = new Paginator($categoryCount, $page);
+
+        $criteria = new CDbCriteria();
+        $criteria->order  = "t.host ASC";
+        $criteria->addCondition("t.project_id = :project_id");
+        $criteria->params = array("project_id" => $project->id);
+        $criteria->together = true;
+
+        $quickTargets = Target::model()->with(array(
+            "categories" => array(
+                "with" => array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    ),
+                ),
+                "order" => "categories.name",
+            )
+        ))->findAll($criteria);
 
         $client = Client::model()->findByPk($project->client_id);
 
@@ -1129,7 +1168,8 @@ class ProjectController extends Controller
                 Project::STATUS_OPEN        => Yii::t('app', 'Open'),
                 Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
                 Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
-            )
+            ),
+            "quickTargets" => $quickTargets,
         ));
 	}
 
@@ -1569,6 +1609,25 @@ class ProjectController extends Controller
             }
         }
 
+        $criteria = new CDbCriteria();
+        $criteria->order  = "t.host ASC";
+        $criteria->addCondition("t.project_id = :project_id");
+        $criteria->params = array("project_id" => $project->id);
+        $criteria->together = true;
+
+        $quickTargets = Target::model()->with(array(
+            "categories" => array(
+                "with" => array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    ),
+                ),
+                "order" => "categories.name",
+            )
+        ))->findAll($criteria);
+
         $client = Client::model()->findByPk($project->client_id);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
@@ -1598,6 +1657,7 @@ class ProjectController extends Controller
                 TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
             ),
             'controlStats' => $controlStats,
+            "quickTargets" => $quickTargets,
         ));
 	}
 

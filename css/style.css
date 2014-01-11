@@ -233,6 +233,42 @@ fieldset hr {
     word-wrap:break-word;
 }
 
+.project-quick-nav > .target > a {
+    font-weight:bold;
+}
+
+.project-quick-nav > .categories > a {
+    color:#666;
+    font-size:80%;
+}
+
+.project-quick-nav > .categories > a.selected {
+    font-weight:bold;
+}
+
+.project-quick-nav > .categories > a:after {
+    content: ", ";
+}
+
+.project-quick-nav > .categories > a:last-child:after {
+    content: "";
+}
+
+.project-quick-nav {
+    border-top:1px dashed #666;
+    padding-bottom:5px;
+    padding-top:5px;
+}
+
+.project-quick-nav:first-child {
+    border-top:none;
+    padding-top:0;
+}
+
+.project-quick-nav:last-child {
+    padding-bottom:0;
+}
+
 .detail-list .detail .content {
     font-size:80%;
     color:#909090;

@@ -162,7 +162,7 @@
             <?php echo $content; ?>
 
             <div class="clearfix"></div>
-            
+
             <hr>
             
             <footer>
