@@ -1863,6 +1863,107 @@ class ProjectController extends Controller
     }
 
     /**
+     * Check autosave
+     */
+    public function actionAutosaveCheck($id, $target, $category, $check) {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $target = (int) $target;
+            $category = (int) $category;
+            $check = (int) $check;
+
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+            }
+
+            if (!$project->checkPermission()) {
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
+
+            $target = Target::model()->findByAttributes(array(
+                'id' => $target,
+                'project_id' => $project->id
+            ));
+
+            if (!$target) {
+                throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+            }
+
+            $category = TargetCheckCategory::model()->with('category')->findByAttributes(array(
+                'target_id' => $target->id,
+                'check_category_id' => $category
+            ));
+
+            if (!$category) {
+                throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+            }
+
+            $controls = CheckControl::model()->findAllByAttributes(array(
+                'check_category_id' => $category->check_category_id
+            ));
+
+            $controlIds = array();
+
+            foreach ($controls as $control) {
+                $controlIds[] = $control->id;
+            }
+
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition('check_control_id', $controlIds);
+            $criteria->addColumnCondition(array(
+                'id' => $check
+            ));
+
+            $check = Check::model()->find($criteria);
+
+            if (!$check) {
+                throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+            }
+
+            $model = new TargetCheckEditForm();
+            $model->attributes = $_POST['TargetCheckEditForm'];
+
+            if (!$model->validate()) {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $targetCheck = TargetCheck::model()->findByAttributes(array(
+                'target_id' => $target->id,
+                'check_id' => $check->id
+            ));
+
+            if (!$targetCheck) {
+                $targetCheck = new TargetCheck();
+                $targetCheck->target_id = $target->id;
+                $targetCheck->check_id = $check->id;
+            }
+
+            $targetCheck->result = $model->result;
+            $targetCheck->save();
+
+            if ($project->status == Project::STATUS_OPEN) {
+                $project->status = Project::STATUS_IN_PROGRESS;
+                $project->save();
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
      * Save check category.
      */
     public function actionSaveCategory($id, $target, $category)
@@ -2604,40 +2705,42 @@ class ProjectController extends Controller
     /**
      * Control check function.
      */
-    public function actionControlCheck($id, $target, $category, $check)
-    {
+    public function actionControlCheck($id, $target, $category, $check) {
         $response = new AjaxResponse();
 
-        try
-        {
-            $id       = (int) $id;
-            $target   = (int) $target;
+        try {
+            $id = (int) $id;
+            $target = (int) $target;
             $category = (int) $category;
-            $check    = (int) $check;
+            $check = (int) $check;
 
             $project = Project::model()->findByPk($id);
 
-            if (!$project)
+            if (!$project) {
                 throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+            }
 
-            if (!$project->checkPermission())
+            if (!$project->checkPermission()) {
                 throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
 
             $target = Target::model()->findByAttributes(array(
-                'id'         => $target,
+                'id' => $target,
                 'project_id' => $project->id
             ));
 
-            if (!$target)
+            if (!$target) {
                 throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+            }
 
             $category = TargetCheckCategory::model()->with('category')->findByAttributes(array(
-                'target_id'         => $target->id,
+                'target_id' => $target->id,
                 'check_category_id' => $category
             ));
 
-            if (!$category)
+            if (!$category) {
                 throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+            }
 
             $controls = CheckControl::model()->findAllByAttributes(array(
                 'check_category_id' => $category->check_category_id
@@ -2645,8 +2748,9 @@ class ProjectController extends Controller
 
             $controlIds = array();
 
-            foreach ($controls as $control)
+            foreach ($controls as $control) {
                 $controlIds[] = $control->id;
+            }
 
             $criteria = new CDbCriteria();
             $criteria->addInCondition('check_control_id', $controlIds);
@@ -3224,6 +3328,101 @@ class ProjectController extends Controller
             }
 
             $response->addData('rating', $projectCheck->rating);
+
+            if ($project->status == Project::STATUS_OPEN) {
+                $project->status = Project::STATUS_IN_PROGRESS;
+                $project->save();
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * GT check autosave.
+     */
+    public function actionGtAutosaveCheck($id, $module, $check) {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $module = (int) $module;
+            $check = (int) $check;
+
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+            }
+
+            if (!$project->guided_test || !$project->checkPermission()) {
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
+
+            $module = ProjectGtModule::model()->findByAttributes(array(
+                'project_id' => $project->id,
+                'gt_module_id' => $module
+            ));
+
+            if (!$module) {
+                throw new CHttpException(404, Yii::t('app', 'Module not found.'));
+            }
+
+            $check = GtCheck::model()->with('check')->findByAttributes(array(
+                'id' => $check,
+                'gt_module_id' => $module->gt_module_id
+            ));
+
+            if (!$check) {
+                throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+            }
+
+            $language = Language::model()->findByAttributes(array(
+                'code' => Yii::app()->language
+            ));
+
+            if (!$language) {
+                $language = Language::model()->findByAttributes(array(
+                    'default' => true
+                ));
+            }
+
+            $projectCheck = ProjectGtCheck::model()->findByAttributes(array(
+                'project_id' => $project->id,
+                'gt_check_id'  => $check->id
+            ));
+
+            if (!$projectCheck) {
+                $projectCheck = new ProjectGtCheck();
+                $projectCheck->project_id = $project->id;
+                $projectCheck->gt_check_id = $check->id;
+                $projectCheck->user_id = Yii::app()->user->id;
+                $projectCheck->language_id = $language->id;
+                $projectCheck->status = ProjectGtCheck::STATUS_OPEN;
+            }
+
+            $model = new ProjectGtCheckEditForm();
+            $model->attributes = $_POST['ProjectGtCheckEditForm'];
+
+            if (!$model->validate()) {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            if ($model->result == '') {
+                $model->result = null;
+            }
+
+            $projectCheck->result = $model->result;
+            $projectCheck->save();
 
             if ($project->status == Project::STATUS_OPEN) {
                 $project->status = Project::STATUS_IN_PROGRESS;

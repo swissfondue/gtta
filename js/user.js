@@ -543,6 +543,65 @@ function User()
         };
 
         /**
+         * Autosave the check.
+         */
+        this.autosave = function (id) {
+            var row, headerRow, data, url, nextRow;
+
+            row = $('div.check-form[data-id="' + id + '"]');
+            url = row.data('autosave-url');
+
+            data = {
+                "YII_CSRF_TOKEN": system.csrf,
+                "TargetCheckEditForm[result]": $('textarea[name="TargetCheckEditForm_' + id + '[result]"]', row).val()
+            };
+
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+                data: data,
+
+                success : function (data, textStatus) {
+                    _check.setLoaded(id);
+
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
+                        return;
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    _check.setLoaded(id);
+                    system.showMessage("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    _check.setLoading(id);
+                }
+            });
+        };
+
+        /**
+         * Init autosave function for check id
+         */
+        this.initAutosave = function () {
+            $(".check-form").each(function () {
+                var id, row;
+
+                id = $(this).data("id");
+                row = $('div.check-form[data-id="' + id + '"]');
+
+                $('textarea[name="TargetCheckEditForm_' + id + '[result]"]', row).on("paste", function () {
+                    setTimeout(function () {
+                        _check.autosave(id);
+                    }, 100);
+                });
+            });
+        };
+
+        /**
          * Set category as advanced.
          */
         this.setAdvanced = function (url, advanced) {
@@ -1409,6 +1468,62 @@ function User()
                 beforeSend : function (jqXHR, settings) {
                     _gtCheck.setLoading();
                 }
+            });
+        };
+
+        /**
+         * Autosave the check.
+         */
+        this.autosave = function () {
+            var row, headerRow, data, url, nextRow;
+
+            row = $("div.check-form");
+            url = row.data("autosave-url");
+
+            data = {
+                "YII_CSRF_TOKEN": system.csrf,
+                "ProjectGtCheckEditForm[result]": $('textarea[name="ProjectGtCheckEditForm[result]"]', row).val()
+            };
+
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+                data: data,
+
+                success : function (data, textStatus) {
+                    _gtCheck.setLoaded();
+
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
+                        return;
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    _gtCheck.setLoaded();
+                    system.showMessage("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    _gtCheck.setLoading();
+                }
+            });
+        };
+
+        /**
+         * Init autosave function for check id
+         */
+        this.initAutosave = function () {
+            $(".check-form").each(function () {
+                var row = $("div.check-form");
+
+                $('textarea[name="ProjectGtCheckEditForm[result]"]', row).on("paste", function () {
+                    setTimeout(function () {
+                        _gtCheck.autosave();
+                    }, 100);
+                });
             });
         };
 

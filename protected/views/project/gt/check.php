@@ -131,7 +131,7 @@
                 </div>
             </div>
 
-            <div class="check-form" data-control-url="<?php echo $this->createUrl('project/gtcontrolcheck', array('id' => $project->id, 'module' => $module->gt_module_id, 'check' => $check->id)); ?>" data-type="<?php echo $check->check->automated ? 'automated' : 'manual'; ?>" data-save-url="<?php echo $this->createUrl('project/gtsavecheck', array('id' => $project->id, 'module' => $module->gt_module_id, 'check' => $check->id)); ?>">
+            <div class="check-form" data-control-url="<?php echo $this->createUrl('project/gtcontrolcheck', array('id' => $project->id, 'module' => $module->gt_module_id, 'check' => $check->id)); ?>" data-type="<?php echo $check->check->automated ? 'automated' : 'manual'; ?>" data-save-url="<?php echo $this->createUrl('project/gtsavecheck', array('id' => $project->id, 'module' => $module->gt_module_id, 'check' => $check->id)); ?>" data-autosave-url="<?php echo $this->createUrl('project/gtautosavecheck', array('id' => $project->id, 'module' => $module->gt_module_id, 'check' => $check->id)); ?>">
                 <?php if ($limited): ?>
                     <?php echo Yii::t("app", "This check is not available in the demo version."); ?>
                 <?php else: ?>
@@ -841,6 +841,7 @@
 
         $(function () {
             user.gtCheck.initProjectGtCheckAttachmentUploadForms();
+            user.gtCheck.initAutosave();
 
             <?php
                 if ($check->isRunning):

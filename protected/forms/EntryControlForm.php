@@ -3,8 +3,7 @@
 /**
  * This is the model class for controlling entries.
  */
-class EntryControlForm extends CFormModel
-{
+class EntryControlForm extends CFormModel {
     /**
      * @var integer id.
      */
@@ -15,13 +14,12 @@ class EntryControlForm extends CFormModel
      */
     public $operation;
 
-	/**
+    /**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
+	public function rules() {
 		return array(
-			array( 'id, operation', 'required' ),
+			array("id, operation", "required"),
 		);
 	}
 }

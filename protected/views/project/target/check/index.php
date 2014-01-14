@@ -195,7 +195,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="check-form hide" data-id="<?php echo $check->id; ?>" data-save-url="<?php echo $this->createUrl('project/savecheck', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>">
+                    <div class="check-form hide" data-id="<?php echo $check->id; ?>" data-save-url="<?php echo $this->createUrl('project/savecheck', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id )); ?>" data-autosave-url="<?php echo $this->createUrl('project/autosavecheck', array('id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id, 'check' => $check->id)); ?>">
                         <?php if ($limited): ?>
                             <?php echo Yii::t("app", "This check is not available in the demo version."); ?>
                         <?php else: ?>
@@ -896,6 +896,7 @@
 
     $(function () {
         user.check.initTargetCheckAttachmentUploadForms();
+        user.check.initAutosave();
 
         user.check.runningChecks = [
             <?php
