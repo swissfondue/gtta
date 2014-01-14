@@ -335,6 +335,11 @@ function User()
             result = result.replace(/\n<br>/g, '\n');
             result = result.replace(/<br>/g, '\n');
             result = result.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+
+            if (result.match(/Problem:/ig)) {
+                result = result + "\n\nTechnical Details:\n\n@cut\n";
+            }
+
             textarea.val(result + '\n' + textarea.val());
         };
 
@@ -1272,6 +1277,11 @@ function User()
             result = result.replace(/\n<br>/g, '\n');
             result = result.replace(/<br>/g, '\n');
             result = result.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+
+            if (result.match(/Problem:/ig)) {
+                result = result + "\n\nTechnical Details:\n\n@cut\n";
+            }
+
             textarea.val(result + '\n' + textarea.val());
         };
 
