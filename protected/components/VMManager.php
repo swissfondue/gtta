@@ -4,7 +4,7 @@
  * VM manager
  */
 class VMManager {
-    const CONTROL_COMMAND = "vzctl";
+    const CONTROL_COMMAND = "/usr/sbin/vzctl";
     const ID = 666;
     const TEMPLATE = "debian-7.0-i386-minimal";
     const CONFIG = "basic";
@@ -92,7 +92,7 @@ class VMManager {
      */
     public function isRunning() {
         try {
-            ProcessManager::runCommand("vzctl status  " . self::ID . " | grep running");
+            ProcessManager::runCommand(self::CONTROL_COMMAND . " status  " . self::ID . " | grep running");
         } catch (Exception $e) {
             return false;
         }
