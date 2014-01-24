@@ -40,7 +40,9 @@ class m131212_110551_9 extends CDbMigration {
 
             if (!array_key_exists($shortName, $packageIds)) {
                 echo "    > unknown script $name\n";
-                return false;
+                $this->delete("check_scripts", "name = :name", array("name" => $name));
+
+                continue;
             }
 
             $this->update(
