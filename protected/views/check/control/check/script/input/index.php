@@ -23,6 +23,7 @@
                         <tr>
                             <th class="name"><?php echo Yii::t('app', 'Input'); ?></th>
                             <th class="type"><?php echo Yii::t('app', 'Type'); ?></th>
+                            <th class="type"><?php echo Yii::t('app', 'Visible'); ?></th>
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($inputs as $input): ?>
@@ -32,6 +33,13 @@
                                 </td>
                                 <td class="type">
                                     <?php echo CHtml::encode($types[$input->type]); ?>
+                                </td>
+                                <td class="visible">
+                                    <?php if ($input->visible): ?>
+                                        <i class="icon-ok"></i>
+                                    <?php else: ?>
+                                        <i class="icon-minus"></i>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="actions">
                                     <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $input->id; ?>);"><i class="icon icon-remove"></i></a>

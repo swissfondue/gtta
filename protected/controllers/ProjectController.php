@@ -915,6 +915,7 @@ class ProjectController extends Controller
                     'scripts' => array(
                         'with' => array(
                             'inputs' => array(
+                                "on" => "inputs.visible AND inputs.check_script_id = scripts.id",
                                 'with' => array(
                                     'l10n' => array(
                                         'alias' => 'l10n_i',
@@ -1511,19 +1512,20 @@ class ProjectController extends Controller
                 'joinType' => 'LEFT JOIN',
                 'with' => array(
                     'inputs' => array(
+                        "on" => "inputs.visible AND inputs.check_script_id = scripts.id",
                         'joinType' => 'LEFT JOIN',
-                        'with'     => array(
+                        'with' => array(
                             'targetInputs' => array(
-                                'alias'    => 'tis',
+                                'alias' => 'tis',
                                 'joinType' => 'LEFT JOIN',
-                                'on'       => 'tis.target_id = :target_id',
-                                'params'   => array( 'target_id' => $target->id )
+                                'on' => 'tis.target_id = :target_id',
+                                'params' => array( 'target_id' => $target->id )
                             ),
                             'l10n' => array(
-                                'alias'    => 'l10n_i',
+                                'alias' => 'l10n_i',
                                 'joinType' => 'LEFT JOIN',
-                                'on'       => 'l10n_i.language_id = :language_id',
-                                'params'   => array( 'language_id' => $language )
+                                'on' => 'l10n_i.language_id = :language_id',
+                                'params' => array( 'language_id' => $language )
                             )
                         ),
                         'order' => 'inputs.sort_order ASC'
@@ -1668,36 +1670,39 @@ class ProjectController extends Controller
     {
         $response = new AjaxResponse();
 
-        try
-        {
-            $id       = (int) $id;
-            $target   = (int) $target;
+        try {
+            $id = (int) $id;
+            $target = (int) $target;
             $category = (int) $category;
-            $check    = (int) $check;
+            $check = (int) $check;
 
             $project = Project::model()->findByPk($id);
 
-            if (!$project)
+            if (!$project) {
                 throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+            }
 
-            if (!$project->checkPermission())
+            if (!$project->checkPermission()) {
                 throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
 
             $target = Target::model()->findByAttributes(array(
-                'id'         => $target,
+                'id' => $target,
                 'project_id' => $project->id
             ));
 
-            if (!$target)
+            if (!$target) {
                 throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+            }
 
             $category = TargetCheckCategory::model()->with('category')->findByAttributes(array(
-                'target_id'         => $target->id,
+                'target_id' => $target->id,
                 'check_category_id' => $category
             ));
 
-            if (!$category)
+            if (!$category) {
                 throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+            }
 
             $controls = CheckControl::model()->findAllByAttributes(array(
                 'check_category_id' => $category->check_category_id
@@ -1705,8 +1710,9 @@ class ProjectController extends Controller
 
             $controlIds = array();
 
-            foreach ($controls as $control)
+            foreach ($controls as $control) {
                 $controlIds[] = $control->id;
+            }
 
             $criteria = new CDbCriteria();
             $criteria->addInCondition('check_control_id', $controlIds);
@@ -1716,18 +1722,17 @@ class ProjectController extends Controller
 
             $check = Check::model()->find($criteria);
 
-            if (!$check)
+            if (!$check) {
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+            }
 
             $model = new TargetCheckEditForm();
             $model->attributes = $_POST['TargetCheckEditForm_' . $check->id];
 
-            if (!$model->validate())
-            {
+            if (!$model->validate()) {
                 $errorText = '';
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -1740,8 +1745,7 @@ class ProjectController extends Controller
                 'check_id'  => $check->id
             ));
 
-            if (!$targetCheck)
-            {
+            if (!$targetCheck) {
                 $targetCheck = new TargetCheck();
                 $targetCheck->target_id = $target->id;
                 $targetCheck->check_id  = $check->id;
@@ -1751,34 +1755,40 @@ class ProjectController extends Controller
                 'code' => Yii::app()->language
             ));
 
-            if (!$language)
+            if (!$language) {
                 $language = Language::model()->findByAttributes(array(
                     'default' => true
                 ));
+            }
 
-            if (!$model->overrideTarget)
+            if (!$model->overrideTarget) {
                 $model->overrideTarget = null;
+            }
 
-            if (!$model->protocol)
+            if (!$model->protocol) {
                 $model->protocol = null;
+            }
 
-            if (!$model->port)
+            if (!$model->port) {
                 $model->port = null;
+            }
 
-            if ($model->result == '')
+            if ($model->result == '') {
                 $model->result = null;
+            }
 
-            if ($model->rating == '' || $model->rating == TargetCheck::RATING_NONE)
+            if ($model->rating == '' || $model->rating == TargetCheck::RATING_NONE) {
                 $model->rating = null;
+            }
 
-            $targetCheck->user_id         = Yii::app()->user->id;
-            $targetCheck->language_id     = $language->id;
+            $targetCheck->user_id = Yii::app()->user->id;
+            $targetCheck->language_id = $language->id;
             $targetCheck->override_target = $model->overrideTarget;
-            $targetCheck->protocol        = $model->protocol;
-            $targetCheck->port            = $model->port;
-            $targetCheck->result          = $model->result;
-            $targetCheck->status          = $model->rating ? TargetCheck::STATUS_FINISHED : $targetCheck->status;
-            $targetCheck->rating          = $model->rating;
+            $targetCheck->protocol = $model->protocol;
+            $targetCheck->port = $model->port;
+            $targetCheck->result = $model->result;
+            $targetCheck->status = $model->rating ? TargetCheck::STATUS_FINISHED : $targetCheck->status;
+            $targetCheck->rating = $model->rating;
             $targetCheck->save();
 
             $category->updateStats();
@@ -1786,76 +1796,94 @@ class ProjectController extends Controller
             // delete old solutions
             TargetCheckSolution::model()->deleteAllByAttributes(array(
                 'target_id' => $target->id,
-                'check_id'  => $check->id
+                'check_id' => $check->id
             ));
 
             // delete old inputs
             TargetCheckInput::model()->deleteAllByAttributes(array(
                 'target_id' => $target->id,
-                'check_id'  => $check->id
+                'check_id' => $check->id
             ));
 
             // delete old vulnerabilities
             TargetCheckVuln::model()->deleteAllByAttributes(array(
                 'target_id' => $target->id,
-                'check_id'  => $check->id
+                'check_id' => $check->id
             ));
 
             // add solutions
-            if ($model->solutions)
-                foreach ($model->solutions as $solutionId)
-                {
+            if ($model->solutions) {
+                foreach ($model->solutions as $solutionId) {
                     // reset solution
-                    if (!$solutionId)
+                    if (!$solutionId) {
                         break;
+                    }
 
                     $solution = CheckSolution::model()->findByAttributes(array(
-                        'id'       => $solutionId,
+                        'id' => $solutionId,
                         'check_id' => $check->id
                     ));
 
-                    if (!$solution)
+                    if (!$solution) {
                         throw new CHttpException(404, Yii::t('app', 'Solution not found.'));
+                    }
 
                     $solution = new TargetCheckSolution();
-                    $solution->target_id         = $target->id;
+                    $solution->target_id = $target->id;
                     $solution->check_solution_id = $solutionId;
-                    $solution->check_id          = $check->id;
+                    $solution->check_id = $check->id;
                     $solution->save();
                 }
+            }
 
             // add inputs
-            if ($model->inputs && $check->automated) {
-                foreach ($model->inputs as $inputId => $inputValue) {
-                    $input = CheckInput::model()->findByAttributes(array(
-                        'id' => $inputId,
-                    ));
+            if ($check->automated) {
+                // initialize all hidden inputs, if any
+                foreach ($check->scripts as $script) {
+                    foreach ($script->inputs as $hiddenInput) {
+                        if (!$hiddenInput->visible) {
+                            $input = new TargetCheckInput();
+                            $input->target_id = $target->id;
+                            $input->check_input_id = $hiddenInput->id;
+                            $input->check_id = $check->id;
+                            $input->value = $hiddenInput->value;
+                            $input->save();
+                        }
+                    }
+                }
 
-                    if (!$input)
-                        throw new CHttpException(404, Yii::t('app', 'Input not found.'));
+                // visible inputs
+                if ($model->inputs) {
+                    foreach ($model->inputs as $inputId => $inputValue) {
+                        $input = CheckInput::model()->findByAttributes(array(
+                            'id' => $inputId,
+                        ));
 
-                    if ($inputValue == '')
-                        $inputValue = null;
+                        if (!$input || !$input->visible) {
+                            throw new CHttpException(404, Yii::t('app', 'Input not found.'));
+                        }
 
-                    $input = new TargetCheckInput();
-                    $input->target_id      = $target->id;
-                    $input->check_input_id = $inputId;
-                    $input->check_id       = $check->id;
-                    $input->value          = $inputValue;
-                    $input->save();
+                        if ($inputValue == '') {
+                            $inputValue = null;
+                        }
+
+                        $input = new TargetCheckInput();
+                        $input->target_id = $target->id;
+                        $input->check_input_id = $inputId;
+                        $input->check_id = $check->id;
+                        $input->value = $inputValue;
+                        $input->save();
+                    }
                 }
             }
 
             $response->addData('rating', $targetCheck->rating);
 
-            if ($project->status == Project::STATUS_OPEN)
-            {
+            if ($project->status == Project::STATUS_OPEN) {
                 $project->status = Project::STATUS_IN_PROGRESS;
                 $project->save();
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -2902,12 +2930,13 @@ class ProjectController extends Controller
 
                         $criteria = new CDbCriteria();
                         $criteria->addInCondition("check_script_id", $scriptIds);
+                        $criteria->addCondition("visible");
 
                         $inputs = CheckInput::model()->findAll($criteria);
 
                         foreach ($inputs as $input) {
                             $inputValues[] = array(
-                                'id'    => 'TargetCheckEditForm_' . $check->id . '_inputs_' . $input->id,
+                                'id' => 'TargetCheckEditForm_' . $check->id . '_inputs_' . $input->id,
                                 'value' => $input->value
                             );
                         }
@@ -3106,6 +3135,7 @@ class ProjectController extends Controller
 
                         $criteria = new CDbCriteria();
                         $criteria->addInCondition("check_script_id", $scriptIds);
+                        $criteria->addCondition("visible");
 
                         $inputs = CheckInput::model()->findAll($criteria);
 
@@ -3161,8 +3191,7 @@ class ProjectController extends Controller
     /**
      * Save GT check.
      */
-    public function actionGtSaveCheck($id, $module, $check)
-    {
+    public function actionGtSaveCheck($id, $module, $check) {
         $response = new AjaxResponse();
 
         try {
@@ -3304,26 +3333,43 @@ class ProjectController extends Controller
             }
 
             // add inputs
-            if ($model->inputs && $check->check->automated) {
-                foreach ($model->inputs as $inputId => $inputValue) {
-                    $input = CheckInput::model()->findByAttributes(array(
-                        'id' => $inputId,
-                    ));
-
-                    if (!$input) {
-                        throw new CHttpException(404, Yii::t('app', 'Input not found.'));
+            if ($check->check->automated) {
+                // initialize all hidden inputs, if any
+                foreach ($check->check->scripts as $script) {
+                    foreach ($script->inputs as $hiddenInput) {
+                        if (!$hiddenInput->visible) {
+                            $input = new ProjectGtCheckInput();
+                            $input->project_id = $project->id;
+                            $input->check_input_id = $hiddenInput->id;
+                            $input->gt_check_id = $check->id;
+                            $input->value = $hiddenInput->value;
+                            $input->save();
+                        }
                     }
+                }
 
-                    if ($inputValue == '') {
-                        $inputValue = null;
+                // visible inputs
+                if ($model->inputs && $check->check->automated) {
+                    foreach ($model->inputs as $inputId => $inputValue) {
+                        $input = CheckInput::model()->findByAttributes(array(
+                            'id' => $inputId,
+                        ));
+
+                        if (!$input || !$input->visible) {
+                            throw new CHttpException(404, Yii::t('app', 'Input not found.'));
+                        }
+
+                        if ($inputValue == '') {
+                            $inputValue = null;
+                        }
+
+                        $input = new ProjectGtCheckInput();
+                        $input->project_id = $project->id;
+                        $input->check_input_id = $inputId;
+                        $input->gt_check_id = $check->id;
+                        $input->value = $inputValue;
+                        $input->save();
                     }
-
-                    $input = new ProjectGtCheckInput();
-                    $input->project_id = $project->id;
-                    $input->check_input_id = $inputId;
-                    $input->gt_check_id = $check->id;
-                    $input->value = $inputValue;
-                    $input->save();
                 }
             }
 

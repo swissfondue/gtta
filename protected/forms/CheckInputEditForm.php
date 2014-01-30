@@ -30,37 +30,42 @@ class CheckInputEditForm extends LocalizedFormModel
      */
     public $sortOrder;
 
-	/**
+    /**
+     * @var boolean visible.
+     */
+    public $visible;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
+	public function rules() {
 		return array(
-			array( 'name, sortOrder', 'required' ),
-            array( 'name', 'length', 'max' => 1000 ),
-            array( 'sortOrder', 'numerical', 'integerOnly' => true, 'min' => 0 ),
-            array( 'type', 'in', 'range' => array(
+			array("name, sortOrder", "required"),
+            array("name", "length", "max" => 1000),
+            array("sortOrder", "numerical", "integerOnly" => true, "min" => 0),
+            array("visible", "boolean"),
+            array("type", "in", "range" => array(
                 CheckInput::TYPE_TEXT,
                 CheckInput::TYPE_TEXTAREA,
                 CheckInput::TYPE_CHECKBOX,
                 CheckInput::TYPE_RADIO,
                 CheckInput::TYPE_FILE
             )),
-            array( 'localizedItems, description, value', 'safe' ),
+            array("localizedItems, description, value", "safe"),
 		);
 	}
     
     /**
 	 * @return array customized attribute labels (name=>label)
 	 */
-	public function attributeLabels()
-	{
+	public function attributeLabels() {
 		return array(
-			'name'        => Yii::t('app', 'Name'),
-            'type'        => Yii::t('app', 'Type'),
-            'description' => Yii::t('app', 'Description'),
-            'value'       => Yii::t('app', 'Value'),
-            'sortOrder'   => Yii::t('app', 'Sort Order'),
+			"name" => Yii::t("app", "Name"),
+            "type" => Yii::t("app", "Type"),
+            "description" => Yii::t("app", "Description"),
+            "value" => Yii::t("app", "Value"),
+            "sortOrder" => Yii::t("app", "Sort Order"),
+            "visible" => Yii::t("app", "Visible"),
 		);
 	}
 }

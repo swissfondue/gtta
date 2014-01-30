@@ -2590,21 +2590,21 @@ class CheckController extends Controller
     /**
      * Check input edit page.
      */
-	public function actionEditInput($id, $control, $check, $script, $input=0)
-	{
-        $id        = (int) $id;
-        $control   = (int) $control;
-        $check     = (int) $check;
-        $input     = (int) $input;
-        $script    = (int) $script;
+	public function actionEditInput($id, $control, $check, $script, $input=0) {
+        $id = (int) $id;
+        $control = (int) $control;
+        $check = (int) $check;
+        $input = (int) $input;
+        $script = (int) $script;
         $newRecord = false;
 
         $language = Language::model()->findByAttributes(array(
             'code' => Yii::app()->language
         ));
 
-        if ($language)
+        if ($language) {
             $language = $language->id;
+        }
 
         $category = CheckCategory::model()->with(array(
             'l10n' => array(
@@ -2614,22 +2614,24 @@ class CheckController extends Controller
             )
         ))->findByPk($id);
 
-        if (!$category)
+        if (!$category) {
             throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+        }
 
         $control = CheckControl::model()->with(array(
             'l10n' => array(
                 'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+                'on' => 'language_id = :language_id',
+                'params' => array('language_id' => $language)
             )
         ))->findByAttributes(array(
-            'id'                => $control,
+            'id' => $control,
             'check_category_id' => $category->id
         ));
 
-        if (!$control)
+        if (!$control) {
             throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+        }
 
         $check = Check::model()->with(array(
             'l10n' => array(
@@ -2654,24 +2656,22 @@ class CheckController extends Controller
             'check_id' => $check->id
         ));
 
-        if ($input)
-        {
+        if ($input) {
             $input = CheckInput::model()->with(array(
                 'l10n' => array(
                     'joinType' => 'LEFT JOIN',
-                    'on'       => 'language_id = :language_id',
-                    'params'   => array( 'language_id' => $language )
+                    'on' => 'language_id = :language_id',
+                    'params' => array('language_id' => $language)
                 )
             ))->findByAttributes(array(
                 'id' => $input,
                 'check_script_id' => $script->id
             ));
 
-            if (!$input)
+            if (!$input) {
                 throw new CHttpException(404, Yii::t('app', 'Input not found.'));
-        }
-        else
-        {
+            }
+        } else {
             $input = new CheckInput();
             $newRecord = true;
         }
@@ -2681,29 +2681,27 @@ class CheckController extends Controller
 		$model = new CheckInputEditForm();
         $model->localizedItems = array();
 
-        if (!$newRecord)
-        {
-            $model->name        = $input->name;
+        if (!$newRecord) {
+            $model->name = $input->name;
             $model->description = $input->description;
-            $model->value       = $input->value;
-            $model->sortOrder   = $input->sort_order;
-            $model->type        = $input->type;
+            $model->value = $input->value;
+            $model->sortOrder = $input->sort_order;
+            $model->type = $input->type;
+            $model->visible = $input->visible;
 
-            if ($input->type == CheckInput::TYPE_FILE)
+            if ($input->type == CheckInput::TYPE_FILE) {
                 $model->value = $input->getfileData();
+            }
 
             $checkInputL10n = CheckInputL10n::model()->findAllByAttributes(array(
                 'check_input_id' => $input->id
             ));
 
-            foreach ($checkInputL10n as $cil)
-            {
+            foreach ($checkInputL10n as $cil) {
                 $model->localizedItems[$cil->language_id]['name']        = $cil->name;
                 $model->localizedItems[$cil->language_id]['description'] = $cil->description;
             }
-        }
-        else
-        {
+        } else {
             // increment last sort_order, if any
             $criteria = new CDbCriteria();
             $criteria->select = 'MAX(sort_order) as max_sort_order';
@@ -2711,55 +2709,55 @@ class CheckController extends Controller
 
             $maxOrder = CheckInput::model()->find($criteria);
 
-            if ($maxOrder && $maxOrder->max_sort_order !== null)
+            if ($maxOrder && $maxOrder->max_sort_order !== null) {
                 $model->sortOrder = $maxOrder->max_sort_order + 1;
+            }
         }
 
 		// collect user input data
-		if (isset($_POST['CheckInputEditForm']))
-		{
+		if (isset($_POST['CheckInputEditForm'])) {
 			$model->attributes = $_POST['CheckInputEditForm'];
-            $model->name        = $model->defaultL10n($languages, 'name');
+            $model->name = $model->defaultL10n($languages, 'name');
             $model->description = $model->defaultL10n($languages, 'description');
+            $model->visible = isset($_POST["CheckInputEditForm"]["visible"]);
 
-			if ($model->validate())
-            {
+			if ($model->validate()) {
                 $input->check_script_id = $script->id;
-                $input->name        = $model->name;
+                $input->name = $model->name;
                 $input->description = $model->description;
-                $input->value       = $model->value;
-                $input->sort_order  = $model->sortOrder;
-                $input->type        = $model->type;
+                $input->value = $model->value;
+                $input->sort_order = $model->sortOrder;
+                $input->type = $model->type;
+                $input->visible = $model->visible;
 
-                if ($input->type == CheckInput::TYPE_FILE)
-                {
+                if ($input->type == CheckInput::TYPE_FILE) {
                     $input->setFileData($model->value);
                     $input->value = '';
                 }
 
                 $input->save();
 
-                foreach ($model->localizedItems as $languageId => $value)
-                {
+                foreach ($model->localizedItems as $languageId => $value) {
                     $checkInputL10n = CheckInputL10n::model()->findByAttributes(array(
                         'check_input_id' => $input->id,
                         'language_id'    => $languageId
                     ));
 
-                    if (!$checkInputL10n)
-                    {
+                    if (!$checkInputL10n) {
                         $checkInputL10n = new CheckInputL10n();
                         $checkInputL10n->check_input_id = $input->id;
                         $checkInputL10n->language_id    = $languageId;
                     }
 
-                    if ($value['name'] == '')
+                    if ($value['name'] == '') {
                         $value['name'] = null;
+                    }
 
-                    if ($value['description'] == '')
+                    if ($value['description'] == '') {
                         $value['description'] = null;
+                    }
 
-                    $checkInputL10n->name        = $value['name'];
+                    $checkInputL10n->name = $value['name'];
                     $checkInputL10n->description = $value['description'];
                     $checkInputL10n->save();
                 }
@@ -2768,11 +2766,19 @@ class CheckController extends Controller
 
                 $input->refresh();
 
-                if ($newRecord)
-                    $this->redirect(array( 'check/editinput', 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id, 'input' => $input->id ));
-            }
-            else
+                if ($newRecord) {
+                    $this->redirect(array(
+                        'check/editinput',
+                        'id' => $category->id,
+                        'control' => $control->id,
+                        'check' => $check->id,
+                        'script' => $script->id,
+                        'input' => $input->id
+                    ));
+                }
+            } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+            }
 		}
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
@@ -2783,10 +2789,11 @@ class CheckController extends Controller
         $this->breadcrumbs[] = array($script->package->name, $this->createUrl('check/editscript', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id )));
         $this->breadcrumbs[] = array(Yii::t('app', 'Inputs'), $this->createUrl('check/inputs', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id )));
 
-        if ($newRecord)
+        if ($newRecord) {
             $this->breadcrumbs[] = array(Yii::t('app', 'New Input'), '');
-        else
+        } else {
             $this->breadcrumbs[] = array($input->localizedName, '');
+        }
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Input') : $input->localizedName;

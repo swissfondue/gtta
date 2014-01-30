@@ -74,6 +74,13 @@
                 <?php endif; ?>
             </div>
         </div>
+        
+        <div class="control-group">
+            <label class="control-label" for="CheckInputEditForm_visible"><?php echo Yii::t('app', 'Visible'); ?></label>
+            <div class="controls">
+                <input type="checkbox" id="CheckInputEditForm_visible" name="CheckInputEditForm[visible]" value="1" <?php if ($model->visible) echo "checked"; ?>>
+            </div>
+        </div>
 
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>

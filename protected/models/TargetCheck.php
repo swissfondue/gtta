@@ -105,8 +105,7 @@ class TargetCheck extends CActiveRecord
     /**
      * Set automation error.
      */
-    public function automationError($error)
-    {
+    public function automationError($error) {
         $uniqueHash = strtoupper(substr(hash('sha256', time() . rand() . $error), 0, 16));
 
         Yii::log($uniqueHash . ' ' . $error, 'error');

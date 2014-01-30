@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * VM not found exception
+ */
+class VMNotFoundException extends Exception {}
+
+/**
  * VM manager
  */
 class VMManager {

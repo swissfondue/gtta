@@ -773,34 +773,32 @@ function User()
             var row, headerRow, url;
 
             headerRow = $('div.check-header[data-id="' + id + '"]');
-            row       = $('div.check-form[data-id="' + id + '"]');
-            url       = headerRow.data('control-url');
+            row = $('div.check-form[data-id="' + id + '"]');
+            url = headerRow.data('control-url');
 
             $.ajax({
-                dataType : 'json',
-                url      : url,
-                timeout  : system.ajaxTimeout,
-                type     : 'POST',
+                dataType: 'json',
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: 'POST',
 
                 data : {
-                    'EntryControlForm[operation]' : operation,
-                    'EntryControlForm[id]'        : id,
-                    'YII_CSRF_TOKEN'              : system.csrf
+                    'EntryControlForm[operation]': operation,
+                    'EntryControlForm[id]': id,
+                    'YII_CSRF_TOKEN': system.csrf
                 },
 
                 success : function (data, textStatus) {
                     _check.setLoaded(id);
 
-                    if (data.status == 'error')
-                    {
+                    if (data.status == 'error') {
                         system.showMessage('error', data.errorText);
                         return;
                     }
 
                     data = data.data;
 
-                    if (operation == 'start')
-                    {
+                    if (operation == 'start') {
                         $('td.status',  headerRow).html('00:00');
                         $('td.actions', headerRow).html('');
                         $('td.actions', headerRow).append(
@@ -817,15 +815,13 @@ function User()
                         $('.loader-image').hide();
 
                         _check.runningChecks.push({
-                            id     : id,
-                            time   : -1,
-                            result : ''
+                            id: id,
+                            time: -1,
+                            result: ''
                         });
 
                         headerRow.addClass('in-progress');
-                    }
-                    else if (operation == 'reset')
-                    {
+                    } else if (operation == 'reset') {
                         $('td.actions', headerRow).html('');
                         $('td.status', headerRow).html('&nbsp;');
 
@@ -867,9 +863,7 @@ function User()
 
                             input_obj.val(input.value);
                         }
-                    }
-                    else if (operation == 'stop')
-                    {
+                    } else if (operation == 'stop') {
                         $('td.actions', headerRow).html('');
                         $('td.actions', headerRow).append(
                             '<span class="disabled"><i class="icon icon-stop" title="' +
@@ -901,24 +895,23 @@ function User()
             var row, headerRow, data, url, nextRow, rating;
 
             headerRow = $('div.check-header[data-id="' + id + '"]');
-            row       = $('div.check-form[data-id="' + id + '"]');
-            url       = row.data('save-url');
+            row = $('div.check-form[data-id="' + id + '"]');
+            url = row.data('save-url');
 
             data = _check.getData(id);
-            data.push({ name : 'YII_CSRF_TOKEN', value : system.csrf });
+            data.push({name: 'YII_CSRF_TOKEN', value: system.csrf});
 
             _check.setLoading(id);
 
             $.ajax({
-                dataType : 'json',
-                url      : url,
-                timeout  : system.ajaxTimeout,
-                type     : 'POST',
-                data     : data,
+                dataType: 'json',
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: 'POST',
+                data: data,
 
                 success : function (data, textStatus) {
-                    if (data.status == 'error')
-                    {
+                    if (data.status == 'error') {
                         _check.setLoaded(id);
                         system.showMessage('error', data.errorText);
 

@@ -10,11 +10,10 @@ class AutomationCommand extends ConsoleCommand {
     private function _processStartingChecks() {
         $checks = TargetCheck::model()->findAllByAttributes(array(
             'status' => TargetCheck::STATUS_IN_PROGRESS,
-            'pid'    => null
+            'pid' => null
         ));
 
-        foreach ($checks as $check)
-        {
+        foreach ($checks as $check) {
             ProcessManager::backgroundExec(
                 Yii::app()->params['yiicPath'] . '/yiic automation ' . $check->target_id . ' ' . $check->check_id
             );
@@ -184,7 +183,11 @@ class AutomationCommand extends ConsoleCommand {
         $filesPath = $vm->virtualizePath(Yii::app()->params["automation"]["filesPath"]);
 
         // create target file
-        $targetFile = fopen($filesPath . '/' . $check->target_file, 'w');
+        $targetFile = @fopen($filesPath . '/' . $check->target_file, 'w');
+
+        if (!$targetFile) {
+            throw new VMNotFoundException("Sandbox is not running, lease regenerate it.");
+        }
 
         // base data
         fwrite($targetFile, ($check->override_target ? $check->override_target : $target->host) . "\n");
@@ -198,7 +201,12 @@ class AutomationCommand extends ConsoleCommand {
         fclose($targetFile);
 
         // create empty result file
-        $resultFile = fopen($filesPath . '/' . $check->result_file, 'w');
+        $resultFile = @fopen($filesPath . '/' . $check->result_file, 'w');
+
+        if (!$resultFile) {
+            throw new VMNotFoundException("Sandbox is not running, lease regenerate it.");
+        }
+
         fclose($resultFile);
 
         $inputs = CheckInput::model()->findAllByAttributes(array(
@@ -240,7 +248,12 @@ class AutomationCommand extends ConsoleCommand {
                 $value = $input->value;
             }
 
-            $inputFile = fopen($filesPath . '/' . $input->file, 'w');
+            $inputFile = @fopen($filesPath . '/' . $input->file, 'w');
+
+            if (!$inputFile) {
+                throw new VMNotFoundException("Sandbox is not running, lease regenerate it.");
+            }
+
             fwrite($inputFile, $value . "\n");
             fclose($inputFile);
 
@@ -374,8 +387,10 @@ class AutomationCommand extends ConsoleCommand {
                 }
 
                 $vm = new VMManager();
+                echo $command . "\n";
 
                 if ($vm->isRunning()) {
+                    echo "is running\n";
                     $output = $vm->runCommand(implode(" ", $command), false);
                     $fileOutput = file_get_contents($vm->virtualizePath($filesPath . '/' . $check->result_file));
                     $data = $fileOutput ? $fileOutput : $output;
@@ -391,9 +406,7 @@ class AutomationCommand extends ConsoleCommand {
                     $this->_getTables($check);
                     $this->_getImages($check);
                 } else {
-                    $check->refresh();
-                    $check->pid = null;
-                    $check->result .= Yii::t("app", "Sandbox is not running, please regenerate it.") . "\n";
+                    throw new VMNotFoundException(Yii::t("app", "Sandbox is not running, please regenerate it."));
                 }
 
                 $check->save();
@@ -404,6 +417,10 @@ class AutomationCommand extends ConsoleCommand {
                 if ($interval > Yii::app()->params['automation']['minNotificationInterval']) {
                     $this->_sendNotification($check, $target);
                 }
+            } catch (VMNotFoundException $e) {
+                $check->refresh();
+                $check->pid = null;
+                $check->result .= $e->getMessage();
             } catch (Exception $e) {
                 $check->automationError($e->getMessage());
             }

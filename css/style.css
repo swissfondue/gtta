@@ -248,6 +248,8 @@ fieldset hr {
 
 .project-quick-nav > .categories > a:after {
     content: ", ";
+    font-weight:normal;
+    text-decoration:none;
 }
 
 .project-quick-nav > .categories > a:last-child:after {
@@ -769,7 +771,7 @@ table.control-header td {
     width:150px;
 }
 
-.input-list .type {
+.input-list .type, .input-list .visible {
     width:100px;
 }
 

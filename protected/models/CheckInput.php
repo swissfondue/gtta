@@ -11,7 +11,8 @@
  * @property string $value
  * @property integer $sort_order
  * @property integer $max_sort_order
- * @property string $type
+ * @property integer $type
+ * @property integer $visible
  */
 class CheckInput extends CActiveRecord {
     /**
@@ -59,6 +60,7 @@ class CheckInput extends CActiveRecord {
                 self::TYPE_RADIO,
                 self::TYPE_FILE
             )),
+            array("visible", "boolean"),
             array('description, value', 'safe'),
 		);
 	}
@@ -66,8 +68,7 @@ class CheckInput extends CActiveRecord {
     /**
 	 * @return array relational rules.
 	 */
-	public function relations()
-	{
+	public function relations() {
 		return array(
             'l10n' => array(self::HAS_MANY, 'CheckInputL10n', 'check_input_id'),
             'script' => array(self::BELONGS_TO, 'CheckScript', 'check_script_id'),
@@ -79,10 +80,10 @@ class CheckInput extends CActiveRecord {
     /**
      * @return string localized name.
      */
-    public function getLocalizedName()
-    {
-        if ($this->l10n && count($this->l10n) > 0)
+    public function getLocalizedName() {
+        if ($this->l10n && count($this->l10n) > 0) {
             return $this->l10n[0]->name != null ? $this->l10n[0]->name : $this->name;
+        }
 
         return $this->name;
     }
@@ -90,10 +91,10 @@ class CheckInput extends CActiveRecord {
     /**
      * @return string localized description.
      */
-    public function getLocalizedDescription()
-    {
-        if ($this->l10n && count($this->l10n) > 0)
+    public function getLocalizedDescription() {
+        if ($this->l10n && count($this->l10n) > 0) {
             return $this->l10n[0]->description != null ? $this->l10n[0]->description : $this->description;
+        }
 
         return $this->description;
     }
