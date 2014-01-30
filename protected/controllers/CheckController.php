@@ -2680,6 +2680,7 @@ class CheckController extends Controller
 
 		$model = new CheckInputEditForm();
         $model->localizedItems = array();
+        $model->visible = true;
 
         if (!$newRecord) {
             $model->name = $input->name;
@@ -2731,7 +2732,12 @@ class CheckController extends Controller
                 $input->visible = $model->visible;
 
                 if ($input->type == CheckInput::TYPE_FILE) {
-                    $input->setFileData($model->value);
+                    if ($input->isNewRecord && !$model->value) {
+                        $model->value = $input->getFileData();
+                    } else {
+                        $input->setFileData($model->value);
+                    }
+
                     $input->value = '';
                 }
 
