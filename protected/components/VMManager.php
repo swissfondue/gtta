@@ -21,7 +21,6 @@ class VMManager {
     const MEMORY_LIMIT = "1G";
     const OPENVZ_PRIVATE_DIR = "/var/lib/vz/private";
     const TOOLS_DIRECTORY = "tools";
-    const INSTALL_SCRIPTS_DIRECTORY = "install";
     const RUN_SCRIPT = "run_script.py";
 
     /**
@@ -165,7 +164,7 @@ class VMManager {
             FileManager::copyRecursive($scriptsPath, $this->virtualizePath($scriptsPath));
 
             FileManager::copy(
-                implode("/", array(VERSION_DIR, self::TOOLS_DIRECTORY, self::INSTALL_SCRIPTS_DIRECTORY, self::RUN_SCRIPT)),
+                implode("/", array(VERSION_DIR, self::TOOLS_DIRECTORY, self::RUN_SCRIPT)),
                 $this->virtualizePath(BASE_DIR . "/" . self::RUN_SCRIPT)
             );
 
