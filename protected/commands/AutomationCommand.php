@@ -186,7 +186,7 @@ class AutomationCommand extends ConsoleCommand {
         $targetFile = @fopen($filesPath . '/' . $check->target_file, 'w');
 
         if (!$targetFile) {
-            throw new VMNotFoundException("Sandbox is not running, lease regenerate it.");
+            throw new VMNotFoundException("Sandbox is not running, please regenerate it.");
         }
 
         // base data
@@ -204,7 +204,7 @@ class AutomationCommand extends ConsoleCommand {
         $resultFile = @fopen($filesPath . '/' . $check->result_file, 'w');
 
         if (!$resultFile) {
-            throw new VMNotFoundException("Sandbox is not running, lease regenerate it.");
+            throw new VMNotFoundException("Sandbox is not running, please regenerate it.");
         }
 
         fclose($resultFile);
@@ -251,7 +251,7 @@ class AutomationCommand extends ConsoleCommand {
             $inputFile = @fopen($filesPath . '/' . $input->file, 'w');
 
             if (!$inputFile) {
-                throw new VMNotFoundException("Sandbox is not running, lease regenerate it.");
+                throw new VMNotFoundException("Sandbox is not running, please regenerate it.");
             }
 
             fwrite($inputFile, $value . "\n");
