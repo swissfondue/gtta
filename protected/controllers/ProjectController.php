@@ -1972,9 +1972,21 @@ class ProjectController extends Controller
             ));
 
             if (!$targetCheck) {
+                $language = Language::model()->findByAttributes(array(
+                    "code" => Yii::app()->language
+                ));
+
+                if (!$language) {
+                    $language = Language::model()->findByAttributes(array(
+                        "default" => true
+                    ));
+                }
+
                 $targetCheck = new TargetCheck();
                 $targetCheck->target_id = $target->id;
                 $targetCheck->check_id = $check->id;
+                $targetCheck->language_id = $language->id;
+                $targetCheck->user_id = Yii::app()->user->id;
             }
 
             $targetCheck->result = $model->result;
