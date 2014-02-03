@@ -50,13 +50,11 @@ class EmailCommand extends CConsoleCommand
      * Runs the command
      * @param array $args list of command-line arguments.
      */
-    public function run($args)
-    {
+    public function run($args) {
         // one instance check
         $fp = fopen(Yii::app()->params['email']['lockFile'], "w");
         
-        if (flock($fp, LOCK_EX))
-        {
+        if (flock($fp, LOCK_EX | LOCK_NB)) {
             $this->_sendEmails();
             flock($fp, LOCK_UN);
         }

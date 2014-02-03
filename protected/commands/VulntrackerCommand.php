@@ -115,7 +115,7 @@ class VulntrackerCommand extends ConsoleCommand
      * @param array $args list of command-line arguments.
      */
     public function run($args) {
-        $fp = fopen(Yii::app()->params['vulntracker']['lockFile'], 'w');
+        $fp = fopen(Yii::app()->params["vulntracker"]["lockFile"], "w");
         
         if (flock($fp, LOCK_EX | LOCK_NB)) {
             for ($i = 0; $i < 10; $i++) {

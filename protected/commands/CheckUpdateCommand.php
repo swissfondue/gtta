@@ -49,7 +49,7 @@ class CheckUpdateCommand extends ConsoleCommand {
     public function run($args) {
         $fp = fopen(Yii::app()->params["checkupdate"]["lockFile"], "w");
 
-        if (flock($fp, LOCK_EX)) {
+        if (flock($fp, LOCK_EX | LOCK_NB)) {
             try {
                 $this->_checkUpdate();
             } catch (Exception $e) {

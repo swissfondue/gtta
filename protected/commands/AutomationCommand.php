@@ -438,24 +438,24 @@ class AutomationCommand extends ConsoleCommand {
         // start checks
         if (count($args) > 0) {
             if (count($args) != 2) {
-                echo 'Invalid number of arguments.' . "\n";
+                echo "Invalid number of arguments." . "\n";
                 exit();
             }
 
             $targetId = (int) $args[0];
-            $checkId  = (int) $args[1];
+            $checkId = (int) $args[1];
 
             if ($targetId && $checkId) {
                 $this->_startCheck($targetId, $checkId);
             } else {
-                echo 'Invalid arguments.' . "\n";
+                echo "Invalid arguments." . "\n";
             }
 
             exit();
         }
 
         // one instance check
-        $fp = fopen(Yii::app()->params['automation']['lockFile'], 'w');
+        $fp = fopen(Yii::app()->params["automation"]["lockFile"], "w");
         
         if (flock($fp, LOCK_EX | LOCK_NB)) {
             for ($i = 0; $i < 10; $i++) {

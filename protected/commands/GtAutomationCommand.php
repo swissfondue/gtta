@@ -396,7 +396,7 @@ class GtautomationCommand extends ConsoleCommand {
         // start checks
         if (count($args) > 0) {
             if (count($args) != 2) {
-                echo 'Invalid number of arguments.' . "\n";
+                echo "Invalid number of arguments." . "\n";
                 exit();
             }
 
@@ -406,14 +406,14 @@ class GtautomationCommand extends ConsoleCommand {
             if ($projectId && $checkId) {
                 $this->_startCheck($projectId, $checkId);
             } else {
-                echo 'Invalid arguments.' . "\n";
+                echo "Invalid arguments." . "\n";
             }
 
             exit();
         }
 
         // one instance check
-        $fp = fopen(Yii::app()->params['automation']['gtLockFile'], 'w');
+        $fp = fopen(Yii::app()->params["automation"]["gtLockFile"], "w");
         
         if (flock($fp, LOCK_EX | LOCK_NB)) {
             for ($i = 0; $i < 10; $i++) {

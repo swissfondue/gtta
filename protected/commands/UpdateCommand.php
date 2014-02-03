@@ -372,7 +372,7 @@ class UpdateCommand extends ConsoleCommand {
     public function run($args) {
         $fp = fopen(Yii::app()->params["update"]["lockFile"], "w");
 
-        if (flock($fp, LOCK_EX)) {
+        if (flock($fp, LOCK_EX | LOCK_NB)) {
             try {
                 $this->_update();
             } catch (Exception $e) {
