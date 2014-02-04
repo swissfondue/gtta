@@ -27,6 +27,8 @@
  * @property boolean $demo
  * @property string $copyright
  * @property string $logo_type
+ * @property integer $language_id
+ * @property Language $language
  */
 class System extends CActiveRecord {
     /**
@@ -102,5 +104,14 @@ class System extends CActiveRecord {
         );
 
         return $statuses[$this->status];
+    }
+
+    /**
+     * @return array relational rules.
+     */
+    public function relations() {
+        return array(
+            "language" => array(self::BELONGS_TO, "Language", "language_id"),
+        );
     }
 }

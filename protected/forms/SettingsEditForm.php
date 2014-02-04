@@ -60,6 +60,11 @@ class SettingsEditForm extends CFormModel {
     public $copyright;
 
     /**
+     * @var integer language id
+     */
+    public $languageId;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
@@ -72,6 +77,7 @@ class SettingsEditForm extends CFormModel {
             array("reportLowPedestal", "compare", "compareAttribute" => "reportMedPedestal", "operator" => "<="),
             array("reportMedPedestal", "compare", "compareAttribute" => "reportHighPedestal", "operator" => "<="),
             array("reportHighPedestal", "compare", "compareAttribute" => "reportMaxRating", "operator" => "<="),
+            array("languageId", "checkLanguage"),
 		);
 	}
     
@@ -91,6 +97,21 @@ class SettingsEditForm extends CFormModel {
             "reportHighDampingLow" => Yii::t("app", "High Risk Region: Low Risks"),
             "reportHighDampingMed" => Yii::t("app", "High Risk Region: Medium Risks"),
             "copyright" => Yii::t("app", "Copyright"),
+            "languageId" => Yii::t("app", "Default Language"),
 		);
 	}
+
+    /**
+     * Checks if language exists.
+     */
+    public function checkLanguage($attribute, $params) {
+        $language = Language::model()->findByPk($this->languageId);
+
+        if (!$language) {
+            $this->addError("languageId", Yii::t("app", "Language not found."));
+            return false;
+        }
+
+        return true;
+    }
 }

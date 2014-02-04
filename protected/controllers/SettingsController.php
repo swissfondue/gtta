@@ -36,6 +36,7 @@ class SettingsController extends Controller {
         $form->reportHighDampingLow = $system->report_high_damping_low;
         $form->reportHighDampingMed = $system->report_high_damping_med;
         $form->copyright = $system->copyright;
+        $form->languageId = $system->language_id;
 
         // collect form input data
 		if (isset($_POST["SettingsEditForm"])) {
@@ -54,8 +55,9 @@ class SettingsController extends Controller {
                 $system->report_high_damping_med = $form->reportHighDampingMed;
                 $system->copyright = $form->copyright;
                 $system->demo = true;
-
+                $system->language_id = $form->languageId;
                 $system->save();
+
                 $this->_system->refresh();
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "Settings saved."));
@@ -64,13 +66,15 @@ class SettingsController extends Controller {
             }
 		}
 
+        $languages = Language::model()->findAll();
         $this->breadcrumbs[] = array(Yii::t("app", "Settings"), "");
 
 		// display the page
         $this->pageTitle = Yii::t("app", "Settings");
 		$this->render("edit", array(
             "form" => $form,
-            "system" => $system
+            "system" => $system,
+            "languages" => $languages,
         ));
     }
 

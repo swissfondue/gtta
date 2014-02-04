@@ -26,21 +26,27 @@ class Controller extends CController
     function init() {
         parent::init();
 
-        $app  = Yii::app();
-        $lang = 'en';
+        $system = System::model()->findByPk(1);
 
-        if (isset($app->request->cookies['language']))
-            $lang = $app->request->cookies['language']->value;
+        $app = Yii::app();
+        $lang = "en";
 
-        if (!in_array($lang, array( 'en', 'de' )))
-            $lang = 'en';
+        if ($system->language) {
+            $lang = $system->language->code;
+        }
+
+        if (isset($app->request->cookies["language"])) {
+            $lang = $app->request->cookies["language"]->value;
+        }
+
+        if (!in_array($lang, array("en", "de"))) {
+            $lang = "en";
+        }
 
         $app->language = $lang;
 
         $this->_requestTime  = microtime(true);
-        $this->breadcrumbs[] = array(Yii::t('app', 'Home'), $this->createUrl('app/index'));
-
-        $system = System::model()->findByPk(1);
+        $this->breadcrumbs[] = array(Yii::t("app", "Home"), $this->createUrl("app/index"));
 
         if (!$system->timezone) {
             $system->timezone = "Europe/Zurich";

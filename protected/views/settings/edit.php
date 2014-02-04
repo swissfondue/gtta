@@ -73,6 +73,20 @@
                 <?php endif; ?>
             </div>
         </div>
+
+        <div class="control-group <?php if ($form->getError('languageId')) echo 'error'; ?>">
+            <label class="control-label" for="SettingsEditForm_languageId"><?php echo Yii::t("app", "Default Language"); ?></label>
+            <div class="controls">
+                <select class="input-xlarge" id="SettingsEditForm_languageId" name="SettingsEditForm[languageId]">
+                    <?php foreach ($languages as $language): ?>
+                        <option value="<?php echo $language->id; ?>" <?php if ($language->id == $system->language_id) echo "selected"; ?>><?php echo CHtml::encode($language->name); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if ($form->getError('languageId')): ?>
+                    <p class="help-block"><?php echo $form->getError('languageId'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
         
         <hr>
         
