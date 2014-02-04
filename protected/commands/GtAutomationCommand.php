@@ -312,11 +312,19 @@ class GtautomationCommand extends ConsoleCommand {
                 $check->result .= "\n";
             }
 
+            $now = new DateTime();
             $package = $script->package;
-            $check->result .= $package->name . "\n" . str_repeat("-", strlen($package->name)) . "\n";
+
+            $data = Yii::t("app", "The {script} script was used within this check against {target} on {date} at {time}", array(
+                "{script}" => $package->name,
+                "{target}" => $check->target,
+                "{date}" => $now->format("d.m.Y"),
+                "{time}" => $now->format("H:i:s"),
+            ));
+
+            $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
 
             try {
-                $now = new DateTime();
                 $check->pid = posix_getpgid(getmypid());
                 $check->started = $now->format("Y-m-d H:i:s");
                 $check->target_file = $this->_generateFileName();

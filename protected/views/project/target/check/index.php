@@ -458,6 +458,29 @@
                                         <td>
                                             <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'readonly'; ?>><?php if ($check->targetChecks) echo $check->targetChecks[0]->result; ?></textarea>
 
+                                            <?php
+                                                $showAuto = false;
+
+                                                if ($check->automated && $check->targetChecks && $check->targetChecks[0]->started && $check->targetChecks[0]->status == TargetCheck::STATUS_IN_PROGRESS) {
+                                                    $showAuto = true;
+                                                }
+                                            ?>
+
+                                            <div class="automated-info-block <?php if (!$showAuto) echo "hide"; ?>">
+                                                <?php
+                                                    if ($showAuto) {
+                                                        $started = new DateTime($check->targetChecks[0]->started);
+                                                        $user = $check->targetChecks[0]->user;
+
+                                                        echo Yii::t("app", "Started by {user} on {date} at {time}", array(
+                                                            "{user}" => $user->name ? $user->name : $user->email,
+                                                            "{date}" => $started->format("d.m.Y"),
+                                                            "{time}" => $started->format("H:i:s"),
+                                                        ));
+                                                    }
+                                                ?>
+                                            </div>
+
                                             <div class="table-result">
                                                 <?php
                                                     if ($check->targetChecks && $check->targetChecks[0]->table_result)

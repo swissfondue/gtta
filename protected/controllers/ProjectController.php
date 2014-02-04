@@ -3570,25 +3570,35 @@ class ProjectController extends Controller
                     'alias'    => 'tcs',
                     'joinType' => 'INNER JOIN',
                     'on'       => 'tcs.target_id = :target_id',
-                    'params'   => array( 'target_id' => $target->id )
+                    'params'   => array('target_id' => $target->id)
                 ),
             ))->findAll($criteria);
 
             $checkData = array();
 
-            foreach ($checks as $check)
-            {
+            foreach ($checks as $check) {
                 $time = $check->targetChecks[0]->started;
+                $startedText = null;
 
-                if ($time)
+                if ($time) {
+                    $started = new DateTime($time);
                     $time = mktime() - strtotime($time);
-                else
+                    $user = $check->targetChecks[0]->user;
+
+                    if ($check->targetChecks[0]->status != TargetCheck::STATUS_FINISHED) {
+                        $startedText = Yii::t("app", "Started by {user} on {date} at {time}", array(
+                            "{user}" => $user->name ? $user->name : $user->email,
+                            "{date}" => $started->format("d.m.Y"),
+                            "{time}" => $started->format("H:i:s"),
+                        ));
+                    }
+                } else {
                     $time = -1;
+                }
 
                 $table = null;
 
-                if ($check->targetChecks[0]->table_result)
-                {
+                if ($check->targetChecks[0]->table_result) {
                     $table = new ResultTable();
                     $table->parse($check->targetChecks[0]->table_result);
                 }
@@ -3608,20 +3618,19 @@ class ProjectController extends Controller
                 }
 
                 $checkData[] = array(
-                    'id'          => $check->id,
-                    'result'      => $check->targetChecks[0]->result,
-                    'tableResult' => $table ? $this->renderPartial('/project/target/check/tableresult', array( 'table' => $table ), true) : '',
-                    'finished'    => $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED,
-                    'time'        => $time,
-                    'attachmentControlUrl' => $this->createUrl('project/controlattachment'),
-                    'attachments' => $attachmentList
+                    "id" => $check->id,
+                    "result" => $check->targetChecks[0]->result,
+                    "tableResult" => $table ? $this->renderPartial("/project/target/check/tableresult", array("table" => $table), true) : "",
+                    "finished" => $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED,
+                    "time" => $time,
+                    "attachmentControlUrl" => $this->createUrl("project/controlattachment"),
+                    "attachments" => $attachmentList,
+                    "startedText" => $startedText,
                 );
             }
 
             $response->addData('checks', $checkData);
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -3701,11 +3710,22 @@ class ProjectController extends Controller
                 'gt_check_id'  => $check->id
             ));
 
+            $startedText = null;
+
             if ($projectCheck->started) {
-                $time = new DateTime($projectCheck->started);
+                $started = new DateTime($projectCheck->started);
                 $now = new DateTime();
 
-                $time = $now->format("U") - $time->format("U");
+                $time = $now->format("U") - $started->format("U");
+                $user = $projectCheck->user;
+
+                if ($projectCheck->status != ProjectGtCheck::STATUS_FINISHED) {
+                    $startedText = Yii::t("app", "Started by {user} on {date} at {time}", array(
+                        "{user}" => $user->name ? $user->name : $user->email,
+                        "{date}" => $started->format("d.m.Y"),
+                        "{time}" => $started->format("H:i:s"),
+                    ));
+                }
             } else {
                 $time = -1;
             }
@@ -3745,15 +3765,16 @@ class ProjectController extends Controller
             }
 
             $checkData = array(
-                'id' => $check->id,
-                'result' => $projectCheck->result,
-                'tableResult' => $table ? $this->renderPartial('/project/gt/tableresult', array('table' => $table), true) : '',
-                'finished' => $projectCheck->status == ProjectGtCheck::STATUS_FINISHED,
-                'time' => $time,
-                'attachmentControlUrl' => $this->createUrl('project/gtcontrolattachment'),
-                'attachments' => $attachmentList,
-                'targetControlUrl' => $this->createUrl('project/gtcontroltarget'),
-                'targets' => $targetList,
+                "id" => $check->id,
+                "result" => $projectCheck->result,
+                "tableResult" => $table ? $this->renderPartial("/project/gt/tableresult", array("table" => $table), true) : "",
+                "finished" => $projectCheck->status == ProjectGtCheck::STATUS_FINISHED,
+                "time" => $time,
+                "attachmentControlUrl" => $this->createUrl("project/gtcontrolattachment"),
+                "attachments" => $attachmentList,
+                "targetControlUrl" => $this->createUrl("project/gtcontroltarget"),
+                "targets" => $targetList,
+                "startedText" => $startedText,
             );
 
             $response->addData('check', $checkData);

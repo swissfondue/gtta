@@ -19,6 +19,7 @@
  * @property integer $pid
  * @property string $rating
  * @property string $status
+ * @property User $user
  */
 class ProjectGtCheck extends CActiveRecord
 {

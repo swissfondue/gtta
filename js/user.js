@@ -107,24 +107,29 @@ function User()
                     success : function (data, textStatus) {
                         $('.loader-image').hide();
 
-                        if (data.status == 'error')
-                        {
+                        if (data.status == 'error') {
                             system.showMessage('error', data.errorText);
                             return;
                         }
 
                         data = data.data;
 
-                        if (data.checks)
-                        {
-                            for (i = 0; i < data.checks.length; i++)
-                            {
+                        if (data.checks) {
+                            for (i = 0; i < data.checks.length; i++) {
                                 var check, checkIdx;
 
                                 check = data.checks[i];
 
                                 $('#TargetCheckEditForm_' + check.id + '_result').val(check.result);
                                 $('div.check-form[data-id="' + check.id + '"] div.table-result').html(check.tableResult);
+
+                                if (check.startedText) {
+                                    $('div.check-form[data-id="' + check.id + '"] .automated-info-block')
+                                        .html(check.startedText)
+                                        .show();
+                                } else {
+                                    $('div.check-form[data-id="' + check.id + '"] .automated-info-block').hide();
+                                }
 
                                 // attachments
                                 if (check.attachments.length > 0) {
@@ -1092,6 +1097,14 @@ function User()
 
                             $('#ProjectGtCheckEditForm_result').val(check.result);
                             $('div.check-form div.table-result').html(check.tableResult);
+
+                            if (check.startedText) {
+                                $('div.check-form .automated-info-block')
+                                    .html(check.startedText)
+                                    .show();
+                            } else {
+                                $('div.check-form .automated-info-block').hide();
+                            }
 
                             // attachments
                             if (check.attachments.length > 0) {

@@ -19,6 +19,7 @@
  * @property string $override_target
  * @property integer $user_id
  * @property string $table_result
+ * @property User $user
  */
 class TargetCheck extends CActiveRecord
 {

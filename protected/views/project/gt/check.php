@@ -404,6 +404,29 @@
                                 <td>
                                     <textarea name="ProjectGtCheckEditForm[result]" class="max-width result" rows="10" id="ProjectGtCheckEditForm_result" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'readonly'; ?>><?php if ($check->projectChecks) echo $check->projectChecks[0]->result; ?></textarea>
 
+                                    <?php
+                                        $showAuto = false;
+
+                                        if ($check->check->automated && $check->projectChecks && $check->projectChecks[0]->started && $check->projectChecks[0]->status == ProjectGtCheck::STATUS_IN_PROGRESS) {
+                                            $showAuto = true;
+                                        }
+                                    ?>
+
+                                    <div class="automated-info-block <?php if (!$showAuto) echo "hide"; ?>">
+                                        <?php
+                                            if ($showAuto) {
+                                                $started = new DateTime($check->projectChecks[0]->started);
+                                                $user = $check->projectChecks[0]->user;
+
+                                                echo Yii::t("app", "Started by {user} on {date} at {time}", array(
+                                                    "{user}" => $user->name ? $user->name : $user->email,
+                                                    "{date}" => $started->format("d.m.Y"),
+                                                    "{time}" => $started->format("H:i:s"),
+                                                ));
+                                            }
+                                        ?>
+                                    </div>
+
                                     <div class="table-result">
                                         <?php
                                             if ($check->projectChecks && $check->projectChecks[0]->table_result) {
