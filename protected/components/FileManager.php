@@ -192,4 +192,17 @@ class FileManager {
 
         return $contents;
     }
+
+    /**
+     * Get file MIME type
+     * @param $filePath
+     */
+    public static function getMimeType($filePath) {
+        if (!file_exists($filePath)) {
+            throw new Exception("File does not exist: $filePath");
+        }
+
+        $fileInfo = finfo_open();
+        return finfo_file($fileInfo, $filePath, FILEINFO_MIME_TYPE);
+    }
 }

@@ -144,83 +144,89 @@ class ClientController extends Controller
     /**
      * Client edit page.
      */
-	public function actionEdit($id=0)
-	{
-        $id        = (int) $id;
+	public function actionEdit($id=0) {
+        $id = (int) $id;
         $newRecord = false;
 
-        if ($id)
+        if ($id) {
             $client = Client::model()->findByPk($id);
-        else
-        {
-            $client    = new Client();
+        } else {
+            $client = new Client();
             $newRecord = true;
         }
 
 		$model = new ClientEditForm();
 
-        if (!$newRecord)
-        {
-            $model->name         = $client->name;
-            $model->country      = $client->country;
-            $model->state        = $client->state;
-            $model->city         = $client->city;
-            $model->address      = $client->address;
-            $model->postcode     = $client->postcode;
-            $model->website      = $client->website;
+        if (!$newRecord) {
+            $model->name = $client->name;
+            $model->country = $client->country;
+            $model->state = $client->state;
+            $model->city = $client->city;
+            $model->address = $client->address;
+            $model->postcode = $client->postcode;
+            $model->website = $client->website;
             $model->contactEmail = $client->contact_email;
-            $model->contactName  = $client->contact_name;
+            $model->contactName = $client->contact_name;
             $model->contactPhone = $client->contact_phone;
-            $model->contactFax   = $client->contact_fax;
+            $model->contactFax = $client->contact_fax;
         }
 
 		// collect user input data
-		if (isset($_POST['ClientEditForm']))
-		{
+		if (isset($_POST['ClientEditForm'])) {
 			$model->attributes = $_POST['ClientEditForm'];
 
-			if ($model->validate())
-            {                
-                $client->name          = $model->name;
-                $client->country       = $model->country;
-                $client->state         = $model->state;
-                $client->city          = $model->city;
-                $client->address       = $model->address;
-                $client->postcode      = $model->postcode;
-                $client->website       = $model->website;
+			if ($model->validate()) {
+                $client->name = $model->name;
+                $client->country = $model->country;
+                $client->state = $model->state;
+                $client->city = $model->city;
+                $client->address = $model->address;
+                $client->postcode = $model->postcode;
+                $client->website = $model->website;
                 $client->contact_email = $model->contactEmail;
-                $client->contact_name  = $model->contactName;
+                $client->contact_name = $model->contactName;
                 $client->contact_phone = $model->contactPhone;
-                $client->contact_fax   = $model->contactFax;
-
+                $client->contact_fax = $model->contactFax;
                 $client->save();
 
-                Yii::app()->user->setFlash('success', Yii::t('app', 'Client saved.'));
+                if ($newRecord && $model->logoPath) {
+                    $filePath = Yii::app()->params["tmpPath"] . "/" . $model->logoPath;
 
+                    if (file_exists($filePath)) {
+                        $client->logo_path = $model->logoPath;
+                        $client->logo_type = FileManager::getMimeType($filePath);
+                        $client->save();
+
+                        FileManager::copy($filePath, Yii::app()->params["clientLogos"]["path"] . "/" . $model->logoPath);
+                        FileManager::unlink($filePath);
+                    }
+                }
+
+                Yii::app()->user->setFlash("success", Yii::t("app", "Client saved."));
                 $client->refresh();
 
-                if ($newRecord)
-                    $this->redirect(array( 'client/edit', 'id' => $client->id ));
+                if ($newRecord) {
+                    $this->redirect(array("client/edit", "id" => $client->id));
+                }
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
-            else
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Clients'), $this->createUrl('client/index'));
+        $this->breadcrumbs[] = array(Yii::t("app", "Clients"), $this->createUrl("client/index"));
 
-        if ($newRecord)
-            $this->breadcrumbs[] = array(Yii::t('app', 'New Client'), '');
-        else
-        {
-            $this->breadcrumbs[] = array($client->name, $this->createUrl('client/view', array( 'id' => $client->id )));
-            $this->breadcrumbs[] = array(Yii::t('app', 'Edit'), '');
+        if ($newRecord) {
+            $this->breadcrumbs[] = array(Yii::t("app", "New Client"), "");
+        } else {
+            $this->breadcrumbs[] = array($client->name, $this->createUrl("client/view", array("id" => $client->id)));
+            $this->breadcrumbs[] = array(Yii::t("app", "Edit"), "");
         }
 
 		// display the page
-        $this->pageTitle = $newRecord ? Yii::t('app', 'New Client') : $client->name;
-		$this->render('edit', array(
-            'model'  => $model,
-            'client' => $client,
+        $this->pageTitle = $newRecord ? Yii::t("app", "New Client") : $client->name;
+		$this->render("edit", array(
+            "model"  => $model,
+            "client" => $client,
         ));
 	}
 
@@ -334,29 +340,30 @@ class ClientController extends Controller
 
     /**
      * Upload logo.
+     * @param $id
      */
-    function actionUploadLogo($id)
-    {
+    function actionUploadLogo($id=0) {
         $response = new AjaxResponse();
 
-        try
-        {
+        try {
             $id = (int) $id;
+            $client = null;
 
-            $client = Client::model()->findByPk($id);
+            if ($id) {
+                $client = Client::model()->findByPk($id);
 
-            if (!$client)
-                throw new CHttpException(404, Yii::t('app', 'Client not found.'));
-
+                if (!$client) {
+                    throw new CHttpException(404, Yii::t("app", "Client not found."));
+                }
+            }
+            
             $model = new ClientLogoUploadForm();
-            $model->image = CUploadedFile::getInstanceByName('ClientLogoUploadForm[image]');
+            $model->image = CUploadedFile::getInstanceByName("ClientLogoUploadForm[image]");
 
-            if (!$model->validate())
-            {
-                $errorText = '';
+            if (!$model->validate()) {
+                $errorText = "";
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -364,20 +371,27 @@ class ClientController extends Controller
                 throw new Exception($errorText);
             }
 
-            // delete the old image
-            if ($client->logo_path)
-                @unlink(Yii::app()->params['clientLogos']['path'] . '/' . $client->logo_path);
+            $path = hash("sha256", $model->image->name . rand() . time());
 
-            $client->logo_type = $model->image->type;
-            $client->logo_path = hash('sha256', $model->image->name . rand() . time());
-            $client->save();
+            if ($client) {
+                // delete the old image
+                if ($client->logo_path) {
+                    @unlink(Yii::app()->params["clientLogos"]["path"] . "/" . $client->logo_path);
+                }
 
-            $model->image->saveAs(Yii::app()->params['clientLogos']['path'] . '/' . $client->logo_path);
+                $client->logo_type = $model->image->type;
+                $client->logo_path = $path;
+                $client->save();
 
-            $response->addData('url', $this->createUrl('client/logo', array( 'id' => $client->id )));
-        }
-        catch (Exception $e)
-        {
+
+                $model->image->saveAs(Yii::app()->params["clientLogos"]["path"] . "/" . $path);
+                $response->addData("url", $this->createUrl("client/logo", array("id" => $client->id)));
+            } else {
+                $model->image->saveAs(Yii::app()->params["tmpPath"] . "/" . $path);
+                $response->addData("url", $this->createUrl("client/tmplogo", array("path" => $path)));
+                $response->addData("path", $path);
+            }
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -474,6 +488,41 @@ class ClientController extends Controller
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');
         header('Content-Length: ' . filesize($filePath));
+
+        ob_clean();
+        flush();
+
+        readfile($filePath);
+
+        exit();
+    }
+
+    /**
+     * Get temporary logo.
+     */
+    public function actionTmpLogo($path) {
+        $filePath = Yii::app()->params["tmpPath"] . "/" . $path;
+
+        if (!file_exists($filePath)) {
+            throw new CHttpException(404, Yii::t("app", "Logo not found."));
+        }
+
+        $extension = "jpg";
+        $mime = FileManager::getMimeType($filePath);
+
+        if ($mime == "image/png") {
+            $extension = "png";
+        }
+
+        // give user a file
+        header("Content-Description: File Transfer");
+        header("Content-Type: " . $mime);
+        header("Content-Disposition: attachment; filename=\"logo." . $extension . "\"");
+        header("Content-Transfer-Encoding: binary");
+        header("Expires: 0");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Pragma: public");
+        header("Content-Length: " . filesize($filePath));
 
         ob_clean();
         flush();

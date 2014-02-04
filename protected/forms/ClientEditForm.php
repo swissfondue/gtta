@@ -3,8 +3,7 @@
 /**
  * This is the model class for client edit form.
  */
-class ClientEditForm extends CFormModel
-{
+class ClientEditForm extends CFormModel {
 	/**
      * @var string name.
      */
@@ -61,35 +60,38 @@ class ClientEditForm extends CFormModel
     public $contactFax;
 
     /**
+     * @var string logo path.
+     */
+    public $logoPath;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
+	public function rules() {
 		return array(
-			array( 'name', 'required' ),
-            array( 'name, country, state, city, address, postcode, website, contactName, contactEmail, contactPhone, contactFax', 'length', 'max' => 1000 ),
-            array( 'contactEmail', 'email' ),
-            array( 'website', 'url', 'defaultScheme' => 'http' ),
+			array("name", "required"),
+            array("name, country, state, city, address, postcode, website, contactName, contactEmail, contactPhone, contactFax, logoPath", "length", "max" => 1000),
+            array("contactEmail", "email"),
+            array("website", "url", "defaultScheme" => "http"),
 		);
 	}
     
     /**
 	 * @return array customized attribute labels (name=>label)
 	 */
-	public function attributeLabels()
-	{
+	public function attributeLabels() {
 		return array(
-			'name'         => Yii::t('app', 'Name'),
-            'country'      => Yii::t('app', 'Country'),
-            'state'        => Yii::t('app', 'State'),
-            'city'         => Yii::t('app', 'City'),
-            'address'      => Yii::t('app', 'Address'),
-            'postcode'     => Yii::t('app', 'Postal Code'),
-            'website'      => Yii::t('app', 'Website'),
-            'contactName'  => Yii::t('app', 'Contact Name'),
-            'contactPhone' => Yii::t('app', 'Contact Phone'),
-            'contactEmail' => Yii::t('app', 'Contact E-mail'),
-            'contactFax'   => Yii::t('app', 'Contact Fax'),
+			"name" => Yii::t("app", "Name"),
+            "country" => Yii::t("app", "Country"),
+            "state" => Yii::t("app", "State"),
+            "city" => Yii::t("app", "City"),
+            "address" => Yii::t("app", "Address"),
+            "postcode" => Yii::t("app", "Postal Code"),
+            "website" => Yii::t("app", "Website"),
+            "contactName" => Yii::t("app", "Contact Name"),
+            "contactPhone" => Yii::t("app", "Contact Phone"),
+            "contactEmail" => Yii::t("app", "Contact E-mail"),
+            "contactFax" => Yii::t("app", "Contact Fax"),
 		);
 	}
 }

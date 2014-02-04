@@ -20,29 +20,34 @@
 <form class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
+    <?php if ($client->isNewRecord): ?>
+        <input type="hidden" value="<?php echo $model->logoPath; ?>" id="ClientEditForm_logoPath" name="ClientEditForm[logoPath]">
+    <?php endif; ?>
+
     <fieldset>
-        <?php if (!$client->isNewRecord): ?>
-            <div class="control-group">
-                <label class="control-label"><?php echo Yii::t('app', 'Logo'); ?></label>
-                <div class="controls form-text">
-                    <div class="logo-image" data-control-url="<?php echo $this->createUrl('client/controllogo'); ?>">
-                        <?php if ($client->logo_path): ?>
-                            <img src="<?php echo $this->createUrl('client/logo', array( 'id' => $client->id )); ?>">
-                        <?php else: ?>
-                            <?php echo Yii::t('app', 'No logo.'); ?>
-                        <?php endif; ?>
-                    </div>
-                    <div class="file-input">
-                        <a href="#logo"><?php echo Yii::t('app', 'Upload Logo'); ?></a>
-                        <input type="file" name="ClientLogoUploadForm[image]" data-upload-url="<?php echo $this->createUrl('client/uploadlogo', array( 'id' => $client->id )); ?>">
-                    </div>
-
-                    <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
-
-                    <a class="delete-logo-link<?php if (!$client->logo_path) echo ' hide'; ?>" href="#delete-logo" onclick="admin.client.delLogo(<?php echo $client->id; ?>);"><?php echo Yii::t('app', 'Delete Logo'); ?></a>
+        <div class="control-group">
+            <label class="control-label"><?php echo Yii::t('app', 'Logo'); ?></label>
+            <div class="controls form-text">
+                <div class="logo-image" data-control-url="<?php echo $this->createUrl('client/controllogo'); ?>">
+                    <?php if (!$client->isNewRecord && $client->logo_path): ?>
+                        <img src="<?php echo $this->createUrl('client/logo', array('id' => $client->id)); ?>">
+                    <?php elseif ($client->isNewRecord && $model->logoPath): ?>
+                        <img src="<?php echo $this->createUrl("client/tmplogo", array("path" => $model->logoPath)); ?>">
+                    <?php else: ?>
+                        <?php echo Yii::t('app', 'No logo.'); ?>
+                    <?php endif; ?>
                 </div>
+
+                <div class="file-input">
+                    <a href="#logo"><?php echo Yii::t('app', 'Upload Logo'); ?></a>
+                    <input type="file" name="ClientLogoUploadForm[image]" data-upload-url="<?php echo $client->isNewRecord ? $this->createUrl("client/uploadlogo") : $this->createUrl('client/uploadlogo', array('id' => $client->id)); ?>">
+                </div>
+
+                <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+
+                <a class="delete-logo-link<?php if (!$client->logo_path) echo ' hide'; ?>" href="#delete-logo" onclick="admin.client.delLogo(<?php echo $client->isNewRecord ? "0" : $client->id; ?>);"><?php echo Yii::t('app', 'Delete Logo'); ?></a>
             </div>
-        <?php endif; ?>
+        </div>
 
         <div class="control-group <?php if ($model->getError('name')) echo 'error'; ?>">
             <label class="control-label" for="ClientEditForm_name"><?php echo Yii::t('app', 'Name'); ?></label>
@@ -162,6 +167,6 @@
 
 <script>
     $(function () {
-        admin.client.initLogoUploadForm();
+        admin.client.initLogoUploadForm(<?php echo $client->isNewRecord ? "1" : "0"; ?>);
     });
 </script>

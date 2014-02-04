@@ -385,10 +385,11 @@ function Admin()
 
         /**
          * Initialize logo upload form.
+         * @param newClient
          */
-        this.initLogoUploadForm = function () {
+        this.initLogoUploadForm = function (newClient) {
             $('input[name^="ClientLogoUploadForm"]').each(function () {
-                var url  = $(this).data('upload-url'),
+                var url = $(this).data('upload-url'),
                     data = {};
 
                 data['YII_CSRF_TOKEN'] = system.csrf;
@@ -408,8 +409,7 @@ function Admin()
 
                         var json = data.result;
 
-                        if (json.status == 'error')
-                        {
+                        if (json.status == 'error') {
                             system.showMessage('error', json.errorText);
                             return;
                         }
@@ -419,10 +419,15 @@ function Admin()
                         // refresh the image
                         var d = new Date();
 
-                        if ($('.logo-image > img').length)
+                        if ($('.logo-image > img').length) {
                             $('.logo-image > img').attr('src', data.url + '?' + d.getTime());
-                        else
+                        } else {
                             $('.logo-image').html('<img src="' + data.url + '?' + d.getTime() + '">');
+                        }
+
+                        if (newClient) {
+                            $("#ClientEditForm_logoPath").val(data.path);
+                        }
 
                         $('.delete-logo-link').show();
                     },
@@ -492,8 +497,15 @@ function Admin()
          * Delete logo.
          */
         this.delLogo = function (id) {
-            if (confirm(system.translate('Are you sure that you want to delete this object?')))
-                _client._controlLogo(id, 'delete');
+            if (confirm(system.translate('Are you sure that you want to delete this object?'))) {
+                if (id) {
+                    _client._controlLogo(id, 'delete');
+                } else {
+                    $('.logo-image').html(system.translate('No logo.'));
+                    $('.delete-logo-link').hide();
+                    $("#ClientEditForm_logoPath").val("");
+                }
+            }
         };
     };
 
