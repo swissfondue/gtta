@@ -192,12 +192,12 @@ class ReportController extends Controller {
     /**
      * Sort checks by ratings
      */
-    public static function sortChecksByRating($a, $b) {
-        if ($a["ratingValue"] == $b["ratingValue"]) {
+    static function sortChecksByRating($a, $b)
+    {
+        if ($a['rating'] == $b['rating'])
             return 0;
-        }
 
-        return $a["ratingValue"] < $b["ratingValue"] ? 1 : -1;
+        return $a['rating'] > $b['rating'] ? 1 : -1;
     }
 
     /**
@@ -377,7 +377,7 @@ class ReportController extends Controller {
                     $row++;
 
                     $reducedChecks = $this->project['reducedChecks'];
-                    usort($reducedChecks, array('ReportController', 'sortChecksByRating'));
+                    usort($reducedChecks, array( 'ReportController', 'sortChecksByRating' ));
 
                     foreach ($reducedChecks as $check) {
                         $table->getCell($row, 1)->writeText($check['target']['host'], $this->textFont, $this->noPar);
@@ -1423,25 +1423,21 @@ class ReportController extends Controller {
                         switch ($check->targetChecks[0]->rating) {
                             case TargetCheck::RATING_INFO:
                                 $checkData['ratingColor'] = '#3A87AD';
-                                $checkData["ratingValue"] = 0;
                                 $checksInfo++;
                                 break;
 
                             case TargetCheck::RATING_LOW_RISK:
                                 $checkData['ratingColor'] = '#53A254';
-                                $checkData["ratingValue"] = 1;
                                 $checksLow++;
                                 break;
 
                             case TargetCheck::RATING_MED_RISK:
                                 $checkData['ratingColor'] = '#DACE2F';
-                                $checkData["ratingValue"] = 2;
                                 $checksMed++;
                                 break;
 
                             case TargetCheck::RATING_HIGH_RISK:
                                 $checkData['ratingColor'] = '#D63515';
-                                $checkData["ratingValue"] = 3;
                                 $checksHigh++;
                                 break;
                         }
@@ -1473,7 +1469,6 @@ class ReportController extends Controller {
                                 'solution' => $checkData['solutions'] ? implode("\n", $checkData['solutions']) : Yii::t('app', 'N/A'),
                                 'rating' => $checkData["rating"],
                                 "result" => $checkData["result"],
-                                "ratingValue" => $checkData["ratingValue"],
                             );
                         }
 
