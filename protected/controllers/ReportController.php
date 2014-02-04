@@ -2532,15 +2532,15 @@ class ReportController extends Controller {
                     }
 
                     $cell = $table->getCell($row, 3);
-                    $this->_renderText($cell, $problem, false);
+                    $cell->writeText($problem);
 
                     if ($details) {
                         $cell->writeText("<br>");
-                        $this->_renderText($cell, $details, false);
+                        $cell->writeText($details);
                     }
 
                     $cell = $table->getCell($row, 4);
-                    $this->_renderText($cell, $check['solution'], false);
+                    $cell->writeText($check["solution"]);
 
                     $image = null;
 
