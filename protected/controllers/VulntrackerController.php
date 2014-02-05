@@ -200,11 +200,7 @@ class VulntrackerController extends Controller {
             'project' => $project,
             'checks' => $checks,
             'p' => $paginator,
-            'ratings' => array(
-                TargetCheck::RATING_LOW_RISK => Yii::t('app', 'Low Risk'),
-                TargetCheck::RATING_MED_RISK => Yii::t('app', 'Med Risk'),
-                TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
-            ),
+            'ratings' => TargetCheck::getRatingNames(),
             'statuses' => array(
                 TargetCheckVuln::STATUS_OPEN => Yii::t('app', 'Open'),
                 TargetCheckVuln::STATUS_RESOLVED => Yii::t('app', 'Resolved'),

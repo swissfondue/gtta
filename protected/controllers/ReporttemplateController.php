@@ -113,14 +113,16 @@ class ReporttemplateController extends Controller
             $model->highDescription = $template->high_description;
             $model->medDescription = $template->med_description;
             $model->lowDescription = $template->low_description;
+            $model->noneDescription = $template->none_description;
+            $model->noVulnDescription = $template->no_vuln_description;
+            $model->infoDescription = $template->info_description;
             $model->footer = $template->footer;
 
             $templateL10n = ReportTemplateL10n::model()->findAllByAttributes(array(
                 'report_template_id' => $template->id
             ));
 
-            foreach ($templateL10n as $tl)
-            {
+            foreach ($templateL10n as $tl) {
                 $model->localizedItems[$tl->language_id]['name'] = $tl->name;
                 $model->localizedItems[$tl->language_id]['intro'] = $tl->intro;
                 $model->localizedItems[$tl->language_id]['appendix'] = $tl->appendix;
@@ -134,6 +136,9 @@ class ReporttemplateController extends Controller
                 $model->localizedItems[$tl->language_id]['highDescription'] = $tl->high_description;
                 $model->localizedItems[$tl->language_id]['medDescription'] = $tl->med_description;
                 $model->localizedItems[$tl->language_id]['lowDescription'] = $tl->low_description;
+                $model->localizedItems[$tl->language_id]['noneDescription'] = $tl->none_description;
+                $model->localizedItems[$tl->language_id]['noVulnDescription'] = $tl->no_vuln_description;
+                $model->localizedItems[$tl->language_id]['infoDescription'] = $tl->info_description;
                 $model->localizedItems[$tl->language_id]['footer'] = $tl->footer;
             }
         }
@@ -155,10 +160,12 @@ class ReporttemplateController extends Controller
             $model->highDescription = $model->defaultL10n($languages, 'highDescription');
             $model->medDescription = $model->defaultL10n($languages, 'medDescription');
             $model->lowDescription = $model->defaultL10n($languages, 'lowDescription');
+            $model->noneDescription = $model->defaultL10n($languages, 'noneDescription');
+            $model->noVulnDescription = $model->defaultL10n($languages, 'noVulnDescription');
+            $model->infoDescription = $model->defaultL10n($languages, 'infoDescription');
             $model->footer = $model->defaultL10n($languages, 'footer');
 
-			if ($model->validate())
-            {
+			if ($model->validate()) {
                 $template->name = $model->name;
                 $template->intro = $model->intro;
                 $template->appendix = $model->appendix;
@@ -172,11 +179,13 @@ class ReporttemplateController extends Controller
                 $template->high_description = $model->highDescription;
                 $template->med_description = $model->medDescription;
                 $template->low_description = $model->lowDescription;
+                $template->none_description = $model->noneDescription;
+                $template->no_vuln_description = $model->noVulnDescription;
+                $template->info_description = $model->infoDescription;
                 $template->footer = $model->footer;
                 $template->save();
 
-                foreach ($model->localizedItems as $languageId => $value)
-                {
+                foreach ($model->localizedItems as $languageId => $value) {
                     $templateL10n = ReportTemplateL10n::model()->findByAttributes(array(
                         'report_template_id' => $template->id,
                         'language_id'        => $languageId
@@ -228,6 +237,18 @@ class ReporttemplateController extends Controller
                     if ($value['lowDescription'] == '')
                         $value['lowDescription'] = NULL;
 
+                    if ($value['noneDescription'] == '') {
+                        $value['noneDescription'] = NULL;
+                    }
+
+                    if ($value['noVulnDescription'] == '') {
+                        $value['noVulnDescription'] = NULL;
+                    }
+
+                    if ($value['infoDescription'] == '') {
+                        $value['infoDescription'] = NULL;
+                    }
+
                     if ($value['footer'] == '')
                         $value['footer'] = NULL;
 
@@ -244,6 +265,9 @@ class ReporttemplateController extends Controller
                     $templateL10n->high_description = $value['highDescription'];
                     $templateL10n->med_description = $value['medDescription'];
                     $templateL10n->low_description = $value['lowDescription'];
+                    $templateL10n->none_description = $value['noneDescription'];
+                    $templateL10n->no_vuln_description = $value['noVulnDescription'];
+                    $templateL10n->info_description = $value['infoDescription'];
                     $templateL10n->footer = $value['footer'];
 
                     $templateL10n->save();
@@ -253,11 +277,12 @@ class ReporttemplateController extends Controller
 
                 $template->refresh();
 
-                if ($newRecord)
+                if ($newRecord) {
                     $this->redirect(array( 'reporttemplate/edit', 'id' => $template->id ));
-            }
-            else
+                }
+            } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+            }
 		}
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Report Templates'), $this->createUrl('reporttemplate/index'));
@@ -270,9 +295,9 @@ class ReporttemplateController extends Controller
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Template') : $template->localizedName;
 		$this->render('edit', array(
-            'model'      => $model,
-            'template'   => $template,
-            'languages'  => $languages,
+            'model' => $model,
+            'template' => $template,
+            'languages' => $languages,
         ));
 	}
 

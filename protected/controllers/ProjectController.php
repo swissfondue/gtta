@@ -320,12 +320,7 @@ class ProjectController extends Controller
                 Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
                 Project::STATUS_FINISHED    => Yii::t("app", "Finished"),
             ),
-            "ratings" => array(
-                TargetCheck::RATING_INFO      => Yii::t("app", "Info"),
-                TargetCheck::RATING_LOW_RISK  => Yii::t("app", "Low Risk"),
-                TargetCheck::RATING_MED_RISK  => Yii::t("app", "Med Risk"),
-                TargetCheck::RATING_HIGH_RISK => Yii::t("app", "High Risk"),
-            ),
+            "ratings" => TargetCheck::getRatingNames(),
             "columns" => array(
                 TargetCheck::COLUMN_TARGET          => Yii::t("app", "Target"),
                 TargetCheck::COLUMN_NAME            => Yii::t("app", "Name"),
@@ -1029,14 +1024,7 @@ class ProjectController extends Controller
             'client' => $client,
             'module' => $module,
             'check' => $check,
-            'ratings' => array(
-                ProjectGtCheck::RATING_NONE => Yii::t('app', 'None'),
-                ProjectGtCheck::RATING_HIDDEN => Yii::t('app', 'Hidden'),
-                ProjectGtCheck::RATING_INFO => Yii::t('app', 'Info'),
-                ProjectGtCheck::RATING_LOW_RISK => Yii::t('app', 'Low Risk'),
-                ProjectGtCheck::RATING_MED_RISK => Yii::t('app', 'Med Risk'),
-                ProjectGtCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
-            ),
+            'ratings' => ProjectGtCheck::getRatingNames(),
             'statuses' => array(
                 Project::STATUS_OPEN => Yii::t('app', 'Open'),
                 Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
@@ -1650,14 +1638,7 @@ class ProjectController extends Controller
                 Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
                 Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
             ),
-            'ratings' => array(
-                TargetCheck::RATING_NONE      => Yii::t('app', 'None'),
-                TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
-                TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
-                TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
-                TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
-                TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
-            ),
+            'ratings' => TargetCheck::getRatingNames(),
             'controlStats' => $controlStats,
             "quickTargets" => $quickTargets,
         ));
@@ -1777,17 +1758,13 @@ class ProjectController extends Controller
                 $model->result = null;
             }
 
-            if ($model->rating == '' || $model->rating == TargetCheck::RATING_NONE) {
-                $model->rating = null;
-            }
-
             $targetCheck->user_id = Yii::app()->user->id;
             $targetCheck->language_id = $language->id;
             $targetCheck->override_target = $model->overrideTarget;
             $targetCheck->protocol = $model->protocol;
             $targetCheck->port = $model->port;
             $targetCheck->result = $model->result;
-            $targetCheck->status = $model->rating ? TargetCheck::STATUS_FINISHED : $targetCheck->status;
+            $targetCheck->status = TargetCheck::STATUS_FINISHED;
             $targetCheck->rating = $model->rating;
             $targetCheck->save();
 
@@ -3293,17 +3270,13 @@ class ProjectController extends Controller
                 $model->result = null;
             }
 
-            if ($model->rating == '' || $model->rating == ProjectGtCheck::RATING_NONE) {
-                $model->rating = null;
-            }
-
             $projectCheck->user_id = Yii::app()->user->id;
             $projectCheck->language_id = $language->id;
             $projectCheck->target = $model->target;
             $projectCheck->protocol = $model->protocol;
             $projectCheck->port = $model->port;
             $projectCheck->result = $model->result;
-            $projectCheck->status = $model->rating ? ProjectGtCheck::STATUS_FINISHED : $projectCheck->status;
+            $projectCheck->status = ProjectGtCheck::STATUS_FINISHED;
             $projectCheck->rating = $model->rating;
             $projectCheck->save();
 
@@ -4193,16 +4166,12 @@ class ProjectController extends Controller
         // display the page
         $this->pageTitle = $project->name;
 		$this->render('vuln/index', array(
-            'project'      => $project,
-            'checks'       => $checks,
-            'p'            => $paginator,
-            'ratings' => array(
-                TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
-                TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
-                TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
-            ),
+            'project' => $project,
+            'checks' => $checks,
+            'p' => $paginator,
+            'ratings' => TargetCheck::getRatingNames(),
             'statuses' => array(
-                TargetCheckVuln::STATUS_OPEN     => Yii::t('app', 'Open'),
+                TargetCheckVuln::STATUS_OPEN => Yii::t('app', 'Open'),
                 TargetCheckVuln::STATUS_RESOLVED => Yii::t('app', 'Resolved'),
             ),
         ));
@@ -4245,7 +4214,7 @@ class ProjectController extends Controller
             'target_id' => $target
         ));
 
-        if (!$check || !in_array($check->rating, array( TargetCheck::RATING_LOW_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_HIGH_RISK )))
+        if (!$check || !in_array($check->rating, array(TargetCheck::RATING_LOW_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_HIGH_RISK)))
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
 
         $vuln = TargetCheckVuln::model()->findByAttributes(array(

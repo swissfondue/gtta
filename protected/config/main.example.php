@@ -59,6 +59,7 @@ return array(
 
                 // misc
                 "app/l10n.js" => "app/l10n",
+                "app/constants.js" => "app/constants",
                 "app/object-list" => "app/objectlist",
                 "app/logo" => "app/logo",
 

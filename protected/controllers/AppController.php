@@ -108,10 +108,32 @@ class AppController extends Controller {
     /**
      * Localization javascript file.
      */
-    public function actionL10n()
-    {
+    public function actionL10n() {
         header('Content-Type: text/javascript');
         echo $this->renderPartial('l10n');
+    }
+
+    /**
+     * Constants javascript file.
+     */
+    public function actionConstants() {
+        header("Content-Type: text/javascript");
+
+        $classes = array(
+            "TargetCheck",
+            "ProjectGtCheck",
+        );
+
+        $constants = array();
+
+        foreach ($classes as $class) {
+            $reflection = new ReflectionClass($class);
+            $constants[$class] = $reflection->getConstants();
+        }
+
+        echo $this->renderPartial("constants", array(
+            "constants" => $constants
+        ));
     }
 
     /**
@@ -283,27 +305,21 @@ class AppController extends Controller {
 
                 case 'target-check-list':
                     $targets = explode(',', $model->id);
+                    $ratings = TargetCheck::getRatingNames();
 
-                    $ratings = array(
-                        TargetCheck::RATING_HIDDEN    => Yii::t('app', 'Hidden'),
-                        TargetCheck::RATING_INFO      => Yii::t('app', 'Info'),
-                        TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
-                        TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
-                        TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
-                    );
-
-                    foreach ($targets as $target)
-                    {
+                    foreach ($targets as $target) {
                         $target = (int) $target;
                         $target = Target::model()->with('project')->findByPk($target);
 
-                        if (!$target)
+                        if (!$target) {
                             throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+                        }
 
-                        if (!$target->project->checkPermission())
+                        if (!$target->project->checkPermission()) {
                             throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                        }
 
-                        $checkList    = array();
+                        $checkList = array();
                         $referenceIds = array();
 
                         $references = TargetReference::model()->findAllByAttributes(array(
@@ -324,8 +340,7 @@ class AppController extends Controller {
                             'checks'      => array()
                         );
 
-                        foreach ($categories as $category)
-                        {
+                        foreach ($categories as $category) {
                             $controlIds = array();
 
                             $controls = CheckControl::model()->findAllByAttributes(array(
@@ -348,29 +363,30 @@ class AppController extends Controller {
                             $checks = Check::model()->with(array(
                                 'l10n' => array(
                                     'joinType' => 'LEFT JOIN',
-                                    'on'       => 'l10n.language_id = :language_id',
-                                    'params'   => array( 'language_id' => $language )
+                                    'on' => 'l10n.language_id = :language_id',
+                                    'params' => array( 'language_id' => $language )
                                 ),
                                 'targetChecks' => array(
-                                    'alias'    => 'tcs',
+                                    'alias' => 'tcs',
                                     'joinType' => 'INNER JOIN',
-                                    'on'       => 'tcs.target_id = :target_id AND tcs.status = :status AND (tcs.rating = :high_risk OR tcs.rating = :med_risk)',
-                                    'params'   => array(
+                                    'on' => 'tcs.target_id = :target_id AND tcs.status = :status AND (tcs.rating = :med OR tcs.rating = :high)',
+                                    'params' => array(
                                         'target_id' => $target->id,
-                                        'status'    => TargetCheck::STATUS_FINISHED,
-                                        'high_risk' => TargetCheck::RATING_HIGH_RISK,
-                                        'med_risk'  => TargetCheck::RATING_MED_RISK,
+                                        'status' => TargetCheck::STATUS_FINISHED,
+                                        'med' => TargetCheck::RATING_MED_RISK,
+                                        'high' => TargetCheck::RATING_HIGH_RISK
                                     ),
                                 )
                             ))->findAll($criteria);
 
-                            foreach ($checks as $check)
+                            foreach ($checks as $check) {
                                 $targetData['checks'][] = array(
-                                    'id'         => $check->id,
+                                    'id' => $check->id,
                                     'ratingName' => $ratings[$check->targetChecks[0]->rating],
-                                    'rating'     => $check->targetChecks[0]->rating,
-                                    'name'       => CHtml::encode($check->localizedName),
+                                    'rating' => $check->targetChecks[0]->rating,
+                                    'name' => CHtml::encode($check->localizedName),
                                 );
+                            }
                         }
 
                         $objects[] = $targetData;
@@ -408,14 +424,7 @@ class AppController extends Controller {
                     }
 
                     $targetId = 1;
-
-                    $ratings = array(
-                        ProjectGtCheck::RATING_HIDDEN => Yii::t('app', 'Hidden'),
-                        ProjectGtCheck::RATING_INFO => Yii::t('app', 'Info'),
-                        ProjectGtCheck::RATING_LOW_RISK => Yii::t('app', 'Low Risk'),
-                        ProjectGtCheck::RATING_MED_RISK => Yii::t('app', 'Med Risk'),
-                        ProjectGtCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
-                    );
+                    $ratings = ProjectGtCheck::getRatingNames();
 
                     foreach ($targets as $target) {
                         $targetData = array(

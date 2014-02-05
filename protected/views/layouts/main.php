@@ -14,6 +14,7 @@
         <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap/bootstrap.js"></script>
         <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap/bootstrap.datepicker.js"></script>
         <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/system.js"></script>
+        <script src="<?php echo $this->createUrl('app/constants') . '?' . rand(); ?>"></script>
         <script src="<?php echo $this->createUrl('app/l10n') . '?' . rand(); ?>"></script>
         <script>
             $(function () {

@@ -62,10 +62,6 @@
                                     <?php if (!$limited && $check->projectChecks && $check->projectChecks[0]->status == ProjectGtCheck::STATUS_FINISHED): ?>
                                         <?php
                                             switch ($check->projectChecks[0]->rating) {
-                                                case ProjectGtCheck::RATING_HIDDEN:
-                                                    echo '<span class="label">' . $ratings[ProjectGtCheck::RATING_HIDDEN] . '</span>';
-                                                    break;
-
                                                 case ProjectGtCheck::RATING_INFO:
                                                     echo '<span class="label label-info">' . $ratings[ProjectGtCheck::RATING_INFO] . '</span>';
                                                     break;
@@ -80,6 +76,10 @@
 
                                                 case ProjectGtCheck::RATING_HIGH_RISK:
                                                     echo '<span class="label label-high-risk">' . $ratings[ProjectGtCheck::RATING_HIGH_RISK] . '</span>';
+                                                    break;
+
+                                                default:
+                                                    echo '<span class="label">' . $ratings[$check->projectChecks[0]->rating] . '</span>';
                                                     break;
                                             }
                                         ?>
@@ -560,7 +560,7 @@
                                 </th>
                                 <td class="text">
                                     <ul class="rating">
-                                        <?php foreach(array(ProjectGtCheck::RATING_NONE, ProjectGtCheck::RATING_HIDDEN, ProjectGtCheck::RATING_INFO, ProjectGtCheck::RATING_LOW_RISK, ProjectGtCheck::RATING_MED_RISK, ProjectGtCheck::RATING_HIGH_RISK) as $rating): ?>
+                                        <?php foreach (ProjectGtCheck::getValidRatings() as $rating): ?>
                                             <li>
                                                 <label class="radio">
                                                     <input type="radio" name="ProjectGtCheckEditForm[rating]" value="<?php echo $rating; ?>" <?php if (($check->projectChecks && $check->projectChecks[0]->rating == $rating) || ($rating == ProjectGtCheck::RATING_NONE && (!$check->projectChecks || !$check->projectChecks[0]->rating))) echo 'checked'; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'disabled'; ?>>
@@ -853,7 +853,7 @@
                     }
 
                     $ratingNames[] = $k . ':' . json_encode(array(
-                        'text'   => CHtml::encode($v),
+                        'text' => CHtml::encode($v),
                         'classN' => $class
                     ));
                 }

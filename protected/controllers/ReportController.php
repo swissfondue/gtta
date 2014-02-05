@@ -1224,14 +1224,7 @@ class ReportController extends Controller {
         $checksInfo = 0;
 
         $reducedChecks = array();
-
-        $ratings = array(
-            TargetCheck::RATING_HIDDEN => Yii::t('app', 'Hidden'),
-            TargetCheck::RATING_INFO => Yii::t('app', 'Info'),
-            TargetCheck::RATING_LOW_RISK => Yii::t('app', 'Low Risk'),
-            TargetCheck::RATING_MED_RISK => Yii::t('app', 'Med Risk'),
-            TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
-        );
+        $ratings = TargetCheck::getRatingNames();
 
         foreach ($targets as $target) {
             $targetData = array(
@@ -1604,15 +1597,7 @@ class ReportController extends Controller {
         $checksInfo = 0;
 
         $reducedChecks = array();
-
-        $ratings = array(
-            ProjectGtCheck::RATING_HIDDEN => Yii::t('app', 'Hidden'),
-            ProjectGtCheck::RATING_INFO => Yii::t('app', 'Info'),
-            ProjectGtCheck::RATING_LOW_RISK => Yii::t('app', 'Low Risk'),
-            ProjectGtCheck::RATING_MED_RISK => Yii::t('app', 'Med Risk'),
-            ProjectGtCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
-        );
-
+        $ratings = ProjectGtCheck::getRatingNames();
         $targetId = 1;
 
         foreach ($targets as $target) {
@@ -1807,21 +1792,25 @@ class ReportController extends Controller {
                         switch ($check->rating) {
                             case TargetCheck::RATING_INFO:
                                 $checkData['ratingColor'] = '#3A87AD';
+                                $checkData["ratingValue"] = 0;
                                 $checksInfo++;
                                 break;
 
                             case TargetCheck::RATING_LOW_RISK:
                                 $checkData['ratingColor'] = '#53A254';
+                                $checkData["ratingValue"] = 1;
                                 $checksLow++;
                                 break;
 
                             case TargetCheck::RATING_MED_RISK:
                                 $checkData['ratingColor'] = '#DACE2F';
+                                $checkData["ratingValue"] = 2;
                                 $checksMed++;
                                 break;
 
                             case TargetCheck::RATING_HIGH_RISK:
                                 $checkData['ratingColor'] = '#D63515';
+                                $checkData["ratingValue"] = 3;
                                 $checksHigh++;
                                 break;
                         }
@@ -1852,6 +1841,8 @@ class ReportController extends Controller {
                                 'question' => $checkData['question'],
                                 'solution' => $checkData['solutions'] ? implode("\n", $checkData['solutions']) : Yii::t('app', 'N/A'),
                                 'rating' => $check->rating,
+                                "result" => $checkData["result"],
+                                "ratingValue" => $checkData["ratingValue"],
                             );
                         }
 
@@ -2397,25 +2388,27 @@ class ReportController extends Controller {
 
             $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
             $table->addColumnsList(array( $this->docWidth * 0.15, $this->docWidth * 0.2, $this->docWidth * 0.65 ));
-            $table->addRows(4);
+            $table->addRows(7);
 
             $table->setFontForCellRange($this->boldFont, 1, 1, 1, 3);
             $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
-            $table->setFontForCellRange($this->textFont, 2, 1, 4, 3);
-            $table->setBorderForCellRange($this->thinBorder, 1, 1, 4, 3);
+            $table->setFontForCellRange($this->textFont, 2, 1, 7, 3);
+            $table->setBorderForCellRange($this->thinBorder, 1, 1, 7, 3);
             $table->setFirstRowAsHeader();
 
             // set paddings
-            for ($row = 1; $row <= 4; $row++)
-                for ($col = 1; $col <= 3; $col++)
-                {
+            for ($row = 1; $row <= 7; $row++) {
+                for ($col = 1; $col <= 3; $col++) {
                     $table->getCell($row, $col)->setCellPaddings($model->cellPadding, $model->cellPadding, $model->cellPadding, $model->cellPadding);
 
-                    if ($row >= 2 && $row <= 4 && $col >= 1 && $col <= 2)
+                    if ($row >= 2 && $row <= 4 && $col >= 1 && $col <= 2) {
                         $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                    else
+                    } else {
                         $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+                    }
                 }
+            }
+
 
             $table->getCell(1, 1)->writeText(Yii::t('app', 'Symbol'));
             $table->getCell(1, 2)->writeText(Yii::t('app', 'Meaning'));
@@ -2424,14 +2417,23 @@ class ReportController extends Controller {
             $table->addImageToCell(2, 1, Yii::app()->basePath . '/../images/high.png');
             $table->addImageToCell(3, 1, Yii::app()->basePath . '/../images/med.png');
             $table->addImageToCell(4, 1, Yii::app()->basePath . '/../images/low.png');
+            $table->addImageToCell(5, 1, Yii::app()->basePath . '/../images/none.png');
+            $table->addImageToCell(6, 1, Yii::app()->basePath . '/../images/no_vuln.png');
+            $table->addImageToCell(7, 1, Yii::app()->basePath . '/../images/info.png');
 
             $table->getCell(2, 2)->writeText(Yii::t('app', 'High Risk'), $this->textFont);
             $table->getCell(3, 2)->writeText(Yii::t('app', 'Med Risk'), $this->textFont);
             $table->getCell(4, 2)->writeText(Yii::t('app', 'Low Risk'), $this->textFont);
+            $table->getCell(5, 2)->writeText(Yii::t('app', 'No Test Done'), $this->textFont);
+            $table->getCell(6, 2)->writeText(Yii::t('app', 'No Vulnerability'), $this->textFont);
+            $table->getCell(7, 2)->writeText(Yii::t('app', 'Information'), $this->textFont);
 
             $table->getCell(2, 3)->writeText($template->localizedHighDescription, $this->textFont);
             $table->getCell(3, 3)->writeText($template->localizedMedDescription, $this->textFont);
             $table->getCell(4, 3)->writeText($template->localizedLowDescription, $this->textFont);
+            $table->getCell(5, 3)->writeText($template->localizedNoneDescription, $this->textFont);
+            $table->getCell(6, 3)->writeText($template->localizedNoVulnDescription, $this->textFont);
+            $table->getCell(7, 3)->writeText($template->localizedInfoDescription, $this->textFont);
 
             $section->writeText("\n");
 
@@ -2555,6 +2557,18 @@ class ReportController extends Controller {
 
                         case TargetCheck::RATING_LOW_RISK:
                             $image = Yii::app()->basePath . '/../images/low.png';
+                            break;
+
+                        case TargetCheck::RATING_NONE:
+                            $image = Yii::app()->basePath . '/../images/none.png';
+                            break;
+
+                        case TargetCheck::RATING_NO_VULNERABILITY:
+                            $image = Yii::app()->basePath . '/../images/no_vuln.png';
+                            break;
+
+                        case TargetCheck::RATING_INFO:
+                            $image = Yii::app()->basePath . '/../images/info.png';
                             break;
                     }
 
@@ -3876,18 +3890,18 @@ class ReportController extends Controller {
                 $checks = Check::model()->with(array(
                     'l10n' => array(
                         'joinType' => 'LEFT JOIN',
-                        'on'       => 'l10n.language_id = :language_id',
-                        'params'   => array( 'language_id' => $language )
+                        'on' => 'l10n.language_id = :language_id',
+                        'params' => array( 'language_id' => $language )
                     ),
                     'targetChecks' => array(
-                        'alias'    => 'tcs',
+                        'alias' => 'tcs',
                         'joinType' => 'INNER JOIN',
-                        'on'       => 'tcs.target_id = :target_id AND tcs.status = :status AND (tcs.rating = :high_risk OR tcs.rating = :med_risk)',
-                        'params'   => array(
+                        'on' => 'tcs.target_id = :target_id AND tcs.status = :status AND (tcs.rating = :high OR tcs.rating = :med)',
+                        'params' => array(
                             'target_id' => $target->id,
-                            'status'    => TargetCheck::STATUS_FINISHED,
-                            'high_risk' => TargetCheck::RATING_HIGH_RISK,
-                            'med_risk'  => TargetCheck::RATING_MED_RISK,
+                            'status' => TargetCheck::STATUS_FINISHED,
+                            'high' => TargetCheck::RATING_HIGH_RISK,
+                            'med' => TargetCheck::RATING_MED_RISK,
                         ),
                     )
                 ))->findAll($criteria);
@@ -4463,14 +4477,7 @@ class ReportController extends Controller {
         }
 
         $data = array();
-
-        $ratings = array(
-            TargetCheck::RATING_HIDDEN => Yii::t('app', 'Hidden'),
-            TargetCheck::RATING_INFO => Yii::t('app', 'Info'),
-            TargetCheck::RATING_LOW_RISK => Yii::t('app', 'Low Risk'),
-            TargetCheck::RATING_MED_RISK => Yii::t('app', 'Med Risk'),
-            TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
-        );
+        $ratings = TargetCheck::getRatingNames();
 
         $statuses = array(
             TargetCheckVuln::STATUS_OPEN => Yii::t('app', 'Open'),
@@ -4706,14 +4713,7 @@ class ReportController extends Controller {
         }
 
         $data = array();
-
-        $ratings = array(
-            TargetCheck::RATING_HIDDEN => Yii::t('app', 'Hidden'),
-            TargetCheck::RATING_INFO => Yii::t('app', 'Info'),
-            TargetCheck::RATING_LOW_RISK => Yii::t('app', 'Low Risk'),
-            TargetCheck::RATING_MED_RISK => Yii::t('app', 'Med Risk'),
-            TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
-        );
+        $ratings = ProjectGtCheck::getRatingNames();
 
         $statuses = array(
             TargetCheckVuln::STATUS_OPEN => Yii::t('app', 'Open'),
@@ -5061,24 +5061,20 @@ class ReportController extends Controller {
         // display the report generation form
         $this->pageTitle = Yii::t('app', 'Vulnerability Export');
 		$this->render('vuln_export', array(
-            'model'   => $model,
+            'model' => $model,
             'clients' => $clients,
-            'ratings' => array(
-                TargetCheck::RATING_LOW_RISK  => Yii::t('app', 'Low Risk'),
-                TargetCheck::RATING_MED_RISK  => Yii::t('app', 'Med Risk'),
-                TargetCheck::RATING_HIGH_RISK => Yii::t('app', 'High Risk'),
-            ),
+            'ratings' => TargetCheck::getRatingNames(),
             'columns' => array(
-                TargetCheck::COLUMN_TARGET          => Yii::t('app', 'Target'),
-                TargetCheck::COLUMN_NAME            => Yii::t('app', 'Name'),
-                TargetCheck::COLUMN_REFERENCE       => Yii::t('app', 'Reference'),
+                TargetCheck::COLUMN_TARGET => Yii::t('app', 'Target'),
+                TargetCheck::COLUMN_NAME => Yii::t('app', 'Name'),
+                TargetCheck::COLUMN_REFERENCE => Yii::t('app', 'Reference'),
                 TargetCheck::COLUMN_BACKGROUND_INFO => Yii::t('app', 'Background Info'),
-                TargetCheck::COLUMN_QUESTION        => Yii::t('app', 'Question'),
-                TargetCheck::COLUMN_RESULT          => Yii::t('app', 'Result'),
-                TargetCheck::COLUMN_SOLUTION        => Yii::t('app', 'Solution'),
-                TargetCheck::COLUMN_RATING          => Yii::t('app', 'Rating'),
-                TargetCheck::COLUMN_ASSIGNED_USER   => Yii::t('app', 'Assigned'),
-                TargetCheck::COLUMN_STATUS          => Yii::t('app', 'Status'),
+                TargetCheck::COLUMN_QUESTION => Yii::t('app', 'Question'),
+                TargetCheck::COLUMN_RESULT => Yii::t('app', 'Result'),
+                TargetCheck::COLUMN_SOLUTION => Yii::t('app', 'Solution'),
+                TargetCheck::COLUMN_RATING => Yii::t('app', 'Rating'),
+                TargetCheck::COLUMN_ASSIGNED_USER => Yii::t('app', 'Assigned'),
+                TargetCheck::COLUMN_STATUS => Yii::t('app', 'Status'),
             )
         ));
     }

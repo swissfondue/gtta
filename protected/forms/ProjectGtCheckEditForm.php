@@ -3,8 +3,7 @@
 /**
  * This is the model class for project GT check edit form.
  */
-class ProjectGtCheckEditForm extends CFormModel
-{
+class ProjectGtCheckEditForm extends CFormModel {
     /**
      * @var string target.
      */
@@ -43,13 +42,12 @@ class ProjectGtCheckEditForm extends CFormModel
 	/**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
+	public function rules() {
 		return array(
-            array('rating', 'in', 'range' => array(ProjectGtCheck::RATING_NONE, ProjectGtCheck::RATING_HIDDEN, ProjectGtCheck::RATING_INFO, ProjectGtCheck::RATING_LOW_RISK, ProjectGtCheck::RATING_MED_RISK, ProjectGtCheck::RATING_HIGH_RISK)),
-            array('port', 'numerical', 'integerOnly' => true, 'min' => 0, 'max' => 65536),
-            array('protocol, target', 'length', 'max' => 1000),
-            array('inputs, result, solutions', 'safe'),
+            array("rating", "in", "range" => ProjectGtCheck::getValidRatings()),
+            array("port", "numerical", "integerOnly" => true, "min" => 0, "max" => 65536),
+            array("protocol, target", "length", "max" => 1000),
+            array("inputs, result, solutions", "safe"),
 		);
 	}
 }

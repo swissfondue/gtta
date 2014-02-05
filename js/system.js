@@ -1,20 +1,16 @@
 /**
  * System class.
  */
-function System()
-{
+function System() {
     var _system = this;
 
     // attributes
-    this.csrf            = null;
-    this.ajaxTimeout     = 5000;
-    this.messageTimeout  = 5000;
-    this.l10nMessages    = {};
+    this.csrf = null;
+    this.ajaxTimeout = 5000;
+    this.messageTimeout = 5000;
+    this.l10nMessages = {};
+    this.constants = {};
     this._messageTimeout = null;
-
-    // constants
-    this.RATING_HIGH_RISK = 'high_risk';
-    this.RATING_MED_RISK  = 'med_risk';
 
     /**
      * Shows a message.
@@ -786,9 +782,9 @@ function System()
                                 for (k = 0; k < target.checks.length; k++) {
                                     check = target.checks[k];
 
-                                    if (check.rating == _system.RATING_HIGH_RISK) {
+                                    if (check.rating == _system.constants.TargetCheck.RATING_HIGH_RISK) {
                                         rating = '<span class="label label-high-risk">' + check.ratingName + '</span>';
-                                    } else if (check.rating == _system.RATING_MED_RISK) {
+                                    } else if (check.rating == _system.constants.TargetCheck.RATING_MED_RISK) {
                                         rating = '<span class="label label-med-risk">' + check.ratingName + '</span>';
                                     }
 

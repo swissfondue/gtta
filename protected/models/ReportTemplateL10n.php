@@ -20,48 +20,46 @@
  * @property string $degree_intro
  * @property string $risk_intro
  * @property string $footer
+ * @property string $none_description
+ * @property string $no_vuln_description
+ * @property string $info_description
  */
-class ReportTemplateL10n extends CActiveRecord
-{   
+class ReportTemplateL10n extends CActiveRecord {
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
 	 * @return ReportTemplateL10n the static model class
 	 */
-	public static function model($className=__CLASS__)
-	{
+	public static function model($className=__CLASS__) {
 		return parent::model($className);
 	}
 
 	/**
 	 * @return string the associated database table name
 	 */
-	public function tableName()
-	{
-		return 'report_templates_l10n';
+	public function tableName() {
+		return "report_templates_l10n";
 	}
 
 	/**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
+	public function rules() {
 		return array(
-            array( 'report_template_id, language_id', 'required' ),
-            array( 'name', 'length', 'max' => 1000 ),
-            array( 'report_template_id, language_id', 'numerical', 'integerOnly' => true ),
-            array( 'intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro', 'safe' ),
+            array("report_template_id, language_id", "required"),
+            array("name", "length", "max" => 1000),
+            array("report_template_id, language_id", "numerical", "integerOnly" => true),
+            array("intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro, none_description, no_vuln_description, info_description", "safe"),
 		);
 	}
 
     /**
 	 * @return array relational rules.
 	 */
-	public function relations()
-	{
+	public function relations() {
 		return array(
-            'template' => array( self::BELONGS_TO, 'ReportTemplate', 'report_template_id' ),
-            'language' => array( self::BELONGS_TO, 'Language',       'language_id' ),
+            "template" => array(self::BELONGS_TO, "ReportTemplate", "report_template_id"),
+            "language" => array(self::BELONGS_TO, "Language", "language_id"),
 		);
 	}
 }

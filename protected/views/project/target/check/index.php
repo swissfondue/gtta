@@ -124,12 +124,7 @@
                                     <td class="status">
                                         <?php if (!$limited && $check->targetChecks && $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED): ?>
                                             <?php
-                                                switch ($check->targetChecks[0]->rating)
-                                                {
-                                                    case TargetCheck::RATING_HIDDEN:
-                                                        echo '<span class="label">' . $ratings[TargetCheck::RATING_HIDDEN] . '</span>';
-                                                        break;
-
+                                                switch ($check->targetChecks[0]->rating) {
                                                     case TargetCheck::RATING_INFO:
                                                         echo '<span class="label label-info">' . $ratings[TargetCheck::RATING_INFO] . '</span>';
                                                         break;
@@ -144,6 +139,10 @@
 
                                                     case TargetChecK::RATING_HIGH_RISK:
                                                         echo '<span class="label label-high-risk">' . $ratings[TargetCheck::RATING_HIGH_RISK] . '</span>';
+                                                        break;
+
+                                                    default:
+                                                        echo '<span class="label">' . $ratings[$check->targetChecks[0]->rating] . '</span>';
                                                         break;
                                                 }
                                             ?>
@@ -614,7 +613,7 @@
                                         </th>
                                         <td class="text">
                                             <ul class="rating">
-                                                <?php foreach(array( TargetCheck::RATING_NONE, TargetCheck::RATING_HIDDEN, TargetCheck::RATING_INFO, TargetCheck::RATING_LOW_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_HIGH_RISK ) as $rating): ?>
+                                                <?php foreach (TargetCheck::getValidRatings() as $rating): ?>
                                                     <li>
                                                         <label class="radio">
                                                             <input type="radio" name="TargetCheckEditForm_<?php echo $check->id; ?>[rating]" value="<?php echo $rating; ?>" <?php if (($check->targetChecks && $check->targetChecks[0]->rating == $rating) || ($rating == TargetCheck::RATING_NONE && (!$check->targetChecks || !$check->targetChecks[0]->rating))) echo 'checked'; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'disabled'; ?>>
@@ -669,12 +668,10 @@
         <?php
             $ratingNames = array();
 
-            foreach ($ratings as $k => $v)
-            {
+            foreach ($ratings as $k => $v) {
                 $class = null;
 
-                switch ($k)
-                {
+                switch ($k) {
                     case TargetCheck::RATING_INFO:
                         $class = 'label-info';
                         break;
@@ -693,7 +690,7 @@
                 }
 
                 $ratingNames[] = $k . ':' . json_encode(array(
-                    'text'   => CHtml::encode($v),
+                    'text' => CHtml::encode($v),
                     'classN' => $class
                 ));
             }
