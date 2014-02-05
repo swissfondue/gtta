@@ -426,6 +426,11 @@ table.check-form > tbody > tr > td {
     margin-bottom:10px;
 }
 
+.check-form .rating li {
+    float:left;
+    margin-right:10px;
+}
+
 .high-risk {
     color:#d63515;
 }

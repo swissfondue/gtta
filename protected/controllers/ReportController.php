@@ -1038,9 +1038,37 @@ class ReportController extends Controller {
                             $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                             $table->getCell($row, 2)->setBorder($this->thinBorder);
 
-                            $table->writeToCell($row, 1, Yii::t('app', 'Rating'));
-                            $table->writeToCell($row, 2, '■ ', new PHPRtfLite_Font($this->fontSize, $this->fontFamily, $check['ratingColor']));
-                            $table->writeToCell($row, 2, $check['ratingName']);
+                            $table->writeToCell($row, 1, Yii::t("app", "Rating"));
+                            $image = null;
+                            
+                            switch ($check["rating"]) {
+                                case TargetCheck::RATING_HIGH_RISK:
+                                    $image = Yii::app()->basePath . "/../images/high.png";
+                                    break;
+        
+                                case TargetCheck::RATING_MED_RISK:
+                                    $image = Yii::app()->basePath . "/../images/med.png";
+                                    break;
+        
+                                case TargetCheck::RATING_LOW_RISK:
+                                    $image = Yii::app()->basePath . "/../images/low.png";
+                                    break;
+        
+                                case TargetCheck::RATING_NONE:
+                                    $image = Yii::app()->basePath . "/../images/none.png";
+                                    break;
+        
+                                case TargetCheck::RATING_NO_VULNERABILITY:
+                                    $image = Yii::app()->basePath . "/../images/no_vuln.png";
+                                    break;
+        
+                                case TargetCheck::RATING_INFO:
+                                    $image = Yii::app()->basePath . "/../images/info.png";
+                                    break;
+                            }
+        
+                            $table->addImageToCell($row, 2, $image);
+                            $table->writeToCell($row, 2, " " . $check["ratingName"]);
 
                             $row++;
                         }
