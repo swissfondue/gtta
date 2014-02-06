@@ -2906,7 +2906,7 @@ class ProjectController extends Controller
                     }
 
                     $targetCheck->status = TargetCheck::STATUS_IN_PROGRESS;
-                    $targetCheck->rating = null;
+                    $targetCheck->rating = TargetCheck::RATING_NONE;
                     $targetCheck->started = null;
                     $targetCheck->pid = null;
                     $targetCheck->save();
@@ -3117,7 +3117,7 @@ class ProjectController extends Controller
                     }
 
                     $projectCheck->status = ProjectGtCheck::STATUS_IN_PROGRESS;
-                    $projectCheck->rating = null;
+                    $projectCheck->rating = ProjectGtCheck::RATING_NONE;
                     $projectCheck->started = null;
                     $projectCheck->pid = null;
                     $projectCheck->save();

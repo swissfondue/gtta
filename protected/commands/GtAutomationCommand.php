@@ -149,10 +149,18 @@ class GtautomationCommand extends ConsoleCommand {
         // create target file
         $targetFile = fopen($filesPath . '/' . $check->target_file, 'w');
 
+        $targetHost = $check->target;
+        $port = $check->port;
+
+        if (preg_match('/:(\d+)$/', $targetHost, $matches)) {
+            $port = $matches[1];
+            $targetHost = substr($targetHost, 0, strrpos($targetHost, ":"));
+        }
+
         // base data
-        fwrite($targetFile, $check->target . "\n");
+        fwrite($targetFile, $targetHost . "\n");
         fwrite($targetFile, $check->protocol . "\n");
-        fwrite($targetFile, $check->port . "\n");
+        fwrite($targetFile, $port . "\n");
         fwrite($targetFile, $check->language->code . "\n");
 
         // directories
