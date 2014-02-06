@@ -578,4 +578,13 @@ class AppController extends Controller {
 
         exit();
     }
+
+    /**
+     * Help
+     */
+    public function actionHelp() {
+        $this->breadcrumbs[] = array(Yii::t("app", "Help"), "");
+        $this->pageTitle = Yii::t("app", "Help");
+		$this->render("help");
+    }
 }

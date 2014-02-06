@@ -844,3 +844,28 @@ table.table-result td {
     font-size:80%;
     color:#999;
 }
+
+.help .toc > li {
+    margin-top:10px;
+}
+
+.help .section {
+    margin-top:20px;
+}
+
+.help pre {
+    margin-top:10px;
+}
+
+.help-images {
+    overflow:hidden;
+    padding:10px;
+}
+
+.help-images > a {
+    float:left;
+    margin-right:10px;
+    padding:10px;
+    border:1px dashed #999;
+    border-radius:5px;
+}

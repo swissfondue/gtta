@@ -62,6 +62,7 @@ return array(
                 "app/constants.js" => "app/constants",
                 "app/object-list" => "app/objectlist",
                 "app/logo" => "app/logo",
+                "app/help" => "app/help",
 
                 // projects
                 "projects/<page:\d+>"         => "project/index",

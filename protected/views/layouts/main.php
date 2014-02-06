@@ -167,6 +167,10 @@
             <hr>
             
             <footer>
+                <div class="pull-right">
+                    <a href="<?php echo $this->createUrl("app/help"); ?>" target="_blank">[<?php echo Yii::t("app", "HELP"); ?>]</a>
+                </div>
+
                 <?php echo Yii::t('app', 'Copyright'); ?> &copy; <?php echo date('Y'); ?> <?php echo $this->_system->copyright; ?><br>
                 <?php echo Yii::t('app', 'All Rights Reserved'); ?><br>
             </footer>
