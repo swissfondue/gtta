@@ -28,7 +28,7 @@
                 <h2>What's New?</h2>
 
                 <p>
-                    Current version is <b>1.7.1</b>:
+                    Current version is <b>1.8</b>:
 
                     <ul>
                         <li>Logo upload form for new clients.</li>
@@ -311,7 +311,7 @@ set threads 3</pre>
             <p id="integration" class="section">
                 <h2>Integration Manual</h2>
 
-                <p>Coming soon (in 1.7.2)...</p>
+                <p>Coming soon (in 1.9)...</p>
             </p>
         </div>
     </div>
