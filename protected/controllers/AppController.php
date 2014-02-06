@@ -40,13 +40,13 @@ class AppController extends Controller {
 		{
 			$model->attributes = $_POST['LoginForm'];
 
-			if ($model->validate())
-            {
-                if ($model->login())
-				    $this->redirect(Yii::app()->user->returnUrl);
-            }
-            else
+			if ($model->validate()) {
+                if ($model->login()) {
+                    $this->redirect("/");
+                }
+            } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+            }
 		}
 
 		// display the login form
@@ -122,6 +122,8 @@ class AppController extends Controller {
         $classes = array(
             "TargetCheck",
             "ProjectGtCheck",
+            "TargetCheckEditForm",
+            "ProjectGtCheckEditForm",
         );
 
         $constants = array();

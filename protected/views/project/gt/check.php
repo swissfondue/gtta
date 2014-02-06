@@ -1,6 +1,9 @@
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.ui.js"></script>
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.iframe-transport.js"></script>
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.fileupload.js"></script>
+<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/bootstrap-wysihtml5.css">
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/wysihtml5.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap/bootstrap-wysihtml5.js"></script>
 
 <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 
@@ -462,66 +465,99 @@
                                     </td>
                                 </tr>
                             <?php endif; ?>
-                            <?php if ($check->check->solutions): ?>
-                                <tr>
-                                    <th>
-                                        <?php echo Yii::t('app', 'Solution'); ?>
-                                    </th>
-                                    <td class="text">
-                                        <ul class="solutions">
-                                            <?php if (!$check->check->multiple_solutions): ?>
-                                                <li>
-                                                    <div class="solution-header">
-                                                        <label class="radio">
-                                                            <input name="ProjectGtCheckEditForm[solutions][]" type="radio" value="0" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'disabled'; ?> <?php if (!$check->projectCheckSolutions) echo 'checked'; ?>>
-                                                            <?php echo Yii::t('app', 'None'); ?>
-                                                        </label>
-                                                    </div>
-                                                </li>
-                                            <?php endif; ?>
-                                            <?php foreach ($check->check->solutions as $solution): ?>
-                                                <li>
-                                                    <div class="solution-header">
-                                                        <?php
-                                                            $checked = false;
+                            <tr>
+                                <th>
+                                    <?php echo Yii::t('app', 'Solution'); ?>
+                                </th>
+                                <td class="text">
+                                    <ul class="solutions">
+                                        <?php if (!$check->check->multiple_solutions): ?>
+                                            <li>
+                                                <div class="solution-header">
+                                                    <label class="radio">
+                                                        <input name="ProjectGtCheckEditForm[solutions][]" type="radio" value="0" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'disabled'; ?> <?php if (!$check->projectCheckSolutions) echo 'checked'; ?>>
+                                                        <?php echo Yii::t('app', 'None'); ?>
+                                                    </label>
+                                                </div>
+                                            </li>
+                                        <?php endif; ?>
 
-                                                            if ($check->projectCheckSolutions) {
-                                                                foreach ($check->projectCheckSolutions as $solutionValue) {
-                                                                    if ($solutionValue->check_solution_id == $solution->id) {
-                                                                        $checked = true;
-                                                                        break;
-                                                                    }
+                                        <li>
+                                            <div class="solution-header">
+                                                <?php if ($check->check->multiple_solutions): ?>
+                                                    <label class="checkbox">
+                                                        <input class="custom-solution" name="ProjectGtCheckEditForm[solutions][]" type="checkbox" value="<?php echo ProjectGtCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>" <?php if ($check->projectChecks && $check->projectChecks[0]->solution) echo 'checked'; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'disabled'; ?>>
+                                                <?php else: ?>
+                                                    <label class="radio">
+                                                        <input class="custom-solution" name="ProjectGtCheckEditForm[solutions][]" type="radio" value="<?php echo ProjectGtCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>" <?php if ($check->projectChecks && $check->projectChecks[0]->solution) echo 'checked'; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'disabled'; ?>>
+                                                <?php endif; ?>
+                                                    <?php echo Yii::t("app", "Custom Solution"); ?>
+
+                                                    <span class="solution-control" data-id="<?php echo ProjectGtCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>">
+                                                        <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                                            <a href="#solution" onclick="user.gtCheck.expandSolution('<?php echo ProjectGtCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>');"><i class="icon-chevron-down"></i></a>
+                                                        <?php else: ?>
+                                                            <a href="#solution" onclick="client.gtCheck.expandSolution('<?php echo ProjectGtCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>');"><i class="icon-chevron-down"></i></a>
+                                                        <?php endif; ?>
+                                                    </span>
+                                                </label>
+                                            </div>
+
+                                            <div class="solution-content hide" data-id="<?php echo ProjectGtCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>">
+                                                <input type="text" name="ProjectGtCheckEditForm[solutionTitle]" class="max-width" id="ProjectGtCheckEditForm_solutionTitle" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'readonly'; ?> value="<?php echo $check->projectChecks ? CHtml::encode($check->projectChecks[0]->solution_title) : ""; ?>">
+                                                <textarea name="ProjectGtCheckEditForm[solution]" class="solution-edit max-width result" rows="10" id="ProjectGtCheckEditForm_solution" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'readonly'; ?>><?php echo $check->projectChecks ? CHtml::encode($check->projectChecks[0]->solution) : ""; ?></textarea>
+
+                                                <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
+                                                    <label class="checkbox">
+                                                        <input name="ProjectGtCheckEditForm[saveSolution]" type="checkbox" value="1" <?php if ($check->isRunning) echo 'disabled'; ?>>
+                                                        <?php echo Yii::t("app", "Save As Generic"); ?>
+                                                    </label>
+                                                <?php endif; ?>
+                                            </div>
+                                        </li>
+
+                                        <?php foreach ($check->check->solutions as $solution): ?>
+                                            <li>
+                                                <div class="solution-header">
+                                                    <?php
+                                                        $checked = false;
+
+                                                        if ($check->projectCheckSolutions) {
+                                                            foreach ($check->projectCheckSolutions as $solutionValue) {
+                                                                if ($solutionValue->check_solution_id == $solution->id) {
+                                                                    $checked = true;
+                                                                    break;
                                                                 }
                                                             }
-                                                        ?>
-                                                        <?php if ($check->check->multiple_solutions): ?>
-                                                            <label class="checkbox">
-                                                                <input name="ProjectGtCheckEditForm[solutions][]" type="checkbox" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'disabled'; ?>>
-                                                        <?php else: ?>
-                                                            <label class="radio">
-                                                                <input name="ProjectGtCheckEditForm[solutions][]" type="radio" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'disabled'; ?>>
-                                                        <?php endif; ?>
-                                                            <?php echo CHtml::encode($solution->localizedTitle); ?>
+                                                        }
+                                                    ?>
+                                                    <?php if ($check->check->multiple_solutions): ?>
+                                                        <label class="checkbox">
+                                                            <input name="ProjectGtCheckEditForm[solutions][]" type="checkbox" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'disabled'; ?>>
+                                                    <?php else: ?>
+                                                        <label class="radio">
+                                                            <input name="ProjectGtCheckEditForm[solutions][]" type="radio" value="<?php echo $solution->id; ?>" <?php if ($checked) echo 'checked'; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo 'disabled'; ?>>
+                                                    <?php endif; ?>
+                                                        <?php echo CHtml::encode($solution->localizedTitle); ?>
 
-                                                            <span class="solution-control" data-id="<?php echo $solution->id; ?>">
-                                                                <?php if (User::checkRole(User::ROLE_USER)): ?>
-                                                                    <a href="#solution" onclick="user.gtCheck.expandSolution(<?php echo $solution->id; ?>);"><i class="icon-chevron-down"></i></a>
-                                                                <?php else: ?>
-                                                                    <a href="#solution" onclick="client.gtCheck.expandSolution(<?php echo $solution->id; ?>);"><i class="icon-chevron-down"></i></a>
-                                                                <?php endif; ?>
-                                                            </span>
-                                                        </label>
-                                                    </div>
+                                                        <span class="solution-control" data-id="<?php echo $solution->id; ?>">
+                                                            <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                                                <a href="#solution" onclick="user.gtCheck.expandSolution(<?php echo $solution->id; ?>);"><i class="icon-chevron-down"></i></a>
+                                                            <?php else: ?>
+                                                                <a href="#solution" onclick="client.gtCheck.expandSolution(<?php echo $solution->id; ?>);"><i class="icon-chevron-down"></i></a>
+                                                            <?php endif; ?>
+                                                        </span>
+                                                    </label>
+                                                </div>
 
-                                                    <div class="solution-content hide" data-id="<?php echo $solution->id; ?>">
-                                                        <?php echo $solution->localizedSolution; ?>
-                                                    </div>
-                                                </li>
-                                            <?php endforeach; ?>
-                                        </ul>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
+                                                <div class="solution-content hide" data-id="<?php echo $solution->id; ?>">
+                                                    <?php echo $solution->localizedSolution; ?>
+                                                </div>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </td>
+                            </tr>
                             <?php if (User::checkRole(User::ROLE_USER) || $check->projectCheckAttachments): ?>
                                 <tr>
                                     <th>
@@ -885,6 +921,14 @@
             setTimeout(function () {
                 user.gtCheck.update('<?php echo $this->createUrl('project/gtupdatechecks', array('id' => $project->id, 'module' => $module->gt_module_id, 'check' => $check->id)); ?>');
             }, 1000);
+
+            $(".solution-edit").wysihtml5({
+                "font-styles": false,
+                "image": false,
+                "link": false,
+                "html": false,
+                "lists": true
+            });
         });
     </script>
 <?php endif; ?>

@@ -300,7 +300,7 @@ function User()
          * Expand solution.
          */
         this.expandSolution = function (id) {
-            $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.check.collapseSolution(' + id + ');"><i class="icon-chevron-up"></i></a>');
+            $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.check.collapseSolution(\'' + id + '\');"><i class="icon-chevron-up"></i></a>');
             $('div.solution-content[data-id=' + id + ']').slideDown('slow');
         };
 
@@ -308,7 +308,7 @@ function User()
          * Collapse solution.
          */
         this.collapseSolution = function (id) {
-            $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.check.expandSolution(' + id + ');"><i class="icon-chevron-down"></i></a>');
+            $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.check.expandSolution(\'' + id + '\');"><i class="icon-chevron-down"></i></a>');
             $('div.solution-content[data-id=' + id + ']').slideUp('slow');
         };
 
@@ -380,7 +380,8 @@ function User()
          * Get check data in array.
          */
         this.getData = function (id) {
-            var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, solutions, rating, data;
+            var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, solutions, rating, data,
+                solution, solutionTitle, saveSolution;
 
             row = $('div.check-form[data-id="' + id + '"]');
 
@@ -428,11 +429,19 @@ function User()
             solutions = $('input[name^="TargetCheckEditForm_' + id + '[solutions]"]:checked', row).map(
                 function () {
                     return {
-                        name  : $(this).attr('name'),
-                        value : $(this).val()
+                        name: $(this).attr('name'),
+                        value: $(this).val()
                     }
                 }
             ).get();
+
+            for (i = 0; i < solutions.length; i++) {
+                if (solutions[i].value == system.constants.TargetCheckEditForm.CUSTOM_SOLUTION_IDENTIFIER) {
+                    solution = $('textarea[name="TargetCheckEditForm_' + id + '[solution]"]', row).val();
+                    solutionTitle = $('input[name="TargetCheckEditForm_' + id + '[solutionTitle]"]', row).val();
+                    saveSolution = $('input[name="TargetCheckEditForm_' + id + '[saveSolution]"]', row).is(":checked");
+                }
+            }
 
             rating = $('input[name="TargetCheckEditForm_' + id + '[rating]"]:checked', row).val();
 
@@ -459,6 +468,13 @@ function User()
             data.push({ name : 'TargetCheckEditForm_' + id + '[result]',         value : result   });
             data.push({ name : 'TargetCheckEditForm_' + id + '[rating]',         value : rating   });
 
+            data.push({name: "TargetCheckEditForm_" + id + "[solution]", value: solution ? solution : ""});
+            data.push({name: "TargetCheckEditForm_" + id + "[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
+
+            if (saveSolution) {
+                data.push({name: "TargetCheckEditForm_" + id + "[saveSolution]", value: "1"});
+            }
+
             for (i = 0; i < texts.length; i++)
                 data.push(texts[i]);
 
@@ -471,8 +487,9 @@ function User()
             for (i = 0; i < radios.length; i++)
                 data.push(radios[i]);
 
-            for (i = 0; i < solutions.length; i++)
+            for (i = 0; i < solutions.length; i++) {
                 data.push(solutions[i]);
+            }
 
             return data;
         };
@@ -484,8 +501,8 @@ function User()
             var row, headerRow, data, url, nextRow, rating;
 
             headerRow = $('div.check-header[data-id="' + id + '"]');
-            row       = $('div.check-form[data-id="' + id + '"]');
-            url       = row.data('save-url');
+            row = $('div.check-form[data-id="' + id + '"]');
+            url = row.data('save-url');
 
             data = _check.getData(id);
             data.push({ name : 'YII_CSRF_TOKEN', value : system.csrf });
@@ -508,14 +525,15 @@ function User()
 
                     data = data.data;
 
-                    if (data.rating != undefined && data.rating != null)
+                    if (data.rating != undefined && data.rating != null) {
                         $('td.status', headerRow).html(
                             '<span class="label ' +
                             (ratings[data.rating].classN ? ratings[data.rating].classN : '') + '">' +
                             ratings[data.rating].text + '</span>'
                         );
-                    else
+                    } else {
                         $('td.status', headerRow).html('');
+                    }
 
                     $('i.icon-refresh', headerRow).parent().remove();
                     $('td.actions', headerRow).append(
@@ -523,8 +541,60 @@ function User()
                         ');"><i class="icon icon-refresh"></i></a>'
                     );
 
-                    if (goToNext)
-                    {
+                    if (data.newSolution) {
+                        var solution = data.newSolution;
+
+                        $('div.check-form[data-id="' + id + '"] ul.solutions').append(
+                            $("<li></li>")
+                                .append(
+                                    $("<div></div>")
+                                        .addClass("solution-header")
+                                        .append(
+                                            $("<label></label>")
+                                                .addClass(solution.multipleSolutions ? "checkbox" : "radio")
+                                                .append(
+                                                    $("<input>")
+                                                        .attr("type", solution.multipleSolutions ? "checkbox" : "radio")
+                                                        .attr("name", "TargetCheckEditForm_" + id + "[solutions][]")
+                                                        .val(solution.id)
+                                                        .prop("checked", true)
+                                                )
+                                                .append(solution.title)
+                                                .append(
+                                                    $("<span></span>")
+                                                        .addClass("solution-control")
+                                                        .attr("data-id", solution.id)
+                                                        .append(
+                                                            $("<a></a>")
+                                                                .attr("href", "#solution")
+                                                                .click(function () {
+                                                                    _check.expandSolution(solution.id);
+                                                                })
+                                                                .append(
+                                                                    $("<i></i>")
+                                                                        .addClass("icon-chevron-down")
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
+                                .append(
+                                    $("<div></div>")
+                                        .addClass("solution-content")
+                                        .addClass("hide")
+                                        .attr("data-id", solution.id)
+                                        .html(solution.solution)
+                                )
+                        );
+
+                        $('input[name="TargetCheckEditForm_' + id + '[solutions][]"].custom-solution').prop("checked", false);
+                        $('textarea[name="TargetCheckEditForm_' + id + '[solution]"]').data("wysihtml5").editor.clear();
+                        $('input[name="TargetCheckEditForm_' + id + '[solutionTitle]"]').val("");
+                        $('input[name="TargetCheckEditForm_' + id + '[saveSolution]"]').prop("checked", false);
+                        _check.collapseSolution(id + "-" + system.constants.TargetCheckEditForm.CUSTOM_SOLUTION_IDENTIFIER);
+                    }
+
+                    if (goToNext) {
                         _check.collapse(id, function () {
                             nextRow = $('div.check-form[data-id="' + id + '"] + div + div.check-form');
 
@@ -1242,7 +1312,7 @@ function User()
          * Expand solution.
          */
         this.expandSolution = function (id) {
-            $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.gtCheck.collapseSolution(' + id + ');"><i class="icon-chevron-up"></i></a>');
+            $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.gtCheck.collapseSolution(\'' + id + '\');"><i class="icon-chevron-up"></i></a>');
             $('div.solution-content[data-id=' + id + ']').slideDown('slow');
         };
 
@@ -1250,7 +1320,7 @@ function User()
          * Collapse solution.
          */
         this.collapseSolution = function (id) {
-            $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.gtCheck.expandSolution(' + id + ');"><i class="icon-chevron-down"></i></a>');
+            $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.gtCheck.expandSolution(\'' + id + '\');"><i class="icon-chevron-down"></i></a>');
             $('div.solution-content[data-id=' + id + ']').slideUp('slow');
         };
 
@@ -1323,7 +1393,8 @@ function User()
          * Get check data in array.
          */
         this.getData = function () {
-            var i, row, textareas, texts, checkboxes, radios, target, protocol, port, result, solutions, rating, data;
+            var i, row, textareas, texts, checkboxes, radios, target, protocol, port, result, solutions, rating, data,
+                solution, solutionTitle, saveSolution;
 
             row = $('div.check-form');
 
@@ -1377,6 +1448,14 @@ function User()
                 }
             ).get();
 
+            for (i = 0; i < solutions.length; i++) {
+                if (solutions[i].value == system.constants.ProjectGtCheckEditForm.CUSTOM_SOLUTION_IDENTIFIER) {
+                    solution = $('textarea[name="ProjectGtCheckEditForm[solution]"]', row).val();
+                    solutionTitle = $('input[name="ProjectGtCheckEditForm[solutionTitle]"]', row).val();
+                    saveSolution = $('input[name="ProjectGtCheckEditForm[saveSolution]"]', row).is(":checked");
+                }
+            }
+
             rating = $('input[name="ProjectGtCheckEditForm[rating]"]:checked', row).val();
 
             if (target == undefined) {
@@ -1406,6 +1485,13 @@ function User()
             data.push({name: 'ProjectGtCheckEditForm[port]', value: port});
             data.push({name: 'ProjectGtCheckEditForm[result]', value: result});
             data.push({name: 'ProjectGtCheckEditForm[rating]', value: rating});
+
+            data.push({name: "ProjectGtCheckEditForm[solution]", value: solution ? solution : ""});
+            data.push({name: "ProjectGtCheckEditForm[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
+
+            if (saveSolution) {
+                data.push({name: "ProjectGtCheckEditForm[saveSolution]", value: "1"});
+            }
 
             for (i = 0; i < texts.length; i++) {
                 data.push(texts[i]);
@@ -1468,6 +1554,59 @@ function User()
                         );
                     } else {
                         $('td.status', headerRow).html('');
+                    }
+
+                    if (data.newSolution) {
+                        var solution = data.newSolution;
+
+                        $('div.check-form ul.solutions').append(
+                            $("<li></li>")
+                                .append(
+                                    $("<div></div>")
+                                        .addClass("solution-header")
+                                        .append(
+                                            $("<label></label>")
+                                                .addClass(solution.multipleSolutions ? "checkbox" : "radio")
+                                                .append(
+                                                    $("<input>")
+                                                        .attr("type", solution.multipleSolutions ? "checkbox" : "radio")
+                                                        .attr("name", "ProjectGtCheckEditForm[solutions][]")
+                                                        .val(solution.id)
+                                                        .prop("checked", true)
+                                                )
+                                                .append(solution.title)
+                                                .append(
+                                                    $("<span></span>")
+                                                        .addClass("solution-control")
+                                                        .attr("data-id", solution.id)
+                                                        .append(
+                                                            $("<a></a>")
+                                                                .attr("href", "#solution")
+                                                                .click(function () {
+                                                                    _gtCheck.expandSolution(solution.id);
+                                                                })
+                                                                .append(
+                                                                    $("<i></i>")
+                                                                        .addClass("icon-chevron-down")
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
+                                .append(
+                                    $("<div></div>")
+                                        .addClass("solution-content")
+                                        .addClass("hide")
+                                        .attr("data-id", solution.id)
+                                        .html(solution.solution)
+                                )
+                        );
+
+                        $('input[name="ProjectGtCheckEditForm[solutions][]"].custom-solution').prop("checked", false);
+                        $('textarea[name="ProjectGtCheckEditForm[solution]"]').data("wysihtml5").editor.clear();
+                        $('input[name="ProjectGtCheckEditForm[solutionTitle]"]').val("");
+                        $('input[name="ProjectGtCheckEditForm[saveSolution]"]').prop("checked", false);
+                        _gtCheck.collapseSolution(system.constants.ProjectGtCheckEditForm.CUSTOM_SOLUTION_IDENTIFIER);
                     }
 
                     $('i.icon-refresh', headerRow).parent().remove();

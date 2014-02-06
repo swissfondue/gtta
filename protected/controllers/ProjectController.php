@@ -1647,8 +1647,7 @@ class ProjectController extends Controller
     /**
      * Save check.
      */
-    public function actionSaveCheck($id, $target, $category, $check)
-    {
+    public function actionSaveCheck($id, $target, $category, $check) {
         $response = new AjaxResponse();
 
         try {
@@ -1790,10 +1789,18 @@ class ProjectController extends Controller
 
             // add solutions
             if ($model->solutions) {
+                $hasCustom = false;
+
                 foreach ($model->solutions as $solutionId) {
                     // reset solution
                     if (!$solutionId) {
                         break;
+                    }
+
+                    // custom solution
+                    if ($solutionId == TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER) {
+                        $hasCustom = true;
+                        continue;
                     }
 
                     $solution = CheckSolution::model()->findByAttributes(array(
@@ -1810,6 +1817,60 @@ class ProjectController extends Controller
                     $solution->check_solution_id = $solutionId;
                     $solution->check_id = $check->id;
                     $solution->save();
+                }
+
+                if ($hasCustom && $model->solution) {
+                    if (User::checkRole(User::ROLE_ADMIN) && $model->saveSolution) {
+                        if (!$model->solutionTitle) {
+                            throw new CHttpException(403, Yii::t("app", "Please specify the solution title."));
+                        }
+                        
+                        $criteria = new CDbCriteria();
+                        $criteria->select = "MAX(sort_order) as max_sort_order";
+                        $criteria->addColumnCondition(array("check_id" => $check->id));
+            
+                        $maxOrder = CheckSolution::model()->find($criteria);
+                        $sortOrder = 0;
+            
+                        if ($maxOrder && $maxOrder->max_sort_order !== null) {
+                            $sortOrder = $maxOrder->max_sort_order + 1;
+                        }
+                                    
+                        $solution = new CheckSolution();
+                        $solution->check_id = $check->id;
+                        $solution->title = $model->solutionTitle;
+                        $solution->solution = $model->solution;
+                        $solution->sort_order = $sortOrder;
+                        $solution->save();
+
+                        $solutionL10n = new CheckSolutionL10n();
+                        $solutionL10n->check_solution_id = $solution->id;
+                        $solutionL10n->language_id = $language->id;
+                        $solutionL10n->title = $model->solutionTitle;
+                        $solutionL10n->solution = $model->solution;
+                        $solutionL10n->save();
+
+                        $checkSolution = new TargetCheckSolution();
+                        $checkSolution->target_id = $target->id;
+                        $checkSolution->check_solution_id = $solution->id;
+                        $checkSolution->check_id = $check->id;
+                        $checkSolution->save();
+
+                        $targetCheck->solution = null;
+                        $targetCheck->solution_title = null;
+                        $targetCheck->save();
+
+                        $response->addData("newSolution", array(
+                            "id" => $solution->id,
+                            "title" => $solution->title,
+                            "solution" => $solution->solution,
+                            "multipleSolutions" => $check->multiple_solutions,
+                        ));
+                    } else {
+                        $targetCheck->solution = $model->solution;
+                        $targetCheck->solution_title = $model->solutionTitle;
+                        $targetCheck->save();
+                    }
                 }
             }
 
@@ -3294,15 +3355,22 @@ class ProjectController extends Controller
 
             // add solutions
             if ($model->solutions) {
+                $hasCustom = false;
+
                 foreach ($model->solutions as $solutionId) {
                     // reset solution
                     if (!$solutionId) {
                         break;
                     }
 
+                    if ($solutionId == ProjectGtCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER) {
+                        $hasCustom = true;
+                        continue;
+                    }
+
                     $solution = CheckSolution::model()->findByAttributes(array(
                         'id' => $solutionId,
-                        'check_id' => $check->id
+                        'check_id' => $check->check->id
                     ));
 
                     if (!$solution) {
@@ -3314,6 +3382,60 @@ class ProjectController extends Controller
                     $solution->check_solution_id = $solutionId;
                     $solution->gt_check_id = $check->id;
                     $solution->save();
+                }
+
+                if ($hasCustom && $model->solution) {
+                    if (User::checkRole(User::ROLE_ADMIN) && $model->saveSolution) {
+                        if (!$model->solutionTitle) {
+                            throw new CHttpException(403, Yii::t("app", "Please specify the solution title."));
+                        }
+
+                        $criteria = new CDbCriteria();
+                        $criteria->select = "MAX(sort_order) as max_sort_order";
+                        $criteria->addColumnCondition(array("check_id" => $check->check->id));
+
+                        $maxOrder = CheckSolution::model()->find($criteria);
+                        $sortOrder = 0;
+
+                        if ($maxOrder && $maxOrder->max_sort_order !== null) {
+                            $sortOrder = $maxOrder->max_sort_order + 1;
+                        }
+
+                        $solution = new CheckSolution();
+                        $solution->check_id = $check->check->id;
+                        $solution->title = $model->solutionTitle;
+                        $solution->solution = $model->solution;
+                        $solution->sort_order = $sortOrder;
+                        $solution->save();
+
+                        $solutionL10n = new CheckSolutionL10n();
+                        $solutionL10n->check_solution_id = $solution->id;
+                        $solutionL10n->language_id = $language->id;
+                        $solutionL10n->title = $model->solutionTitle;
+                        $solutionL10n->solution = $model->solution;
+                        $solutionL10n->save();
+
+                        $projectSolution = new ProjectGtCheckSolution();
+                        $projectSolution->project_id = $project->id;
+                        $projectSolution->gt_check_id = $check->id;
+                        $projectSolution->check_solution_id = $solution->id;
+                        $projectSolution->save();
+
+                        $projectCheck->solution = null;
+                        $projectCheck->solution_title = null;
+                        $projectCheck->save();
+
+                        $response->addData("newSolution", array(
+                            "id" => $solution->id,
+                            "title" => $solution->title,
+                            "solution" => $solution->solution,
+                            "multipleSolutions" => $check->check->multiple_solutions,
+                        ));
+                    } else {
+                        $projectCheck->solution = $model->solution;
+                        $projectCheck->solution_title = $model->solutionTitle;
+                        $projectCheck->save();
+                    }
                 }
             }
 

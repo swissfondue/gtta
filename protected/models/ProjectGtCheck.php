@@ -19,6 +19,8 @@
  * @property integer $pid
  * @property string $rating
  * @property string $status
+ * @property string $solution
+ * @property string $solution_title
  * @property User $user
  */
 class ProjectGtCheck extends CActiveRecord {
@@ -98,7 +100,7 @@ class ProjectGtCheck extends CActiveRecord {
             array('target_file, result_file, protocol, target', 'length', 'max' => 1000),
             array('status', 'in', 'range' => array(self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_STOP, self::STATUS_FINISHED)),
             array('rating', 'in', 'range' => self::getValidRatings()),
-            array('result, started, table_result', 'safe'),
+            array('result, started, table_result, solution, solution_title', 'safe'),
 		);
 	}
 

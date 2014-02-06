@@ -1419,6 +1419,10 @@ class ReportController extends Controller {
                             'separate' => in_array($category->check_category_id, $templateCategoryIds),
                         );
 
+                        if ($check->targetChecks[0]->solution) {
+                            $checkData["solutions"][] = $this->_prepareProjectReportText($check->targetChecks[0]->solution);
+                        }
+
                         if ($checkData['info']) {
                             $controlData['info']++;
                             $categoryData['info']++;
@@ -1491,7 +1495,7 @@ class ReportController extends Controller {
                                 'id' => $checkData['id'],
                                 'name' => $checkData['name'],
                                 'question' => $checkData['question'],
-                                'solution' => $checkData['solutions'] ? implode("\n", $checkData['solutions']) : Yii::t('app', 'N/A'),
+                                'solution' => $checkData["solutions"] ? implode("\n", $checkData["solutions"]) : "",
                                 'rating' => $checkData["rating"],
                                 "result" => $checkData["result"],
                                 "ratingValue" => $checkData["ratingValue"],
@@ -1794,6 +1798,10 @@ class ReportController extends Controller {
                             'info' => $check->rating == ProjectGtCheck::RATING_INFO,
                             'separate' => in_array($category["id"], $templateCategoryIds),
                         );
+
+                        if ($check->solution) {
+                            $checkData["solutions"][] = $this->_prepareProjectReportText($check->solution);
+                        }
 
                         if ($checkData['info']) {
                             $controlData['info']++;

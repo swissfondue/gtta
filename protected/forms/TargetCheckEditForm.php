@@ -4,6 +4,8 @@
  * This is the model class for target check edit form.
  */
 class TargetCheckEditForm extends CFormModel {
+    const CUSTOM_SOLUTION_IDENTIFIER = "custom";
+
     /**
      * @var string override target.
      */
@@ -35,6 +37,21 @@ class TargetCheckEditForm extends CFormModel {
     public $solutions;
 
     /**
+     * @var string solution.
+     */
+    public $solution;
+
+    /**
+     * @var string solution title.
+     */
+    public $solutionTitle;
+
+    /**
+     * @var boolean save solution.
+     */
+    public $saveSolution;
+
+    /**
      * @var array inputs.
      */
     public $inputs;
@@ -46,8 +63,9 @@ class TargetCheckEditForm extends CFormModel {
 		return array(
             array("rating", "in", "range" => TargetCheck::getValidRatings()),
             array("port", "numerical", "integerOnly" => true, "min" => 0, "max" => 65536),
-            array("protocol, overrideTarget", "length", "max" => 1000),
-            array("inputs, result, solutions", "safe"),
+            array("protocol, overrideTarget, solutionTitle", "length", "max" => 1000),
+            array("saveSolution", "boolean"),
+            array("inputs, result, solutions, solution", "safe"),
 		);
 	}
 }

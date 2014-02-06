@@ -4,6 +4,8 @@
  * This is the model class for project GT check edit form.
  */
 class ProjectGtCheckEditForm extends CFormModel {
+    const CUSTOM_SOLUTION_IDENTIFIER = "custom";
+
     /**
      * @var string target.
      */
@@ -35,6 +37,21 @@ class ProjectGtCheckEditForm extends CFormModel {
     public $solutions;
 
     /**
+     * @var string solution.
+     */
+    public $solution;
+
+    /**
+     * @var string solution title.
+     */
+    public $solutionTitle;
+
+    /**
+     * @var boolean save solution.
+     */
+    public $saveSolution;
+
+    /**
      * @var array inputs.
      */
     public $inputs;
@@ -46,8 +63,9 @@ class ProjectGtCheckEditForm extends CFormModel {
 		return array(
             array("rating", "in", "range" => ProjectGtCheck::getValidRatings()),
             array("port", "numerical", "integerOnly" => true, "min" => 0, "max" => 65536),
-            array("protocol, target", "length", "max" => 1000),
-            array("inputs, result, solutions", "safe"),
+            array("protocol, target, solutionTitle", "length", "max" => 1000),
+            array("saveSolution", "boolean"),
+            array("inputs, result, solutions, solution", "safe"),
 		);
 	}
 }
