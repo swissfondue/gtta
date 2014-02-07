@@ -295,7 +295,7 @@ class UpdateCommand extends ConsoleCommand {
 
             try {
                 $this->_getUpdate($targetVersion, $system->workstation_id, $system->workstation_key);
-                FileManager::copyFiles($targetVersion);
+                $this->_copyFiles($targetVersion);
                 $this->_runInstallScript($targetVersion);
 
                 try {
