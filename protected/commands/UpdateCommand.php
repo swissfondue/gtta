@@ -348,6 +348,7 @@ class UpdateCommand extends ConsoleCommand {
             $system->update_version = null;
             $system->update_description = null;
             $system->update_time = new CDbExpression("NOW()");
+            $system->save();
         } catch (Exception $e) {
             $exception = $e;
         }
