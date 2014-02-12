@@ -202,10 +202,6 @@ class AutomationCommand extends ConsoleCommand {
         fwrite($targetFile, $check->protocol . "\n");
         fwrite($targetFile, $port . "\n");
         fwrite($targetFile, $check->language->code . "\n");
-
-        // directories
-        fwrite($targetFile, "\n"); // scripts path
-        fwrite($targetFile, Yii::app()->params["automation"]["filesPath"] . "\n");
         fclose($targetFile);
 
         // create empty result file
