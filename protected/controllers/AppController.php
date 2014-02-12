@@ -587,4 +587,37 @@ class AppController extends Controller {
         $this->pageTitle = Yii::t("app", "Help");
 		$this->render("help");
     }
+
+    /**
+     * Get file.
+     */
+    public function actionFile($section, $subsection, $file) {
+        $filePath = implode("/", array(
+            Yii::app()->params["filesPath"],
+            $section,
+            $subsection,
+            $file
+        ));
+
+        if (!file_exists($filePath)) {
+            throw new CHttpException(404, Yii::t("app", "File not found."));
+        }
+
+        // give user a file
+        header("Content-Description: File Transfer");
+        header("Content-Type: application/octet-stream");
+        header("Content-Disposition: attachment; filename=\"" . $file . "\"");
+        header("Content-Transfer-Encoding: binary");
+        header("Expires: 0");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Pragma: public");
+        header("Content-Length: " . filesize($filePath));
+
+        ob_clean();
+        flush();
+
+        readfile($filePath);
+
+        exit();
+    }
 }

@@ -63,6 +63,7 @@ return array(
                 "app/object-list" => "app/objectlist",
                 "app/logo" => "app/logo",
                 "app/help" => "app/help",
+                "app/file/<section:[a-z]+>/<subsection:[a-z]+>/<file:[a-z0-9\-\.]+>" => "app/file",
 
                 // projects
                 "projects/<page:\d+>"         => "project/index",
@@ -438,6 +439,7 @@ return array(
             "lockFile" => "/tmp/gtta.package",
         ),
 
+        "filesPath" => VERSION_DIR . "/web/files",
         "systemStatusLock" => "/tmp/gtta-status.lock",
     ),
 
