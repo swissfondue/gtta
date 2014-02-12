@@ -74,6 +74,10 @@ return array(
             "lockFile" => "/tmp/gtta.check-update",
         ),
 
+        "stats" => array(
+            "lockFile" => "/tmp/gtta.stats"
+        ),
+
         "update" => array(
             "lockFile" => "/tmp/gtta.update",
             "keyFile" => BASE_DIR . "/security/keys/update-server.pub",

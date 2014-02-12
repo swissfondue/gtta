@@ -60,52 +60,48 @@ class TargetCheckCategory extends CActiveRecord
     /**
      * Update stats.
      */
-    public function updateStats()
-    {
-        $checkCount    = 0;
-        $finishedCount = 0;
-        $lowCount      = 0;
-        $medCount      = 0;
-        $highCount     = 0;
-        $infoCount     = 0;
-
-        $controlIds   = array();
+    public function updateStats() {
+        $controlIds = array();
         $referenceIds = array();
 
         $controls = CheckControl::model()->findAllByAttributes(array(
              'check_category_id' => $this->check_category_id
         ));
 
-        foreach ($controls as $control)
+        foreach ($controls as $control) {
             $controlIds[] = $control->id;
+        }
 
         $references = TargetReference::model()->findAllByAttributes(array(
             'target_id' => $this->target_id
         ));
 
-        foreach ($references as $reference)
+        foreach ($references as $reference) {
             $referenceIds[] = $reference->reference_id;
+        }
 
         $criteria = new CDbCriteria();
         $criteria->addInCondition('check_control_id', $controlIds);
         $criteria->addInCondition('reference_id', $referenceIds);
 
-        if (!$this->advanced)
+        if (!$this->advanced) {
             $criteria->addCondition('t.advanced = FALSE');
+        }
 
         $checkCount = Check::model()->count($criteria);
 
-        $checks   = Check::model()->findAll($criteria);
+        $checks = Check::model()->findAll($criteria);
         $checkIds = array();
 
-        foreach ($checks as $check)
+        foreach ($checks as $check) {
             $checkIds[] = $check->id;
+        }
 
         $criteria = new CDbCriteria();
 
         $criteria->addColumnCondition(array(
             'target_id' => $this->target_id,
-            'status'    => TargetCheck::STATUS_FINISHED
+            'status' => TargetCheck::STATUS_FINISHED
         ));
 
         $criteria->addInCondition('check_id', $checkIds);
@@ -132,11 +128,11 @@ class TargetCheckCategory extends CActiveRecord
         $highCriteria->addColumnCondition(array( 'rating' => TargetCheck::RATING_HIGH_RISK ));
         $highCount = TargetCheck::model()->count($highCriteria);
 
-        $this->check_count     = $checkCount;
-        $this->finished_count  = $finishedCount;
-        $this->info_count      = $infoCount;
-        $this->low_risk_count  = $lowCount;
-        $this->med_risk_count  = $medCount;
+        $this->check_count = $checkCount;
+        $this->finished_count = $finishedCount;
+        $this->info_count = $infoCount;
+        $this->low_risk_count = $lowCount;
+        $this->med_risk_count = $medCount;
         $this->high_risk_count = $highCount;
 
         $this->save();
@@ -145,11 +141,12 @@ class TargetCheckCategory extends CActiveRecord
     /**
      * Update all stats.
      */
-    static public function updateAllStats()
-    {
+    static public function updateAllStats() {
         $targetCategories = TargetCheckCategory::model()->findAll();
 
-        foreach ($targetCategories as $targetCategory)
+        foreach ($targetCategories as $targetCategory) {
             $targetCategory->updateStats();
+            sleep(1);
+        }
     }
 }

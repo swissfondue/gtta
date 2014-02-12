@@ -434,17 +434,12 @@ class CheckController extends Controller
                 $control->name              = $model->name;
                 $control->save();
 
-                if ($newRecord)
-                {
+                if ($newRecord) {
                     $control->sort_order = $control->id;
                     $control->save();
                 }
 
-                if (!$newRecord)
-                    TargetCheckCategory::updateAllStats();
-
-                foreach ($model->localizedItems as $languageId => $value)
-                {
+                foreach ($model->localizedItems as $languageId => $value) {
                     $controlL10n = CheckControlL10n::model()->findByAttributes(array(
                         'check_control_id' => $control->id,
                         'language_id'      => $languageId
@@ -809,14 +804,6 @@ class CheckController extends Controller
 
                 $control = CheckControl::model()->findByPk($model->controlId);
 
-                $targetCheckCategories = TargetCheckCategory::model()->findAllByAttributes(array(
-                    "check_category_id" => $control->check_category_id
-                ));
-
-                foreach ($targetCheckCategories as $targetCheckCategory) {
-                    $targetCheckCategory->updateStats();
-                }
-
                 Yii::app()->user->setFlash("success", Yii::t("app", "Check saved."));
                 $check->refresh();
 
@@ -1029,10 +1016,6 @@ class CheckController extends Controller
                     $check->save();
                 }
 
-                if (!$newRecord) {
-                    TargetCheckCategory::updateAllStats();
-                }
-
                 foreach ($model->localizedItems as $languageId => $value) {
                     $checkL10n = CheckL10n::model()->findByAttributes(array(
                         'check_id' => $check->id,
@@ -1066,14 +1049,6 @@ class CheckController extends Controller
                     $checkL10n->hints = $value['hints'];
                     $checkL10n->question = $value['question'];
                     $checkL10n->save();
-                }
-
-                $targetCheckCategories = TargetCheckCategory::model()->findAllByAttributes(array(
-                    'check_category_id' => $category->id
-                ));
-
-                foreach ($targetCheckCategories as $targetCheckCategory) {
-                    $targetCheckCategory->updateStats();
                 }
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check saved.'));
@@ -1422,7 +1397,7 @@ class CheckController extends Controller
                     }
 
                     $check->delete();
-                    TargetCheckCategory::updateAllStats();
+
                     break;
 
                 case 'up':

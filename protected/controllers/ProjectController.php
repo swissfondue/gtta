@@ -1305,9 +1305,7 @@ class ProjectController extends Controller
                     $targetCategory->target_id         = $target->id;
                     $targetCategory->check_category_id = $category;
                     $targetCategory->advanced          = true;
-
                     $targetCategory->save();
-                    $targetCategory->updateStats();
                 }
 
                 // delete references
@@ -1328,18 +1326,7 @@ class ProjectController extends Controller
                     $targetReference->save();
                 }
 
-                if ($addReferences || $delReferences)
-                {
-                    $categories = TargetCheckCategory::model()->findAllByAttributes(array(
-                        'target_id' => $target->id
-                    ));
-
-                    foreach ($categories as $category)
-                        $category->updateStats();
-                }
-
                 $target->cleanChecks();
-
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Target saved.'));
 
                 $target->refresh();
@@ -1767,8 +1754,6 @@ class ProjectController extends Controller
             $targetCheck->rating = $model->rating;
             $targetCheck->save();
 
-            $category->updateStats();
-
             // delete old solutions
             TargetCheckSolution::model()->deleteAllByAttributes(array(
                 'target_id' => $target->id,
@@ -2096,8 +2081,6 @@ class ProjectController extends Controller
 
             $category->advanced = $model->advanced;
             $category->save();
-
-            $category->updateStats();
         }
         catch (Exception $e)
         {
@@ -3000,8 +2983,6 @@ class ProjectController extends Controller
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;
             }
-
-            $category->updateStats();
         }
         catch (Exception $e)
         {
