@@ -1,6 +1,5 @@
-<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/bootstrap-wysihtml5.css">
-<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/wysihtml5.js"></script>
-<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap/bootstrap-wysihtml5.js"></script>
+<script src="/ckeditor/ckeditor.js"></script>
+<script src="/ckeditor/adapters/jquery.js"></script>
 
 <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 
@@ -243,12 +242,6 @@
     });
 
     $(function () {
-        $('textarea').wysihtml5({
-            'font-styles' : false,
-            'image'       : false,
-            'link'        : false,
-            'html'        : false,
-            'lists'       : true
-        });
+        $(".wysiwyg").ckeditor();
     });
 </script>

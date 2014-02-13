@@ -181,10 +181,15 @@ class ReportController extends Controller {
     /**
      * Prepare text for project report.
      */
-    private function _prepareProjectReportText($text)
-    {
-        $text = str_replace(array("\r", "\n"), ' ', $text);
+    private function _prepareProjectReportText($text) {
+        $text = preg_replace('~>\s*\n\s*<~', '><', $text);
+        $text = str_replace(array("<br />", "<br/>"), "<br>", $text);
+        $text = str_replace(array("\r", "\n", "\t"), ' ', $text);
         $text = strip_tags($text, '<b><i><u><br><ol><ul><li>');
+        $text = preg_replace('~<br>\s+~', "<br>", $text);
+        $text = preg_replace('~</ul>\s+~', "</ul>", $text);
+        $text = preg_replace('~</ol>\s+~', "</ol>", $text);
+        $text = preg_replace('~</li>\s+~', "</li>", $text);
 
         return $text;
     }
@@ -437,19 +442,23 @@ class ReportController extends Controller {
             $this->_renderText($container, $textBlock, $substitute);
 
             $listBlock = substr($text, $openTagPosition + strlen($openTag), $closeTagPosition - $openTagPosition - strlen($openTag));
+            $listBlock = trim($listBlock);
             $listElements = explode('<li>', $listBlock);
 
             $listObject = null;
 
-            if ($listType == 'ol')
+            if ($listType == 'ol') {
                 $listObject = new PHPRtfLite_List_Numbering($this->rtf);
-            elseif ($listType == 'ul')
+            } elseif ($listType == 'ul') {
                 $listObject = new PHPRtfLite_List_Enumeration($this->rtf, PHPRtfLite_List_Enumeration::TYPE_CIRCLE);
+            }
 
-            foreach ($listElements as $listElement)
-            {
-                if (!$listElement)
+            foreach ($listElements as $listElement) {
+                $listElement = trim($listElement);
+
+                if (!$listElement) {
                     continue;
+                }
 
                 $listElement = str_replace('</li>', '', $listElement);
                 $listObject->addItem($listElement, $this->textFont, $this->noPar);
@@ -2578,7 +2587,7 @@ class ReportController extends Controller {
                     }
 
                     $cell = $table->getCell($row, 4);
-                    $cell->writeText($check["solution"]);
+                    $this->_renderText($cell, $check["solution"], false);
 
                     $image = null;
 
@@ -4483,8 +4492,8 @@ class ReportController extends Controller {
      */
     private function _prepareVulnExportText($text)
     {
-        $text = str_replace(array( "\r", "\n" ), '', $text);
-        $text = str_replace('<br>', "\n", $text);
+        $text = str_replace(array("\r", "\n"), '', $text);
+        $text = str_replace(array("<br>", "<br/>", "<br />"), "\n", $text);
         $text = strip_tags($text);
         $text = html_entity_decode($text, ENT_COMPAT, 'UTF-8');
 

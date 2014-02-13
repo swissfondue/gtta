@@ -1,9 +1,8 @@
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.ui.js"></script>
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.iframe-transport.js"></script>
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.fileupload.js"></script>
-<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/bootstrap-wysihtml5.css">
-<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/wysihtml5.js"></script>
-<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap/bootstrap-wysihtml5.js"></script>
+<script src="/ckeditor/ckeditor.js"></script>
+<script src="/ckeditor/adapters/jquery.js"></script>
 
 <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 
@@ -922,13 +921,7 @@
                 user.gtCheck.update('<?php echo $this->createUrl('project/gtupdatechecks', array('id' => $project->id, 'module' => $module->gt_module_id, 'check' => $check->id)); ?>');
             }, 1000);
 
-            $(".solution-edit").wysihtml5({
-                "font-styles": false,
-                "image": false,
-                "link": false,
-                "html": false,
-                "lists": true
-            });
+            $(".solution-edit").ckeditor();
         });
     </script>
 <?php endif; ?>
