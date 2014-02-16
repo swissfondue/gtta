@@ -25,7 +25,7 @@
                     <p class="help-block"><?php echo $model->getError('host'); ?></p>
                 <?php else: ?>
                     <p class="help-block">
-                        <?php echo Yii::t('app', 'Host name or IP address.'); ?>
+                        <?php echo Yii::t("app", "Host name or IP address. You may also specify a default port here, separated by the colon symbol (for example, google.com:443)."); ?>
                     </p>
                 <?php endif; ?>
             </div>
