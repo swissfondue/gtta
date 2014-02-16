@@ -47,7 +47,28 @@
                 <h2>What's New?</h2>
 
                 <p>
-                    Current version is <b>1.8</b>:
+                    <b>1.10 (current version)</b>:
+
+                    <ul>
+                        <li>New script: <em>shell</em> - runs an external shell command.</li>
+                        <li>Third-level domain support in <em>dns_find_ns</em> script package.</li>
+                        <li>Online help updated.</li>
+                    </ul>
+                </p>
+
+                <p>
+                    <b>1.9</b>:
+
+                    <ul>
+                        <li>New script: <em>telnet_banner</em> - show telnet server banner.</li>
+                        <li>New script: <em>telnet_bruteforce</em> - bruteforce telnet server's login & password.</li>
+                        <li>Integration manual.</li>
+                        <li>A lot of bugs fixed.</li>
+                    </ul>
+                </p>
+
+                <p>
+                    <b>1.8</b>:
 
                     <ul>
                         <li>Logo upload form for new clients.</li>
