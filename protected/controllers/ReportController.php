@@ -185,11 +185,18 @@ class ReportController extends Controller {
         $text = preg_replace('~>\s*\n\s*<~', '><', $text);
         $text = str_replace(array("<br />", "<br/>"), "<br>", $text);
         $text = str_replace(array("\r", "\n", "\t"), ' ', $text);
+        $text = str_replace(array("\\r", "\\n", "\\t"), "", $text);
+
         $text = strip_tags($text, '<b><i><u><br><ol><ul><li>');
         $text = preg_replace('~<br>\s+~', "<br>", $text);
         $text = preg_replace('~</ul>\s+~', "</ul>", $text);
         $text = preg_replace('~</ol>\s+~', "</ol>", $text);
         $text = preg_replace('~</li>\s+~', "</li>", $text);
+
+        $text = preg_replace('~<ul>[^<]+~', "</ul>", $text);
+        $text = preg_replace('~<ol>[^<]+~', "</ul>", $text);
+        $text = preg_replace('~</li>[^<]+~', "</li>", $text);
+        $text = trim($text);
 
         return $text;
     }
@@ -413,30 +420,67 @@ class ReportController extends Controller {
     }
 
     /**
+     * Substitute scalar variables
+     * @param $text
+     * @return string text
+     */
+    private function _substituteScalarVars($text) {
+        $text = str_replace("{client}", $this->project["project"]->client->name, $text);
+        $text = str_replace("{project}", $this->project["project"]->name, $text);
+        $text = str_replace("{year}", $this->project["project"]->year, $text);
+
+        $deadline = implode(".", array_reverse(explode("-", $this->project["project"]->deadline)));
+        $text = str_replace("{deadline}", $deadline, $text);
+
+        $admin = Yii::t("app", "N/A");
+
+        if ($this->project["project"]->project_users) {
+            foreach ($this->project["project"]->project_users as $user) {
+                if ($user->admin) {
+                    $admin = $user->user->name ? $user->user->name : $user->user->email;
+                    break;
+                }
+            }
+        }
+
+        $text = str_replace("{admin}", $admin, $text);
+        $text = str_replace("{rating}", sprintf("%.2f", $this->project["rating"]), $text);
+        $text = str_replace("{targets}", count($this->project["targets"]), $text);
+        $text = str_replace("{checks}", $this->project["checks"], $text);
+        $text = str_replace("{checks.info}", $this->project["checksInfo"], $text);
+        $text = str_replace("{checks.med}", $this->project["checksMed"], $text);
+        $text = str_replace("{checks.lo}", $this->project["checksLow"], $text);
+        $text = str_replace("{checks.hi}", $this->project["checksHigh"], $text);
+
+        return $text;
+    }
+
+    /**
      * Render lists.
      */
-    private function _renderLists(&$container, $text, $substitute=true)
-    {
-        $listTypes = array( 'ul', 'ol' );
+    private function _renderLists(&$container, $text, $substitute=true) {
+        $listTypes = array("ul", "ol");
         $rendered = false;
 
-        foreach ($listTypes as $listType)
-        {
-            $openTag = '<' . $listType . '>';
-            $closeTag = '</' . $listType . '>';
+        foreach ($listTypes as $listType) {
+            $openTag = "<" . $listType . ">";
+            $closeTag = "</" . $listType . ">";
 
-            if (strpos($text, $openTag) === false)
+            if (strpos($text, $openTag) === false) {
                 continue;
+            }
 
             $openTagPosition = strpos($text, $openTag);
 
-            if ($openTagPosition === false)
+            if ($openTagPosition === false) {
                 continue;
+            }
 
             $closeTagPosition = strpos($text, $closeTag, $openTagPosition);
 
-            if ($closeTagPosition === false)
+            if ($closeTagPosition === false) {
                 continue;
+            }
 
             $textBlock = substr($text, 0, $openTagPosition);
             $this->_renderText($container, $textBlock, $substitute);
@@ -461,6 +505,11 @@ class ReportController extends Controller {
                 }
 
                 $listElement = str_replace('</li>', '', $listElement);
+
+                if ($substitute) {
+                    $listElement = $this->_substituteScalarVars($listElement);
+                }
+
                 $listObject->addItem($listElement, $this->textFont, $this->noPar);
             }
 
@@ -481,52 +530,29 @@ class ReportController extends Controller {
     /**
      * Render variable values
      */
-    private function _renderText(&$container, $text, $substitute=true)
-    {
-        if ($substitute && $this->_renderTables('{target.list}', $container, $text, $substitute))
+    private function _renderText(&$container, $text, $substitute=true) {
+        if ($substitute && $this->_renderTables('{target.list}', $container, $text, $substitute)) {
             return;
+        }
 
-        if ($substitute && $this->_renderTables('{target.stats}', $container, $text, $substitute))
+        if ($substitute && $this->_renderTables('{target.stats}', $container, $text, $substitute)) {
             return;
+        }
 
-        if ($substitute && $this->_renderTables('{target.weakest}', $container, $text, $substitute))
+        if ($substitute && $this->_renderTables('{target.weakest}', $container, $text, $substitute)) {
             return;
+        }
 
-        if ($substitute && $this->_renderTables('{vuln.list}', $container, $text, $substitute))
+        if ($substitute && $this->_renderTables('{vuln.list}', $container, $text, $substitute)) {
             return;
+        }
 
-        if ($this->_renderLists($container, $text, $substitute))
+        if ($this->_renderLists($container, $text, $substitute)) {
             return;
+        }
 
-        if ($substitute)
-        {
-            $text = str_replace('{client}', $this->project['project']->client->name, $text);
-            $text = str_replace('{project}', $this->project['project']->name, $text);
-            $text = str_replace('{year}', $this->project['project']->year, $text);
-
-            $deadline = implode('.', array_reverse(explode('-', $this->project['project']->deadline)));
-            $text = str_replace('{deadline}', $deadline, $text);
-
-            $admin = Yii::t('app', 'N/A');
-
-            if ($this->project['project']->project_users)
-            {
-                foreach ($this->project['project']->project_users as $user)
-                    if ($user->admin)
-                    {
-                        $admin = $user->user->name ? $user->user->name : $user->user->email;
-                        break;
-                    }
-            }
-
-            $text = str_replace('{admin}', $admin, $text);
-            $text = str_replace('{rating}', sprintf('%.2f', $this->project['rating']), $text);
-            $text = str_replace('{targets}', count($this->project['targets']), $text);
-            $text = str_replace('{checks}', $this->project['checks'], $text);
-            $text = str_replace('{checks.info}', $this->project['checksInfo'], $text);
-            $text = str_replace('{checks.med}', $this->project['checksMed'], $text);
-            $text = str_replace('{checks.lo}', $this->project['checksLow'], $text);
-            $text = str_replace('{checks.hi}', $this->project['checksHigh'], $text);
+        if ($substitute) {
+            $text = $this->_substituteScalarVars($text);
         }
 
         $container->writeText($this->_prepareProjectReportText($text), $this->textFont, $this->noPar);
@@ -2206,8 +2232,7 @@ class ReportController extends Controller {
         $sectionNumber = 1;
 
         // introduction
-        if (in_array('intro', $options) && $template->localizedIntro)
-        {
+        if (in_array('intro', $options) && $template->localizedIntro) {
             $this->toc->writeHyperLink(
                 '#introduction',
                 $sectionNumber . '. ' . Yii::t('app', 'Introduction') . "\n",
@@ -2473,12 +2498,12 @@ class ReportController extends Controller {
             $table->getCell(6, 2)->writeText(Yii::t('app', 'No Vulnerability'), $this->textFont);
             $table->getCell(7, 2)->writeText(Yii::t('app', 'Information'), $this->textFont);
 
-            $table->getCell(2, 3)->writeText($template->localizedHighDescription, $this->textFont);
-            $table->getCell(3, 3)->writeText($template->localizedMedDescription, $this->textFont);
-            $table->getCell(4, 3)->writeText($template->localizedLowDescription, $this->textFont);
-            $table->getCell(5, 3)->writeText($template->localizedNoneDescription, $this->textFont);
-            $table->getCell(6, 3)->writeText($template->localizedNoVulnDescription, $this->textFont);
-            $table->getCell(7, 3)->writeText($template->localizedInfoDescription, $this->textFont);
+            $this->_renderText($table->getCell(2, 3), $template->localizedHighDescription, true);
+            $this->_renderText($table->getCell(3, 3), $template->localizedMedDescription, true);
+            $this->_renderText($table->getCell(4, 3), $template->localizedLowDescription, true);
+            $this->_renderText($table->getCell(5, 3), $template->localizedNoneDescription, true);
+            $this->_renderText($table->getCell(6, 3), $template->localizedNoVulnDescription, true);
+            $this->_renderText($table->getCell(7, 3), $template->localizedInfoDescription, true);
 
             $section->writeText("\n");
 
