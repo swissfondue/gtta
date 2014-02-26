@@ -122,6 +122,12 @@ return array(
                 "reports/effort"      => "report/effort",
                 "reports/vuln-export" => "report/vulnexport",
 
+                // project planner
+                "project-planner" => "planner/index",
+                "project-planner/control" => "planner/control",
+                "project-planner/data" => "planner/data",
+                "project-planner/edit" => "planner/edit",
+
                 // vulnerability tracker
                 "vuln-tracker"                                             => "vulntracker/index",
                 "vuln-tracker/<id:\d+>/<page:\d+>"                         => "vulntracker/vulns",

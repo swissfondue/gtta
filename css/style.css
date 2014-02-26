@@ -869,3 +869,125 @@ table.table-result td {
     border:1px dashed #999;
     border-radius:5px;
 }
+
+.planner {
+    height:auto;
+}
+
+.planner > .users {
+    float:left;
+    width:200px;
+    border-right:1px solid #f0f0f0;
+    min-height:400px;
+}
+
+.planner > .users > .header {
+    height:40px;
+    vertical-align:middle;
+    font-weight:bold;
+    border-bottom:1px solid #f0f0f0;
+    line-height:40px;
+}
+
+.planner > .users > .user > .name {
+    height:29px;
+    border-bottom:1px solid #f0f0f0;
+    line-height:30px;
+    white-space:nowrap;
+    overflow:hidden;
+}
+
+.planner > .users > .user > .plans > .plan {
+    height:29px;
+    border-bottom:1px solid #f0f0f0;
+    line-height:30px;
+    white-space:nowrap;
+    overflow:hidden;
+    font-size:80%;
+    padding-left:10px;
+}
+
+.planner > .users > .user > .plans > .plan > a {
+    color:black;
+}
+
+.planner > .timeline-container {
+    float:left;
+    width:730px;
+    min-height:400px;
+    overflow-x:scroll;
+}
+
+.planner > .timeline-container > .timeline {
+    width:2730px; /* (90 + 1) days * 30 = 2730 */
+}
+
+.planner > .timeline-container > .timeline > .calendar {
+    height:40px;
+    background-color:white;
+    border-bottom:1px solid #e0e0e0;
+    overflow:hidden;
+}
+
+.planner > .timeline-container > .timeline > .calendar > .month {
+    font-size:70%;
+    float:left;
+    height:40px;
+}
+
+.planner > .timeline-container > .timeline > .calendar > .month > .header {
+    height:20px;
+    font-weight:bold;
+    background-color:#c0c0c0;
+    padding-left:10px;
+    line-height:20px;
+}
+
+.planner > .timeline-container > .timeline > .calendar > .month:nth-child(even) > .header {
+    background-color:#d0d0d0;
+}
+
+
+.planner > .timeline-container > .timeline > .calendar > .month > .body {
+    height:20px;
+    background-color:#e0e0e0;
+}
+
+.planner > .timeline-container > .timeline > .calendar > .month > .body > .day {
+    height:20px;
+    width:30px;
+    float:left;
+    text-align:center;
+    line-height:20px;
+}
+
+.planner > .timeline-container > .timeline > .body {
+    background: url("/images/planner/day.png") top left;
+    min-height:360px;
+}
+
+.planner > .timeline-container > .timeline > .body > .user > .ranges {
+    height:30px;
+}
+
+.planner > .timeline-container > .timeline > .body > .user > .ranges > .range {
+    position:relative;
+    top:0;
+    height:30px;
+    background-color:#0088cc;
+}
+
+.planner > .timeline-container > .timeline > .body > .user > .plans {
+    height:30px;
+}
+
+.planner > .timeline-container > .timeline > .body > .user > .plans > .plan {
+    height:30px;
+}
+
+.planner > .timeline-container > .timeline > .body > .user > .plans > .plan > .range {
+    position:relative;
+    top:5px;
+    height:20px;
+    background-color:#00b2ff;
+}

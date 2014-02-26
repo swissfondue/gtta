@@ -931,6 +931,106 @@ function Admin()
             }
         };
     };
+
+    /**
+     * Project planner
+     */
+    this.planner = new function () {
+        var _planner = this;
+
+        /**
+         * Show add plan form.
+         */
+        this.planForm = function () {
+            $('#plan-modal').modal();
+        };
+
+        /**
+         * Form change handler
+         * @param elem
+         */
+        this.onFormChange = function (elem) {
+            var id;
+
+            elem = $(elem);
+            id = $(elem).attr("id");
+
+            if (id == "ProjectPlannerEditForm_clientId") {
+                system.control.loadObjects($(elem).val(), "project-list", function (data) {
+                    if (data && data.objects) {
+                        var target = $("#ProjectPlannerEditForm_projectId");
+
+                        target.find("option:not(:first)").remove();
+                        $("#ProjectPlannerEditForm_targetId option:not(:first)").remove();
+
+                        var options = [];
+
+                        for (var i = 0; i < data.objects.length; i++) {
+                            var option = data.objects[i];
+
+                            if (option.guided) {
+                                continue;
+                            }
+
+                            options.push($("<option></option>")
+                                .val(option.id)
+                                .html(option.name)
+                            );
+                        }
+
+                        target.append(options);
+                    }
+                });
+            } else if (id == "ProjectPlannerEditForm_projectId") {
+                system.control.loadObjects($(elem).val(), "target-list", function (data) {
+                    if (data && data.objects) {
+                        var target = $("#ProjectPlannerEditForm_targetId");
+
+                        target.find("option:not(:first)").remove();
+                        var options = [];
+
+                        for (var i = 0; i < data.objects.length; i++) {
+                            var option = data.objects[i];
+
+                            options.push($("<option></option>")
+                                .val(option.id)
+                                .html(option.host)
+                            );
+                        }
+
+                        target.append(options);
+                    }
+                });
+            }  else if (id == "ProjectPlannerEditForm_targetId") {
+                system.control.loadObjects($(elem).val(), "target-category-list", function (data) {
+                    if (data && data.objects) {
+                        var target = $("#ProjectPlannerEditForm_categoryId");
+
+                        target.find("option:not(:first)").remove();
+                        var options = [];
+
+                        for (var i = 0; i < data.objects.length; i++) {
+                            var option = data.objects[i];
+
+                            options.push($("<option></option>")
+                                .val(option.id)
+                                .html(option.name)
+                            );
+                        }
+
+                        target.append(options);
+                    }
+                });
+            }
+        };
+
+        /**
+         * Submit add form
+         */
+        this.addFormSubmit = function () {
+            $("#object-selection-form").submit();
+        };
+    };
 }
 
 var admin = new Admin();

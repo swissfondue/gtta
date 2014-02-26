@@ -6,7 +6,7 @@ function System() {
 
     // attributes
     this.csrf = null;
-    this.ajaxTimeout = 5000;
+    this.ajaxTimeout = 60000;
     this.messageTimeout = 5000;
     this.l10nMessages = {};
     this.constants = {};

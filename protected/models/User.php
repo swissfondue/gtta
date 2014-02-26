@@ -19,65 +19,60 @@
  * @property boolean $certificate_required
  * @property boolean $certificate_serial
  * @property boolean $certificate_issuer
+ * @property ProjectPlanner[] $planner
  */
-class User extends CActiveRecord
-{
+class User extends CActiveRecord {
     /**
      * User roles.
      */
-    const ROLE_ADMIN  = 'admin';
-    const ROLE_USER   = 'user';
-    const ROLE_CLIENT = 'client';
+    const ROLE_ADMIN = "admin";
+    const ROLE_USER = "user";
+    const ROLE_CLIENT = "client";
 
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
 	 * @return User the static model class
 	 */
-	public static function model($className=__CLASS__)
-	{
+	public static function model($className=__CLASS__) {
 		return parent::model($className);
 	}
 
 	/**
 	 * @return string the associated database table name
 	 */
-	public function tableName()
-	{
-		return 'users';
+	public function tableName() {
+		return "users";
 	}
 
 	/**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
+	public function rules() {
 		return array(
-            array( 'email, password, role', 'required' ),
-            array( 'email, password, name, password_reset_code', 'length', 'max' => 1000 ),
-            array( 'role', 'in', 'range' => array( self::ROLE_ADMIN, self::ROLE_USER, self::ROLE_CLIENT ) ),
-            array( 'client_id, last_action_time, send_notifications, show_details, show_reports, password_reset_time, certificate_required, certificate_serial, certificate_issuer', 'safe' ),
+            array("email, password, role", "required"),
+            array("email, password, name, password_reset_code", "length", "max" => 1000),
+            array("role", "in", "range" => array(self::ROLE_ADMIN, self::ROLE_USER, self::ROLE_CLIENT)),
+            array("client_id, last_action_time, send_notifications, show_details, show_reports, password_reset_time, certificate_required, certificate_serial, certificate_issuer", "safe"),
 		);
 	}
 
     /**
 	 * @return array relational rules.
 	 */
-	public function relations()
-	{
+	public function relations() {
 		return array(
-			'client'   => array( self::BELONGS_TO, 'Client',  'client_id' ),
-            'projects' => array( self::MANY_MANY,  'Project', 'project_users(user_id, project_id)' ),
+			"client" => array(self::BELONGS_TO, "Client",  "client_id"),
+            "projects" => array(self::MANY_MANY,  "Project", "project_users(user_id, project_id)"),
+            "planner" => array(self::HAS_MANY, "ProjectPlanner",  "user_id"),
 		);
 	}
 
     /**
      * Check role.
      */
-    static function checkRole($role)
-    {
-        switch ($role)
-        {
+    static function checkRole($role) {
+        switch ($role) {
             case self::ROLE_ADMIN:
             case self::ROLE_CLIENT:
                 return Yii::app()->user->role == $role;

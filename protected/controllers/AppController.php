@@ -280,6 +280,30 @@ class AppController extends Controller {
 
                     break;
 
+                case "target-category-list":
+                    $target = Target::model()->findByPk($model->id);
+
+                    if (!$target) {
+                        throw new CHttpException(404, Yii::t("app", "Project not found."));
+                    }
+
+                    if (!$target->project->checkPermission()) {
+                        throw new CHttpException(403, Yii::t("app", "Access denied."));
+                    }
+
+                    $categories = TargetCheckCategory::model()->findAllByAttributes(
+                        array("target_id" => $target->id)
+                    );
+
+                    foreach ($categories as $category) {
+                        $objects[] = array(
+                            "id" => $category->check_category_id,
+                            "name" => $category->category->name,
+                        );
+                    }
+
+                    break;
+
                 case 'control-check-list':
                     $control = CheckControl::model()->findByPk($model->id);
 
