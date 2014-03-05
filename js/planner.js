@@ -16,7 +16,6 @@
         this.target = target;
         this.dataUrl = options.dataUrl;
         this.controlUrl = options.controlUrl;
-        this.editUrl = options.editUrl;
         this.currentDate = null;
         this.startDate = null;
         this.endDate = null;
@@ -75,8 +74,8 @@
                 return;
             }
 
-            leftPlans.toggle();
-            rightPlans.toggle();
+            leftPlans.slideToggle("fast");
+            rightPlans.slideToggle("fast");
         };
 
         /**
@@ -99,6 +98,29 @@
                     planObj = $("<div></div>")
                         .addClass("plan")
                         .append(
+                            $("<div></div>")
+                                .addClass("pull-left")
+                                .css("margin-right", 10)
+                                .append(
+                                    $("<a></a>")
+                                        .attr("href", "#del")
+                                        .attr("title", system.translate("Delete"))
+                                        .click(
+                                            (function (plan, planner) {
+                                                return function () {
+                                                    admin.planner.del(plan.id, planner.controlUrl, function () {
+                                                        planner.loadData();
+                                                    });
+                                                }
+                                            })(plan, planner)
+                                        )
+                                        .append(
+                                            $("<i></i>")
+                                                .addClass("icon")
+                                                .addClass("icon-remove")
+                                        )
+                                ),
+
                             $("<a></a>")
                                 .attr("href", plan.link)
                                 .html(plan.name)
@@ -255,6 +277,12 @@
                     duration = (this._dateDiff(rangeStart, rangeEnd) + 1) * 30;
                     rangeObj.css("width", duration);
 
+                    $("<div></div>")
+                        .addClass("finished")
+                        .css("width", range.finished)
+                        .html(range.finished == "0%" ? "" : range.finished)
+                        .appendTo(rangeObj);
+
                     planObj = $("<div></div>")
                         .addClass("plan")
                         .attr("id", range.id)
@@ -263,7 +291,7 @@
                     plans.push(planObj);
                 }
 
-                var top = 0;
+                var top = 5;
 
                 for (k = 0; k < ranges.length; k++) {
                     range = ranges[k];
@@ -278,7 +306,7 @@
                     rangeObj.css("width", duration);
 
                     rangeList.push(rangeObj);
-                    top -= 30;
+                    top -= 20;
                 }
 
                 userObj.append(

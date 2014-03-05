@@ -10,6 +10,7 @@ class StatsCommand extends ConsoleCommand {
     private function _process() {
         if ($this->_system->status == System::STATUS_IDLE) {
             TargetCheckCategory::updateAllStats();
+            ProjectPlanner::updateAllStats();
         }
     }
     

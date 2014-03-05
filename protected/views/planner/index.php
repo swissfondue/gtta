@@ -74,7 +74,7 @@
                     </div>
                 </div>
 
-                <div class="control-group">
+                <div class="control-group hide">
                     <label class="control-label" for="ProjectPlannerEditForm_projectId"><?php echo Yii::t("app", "Project"); ?></label>
                     <div class="controls">
                         <select class="input-xlarge" id="ProjectPlannerEditForm_projectId" name="ProjectPlannerEditForm[projectId]" onchange="admin.planner.onFormChange(this);">
@@ -83,7 +83,7 @@
                     </div>
                 </div>
 
-                <div class="control-group">
+                <div class="control-group hide">
                     <label class="control-label" for="ProjectPlannerEditForm_targetId"><?php echo Yii::t("app", "Target"); ?></label>
                     <div class="controls">
                         <select class="input-xlarge" id="ProjectPlannerEditForm_targetId" name="ProjectPlannerEditForm[targetId]" onchange="admin.planner.onFormChange(this);">
@@ -92,10 +92,19 @@
                     </div>
                 </div>
                 
-                <div class="control-group">
+                <div class="control-group hide">
                     <label class="control-label" for="ProjectPlannerEditForm_categoryId"><?php echo Yii::t("app", "Category"); ?></label>
                     <div class="controls">
                         <select class="input-xlarge" id="ProjectPlannerEditForm_categoryId" name="ProjectPlannerEditForm[categoryId]" onchange="admin.planner.onFormChange(this);">
+                            <option value="0"><?php echo Yii::t("app", "Please select..."); ?></option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="control-group hide">
+                    <label class="control-label" for="ProjectPlannerEditForm_moduleId"><?php echo Yii::t("app", "Module"); ?></label>
+                    <div class="controls">
+                        <select class="input-xlarge" id="ProjectPlannerEditForm_moduleId" name="ProjectPlannerEditForm[moduleId]" onchange="admin.planner.onFormChange(this);">
                             <option value="0"><?php echo Yii::t("app", "Please select..."); ?></option>
                         </select>
                     </div>
@@ -105,7 +114,7 @@
     </div>
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal"><?php echo Yii::t("app", "Cancel"); ?></button>
-        <button id="add-button" class="btn btn-primary" onclick="admin.planner.addFormSubmit();"><?php echo Yii::t("app", "Add"); ?></button>
+        <button id="add-button" class="btn btn-primary" onclick="admin.planner.addFormSubmit(); return false;" disabled><?php echo Yii::t("app", "Add"); ?></button>
     </div>
 </div>
 
@@ -114,7 +123,6 @@
         $(".planner").planner({
             dataUrl: "<?php echo $this->createUrl("planner/data"); ?>",
             controlUrl: "<?php echo $this->createUrl("planner/control"); ?>",
-            editUrl: "<?php echo $this->createUrl("planner/edit"); ?>"
         });
 
         $(".datepicker").datepicker();

@@ -126,7 +126,6 @@ return array(
                 "project-planner" => "planner/index",
                 "project-planner/control" => "planner/control",
                 "project-planner/data" => "planner/data",
-                "project-planner/edit" => "planner/edit",
 
                 // vulnerability tracker
                 "vuln-tracker"                                             => "vulntracker/index",

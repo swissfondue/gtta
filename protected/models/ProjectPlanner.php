@@ -54,4 +54,54 @@ class ProjectPlanner extends CActiveRecord {
             "projectGtModule" => array(self::BELONGS_TO, "ProjectGtModule", array("project_id", "gt_module_id")),
 		);
 	}
+
+    /**
+     * Update planner stats
+     */
+    public static function updateAllStats() {
+        $plans = ProjectPlanner::model()->findAll();
+
+        /** @var ProjectPlanner $plan */
+        foreach ($plans as $plan) {
+            $finished = 0;
+
+            if ($plan->targetCheckCategory) {
+                $category = $plan->targetCheckCategory;
+
+                if ($category->check_count > 0) {
+                    $finished = $category->finished_count / $category->check_count;
+                }
+            } else if ($plan->projectGtModule) {
+                $module = $plan->projectGtModule;
+                $checkIds = array();
+
+                $checks = GtCheck::model()->findAllByAttributes(array(
+                    "gt_module_id" => $module->gt_module_id
+                ));
+
+                foreach ($checks as $check) {
+                    $checkIds[] = $check->id;
+                }
+
+                $criteria = new CDbCriteria();
+                $criteria->addColumnCondition(array("project_id" => $module->project_id));
+                $criteria->addInCondition("t.gt_check_id", $checkIds);
+
+                $projectChecks = ProjectGtCheck::model()->findAll($criteria);
+
+                if (count($projectChecks) > 0) {
+                    foreach ($projectChecks as $check) {
+                        if ($check->status == ProjectGtCheck::STATUS_FINISHED) {
+                            $finished++;
+                        }
+                    }
+
+                    $finished = $finished / count($projectChecks);
+                }
+            }
+
+            $plan->finished = $finished;
+            $plan->save();
+        }
+    }
 }

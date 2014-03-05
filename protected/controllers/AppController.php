@@ -559,8 +559,41 @@ class AppController extends Controller {
 
                     break;
 
+                case "gt-project-module-list":
+                    $project = Project::model()->findByPk($model->id);
+
+                    if (!$project) {
+                        throw new CHttpException(404, Yii::t("app", "Project not found."));
+                    }
+
+                    if (!$project->checkPermission()) {
+                        throw new CHttpException(403, Yii::t("app", "Access denied."));
+                    }
+
+                    $modules = ProjectGtModule::model()->with(array(
+                        "module" => array(
+                            "l10n" => array(
+                                "alias" => "l10n",
+                                "joinType" => "LEFT JOIN",
+                                "on" => "language_id = :language_id",
+                                "params" => array("language_id" => $language)
+                            )
+                        )
+                    ))->findAllByAttributes(array(
+                        "project_id" => $project->id
+                    ));
+
+                    foreach ($modules as $module) {
+                        $objects[] = array(
+                            "id" => $module->gt_module_id,
+                            "name" => $module->module->localizedName,
+                        );
+                    }
+
+                    break;
+
                 default:
-                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    throw new CHttpException(403, Yii::t("app", "Unknown operation."));
                     break;
             }
 

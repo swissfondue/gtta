@@ -12,8 +12,8 @@ class PlannerController extends Controller {
             "https",
 			"checkAuth",
             "checkAdmin",
-            "postOnly + data, control, edit",
-            "ajaxOnly + data, control, edit",
+            "postOnly + data, control",
+            "ajaxOnly + data, control",
         );
 	}
 
@@ -22,19 +22,60 @@ class PlannerController extends Controller {
      */
 	public function actionIndex() {
         if (isset($_POST["ProjectPlannerEditForm"])) {
-            $user_id = $_POST["ProjectPlannerEditForm"]["userId"];
-            $target_id = $_POST["ProjectPlannerEditForm"]["targetId"];
-            $category_id = $_POST["ProjectPlannerEditForm"]["categoryId"];
-            $start = $_POST["ProjectPlannerEditForm"]["startDate"];
-            $end = $_POST["ProjectPlannerEditForm"]["endDate"];
+            $form = new ProjectPlannerEditForm();
+            $form->attributes = $_POST["ProjectPlannerEditForm"];
 
-            $plan = new ProjectPlanner();
-            $plan->start_date = $start;
-            $plan->end_date = $end;
-            $plan->user_id = $user_id;
-            $plan->target_id = $target_id;
-            $plan->check_category_id = $category_id;
-            $plan->save();
+            if ($form->validate()) {
+                $targetId = $form->targetId;
+                $categoryId = $form->categoryId;
+                $projectId = $form->projectId;
+                $moduleId = $form->moduleId;
+                $error = false;
+
+                if ($targetId && $categoryId) {
+                    $moduleId = null;
+
+                    $plan = ProjectPlanner::model()->findByAttributes(array(
+                        "target_id" => $targetId,
+                        "check_category_id" => $categoryId
+                    ));
+
+                    if ($plan) {
+                        Yii::app()->user->setFlash("error", Yii::t("app", "This category is already planned."));
+                        $error = true;
+                    }
+                } else if ($projectId && $moduleId) {
+                    $targetId = null;
+                    $categoryId = null;
+
+                    $plan = ProjectPlanner::model()->findByAttributes(array(
+                        "project_id" => $projectId,
+                        "gt_module_id" => $moduleId
+                    ));
+
+                    if ($plan) {
+                        Yii::app()->user->setFlash("error", Yii::t("app", "This module is already planned."));
+                        $error = true;
+                    }
+                } else {
+                    Yii::app()->user->setFlash("error", Yii::t("app", "Please specify target and category or project and module."));
+                    $error = true;
+                }
+
+                if (!$error) {
+                    $plan = new ProjectPlanner();
+                    $plan->start_date = $form->startDate;
+                    $plan->end_date = $form->endDate;
+                    $plan->user_id = $form->userId;
+                    $plan->target_id = $targetId;
+                    $plan->check_category_id = $categoryId;
+                    $plan->project_id = $projectId;
+                    $plan->gt_module_id = $moduleId;
+                    $plan->save();
+                }
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
         }
 
         $criteria = new CDbCriteria();
@@ -179,7 +220,7 @@ class PlannerController extends Controller {
                         "link" => $link,
                         "startDate" => $plan->start_date,
                         "endDate" => $plan->end_date,
-                        "finished" => $plan->finished
+                        "finished" => round($plan->finished * 100) . "%"
                     );
                 }
 
@@ -192,6 +233,50 @@ class PlannerController extends Controller {
             }
 
             $response->addData("users", $userList);
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+    
+    /**
+     * Control function.
+     */
+    public function actionControl() {
+        $response = new AjaxResponse();
+
+        try {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST["EntryControlForm"];
+
+            if (!$model->validate()) {
+                $errorText = "";
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $id = $model->id;
+            $plan = ProjectPlanner::model()->findByPk($id);
+
+            if ($plan === null) {
+                throw new CHttpException(404, Yii::t("app", "Plan not found."));
+            }
+
+            switch ($model->operation) {
+                case "delete":
+                    $plan->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t("app", "Unknown operation."));
+                    break;
+            }
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }

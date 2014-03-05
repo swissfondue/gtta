@@ -950,77 +950,133 @@ function Admin()
          * @param elem
          */
         this.onFormChange = function (elem) {
-            var id;
+            var id, targetId, projectId, categoryId, moduleId;
 
             elem = $(elem);
             id = $(elem).attr("id");
 
+            $("#add-button").prop("disabled", true);
+
+            targetId = $("#ProjectPlannerEditForm_targetId");
+            projectId = $("#ProjectPlannerEditForm_projectId");
+            categoryId = $("#ProjectPlannerEditForm_categoryId");
+            moduleId = $("#ProjectPlannerEditForm_moduleId");
+
             if (id == "ProjectPlannerEditForm_clientId") {
-                system.control.loadObjects($(elem).val(), "project-list", function (data) {
-                    if (data && data.objects) {
-                        var target = $("#ProjectPlannerEditForm_projectId");
+                projectId.find("option:not(:first)").remove();
+                targetId.find("option:not(:first)").remove();
+                categoryId.find("option:not(:first)").remove();
+                moduleId.find("option:not(:first)").remove();
 
-                        target.find("option:not(:first)").remove();
-                        $("#ProjectPlannerEditForm_targetId option:not(:first)").remove();
+                targetId.parent().parent().hide();
+                categoryId.parent().parent().hide();
+                moduleId.parent().parent().hide();
 
-                        var options = [];
+                if (!$(elem).val()) {
+                    projectId.parent().parent().hide();
+                } else {
+                    projectId.parent().parent().show();
+                    system.control.loadObjects($(elem).val(), "project-list", function (data) {
+                        if (data && data.objects) {
+                            var options = [];
 
-                        for (var i = 0; i < data.objects.length; i++) {
-                            var option = data.objects[i];
+                            for (var i = 0; i < data.objects.length; i++) {
+                                var option = data.objects[i];
 
-                            if (option.guided) {
-                                continue;
+                                options.push($("<option></option>")
+                                    .val(option.id)
+                                    .html(option.name)
+                                    .attr("data-guided", option.guided)
+                                );
                             }
 
-                            options.push($("<option></option>")
-                                .val(option.id)
-                                .html(option.name)
-                            );
+                            projectId.append(options);
                         }
-
-                        target.append(options);
-                    }
-                });
+                    });
+                }
             } else if (id == "ProjectPlannerEditForm_projectId") {
-                system.control.loadObjects($(elem).val(), "target-list", function (data) {
-                    if (data && data.objects) {
-                        var target = $("#ProjectPlannerEditForm_targetId");
+                targetId.find("option:not(:first)").remove();
+                categoryId.find("option:not(:first)").remove();
+                moduleId.find("option:not(:first)").remove();
 
-                        target.find("option:not(:first)").remove();
-                        var options = [];
+                categoryId.parent().parent().hide();
 
-                        for (var i = 0; i < data.objects.length; i++) {
-                            var option = data.objects[i];
+                if (!$(elem).val()) {
+                    targetId.parent().parent().hide();
+                    moduleId.parent().parent().hide();
+                } else {
+                    var guided = $(elem).find("option:selected").data("guided");
 
-                            options.push($("<option></option>")
-                                .val(option.id)
-                                .html(option.host)
-                            );
-                        }
+                    if (!guided) {
+                        system.control.loadObjects($(elem).val(), "target-list", function (data) {
+                            if (data && data.objects) {
+                                targetId.parent().parent().show();
+                                moduleId.parent().parent().hide();
 
-                        target.append(options);
+                                var options = [];
+
+                                for (var i = 0; i < data.objects.length; i++) {
+                                    var option = data.objects[i];
+
+                                    options.push($("<option></option>")
+                                        .val(option.id)
+                                        .html(option.host)
+                                    );
+                                }
+
+                                targetId.append(options);
+                            }
+                        });
+                    } else {
+                        system.control.loadObjects($(elem).val(), "gt-project-module-list", function (data) {
+                            if (data && data.objects) {
+                                moduleId.parent().parent().show();
+                                targetId.parent().parent().hide();
+
+                                var options = [];
+
+                                for (var i = 0; i < data.objects.length; i++) {
+                                    var option = data.objects[i];
+
+                                    options.push($("<option></option>")
+                                        .val(option.id)
+                                        .html(option.name)
+                                    );
+                                }
+
+                                moduleId.append(options);
+                            }
+                        });
                     }
-                });
-            }  else if (id == "ProjectPlannerEditForm_targetId") {
-                system.control.loadObjects($(elem).val(), "target-category-list", function (data) {
-                    if (data && data.objects) {
-                        var target = $("#ProjectPlannerEditForm_categoryId");
+                }
+            } else if (id == "ProjectPlannerEditForm_targetId") {
+                categoryId.find("option:not(:first)").remove();
+                moduleId.find("option:not(:first)").remove();
 
-                        target.find("option:not(:first)").remove();
-                        var options = [];
+                if (!$(elem).val()) {
+                    categoryId.parent().parent().hide();
+                } else {
+                    system.control.loadObjects($(elem).val(), "target-category-list", function (data) {
+                        if (data && data.objects) {
+                            categoryId.parent().parent().show();
 
-                        for (var i = 0; i < data.objects.length; i++) {
-                            var option = data.objects[i];
+                            var options = [];
 
-                            options.push($("<option></option>")
-                                .val(option.id)
-                                .html(option.name)
-                            );
+                            for (var i = 0; i < data.objects.length; i++) {
+                                var option = data.objects[i];
+
+                                options.push($("<option></option>")
+                                    .val(option.id)
+                                    .html(option.name)
+                                );
+                            }
+
+                            categoryId.append(options);
                         }
-
-                        target.append(options);
-                    }
-                });
+                    });
+                }
+            } else if ((id == "ProjectPlannerEditForm_categoryId" || id == "ProjectPlannerEditForm_moduleId") && $(elem).val()) {
+                $("#add-button").prop("disabled", false);
             }
         };
 
@@ -1029,6 +1085,59 @@ function Admin()
          */
         this.addFormSubmit = function () {
             $("#object-selection-form").submit();
+        };
+
+        /**
+         * Control.
+         */
+        this._control = function(operation, id, url, callback) {
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data: {
+                    "EntryControlForm[operation]": operation,
+                    "EntryControlForm[id]": id,
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
+                        return;
+                    }
+
+                    data = data.data;
+
+                    if (operation == "delete") {
+                        if (callback) {
+                            callback();
+                        }
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.showMessage("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
+         * Delete plan.
+         */
+        this.del = function (id, url, callback) {
+            if (confirm(system.translate("Are you sure that you want to delete this object?"))) {
+                _planner._control("delete", id, url, callback);
+            }
         };
     };
 }

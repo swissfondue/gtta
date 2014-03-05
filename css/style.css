@@ -972,13 +972,14 @@ table.table-result td {
 
 .planner > .timeline-container > .timeline > .body > .user > .ranges > .range {
     position:relative;
-    top:0;
-    height:30px;
+    height:20px;
+    top:5px;
     background-color:#0088cc;
+    border-radius:5px;
+    cursor:pointer;
 }
 
 .planner > .timeline-container > .timeline > .body > .user > .plans {
-    height:30px;
 }
 
 .planner > .timeline-container > .timeline > .body > .user > .plans > .plan {
@@ -989,5 +990,17 @@ table.table-result td {
     position:relative;
     top:5px;
     height:20px;
-    background-color:#00b2ff;
+    background-color: rgba(0, 178, 255, 0.41);
+    cursor:pointer;
+}
+
+.planner > .timeline-container > .timeline > .body > .user > .plans > .plan > .range > .finished {
+    top:2px;
+    height:14px;
+    padding-top:6px;
+    background-color: #00acff;
+    text-align:center;
+    font-size:80%;
+    line-height:80%;
+    color:white;
 }
