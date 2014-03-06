@@ -1193,6 +1193,7 @@ class CheckController extends Controller
                 $dst->reference_url = $src->reference_url;
                 $dst->effort = $src->effort;
                 $dst->sort_order = 0;
+                $dst->demo = $src->demo;
                 $dst->save();
 
                 $dst->sort_order = $dst->id;
@@ -1218,7 +1219,7 @@ class CheckController extends Controller
                 foreach ($src->scripts as $script) {
                     $newScript = new CheckScript();
                     $newScript->check_id = $dst->id;
-                    $newScript->package_id = $src->package_id;
+                    $newScript->package_id = $script->package_id;
                     $newScript->save();
 
                     foreach ($script->inputs as $input) {
