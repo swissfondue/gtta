@@ -1004,3 +1004,7 @@ table.table-result td {
     line-height:80%;
     color:white;
 }
+
+.check-header.limited, .check-list .limited {
+    opacity:0.3;
+}

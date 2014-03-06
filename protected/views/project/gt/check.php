@@ -45,7 +45,7 @@
                     </div>
                 <?php endif; ?>
 
-                <div class="check-header <?php if ($check->isRunning) echo 'in-progress'; ?>">
+                <div class="check-header <?php if ($check->isRunning) echo 'in-progress'; ?> <?php if ($limited) echo "limited"; ?>">
                     <table class="check-header">
                         <tbody>
                             <tr>
@@ -56,7 +56,7 @@
                                         <i class="icon-cog" title="<?php echo Yii::t('app', 'Automated'); ?>"></i>
                                     <?php endif; ?>
 
-                                    <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
+                                    <?php if (User::checkRole(User::ROLE_ADMIN) && !$limited): ?>
                                         <a href="<?php echo $this->createUrl('check/editcheck', array('id' => $check->check->control->check_category_id, 'control' => $check->check->check_control_id, 'check' => $check->check_id)); ?>"><i class="icon-edit" title="<?php echo Yii::t('app', 'Edit'); ?>"></i></a>
                                     <?php endif; ?>
                                 </td>

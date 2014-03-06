@@ -261,7 +261,7 @@
                         $prevControl = $check->control->id;
                     ?>
                     <div id="check-<?php echo $check->id; ?>" class="check-header <?php if ($check->isRunning) echo "in-progress"; ?>" data-id="<?php echo $check->id; ?>" data-control-url="<?php echo $this->createUrl("project/controlcheck", array( "id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $check->id )); ?>" data-type="<?php echo $check->automated ? "automated" : "manual"; ?>" data-limited="<?php echo $limited ? 1 : 0; ?>">
-                        <table class="check-header">
+                        <table class="check-header <?php if ($limited) echo "limited"; ?>">
                             <tbody>
                                 <tr>
                                     <td class="name">
@@ -275,7 +275,7 @@
                                             <i class="icon-cog" title="<?php echo Yii::t("app", "Automated"); ?>"></i>
                                         <?php endif; ?>
 
-                                        <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
+                                        <?php if (User::checkRole(User::ROLE_ADMIN) && !$limited): ?>
                                             <a href="<?php echo $this->createUrl("check/editcheck", array( "id" => $check->control->check_category_id, "control" => $check->check_control_id, "check" => $check->id )); ?>"><i class="icon-edit" title="<?php echo Yii::t("app", "Edit"); ?>"></i></a>
                                         <?php endif; ?>
                                     </td>
