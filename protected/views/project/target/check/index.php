@@ -103,7 +103,7 @@
                         </div>
 
                         <div class="control-body<?php if ($collapseControls) echo " hide"; ?>" data-id="<?php echo $check->control->id; ?>">
-                            <div id="custom-check-<?php echo $check->control->id; ?>" class="check-header" data-id="custom-<?php echo $check->control->id; ?>">
+                            <div id="custom-check-<?php echo $check->control->id; ?>" class="check-header" data-id="custom-<?php echo $check->control->id; ?>" data-control-url="<?php echo $this->createUrl("project/controlcustomcheck", array("id" => $project->id, "target" => $target->id)); ?>">
                                 <table class="check-header">
                                     <tbody>
                                         <tr>
@@ -146,7 +146,7 @@
                                             <?php if (User::checkRole(User::ROLE_USER)): ?>
                                                 <td class="actions">
                                                     <?php if ($check->control->customCheck): ?>
-                                                        <a href="#reset" title="<?php echo Yii::t("app", "Reset"); ?>" onclick="user.check.reset(<?php echo $check->control->id; ?>, true);"><i class="icon icon-refresh"></i></a>
+                                                        <a href="#reset" title="<?php echo Yii::t("app", "Reset"); ?>" onclick="user.check.resetCustom(<?php echo $check->control->id; ?>);"><i class="icon icon-refresh"></i></a>
                                                     <?php else: ?>
                                                         <span class="disabled"><i class="icon icon-refresh" title="<?php echo Yii::t("app", "Reset"); ?>"></i></span>
                                                     <?php endif; ?>

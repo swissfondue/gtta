@@ -988,13 +988,22 @@ function User()
 
         /**
          * Control check function.
+         * @param id
+         * @param operation
+         * @param custom
          */
-        this._control = function(id, operation) {
+        this._control = function(id, operation, custom) {
             var row, headerRow, url;
 
-            headerRow = $('div.check-header[data-id="' + id + '"]');
-            row = $('div.check-form[data-id="' + id + '"]');
-            url = headerRow.data('control-url');
+            headerRow = custom ?
+                $('div.check-header[data-id="custom-' + id + '"]') :
+                $('div.check-header[data-id="' + id + '"]');
+
+            row = custom ?
+                $('div.check-form[data-id="custom-' + id + '"]') :
+                $('div.check-form[data-id="' + id + '"]');
+
+            url = headerRow.data("control-url");
 
             $.ajax({
                 dataType: 'json',
@@ -1009,7 +1018,7 @@ function User()
                 },
 
                 success : function (data, textStatus) {
-                    _check.setLoaded(id);
+                    _check.setLoaded(id, custom);
 
                     if (data.status == 'error') {
                         system.showMessage('error', data.errorText);
@@ -1041,7 +1050,7 @@ function User()
                         });
 
                         headerRow.addClass('in-progress');
-                    } else if (operation == 'reset') {
+                    } else if (!custom && operation == 'reset') {
                         $('td.actions', headerRow).html('');
                         $('td.status', headerRow).html('&nbsp;');
 
@@ -1094,16 +1103,28 @@ function User()
 
                         _check.setLoading(id);
                         $('.loader-image').hide();
+                    } else if (custom && operation == "reset") {
+                        $("td.status", headerRow).html("&nbsp;");
+                        $("td.actions", headerRow).html("");
+                        $("td.actions", headerRow).append(
+                            '<span class="disabled"><i class="icon icon-refresh" title="' +
+                            system.translate('Reset') + '"></i></span>'
+                        );
+
+                        $('input[type="text"]', row).val("");
+                        $('input[type="radio"]', row).prop("checked", false);
+                        $('input[type="checkbox"]', row).prop("checked", false);
+                        $("textarea", row).val("");
                     }
                 },
 
                 error : function(jqXHR, textStatus, e) {
-                    _check.setLoaded(id);
+                    _check.setLoaded(id, custom);
                     system.showMessage('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend : function (jqXHR, settings) {
-                    _check.setLoading(id);
+                    _check.setLoading(id, custom);
                 }
             });
         };
@@ -1157,10 +1178,18 @@ function User()
 
         /**
          * Reset check.
+         * @param id
          */
         this.reset = function (id) {
-            if (confirm(system.translate('Are you sure that you want to reset this check?')))
-                _check._control(id, 'reset');
+            if (confirm(system.translate('Are you sure that you want to reset this check?'))) {
+                _check._control(id, "reset");
+            }
+        };
+
+        this.resetCustom = function (id) {
+            if (confirm(system.translate("Are you sure that you want to reset this check?"))) {
+                _check._control(id, "reset", true);
+            }
         };
     };
 

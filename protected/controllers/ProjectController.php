@@ -3240,6 +3240,89 @@ class ProjectController extends Controller
     }
 
     /**
+     * Control check function.
+     */
+    public function actionControlCustomCheck($id, $target) {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $target = (int) $target;
+
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new CHttpException(404, Yii::t("app", "Project not found."));
+            }
+
+            if (!$project->checkPermission()) {
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
+            }
+
+            $target = Target::model()->findByAttributes(array(
+                "id" => $target,
+                "project_id" => $project->id
+            ));
+
+            if (!$target) {
+                throw new CHttpException(404, Yii::t("app", "Target not found."));
+            }
+
+            $form = new EntryControlForm();
+            $form->attributes = $_POST["EntryControlForm"];
+
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $control = CheckControl::model()->findByPk($form->id);
+
+            if (!$control) {
+                throw new CHttpException(404, Yii::t("app", "Control not found."));
+            }
+
+            $categoryCheck = TargetCheckCategory::model()->findByAttributes(array(
+                "target_id" => $target->id,
+                "check_category_id" => $control->check_category_id
+            ));
+
+            if (!$categoryCheck) {
+                throw new CHttpException(404, Yii::t("app", "Control not found."));
+            }
+
+            $customCheck = TargetCustomCheck::model()->findByAttributes(array(
+                "target_id" => $target->id,
+                "check_control_id"  => $control->id
+            ));
+
+            if (!$customCheck) {
+                throw new CHttpException(404, Yii::t("app", "Check not found."));
+            }
+
+            switch ($form->operation) {
+                case "reset":
+                    $customCheck->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t("app", "Unknown operation."));
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
      * Control GT check function.
      */
     public function actionGtControlCheck($id, $module, $check) {
