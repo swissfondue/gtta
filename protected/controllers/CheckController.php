@@ -206,32 +206,29 @@ class CheckController extends Controller
         }
 
 		// collect user input data
-		if (isset($_POST['CheckCategoryEditForm']))
-		{
+		if (isset($_POST['CheckCategoryEditForm'])) {
 			$model->attributes = $_POST['CheckCategoryEditForm'];
             $model->name = $model->defaultL10n($languages, 'name');
 
-			if ($model->validate())
-            {
+			if ($model->validate()) {
                 $category->name = $model->name;
                 $category->save();
 
-                foreach ($model->localizedItems as $languageId => $value)
-                {
+                foreach ($model->localizedItems as $languageId => $value) {
                     $categoryL10n = CheckCategoryL10n::model()->findByAttributes(array(
                         'check_category_id' => $category->id,
                         'language_id'       => $languageId
                     ));
 
-                    if (!$categoryL10n)
-                    {
+                    if (!$categoryL10n) {
                         $categoryL10n = new CheckCategoryL10n();
                         $categoryL10n->check_category_id = $category->id;
                         $categoryL10n->language_id       = $languageId;
                     }
 
-                    if ($value['name'] == '')
+                    if ($value['name'] == '') {
                         $value['name'] = null;
+                    }
 
                     $categoryL10n->name = $value['name'];
                     $categoryL10n->save();
@@ -241,11 +238,21 @@ class CheckController extends Controller
 
                 $category->refresh();
 
-                if ($newRecord)
+                if ($newRecord) {
                     $this->redirect(array( 'check/edit', 'id' => $category->id ));
-            }
-            else
+                }
+                
+                // refresh the category after saving
+                $category = CheckCategory::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                ))->findByPk($id);
+            } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+            }
 		}
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
@@ -383,8 +390,9 @@ class CheckController extends Controller
                 'check_category_id' => $category->id
             ));
 
-            if (!$control)
+            if (!$control) {
                 throw new CHttpException(404, Yii::t('app', 'Control not found.'));
+            }
         }
         else
         {
@@ -423,15 +431,15 @@ class CheckController extends Controller
 			$model->attributes = $_POST['CheckControlEditForm'];
             $model->name = $model->defaultL10n($languages, 'name');
 
-			if ($model->validate())
-            {
+			if ($model->validate()) {
                 $redirect = false;
 
-                if ($model->categoryId != $control->check_category_id || $newRecord)
+                if ($model->categoryId != $control->check_category_id || $newRecord) {
                     $redirect = true;
+                }
 
                 $control->check_category_id = $model->categoryId;
-                $control->name              = $model->name;
+                $control->name = $model->name;
                 $control->save();
 
                 if ($newRecord) {
@@ -442,11 +450,10 @@ class CheckController extends Controller
                 foreach ($model->localizedItems as $languageId => $value) {
                     $controlL10n = CheckControlL10n::model()->findByAttributes(array(
                         'check_control_id' => $control->id,
-                        'language_id'      => $languageId
+                        'language_id' => $languageId
                     ));
 
-                    if (!$controlL10n)
-                    {
+                    if (!$controlL10n) {
                         $controlL10n = new CheckControlL10n();
                         $controlL10n->check_control_id = $control->id;
                         $controlL10n->language_id      = $languageId;
@@ -463,11 +470,24 @@ class CheckController extends Controller
 
                 $control->refresh();
 
-                if ($redirect)
-                    $this->redirect(array( 'check/editcontrol', 'id' => $control->check_category_id, 'control' => $control->id ));
-            }
-            else
+                if ($redirect) {
+                    $this->redirect(array('check/editcontrol', 'id' => $control->check_category_id, 'control' => $control->id));
+                }
+                
+                // refresh the control after saving
+                $control = CheckControl::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                ))->findByAttributes(array(
+                    "id" => $control->id,
+                    "check_category_id" => $category->id
+                ));
+            } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+            }
 		}
 
         $categories = CheckCategory::model()->with(array(
@@ -907,15 +927,15 @@ class CheckController extends Controller
             ));
 
             $check = Check::model()->with(array(
-                'l10n' => array(
-                    'joinType' => 'LEFT JOIN',
-                    'on' => 'language_id = :language_id',
-                    'params' => array('language_id' => $language)
+                "l10n" => array(
+                    "joinType" => "LEFT JOIN",
+                    "on" => "language_id = :language_id",
+                    "params" => array("language_id" => $language)
                 )
             ))->find($criteria);
 
             if (!$check) {
-                throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+                throw new CHttpException(404, Yii::t("app", "Check not found."));
             }
         } else {
             $check = new Check();
@@ -1052,7 +1072,6 @@ class CheckController extends Controller
                 }
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check saved.'));
-
                 $check->refresh();
 
                 if ($redirect) {
@@ -1063,6 +1082,22 @@ class CheckController extends Controller
                         'check' => $check->id
                     ));
                 }
+
+                // reload localized check after saving
+                $criteria = new CDbCriteria();
+                $criteria->together = true;
+                $criteria->addColumnCondition(array(
+                    "id" => $check->id,
+                    "check_control_id" => $control->id
+                ));
+
+                $check = Check::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                ))->find($criteria);
             } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
             }
@@ -1740,8 +1775,21 @@ class CheckController extends Controller
 
                 $result->refresh();
 
-                if ($newRecord)
+                if ($newRecord) {
                     $this->redirect(array( 'check/editresult', 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'result' => $result->id ));
+                }
+                
+                // refresh result after saving
+                $result = CheckResult::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                ))->findByAttributes(array(
+                    "id" => $result->id,
+                    "check_id" => $check->id
+                ));
             }
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
@@ -2079,8 +2127,20 @@ class CheckController extends Controller
 
                 $solution->refresh();
 
-                if ($newRecord)
+                if ($newRecord) {
                     $this->redirect(array( 'check/editsolution', 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'solution' => $solution->id ));
+                }
+                
+                $solution = CheckSolution::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                ))->findByAttributes(array(
+                    "id" => $solution->id,
+                    "check_id" => $check->id
+                ));
             }
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
@@ -2758,6 +2818,18 @@ class CheckController extends Controller
                         'input' => $input->id
                     ));
                 }
+                
+                // refresh the input
+                $input = CheckInput::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                ))->findByAttributes(array(
+                    "id" => $input->id,
+                    "check_script_id" => $script->id
+                ));
             } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
             }

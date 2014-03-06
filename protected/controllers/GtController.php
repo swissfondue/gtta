@@ -209,6 +209,15 @@ class GtController extends Controller
                 if ($newRecord) {
                     $this->redirect(array('gt/edit', 'id' => $category->id));
                 }
+                
+                // refresh the category
+                $category = GtCategory::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                ))->findByPk($id);
             } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
             }
@@ -381,6 +390,18 @@ class GtController extends Controller
                 if ($newRecord) {
                     $this->redirect(array('gt/edittype', 'id' => $type->gt_category_id, 'type' => $type->id));
                 }
+                
+                // refresh the type
+                $type = GtType::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                ))->findByAttributes(array(
+                    "id" => $type->id,
+                    "gt_category_id" => $category->id
+                ));
             } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
             }
@@ -656,6 +677,18 @@ class GtController extends Controller
                 if ($newRecord) {
                     $this->redirect(array('gt/editmodule', 'id' => $category->id, 'type' => $type->id, 'module' => $module->id));
                 }
+                
+                // refresh the module
+                $module = GtModule::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                ))->findByAttributes(array(
+                    "id" => $module->id,
+                    "gt_type_id" => $type->id
+                ));
             } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
             }

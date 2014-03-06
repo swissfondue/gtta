@@ -144,8 +144,18 @@ class RiskController extends Controller
 
                 $template->refresh();
 
-                if ($newRecord)
+                if ($newRecord) {
                     $this->redirect(array( 'risk/edit', 'id' => $template->id ));
+                }
+                
+                // refresh the template
+                $template = RiskTemplate::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                ))->findByPk($id);
             }
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
@@ -395,8 +405,21 @@ class RiskController extends Controller
 
                 $risk->refresh();
 
-                if ($newRecord)
+                if ($newRecord) {
                     $this->redirect(array( 'risk/editcategory', 'id' => $template->id, 'category' => $risk->id ));
+                }
+
+                // refresh the category
+                $risk = RiskCategory::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                ))->findByAttributes(array(
+                    "id" => $category,
+                    "risk_template_id" => $template->id
+                ));
             }
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));

@@ -280,6 +280,15 @@ class ReporttemplateController extends Controller
                 if ($newRecord) {
                     $this->redirect(array( 'reporttemplate/edit', 'id' => $template->id ));
                 }
+                
+                // refresh the template
+                $template = ReportTemplate::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                ))->findByPk($id);
             } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
             }
@@ -678,8 +687,21 @@ class ReporttemplateController extends Controller
 
                 $summary->refresh();
 
-                if ($newRecord)
+                if ($newRecord) {
                     $this->redirect(array( 'reporttemplate/editsummary', 'id' => $template->id, 'summary' => $summary->id ));
+                }
+                
+                // refresh the summary
+                $summary = ReportTemplateSummary::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                ))->findByAttributes(array(
+                    "id" => $summary->id,
+                    "report_template_id" => $template->id
+                ));
             }
 
             if (count($model->getErrors()) > 0)
@@ -953,8 +975,21 @@ class ReporttemplateController extends Controller
 
                     $section->refresh();
 
-                    if ($newRecord)
+                    if ($newRecord) {
                         $this->redirect(array( 'reporttemplate/editsection', 'id' => $template->id, 'section' => $section->id ));
+                    }
+                    
+                    // refresh the section
+                     $section = ReportTemplateSection::model()->with(array(
+                        "l10n" => array(
+                            "joinType" => "LEFT JOIN",
+                            "on" => "language_id = :language_id",
+                            "params" => array( "language_id" => $language )
+                        )
+                    ))->findByAttributes(array(
+                        "id" => $section->id,
+                        "report_template_id" => $template->id
+                    ));
                 }
             }
 
