@@ -7,8 +7,8 @@
 <?php if (User::checkRole(User::ROLE_USER)): ?>
     <div class="pull-right buttons">
         <div class="btn-group" data-toggle="buttons-radio">
-            <button class="btn <?php if (!$category->advanced) echo "active"; ?>" onclick="user.check.setAdvanced("<?php echo $this->createUrl("project/savecategory", array( "id" => $project->id, "target" => $target->id, "category" => $category->check_category_id )); ?>", 0);"><?php echo Yii::t("app", "Basic"); ?></button>
-            <button class="btn <?php if ($category->advanced)  echo "active"; ?>" onclick="user.check.setAdvanced("<?php echo $this->createUrl("project/savecategory", array( "id" => $project->id, "target" => $target->id, "category" => $category->check_category_id )); ?>", 1);"><?php echo Yii::t("app", "Advanced"); ?></button>
+            <button class="btn <?php if (!$category->advanced) echo "active"; ?>" onclick="user.check.setAdvanced('<?php echo $this->createUrl("project/savecategory", array( "id" => $project->id, "target" => $target->id, "category" => $category->check_category_id )); ?>', 0);"><?php echo Yii::t("app", "Basic"); ?></button>
+            <button class="btn <?php if ($category->advanced)  echo "active"; ?>" onclick="user.check.setAdvanced('<?php echo $this->createUrl("project/savecategory", array( "id" => $project->id, "target" => $target->id, "category" => $category->check_category_id )); ?>', 1);"><?php echo Yii::t("app", "Advanced"); ?></button>
         </div>
     </div>
 
@@ -662,7 +662,7 @@
                                                     <?php foreach ($check->results as $result): ?>
                                                         <li>
                                                             <div class="result-header">
-                                                                <a href="#insert" onclick="user.check.insertResult(<?php echo $check->id; ?>, $(".result-content[data-id=<?php echo $result->id; ?>]").html());"><?php echo CHtml::encode($result->localizedTitle); ?></a>
+                                                                <a href="#insert" onclick="user.check.insertResult(<?php echo $check->id; ?>, $('.result-content[data-id=<?php echo $result->id; ?>]').html());"><?php echo CHtml::encode($result->localizedTitle); ?></a>
 
                                                                 <span class="result-control" data-id="<?php echo $result->id; ?>">
                                                                     <a href="#result" onclick="user.check.expandResult(<?php echo $result->id; ?>);"><i class="icon-chevron-down"></i></a>
@@ -706,9 +706,9 @@
 
                                                             <span class="solution-control" data-id="<?php echo $check->id; ?>-<?php echo TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>">
                                                                 <?php if (User::checkRole(User::ROLE_USER)): ?>
-                                                                    <a href="#solution" onclick="user.check.expandSolution("<?php echo $check->id; ?>-<?php echo TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>");"><i class="icon-chevron-down"></i></a>
+                                                                    <a href="#solution" onclick="user.check.expandSolution('<?php echo $check->id; ?>-<?php echo TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>');"><i class="icon-chevron-down"></i></a>
                                                                 <?php else: ?>
-                                                                    <a href="#solution" onclick="client.check.expandSolution("<?php echo $check->id; ?>-<?php echo TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>");"><i class="icon-chevron-down"></i></a>
+                                                                    <a href="#solution" onclick="client.check.expandSolution('<?php echo $check->id; ?>-<?php echo TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>');"><i class="icon-chevron-down"></i></a>
                                                                 <?php endif; ?>
                                                             </span>
                                                         </label>
@@ -790,7 +790,7 @@
                                                                         <a href="<?php echo $this->createUrl("project/attachment", array( "path" => $attachment->path )); ?>"><?php echo CHtml::encode($attachment->name); ?></a>
                                                                     </td>
                                                                     <td class="actions">
-                                                                        <a href="#del" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="user.check.delAttachment("<?php echo $attachment->path; ?>");"><i class="icon icon-remove"></i></a>
+                                                                        <a href="#del" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="user.check.delAttachment('<?php echo $attachment->path; ?>');"><i class="icon icon-remove"></i></a>
                                                                     </td>
                                                                 </tr>
                                                             <?php endforeach; ?>
