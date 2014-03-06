@@ -63,13 +63,45 @@ class TargetCheckCategory extends CActiveRecord
     public function updateStats() {
         $controlIds = array();
         $referenceIds = array();
+        $checkCount = 0;
+        $finishedCount = 0;
+        $infoCount = 0;
+        $lowCount = 0;
+        $medCount = 0;
+        $highCount = 0;
 
-        $controls = CheckControl::model()->findAllByAttributes(array(
-             'check_category_id' => $this->check_category_id
+        $controls = CheckControl::model()->with("customCheck")->findAllByAttributes(array(
+             "check_category_id" => $this->check_category_id
         ));
 
         foreach ($controls as $control) {
             $controlIds[] = $control->id;
+
+            if ($control->customCheck) {
+                $checkCount++;
+                $finishedCount++;
+
+                switch ($control->customCheck[0]->rating) {
+                    case TargetCustomCheck::RATING_INFO:
+                        $infoCount++;
+                        break;
+
+                    case TargetCustomCheck::RATING_LOW_RISK:
+                        $lowCount++;
+                        break;
+
+                    case TargetCustomCheck::RATING_MED_RISK:
+                        $medCount++;
+                        break;
+
+                    case TargetCustomCheck::RATING_HIGH_RISK:
+                        $highCount++;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
         }
 
         $references = TargetReference::model()->findAllByAttributes(array(
@@ -88,7 +120,7 @@ class TargetCheckCategory extends CActiveRecord
             $criteria->addCondition('t.advanced = FALSE');
         }
 
-        $checkCount = Check::model()->count($criteria);
+        $checkCount += Check::model()->count($criteria);
 
         $checks = Check::model()->findAll($criteria);
         $checkIds = array();
@@ -105,28 +137,27 @@ class TargetCheckCategory extends CActiveRecord
         ));
 
         $criteria->addInCondition('check_id', $checkIds);
-
-        $finishedCount = TargetCheck::model()->count($criteria);
+        $finishedCount += TargetCheck::model()->count($criteria);
 
         // info count
         $infoCriteria = clone $criteria;
-        $infoCriteria->addColumnCondition(array( 'rating' => TargetCheck::RATING_INFO ));
-        $infoCount = TargetCheck::model()->count($infoCriteria);
+        $infoCriteria->addColumnCondition(array('rating' => TargetCheck::RATING_INFO));
+        $infoCount += TargetCheck::model()->count($infoCriteria);
         
         // low count
         $lowCriteria = clone $criteria;
-        $lowCriteria->addColumnCondition(array( 'rating' => TargetCheck::RATING_LOW_RISK ));
-        $lowCount = TargetCheck::model()->count($lowCriteria);
+        $lowCriteria->addColumnCondition(array('rating' => TargetCheck::RATING_LOW_RISK));
+        $lowCount += TargetCheck::model()->count($lowCriteria);
 
         // med count
         $medCriteria = clone $criteria;
-        $medCriteria->addColumnCondition(array( 'rating' => TargetCheck::RATING_MED_RISK ));
-        $medCount = TargetCheck::model()->count($medCriteria);
+        $medCriteria->addColumnCondition(array('rating' => TargetCheck::RATING_MED_RISK));
+        $medCount += TargetCheck::model()->count($medCriteria);
 
         // high count
         $highCriteria = clone $criteria;
-        $highCriteria->addColumnCondition(array( 'rating' => TargetCheck::RATING_HIGH_RISK ));
-        $highCount = TargetCheck::model()->count($highCriteria);
+        $highCriteria->addColumnCondition(array('rating' => TargetCheck::RATING_HIGH_RISK));
+        $highCount += TargetCheck::model()->count($highCriteria);
 
         $this->check_count = $checkCount;
         $this->finished_count = $finishedCount;

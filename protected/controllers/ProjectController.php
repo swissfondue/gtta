@@ -16,8 +16,8 @@ class ProjectController extends Controller
             'showDetails + target, attachment, checks',
             'checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, gtcontrolcheck, gtsavecheck, savecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment',
             'checkAdmin + edit, users, adduser, controluser',
-            'ajaxOnly + savecheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtcontrolattachment',
-            'postOnly + savecheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment',
+            'ajaxOnly + savecheck, savecustomcheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtcontrolattachment',
+            'postOnly + savecheck, savecustomcheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment',
             "idleOrRunning",
 		);
 	}
@@ -1386,201 +1386,237 @@ class ProjectController extends Controller
     /**
      * Display a list of checks.
      */
-	public function actionChecks($id, $target, $category)
-	{
-        $id       = (int) $id;
-        $target   = (int) $target;
+	public function actionChecks($id, $target, $category) {
+        $id = (int) $id;
+        $target = (int) $target;
         $category = (int) $category;
 
         $project = Project::model()->findByPk($id);
 
-        if (!$project)
-            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+        if (!$project) {
+            throw new CHttpException(404, Yii::t("app", "Project not found."));
+        }
 
-        if (!$project->checkPermission())
-            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+        if (!$project->checkPermission()) {
+            throw new CHttpException(403, Yii::t("app", "Access denied."));
+        }
 
         $target = Target::model()->findByAttributes(array(
-            'id'         => $target,
-            'project_id' => $project->id
+            "id" => $target,
+            "project_id" => $project->id
         ));
 
-        if (!$target)
-            throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+        if (!$target) {
+            throw new CHttpException(404, Yii::t("app", "Target not found."));
+        }
 
         $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
+            "code" => Yii::app()->language
         ));
 
-        if ($language)
+        if ($language) {
             $language = $language->id;
+        }
 
         $category = TargetCheckCategory::model()->with(array(
-            'category' => array(
-                'with' => array(
-                    'l10n' => array(
-                        'joinType' => 'LEFT JOIN',
-                        'on'       => 'language_id = :language_id',
-                        'params'   => array( 'language_id' => $language )
+            "category" => array(
+                "with" => array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
                     )
                 )
             )
         ))->findByAttributes(array(
-            'target_id'         => $target->id,
-            'check_category_id' => $category
+            "target_id" => $target->id,
+            "check_category_id" => $category
         ));
 
-        if (!$category)
-            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+        if (!$category) {
+            throw new CHttpException(404, Yii::t("app", "Category not found."));
+        }
 
-        $controlIds   = array();
+        $controlIds = array();
         $referenceIds = array();
 
         $controls = CheckControl::model()->findAllByAttributes(array(
-            'check_category_id' => $category->check_category_id
+            "check_category_id" => $category->check_category_id
         ));
 
-        foreach ($controls as $control)
+        foreach ($controls as $control) {
             $controlIds[] = $control->id;
+        }
 
         $references = TargetReference::model()->findAllByAttributes(array(
-            'target_id' => $target->id
+            "target_id" => $target->id
         ));
 
-        foreach ($references as $reference)
+        foreach ($references as $reference) {
             $referenceIds[] = $reference->reference_id;
+        }
 
         $criteria = new CDbCriteria();
 
-        $criteria->addInCondition('t.check_control_id', $controlIds);
-        $criteria->addInCondition('t.reference_id', $referenceIds);
-        $criteria->order = 'control.sort_order ASC, t.sort_order ASC';
+        $criteria->addInCondition("t.check_control_id", $controlIds);
+        $criteria->addInCondition("t.reference_id", $referenceIds);
+        $criteria->order = "control.sort_order ASC, t.sort_order ASC";
 
-        if (!$category->advanced)
-            $criteria->addCondition('t.advanced = FALSE');
+        if (!$category->advanced) {
+            $criteria->addCondition("t.advanced = FALSE");
+        }
 
         $checks = Check::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'l10n.language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "l10n.language_id = :language_id",
+                "params" => array("language_id" => $language)
             ),
-            'targetChecks' => array(
-                'alias'    => 'tcs',
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'tcs.target_id = :target_id',
-                'params'   => array( 'target_id' => $target->id )
+            "targetChecks" => array(
+                "alias" => "tcs",
+                "joinType" => "LEFT JOIN",
+                "on" => "tcs.target_id = :target_id",
+                "params" => array("target_id" => $target->id)
             ),
-            'targetCheckSolutions' => array(
-                'alias'    => 'tss',
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'tss.target_id = :target_id',
-                'params'   => array( 'target_id' => $target->id )
+            "targetCheckSolutions" => array(
+                "alias" => "tss",
+                "joinType" => "LEFT JOIN",
+                "on" => "tss.target_id = :target_id",
+                "params" => array("target_id" => $target->id)
             ),
-            'targetCheckAttachments' => array(
-                'alias'    => 'tas',
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'tas.target_id = :target_id',
-                'params'   => array( 'target_id' => $target->id ),
+            "targetCheckAttachments" => array(
+                "alias" => "tas",
+                "joinType" => "LEFT JOIN",
+                "on" => "tas.target_id = :target_id",
+                "params" => array("target_id" => $target->id),
             ),
-            'scripts' => array(
-                'joinType' => 'LEFT JOIN',
-                'with' => array(
-                    'inputs' => array(
+            "scripts" => array(
+                "joinType" => "LEFT JOIN",
+                "with" => array(
+                    "inputs" => array(
                         "on" => "inputs.visible AND inputs.check_script_id = scripts.id",
-                        'joinType' => 'LEFT JOIN',
-                        'with' => array(
-                            'targetInputs' => array(
-                                'alias' => 'tis',
-                                'joinType' => 'LEFT JOIN',
-                                'on' => 'tis.target_id = :target_id',
-                                'params' => array( 'target_id' => $target->id )
+                        "joinType" => "LEFT JOIN",
+                        "with" => array(
+                            "targetInputs" => array(
+                                "alias" => "tis",
+                                "joinType" => "LEFT JOIN",
+                                "on" => "tis.target_id = :target_id",
+                                "params" => array("target_id" => $target->id)
                             ),
-                            'l10n' => array(
-                                'alias' => 'l10n_i',
-                                'joinType' => 'LEFT JOIN',
-                                'on' => 'l10n_i.language_id = :language_id',
-                                'params' => array( 'language_id' => $language )
+                            "l10n" => array(
+                                "alias" => "l10n_i",
+                                "joinType" => "LEFT JOIN",
+                                "on" => "l10n_i.language_id = :language_id",
+                                "params" => array("language_id" => $language)
                             )
                         ),
-                        'order' => 'inputs.sort_order ASC'
+                        "order" => "inputs.sort_order ASC"
                     ),
                 )
             ),
-            'results' => array(
-                'joinType' => 'LEFT JOIN',
-                'with'     => array(
-                    'l10n' => array(
-                        'alias'    => 'l10n_r',
-                        'joinType' => 'LEFT JOIN',
-                        'on'       => 'l10n_r.language_id = :language_id',
-                        'params'   => array( 'language_id' => $language )
+            "results" => array(
+                "joinType" => "LEFT JOIN",
+                "with" => array(
+                    "l10n" => array(
+                        "alias" => "l10n_r",
+                        "joinType" => "LEFT JOIN",
+                        "on" => "l10n_r.language_id = :language_id",
+                        "params" => array("language_id" => $language)
                     )
                 ),
-                'order' => 'results.sort_order ASC'
+                "order" => "results.sort_order ASC"
             ),
-            'solutions' => array(
-                'joinType' => 'LEFT JOIN',
-                'with'     => array(
-                    'l10n' => array(
-                        'alias'    => 'l10n_s',
-                        'joinType' => 'LEFT JOIN',
-                        'on'       => 'l10n_s.language_id = :language_id',
-                        'params'   => array( 'language_id' => $language )
+            "solutions" => array(
+                "joinType" => "LEFT JOIN",
+                "with" => array(
+                    "l10n" => array(
+                        "alias" => "l10n_s",
+                        "joinType" => "LEFT JOIN",
+                        "on" => "l10n_s.language_id = :language_id",
+                        "params" => array("language_id" => $language)
                     )
                 ),
-                'order' => 'solutions.sort_order ASC'
+                "order" => "solutions.sort_order ASC"
             ),
-            'control' => array(
-                'joinType' => 'LEFT JOIN',
-                'with'     => array(
-                    'l10n' => array(
-                        'alias'    => 'l10n_c',
-                        'joinType' => 'LEFT JOIN',
-                        'on'       => 'l10n_c.language_id = :language_id',
-                        'params'   => array( 'language_id' => $language )
+            "control" => array(
+                "joinType" => "LEFT JOIN",
+                "with" => array(
+                    "customCheck" => array(
+                        "alias" => "custom",
+                        "on" => "custom.target_id = :target_id",
+                        "params" => array("target_id" => $target->id)
+                    ),
+                    "l10n" => array(
+                        "alias" => "l10n_c",
+                        "joinType" => "LEFT JOIN",
+                        "on" => "l10n_c.language_id = :language_id",
+                        "params" => array("language_id" => $language)
                     )
                 )
             ),
-            '_reference'
+            "_reference"
         ))->findAll($criteria);
 
         $controlStats = array();
 
-        foreach ($checks as $check)
-        {
-            if (!isset($controlStats[$check->check_control_id]))
+        foreach ($checks as $check) {
+            if (!isset($controlStats[$check->check_control_id])) {
                 $controlStats[$check->check_control_id] = array(
-                    'checks'   => 0,
-                    'finished' => 0,
-                    'info'     => 0,
-                    'lowRisk'  => 0,
-                    'medRisk'  => 0,
-                    'highRisk' => 0,
+                    "checks" => 0,
+                    "finished" => 0,
+                    "info" => 0,
+                    "lowRisk" => 0,
+                    "medRisk" => 0,
+                    "highRisk" => 0,
                 );
 
-            $controlStats[$check->check_control_id]['checks']++;
+                if ($check->control->customCheck) {
+                    $controlStats[$check->check_control_id]["checks"]++;
+                    $controlStats[$check->check_control_id]["finished"]++;
 
-            if ($check->targetChecks && $check->targetChecks[0] && $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED)
-            {
-                $controlStats[$check->check_control_id]['finished']++;
+                    switch ($check->control->customCheck[0]->rating) {
+                        case TargetCustomCheck::RATING_INFO:
+                            $controlStats[$check->check_control_id]["info"]++;
+                            break;
 
-                switch ($check->targetChecks[0]->rating)
-                {
+                        case TargetCustomCheck::RATING_LOW_RISK:
+                            $controlStats[$check->check_control_id]["lowRisk"]++;
+                            break;
+
+                        case TargetCustomCheck::RATING_MED_RISK:
+                            $controlStats[$check->check_control_id]["medRisk"]++;
+                            break;
+
+                        case TargetCustomCheck::RATING_HIGH_RISK:
+                            $controlStats[$check->check_control_id]["highRisk"]++;
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            $controlStats[$check->check_control_id]["checks"]++;
+
+            if ($check->targetChecks && $check->targetChecks[0] && $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED) {
+                $controlStats[$check->check_control_id]["finished"]++;
+
+                switch ($check->targetChecks[0]->rating) {
                     case TargetCheck::RATING_INFO:
-                        $controlStats[$check->check_control_id]['info']++;
+                        $controlStats[$check->check_control_id]["info"]++;
                         break;
 
                     case TargetCheck::RATING_LOW_RISK:
-                        $controlStats[$check->check_control_id]['lowRisk']++;
+                        $controlStats[$check->check_control_id]["lowRisk"]++;
                         break;
 
                     case TargetCheck::RATING_MED_RISK:
-                        $controlStats[$check->check_control_id]['medRisk']++;
+                        $controlStats[$check->check_control_id]["medRisk"]++;
                         break;
 
                     case TargetCheck::RATING_HIGH_RISK:
-                        $controlStats[$check->check_control_id]['highRisk']++;
+                        $controlStats[$check->check_control_id]["highRisk"]++;
                         break;
                 }
             }
@@ -1607,26 +1643,26 @@ class ProjectController extends Controller
 
         $client = Client::model()->findByPk($project->client_id);
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
-        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
-        $this->breadcrumbs[] = array($target->host, $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )));
-        $this->breadcrumbs[] = array($category->category->localizedName, '');
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array( "id" => $project->id )));
+        $this->breadcrumbs[] = array($target->host, $this->createUrl("project/target", array( "id" => $project->id, "target" => $target->id )));
+        $this->breadcrumbs[] = array($category->category->localizedName, "");
 
         // display the page
         $this->pageTitle = $category->category->localizedName;
-		$this->render('target/check/index', array(
-            'project'  => $project,
-            'target'   => $target,
-            'client'   => $client,
-            'category' => $category,
-            'checks'   => $checks,
-            'statuses' => array(
-                Project::STATUS_OPEN        => Yii::t('app', 'Open'),
-                Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
-                Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
+		$this->render("target/check/index", array(
+            "project" => $project,
+            "target" => $target,
+            "client" => $client,
+            "category" => $category,
+            "checks" => $checks,
+            "statuses" => array(
+                Project::STATUS_OPEN => Yii::t("app", "Open"),
+                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
+                Project::STATUS_FINISHED => Yii::t("app", "Finished"),
             ),
-            'ratings' => TargetCheck::getRatingNames(),
-            'controlStats' => $controlStats,
+            "ratings" => TargetCheck::getRatingNames(),
+            "controlStats" => $controlStats,
             "quickTargets" => $quickTargets,
         ));
 	}
@@ -2014,6 +2050,217 @@ class ProjectController extends Controller
 
             $targetCheck->result = $model->result;
             $targetCheck->save();
+
+            if ($project->status == Project::STATUS_OPEN) {
+                $project->status = Project::STATUS_IN_PROGRESS;
+                $project->save();
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Save custom check.
+     */
+    public function actionSaveCustomCheck($id, $target) {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $target = (int) $target;
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new CHttpException(404, Yii::t("app", "Project not found."));
+            }
+
+            if (!$project->checkPermission()) {
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
+            }
+
+            $target = Target::model()->findByAttributes(array(
+                "id" => $target,
+                "project_id" => $project->id
+            ));
+
+            if (!$target) {
+                throw new CHttpException(404, Yii::t("app", "Target not found."));
+            }
+
+            $form = new TargetCustomCheckEditForm();
+            $form->attributes = $_POST["TargetCustomCheckEditForm"];
+
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $control = CheckControl::model()->findByPk($form->controlId);
+
+            if (!$control) {
+                throw new CHttpException(404, Yii::t("app", "Control not found."));
+            }
+
+            $categoryCheck = TargetCheckCategory::model()->findByAttributes(array(
+                "target_id" => $target->id,
+                "check_category_id" => $control->check_category_id
+            ));
+
+            if (!$categoryCheck) {
+                throw new CHttpException(404, Yii::t("app", "Control not found."));
+            }
+
+            $customCheck = TargetCustomCheck::model()->findByAttributes(array(
+                "target_id" => $target->id,
+                "check_control_id"  => $control->id
+            ));
+
+            if (!$customCheck) {
+                $customCheck = new TargetCustomCheck();
+                $customCheck->target_id = $target->id;
+                $customCheck->check_control_id = $control->id;
+
+                $criteria = new CDbCriteria();
+                $criteria->select = "MAX(reference) as max_reference";
+
+                $maxReference = TargetCustomCheck::model()->find($criteria);
+                $reference = 1;
+
+                if ($maxReference && $maxReference->max_reference !== null) {
+                    $reference = $maxReference->max_reference + 1;
+                }
+
+                $customCheck->reference = $reference;
+            }
+
+            if (!$form->name) {
+                $form->name = null;
+            }
+
+            if (!$form->backgroundInfo) {
+                $form->backgroundInfo = null;
+            }
+
+            if (!$form->question) {
+                $form->question = null;
+            }
+
+            if ($form->result == "") {
+                $form->result = null;
+            }
+
+            if (!$form->solution) {
+                $form->solution = null;
+            }
+
+            if (!$form->solutionTitle) {
+                $form->solutionTitle = null;
+            }
+
+            if ($form->createCheck) {
+                $reference = Reference::model()->findByAttributes(array("name" => "CUSTOM"));
+
+                if (!$reference) {
+                    $reference = Reference::model()->find();
+                }
+
+                if (!$reference) {
+                   throw new CHttpException(500, Yii::t("app", "At least one reference should be created first."));
+                }
+
+                $language = Language::model()->findByAttributes(array(
+                    "code" => Yii::app()->language
+                ));
+
+                if (!$language) {
+                    $language = Language::model()->findByAttributes(array(
+                        "default" => true
+                    ));
+                }
+
+                $check = new Check();
+                $check->demo = true;
+                $check->name = $form->name;
+                $check->background_info = $form->backgroundInfo;
+                $check->question = $form->question;
+                $check->check_control_id = $form->controlId;
+                $check->reference_id = $reference->id;
+                $check->reference_code = "CHECK-" . $customCheck->reference;
+                $check->reference_url = $reference->url;
+                $check->advanced = false;
+                $check->automated = false;
+                $check->multiple_solutions = false;
+                $check->save();
+                $check->sort_order = $check->id;
+                $check->save();
+
+                $checkL10n = new CheckL10n();
+                $checkL10n->check_id = $check->id;
+                $checkL10n->language_id = $language->id;
+                $checkL10n->background_info = $form->backgroundInfo;
+                $checkL10n->question = $form->question;
+                $checkL10n->name = $form->name;
+                $checkL10n->save();
+
+                $targetCheck = new TargetCheck();
+                $targetCheck->target_id = $target->id;
+                $targetCheck->check_id = $check->id;
+                $targetCheck->user_id = Yii::app()->user->id;
+                $targetCheck->language_id = $language->id;
+                $targetCheck->result = $form->result;
+                $targetCheck->status = TargetCheck::STATUS_FINISHED;
+                $targetCheck->rating = $form->rating;
+                $targetCheck->save();
+
+                if ($form->solutionTitle && $form->solution) {
+                    $solution = new CheckSolution();
+                    $solution->check_id = $check->id;
+                    $solution->sort_order = 0;
+                    $solution->title = $form->solutionTitle;
+                    $solution->solution = $form->solution;
+                    $solution->save();
+
+                    $solutionL10n = new CheckSolutionL10n();
+                    $solutionL10n->check_solution_id = $solution->id;
+                    $solutionL10n->language_id = $language->id;
+                    $solutionL10n->title = $form->solutionTitle;
+                    $solutionL10n->solution = $form->solution;
+                    $solutionL10n->save();
+
+                    $checkSolution = new TargetCheckSolution();
+                    $checkSolution->target_id = $target->id;
+                    $checkSolution->check_solution_id = $solution->id;
+                    $checkSolution->check_id = $check->id;
+                    $checkSolution->save();
+                }
+
+                if (!$customCheck->isNewRecord) {
+                    $customCheck->delete();
+                }
+
+                $response->addData("createCheck", true);
+            } else {
+                $customCheck->user_id = Yii::app()->user->id;
+                $customCheck->name = $form->name;
+                $customCheck->background_info = $form->backgroundInfo;
+                $customCheck->question = $form->question;
+                $customCheck->result = $form->result;
+                $customCheck->solution_title = $form->solutionTitle;
+                $customCheck->solution = $form->solution;
+                $customCheck->rating = $form->rating;
+                $customCheck->save();
+
+                $response->addData("rating", $customCheck->rating);
+            }
 
             if ($project->status == Project::STATUS_OPEN) {
                 $project->status = Project::STATUS_IN_PROGRESS;

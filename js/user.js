@@ -244,32 +244,55 @@ function User()
 
         /**
          * Expand.
+         * @param id
+         * @param callback
+         * @param custom
          */
-        this.expand = function (id, callback) {
-            $('div.check-form[data-id=' + id + ']').slideDown('slow', undefined, function () {
-                if (callback)
+        this.expand = function (id, callback, custom) {
+            var selector = custom ?
+                $("div.check-form[data-id=custom-" + id + "]") :
+                $("div.check-form[data-id=" + id + "]"); 
+                
+            selector.slideDown("slow", undefined, function () {
+                if (callback) {
                     callback();
+                }
             });
         };
 
         /**
          * Collapse.
+         * @param id
+         * @param callback
+         * @param custom
          */
-        this.collapse = function (id, callback) {
-            $('div.check-form[data-id=' + id + ']').slideUp('slow', undefined, function () {
-                if (callback)
+        this.collapse = function (id, callback, custom) {
+            var selector = custom ?
+                $("div.check-form[data-id=custom-" + id + "]") :
+                $("div.check-form[data-id=" + id + "]"); 
+            
+            selector.slideUp("slow", undefined, function () {
+                if (callback) {
                     callback();
+                }
             });
         };
 
         /**
-         * Toggle.
+         * Toggle check
+         * @param id
+         * @param custom
          */
-        this.toggle = function (id) {
-            if ($('div.check-form[data-id=' + id + ']').is(':visible'))
-                _check.collapse(id);
-            else
-                _check.expand(id);
+        this.toggle = function (id, custom) {
+            var visible = custom ?
+                $("div.check-form[data-id=custom-" + id + "]").is(":visible") :
+                $("div.check-form[data-id=" + id + "]").is(":visible");
+
+            if (visible) {
+                _check.collapse(id, null, custom);
+            } else {
+                _check.expand(id, null, custom);
+            }
         };
 
         /**
@@ -290,10 +313,11 @@ function User()
          * Toggle control.
          */
         this.toggleControl = function (id) {
-            if ($('div.control-body[data-id=' + id + ']').is(':visible'))
+            if ($('div.control-body[data-id=' + id + ']').is(':visible')) {
                 _check.collapseControl(id);
-            else
+            } else {
                 _check.expandControl(id);
+            }
         };
 
         /**
@@ -351,8 +375,10 @@ function User()
         /**
          * Set loading.
          */
-        this.setLoading = function (id) {
-            row = $('div.check-form[data-id="' + id + '"]');
+        this.setLoading = function (id, custom) {
+            var row = custom ?
+                $('div.check-form[data-id="custom-' + id + '"]') :
+                $('div.check-form[data-id="' + id + '"]');
 
             $('.loader-image').show();
             $('input[type="text"]', row).prop('readonly', true);
@@ -365,8 +391,10 @@ function User()
         /**
          * Set loaded.
          */
-        this.setLoaded = function (id) {
-            row = $('div.check-form[data-id="' + id + '"]');
+        this.setLoaded = function (id, custom) {
+            var row = custom ?
+                $('div.check-form[data-id="custom-' + id + '"]') :
+                $('div.check-form[data-id="' + id + '"]');
 
             $('.loader-image').hide();
             $('input[type="text"]', row).prop('readonly', false);
@@ -618,6 +646,123 @@ function User()
 
                 beforeSend : function (jqXHR, settings) {
                     _check.setLoading(id);
+                }
+            });
+        };
+
+        /**
+         * Get custom check data in array.
+         */
+        this.getCustomData = function (id) {
+            var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck;
+
+            row = $('div.check-form[data-id="custom-' + id + '"]');
+
+            name = $('input[name="TargetCustomCheckEditForm_' + id + '[name]"]', row).val();
+            background = $('textarea[name="TargetCustomCheckEditForm_' + id + '[backgroundInfo]"]', row).val();
+            question = $('textarea[name="TargetCustomCheckEditForm_' + id + '[question]"]', row).val();
+            result = $('textarea[name="TargetCustomCheckEditForm_' + id + '[result]"]', row).val();
+            rating = $('input[name="TargetCustomCheckEditForm_' + id + '[rating]"]:checked', row).val();
+            solutionTitle = $('input[name="TargetCustomCheckEditForm_' + id + '[solutionTitle]"]', row).val();
+            solution = $('textarea[name="TargetCustomCheckEditForm_' + id + '[solution]"]', row).val();
+            createCheck = $('input[name="TargetCustomCheckEditForm_' + id + '[createCheck]"]', row).is(":checked");
+
+            if (name == undefined) {
+                name = "";
+            }
+
+            if (background == undefined) {
+                background = "";
+            }
+
+            if (question == undefined) {
+                question = "";
+            }
+
+            if (result == undefined) {
+                result = "";
+            }
+
+            if (rating == undefined) {
+                rating = "";
+            }
+
+            data = [];
+
+            if (createCheck) {
+                data.push({name: "TargetCustomCheckEditForm[createCheck]", value: "1"});
+            }
+
+            data.push({name: "TargetCustomCheckEditForm[controlId]", value: id});
+            data.push({name: "TargetCustomCheckEditForm[name]", value: name});
+            data.push({name: "TargetCustomCheckEditForm[backgroundInfo]", value: background});
+            data.push({name: "TargetCustomCheckEditForm[question]", value: question});
+            data.push({name: "TargetCustomCheckEditForm[result]", value: result});
+            data.push({name: "TargetCustomCheckEditForm[rating]", value: rating});
+            data.push({name: "TargetCustomCheckEditForm[solution]", value: solution ? solution : ""});
+            data.push({name: "TargetCustomCheckEditForm[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
+
+            return data;
+        };
+
+        /**
+         * Save custom check.
+         */
+        this.saveCustom = function (id) {
+            var row, headerRow, data, url, nextRow, rating;
+
+            headerRow = $('div.check-header[data-id="custom-' + id + '"]');
+            row = $('div.check-form[data-id="custom-' + id + '"]');
+            url = row.data("save-url");
+
+            data = _check.getCustomData(id);
+            data.push({name : "YII_CSRF_TOKEN", value : system.csrf});
+
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+                data: data,
+
+                success: function (data, textStatus) {
+                    _check.setLoaded(id, true);
+
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
+                        return;
+                    }
+
+                    data = data.data;
+
+                    if (data.createCheck) {
+                        location.reload();
+                    }
+
+                    if (data.rating != undefined && data.rating != null) {
+                        $("td.status", headerRow).html(
+                            '<span class="label ' +
+                            (ratings[data.rating].classN ? ratings[data.rating].classN : '') + '">' +
+                            ratings[data.rating].text + '</span>'
+                        );
+                    } else {
+                        $("td.status", headerRow).html("");
+                    }
+
+                    $("i.icon-refresh", headerRow).parent().remove();
+                    $("td.actions", headerRow).append(
+                        '<a href="#reset" title="' + system.translate("Reset") + '" onclick="user.check.reset(' + id +
+                        ', true);"><i class="icon icon-refresh"></i></a>'
+                    );
+                },
+
+                error: function(jqXHR, textStatus, e) {
+                    _check.setLoaded(id, true);
+                    system.showMessage("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend: function (jqXHR, settings) {
+                    _check.setLoading(id, true);
                 }
             });
         };

@@ -45,14 +45,7 @@
                                     <?php echo $category->finished_count; ?>
                                 </td>
                                 <td>
-                                    <?php
-                                        $checkCount = 0;
-
-                                        foreach ($category->category->controls as $control)
-                                            $checkCount += $control->checkCount;
-
-                                        echo $checkCount;
-                                    ?>
+                                    <?php echo $category->check_count ? $category->check_count : "0"; ?>
                                 </td>
                                 <?php if (User::checkRole(User::ROLE_USER)): ?>
                                     <td class="actions">

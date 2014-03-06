@@ -105,6 +105,7 @@ return array(
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>"                                  => "project/checks",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/save"                             => "project/savecategory",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/save"           => "project/savecheck",
+                "project/<id:\d+>/target/<target:\d+>/save-custom" => "project/savecustomcheck",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/autosave" => "project/autosavecheck",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/control"        => "project/controlcheck",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/update"                           => "project/updatechecks",

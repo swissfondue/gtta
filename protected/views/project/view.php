@@ -105,9 +105,9 @@
                                     <?php
                                         $checkCount = 0;
 
-                                        foreach ($target->categories as $category)
-                                            foreach ($category->controls as $control)
-                                                $checkCount += $control->checkCount;
+                                        foreach ($target->_categories as $category) {
+                                            $checkCount += $category->check_count;
+                                        }
 
                                         echo $checkCount;
                                     ?>
