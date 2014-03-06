@@ -27,6 +27,7 @@
  * @property boolean $demo
  * @property string $copyright
  * @property string $logo_type
+ * @property integer $demo_check_limit
  * @property integer $language_id
  * @property Language $language
  */
@@ -83,7 +84,7 @@ class System extends CActiveRecord {
 		return array(
             array("workstation_id, workstation_key, version, update_version, update_description, version_description, copyright, logo_type", "length", "max" => 1000),
             array("status", "in", "range" => self::validStatuses()),
-            array("report_low_pedestal, report_med_pedestal, report_high_pedestal, report_max_rating, report_med_damping_low, report_high_damping_low, report_high_damping_med", "numerical", "min" => 0),
+            array("report_low_pedestal, report_med_pedestal, report_high_pedestal, report_max_rating, report_med_damping_low, report_high_damping_low, report_high_damping_med, demo_check_limit", "numerical", "min" => 0),
             array("demo", "boolean"),
             array("backup, timezone, update_check_time, update_time, update_pid", "safe"),
 		);

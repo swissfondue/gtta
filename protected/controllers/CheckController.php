@@ -1014,6 +1014,17 @@ class CheckController extends Controller
                     $redirect = true;
                 }
 
+                if ($newRecord && $this->_system->demo) {
+                    $updated = System::model()->updateCounters(
+                        array("demo_check_limit" => -1),
+                        array("condition" => "id = 1 AND demo_check_limit > 0")
+                    );
+
+                    if (!$updated) {
+                        throw new CHttpException(403, Yii::t("app", "You've exceeded a limit of the new checks for the demo version."));
+                    }
+                }
+
                 $check->name = $model->name;
                 $check->background_info = $model->backgroundInfo;
                 $check->hints = $model->hints;
