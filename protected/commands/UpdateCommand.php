@@ -81,7 +81,7 @@ class UpdateCommand extends ConsoleCommand {
             "python %s %s %s/config/",
             implode("/", array(
                 $srcDir,
-                self::INSTALL_SCRIPTS_DIRECTORY,
+                self::TOOLS_DIRECTORY,
                 self::MAKE_CONFIG_SCRIPT
             )),
             $params["deployConfig"],
