@@ -1092,6 +1092,8 @@ function User()
 
                             input_obj.val(input.value);
                         }
+
+                        $('input[name="TargetCheckEditForm_' + id + '[rating]"][value=0]').prop("checked", true);
                     } else if (operation == 'stop') {
                         $('td.actions', headerRow).html('');
                         $('td.actions', headerRow).append(
@@ -1115,6 +1117,8 @@ function User()
                         $('input[type="radio"]', row).prop("checked", false);
                         $('input[type="checkbox"]', row).prop("checked", false);
                         $("textarea", row).val("");
+
+                        $('input[name="TargetCustomCheckEditForm_' + id + '[rating]"][value=0]').prop("checked", true);
                     }
                 },
 
@@ -2150,6 +2154,10 @@ function User()
                     } else if (operation == 'gt-next' || operation == 'gt-prev') {
                         $.cookie('gt_step', data.step, { path : '/' });
                         location.reload();
+                    }
+
+                    if (operation == "reset") {
+                        $('input[name="ProjectGtCheckEditForm[rating]"][value=0]').prop("checked", true);
                     }
                 },
 
