@@ -751,8 +751,8 @@ function User()
 
                     $("i.icon-refresh", headerRow).parent().remove();
                     $("td.actions", headerRow).append(
-                        '<a href="#reset" title="' + system.translate("Reset") + '" onclick="user.check.reset(' + id +
-                        ', true);"><i class="icon icon-refresh"></i></a>'
+                        '<a href="#reset" title="' + system.translate("Reset") + '" onclick="user.check.resetCustom(' + id +
+                        ');"><i class="icon icon-refresh"></i></a>'
                     );
                 },
 
