@@ -5,8 +5,7 @@
  * It contains the authentication method that checks if the provided
  * data can identity the user.
  */
-class UserIdentity extends CUserIdentity
-{
+class UserIdentity extends CUserIdentity {
     /**
      * @var string email
      */
@@ -18,8 +17,7 @@ class UserIdentity extends CUserIdentity
 	 * @param string $email email
 	 * @param string $password password
 	 */
-	public function __construct($email, $password)
-	{
+	public function __construct($email, $password) {
         parent::__construct($email, $password);
 		$this->email = $email;
 	}
@@ -28,38 +26,19 @@ class UserIdentity extends CUserIdentity
 	 * Authenticate a user.
 	 * @return boolean whether authentication succeeds.
 	 */
-	public function authenticate()
-	{
+	public function authenticate() {
 		$user = User::model()->findByAttributes(array(
-            'email' => $this->email,
+            "email" => $this->email,
         ));
-
-        if ($user && $user->certificate_required) {
-            $serial = $user->certificate_serial;
-            $issuer = $user->certificate_issuer;
-            $email = $user->email;
-
-            if ($serial &&
-                $issuer && (
-                    !isset($_SERVER["SSL_CLIENT_VERIFY"]) || $_SERVER["SSL_CLIENT_VERIFY"] != "SUCCESS" ||
-                    !isset($_SERVER["SSL_CLIENT_M_SERIAL"]) || $serial != $_SERVER["SSL_CLIENT_M_SERIAL"] ||
-                    !isset($_SERVER["SSL_CLIENT_I_DN"]) || $issuer != $_SERVER["SSL_CLIENT_I_DN"] ||
-                    !isset($_SERVER["SSL_CLIENT_S_DN_Email"]) || $email != $_SERVER["SSL_CLIENT_S_DN_Email"]
-                )
-            ) {
-                $user = null;
-            }
-        }
         
-		if ($user === null)
+		if ($user === null) {
 			$this->errorCode = self::ERROR_USERNAME_INVALID;
-		else if ($user->password != hash('sha256', $this->password))
-			$this->errorCode = self::ERROR_PASSWORD_INVALID;        
-		else
-		{
-			$this->_id       = $user->id;
-            $this->username  = $user->email;
-			$this->email     = $user->email;
+		} else if ($user->password != hash("sha256", $this->password)) {
+			$this->errorCode = self::ERROR_PASSWORD_INVALID;
+		} else {
+			$this->_id = $user->id;
+            $this->username = $user->email;
+			$this->email = $user->email;
 			$this->errorCode = self::ERROR_NONE;
 
             $entry = new LoginHistory();
@@ -74,8 +53,7 @@ class UserIdentity extends CUserIdentity
 	/**
 	 * @return integer the ID of the user record
 	 */
-	public function getId()
-	{
+	public function getId() {
 		return $this->_id;
 	}
 }

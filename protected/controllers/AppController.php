@@ -10,7 +10,7 @@ class AppController extends Controller {
 	public function filters() {
 		return array(
             'https',
-			'checkAuth - login, error, maintenance, l10n, logo',
+			'checkAuth - login, error, maintenance, l10n, logo, verify',
             'postOnly + objectList',
             'ajaxOnly + objectList',
 		);
@@ -20,47 +20,107 @@ class AppController extends Controller {
      * If user is logged in then redirect to a project list, otherwise
      * redirect to a login form.
      */
-	public function actionIndex()
-	{
+	public function actionIndex() {
         $this->redirect(array( 'project/index' ));
 	}
 
     /**
      * Log the user in and redirect to a project list
      */
-	public function actionLogin()
-	{
-        if (!Yii::app()->user->isGuest)
-            $this->redirect(array( 'project/index' ));
+	public function actionLogin() {
+        if (!Yii::app()->user->isGuest) {
+            $this->redirect(array("project/index"));
+        }
 
 		$model = new LoginForm();
 
 		// collect user input data
-		if (isset($_POST['LoginForm']))
-		{
-			$model->attributes = $_POST['LoginForm'];
+		if (isset($_POST["LoginForm"])) {
+			$model->attributes = $_POST["LoginForm"];
 
 			if ($model->validate()) {
                 if ($model->login()) {
-                    $this->redirect("/");
+                    if (Yii::app()->user->getCertificateRequired()) {
+                        $this->redirect(array("app/verify"));
+                    } else {
+                        $this->redirect("/");
+                    }
                 }
             } else {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
 		}
 
 		// display the login form
-        $this->pageTitle = Yii::t('app', 'Login');
-		$this->render('login', array(
-            'model' => $model
+        $this->pageTitle = Yii::t("app", "Login");
+		$this->render("login", array(
+            "model" => $model
         ));
+	}
+
+    /**
+     * Verify user's certificate, if needed
+     */
+	public function actionVerify() {
+        /** @var WebUser $user */
+        $user = Yii::app()->user;
+
+        if ($user->isGuest) {
+            $this->redirect(array("app/login"));
+        }
+
+        if (!$user->getCertificateRequired()) {
+            $this->redirect(array("project/index"));
+        }
+
+        $user->setState("certificateVerified", false);
+
+        $serial = $user->getCertificateSerial();
+        $issuer = $user->getCertificateIssuer();
+        $email = $user->getEmail();
+
+        $validations = array(
+            "SSL_CLIENT_VERIFY" => "SUCCESS",
+            "SSL_CLIENT_M_SERIAL" => $serial,
+            "SSL_CLIENT_I_DN" => $issuer,
+            "SSL_CLIENT_S_DN_Email" => $email,
+        );
+
+        if ($serial && $issuer) {
+            $failed = false;
+
+            foreach ($validations as $key => $validator) {
+                if (isset($_SERVER[$key]) && $_SERVER[$key] == $validator) {
+                    continue;
+                }
+
+                if (isset($_SERVER["REDIRECT_" . $key]) && $_SERVER["REDIRECT_" . $key] == $validator) {
+                    continue;
+                }
+
+                $failed = true;
+
+                break;
+            }
+
+
+            if ($failed) {
+                $user->logout();
+                $user->setFlash("error", Yii::t("app", "Invalid client certificate."));
+                $this->redirect(Yii::app()->homeUrl);
+
+                return;
+            }
+        }
+
+        $user->setState("certificateVerified", true);
+        $this->redirect(array("project/index"));
 	}
 
     /**
      * Log the user out and redirect to the main page
      */
-	public function actionLogout()
-	{
+	public function actionLogout() {
         Yii::app()->user->logout();
 		$this->redirect(Yii::app()->homeUrl);
 	}
@@ -98,8 +158,7 @@ class AppController extends Controller {
     /**
 	 * Maintenance handler
 	 */
-	public function actionMaintenance()
-	{
+	public function actionMaintenance() {
         $this->breadcrumbs[] = array(Yii::t('app', 'Maintenance'), '');
         $this->pageTitle = Yii::t('app', 'Maintenance');
         $this->render('maintenance');

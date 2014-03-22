@@ -51,7 +51,7 @@ return array(
             "showScriptName" => false,
             "rules"  => array(
                 // account
-                "<action:(login|logout)>" => "app/<action>",
+                "<action:(login|logout|verify)>" => "app/<action>",
                 "account" => "account/edit",
                 "account/certificate" => "account/certificate",
                 "account/restore" => "account/restore",
