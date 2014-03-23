@@ -4,6 +4,8 @@
  * Check update command
  */
 class CheckUpdateCommand extends ConsoleCommand {
+    const SETUP_COMPLETED_FLAG = "/opt/gtta/.setup-completed";
+
     /**
      * Register the demo version
      */
@@ -25,6 +27,11 @@ class CheckUpdateCommand extends ConsoleCommand {
      * Check update
      */
     private function _checkUpdate() {
+        // check if setup has been completed
+        if (!file_exists(self::SETUP_COMPLETED_FLAG)) {
+            return;
+        }
+
         if (!$this->_system->workstation_id && !$this->_system->workstation_key) {
             $this->_register();
         }
