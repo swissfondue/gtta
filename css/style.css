@@ -905,6 +905,23 @@ table.table-result td {
     overflow:hidden;
     font-size:80%;
     padding-left:10px;
+    position:relative;
+    width:90%;
+}
+
+.planner > .users > .user > .plans > .plan:after {
+    content: " ";
+    position:absolute;
+    top:0;
+    right:0;
+    width:30px;
+    height:29px;
+
+    background-image: -webkit-linear-gradient(right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+	background-image: -moz-linear-gradient(right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+	background-image: -ms-linear-gradient(right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+	background-image: -o-linear-gradient(right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+	background-image: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
 }
 
 .planner > .users > .user > .plans > .plan > a {

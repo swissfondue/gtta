@@ -97,6 +97,8 @@
                     plan = user.data[k];
                     planObj = $("<div></div>")
                         .addClass("plan")
+                        .attr("title", plan.name)
+                        .tooltip({placement: "right"})
                         .append(
                             $("<div></div>")
                                 .addClass("pull-left")
