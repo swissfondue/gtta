@@ -1908,7 +1908,7 @@ class ReportController extends Controller {
                         continue;
                     }
 
-                    foreach ($checks as $check) {
+                    foreach ($control["checks"] as $check) {
                         $innerCheck = $check->check->check;
 
                         if ($this->_system->demo && !$innerCheck->demo) {
