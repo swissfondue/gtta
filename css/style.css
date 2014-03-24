@@ -1022,6 +1022,6 @@ table.table-result td {
     color:white;
 }
 
-.check-header.limited, .check-list .limited {
+.check-header.limited, .check-list .limited, .checkbox.limited, .category-list .limited td {
     opacity:0.3;
 }

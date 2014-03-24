@@ -30,7 +30,24 @@
                             <?php endif; ?>
                         </tr>
                         <?php foreach ($categories as $category): ?>
-                            <tr>
+                            <?php
+                                $limited = false;
+
+                                if ($this->_system->demo) {
+                                    $checkCount = 0;
+                                    $limitedCheckCount = 0;
+
+                                    foreach ($category->category->controls as $control) {
+                                        $checkCount += $control->checkCount;
+                                        $limitedCheckCount += $control->limitedCheckCount;
+                                    }
+
+                                    if ($limitedCheckCount > 0 && $checkCount == $limitedCheckCount) {
+                                        $limited = true;
+                                    }
+                                }
+                            ?>
+                            <tr<?php if ($limited) echo ' class="limited"'; ?>>
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('project/checks', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>"><?php echo CHtml::encode($category->category->localizedName); ?></a>
                                 </td>

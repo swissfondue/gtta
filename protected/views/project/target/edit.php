@@ -46,7 +46,24 @@
                 <label class="control-label"><?php echo Yii::t('app', 'Check Categories'); ?></label>
                 <div class="controls">
                     <?php foreach ($categories as $category): ?>
-                        <label class="checkbox">
+                        <?php
+                            $limited = false;
+
+                            if ($this->_system->demo) {
+                                $checkCount = 0;
+                                $limitedCheckCount = 0;
+
+                                foreach ($category->controls as $control) {
+                                    $checkCount += $control->checkCount;
+                                    $limitedCheckCount += $control->limitedCheckCount;
+                                }
+
+                                if ($limitedCheckCount > 0 && $checkCount == $limitedCheckCount) {
+                                    $limited = true;
+                                }
+                            }
+                        ?>
+                        <label class="checkbox <?php if ($limited) echo "limited"; ?>">
                             <input type="checkbox" id="TargetEditForm_categoryIds_<?php echo $category->id; ?>" name="TargetEditForm[categoryIds][]" value="<?php echo $category->id; ?>" <?php if (in_array($category->id, $model->categoryIds)) echo 'checked'; ?>>
                             <?php echo CHtml::encode($category->localizedName); ?>
                         </label>

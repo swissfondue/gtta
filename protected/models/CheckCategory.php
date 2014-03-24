@@ -30,21 +30,19 @@ class CheckCategory extends CActiveRecord
 	/**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
+	public function rules() {
 		return array(
-            array( 'name', 'required' ),
+            array("name", "required"),
 		);
 	}
 
     /**
 	 * @return array relational rules.
 	 */
-	public function relations()
-	{
+	public function relations() {
 		return array(
-            'l10n'     => array( self::HAS_MANY, 'CheckCategoryL10n', 'check_category_id' ),
-            'controls' => array( self::HAS_MANY, 'CheckControl',      'check_category_id' ),
+            "l10n" => array(self::HAS_MANY, "CheckCategoryL10n", "check_category_id"),
+            "controls" => array(self::HAS_MANY, "CheckControl", "check_category_id"),
 		);
 	}
 

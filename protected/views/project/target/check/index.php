@@ -19,11 +19,12 @@
         <?php
             $hasAutomated = false;
 
-            foreach ($checks as $check)
+            foreach ($checks as $check) {
                 if ($check->automated) {
                     $hasAutomated = true;
                     break;
                 }
+            }
 
             if ($hasAutomated):
         ?>

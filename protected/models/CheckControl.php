@@ -48,6 +48,7 @@ class CheckControl extends CActiveRecord {
             "checks" => array(self::HAS_MANY, "Check", "check_control_id"),
             "category" => array(self::BELONGS_TO, "CheckCategory", "check_category_id"),
             "checkCount" => array(self::STAT, "Check", "check_control_id"),
+            "limitedCheckCount" => array(self::STAT, "Check", "check_control_id", "condition" => "NOT t.demo"),
             "customCheck" => array(self::HAS_MANY, "TargetCustomCheck", "check_control_id"),
 		);
 	}

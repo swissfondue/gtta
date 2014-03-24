@@ -1038,53 +1038,55 @@ class ProjectController extends Controller
     /**
      * Display a list of check categories.
      */
-	public function actionTarget($id, $target, $page=1)
-	{
-        $id     = (int) $id;
+	public function actionTarget($id, $target, $page=1) {
+        $id = (int) $id;
         $target = (int) $target;
-        $page   = (int) $page;
+        $page = (int) $page;
 
         $project = Project::model()->findByPk($id);
 
         if (!$project)
-            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+            throw new CHttpException(404, Yii::t("app", "Project not found."));
 
         if (!$project->checkPermission())
-            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            throw new CHttpException(403, Yii::t("app", "Access denied."));
 
         $target = Target::model()->findByAttributes(array(
-            'id'         => $target,
-            'project_id' => $project->id
+            "id" => $target,
+            "project_id" => $project->id
         ));
 
-        if (!$target)
-            throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+        if (!$target) {
+            throw new CHttpException(404, Yii::t("app", "Target not found."));
+        }
 
-        if ($page < 1)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+        if ($page < 1) {
+            throw new CHttpException(404, Yii::t("app", "Page not found."));
+        }
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 'COALESCE(l10n.name, category.name) ASC';
-        $criteria->addCondition('t.target_id = :target_id');
-        $criteria->params = array( 'target_id' => $target->id );
+        $criteria->limit = Yii::app()->params["entriesPerPage"];
+        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->order = "COALESCE(l10n.name, category.name) ASC";
+        $criteria->addCondition("t.target_id = :target_id");
+        $criteria->params = array( "target_id" => $target->id );
         $criteria->together = true;
 
         $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
+            "code" => Yii::app()->language
         ));
 
-        if ($language)
+        if ($language) {
             $language = $language->id;
+        }
 
         $categories = TargetCheckCategory::model()->with(array(
-            'category' => array(
-                'with' => array(
-                    'l10n' => array(
-                        'joinType' => 'LEFT JOIN',
-                        'on'       => 'language_id = :language_id',
-                        'params'   => array( 'language_id' => $language )
+            "category" => array(
+                "with" => array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array( "language_id" => $language )
                     ),
                 )
             ),
@@ -1092,28 +1094,32 @@ class ProjectController extends Controller
 
         $categoryIds = array();
 
-        foreach ($categories as $category)
+        foreach ($categories as $category) {
             $categoryIds[] = $category->check_category_id;
+        }
 
         $newCriteria = new CDbCriteria();
-        $newCriteria->addCondition('t.target_id = :target_id');
-        $newCriteria->params = array( 'target_id' => $target->id );
-        $newCriteria->addInCondition('t.check_category_id', $categoryIds);
-        $newCriteria->order = 'COALESCE(l10n.name, category.name) ASC';
+        $newCriteria->addCondition("t.target_id = :target_id");
+        $newCriteria->params = array( "target_id" => $target->id );
+        $newCriteria->addInCondition("t.check_category_id", $categoryIds);
+        $newCriteria->order = "COALESCE(l10n.name, category.name) ASC";
         $newCriteria->together = true;
 
         $categories = TargetCheckCategory::model()->with(array(
-            'category' => array(
-                'with' => array(
-                    'l10n' => array(
-                        'joinType' => 'LEFT JOIN',
-                        'on'       => 'language_id = :language_id',
-                        'params'   => array( 'language_id' => $language )
+            "category" => array(
+                "with" => array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array( "language_id" => $language )
                     ),
-                    'controls' => array(
-                        'with' => 'checkCount'
-                    )
-                )
+                    "controls" => array(
+                        "with" => array(
+                            "checkCount",
+                            "limitedCheckCount",
+                        ),
+                    ),
+                ),
             ),
         ))->findAll($newCriteria);
 
@@ -1121,7 +1127,7 @@ class ProjectController extends Controller
         $paginator = new Paginator($categoryCount, $page);
 
         $criteria = new CDbCriteria();
-        $criteria->order  = "t.host ASC";
+        $criteria->order = "t.host ASC";
         $criteria->addCondition("t.project_id = :project_id");
         $criteria->params = array("project_id" => $project->id);
         $criteria->together = true;
@@ -1141,22 +1147,22 @@ class ProjectController extends Controller
 
         $client = Client::model()->findByPk($project->client_id);
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
-        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
-        $this->breadcrumbs[] = array($target->host, '');
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array( "id" => $project->id )));
+        $this->breadcrumbs[] = array($target->host, "");
 
         // display the page
-        $this->pageTitle = $target->host . ($target->description ? ' / ' . $target->description : '');
-		$this->render('target/index', array(
-            'project'    => $project,
-            'target'     => $target,
-            'client'     => $client,
-            'categories' => $categories,
-            'p'          => $paginator,
-            'statuses'   => array(
-                Project::STATUS_OPEN        => Yii::t('app', 'Open'),
-                Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
-                Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
+        $this->pageTitle = $target->host . ($target->description ? " / " . $target->description : "");
+		$this->render("target/index", array(
+            "project" => $project,
+            "target" => $target,
+            "client" => $client,
+            "categories" => $categories,
+            "p" => $paginator,
+            "statuses" => array(
+                Project::STATUS_OPEN => Yii::t("app", "Open"),
+                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
+                Project::STATUS_FINISHED => Yii::t("app", "Finished"),
             ),
             "quickTargets" => $quickTargets,
         ));
@@ -1165,33 +1171,32 @@ class ProjectController extends Controller
     /**
      * Project target edit page.
      */
-	public function actionEditTarget($id, $target=0)
-	{
-        $id        = (int) $id;
-        $target    = (int) $target;
+	public function actionEditTarget($id, $target=0) {
+        $id = (int) $id;
+        $target = (int) $target;
         $newRecord = false;
 
         $project = Project::model()->findByPk($id);
 
-        if (!$project)
-            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+        if (!$project) {
+            throw new CHttpException(404, Yii::t("app", "Project not found."));
+        }
 
-        if (!$project->checkPermission())
-            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+        if (!$project->checkPermission()) {
+            throw new CHttpException(403, Yii::t("app", "Access denied."));
+        }
 
-        if ($target)
-        {
+        if ($target) {
             $target = Target::model()->findByAttributes(array(
-                'id'         => $target,
-                'project_id' => $project->id
+                "id" => $target,
+                "project_id" => $project->id
             ));
 
-            if (!$target)
-                throw new CHttpException(404, Yii::t('app', 'Target not found.'));
-        }
-        else
-        {
-            $target    = new Target();
+            if (!$target) {
+                throw new CHttpException(404, Yii::t("app", "Target not found."));
+            }
+        } else {
+            $target = new Target();
             $newRecord = true;
         }
 
@@ -1200,36 +1205,33 @@ class ProjectController extends Controller
         $model->categoryIds  = array();
         $model->referenceIds = array();
 
-        if (!$newRecord)
-        {
+        if (!$newRecord) {
             $model->host = $target->host;
             $model->description = $target->description;
 
             $categories = TargetCheckCategory::model()->findAllByAttributes(array(
-                'target_id' => $target->id
+                "target_id" => $target->id
             ));
 
             foreach ($categories as $category)
                 $model->categoryIds[] = $category->check_category_id;
 
             $references = TargetReference::model()->findAllByAttributes(array(
-                'target_id' => $target->id
+                "target_id" => $target->id
             ));
 
-            foreach ($references as $reference)
+            foreach ($references as $reference) {
                 $model->referenceIds[] = $reference->reference_id;
+            }
         }
 
 		// collect user input data
-		if (isset($_POST['TargetEditForm']))
-		{
-            $model->categoryIds  = array();
+		if (isset($_POST["TargetEditForm"])) {
+            $model->categoryIds = array();
             $model->referenceIds = array();
+			$model->attributes = $_POST["TargetEditForm"];
 
-			$model->attributes = $_POST['TargetEditForm'];
-
-			if ($model->validate())
-            {
+			if ($model->validate()) {
                 $target->project_id = $project->id;
                 $target->host = $model->host;
                 $target->description = $model->description;
@@ -1242,144 +1244,167 @@ class ProjectController extends Controller
                 $addReferences = array();
                 $delReferences = array();
 
-                if (!$newRecord)
-                {
+                if (!$newRecord) {
                     $oldCategories = array();
                     $oldReferences = array();
 
                     // fill in addCategories & delCategories arrays
                     $categories = TargetCheckCategory::model()->findAllByAttributes(array(
-                        'target_id' => $target->id
+                        "target_id" => $target->id
                     ));
 
-                    foreach ($categories as $category)
+                    foreach ($categories as $category) {
                         $oldCategories[] = $category->check_category_id;
+                    }
 
-                    foreach ($oldCategories as $category)
-                        if (!in_array($category, $model->categoryIds))
+                    foreach ($oldCategories as $category) {
+                        if (!in_array($category, $model->categoryIds)) {
                             $delCategories[] = $category;
+                        }
+                    }
 
-                    foreach ($model->categoryIds as $category)
-                        if (!in_array($category, $oldCategories))
+                    foreach ($model->categoryIds as $category) {
+                        if (!in_array($category, $oldCategories)) {
                             $addCategories[] = $category;
+                        }
+                    }
 
                     // fill in addReferences & delReferences arrays
                     $references = TargetReference::model()->findAllByAttributes(array(
-                        'target_id' => $target->id
+                        "target_id" => $target->id
                     ));
 
-                    foreach ($references as $reference)
+                    foreach ($references as $reference) {
                         $oldReferences[] = $reference->reference_id;
+                    }
 
-                    foreach ($oldReferences as $reference)
-                        if (!in_array($reference, $model->referenceIds))
+                    foreach ($oldReferences as $reference) {
+                        if (!in_array($reference, $model->referenceIds)) {
                             $delReferences[] = $reference;
+                        }
+                    }
 
-                    foreach ($model->referenceIds as $reference)
-                        if (!in_array($reference, $oldReferences))
+                    foreach ($model->referenceIds as $reference) {
+                        if (!in_array($reference, $oldReferences)) {
                             $addReferences[] = $reference;
-                }
-                else
-                {
+                        }
+                    }
+                } else {
                     $addCategories = $model->categoryIds;
                     $addReferences = $model->referenceIds;
                 }
 
                 // delete categories
-                if ($delCategories)
-                {
+                if ($delCategories) {
                     $criteria = new CDbCriteria();
 
-                    $criteria->addInCondition('check_category_id', $delCategories);
+                    $criteria->addInCondition("check_category_id", $delCategories);
                     $criteria->addColumnCondition(array(
-                        'target_id' => $target->id
+                        "target_id" => $target->id
                     ));
 
                     TargetCheckCategory::model()->deleteAll($criteria);
                 }
 
                 // add categories
-                foreach ($addCategories as $category)
-                {
+                foreach ($addCategories as $category) {
                     $targetCategory = new TargetCheckCategory();
-                    $targetCategory->target_id         = $target->id;
+                    $targetCategory->target_id = $target->id;
                     $targetCategory->check_category_id = $category;
-                    $targetCategory->advanced          = true;
+                    $targetCategory->advanced = true;
                     $targetCategory->save();
                 }
 
                 // delete references
-                if ($delReferences)
-                {
+                if ($delReferences) {
                     $criteria = new CDbCriteria();
-                    $criteria->addInCondition('reference_id', $delReferences);
+                    $criteria->addInCondition("reference_id", $delReferences);
 
                     TargetReference::model()->deleteAll($criteria);
                 }
 
                 // add references
-                foreach ($addReferences as $reference)
-                {
+                foreach ($addReferences as $reference) {
                     $targetReference = new TargetReference();
-                    $targetReference->target_id    = $target->id;
+                    $targetReference->target_id = $target->id;
                     $targetReference->reference_id = $reference;
                     $targetReference->save();
                 }
 
                 $target->cleanChecks();
-                Yii::app()->user->setFlash('success', Yii::t('app', 'Target saved.'));
+                Yii::app()->user->setFlash("success", Yii::t("app", "Target saved."));
 
                 $target->refresh();
 
-                if ($newRecord)
-                    $this->redirect(array( 'project/edittarget', 'id' => $project->id, 'target' => $target->id ));
+                if ($newRecord) {
+                    $this->redirect(array("project/edittarget", "id" => $project->id, "target" => $target->id));
+                }
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
-            else
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
-        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
 
-        if ($newRecord)
-            $this->breadcrumbs[] = array(Yii::t('app', 'New Target'), '');
-        else
-        {
-            $this->breadcrumbs[] = array($target->host, $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )));
-            $this->breadcrumbs[] = array(Yii::t('app', 'Edit'), '');
+        if ($newRecord) {
+            $this->breadcrumbs[] = array(Yii::t("app", "New Target"), "");
+        } else {
+            $this->breadcrumbs[] = array($target->host, $this->createUrl("project/target", array("id" => $project->id, "target" => $target->id)));
+            $this->breadcrumbs[] = array(Yii::t("app", "Edit"), "");
         }
 
         $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
+            "code" => Yii::app()->language
         ));
 
-        if ($language)
+        if ($language) {
             $language = $language->id;
+        }
 
-        $categories = CheckCategory::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
-            )
-        ))->findAllByAttributes(
-            array(),
-            array( 'order' => 'COALESCE(l10n.name, t.name) ASC' )
-        );
+        if ($this->_system->demo) {
+            $categories = CheckCategory::model()->with(array(
+                "l10n" => array(
+                    "joinType" => "LEFT JOIN",
+                    "on" => "language_id = :language_id",
+                    "params" => array( "language_id" => $language )
+                ),
+                "controls" => array(
+                    "with" => array(
+                        "checkCount",
+                        "limitedCheckCount"
+                    )
+                )
+            ))->findAllByAttributes(
+                array(),
+                array("order" => "COALESCE(l10n.name, t.name) ASC")
+            );
+        } else {
+            $categories = CheckCategory::model()->with(array(
+                "l10n" => array(
+                    "joinType" => "LEFT JOIN",
+                    "on" => "language_id = :language_id",
+                    "params" => array( "language_id" => $language )
+                ),
+            ))->findAllByAttributes(
+                array(),
+                array("order" => "COALESCE(l10n.name, t.name) ASC")
+            );
+        }
 
         $references = Reference::model()->findAllByAttributes(
             array(),
-            array( 'order' => 't.name ASC' )
+            array("order" => "t.name ASC")
         );
 
 		// display the page
-        $this->pageTitle = $newRecord ? Yii::t('app', 'New Target') : $target->host . ($target->description ? ' / ' . $target->description : '');
-		$this->render('target/edit', array(
-            'model'      => $model,
-            'project'    => $project,
-            'target'     => $target,
-            'categories' => $categories,
-            'references' => $references
+        $this->pageTitle = $newRecord ? Yii::t("app", "New Target") : $target->host . ($target->description ? " / " . $target->description : "");
+		$this->render("target/edit", array(
+            "model" => $model,
+            "project" => $project,
+            "target" => $target,
+            "categories" => $categories,
+            "references" => $references
         ));
 	}
 

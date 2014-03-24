@@ -47,19 +47,26 @@
                             </tr>
                         <?php endif; ?>
                         <?php foreach ($categories as $category): ?>
-                            <tr data-id="<?php echo $category->id; ?>" data-control-url="<?php echo $this->createUrl('check/control'); ?>">
+                            <?php
+                                $limited = false;
+                                $checkCount = 0;
+                                $limitedCheckCount = 0;
+
+                                foreach ($category->controls as $control) {
+                                    $checkCount += $control->checkCount;
+                                    $limitedCheckCount += $control->limitedCheckCount;
+                                }
+
+                                if ($this->_system->demo && $limitedCheckCount > 0 && $checkCount == $limitedCheckCount) {
+                                    $limited = true;
+                                }
+                            ?>
+                            <tr data-id="<?php echo $category->id; ?>" data-control-url="<?php echo $this->createUrl('check/control'); ?>" <?php if ($limited) echo 'class="limited"'; ?>>
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('check/view', array( 'id' => $category->id )); ?>"><?php echo CHtml::encode($category->localizedName); ?></a>
                                 </td>
                                 <td>
-                                    <?php
-                                        $checkCount = 0;
-
-                                        foreach ($category->controls as $control)
-                                            $checkCount += $control->checkCount;
-
-                                        echo $checkCount;
-                                    ?>
+                                    <?php echo $checkCount; ?>
                                 </td>
                                 <td class="actions">
                                     <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $category->id; ?>, '<?php echo Yii::t('app', 'WARNING! ALL CHECKS WITHIN THIS CATEGORY WILL BE DELETED!'); ?>');"><i class="icon icon-remove"></i></a>

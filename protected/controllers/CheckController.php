@@ -23,56 +23,61 @@ class CheckController extends Controller
     /**
      * Display a list of check categories.
      */
-	public function actionIndex($page=1)
-	{
+	public function actionIndex($page=1) {
         $page = (int) $page;
 
-        if ($page < 1)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+        if ($page < 1) {
+            throw new CHttpException(404, Yii::t("app", "Page not found."));
+        }
 
         $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
+            "code" => Yii::app()->language
         ));
 
-        if ($language)
+        if ($language) {
             $language = $language->id;
+        }
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 'COALESCE(l10n.name, t.name) ASC';
+        $criteria->limit = Yii::app()->params["entriesPerPage"];
+        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->order = "COALESCE(l10n.name, t.name) ASC";
         $criteria->together = true;
 
         $categories = CheckCategory::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array("language_id" => $language)
             ),
         ))->findAll($criteria);
 
         $categoryIds = array();
 
-        foreach ($categories as $category)
+        foreach ($categories as $category) {
             $categoryIds[] = $category->id;
+        }
 
         $newCriteria = new CDbCriteria();
-        $newCriteria->addInCondition('t.id', $categoryIds);
-        $newCriteria->order = 'COALESCE(l10n.name, t.name) ASC';
+        $newCriteria->addInCondition("t.id", $categoryIds);
+        $newCriteria->order = "COALESCE(l10n.name, t.name) ASC";
         $newCriteria->together = true;
         $categories = CheckCategory::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array( "language_id" => $language )
             ),
-            'controls' => array(
-                'with' => 'checkCount',
+            "controls" => array(
+                "with" => array(
+                    "checkCount",
+                    "limitedCheckCount",
+                ),
             ),
         ))->findAll($newCriteria);
 
         $categoryCount = CheckCategory::model()->count($criteria);
-        $paginator     = new Paginator($categoryCount, $page);
+        $paginator = new Paginator($categoryCount, $page);
 
         $count = Check::model()->count();
 
@@ -80,11 +85,11 @@ class CheckController extends Controller
         $criteria->addCondition("check_control_id IS NULL");
         $incomingCount = Check::model()->count($criteria);
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), '');
+        $this->breadcrumbs[] = array(Yii::t("app", "Checks"), "");
 
         // display the page
-        $this->pageTitle = Yii::t('app', 'Checks');
-		$this->render('index', array(
+        $this->pageTitle = Yii::t("app", "Checks");
+		$this->render("index", array(
             "categories" => $categories,
             "p" => $paginator,
             "count" => $count,
@@ -95,65 +100,69 @@ class CheckController extends Controller
     /**
      * Display a list of check controls.
      */
-	public function actionView($id, $page=1)
-	{
-        $id   = (int) $id;
+	public function actionView($id, $page=1) {
+        $id = (int) $id;
         $page = (int) $page;
 
         $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
+            "code" => Yii::app()->language
         ));
 
-        if ($language)
+        if ($language) {
             $language = $language->id;
+        }
 
         $category = CheckCategory::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array( "language_id" => $language )
             )
         ))->findByPk($id);
 
-        if (!$category)
-            throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+        if (!$category) {
+            throw new CHttpException(404, Yii::t("app", "Category not found."));
+        }
 
-        if ($page < 1)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+        if ($page < 1) {
+            throw new CHttpException(404, Yii::t("app", "Page not found."));
+        }
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->order  = 't.sort_order ASC';
-        $criteria->addColumnCondition(array( 'check_category_id' => $category->id ));
+        $criteria->limit = Yii::app()->params["entriesPerPage"];
+        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->order = "t.sort_order ASC";
+        $criteria->addColumnCondition(array( "check_category_id" => $category->id ));
         $criteria->together = true;
 
         $controls = CheckControl::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array( "language_id" => $language )
             ),
-            'checkCount'
+            "checkCount",
+            "limitedCheckCount",
         ))->findAll($criteria);
 
         $controlCount = CheckControl::model()->count($criteria);
-        $paginator    = new Paginator($controlCount, $page);
+        $paginator = new Paginator($controlCount, $page);
 
         $controlIds = array();
 
-        foreach ($controls as $control)
+        foreach ($controls as $control) {
             $controlIds[] = $control->id;
+        }
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
-        $this->breadcrumbs[] = array($category->localizedName, '');
+        $this->breadcrumbs[] = array(Yii::t("app", "Checks"), $this->createUrl("check/index"));
+        $this->breadcrumbs[] = array($category->localizedName, "");
 
         // display the page
         $this->pageTitle = $category->localizedName;
-		$this->render('view', array(
-            'controls' => $controls,
-            'p'        => $paginator,
-            'category' => $category,
+		$this->render("view", array(
+            "controls" => $controls,
+            "p" => $paginator,
+            "category" => $category,
         ));
 	}
 
