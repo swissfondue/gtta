@@ -20,7 +20,7 @@
     </div>
 </div>
 
-<div class="modal fade hide" id="plan-modal">
+<div class="modal hide" id="plan-modal">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">×</button>
         <h3><?php echo Yii::t("app", "Add Plan"); ?></h3>

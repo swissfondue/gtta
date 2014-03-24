@@ -59,7 +59,9 @@
                                 </li>
                             <?php endif; ?>
 
-                            <li <?php if (Yii::app()->controller->id == "planner") echo 'class="active"'; ?>><a href="<?php echo $this->createUrl("planner/index"); ?>"><?php echo Yii::t('app', "Project Planner"); ?></a></li>
+                            <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
+                                <li <?php if (Yii::app()->controller->id == "planner") echo 'class="active"'; ?>><a href="<?php echo $this->createUrl("planner/index"); ?>"><?php echo Yii::t('app', "Project Planner"); ?></a></li>
+                            <?php endif; ?>
 
                             <li <?php if (Yii::app()->controller->id == 'vulntracker') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('vulntracker/index'); ?>"><?php echo Yii::t('app', 'Vulnerability Tracker'); ?></a></li>
 

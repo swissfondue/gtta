@@ -29,7 +29,7 @@
 
 <div id="placeholder-text"><?php echo Yii::t('app', 'No categories yet.'); ?></div>
 
-<div class="modal fade hide" id="effort-modal">
+<div class="modal hide" id="effort-modal">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">×</button>
         <h3><?php echo Yii::t('app', 'Add Category'); ?></h3>
