@@ -736,6 +736,9 @@ class PHPRtfLite_Table
             return;
         }
 
+        $verticalMerge = $startRow != $endRow;
+        $horizontalMerge = $startColumn != $endColumn;
+
         for ($j = $startRow; $j <= $endRow; $j++) {
             $start = $startColumn;
             $cell = $this->getCell($j, $start);
@@ -748,6 +751,7 @@ class PHPRtfLite_Table
             $end = $endColumn;
 
             $cell = $this->getCell($j, $end);
+
             while ($cell->isHorizontalMerged()) {
                 $end++;
                 $cell = $this->getCell($j, $end + 1);
@@ -757,17 +761,22 @@ class PHPRtfLite_Table
 
             for ($i = $start; $i <= $end; $i++) {
                 $cell = $this->getCell($j, $i);
-                if ($j == $startRow) {
-                    $cell->setVerticalMergeStart();
-                }
-                else {
-                    $cell->setVerticalMerged();
+
+                if ($verticalMerge) {
+                    if ($j == $startRow) {
+                        $cell->setVerticalMergeStart();
+                    } else {
+                        $cell->setVerticalMerged();
+                    }
                 }
 
                 $width += $this->getColumn($i)->getWidth();
 
-                if ($i != $start) {
-                    $cell->setHorizontalMerged();
+                if ($horizontalMerge) {
+                    if ($i != $start) {
+                        $cell->setHorizontalMerged();
+                    }
+
                     $cell->setWidth(null);
                 }
             }
@@ -931,8 +940,8 @@ class PHPRtfLite_Table
         foreach ($this->getColumns() as $columnIndex => $column) {
             $cell = $this->getCell($rowIndex, $columnIndex + 1);
 
-            // render cell definition
             if (!$cell->isHorizontalMerged()) {
+                // render cell definition
                 $cell->renderDefinition();
 
                 // cell width

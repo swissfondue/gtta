@@ -118,13 +118,19 @@ class PHPRtfLite_Table_Cell extends PHPRtfLite_Container
     protected $_horizontalMerged = false;
 
     /**
+     * true, if horizontal cell merge starts with this cell
+     * @var boolean
+     */
+    protected $_horizontalMergeStart = false;
+
+    /**
      * true, if cell is merged vertically
      * @var boolean
      */
     protected $_verticalMerged = false;
 
     /**
-     * ture, if cell merge starts with this cell
+     * true, if vertical cell merge starts with this cell
      * @var boolean
      */
     protected $_verticalMergeStart = false;
@@ -396,6 +402,27 @@ class PHPRtfLite_Table_Cell extends PHPRtfLite_Container
 
 
     /**
+     * sets horizontal merge start
+     */
+    public function setHorizontalMergeStart()
+    {
+        $this->_horizontalMergeStart = true;
+        $this->_horizontalMerged = true;
+    }
+
+
+    /**
+     * checks, if cell is first cell of a horizontal cell range merge
+     *
+     * @return boolean
+     */
+    public function isHorizontalMergedFirstInRange()
+    {
+        return $this->_horizontalMergeStart;
+    }
+
+
+    /**
      * checks, if cell is first cell of a vertical cell range merge
      *
      * @return boolean
@@ -608,11 +635,19 @@ class PHPRtfLite_Table_Cell extends PHPRtfLite_Container
     public function renderDefinition()
     {
         $stream = $this->_rtf->getWriter();
+
+        if ($this->isHorizontalMerged()) {
+            if ($this->isHorizontalMergedFirstInRange()) {
+                $stream->write('\clmgf');
+            } else {
+                return;
+            }
+        }
+
         if ($this->isVerticalMerged()) {
             if ($this->isVerticalMergedFirstInRange()) {
                 $stream->write('\clvmgf');
-            }
-            else {
+            } else {
                 $stream->write('\clvmrg');
             }
         }
