@@ -342,10 +342,6 @@ set threads 3</pre>
                         </li>
                     </ol>
                 </p>
-
-                <p>
-                    Basically, that’s it. Currently Guided Test-based project do not support reports, because they use completely different database objects, but I will describe you this in the separate email.
-                </p>
             </p>
 
             <p id="integration" class="section">
