@@ -47,7 +47,21 @@
                 <h2>What's New?</h2>
 
                 <p>
-                    <b>1.10 (current version)</b>:
+                    <b>1.11 (current version)</b>:
+
+                    <ul>
+                        <li>Demo checks & categories are easily distinguishable in the list.</li>
+                        <li>Project reports now support Microsoft Office 2013.</li>
+                        <li>Network tools in GTTA configuration utility (ifconfig, route, ip, ping, traceroute and iptables).</li>
+                        <li>Automated connectivity test after network configuration change.</li>
+                        <li>GTTA configuration tool launches on local console login (please refer to manual on how to do that).</li>
+                        <li>Safari SSL bug workaround.</li>
+                        <li>Numerous bugs fixed.</li>
+                    </ul>
+                </p>
+
+                <p>
+                    <b>1.10</b>:
 
                     <ul>
                         <li>New script: <em>shell</em> - runs an external shell command.</li>
