@@ -7,7 +7,7 @@
  * @property integer $target_id
  * @property integer $reference_id
  */
-class TargetReference extends CActiveRecord
+class TargetReference extends ActiveRecord
 {
 	/**
 	 * Returns the static model of the specified AR class.

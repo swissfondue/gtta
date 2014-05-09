@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Update command
+ * Community share command
  */
-class UpdateCommand extends ConsoleCommand {
+class CommunityShareCommand extends ConsoleCommand {
     const GTTA_USER = "gtta";
     const GTTA_GROUP = "gtta";
     const EXTRACTED_DIRECTORY = "gtta";
@@ -272,8 +272,8 @@ class UpdateCommand extends ConsoleCommand {
             return;
         }
 
-        if ($system->pid != null) {
-            if (ProcessManager::isRunning($system->pid)) {
+        if ($system->update_pid != null) {
+            if (ProcessManager::isRunning($system->update_pid)) {
                 return;
             }
 
@@ -282,7 +282,7 @@ class UpdateCommand extends ConsoleCommand {
             return;
         }
 
-        $system->pid = posix_getpgid(getmypid());
+        $system->update_pid = posix_getpgid(getmypid());
         $system->save();
         $targetVersion = $system->update_version;
 

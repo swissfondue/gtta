@@ -9,7 +9,7 @@
  * @property string $title
  * @property string $summary
  */
-class ReportTemplateSummaryL10n extends CActiveRecord
+class ReportTemplateSummaryL10n extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

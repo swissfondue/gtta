@@ -9,7 +9,7 @@
  * @property string $title
  * @property string $result
  */
-class CheckResultL10n extends CActiveRecord
+class CheckResultL10n extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

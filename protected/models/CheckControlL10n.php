@@ -8,7 +8,7 @@
  * @property integer $language_id
  * @property string $name
  */
-class CheckControlL10n extends CActiveRecord
+class CheckControlL10n extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

@@ -17,7 +17,7 @@
  * @property TargetCheckCategory $targetCheckCategory
  * @property ProjectGtModule $projectGtModule
  */
-class ProjectPlanner extends CActiveRecord {
+class ProjectPlanner extends ActiveRecord {
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.

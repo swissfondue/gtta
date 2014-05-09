@@ -11,13 +11,15 @@
  * @property string $name
  * @property string $version
  * @property integer $status
+ * @property integer $external_id
+ * @property string $create_time
  */
-class Package extends CActiveRecord {
+class Package extends ActiveRecord {
     const TYPE_LIBRARY = 0;
     const TYPE_SCRIPT = 1;
-
     const STATUS_INSTALL = 0;
     const STATUS_INSTALLED = 1;
+    const STATUS_UPLOAD = 2;
     const STATUS_DELETE = 10;
     const STATUS_ERROR = 100;
 
@@ -44,15 +46,17 @@ class Package extends CActiveRecord {
 		return array(
             array("type, name, version", "required"),
             array("file_name, name, version", "length", "max" => 1000),
-            array("type, status", "numerical", "integerOnly" => true),
+            array("type, status, external_id", "numerical", "integerOnly" => true),
             array("type", "in", "range" => array(self::TYPE_LIBRARY, self::TYPE_SCRIPT)),
             array("status", "in", "range" => array(
                 self::STATUS_INSTALL,
                 self::STATUS_INSTALLED,
+                self::STATUS_UPLOAD,
                 self::STATUS_DELETE,
                 self::STATUS_ERROR
             )),
             array("system", "boolean"),
+            array("create_time", "safe"),
 		);
 	}
 
@@ -75,6 +79,7 @@ class Package extends CActiveRecord {
         $names = array(
             self::STATUS_INSTALL => Yii::t("app", "Installing"),
             self::STATUS_INSTALLED => Yii::t("app", "Installed"),
+            self::STATUS_UPLOAD => Yii::t("app", "Uploading"),
             self::STATUS_DELETE => Yii::t("app", "Deleting"),
             self::STATUS_ERROR => Yii::t("app", "Error"),
         );

@@ -14,7 +14,7 @@
  * @property integer $type
  * @property integer $visible
  */
-class CheckInput extends CActiveRecord {
+class CheckInput extends ActiveRecord {
     /**
      * Input types.
      */

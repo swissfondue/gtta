@@ -13,6 +13,7 @@ class PackageManager {
     const SECTION_TYPE = "type";
     const SECTION_VERSION = "version";
     const SECTION_SYSTEM = "system";
+    const SECTION_DESCRIPTION = "description";
     const SECTION_VALUE = "value";
     const SECTION_DEPENDENCIES = "dependencies";
     const SECTION_INPUTS = "inputs";
@@ -281,6 +282,7 @@ class PackageManager {
         $name = null;
         $version = null;
         $type = null;
+        $description = null;
         $dependencies = array();
         $inputs = array();
 
@@ -293,6 +295,7 @@ class PackageManager {
             $version = $this->_getSection($package, self::SECTION_VERSION);
             $type = $this->_getSection($package, self::SECTION_TYPE);
             $system = $this->_getSection($package, self::SECTION_SYSTEM);
+            $description = $this->_getSection($package, self::SECTION_DESCRIPTION);
         } catch (MissingSectionException $e) {
             throw new Exception(
                 Yii::t("app", "Missing package section:: {section}.", array(
@@ -395,6 +398,7 @@ class PackageManager {
             self::SECTION_TYPE,
             self::SECTION_SYSTEM,
             self::SECTION_VERSION,
+            self::SECTION_DESCRIPTION,
             self::SECTION_DEPENDENCIES,
             self::SECTION_INPUTS,
         );
@@ -635,6 +639,7 @@ class PackageManager {
     /**
      * Schedule package for installation
      * @param $id
+     * @return Package
      * @throws Exception
      */
     public function scheduleForInstallation($id) {
@@ -642,6 +647,7 @@ class PackageManager {
         $zipPath = Yii::app()->params["packages"]["tmpPath"] . "/" . $id . ".zip";
         $package = null;
         $exception = null;
+        $pkg = null;
 
         try {
             $this->_extract($zipPath, $packagePath);
@@ -666,6 +672,28 @@ class PackageManager {
         if ($exception) {
             throw $exception;
         }
+
+        return $pkg;
+    }
+
+    /**
+     * Get temporary package path
+     * @return array
+     */
+    private function _getTemporaryPackageData() {
+        $packageDir = Yii::app()->params["packages"]["tmpPath"];
+
+        if (!is_dir($packageDir)) {
+            FileManager::createDir($packageDir, 0777);
+        }
+
+        $id = md5(uniqid("", true));
+
+        return array(
+            "id" => $id,
+            "packagePath" => $packageDir . "/" . $id,
+            "zipPath" => $packageDir . "/" . $id . ".zip"
+        );
     }
 
     /**
@@ -675,15 +703,9 @@ class PackageManager {
      * @return array
      */
     public function upload($model) {
-        $packageDir = Yii::app()->params["packages"]["tmpPath"];
-
-        if (!is_dir($packageDir)) {
-            FileManager::createDir($packageDir, 0777);
-        }
-
-        $id = md5(uniqid("", true));
-        $packagePath = $packageDir . "/" . $id;
-        $zipPath = $packageDir . "/" . $id . ".zip";
+        $tmpData = $this->_getTemporaryPackageData();
+        $packagePath = $tmpData["packagePath"];
+        $zipPath = $tmpData["zipPath"];
         $model->file->saveAs($zipPath);
 
         $exception = null;
@@ -708,7 +730,7 @@ class PackageManager {
             throw $exception;
         }
 
-        $package["id"] = $id;
+        $package["id"] = $tmpData["id"];
         $package["type"] = $this->_getTypeName($package["type"]);
 
         return $package;
@@ -1108,5 +1130,71 @@ class PackageManager {
             $this->_installDependencies($package);
             $this->_validate($package, true, true, true);
         }
+    }
+
+    /**
+     * Create package by id
+     * @param $package
+     * @return Package
+     * @throws Exception
+     */
+    public function createPackage($package) {
+        /** @var System $system */
+        $system = System::model()->findByPk(1);
+        $api = new CommunityApiClient($system->integration_key);
+        $package = $api->getPackage($package)->package;
+
+        if ($package->status == CommunityApiClient::STATUS_UNVERIFIED && !$system->community_allow_unverified) {
+            throw new Exception("Installing unverified packages is prohibited.");
+        }
+
+        if ($system->community_min_rating > 0 && $package->rating < $system->community_min_rating) {
+            throw new Exception("Package rating is below the system rating limit.");
+        }
+
+        $id = $package->id;
+        $checkPackage = Package::model()->findByAttributes(array("external_id" => $id));
+
+        if ($checkPackage) {
+            return $checkPackage;
+        }
+
+        foreach ($package->dependencies as $dep) {
+            $this->createPackage($dep->id);
+        }
+
+        $tmpData = $this->_getTemporaryPackageData();
+        $zipPath = $tmpData["zipPath"];
+
+        $api = new CommunityApiClient($system->integration_key);
+        $api->getPackageArchive($id, $zipPath);
+
+        if (!file_exists($zipPath)) {
+            throw new Exception("Error downloading package file: $zipPath");
+        }
+
+        $pkg = $this->scheduleForInstallation($tmpData["id"]);
+        $pkg->external_id = $id;
+        $pkg->save();
+        $this->install($pkg);
+
+        return $pkg;
+    }
+
+    /**
+     * Get external package ids
+     * @return array
+     */
+    public function getExternalIds() {
+        $packageIds = array();
+        $packages = Package::model()->findAll("external_id IS NOT NULL AND status = :status", array(
+            "status" => Package::STATUS_INSTALLED
+        ));
+
+        foreach ($packages as $package) {
+            $packageIds[] = $package->external_id;
+        }
+
+        return $packageIds;
     }
 }

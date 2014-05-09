@@ -23,7 +23,7 @@
  * @property string $solution_title
  * @property User $user
  */
-class ProjectGtCheck extends CActiveRecord {
+class ProjectGtCheck extends ActiveRecord {
     /**
      * Check statuses.
      */

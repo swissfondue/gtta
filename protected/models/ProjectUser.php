@@ -8,7 +8,7 @@
  * @property integer $user_id
  * @property boolean $admin
  */
-class ProjectUser extends CActiveRecord
+class ProjectUser extends ActiveRecord
 {
 	/**
 	 * Returns the static model of the specified AR class.

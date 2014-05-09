@@ -1,14 +1,15 @@
 <?php
 
 /**
- * API client class
+ * Server API client class
  */
-class ApiClient {
+class ServerApiClient {
     const URL = "api";
     const TIMEOUT = 3600;
     const WORKSTATION_ID_HEADER = "X_WORKSTATION_ID";
     const WORKSTATION_KEY_HEADER = "X_WORKSTATION_KEY";
     const PARAM_VERSION = "version";
+    const PARAM_INTEGRATION_KEY = "integrationKey";
 
     private $id;
     private $key;
@@ -18,7 +19,7 @@ class ApiClient {
      * @param $id
      * @param $key
      */
-    public function __construct($id=null, $key=null) {
+    public function __construct($id, $key) {
         $this->id = $id;
         $this->key = $key;
     }
@@ -80,7 +81,7 @@ class ApiClient {
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
         if ($code != 200) {
-            throw new Exception("API error: " . $code);
+            throw new Exception("Server API error: " . $code);
         }
 
         return $result;
@@ -108,10 +109,15 @@ class ApiClient {
     /**
      * Set status
      * @param $version
+     * @param $integrationKey
      * @return mixed response
      */
-    public function setStatus($version) {
-        $response = $this->_sendRequest("status", array(self::PARAM_VERSION => $version));
+    public function setStatus($version, $integrationKey) {
+        $response = $this->_sendRequest("status", array(
+            self::PARAM_VERSION => $version,
+            self::PARAM_INTEGRATION_KEY => $integrationKey,
+        ));
+
         return $this->_parseResponse($response);
     }
 

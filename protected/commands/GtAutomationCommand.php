@@ -408,8 +408,7 @@ class GtautomationCommand extends ConsoleCommand {
         // start checks
         if (count($args) > 0) {
             if (count($args) != 2) {
-                echo "Invalid number of arguments." . "\n";
-                exit();
+                die("Invalid number of arguments.");
             }
 
             $projectId = (int) $args[0];
@@ -418,7 +417,7 @@ class GtautomationCommand extends ConsoleCommand {
             if ($projectId && $checkId) {
                 $this->_startCheck($projectId, $checkId);
             } else {
-                echo "Invalid arguments." . "\n";
+                die("Invalid arguments.");
             }
 
             exit();

@@ -9,7 +9,7 @@
  * @property integer $gt_module_id
  * @property string $condition
  */
-class GtCheckDependency extends CActiveRecord
+class GtCheckDependency extends ActiveRecord
 {
 	/**
 	 * Returns the static model of the specified AR class.

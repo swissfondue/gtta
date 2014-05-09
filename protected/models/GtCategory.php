@@ -7,7 +7,7 @@
  * @property integer $id
  * @property string $name
  */
-class GtCategory extends CActiveRecord
+class GtCategory extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

@@ -9,7 +9,7 @@
  * @property string $subject
  * @property string $content
  */
-class ProjectDetail extends CActiveRecord
+class ProjectDetail extends ActiveRecord
 {
 	/**
 	 * Returns the static model of the specified AR class.

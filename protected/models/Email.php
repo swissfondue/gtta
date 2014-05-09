@@ -14,7 +14,7 @@
  * The followings are the available model relations:
  * @property User $user
  */
-class Email extends CActiveRecord
+class Email extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

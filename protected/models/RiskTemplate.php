@@ -7,7 +7,7 @@
  * @property integer $id
  * @property string $name
  */
-class RiskTemplate extends CActiveRecord
+class RiskTemplate extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

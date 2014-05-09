@@ -11,7 +11,7 @@
  * @property integer $sort_order
  * @property integer $max_sort_order
  */
-class CheckSolution extends CActiveRecord
+class CheckSolution extends ActiveRecord
 {
     /**
      * @var integer max sort order.

@@ -8,7 +8,7 @@
  * @property integer $language_id
  * @property string $name
  */
-class RiskCategoryL10n extends CActiveRecord
+class RiskCategoryL10n extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

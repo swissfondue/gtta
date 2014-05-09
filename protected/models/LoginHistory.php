@@ -12,7 +12,7 @@
  * The followings are the available model relations:
  * @property User $user
  */
-class LoginHistory extends CActiveRecord
+class LoginHistory extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

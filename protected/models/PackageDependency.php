@@ -7,7 +7,7 @@
  * @property integer $from_package_id
  * @property integer $to_package_id
  */
-class PackageDependency extends CActiveRecord {
+class PackageDependency extends ActiveRecord {
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.

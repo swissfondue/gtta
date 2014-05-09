@@ -23,7 +23,7 @@
  * @property string $solution_title
  * @property User $user
  */
-class TargetCheck extends CActiveRecord {
+class TargetCheck extends ActiveRecord {
     /**
      * Check statuses.
      */

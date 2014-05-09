@@ -9,7 +9,7 @@
  * @property integer $damage
  * @property integer $likelihood
  */
-class RiskCategoryCheck extends CActiveRecord
+class RiskCategoryCheck extends ActiveRecord
 {
 	/**
 	 * Returns the static model of the specified AR class.

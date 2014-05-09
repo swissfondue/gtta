@@ -8,7 +8,7 @@
  * @property integer $check_id
  * @property integer $package_id
  */
-class CheckScript extends CActiveRecord
+class CheckScript extends ActiveRecord
 {
 	/**
 	 * Returns the static model of the specified AR class.

@@ -8,7 +8,7 @@
  * @property integer $check_solution_id
  * @property integer $check_id
  */
-class TargetCheckSolution extends CActiveRecord
+class TargetCheckSolution extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

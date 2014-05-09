@@ -13,7 +13,7 @@
  * @property string $vuln_overdue
  * @property boolean $guided_test
  */
-class Project extends CActiveRecord
+class Project extends ActiveRecord
 {
     /**
      * Project statuses.

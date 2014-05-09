@@ -9,7 +9,7 @@
  * @property string $name
  * @property string $description
  */
-class CheckInputL10n extends CActiveRecord
+class CheckInputL10n extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

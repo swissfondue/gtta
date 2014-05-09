@@ -33,6 +33,10 @@ class FileManager {
      * @throws Exception
      */
     public static function createDir($dir, $perms, $recursive=false) {
+        if (is_dir($dir)) {
+            return;
+        }
+
         if (!@mkdir($dir, $perms, $recursive)) {
             throw new Exception("Error creating directory: $dir");
         }

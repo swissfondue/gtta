@@ -7,7 +7,7 @@
  * @property integer $id
  * @property string $name
  */
-class GtDependencyProcessor extends CActiveRecord
+class GtDependencyProcessor extends ActiveRecord
 {
 	/**
 	 * Returns the static model of the specified AR class.

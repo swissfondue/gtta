@@ -19,7 +19,7 @@
  * @property CheckControl $control
  * @property User $user
  */
-class TargetCustomCheck extends CActiveRecord {
+class TargetCustomCheck extends ActiveRecord {
     /**
      * Result ratings.
      */

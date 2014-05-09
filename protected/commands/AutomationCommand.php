@@ -399,10 +399,8 @@ class AutomationCommand extends ConsoleCommand {
                 }
 
                 $vm = new VMManager();
-                echo $command . "\n";
 
                 if ($vm->isRunning()) {
-                    echo "is running\n";
                     $output = $vm->runCommand(implode(" ", $command), false);
                     $fileOutput = file_get_contents($vm->virtualizePath($filesPath . '/' . $check->result_file));
                     $data = $fileOutput ? $fileOutput : $output;
@@ -450,8 +448,7 @@ class AutomationCommand extends ConsoleCommand {
         // start checks
         if (count($args) > 0) {
             if (count($args) != 2) {
-                echo "Invalid number of arguments." . "\n";
-                exit();
+                die("Invalid number of arguments.");
             }
 
             $targetId = (int) $args[0];
@@ -460,7 +457,7 @@ class AutomationCommand extends ConsoleCommand {
             if ($targetId && $checkId) {
                 $this->_startCheck($targetId, $checkId);
             } else {
-                echo "Invalid arguments." . "\n";
+                die("Invalid arguments.");
             }
 
             exit();

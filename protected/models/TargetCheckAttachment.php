@@ -11,7 +11,7 @@
  * @property string $path
  * @property integer $size
  */
-class TargetCheckAttachment extends CActiveRecord
+class TargetCheckAttachment extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

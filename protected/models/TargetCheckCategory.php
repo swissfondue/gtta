@@ -14,7 +14,7 @@
  * @property integer $high_risk_count
  * @property integer $info_count
  */
-class TargetCheckCategory extends CActiveRecord
+class TargetCheckCategory extends ActiveRecord
 {
 	/**
 	 * Returns the static model of the specified AR class.

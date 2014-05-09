@@ -8,8 +8,9 @@
  * @property integer $check_category_id
  * @property string $name
  * @property integer $sort_order
+ * @property integer $external_id
  */
-class CheckControl extends CActiveRecord {
+class CheckControl extends ActiveRecord {
     // nearest sort order
     public $nearest_sort_order;
 
@@ -36,6 +37,7 @@ class CheckControl extends CActiveRecord {
 		return array(
             array("name, check_category_id, sort_order", "required"),
             array("check_category_id, sort_order", "numerical", "integerOnly" => true),
+            array("external_id", "numerical", "integerOnly" => true),
 		);
 	}
 

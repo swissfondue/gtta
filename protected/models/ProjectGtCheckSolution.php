@@ -8,7 +8,7 @@
  * @property integer $gt_check_id
  * @property integer $check_solution_id
  */
-class ProjectGtCheckSolution extends CActiveRecord
+class ProjectGtCheckSolution extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

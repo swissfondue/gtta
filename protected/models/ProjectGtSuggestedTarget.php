@@ -11,7 +11,7 @@
  * @property string $target
  * @property boolean $approved
  */
-class ProjectGtSuggestedTarget extends CActiveRecord
+class ProjectGtSuggestedTarget extends ActiveRecord
 {
 	/**
 	 * Returns the static model of the specified AR class.

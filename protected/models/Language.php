@@ -9,7 +9,7 @@
  * @property string $code
  * @property boolean $default
  */
-class Language extends CActiveRecord
+class Language extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

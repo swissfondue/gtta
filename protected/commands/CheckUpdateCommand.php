@@ -10,7 +10,7 @@ class CheckUpdateCommand extends ConsoleCommand {
      * Register the demo version
      */
     private function _register() {
-        $api = new ApiClient();
+        $api = new ServerApiClient();
         $result = $api->register($this->_system->version);
 
         if ($result->id && $result->key) {
@@ -36,8 +36,8 @@ class CheckUpdateCommand extends ConsoleCommand {
             $this->_register();
         }
 
-        $api = new ApiClient($this->_system->workstation_id, $this->_system->workstation_key);
-        $result = $api->setStatus($this->_system->version);
+        $api = new ServerApiClient($this->_system->workstation_id, $this->_system->workstation_key);
+        $result = $api->setStatus($this->_system->version, $this->_system->integration_key);
         $this->_system->demo = $result->demo;
 
         if ($result->update !== null) {
@@ -47,6 +47,14 @@ class CheckUpdateCommand extends ConsoleCommand {
         }
 
         $this->_system->save();
+
+        if ($result->communityInstall) {
+            try {
+                SystemManager::updateStatus(System::STATUS_COMMUNITY_INSTALL, System::STATUS_IDLE);
+            } catch (Exception $e) {
+                // pass
+            }
+        }
     }
     
     /**

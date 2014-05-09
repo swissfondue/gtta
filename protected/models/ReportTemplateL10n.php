@@ -24,7 +24,7 @@
  * @property string $no_vuln_description
  * @property string $info_description
  */
-class ReportTemplateL10n extends CActiveRecord {
+class ReportTemplateL10n extends ActiveRecord {
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.

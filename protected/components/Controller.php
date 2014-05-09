@@ -3,8 +3,7 @@
 /**
  * Base class for all application's controllers.
  */
-class Controller extends CController 
-{
+class Controller extends CController {
     /**
      * @var array breadcrumbs.
      */

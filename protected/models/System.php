@@ -16,7 +16,7 @@
  * @property string $update_check_time
  * @property string $update_time
  * @property integer $status
- * @property integer $update_pid
+ * @property integer $pid
  * @property float $report_low_pedestal
  * @property float $report_med_pedestal
  * @property float $report_high_pedestal
@@ -29,9 +29,12 @@
  * @property string $logo_type
  * @property integer $demo_check_limit
  * @property integer $language_id
+ * @property float $community_min_rating
+ * @property boolean $community_allow_unverified
+ * @property string $integration_key
  * @property Language $language
  */
-class System extends CActiveRecord {
+class System extends ActiveRecord {
     /**
      * Statuses
      */
@@ -42,6 +45,8 @@ class System extends CActiveRecord {
     const STATUS_UPDATING = 210;
     const STATUS_PACKAGE_MANAGER = 215;
     const STATUS_REGENERATE_SANDBOX = 220;
+    const STATUS_COMMUNITY_INSTALL = 230;
+    const STATUS_COMMUNITY_UPLOAD = 240;
     const STATUS_LICENSE_EXPIRED = 500;
 
     /**
@@ -73,6 +78,8 @@ class System extends CActiveRecord {
             self::STATUS_UPDATING,
             self::STATUS_PACKAGE_MANAGER,
             self::STATUS_REGENERATE_SANDBOX,
+            self::STATUS_COMMUNITY_INSTALL,
+            self::STATUS_COMMUNITY_UPLOAD,
             self::STATUS_LICENSE_EXPIRED,
         );
     }
@@ -82,11 +89,12 @@ class System extends CActiveRecord {
 	 */
 	public function rules() {
 		return array(
-            array("workstation_id, workstation_key, version, update_version, update_description, version_description, copyright, logo_type", "length", "max" => 1000),
+            array("workstation_id, workstation_key, version, update_version, update_description, version_description, copyright, logo_type, integration_key", "length", "max" => 1000),
             array("status", "in", "range" => self::validStatuses()),
             array("report_low_pedestal, report_med_pedestal, report_high_pedestal, report_max_rating, report_med_damping_low, report_high_damping_low, report_high_damping_med, demo_check_limit", "numerical", "min" => 0),
-            array("demo", "boolean"),
-            array("backup, timezone, update_check_time, update_time, update_pid", "safe"),
+            array("community_min_rating", "numerical", "min" => 0, "max" => 5),
+            array("demo, community_allow_unverified", "boolean"),
+            array("backup, timezone, update_check_time, update_time, pid", "safe"),
 		);
 	}
 
@@ -102,6 +110,8 @@ class System extends CActiveRecord {
             self::STATUS_UPDATING => Yii::t("app", "The system is updating."),
             self::STATUS_PACKAGE_MANAGER => Yii::t("app", "The system is installing or removing packages."),
             self::STATUS_REGENERATE_SANDBOX => Yii::t("app", "The system is regenerating scripts sandbox."),
+            self::STATUS_COMMUNITY_INSTALL => Yii::t("app", "The system is installing checks or packages from the community platform."),
+            self::STATUS_COMMUNITY_UPLOAD => Yii::t("app", "The system is uploading checks or packages to the community platform."),
         );
 
         return $statuses[$this->status];

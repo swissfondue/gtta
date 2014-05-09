@@ -10,7 +10,7 @@
  * @property string $value
  * @property string $file
  */
-class ProjectGtCheckInput extends CActiveRecord
+class ProjectGtCheckInput extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

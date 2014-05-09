@@ -11,7 +11,7 @@
  * @property string $hints
  * @property string $question
  */
-class CheckL10n extends CActiveRecord
+class CheckL10n extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

@@ -107,6 +107,16 @@ return array(
             "url" => "$DEPLOY_API_URL",
         ),
 
+        "community" => array(
+            "url" => "$DEPLOY_COMMUNITY_URL",
+            "install" => array(
+                "lockFile" => "/tmp/gtta.community-install",
+            ),
+            "share" => array(
+                "lockFile" => "/tmp/gtta.community-share",
+            ),
+        ),
+
         "packages" => $mainConfig["params"]["packages"],
         "systemStatusLock" => $mainConfig["params"]["systemStatusLock"],
     ),

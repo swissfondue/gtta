@@ -21,7 +21,7 @@
  * @property boolean $certificate_issuer
  * @property ProjectPlanner[] $planner
  */
-class User extends CActiveRecord {
+class User extends ActiveRecord {
     /**
      * User roles.
      */

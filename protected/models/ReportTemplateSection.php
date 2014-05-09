@@ -11,7 +11,7 @@
  * @property integer $check_category_id
  * @property integer $max_sort_order
  */
-class ReportTemplateSection extends CActiveRecord
+class ReportTemplateSection extends ActiveRecord
 {
     /**
      * @var integer max sort order.

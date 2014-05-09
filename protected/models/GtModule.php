@@ -8,7 +8,7 @@
  * @property integer $gt_type_id
  * @property string $name
  */
-class GtModule extends CActiveRecord
+class GtModule extends ActiveRecord
 {
 	/**
 	 * Returns the static model of the specified AR class.

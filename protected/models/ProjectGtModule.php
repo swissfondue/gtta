@@ -9,7 +9,7 @@
  * @property integer $sort_order
  * @property integer $max_sort_order
  */
-class ProjectGtModule extends CActiveRecord
+class ProjectGtModule extends ActiveRecord
 {
     /**
      * @var integer max sort order.

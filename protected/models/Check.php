@@ -21,9 +21,16 @@
  * @property integer $effort
  * @property integer $sort_order
  * @property boolean $demo
+ * @property integer $status
+ * @property integer $external_id
+ * @property string $create_time
+ * @property TargetCheck[] $targetChecks
+ * @property CheckL10n[] $l10n
  */
-class Check extends CActiveRecord
-{
+class Check extends ActiveRecord {
+    const STATUS_INSTALLED = 1;
+    const STATUS_UPLOAD = 2;
+
     // nearest sort order
     public $nearest_sort_order;
 
@@ -32,59 +39,64 @@ class Check extends CActiveRecord
 	 * @param string $className active record class name.
 	 * @return Check the static model class
 	 */
-	public static function model($className=__CLASS__)
-	{
+	public static function model($className=__CLASS__) {
 		return parent::model($className);
 	}
 
 	/**
 	 * @return string the associated database table name
 	 */
-	public function tableName()
-	{
-		return 'checks';
+	public function tableName() {
+		return "checks";
 	}
 
 	/**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
+	public function rules() {
 		return array(
-            array('name, check_control_id, sort_order', 'required'),
-            array('name, protocol, reference_code, reference_url', 'length', 'max' => 1000),
-            array('check_control_id, reference_id, port, effort, sort_order', 'numerical', 'integerOnly' => true),
-            array('advanced, automated, multiple_solutions, demo', 'boolean'),
+            array("name, check_control_id, sort_order", "required"),
+            array("name, protocol, reference_code, reference_url", "length", "max" => 1000),
+            array(
+                "check_control_id, reference_id, port, effort, sort_order, external_id, status",
+                "numerical",
+                "integerOnly" => true
+            ),
+            array("advanced, automated, multiple_solutions, demo", "boolean"),
+            array("status", "in", "range" => array(
+                self::STATUS_INSTALLED,
+                self::STATUS_UPLOAD,
+            )),
+            array("create_time", "safe"),
 		);
 	}
 
     /**
 	 * @return array relational rules.
 	 */
-	public function relations()
-	{
+	public function relations() {
 		return array(
-            'l10n' => array(self::HAS_MANY, 'CheckL10n', 'check_id'),
-            'control' => array(self::BELONGS_TO, 'CheckControl', 'check_control_id'),
-            '_reference' => array(self::BELONGS_TO, 'Reference', 'reference_id'),
-            'targetChecks' => array(self::HAS_MANY, 'TargetCheck', 'check_id'),
-            'targetCheckInputs' => array(self::HAS_MANY, 'TargetCheckInput', 'check_id'),
-            'targetCheckSolutions' => array(self::HAS_MANY, 'TargetCheckSolution', 'check_id'),
-            'targetCheckAttachments' => array(self::HAS_MANY, 'TargetCheckAttachment', 'check_id'),
-            'results' => array(self::HAS_MANY, 'CheckResult', 'check_id'),
-            'solutions' => array(self::HAS_MANY, 'CheckSolution', 'check_id'),
-            'scripts' => array(self::HAS_MANY, 'CheckScript', 'check_id'),
-            'riskCategories' => array(self::HAS_MANY, 'RiskCategoryCheck', 'check_id'),
+            "l10n" => array(self::HAS_MANY, "CheckL10n", "check_id"),
+            "control" => array(self::BELONGS_TO, "CheckControl", "check_control_id"),
+            "_reference" => array(self::BELONGS_TO, "Reference", "reference_id"),
+            "targetChecks" => array(self::HAS_MANY, "TargetCheck", "check_id"),
+            "targetCheckInputs" => array(self::HAS_MANY, "TargetCheckInput", "check_id"),
+            "targetCheckSolutions" => array(self::HAS_MANY, "TargetCheckSolution", "check_id"),
+            "targetCheckAttachments" => array(self::HAS_MANY, "TargetCheckAttachment", "check_id"),
+            "results" => array(self::HAS_MANY, "CheckResult", "check_id"),
+            "solutions" => array(self::HAS_MANY, "CheckSolution", "check_id"),
+            "scripts" => array(self::HAS_MANY, "CheckScript", "check_id"),
+            "riskCategories" => array(self::HAS_MANY, "RiskCategoryCheck", "check_id"),
 		);
 	}
 
     /**
      * @return string localized name.
      */
-    public function getLocalizedName()
-    {
-        if ($this->l10n && count($this->l10n) > 0)
+    public function getLocalizedName() {
+        if ($this->l10n && count($this->l10n) > 0) {
             return $this->l10n[0]->name != NULL ? $this->l10n[0]->name : $this->name;
+        }
 
         return $this->name;
     }
@@ -92,10 +104,10 @@ class Check extends CActiveRecord
     /**
      * @return string localized background info.
      */
-    public function getLocalizedBackgroundInfo()
-    {
-        if ($this->l10n && count($this->l10n) > 0)
+    public function getLocalizedBackgroundInfo() {
+        if ($this->l10n && count($this->l10n) > 0) {
             return $this->l10n[0]->background_info != NULL ? $this->l10n[0]->background_info : $this->background_info;
+        }
 
         return $this->background_info;
     }
@@ -103,10 +115,10 @@ class Check extends CActiveRecord
     /**
      * @return string localized hints.
      */
-    public function getLocalizedHints()
-    {
-        if ($this->l10n && count($this->l10n) > 0)
+    public function getLocalizedHints() {
+        if ($this->l10n && count($this->l10n) > 0) {
             return $this->l10n[0]->hints != NULL ? $this->l10n[0]->hints : $this->hints;
+        }
 
         return $this->hints;
     }
@@ -114,10 +126,10 @@ class Check extends CActiveRecord
     /**
      * @return string localized question.
      */
-    public function getLocalizedQuestion()
-    {
-        if ($this->l10n && count($this->l10n) > 0)
+    public function getLocalizedQuestion() {
+        if ($this->l10n && count($this->l10n) > 0) {
             return $this->l10n[0]->question != NULL ? $this->l10n[0]->question : $this->question;
+        }
 
         return $this->question;
     }
@@ -125,8 +137,25 @@ class Check extends CActiveRecord
     /**
      * @return boolean is running.
      */
-    public function getIsRunning()
-    {
-        return $this->automated && $this->targetChecks && in_array($this->targetChecks[0]->status, array(TargetCheck::STATUS_IN_PROGRESS, TargetCheck::STATUS_STOP));
+    public function getIsRunning() {
+        return $this->automated && $this->targetChecks &&
+            in_array($this->targetChecks[0]->status, array(TargetCheck::STATUS_IN_PROGRESS, TargetCheck::STATUS_STOP));
+    }
+
+    /**
+     * Get status name
+     * @return string
+     */
+    public function getStatusName() {
+        $names = array(
+            self::STATUS_INSTALLED => Yii::t("app", "Installed"),
+            self::STATUS_UPLOAD => Yii::t("app", "Uploading"),
+        );
+
+        if (!isset($names[$this->status])) {
+            throw new Exception(Yii::t("app", "Invalid status."));
+        }
+
+        return $names[$this->status];
     }
 }

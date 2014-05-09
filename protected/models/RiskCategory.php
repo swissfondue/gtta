@@ -8,7 +8,7 @@
  * @property string $name
  * @property integer $risk_category_id
  */
-class RiskCategory extends CActiveRecord
+class RiskCategory extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

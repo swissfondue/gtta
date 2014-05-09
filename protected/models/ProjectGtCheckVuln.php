@@ -10,7 +10,7 @@
  * @property string $deadline
  * @property string $status
  */
-class ProjectGtCheckVuln extends CActiveRecord {
+class ProjectGtCheckVuln extends ActiveRecord {
     /**
      * Vulnerability statuses.
      */

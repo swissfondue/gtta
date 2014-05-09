@@ -9,7 +9,7 @@
  * @property string $description
  * @property string $target_description
  */
-class GtCheckL10n extends CActiveRecord
+class GtCheckL10n extends ActiveRecord
 {
 	/**
 	 * Returns the static model of the specified AR class.

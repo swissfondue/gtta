@@ -13,7 +13,7 @@
  * @property integer $max_sort_order
  * @property integer $gt_dependency_processor_id
  */
-class GtCheck extends CActiveRecord
+class GtCheck extends ActiveRecord
 {
     /**
      * @var integer max sort order.

@@ -4428,9 +4428,7 @@ class ProjectController extends Controller
                         $user->project_id = $project->id;
                         $user->user_id    = $model->userId;
 
-                        if (!$user->save())
-                        {
-                            var_dump($user->getErrors());
+                        if (!$user->save()) {
                             exit();
                         }
 

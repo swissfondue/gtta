@@ -19,7 +19,7 @@
  * @property string $logo_path
  * @property string $logo_type
  */
-class Client extends CActiveRecord
+class Client extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

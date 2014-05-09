@@ -9,7 +9,7 @@
  * @property string $title
  * @property string $solution
  */
-class CheckSolutionL10n extends CActiveRecord
+class CheckSolutionL10n extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

@@ -9,7 +9,7 @@
  * @property string $host
  * @property string $description
  */
-class Target extends CActiveRecord
+class Target extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.

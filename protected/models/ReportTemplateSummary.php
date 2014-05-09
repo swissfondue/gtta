@@ -11,7 +11,7 @@
  * @property float $rating_to
  * @property integer $report_template_id
  */
-class ReportTemplateSummary extends CActiveRecord
+class ReportTemplateSummary extends ActiveRecord
 {   
 	/**
 	 * Returns the static model of the specified AR class.
