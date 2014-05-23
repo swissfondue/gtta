@@ -32,6 +32,7 @@
  * @property float $community_min_rating
  * @property boolean $community_allow_unverified
  * @property string $integration_key
+ * @property string $community_catalogs_cache
  * @property Language $language
  */
 class System extends ActiveRecord {
@@ -46,7 +47,7 @@ class System extends ActiveRecord {
     const STATUS_PACKAGE_MANAGER = 215;
     const STATUS_REGENERATE_SANDBOX = 220;
     const STATUS_COMMUNITY_INSTALL = 230;
-    const STATUS_COMMUNITY_UPLOAD = 240;
+    const STATUS_COMMUNITY_SHARE = 240;
     const STATUS_LICENSE_EXPIRED = 500;
 
     /**
@@ -79,7 +80,7 @@ class System extends ActiveRecord {
             self::STATUS_PACKAGE_MANAGER,
             self::STATUS_REGENERATE_SANDBOX,
             self::STATUS_COMMUNITY_INSTALL,
-            self::STATUS_COMMUNITY_UPLOAD,
+            self::STATUS_COMMUNITY_SHARE,
             self::STATUS_LICENSE_EXPIRED,
         );
     }
@@ -111,7 +112,7 @@ class System extends ActiveRecord {
             self::STATUS_PACKAGE_MANAGER => Yii::t("app", "The system is installing or removing packages."),
             self::STATUS_REGENERATE_SANDBOX => Yii::t("app", "The system is regenerating scripts sandbox."),
             self::STATUS_COMMUNITY_INSTALL => Yii::t("app", "The system is installing checks or packages from the community platform."),
-            self::STATUS_COMMUNITY_UPLOAD => Yii::t("app", "The system is uploading checks or packages to the community platform."),
+            self::STATUS_COMMUNITY_SHARE => Yii::t("app", "The system is sharing checks or packages to the community platform."),
         );
 
         return $statuses[$this->status];

@@ -37,6 +37,7 @@ class PackageController extends Controller {
         $criteria->addInCondition("status", array(
             Package::STATUS_INSTALL,
             Package::STATUS_INSTALLED,
+            Package::STATUS_SHARE,
             Package::STATUS_ERROR
         ));
 
@@ -74,6 +75,7 @@ class PackageController extends Controller {
         $criteria->addInCondition("status", array(
             Package::STATUS_INSTALL,
             Package::STATUS_INSTALLED,
+            Package::STATUS_SHARE,
             Package::STATUS_ERROR
         ));
 
@@ -262,11 +264,12 @@ class PackageController extends Controller {
     /**
      * View package
      * @param $id
+     * @throws CHttpException
      */
     public function actionView($id) {
         $package = Package::model()->findByPk($id);
 
-        if (!$package || $package->status != Package::STATUS_INSTALLED) {
+        if (!$package || !$package->isActive()) {
             throw new CHttpException(404, Yii::t("app", "Package not found."));
         }
 
@@ -286,6 +289,53 @@ class PackageController extends Controller {
 		$this->render("view", array(
             "package" => $package,
             "data" => $data
+        ));
+    }
+
+    /**
+     * Share package
+     * @param $id
+     * @throws CHttpException
+     */
+    public function actionShare($id) {
+        $package = Package::model()->findByPk($id);
+
+        if (!$package) {
+            throw new CHttpException(404, Yii::t("app", "Package not found."));
+        }
+
+        $form = new SharePackageForm();
+
+		if (isset($_POST["SharePackageForm"])) {
+			$form->attributes = $_POST["SharePackageForm"];
+
+			if ($form->validate()) {
+                try {
+                    $pm = new PackageManager();
+                    $pm->share($package);
+                } catch (Exception $e) {
+                    throw new CHttpException(403, Yii::t("app", "Access denied."));
+                }
+
+                Yii::app()->user->setFlash("success", Yii::t("app", "Package scheduled for sharing."));
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+		}
+
+        if ($package->type == Package::TYPE_LIBRARY) {
+            $this->breadcrumbs[] = array(Yii::t("app", "Libraries"), $this->createUrl("package/libraries"));
+        } else {
+            $this->breadcrumbs[] = array(Yii::t("app", "Scripts"), $this->createUrl("package/index"));
+        }
+
+        $this->breadcrumbs[] = array($package->name, $this->createUrl("package/view", array("id" => $id)));
+        $this->breadcrumbs[] = array(Yii::t("app", "Share"), "");
+
+        // display the page
+        $this->pageTitle = $package->name;
+		$this->render("share", array(
+            "package" => $package,
         ));
     }
 

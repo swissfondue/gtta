@@ -51,6 +51,12 @@ class CommunityInstallCommand extends ConsoleCommand {
     private function _installChecks($checks, $integrationKey) {
         $api = new CommunityApiClient($integrationKey);
         $catalogs = $api->getCatalogs();
+
+        /** @var System $system */
+        $system = System::model()->findByPk(1);
+        $system->community_catalogs_cache = json_encode($catalogs);
+        $system->save();
+
         $cm = new CheckManager($catalogs);
 
         foreach ($checks as $check) {

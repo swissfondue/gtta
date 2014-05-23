@@ -24,12 +24,15 @@
  * @property integer $status
  * @property integer $external_id
  * @property string $create_time
+ * @property integer external_control_id
+ * @property integer external_reference_id
  * @property TargetCheck[] $targetChecks
  * @property CheckL10n[] $l10n
+ * @property CheckScript[] $scripts
  */
 class Check extends ActiveRecord {
     const STATUS_INSTALLED = 1;
-    const STATUS_UPLOAD = 2;
+    const STATUS_SHARE = 2;
 
     // nearest sort order
     public $nearest_sort_order;
@@ -58,14 +61,14 @@ class Check extends ActiveRecord {
             array("name, check_control_id, sort_order", "required"),
             array("name, protocol, reference_code, reference_url", "length", "max" => 1000),
             array(
-                "check_control_id, reference_id, port, effort, sort_order, external_id, status",
+                "check_control_id, reference_id, port, effort, sort_order, external_id, status, external_control_id, external_reference_id",
                 "numerical",
                 "integerOnly" => true
             ),
             array("advanced, automated, multiple_solutions, demo", "boolean"),
             array("status", "in", "range" => array(
                 self::STATUS_INSTALLED,
-                self::STATUS_UPLOAD,
+                self::STATUS_SHARE,
             )),
             array("create_time", "safe"),
 		);
@@ -145,11 +148,12 @@ class Check extends ActiveRecord {
     /**
      * Get status name
      * @return string
+     * @throws Exception
      */
     public function getStatusName() {
         $names = array(
             self::STATUS_INSTALLED => Yii::t("app", "Installed"),
-            self::STATUS_UPLOAD => Yii::t("app", "Uploading"),
+            self::STATUS_SHARE => Yii::t("app", "Sharing"),
         );
 
         if (!isset($names[$this->status])) {

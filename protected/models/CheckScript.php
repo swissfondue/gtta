@@ -7,6 +7,7 @@
  * @property integer $id
  * @property integer $check_id
  * @property integer $package_id
+ * @property Package $package
  */
 class CheckScript extends ActiveRecord
 {

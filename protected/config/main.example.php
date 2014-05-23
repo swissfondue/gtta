@@ -151,6 +151,7 @@ return array(
 
                 // settings
                 "settings" => "settings/edit",
+                "settings/integration-key" => "settings/integrationkey",
 
                 // update
                 "update" => "update/index",
@@ -164,6 +165,7 @@ return array(
                 "libraries" => "package/libraries",
                 "library/new" => "package/editlibrary",
                 "package/<id:\d+>" => "package/view",
+                "package/<id:\d+>/share" => "package/share",
                 "package/control" => "package/control",
                 "package/upload" => "package/upload",
                 "scripts/regenerate" => "package/regenerate",
@@ -224,6 +226,9 @@ return array(
                 "check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/script/<script:\d+>/input/<input:\d+>/edit" => "check/editinput",
                 "check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/script/<script:\d+>/input/new"              => "check/editinput",
                 "check/control/check/input/control" => "check/controlinput",
+
+                // check share
+                "check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/share" => "check/share",
 
                 // references
                 "references/<page:\d+>"   => "reference/index",

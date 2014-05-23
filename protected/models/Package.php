@@ -13,13 +13,14 @@
  * @property integer $status
  * @property integer $external_id
  * @property string $create_time
+ * @property Package[] $dependencies
  */
 class Package extends ActiveRecord {
     const TYPE_LIBRARY = 0;
     const TYPE_SCRIPT = 1;
     const STATUS_INSTALL = 0;
     const STATUS_INSTALLED = 1;
-    const STATUS_UPLOAD = 2;
+    const STATUS_SHARE = 2;
     const STATUS_DELETE = 10;
     const STATUS_ERROR = 100;
 
@@ -39,6 +40,22 @@ class Package extends ActiveRecord {
 		return "packages";
 	}
 
+    /**
+     * Get active package statuses
+     * @return array
+     */
+    public static function getActiveStatuses() {
+        return array(self::STATUS_INSTALLED, self::STATUS_SHARE);
+    }
+
+    /**
+     * Check if package status is active
+     * @return boolean
+     */
+    public function isActive() {
+        return in_array($this->status, self::getActiveStatuses());
+    }
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
@@ -51,7 +68,7 @@ class Package extends ActiveRecord {
             array("status", "in", "range" => array(
                 self::STATUS_INSTALL,
                 self::STATUS_INSTALLED,
-                self::STATUS_UPLOAD,
+                self::STATUS_SHARE,
                 self::STATUS_DELETE,
                 self::STATUS_ERROR
             )),
@@ -79,7 +96,7 @@ class Package extends ActiveRecord {
         $names = array(
             self::STATUS_INSTALL => Yii::t("app", "Installing"),
             self::STATUS_INSTALLED => Yii::t("app", "Installed"),
-            self::STATUS_UPLOAD => Yii::t("app", "Uploading"),
+            self::STATUS_SHARE => Yii::t("app", "Sharing"),
             self::STATUS_DELETE => Yii::t("app", "Deleting"),
             self::STATUS_ERROR => Yii::t("app", "Error"),
         );

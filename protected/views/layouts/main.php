@@ -173,7 +173,8 @@
             <footer>
                 <?php if (!Yii::app()->user->isGuest): ?>
                     <div class="pull-right">
-                        <a href="<?php echo $this->createUrl("app/help"); ?>" target="_blank">[<?php echo Yii::t("app", "HELP"); ?>]</a>
+                        <a href="http://community.gtta.net" target="_blank">[<?php echo Yii::t("app", "COMMUNITY"); ?>]</a>
+                        &nbsp;<a href="<?php echo $this->createUrl("app/help"); ?>" target="_blank">[<?php echo Yii::t("app", "HELP"); ?>]</a>
                     </div>
                 <?php endif; ?>
 

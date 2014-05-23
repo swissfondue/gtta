@@ -2994,4 +2994,120 @@ class CheckController extends Controller
             'checks' => $checks,
         ));
     }
+
+    /**
+     * Share check
+     * @param $id
+     * @param $control
+     * @param $check
+     * @throws CHttpException
+     */
+    public function actionShare($id, $control, $check) {
+        $id = (int) $id;
+        $control = (int) $control;
+        $check = (int) $check;
+
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        $category = CheckCategory::model()->with(array(
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array("language_id" => $language)
+            )
+        ))->findByPk($id);
+
+        if (!$category) {
+            throw new CHttpException(404, Yii::t("app", "Category not found."));
+        }
+
+        $control = CheckControl::model()->with(array(
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array("language_id" => $language)
+            )
+        ))->findByAttributes(array(
+            "id" => $control,
+            "check_category_id" => $category->id
+        ));
+
+        if (!$control) {
+            throw new CHttpException(404, Yii::t("app", "Control not found."));
+        }
+
+        $check = Check::model()->with(array(
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array("language_id" => $language)
+            )
+        ))->findByAttributes(array(
+            "id" => $check,
+            "check_control_id" => $control->id
+        ));
+
+        if (!$check) {
+            throw new CHttpException(404, Yii::t("app", "Check not found."));
+        }
+
+        if ($this->_system->demo && !$check->demo) {
+            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
+        }
+
+        $form = new ShareCheckForm();
+
+		if (isset($_POST["ShareCheckForm"])) {
+			$form->attributes = $_POST["ShareCheckForm"];
+
+			if ($form->validate()) {
+                try {
+                    $cm = new CheckManager();
+                    $cm->share($check, $form->externalControlId, $form->externalReferenceId);
+                    Yii::app()->user->setFlash("success", Yii::t("app", "Check scheduled for sharing."));
+                } catch (Exception $e) {
+                    Yii::app()->user->setFlash("error", Yii::t("app", "Error creating check."));
+                }
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+		}
+
+        $catalogs = json_decode($this->_system->community_catalogs_cache);
+
+        if (!$catalogs) {
+            throw new CHttpException(403, Yii::t("app", "No community catalogs."));
+        }
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Checks"), $this->createUrl("check/index"));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl("check/view", array(
+            "id" => $category->id
+        )));
+        $this->breadcrumbs[] = array($control->localizedName, $this->createUrl("check/viewcontrol", array(
+            "id" => $category->id,
+            "control" => $control->id
+        )));
+        $this->breadcrumbs[] = array($check->localizedName, $this->createUrl("check/editcheck", array(
+            "id" => $category->id,
+            "control" => $control->id,
+            "check" => $check->id
+        )));
+        $this->breadcrumbs[] = array(Yii::t("app", "Share"), "");
+
+        // display the page
+        $this->pageTitle = $check->localizedName;
+		$this->render("control/check/share", array(
+            "category" => $category,
+            "control" => $control,
+            "check" => $check,
+            "catalogs" => $catalogs,
+            "form" => $form,
+        ));
+    }
 }

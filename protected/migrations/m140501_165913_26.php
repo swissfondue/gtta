@@ -13,7 +13,7 @@ class m140501_165913_26 extends CDbMigration {
         $this->addColumn("check_controls", "external_id", "bigint DEFAULT NULL");
         $this->addColumn("checks", "external_id", "bigint DEFAULT NULL");
         $this->addColumn("checks", "create_time", "timestamp WITHOUT TIME ZONE NOT NULL DEFAULT NOW()");
-        $this->addColumn("checks", "status", "integer NOT NULL DEFAULT 0");
+        $this->addColumn("checks", "status", "integer NOT NULL DEFAULT 1");
         $this->addColumn("packages", "external_id", "bigint DEFAULT NULL");
         $this->addColumn("packages", "create_time", "timestamp WITHOUT TIME ZONE NOT NULL DEFAULT NOW()");
         $this->addColumn("references", "external_id", "bigint DEFAULT NULL");

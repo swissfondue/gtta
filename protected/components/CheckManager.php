@@ -287,11 +287,13 @@ class CheckManager {
         $pm = new PackageManager();
 
         foreach ($check->scripts as $script) {
-            $pkg = Package::model()->findByAttributes(array(
+            $criteria = new CDbCriteria();
+            $criteria->addColumnCondition(array(
                 "external_id" => $script->package_id,
                 "type" => Package::TYPE_SCRIPT,
-                "status" => Package::STATUS_INSTALLED
             ));
+            $criteria->addInCondition("status", Package::getActiveStatuses());
+            $pkg = Package::model()->find($criteria);
 
             if (!$pkg) {
                 $pkg = $pm->createPackage($script->package_id);
@@ -340,5 +342,37 @@ class CheckManager {
         }
 
         return $checkIds;
+    }
+
+    /**
+     * Share check
+     * @param Check $check
+     * @param integer $externalControlId
+     * @param integer $externalReferenceId
+     * @throws Exception
+     */
+    public function share(Check $check, $externalControlId, $externalReferenceId) {
+        if ($check->external_id || $check->status != Check::STATUS_INSTALLED) {
+            throw new Exception("Invalid check.");
+        }
+
+        $pm = new PackageManager();
+
+        if ($check->automated) {
+            foreach ($check->scripts as $script) {
+                $package = $script->package;
+
+                if ($package->external_id) {
+                    continue;
+                }
+
+                $pm->share($package);
+            }
+        }
+
+        $check->external_control_id = $externalControlId;
+        $check->external_reference_id = $externalReferenceId;
+        $check->status = Package::STATUS_SHARE;
+        $check->save();
     }
 }

@@ -30,6 +30,21 @@
             </div>
         </div>
 
+        <div class="control-group">
+            <label class="control-label"><?php echo Yii::t("app", "Integration Key"); ?></label>
+            <div class="controls form-text">
+                <span id="integration-key" data-integration-key-url="<?php echo $this->createUrl("settings/integration-key"); ?>">
+                    <?php if ($this->_system->integration_key): ?>
+                        <?php echo $this->_system->integration_key; ?>
+                    <?php else: ?>
+                        <?php echo Yii::t("app", "N/A"); ?>
+                    <?php endif; ?>
+                </span>
+
+                <a href="#generate" title="<?php echo Yii::t("app", "Generate New"); ?>" onclick="admin.settings.generateIntegrationKey();"><i class="icon icon-refresh"></i></a>
+            </div>
+        </div>
+
         <hr>
 
         <div class="control-group">

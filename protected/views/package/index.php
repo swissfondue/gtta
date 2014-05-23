@@ -40,10 +40,10 @@
                         <?php foreach ($scripts as $script): ?>
                             <tr data-id="<?php echo $script->id; ?>" data-control-url="<?php echo $this->createUrl("package/control"); ?>">
                                 <td class="name">
-                                    <?php if ($script->status == Package::STATUS_INSTALLED): ?>
+                                    <?php if ($script->isActive()): ?>
                                         <a href="<?php echo $this->createUrl("package/view", array("id" => $script->id)); ?>"><?php echo CHtml::encode($script->name); ?><?php echo $script->version ? " " . $script->version : ""; ?></a>
                                     <?php else: ?>
-                                        <?php echo CHtml::encode($script->name); ?>
+                                        <?php echo CHtml::encode($script->name); ?><?php echo $script->version ? " " . $script->version : ""; ?>
                                     <?php endif; ?>
                                 </td>
                                 <td class="status">

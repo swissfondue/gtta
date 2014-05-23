@@ -13,6 +13,8 @@ class SettingsController extends Controller {
 			"checkAuth",
             "checkAdmin",
             "idleOrRunning",
+            "ajaxOnly + controllogo, integrationkey",
+            "postOnly + controllogo, integrationkey",
 		);
 	}
 
@@ -143,6 +145,49 @@ class SettingsController extends Controller {
                     $this->_system->save();
 
                     $response->addData("url", $this->createUrl("app/logo"));
+
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t("app", "Unknown operation."));
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Generate integration key logo.
+     */
+    public function actionIntegrationKey() {
+        $response = new AjaxResponse();
+
+        try {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST["EntryControlForm"];
+
+            if (!$model->validate()) {
+                $errorText = "";
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            switch ($model->operation) {
+                case "generate":
+                    $this->_system->integration_key = strtoupper(hash("sha256",
+                        rand() . time() . ($this->_system->workstation_id ? $this->_system->workstation_id : "N/A")
+                    ));
+                    $this->_system->save();
+
+                    $response->addData("integrationKey", $this->_system->integration_key);
 
                     break;
 

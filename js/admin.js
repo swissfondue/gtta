@@ -930,6 +930,47 @@ function Admin()
                 _settings._controlLogo("delete");
             }
         };
+
+        /**
+         * Generate new integration key.
+         */
+        this.generateIntegrationKey = function() {
+            var url = $("#integration-key").data("integration-key-url");
+
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data: {
+                    "EntryControlForm[operation]": "generate",
+                    "EntryControlForm[id]": 1,
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
+                        return;
+                    }
+
+                    data = data.data;
+                    $("#integration-key").html(data.integrationKey);
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.showMessage("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
     };
 
     /**

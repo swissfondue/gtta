@@ -295,7 +295,6 @@ class PackageManager {
             $version = $this->_getSection($package, self::SECTION_VERSION);
             $type = $this->_getSection($package, self::SECTION_TYPE);
             $system = $this->_getSection($package, self::SECTION_SYSTEM);
-            $description = $this->_getSection($package, self::SECTION_DESCRIPTION);
         } catch (MissingSectionException $e) {
             throw new Exception(
                 Yii::t("app", "Missing package section:: {section}.", array(
@@ -1196,5 +1195,27 @@ class PackageManager {
         }
 
         return $packageIds;
+    }
+
+    /**
+     * Share package
+     * @param Package $package
+     * @throws Exception
+     */
+    public function share($package) {
+        if ($package->external_id || !$package->isActive()) {
+            throw new Exception("Invalid package.");
+        }
+
+        foreach ($package->dependencies as $dep) {
+            if ($dep->external_id) {
+                continue;
+            }
+
+            $this->share($dep);
+        }
+
+        $package->status = Package::STATUS_SHARE;
+        $package->save();
     }
 }
