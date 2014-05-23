@@ -39,10 +39,13 @@ class SettingsController extends Controller {
         $form->reportHighDampingMed = $system->report_high_damping_med;
         $form->copyright = $system->copyright;
         $form->languageId = $system->language_id;
+        $form->communityAllowUnverified = $system->community_allow_unverified;
+        $form->communityMinRating = $system->community_min_rating;
 
         // collect form input data
 		if (isset($_POST["SettingsEditForm"])) {
 			$form->attributes = $_POST["SettingsEditForm"];
+            $form->communityAllowUnverified = isset($_POST["SettingsEditForm"]["communityAllowUnverified"]);
 
 			if ($form->validate()) {
                 $system->workstation_id = $form->workstationId ? $form->workstationId : null;
@@ -58,6 +61,8 @@ class SettingsController extends Controller {
                 $system->copyright = $form->copyright;
                 $system->demo = true;
                 $system->language_id = $form->languageId;
+                $system->community_allow_unverified = $form->communityAllowUnverified;
+                $system->community_min_rating = $form->communityMinRating;
                 $system->save();
 
                 $this->_system->refresh();

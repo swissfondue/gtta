@@ -40,17 +40,17 @@ class SettingsEditForm extends CFormModel {
     public $reportMaxRating;
 
     /**
-     * @var med region damping factor for low risk checks
+     * @var float med region damping factor for low risk checks
      */
     public $reportMedDampingLow;
 
     /**
-     * @var high region damping factor for low risk checks
+     * @var float high region damping factor for low risk checks
      */
     public $reportHighDampingLow;
 
     /**
-     * @var high region damping factor for med risk checks
+     * @var float high region damping factor for med risk checks
      */
     public $reportHighDampingMed;
 
@@ -65,6 +65,16 @@ class SettingsEditForm extends CFormModel {
     public $languageId;
 
     /**
+     * @var float min rating
+     */
+    public $communityMinRating;
+
+    /**
+     * @var bool allow unverified checks/packages
+     */
+    public $communityAllowUnverified;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
@@ -73,6 +83,8 @@ class SettingsEditForm extends CFormModel {
             array("timezone", "in", "range" => array_keys(TimeZones::$zones)),
             array("workstationId", "length", "is" => 36),
             array("workstationKey, copyright", "length", "max" => 1000),
+            array("communityMinRating", "numerical", "min" => 0, "max" => 5),
+            array("communityAllowUnverified", "boolean"),
             array("reportLowPedestal, reportMedPedestal, reportHighPedestal, reportMaxRating, reportMedDampingLow, reportHighDampingLow, reportHighDampingMed", "numerical", "min" => 0),
             array("reportLowPedestal", "compare", "compareAttribute" => "reportMedPedestal", "operator" => "<="),
             array("reportMedPedestal", "compare", "compareAttribute" => "reportHighPedestal", "operator" => "<="),
@@ -98,6 +110,8 @@ class SettingsEditForm extends CFormModel {
             "reportHighDampingMed" => Yii::t("app", "High Risk Region: Medium Risks"),
             "copyright" => Yii::t("app", "Copyright"),
             "languageId" => Yii::t("app", "Default Language"),
+            "communityMinRating" => Yii::t("app", "Community Min Rating"),
+            "communityAllowUnverified" => Yii::t("app", "Community Allow Unverified"),
 		);
 	}
 

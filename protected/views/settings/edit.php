@@ -29,6 +29,8 @@
                 <?php endif; ?>
             </div>
         </div>
+        
+        <hr>               
 
         <div class="control-group">
             <label class="control-label"><?php echo Yii::t("app", "Integration Key"); ?></label>
@@ -42,6 +44,23 @@
                 </span>
 
                 <a href="#generate" title="<?php echo Yii::t("app", "Generate New"); ?>" onclick="admin.settings.generateIntegrationKey();"><i class="icon icon-refresh"></i></a>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($form->getError("communityMinRating")) echo "error"; ?>">
+            <label class="control-label" for="SettingsEditForm_communityMinRating"><?php echo Yii::t("app", "Community Min Rating"); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="SettingsEditForm_communityMinRating" name="SettingsEditForm[communityMinRating]" value="<?php echo CHtml::encode($form->communityMinRating); ?>">
+                <?php if ($form->getError("communityMinRating")): ?>
+                    <p class="help-block"><?php echo $form->getError("communityMinRating"); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label class="control-label" for="SettingsEditForm_communityAllowUnverified"><?php echo Yii::t("app", "Community Allow Unverified"); ?></label>
+            <div class="controls">
+                <input type="checkbox" id="SettingsEditForm_communityAllowUnverified" name="SettingsEditForm[communityAllowUnverified]" value="1" <?php if ($form->communityAllowUnverified) echo 'checked="checked"'; ?>>
             </div>
         </div>
 
