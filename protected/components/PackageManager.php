@@ -744,7 +744,7 @@ class PackageManager {
         $vm = new VMManager();
 
         try {
-            $vm->runCommand("apt-get -y --no-install-recommends install $package");
+            $vm->runCommand("DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install $package");
             $this->_checkSystemDependency($package);
         } catch (Exception $e) {
             throw new Exception(
