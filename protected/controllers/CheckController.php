@@ -3069,11 +3069,12 @@ class CheckController extends Controller
 			if ($form->validate()) {
                 try {
                     $cm = new CheckManager();
-                    $cm->share($check, $form->externalControlId, $form->externalReferenceId);
-                    Yii::app()->user->setFlash("success", Yii::t("app", "Check scheduled for sharing."));
+                    $cm->prepareSharing($check, $form->externalControlId, $form->externalReferenceId);
                 } catch (Exception $e) {
-                    Yii::app()->user->setFlash("error", Yii::t("app", "Error creating check."));
+                    throw new CHttpException(403, Yii::t("app", "Access denied."));
                 }
+
+                Yii::app()->user->setFlash("success", Yii::t("app", "Check scheduled for sharing."));
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }

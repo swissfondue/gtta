@@ -124,6 +124,16 @@ class CommunityApiClient {
     }
 
     /**
+     * Share check info
+     * @param $check
+     * @return mixed response
+     */
+    public function shareCheck($check) {
+        $response = $this->_sendRequest("check", json_encode($check));
+        return $this->_parseResponse($response);
+    }
+
+    /**
      * Get catalogs
      * @return mixed response
      */
@@ -139,6 +149,24 @@ class CommunityApiClient {
      */
     public function getPackageArchive($package, $pathToSave) {
         $this->_sendRequest("package/$package/download", null, $pathToSave);
+    }
+
+    /**
+     * Share package
+     * @param $path
+     * @return mixed response
+     */
+    public function sharePackage($path) {
+        $response = $this->_sendRequest(
+            "package",
+            array(
+                "package" => "@" . realpath($path) . ";filename=package.zip;type=application/zip"
+            ),
+            null,
+            "multipart/form-data"
+        );
+
+        return $this->_parseResponse($response);
     }
 
     /**

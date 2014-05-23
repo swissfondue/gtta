@@ -192,6 +192,7 @@ class CheckManager {
      * Create check
      * @param $check
      * @return Check
+     * @throws Exception
      */
     public function createCheck($check) {
         /** @var System $system */
@@ -345,13 +346,13 @@ class CheckManager {
     }
 
     /**
-     * Share check
+     * Prepare check sharing
      * @param Check $check
      * @param integer $externalControlId
      * @param integer $externalReferenceId
      * @throws Exception
      */
-    public function share(Check $check, $externalControlId, $externalReferenceId) {
+    public function prepareSharing(Check $check, $externalControlId, $externalReferenceId) {
         if ($check->external_id || $check->status != Check::STATUS_INSTALLED) {
             throw new Exception("Invalid check.");
         }
@@ -366,13 +367,133 @@ class CheckManager {
                     continue;
                 }
 
-                $pm->share($package);
+                $pm->prepareSharing($package);
             }
         }
 
         $check->external_control_id = $externalControlId;
         $check->external_reference_id = $externalReferenceId;
         $check->status = Package::STATUS_SHARE;
+        $check->save();
+    }
+
+    /**
+     * Serialize check
+     * @param Check $check
+     * @return array
+     * @throws Exception
+     */
+    public function share(Check $check) {
+        /** @var System $system */
+        $system = System::model()->findByPk(1);
+
+        $target = array(
+            "control_id" => $check->external_control_id,
+            "reference_id" => $check->external_reference_id,
+            "reference_code" => $check->reference_code,
+            "reference_url" => $check->reference_url,
+            "name" => $check->name,
+            "background_info" => $check->background_info,
+            "hints" => $check->hints,
+            "question" => $check->question,
+            "advanced" => $check->advanced,
+            "automated" => $check->automated,
+            "multiple_solutions" => $check->multiple_solutions,
+            "protocol" => $check->protocol,
+            "port" => $check->port,
+            "sort_order" => $check->sort_order,
+            "l10n" => array(),
+            "results" => array(),
+            "solutions" => array(),
+            "scripts" => array()
+        );
+
+        foreach ($check->l10n as $l10n) {
+            $target["l10n"][] = array(
+                "code" => $l10n->language->code,
+                "name" => $l10n->name,
+                "background_info" => $l10n->background_info,
+                "hints" => $l10n->hints,
+                "question" => $l10n->question,
+            );
+        }
+
+        foreach ($check->results as $result) {
+            $r = array(
+                "title" => $result->title,
+                "result" => $result->result,
+                "sort_order" => $result->sort_order,
+                "l10n" => array(),
+            );
+
+            foreach ($result->l10n as $l10n) {
+                $r["l10n"][] = array(
+                    "code" => $l10n->language->code,
+                    "title" => $l10n->title,
+                    "result" => $l10n->result,
+                );
+            }
+
+            $target["results"][] = $r;
+        }
+
+        foreach ($check->solutions as $solution) {
+            $s = array(
+                "title" => $solution->title,
+                "solution" => $solution->solution,
+                "sort_order" => $solution->sort_order,
+                "l10n" => array(),
+            );
+
+            foreach ($solution->l10n as $l10n) {
+                $s["l10n"][] = array(
+                    "code" => $l10n->language->code,
+                    "title" => $l10n->title,
+                    "solution" => $l10n->solution,
+                );
+            }
+
+            $target["solutions"][] = $s;
+        }
+
+        foreach ($check->scripts as $script) {
+            if (!$script->package->external_id) {
+                throw new Exception("Invalid package id.");
+            }
+
+            $s = array(
+                "package_id" => $script->package->external_id,
+                "inputs" => array(),
+            );
+
+            foreach ($script->inputs as $input) {
+                $i = array(
+                    "type" => $input->type,
+                    "name" => $input->name,
+                    "description" => $input->description,
+                    "value" => $input->value,
+                    "visible" => $input->visible,
+                    "sort_order" => $input->sort_order,
+                    "l10n" => array(),
+                );
+
+                foreach ($input->l10n as $l10n) {
+                    $i["l10n"][] = array(
+                        "code" => $l10n->language->code,
+                        "name" => $l10n->name,
+                        "description" => $l10n->description,
+                    );
+                }
+
+                $s["inputs"][] = $i;
+            }
+
+            $target["scripts"][] = $s;
+        }
+
+        $api = new CommunityApiClient($system->integration_key);
+        $check->external_id = $api->shareCheck(array("check" => $target))->id;
+        $check->status = Check::STATUS_INSTALLED;
         $check->save();
     }
 }

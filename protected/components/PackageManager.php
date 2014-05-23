@@ -1198,11 +1198,11 @@ class PackageManager {
     }
 
     /**
-     * Share package
+     * Prepare package for sharing
      * @param Package $package
      * @throws Exception
      */
-    public function share($package) {
+    public function prepareSharing(Package $package) {
         if ($package->external_id || !$package->isActive()) {
             throw new Exception("Invalid package.");
         }
@@ -1212,10 +1212,41 @@ class PackageManager {
                 continue;
             }
 
-            $this->share($dep);
+            $this->prepareSharing($dep);
         }
 
         $package->status = Package::STATUS_SHARE;
         $package->save();
+    }
+
+    /**
+     * Share package
+     * @param Package $package
+     * @throws Exception
+     */
+    public function share(Package $package) {
+        $path = $this->getPath($package);
+        $zip = new ZipArchive();
+        $zipPath = "/tmp/package-" . $package->id . ".zip";
+
+        if (file_exists($zipPath)) {
+            FileManager::unlink($zipPath);
+        }
+
+        if (!$zip->open($zipPath, ZipArchive::CREATE)) {
+            throw new Exception(Yii::t("app", "Unable to create the package."));
+        }
+
+        FileManager::zipDirectory($zip, $path, $package->name);
+        $zip->close();
+
+        /** @var System $system */
+        $system = System::model()->findByPk(1);
+        $api = new CommunityApiClient($system->integration_key);
+        $package->external_id = $api->sharePackage($zipPath)->id;
+        $package->status = Check::STATUS_INSTALLED;
+        $package->save();
+
+        FileManager::unlink($zipPath);
     }
 }

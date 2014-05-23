@@ -200,6 +200,8 @@ class FileManager {
     /**
      * Get file MIME type
      * @param $filePath
+     * @return string
+     * @throws Exception
      */
     public static function getMimeType($filePath) {
         if (!file_exists($filePath)) {
@@ -207,6 +209,7 @@ class FileManager {
         }
 
         $fileInfo = finfo_open();
+
         return finfo_file($fileInfo, $filePath, FILEINFO_MIME_TYPE);
     }
 }

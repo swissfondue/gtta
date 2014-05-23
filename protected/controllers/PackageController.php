@@ -312,7 +312,7 @@ class PackageController extends Controller {
 			if ($form->validate()) {
                 try {
                     $pm = new PackageManager();
-                    $pm->share($package);
+                    $pm->prepareSharing($package);
                 } catch (Exception $e) {
                     throw new CHttpException(403, Yii::t("app", "Access denied."));
                 }
