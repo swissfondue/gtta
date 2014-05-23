@@ -39,6 +39,12 @@ class SystemManager {
 
         fclose($fp);
 
+        try {
+            FileManager::chmod(Yii::app()->params["systemStatusLock"], 0666);
+        } catch (Exception $e) {
+            // pass
+        }
+
         if ($error) {
             throw new Exception("Error changing system status.");
         }
