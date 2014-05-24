@@ -70,18 +70,18 @@ class TargetCheckCategory extends ActiveRecord
         $medCount = 0;
         $highCount = 0;
 
-        $controls = CheckControl::model()->with("customCheck")->findAllByAttributes(array(
+        $controls = CheckControl::model()->with("customChecks")->findAllByAttributes(array(
              "check_category_id" => $this->check_category_id
         ));
 
         foreach ($controls as $control) {
             $controlIds[] = $control->id;
 
-            if ($control->customCheck) {
+            foreach ($control->customChecks as $custom) {
                 $checkCount++;
                 $finishedCount++;
 
-                switch ($control->customCheck[0]->rating) {
+                switch ($custom->rating) {
                     case TargetCustomCheck::RATING_INFO:
                         $infoCount++;
                         break;
