@@ -4,6 +4,7 @@
  * This is the model class for table "target_custom_checks".
  *
  * The followings are the available columns in table "target_custom_checks":
+ * @property integer $id
  * @property integer $target_id
  * @property integer $check_control_id
  * @property integer $user_id

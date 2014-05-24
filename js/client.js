@@ -12,12 +12,9 @@ function Client() {
          * Expand.
          * @param id
          * @param callback
-         * @param custom
          */
-        this.expand = function (id, callback, custom) {
-            var selector = custom ?
-                $("div.check-form[data-id=custom-" + id + "]") :
-                $("div.check-form[data-id=" + id + "]");
+        this.expand = function (id, callback) {
+            var selector = $("div.check-form[data-id=" + id + "]");
 
             selector.slideDown("slow", undefined, function () {
                 if (callback) {
@@ -30,12 +27,9 @@ function Client() {
          * Collapse.
          * @param id
          * @param callback
-         * @param custom
          */
-        this.collapse = function (id, callback, custom) {
-            var selector = custom ?
-                $("div.check-form[data-id=custom-" + id + "]") :
-                $("div.check-form[data-id=" + id + "]");
+        this.collapse = function (id, callback) {
+            var selector = $("div.check-form[data-id=" + id + "]");
 
             selector.slideUp("slow", undefined, function () {
                 if (callback) {
@@ -47,12 +41,9 @@ function Client() {
         /**
          * Toggle check
          * @param id
-         * @param custom
          */
-        this.toggle = function (id, custom) {
-            var visible = custom ?
-                $("div.check-form[data-id=custom-" + id + "]").is(":visible") :
-                $("div.check-form[data-id=" + id + "]").is(":visible");
+        this.toggle = function (id) {
+            var visible = $("div.check-form[data-id=" + id + "]").is(":visible");
 
             if (visible) {
                 _check.collapse(id, null, custom);

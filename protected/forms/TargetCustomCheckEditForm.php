@@ -45,7 +45,12 @@ class TargetCustomCheckEditForm extends CFormModel {
     public $createCheck;
 
     /**
-     * @var boolean control id.
+     * @var integer id.
+     */
+    public $id;
+
+    /**
+     * @var integer control id.
      */
     public $controlId;
 
@@ -56,7 +61,7 @@ class TargetCustomCheckEditForm extends CFormModel {
 		return array(
             array("rating", "in", "range" => TargetCheck::getValidRatings()),
             array("name, solutionTitle", "length", "max" => 1000),
-            array("controlId", "numerical", "integerOnly" => true),
+            array("id, controlId", "numerical", "integerOnly" => true),
             array("createCheck", "boolean"),
             array("backgroundInfo, question, result, solution", "safe"),
 		);

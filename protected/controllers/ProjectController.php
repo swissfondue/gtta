@@ -1566,7 +1566,7 @@ class ProjectController extends Controller
             "control" => array(
                 "joinType" => "LEFT JOIN",
                 "with" => array(
-                    "customCheck" => array(
+                    "customChecks" => array(
                         "alias" => "custom",
                         "on" => "custom.target_id = :target_id",
                         "params" => array("target_id" => $target->id)
@@ -1595,29 +1595,31 @@ class ProjectController extends Controller
                     "highRisk" => 0,
                 );
 
-                if ($check->control->customCheck) {
-                    $controlStats[$check->check_control_id]["checks"]++;
-                    $controlStats[$check->check_control_id]["finished"]++;
+                if ($check->control->customChecks) {
+                    foreach ($check->control->customChecks as $customCheck) {
+                        $controlStats[$check->check_control_id]["checks"]++;
+                        $controlStats[$check->check_control_id]["finished"]++;
 
-                    switch ($check->control->customCheck[0]->rating) {
-                        case TargetCustomCheck::RATING_INFO:
-                            $controlStats[$check->check_control_id]["info"]++;
-                            break;
+                        switch ($customCheck->rating) {
+                            case TargetCustomCheck::RATING_INFO:
+                                $controlStats[$check->check_control_id]["info"]++;
+                                break;
 
-                        case TargetCustomCheck::RATING_LOW_RISK:
-                            $controlStats[$check->check_control_id]["lowRisk"]++;
-                            break;
+                            case TargetCustomCheck::RATING_LOW_RISK:
+                                $controlStats[$check->check_control_id]["lowRisk"]++;
+                                break;
 
-                        case TargetCustomCheck::RATING_MED_RISK:
-                            $controlStats[$check->check_control_id]["medRisk"]++;
-                            break;
+                            case TargetCustomCheck::RATING_MED_RISK:
+                                $controlStats[$check->check_control_id]["medRisk"]++;
+                                break;
 
-                        case TargetCustomCheck::RATING_HIGH_RISK:
-                            $controlStats[$check->check_control_id]["highRisk"]++;
-                            break;
+                            case TargetCustomCheck::RATING_HIGH_RISK:
+                                $controlStats[$check->check_control_id]["highRisk"]++;
+                                break;
 
-                        default:
-                            break;
+                            default:
+                                break;
+                        }
                     }
                 }
             }
@@ -2129,27 +2131,33 @@ class ProjectController extends Controller
                 throw new Exception($errorText);
             }
 
-            $control = CheckControl::model()->findByPk($form->controlId);
+            if ($form->id) {
+                $customCheck = TargetCustomCheck::model()->findByAttributes(array(
+                    "id" => $form->id,
+                    "target_id" => $target->id,
+                ));
 
-            if (!$control) {
-                throw new CHttpException(404, Yii::t("app", "Control not found."));
-            }
+                if (!$customCheck) {
+                    throw new CHttpException(404, Yii::t("app", "Custom check not found."));
+                }
 
-            $categoryCheck = TargetCheckCategory::model()->findByAttributes(array(
-                "target_id" => $target->id,
-                "check_category_id" => $control->check_category_id
-            ));
+                $control = $customCheck->control;
+            } else {
+                $control = CheckControl::model()->findByPk($form->controlId);
 
-            if (!$categoryCheck) {
-                throw new CHttpException(404, Yii::t("app", "Control not found."));
-            }
+                if (!$control) {
+                    throw new CHttpException(404, Yii::t("app", "Control not found."));
+                }
 
-            $customCheck = TargetCustomCheck::model()->findByAttributes(array(
-                "target_id" => $target->id,
-                "check_control_id"  => $control->id
-            ));
+                $categoryCheck = TargetCheckCategory::model()->findByAttributes(array(
+                    "target_id" => $target->id,
+                    "check_category_id" => $control->check_category_id
+                ));
 
-            if (!$customCheck) {
+                if (!$categoryCheck) {
+                    throw new CHttpException(404, Yii::t("app", "Control not found."));
+                }
+
                 $customCheck = new TargetCustomCheck();
                 $customCheck->target_id = $target->id;
                 $customCheck->check_control_id = $control->id;
@@ -2228,14 +2236,16 @@ class ProjectController extends Controller
                 $check->name = $form->name;
                 $check->background_info = $form->backgroundInfo;
                 $check->question = $form->question;
-                $check->check_control_id = $form->controlId;
+                $check->check_control_id = $control->id;
                 $check->reference_id = $reference->id;
                 $check->reference_code = "CHECK-" . $customCheck->reference;
                 $check->reference_url = $reference->url;
                 $check->advanced = false;
                 $check->automated = false;
                 $check->multiple_solutions = false;
+                $check->status = Check::STATUS_INSTALLED;
                 $check->save();
+
                 $check->sort_order = $check->id;
                 $check->save();
 
@@ -3284,7 +3294,6 @@ class ProjectController extends Controller
         try {
             $id = (int) $id;
             $target = (int) $target;
-
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
@@ -3318,33 +3327,40 @@ class ProjectController extends Controller
                 throw new Exception($errorText);
             }
 
-            $control = CheckControl::model()->findByPk($form->id);
-
-            if (!$control) {
-                throw new CHttpException(404, Yii::t("app", "Control not found."));
-            }
-
-            $categoryCheck = TargetCheckCategory::model()->findByAttributes(array(
-                "target_id" => $target->id,
-                "check_category_id" => $control->check_category_id
-            ));
-
-            if (!$categoryCheck) {
-                throw new CHttpException(404, Yii::t("app", "Control not found."));
-            }
-
+            /** @var TargetCustomCheck $customCheck */
             $customCheck = TargetCustomCheck::model()->findByAttributes(array(
+                "id" => $form->id,
                 "target_id" => $target->id,
-                "check_control_id"  => $control->id
             ));
 
             if (!$customCheck) {
                 throw new CHttpException(404, Yii::t("app", "Check not found."));
             }
 
+            $categoryCheck = TargetCheckCategory::model()->findByAttributes(array(
+                "target_id" => $target->id,
+                "check_category_id" => $customCheck->control->check_category_id
+            ));
+
+            if (!$categoryCheck) {
+                throw new CHttpException(404, Yii::t("app", "Control not found."));
+            }
+
             switch ($form->operation) {
-                case "reset":
+                case "delete":
                     $customCheck->delete();
+                    break;
+
+                case "reset":
+                    $customCheck->name = null;
+                    $customCheck->background_info = null;
+                    $customCheck->question = null;
+                    $customCheck->result = null;
+                    $customCheck->solution_title = null;
+                    $customCheck->solution = null;
+                    $customCheck->rating = TargetCustomCheck::RATING_NONE;
+                    $customCheck->save();
+
                     break;
 
                 default:

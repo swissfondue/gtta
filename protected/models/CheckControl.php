@@ -9,6 +9,7 @@
  * @property string $name
  * @property integer $sort_order
  * @property integer $external_id
+ * @property TargetCustomCheck[] $customChecks
  */
 class CheckControl extends ActiveRecord {
     // nearest sort order
@@ -51,7 +52,7 @@ class CheckControl extends ActiveRecord {
             "category" => array(self::BELONGS_TO, "CheckCategory", "check_category_id"),
             "checkCount" => array(self::STAT, "Check", "check_control_id"),
             "limitedCheckCount" => array(self::STAT, "Check", "check_control_id", "condition" => "NOT t.demo"),
-            "customCheck" => array(self::HAS_MANY, "TargetCustomCheck", "check_control_id"),
+            "customChecks" => array(self::HAS_MANY, "TargetCustomCheck", "check_control_id"),
 		);
 	}
 

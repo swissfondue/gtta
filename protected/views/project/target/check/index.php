@@ -104,21 +104,137 @@
                         </div>
 
                         <div class="control-body<?php if ($collapseControls) echo " hide"; ?>" data-id="<?php echo $check->control->id; ?>">
-                            <div id="custom-check-<?php echo $check->control->id; ?>" class="check-header" data-id="custom-<?php echo $check->control->id; ?>" data-control-url="<?php echo $this->createUrl("project/controlcustomcheck", array("id" => $project->id, "target" => $target->id)); ?>">
+                            <div id="custom-template-<?php echo $check->control->id; ?>" class="check-header" data-id="custom-template-<?php echo $check->control->id; ?>" data-control-url="<?php echo $this->createUrl("project/controlcustomcheck", array("id" => $project->id, "target" => $target->id)); ?>">
                                 <table class="check-header">
                                     <tbody>
                                         <tr>
                                             <td class="name">
                                                 <?php if (User::checkRole(User::ROLE_USER)): ?>
-                                                    <a href="#custom-check-<?php echo $check->control->id; ?>" onclick="user.check.toggle(<?php echo $check->control->id; ?>, true);"><?php echo Yii::t("app", "Custom Check"); ?></a>
+                                                    <a href="#custom-template-<?php echo $check->control->id; ?>" onclick="user.check.toggle('custom-template-<?php echo $check->control->id; ?>');"><?php echo Yii::t("app", "Custom Check"); ?></a>
                                                 <?php else: ?>
-                                                    <a href="#custom-check-<?php echo $check->control->id; ?>" onclick="client.check.toggle(<?php echo $check->control->id; ?>, true);"><?php echo Yii::t("app", "Custom Check"); ?></a>
+                                                    <a href="#custom-template-<?php echo $check->control->id; ?>" onclick="client.check.toggle('custom-template-<?php echo $check->control->id; ?>');"><?php echo Yii::t("app", "Custom Check"); ?></a>
                                                 <?php endif; ?>
                                             </td>
                                             <td class="status">
-                                                <?php if ($check->control->customCheck): ?>
+                                                &nbsp;
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="check-form hide" data-id="custom-template-<?php echo $check->control->id; ?>" data-save-url="<?php echo $this->createUrl("project/savecustomcheck", array("id" => $project->id, "target" => $target->id)); ?>">
+                                <table class="table check-form">
+                                    <tbody>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Reference"); ?>
+                                            </th>
+                                            <td class="text">
+                                                CUSTOM-CHECK
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Name"); ?>
+                                            </th>
+                                            <td>
+                                                <input type="text" class="input-xlarge" name="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>[name]" id="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>_name" value="" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Background Info"); ?>
+                                            </th>
+                                            <td>
+                                                <textarea name="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>[backgroundInfo]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>_backgroundInfo" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>></textarea>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Question"); ?>
+                                            </th>
+                                            <td>
+                                                <textarea name="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>[question]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>_question" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>></textarea>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Result"); ?>
+                                            </th>
+                                            <td>
+                                                <textarea name="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>[result]" class="max-width" rows="10" id="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>_result" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>></textarea>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Solution Title"); ?>
+                                            </th>
+                                            <td>
+                                                <input type="text" class="input-xlarge" name="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>[solutionTitle]" id="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>_solutionTitle" value="" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Solution"); ?>
+                                            </th>
+                                            <td>
+                                                <textarea name="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>[solution]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>_solution" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>></textarea>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Result Rating"); ?>
+                                            </th>
+                                            <td class="text">
+                                                <ul class="rating">
+                                                    <?php foreach (TargetCustomCheck::getValidRatings() as $rating): ?>
+                                                        <li>
+                                                            <label class="radio">
+                                                                <input type="radio" name="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>[rating]" value="<?php echo $rating; ?>" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "disabled"; ?>>
+                                                                <?php echo $ratings[$rating]; ?>
+                                                            </label>
+                                                        </li>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Create New Check"); ?>
+                                            </th>
+                                            <td class="text">
+                                                <input type="checkbox" name="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>[createCheck]" value="1" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "disabled"; ?>>
+                                            </td>
+                                        </tr>
+
+                                        <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                            <tr>
+                                                <td>&nbsp;</td>
+                                                <td>
+                                                    <button class="btn" onclick="user.check.saveCustomTemplate(<?php echo $check->control->id; ?>);"><?php echo Yii::t("app", "Save"); ?></button>&nbsp;
+                                                </td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <?php foreach ($check->control->customChecks as $custom): ?>
+                                <div id="custom-<?php echo $custom->id; ?>" class="check-header" data-id="custom-<?php echo $custom->id; ?>" data-control-url="<?php echo $this->createUrl("project/controlcustomcheck", array("id" => $project->id, "target" => $target->id)); ?>">
+                                    <table class="check-header">
+                                        <tbody>
+                                            <tr>
+                                                <td class="name">
+                                                    <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                                        <a href="#custom-<?php echo $custom->id; ?>" onclick="user.check.toggle('custom-<?php echo $custom->id; ?>');"><?php echo $custom->name ? CHtml::encode($custom->name) : "CUSTOM-CHECK-" . $custom->reference; ?></a>
+                                                    <?php else: ?>
+                                                        <a href="#custom-<?php echo $custom->id; ?>" onclick="client.check.toggle('custom-<?php echo $custom->id; ?>');"><?php echo $custom->name ? CHtml::encode($custom->name) : "CUSTOM-CHECK-" . $custom->reference; ?></a>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td class="status">
                                                     <?php
-                                                        switch ($check->control->customCheck[0]->rating) {
+                                                        switch ($custom->rating) {
                                                             case TargetCustomCheck::RATING_INFO:
                                                                 echo "<span class=\"label label-info\">" . $ratings[TargetCustomCheck::RATING_INFO] . "</span>";
                                                                 break;
@@ -136,126 +252,119 @@
                                                                 break;
 
                                                             default:
-                                                                echo "<span class=\"label\">" . $ratings[$check->control->customCheck[0]->rating] . "</span>";
+                                                                echo "<span class=\"label\">" . $ratings[$custom->rating] . "</span>";
                                                                 break;
                                                         }
                                                     ?>
-                                                <?php else: ?>
-                                                    &nbsp;
-                                                <?php endif; ?>
-                                            </td>
-                                            <?php if (User::checkRole(User::ROLE_USER)): ?>
-                                                <td class="actions">
-                                                    <?php if ($check->control->customCheck): ?>
-                                                        <a href="#reset" title="<?php echo Yii::t("app", "Reset"); ?>" onclick="user.check.resetCustom(<?php echo $check->control->id; ?>);"><i class="icon icon-refresh"></i></a>
-                                                    <?php else: ?>
-                                                        <span class="disabled"><i class="icon icon-refresh" title="<?php echo Yii::t("app", "Reset"); ?>"></i></span>
-                                                    <?php endif; ?>
                                                 </td>
-                                            <?php endif; ?>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                                                <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                                    <td class="actions">
+                                                        <a href="#delete" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="user.check.deleteCustom(<?php echo $custom->id; ?>);"><i class="icon icon-remove"></i></a>&nbsp;&nbsp;
+                                                        <a href="#reset" title="<?php echo Yii::t("app", "Reset"); ?>" onclick="user.check.resetCustom(<?php echo $custom->id; ?>);"><i class="icon icon-refresh"></i></a>
+                                                    </td>
+                                                <?php endif; ?>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
 
-                            <div class="check-form hide" data-id="custom-<?php echo $check->control->id; ?>" data-save-url="<?php echo $this->createUrl("project/savecustomcheck", array("id" => $project->id, "target" => $target->id)); ?>">
-                                <table class="table check-form">
-                                    <tbody>
-                                        <tr>
-                                            <th>
-                                                <?php echo Yii::t("app", "Reference"); ?>
-                                            </th>
-                                            <td class="text">
-                                                <?php
-                                                    echo $check->control->customCheck ? "CUSTOM-CHECK-" . $check->control->customCheck[0]->reference : "CUSTOM-CHECK";
-                                                ?>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <?php echo Yii::t("app", "Name"); ?>
-                                            </th>
-                                            <td>
-                                                <input type="text" class="input-xlarge" name="TargetCustomCheckEditForm_<?php echo $check->control->id; ?>[name]" id="TargetCustomCheckEditForm_<?php echo $check->control->id; ?>_name" value="<?php if ($check->control->customCheck) echo CHtml::encode($check->control->customCheck[0]->name); ?>" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <?php echo Yii::t("app", "Background Info"); ?>
-                                            </th>
-                                            <td>
-                                                <textarea name="TargetCustomCheckEditForm_<?php echo $check->control->id; ?>[backgroundInfo]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckEditForm_<?php echo $check->control->id; ?>_backgroundInfo" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php if ($check->control->customCheck) echo CHtml::encode($check->control->customCheck[0]->background_info); ?></textarea>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <?php echo Yii::t("app", "Question"); ?>
-                                            </th>
-                                            <td>
-                                                <textarea name="TargetCustomCheckEditForm_<?php echo $check->control->id; ?>[question]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckEditForm_<?php echo $check->control->id; ?>_question" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php if ($check->control->customCheck) echo CHtml::encode($check->control->customCheck[0]->question); ?></textarea>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <?php echo Yii::t("app", "Result"); ?>
-                                            </th>
-                                            <td>
-                                                <textarea name="TargetCustomCheckEditForm_<?php echo $check->control->id; ?>[result]" class="max-width" rows="10" id="TargetCustomCheckEditForm_<?php echo $check->control->id; ?>_result" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php if ($check->control->customCheck) echo CHtml::encode($check->control->customCheck[0]->result); ?></textarea>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <?php echo Yii::t("app", "Solution Title"); ?>
-                                            </th>
-                                            <td>
-                                                <input type="text" class="input-xlarge" name="TargetCustomCheckEditForm_<?php echo $check->control->id; ?>[solutionTitle]" id="TargetCustomCheckEditForm_<?php echo $check->control->id; ?>_solutionTitle" value="<?php if ($check->control->customCheck) echo CHtml::encode($check->control->customCheck[0]->solution_title); ?>" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <?php echo Yii::t("app", "Solution"); ?>
-                                            </th>
-                                            <td>
-                                                <textarea name="TargetCustomCheckEditForm_<?php echo $check->control->id; ?>[solution]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckEditForm_<?php echo $check->control->id; ?>_solution" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php if ($check->control->customCheck) echo CHtml::encode($check->control->customCheck[0]->solution); ?></textarea>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <?php echo Yii::t("app", "Result Rating"); ?>
-                                            </th>
-                                            <td class="text">
-                                                <ul class="rating">
-                                                    <?php foreach (TargetCustomCheck::getValidRatings() as $rating): ?>
-                                                        <li>
-                                                            <label class="radio">
-                                                                <input type="radio" name="TargetCustomCheckEditForm_<?php echo $check->control->id; ?>[rating]" value="<?php echo $rating; ?>" <?php if (($check->control->customCheck && $check->control->customCheck[0]->rating == $rating) || ($rating == TargetCheck::RATING_NONE && !$check->control->customCheck)) echo "checked"; ?> <?php if (User::checkRole(User::ROLE_CLIENT)) echo "disabled"; ?>>
-                                                                <?php echo $ratings[$rating]; ?>
-                                                            </label>
-                                                        </li>
-                                                    <?php endforeach; ?>
-                                                </ul>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <?php echo Yii::t("app", "Create New Check"); ?>
-                                            </th>
-                                            <td class="text">
-                                                <input type="checkbox" name="TargetCustomCheckEditForm_<?php echo $check->control->id; ?>[createCheck]" value="1" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "disabled"; ?>>
-                                            </td>
-                                        </tr>
-
-                                        <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                <div class="check-form hide" data-id="custom-<?php echo $custom->id; ?>" data-save-url="<?php echo $this->createUrl("project/savecustomcheck", array("id" => $project->id, "target" => $target->id)); ?>">
+                                    <table class="table check-form">
+                                        <tbody>
                                             <tr>
-                                                <td>&nbsp;</td>
-                                                <td>
-                                                    <button class="btn" onclick="user.check.saveCustom(<?php echo $check->control->id; ?>);"><?php echo Yii::t("app", "Save"); ?></button>&nbsp;
+                                                <th>
+                                                    <?php echo Yii::t("app", "Reference"); ?>
+                                                </th>
+                                                <td class="text">
+                                                    <?php echo "CUSTOM-CHECK-" . $custom->reference; ?>
                                                 </td>
                                             </tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
-                            </div>
+                                            <tr>
+                                                <th>
+                                                    <?php echo Yii::t("app", "Name"); ?>
+                                                </th>
+                                                <td>
+                                                    <input type="text" class="input-xlarge" name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[name]" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_name" value="<?php echo CHtml::encode($custom->name); ?>" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <?php echo Yii::t("app", "Background Info"); ?>
+                                                </th>
+                                                <td>
+                                                    <textarea name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[backgroundInfo]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_backgroundInfo" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($custom->background_info); ?></textarea>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <?php echo Yii::t("app", "Question"); ?>
+                                                </th>
+                                                <td>
+                                                    <textarea name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[question]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_question" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($custom->question); ?></textarea>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <?php echo Yii::t("app", "Result"); ?>
+                                                </th>
+                                                <td>
+                                                    <textarea name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[result]" class="max-width" rows="10" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_result" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($custom->result); ?></textarea>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <?php echo Yii::t("app", "Solution Title"); ?>
+                                                </th>
+                                                <td>
+                                                    <input type="text" class="input-xlarge" name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[solutionTitle]" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_solutionTitle" value="<?php echo CHtml::encode($custom->solution_title); ?>" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <?php echo Yii::t("app", "Solution"); ?>
+                                                </th>
+                                                <td>
+                                                    <textarea name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[solution]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_solution" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($custom->solution); ?></textarea>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <?php echo Yii::t("app", "Result Rating"); ?>
+                                                </th>
+                                                <td class="text">
+                                                    <ul class="rating">
+                                                        <?php foreach (TargetCustomCheck::getValidRatings() as $rating): ?>
+                                                            <li>
+                                                                <label class="radio">
+                                                                    <input type="radio" name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[rating]" value="<?php echo $rating; ?>" <?php if ($custom->rating == $rating) echo "checked"; ?> <?php if (User::checkRole(User::ROLE_CLIENT)) echo "disabled"; ?>>
+                                                                    <?php echo $ratings[$rating]; ?>
+                                                                </label>
+                                                            </li>
+                                                        <?php endforeach; ?>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <?php echo Yii::t("app", "Create New Check"); ?>
+                                                </th>
+                                                <td class="text">
+                                                    <input type="checkbox" name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[createCheck]" value="1" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "disabled"; ?>>
+                                                </td>
+                                            </tr>
+
+                                            <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                                <tr>
+                                                    <td>&nbsp;</td>
+                                                    <td>
+                                                        <button class="btn" onclick="user.check.saveCustom(<?php echo $custom->id; ?>);"><?php echo Yii::t("app", "Save"); ?></button>&nbsp;
+                                                    </td>
+                                                </tr>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <?php endforeach; ?>
                     <?php
                         endif;
 

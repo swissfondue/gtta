@@ -246,12 +246,9 @@ function User()
          * Expand.
          * @param id
          * @param callback
-         * @param custom
          */
-        this.expand = function (id, callback, custom) {
-            var selector = custom ?
-                $("div.check-form[data-id=custom-" + id + "]") :
-                $("div.check-form[data-id=" + id + "]"); 
+        this.expand = function (id, callback) {
+            var selector = $("div.check-form[data-id=" + id + "]");
                 
             selector.slideDown("slow", undefined, function () {
                 if (callback) {
@@ -264,12 +261,9 @@ function User()
          * Collapse.
          * @param id
          * @param callback
-         * @param custom
          */
-        this.collapse = function (id, callback, custom) {
-            var selector = custom ?
-                $("div.check-form[data-id=custom-" + id + "]") :
-                $("div.check-form[data-id=" + id + "]"); 
+        this.collapse = function (id, callback) {
+            var selector = $("div.check-form[data-id=" + id + "]");
             
             selector.slideUp("slow", undefined, function () {
                 if (callback) {
@@ -281,17 +275,14 @@ function User()
         /**
          * Toggle check
          * @param id
-         * @param custom
          */
-        this.toggle = function (id, custom) {
-            var visible = custom ?
-                $("div.check-form[data-id=custom-" + id + "]").is(":visible") :
-                $("div.check-form[data-id=" + id + "]").is(":visible");
+        this.toggle = function (id) {
+            var visible = $("div.check-form[data-id=" + id + "]").is(":visible");
 
             if (visible) {
-                _check.collapse(id, null, custom);
+                _check.collapse(id, null);
             } else {
-                _check.expand(id, null, custom);
+                _check.expand(id, null);
             }
         };
 
@@ -652,6 +643,7 @@ function User()
 
         /**
          * Get custom check data in array.
+         * @param id
          */
         this.getCustomData = function (id) {
             var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck;
@@ -693,7 +685,7 @@ function User()
                 data.push({name: "TargetCustomCheckEditForm[createCheck]", value: "1"});
             }
 
-            data.push({name: "TargetCustomCheckEditForm[controlId]", value: id});
+            data.push({name: "TargetCustomCheckEditForm[id]", value: id});
             data.push({name: "TargetCustomCheckEditForm[name]", value: name});
             data.push({name: "TargetCustomCheckEditForm[backgroundInfo]", value: background});
             data.push({name: "TargetCustomCheckEditForm[question]", value: question});
@@ -707,6 +699,7 @@ function User()
 
         /**
          * Save custom check.
+         * @param id
          */
         this.saveCustom = function (id) {
             var row, headerRow, data, url, nextRow, rating;
@@ -716,7 +709,7 @@ function User()
             url = row.data("save-url");
 
             data = _check.getCustomData(id);
-            data.push({name : "YII_CSRF_TOKEN", value : system.csrf});
+            data.push({name: "YII_CSRF_TOKEN", value: system.csrf, id: id});
 
             $.ajax({
                 dataType: "json",
@@ -748,12 +741,106 @@ function User()
                     } else {
                         $("td.status", headerRow).html("");
                     }
+                },
 
-                    $("i.icon-refresh", headerRow).parent().remove();
-                    $("td.actions", headerRow).append(
-                        '<a href="#reset" title="' + system.translate("Reset") + '" onclick="user.check.resetCustom(' + id +
-                        ');"><i class="icon icon-refresh"></i></a>'
-                    );
+                error: function(jqXHR, textStatus, e) {
+                    _check.setLoaded(id, true);
+                    system.showMessage("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend: function (jqXHR, settings) {
+                    _check.setLoading(id, true);
+                }
+            });
+        };
+
+        /**
+         * Get custom template data in array.
+         * @param id
+         */
+        this.getCustomTemplateData = function (id) {
+            var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck;
+
+            row = $('div.check-form[data-id="custom-template-' + id + '"]');
+
+            name = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[name]"]', row).val();
+            background = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[backgroundInfo]"]', row).val();
+            question = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[question]"]', row).val();
+            result = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[result]"]', row).val();
+            rating = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[rating]"]:checked', row).val();
+            solutionTitle = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[solutionTitle]"]', row).val();
+            solution = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[solution]"]', row).val();
+            createCheck = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[createCheck]"]', row).is(":checked");
+
+            if (name == undefined) {
+                name = "";
+            }
+
+            if (background == undefined) {
+                background = "";
+            }
+
+            if (question == undefined) {
+                question = "";
+            }
+
+            if (result == undefined) {
+                result = "";
+            }
+
+            if (rating == undefined) {
+                rating = "";
+            }
+
+            data = [];
+
+            if (createCheck) {
+                data.push({name: "TargetCustomCheckEditForm[createCheck]", value: "1"});
+            }
+
+            data.push({name: "TargetCustomCheckEditForm[controlId]", value: id});
+            data.push({name: "TargetCustomCheckEditForm[name]", value: name});
+            data.push({name: "TargetCustomCheckEditForm[backgroundInfo]", value: background});
+            data.push({name: "TargetCustomCheckEditForm[question]", value: question});
+            data.push({name: "TargetCustomCheckEditForm[result]", value: result});
+            data.push({name: "TargetCustomCheckEditForm[rating]", value: rating});
+            data.push({name: "TargetCustomCheckEditForm[solution]", value: solution ? solution : ""});
+            data.push({name: "TargetCustomCheckEditForm[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
+
+            return data;
+        };
+
+        /**
+         * Save custom template.
+         * @param id
+         */
+        this.saveCustomTemplate = function (id) {
+            var row, headerRow, data, url, nextRow, rating;
+
+            headerRow = $('div.check-header[data-id="custom-template-' + id + '"]');
+            row = $('div.check-form[data-id="custom-template-' + id + '"]');
+            url = row.data("save-url");
+
+            data = _check.getCustomTemplateData(id);
+            data.push({name: "YII_CSRF_TOKEN", value: system.csrf});
+
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+                data: data,
+
+                success: function (data, textStatus) {
+                    _check.setLoaded(id, true);
+
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
+                        return;
+                    }
+
+                    data = data.data;
+                    location.reload();
                 },
 
                 error: function(jqXHR, textStatus, e) {
@@ -1011,56 +1098,55 @@ function User()
                 timeout: system.ajaxTimeout,
                 type: 'POST',
 
-                data : {
+                data: {
                     'EntryControlForm[operation]': operation,
                     'EntryControlForm[id]': id,
                     'YII_CSRF_TOKEN': system.csrf
                 },
 
-                success : function (data, textStatus) {
+                success: function (data, textStatus) {
                     _check.setLoaded(id, custom);
 
-                    if (data.status == 'error') {
-                        system.showMessage('error', data.errorText);
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
                         return;
                     }
 
                     data = data.data;
 
-                    if (operation == 'start') {
-                        $('td.status',  headerRow).html('00:00');
-                        $('td.actions', headerRow).html('');
-                        $('td.actions', headerRow).append(
+                    if (operation == "start") {
+                        $("td.status", headerRow).html("00:00");
+                        $("td.actions", headerRow).html("");
+                        $("td.actions", headerRow).append(
                             '<a href="#stop" title="' + system.translate('Stop') + '" onclick="user.check.stop(' + id +
                             ');"><i class="icon icon-stop"></i></a> &nbsp; ' +
                             '<span class="disabled"><i class="icon icon-refresh" title="' +
-                            system.translate('Reset') + '"></i></span>'
+                            system.translate("Reset") + '"></i></span>'
                         );
 
-                        //$('#TargetCheckEditForm_' + id + '_result').val('');
-                        $('div.table-result', row).html('');
-
+                        $("div.table-result", row).html("");
                         _check.setLoading(id);
-                        $('.loader-image').hide();
+                        $(".loader-image").hide();
 
                         _check.runningChecks.push({
                             id: id,
                             time: -1,
-                            result: ''
+                            result: ""
                         });
 
-                        headerRow.addClass('in-progress');
-                    } else if (!custom && operation == 'reset') {
-                        $('td.actions', headerRow).html('');
-                        $('td.status', headerRow).html('&nbsp;');
+                        headerRow.addClass("in-progress");
+                    } else if (!custom && operation == "reset") {
+                        $("td.actions", headerRow).html("");
+                        $("td.status", headerRow).html("&nbsp;");
 
-                        if (data.automated)
-                            $('td.actions', headerRow).append(
-                                '<a href="#start" title="' + system.translate('Start') + '" onclick="user.check.start(' + id +
+                        if (data.automated) {
+                            $("td.actions", headerRow).append(
+                                '<a href="#start" title="' + system.translate("Start") + '" onclick="user.check.start(' + id +
                                 ');"><i class="icon icon-play"></i></a> &nbsp; '
                             );
+                        }
 
-                        $('td.actions', headerRow).append(
+                        $("td.actions", headerRow).append(
                             '<span class="disabled"><i class="icon icon-refresh" title="' +
                             system.translate('Reset') + '"></i></span>'
                         );
@@ -1119,15 +1205,19 @@ function User()
                         $("textarea", row).val("");
 
                         $('input[name="TargetCustomCheckEditForm_' + id + '[rating]"][value=0]').prop("checked", true);
+                    } else if (custom && operation == "delete") {
+                        $("div[data-id=custom-" + id + "]").fadeOut("slow", undefined, function () {
+                            $("div[data-id=custom-" + id + ']').remove();
+                        });
                     }
                 },
 
-                error : function(jqXHR, textStatus, e) {
+                error: function(jqXHR, textStatus, e) {
                     _check.setLoaded(id, custom);
                     system.showMessage('error', system.translate('Request failed, please try again.'));
                 },
 
-                beforeSend : function (jqXHR, settings) {
+                beforeSend: function (jqXHR, settings) {
                     _check.setLoading(id, custom);
                 }
             });
@@ -1191,8 +1281,14 @@ function User()
         };
 
         this.resetCustom = function (id) {
-            if (confirm(system.translate("Are you sure that you want to reset this check?"))) {
+            if (confirm(system.translate("Are you sure that you want to reset this custom check?"))) {
                 _check._control(id, "reset", true);
+            }
+        };
+
+        this.deleteCustom = function (id) {
+            if (confirm(system.translate("Are you sure that you want to delete this custom check?"))) {
+                _check._control(id, "delete", true);
             }
         };
     };
