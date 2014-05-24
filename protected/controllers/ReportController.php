@@ -1342,7 +1342,7 @@ class ReportController extends Controller {
 
                 // get all controls
                 $controls = CheckControl::model()->with(array(
-                    "customCheck" => array(
+                    "customChecks" => array(
                         "alias" => "custom",
                         "on" => "custom.target_id = :target_id",
                         "params" => array("target_id" => $target->id)
@@ -1371,9 +1371,7 @@ class ReportController extends Controller {
                         "separate" => 0,
                     );
 
-                    if ($control->customCheck) {
-                        $check = $control->customCheck[0];
-
+                    foreach ($control->customChecks as $check) {
                         $checkData = array(
                             "id" => $check->target_id . "-" . $check->check_control_id,
                             "custom" => true,
@@ -3076,7 +3074,7 @@ class ReportController extends Controller {
 
                 foreach ($categories as $category) {
                     $controls = CheckControl::model()->with(array(
-                        "customCheck" => array(
+                        "customChecks" => array(
                             "alias" => "custom",
                             "on" => "custom.target_id = :target_id",
                             "params" => array("target_id" => $target->id)
@@ -3090,10 +3088,8 @@ class ReportController extends Controller {
                     foreach ($controls as $control) {
                         $controlIds[] = $control->id;
 
-                        if ($control->customCheck) {
-                            $checksData[] = array(
-                                "rating" => $control->customCheck[0]->rating
-                            );
+                        foreach ($control->customChecks as $custom) {
+                            $checksData[] = array("rating" => $custom->rating);
                         }
                     }
 
