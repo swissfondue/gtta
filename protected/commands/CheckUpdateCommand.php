@@ -10,7 +10,7 @@ class CheckUpdateCommand extends ConsoleCommand {
      * Register the demo version
      */
     private function _register() {
-        $api = new ServerApiClient();
+        $api = new ServerApiClient($this->_system->workstation_id, $this->_system->workstation_key);
         $result = $api->register($this->_system->version);
 
         if ($result->id && $result->key) {

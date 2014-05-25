@@ -52,17 +52,19 @@ class CommunityShareCommand extends ConsoleCommand {
             System::STATUS_COMMUNITY_SHARE
         ));
 
-        if ($system->pid !== null) {
-            if (ProcessManager::isRunning($system->pid)) {
+        if ($system->update_pid !== null) {
+            if (ProcessManager::isRunning($system->update_pid)) {
                 return;
             }
 
             SystemManager::updateStatus(System::STATUS_IDLE);
+            $system->update_pid = null;
+            $system->save();
 
             return;
         }
 
-        $system->pid = posix_getpgid(getmypid());
+        $system->update_pid = posix_getpgid(getmypid());
         $system->save();
         $exception = null;
 
@@ -76,6 +78,8 @@ class CommunityShareCommand extends ConsoleCommand {
         // "finally" block emulation
         try {
             SystemManager::updateStatus(System::STATUS_IDLE);
+            $system->update_pid = null;
+            $system->save();
         } catch (Exception $e) {
             // swallow exceptions
         }

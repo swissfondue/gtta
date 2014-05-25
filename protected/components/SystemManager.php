@@ -28,7 +28,6 @@ class SystemManager {
 
             if (!$error) {
                 $system->status = $newStatus;
-                $system->pid = null;
                 $system->save();
             }
 

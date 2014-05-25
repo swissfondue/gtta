@@ -68,6 +68,8 @@ class m140524_103933_28 extends CDbMigration {
      * @return bool
      */
     public function safeDown() {
+        $this->dropTable("target_custom_checks");
+
         $this->createTable("target_custom_checks", array(
             "target_id" => "bigint NOT NULL",
             "check_control_id" => "bigint NOT NULL",
