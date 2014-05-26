@@ -48,6 +48,16 @@
                     <?php endif; ?>
                 </div>
             </div>
+            
+            <div class="control-group <?php if ($model->getError("startDate")) echo "error"; ?>">
+                <label class="control-label" for="ProjectEditForm_startDate"><?php echo Yii::t("app", "Start Date"); ?></label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" id="ProjectEditForm_startDate" name="ProjectEditForm[startDate]" value="<?php echo CHtml::encode($model->startDate); ?>"  readonly data-date="<?php echo $model->startDate; ?>" data-date-format="yyyy-mm-dd">
+                    <?php if ($model->getError("startDate")): ?>
+                        <p class="help-block"><?php echo $model->getError("startDate"); ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
 
             <div class="control-group <?php if ($model->getError('deadline')) echo 'error'; ?>">
                 <label class="control-label" for="ProjectEditForm_deadline"><?php echo Yii::t('app', 'Deadline'); ?></label>
@@ -98,7 +108,8 @@
 <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
     <script>
         $(function() {
-            $('#ProjectEditForm_deadline').datepicker();
+            $("#ProjectEditForm_deadline").datepicker();
+            $("#ProjectEditForm_startDate").datepicker();
         });
     </script>
 <?php endif; ?>

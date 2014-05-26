@@ -70,6 +70,11 @@ return array(
             "lockFile" => "/tmp/gtta.vulntracker",
         ),
 
+        // project hold
+        "projectHold" => array(
+            "lockFile" => "/tmp/gtta.project-hold",
+        ),
+
         "checkupdate" => array(
             "lockFile" => "/tmp/gtta.check-update",
         ),

@@ -272,23 +272,27 @@ function System() {
          * Filter has been changed.
          */
         this.filterChange = function () {
-            var i, realStatus, status, sortBy, sortDirection;
+            var i, data, statuses, sortBy, sortDirection;
 
-            status = $('input[name="ProjectFilterForm[status]"]:checked').map(function () {
-                return parseInt(this.value);
+            statuses = $('input[name="ProjectFilterForm[status]"]:checked').map(function () {
+                return this.value;
             });
 
-            realStatus = 0;
+            data = [];
 
-            for (i = 0; i < status.length; i++)
-                realStatus += status[i];
+            for (i = 0; i < statuses.length; i++) {
+                data.push(statuses[i]);
+            }
 
-            sortBy        = parseInt($('select[name="ProjectFilterForm[sortBy]"]').val());
+            console.log(data);
+
+            data = data.join(",");
+            sortBy = parseInt($('select[name="ProjectFilterForm[sortBy]"]').val());
             sortDirection = parseInt($('select[name="ProjectFilterForm[sortDirection]"]').val());
 
-            $.cookie('project_filter_status', realStatus, { path : '/' });
-            $.cookie('project_filter_sort_by', sortBy, { path : '/' });
-            $.cookie('project_filter_sort_direction', sortDirection, { path : '/' });
+            $.cookie("project_filter_status", data, {path : "/"});
+            $.cookie("project_filter_sort_by", sortBy, {path : "/"});
+            $.cookie("project_filter_sort_direction", sortDirection, {path : "/"});
 
             location.reload();
         };

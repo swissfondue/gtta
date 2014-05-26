@@ -25,117 +25,111 @@ class ProjectController extends Controller
     /**
      * Display a list of projects.
      */
-	public function actionIndex($page=1)
-	{
+	public function actionIndex($page=1) {
         $page = (int) $page;
 
         if ($page < 1)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t("app", "Page not found."));
 
         $cookies = Yii::app()->request->cookies;
+        $statusCookie = isset($cookies["project_filter_status"]) ? $cookies["project_filter_status"]->value : "";
+        $statuses = explode(",", $statusCookie);
+        $filtered = array();
 
-        $showStatuses = array();
-        $statusCookie = isset($cookies['project_filter_status']) ?
-            (int) $cookies['project_filter_status']->value : Project::FILTER_STATUS_OPEN | Project::FILTER_STATUS_IN_PROGRESS;
+        foreach ($statuses as $s) {
+            if (in_array((int) $s, Project::getValidStatuses())) {
+                $filtered[] = (int) $s;
+            }
+        }
 
-        if ($statusCookie & Project::FILTER_STATUS_OPEN)
-            $showStatuses[] = Project::STATUS_OPEN;
-
-        if ($statusCookie & Project::FILTER_STATUS_IN_PROGRESS)
-            $showStatuses[] = Project::STATUS_IN_PROGRESS;
-
-        if ($statusCookie & Project::FILTER_STATUS_FINISHED)
-            $showStatuses[] = Project::STATUS_FINISHED;
-
+        $showStatuses = $filtered;
         $sortBy = null;
         $sortDirection = null;
 
-        $sortByCookie = isset($cookies['project_filter_sort_by']) ?
-            (int) $cookies['project_filter_sort_by']->value : Project::FILTER_SORT_DEADLINE;
-        $sortDirectionCookie = isset($cookies['project_filter_sort_direction']) ?
-            (int) $cookies['project_filter_sort_direction']->value : Project::FILTER_SORT_ASCENDING;
+        $sortByCookie = isset($cookies["project_filter_sort_by"]) ?
+            (int) $cookies["project_filter_sort_by"]->value : Project::FILTER_SORT_DEADLINE;
+        $sortDirectionCookie = isset($cookies["project_filter_sort_direction"]) ?
+            (int) $cookies["project_filter_sort_direction"]->value : Project::FILTER_SORT_ASCENDING;
 
-        switch ($sortDirectionCookie)
-        {
+        switch ($sortDirectionCookie) {
             case Project::FILTER_SORT_ASCENDING:
-                $sortDirection = 'ASC';
+                $sortDirection = "ASC";
                 break;
 
             case Project::FILTER_SORT_DESCENDING:
-                $sortDirection = 'DESC';
+                $sortDirection = "DESC";
                 break;
         }
 
-        switch ($sortByCookie)
-        {
+        switch ($sortByCookie) {
             case Project::FILTER_SORT_DEADLINE:
-                $sortBy = 't.deadline';
+                $sortBy = "t.deadline";
                 break;
 
             case Project::FILTER_SORT_NAME:
-                $sortBy = 't.name';
+                $sortBy = "t.name";
                 break;
 
             case Project::FILTER_SORT_CLIENT:
-                $sortBy = 'client.name';
+                $sortBy = "client.name";
                 break;
 
             case Project::FILTER_SORT_STATUS:
-                $sortBy = 't.status';
+                $sortBy = "t.status";
+                break;
+
+            case Project::FILTER_SORT_START_DATE:
+                $sortBy = "t.start_date";
                 break;
         }
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = Yii::app()->params["entriesPerPage"];
+        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
         $criteria->together = true;
-        $criteria->addInCondition('status', $showStatuses);
+        $criteria->addInCondition("status", $showStatuses);
 
-        if ($sortBy && $sortDirection)
-            $criteria->order = $sortBy . ' ' . $sortDirection . ', t.name ASC';
+        if ($sortBy && $sortDirection) {
+            $criteria->order = $sortBy . " " . $sortDirection . ", t.name ASC";
+        }
 
-        if (User::checkRole(User::ROLE_CLIENT))
-        {
+        if (User::checkRole(User::ROLE_CLIENT)) {
             $user = User::model()->findByPk(Yii::app()->user->id);
-            $criteria->addColumnCondition(array( 'client_id' => $user->client_id ));
+            $criteria->addColumnCondition(array("client_id" => $user->client_id));
         }
 
-        if (User::checkRole(User::ROLE_ADMIN))
-        {
-            $projects     = Project::model()->with('client')->findAll($criteria);
+        if (User::checkRole(User::ROLE_ADMIN)) {
+            $projects = Project::model()->with("client")->findAll($criteria);
             $projectCount = Project::model()->count($criteria);
-        }
-        else
-        {
+        } else {
             $projects = Project::model()->with(array(
-                'project_users' => array(
-                    'joinType' => 'INNER JOIN',
-                    'on'       => 'project_users.user_id = :user_id',
-                    'params'   => array(
-                        'user_id' => Yii::app()->user->id,
+                "project_users" => array(
+                    "joinType" => "INNER JOIN",
+                    "on" => "project_users.user_id = :user_id",
+                    "params" => array(
+                        "user_id" => Yii::app()->user->id,
                     ),
                 ),
-                'client'
+                "client"
             ))->findAll($criteria);
 
             $projectCount = Project::model()->with(array(
-                'project_users' => array(
-                    'joinType' => 'INNER JOIN',
-                    'on'       => 'project_users.user_id = :user_id',
-                    'params'   => array(
-                        'user_id' => Yii::app()->user->id,
+                "project_users" => array(
+                    "joinType" => "INNER JOIN",
+                    "on" => "project_users.user_id = :user_id",
+                    "params" => array(
+                        "user_id" => Yii::app()->user->id,
                     ),
                 ),
-                'client'
+                "client"
             ))->count($criteria);
         }
 
         $paginator = new Paginator($projectCount, $page);
-        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), '');
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), "");
         $projectStats = array();
 
-        foreach ($projects as $project)
-        {
+        foreach ($projects as $project) {
             $checkCount    = 0;
             $finishedCount = 0;
             $lowRiskCount  = 0;
@@ -210,18 +204,19 @@ class ProjectController extends Controller
         }
 
         // display the page
-        $this->pageTitle = Yii::t('app', 'Projects');
-		$this->render('index', array(
-            'projects'      => $projects,
-            'stats'         => $projectStats,
-            'p'             => $paginator,
-            'showStatuses'  => $showStatuses,
-            'sortBy'        => $sortByCookie,
-            'sortDirection' => $sortDirectionCookie,
-            'statuses' => array(
-                Project::STATUS_OPEN        => Yii::t('app', 'Open'),
-                Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
-                Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
+        $this->pageTitle = Yii::t("app", "Projects");
+		$this->render("index", array(
+            "projects" => $projects,
+            "stats" => $projectStats,
+            "p" => $paginator,
+            "showStatuses" => $showStatuses,
+            "sortBy" => $sortByCookie,
+            "sortDirection" => $sortDirectionCookie,
+            "statuses" => array(
+                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
+                Project::STATUS_OPEN => Yii::t("app", "Open"),
+                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
+                Project::STATUS_FINISHED => Yii::t("app", "Finished"),
             )
         ));
 	}
@@ -485,53 +480,53 @@ class ProjectController extends Controller
         $criteria->together = true;
 
         $categories = GtCategory::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on' => 'language_id = :language_id',
-                'params' => array('language_id' => $language)
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array("language_id" => $language)
             ),
-            'types' => array(
-                'with' => array(
-                    'l10n' => array(
-                        'alias' => 'l10n_t',
-                        'joinType' => 'LEFT JOIN',
-                        'on' => 'l10n_t.language_id = :language_id',
-                        'params' => array('language_id' => $language),
+            "types" => array(
+                "with" => array(
+                    "l10n" => array(
+                        "alias" => "l10n_t",
+                        "joinType" => "LEFT JOIN",
+                        "on" => "l10n_t.language_id = :language_id",
+                        "params" => array("language_id" => $language),
                     ),
-                    'modules' => array(
-                        'with' => array(
-                            'l10n' => array(
-                                'alias' => 'l10n_m',
-                                'joinType' => 'LEFT JOIN',
-                                'on' => 'l10n_m.language_id = :language_id',
-                                'params' => array('language_id' => $language),
+                    "modules" => array(
+                        "with" => array(
+                            "l10n" => array(
+                                "alias" => "l10n_m",
+                                "joinType" => "LEFT JOIN",
+                                "on" => "l10n_m.language_id = :language_id",
+                                "params" => array("language_id" => $language),
                             )
                         ),
-                        'order' => 'COALESCE(l10n_m.name, modules.name) ASC',
+                        "order" => "COALESCE(l10n_m.name, modules.name) ASC",
                     )
                 ),
-                'order' => 'COALESCE(l10n_t.name, types.name) ASC',
+                "order" => "COALESCE(l10n_t.name, types.name) ASC",
             )
         ))->findAll($criteria);
 
         $nextStep = $this->_getGtStep($project, 0);
-
-        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
-        $this->breadcrumbs[] = array($project->name, '');
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
+        $this->breadcrumbs[] = array($project->name, "");
 
         // display the page
         $this->pageTitle = $project->name;
-		$this->render('gt/index', array(
-            'project'  => $project,
-            'client'   => $client,
-            'categories' => $categories,
-            'statuses' => array(
-                Project::STATUS_OPEN        => Yii::t('app', 'Open'),
-                Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
-                Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
+		$this->render("gt/index", array(
+            "project" => $project,
+            "client" => $client,
+            "categories" => $categories,
+            "statuses" => array(
+                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
+                Project::STATUS_OPEN => Yii::t("app", "Open"),
+                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
+                Project::STATUS_FINISHED => Yii::t("app", "Finished"),
             ),
-            'modules' => $moduleIds,
-            'nextStep' => $nextStep,
+            "modules" => $moduleIds,
+            "nextStep" => $nextStep,
         ));
     }
 
@@ -568,45 +563,42 @@ class ProjectController extends Controller
     /**
      * Project edit page.
      */
-	public function actionEdit($id=0)
-	{
-        $id        = (int) $id;
+	public function actionEdit($id=0) {
+        $id = (int) $id;
         $newRecord = false;
 
-        if ($id)
+        if ($id) {
             $project = Project::model()->findByPk($id);
-        else
-        {
-            $project   = new Project();
+        } else {
+            $project = new Project();
             $newRecord = true;
         }
 
 		$model = new ProjectEditForm(User::checkRole(User::ROLE_ADMIN) ? ProjectEditForm::ADMIN_SCENARIO : ProjectEditForm::USER_SCENARIO);
 
         if (!$newRecord) {
-            $model->name     = $project->name;
-            $model->year     = $project->year;
-            $model->status   = $project->status;
+            $model->name = $project->name;
+            $model->year = $project->year;
+            $model->status = $project->status;
             $model->clientId = $project->client_id;
             $model->deadline = $project->deadline;
+            $model->startDate = $project->start_date ? $project->start_date : date("Y-m-d");
         } else {
             $model->year = date("Y");
-            $model->deadline = date('Y-m-d');
+            $model->deadline = date("Y-m-d");
+            $model->startDate = date("Y-m-d");
         }
 
 		// collect user input data
-		if (isset($_POST['ProjectEditForm']))
-		{
-			$model->attributes = $_POST['ProjectEditForm'];
+		if (isset($_POST["ProjectEditForm"])) {
+			$model->attributes = $_POST["ProjectEditForm"];
 
-			if ($model->validate())
-            {
+			if ($model->validate()) {
                 // delete all client accounts from this project
-                if (!$newRecord && $model->clientId != $project->client_id)
-                {
+                if (!$newRecord && $model->clientId != $project->client_id) {
                     $clientUsers = User::model()->findAllByAttributes(array(
-                        'role'      => User::ROLE_CLIENT,
-                        'client_id' => $project->client_id
+                        "role" => User::ROLE_CLIENT,
+                        "client_id" => $project->client_id
                     ));
 
                     $clientUserIds = array();
@@ -615,24 +607,23 @@ class ProjectController extends Controller
                         $clientUserIds[] = $user->id;
 
                     $criteria = new CDbCriteria();
-                    $criteria->addInCondition('user_id', $clientUserIds);
+                    $criteria->addInCondition("user_id", $clientUserIds);
                     $criteria->addColumnCondition(array(
-                        'project_id' => $project->id
+                        "project_id" => $project->id
                     ));
 
                     ProjectUser::model()->deleteAll($criteria);
                 }
 
-                $project->name      = $model->name;
-                $project->year      = $model->year;
-                $project->status    = $model->status;
+                $project->name = $model->name;
+                $project->year = $model->year;
+                $project->status = $model->status;
                 $project->client_id = $model->clientId;
-                $project->deadline  = $model->deadline;
-
+                $project->start_date = $model->startDate;
+                $project->deadline = $model->deadline;
                 $project->save();
 
-                if ($newRecord)
-                {
+                if ($newRecord) {
                     $projectUser = new ProjectUser();
                     $projectUser->user_id = Yii::app()->user->id;
                     $projectUser->project_id = $project->id;
@@ -640,42 +631,43 @@ class ProjectController extends Controller
                     $projectUser->save();
                 }
 
-                Yii::app()->user->setFlash('success', Yii::t('app', 'Project saved.'));
+                Yii::app()->user->setFlash("success", Yii::t("app", "Project saved."));
 
                 $project->refresh();
 
-                if ($newRecord)
-                    $this->redirect(array( 'project/edit', 'id' => $project->id ));
+                if ($newRecord) {
+                    $this->redirect(array("project/edit", "id" => $project->id));
+                }
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
-            else
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
 
-        if ($newRecord)
-            $this->breadcrumbs[] = array(Yii::t('app', 'New Project'), '');
-        else
-        {
-            $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
-            $this->breadcrumbs[] = array(Yii::t('app', 'Edit'), '');
+        if ($newRecord) {
+            $this->breadcrumbs[] = array(Yii::t("app", "New Project"), "");
+        } else {
+            $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
+            $this->breadcrumbs[] = array(Yii::t("app", "Edit"), "");
         }
 
         $clients = Client::model()->findAllByAttributes(
             array(),
-            array( 'order' => 't.name ASC' )
+            array("order" => "t.name ASC")
         );
 
 		// display the page
-        $this->pageTitle = $newRecord ? Yii::t('app', 'New Project') : $project->name;
-		$this->render('edit', array(
-            'model'    => $model,
-            'project'  => $project,
-            'clients'  => $clients,
-            'statuses' => array(
-                Project::STATUS_OPEN        => Yii::t('app', 'Open'),
-                Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
-                Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
+        $this->pageTitle = $newRecord ? Yii::t("app", "New Project") : $project->name;
+		$this->render("edit", array(
+            "model" => $model,
+            "project" => $project,
+            "clients" => $clients,
+            "statuses" => array(
+                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
+                Project::STATUS_OPEN => Yii::t("app", "Open"),
+                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
+                Project::STATUS_FINISHED => Yii::t("app", "Finished"),
             )
         ));
 	}
@@ -1026,6 +1018,7 @@ class ProjectController extends Controller
             'check' => $check,
             'ratings' => ProjectGtCheck::getRatingNames(),
             'statuses' => array(
+                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
                 Project::STATUS_OPEN => Yii::t('app', 'Open'),
                 Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
                 Project::STATUS_FINISHED => Yii::t('app', 'Finished'),
@@ -1160,6 +1153,7 @@ class ProjectController extends Controller
             "categories" => $categories,
             "p" => $paginator,
             "statuses" => array(
+                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
                 Project::STATUS_OPEN => Yii::t("app", "Open"),
                 Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
                 Project::STATUS_FINISHED => Yii::t("app", "Finished"),
@@ -1684,6 +1678,7 @@ class ProjectController extends Controller
             "category" => $category,
             "checks" => $checks,
             "statuses" => array(
+                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
                 Project::STATUS_OPEN => Yii::t("app", "Open"),
                 Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
                 Project::STATUS_FINISHED => Yii::t("app", "Finished"),
@@ -4349,6 +4344,7 @@ class ProjectController extends Controller
             'projects' => $projects,
             'stats'    => $projectStats,
             'statuses' => array(
+                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
                 Project::STATUS_OPEN        => Yii::t('app', 'Open'),
                 Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
                 Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
