@@ -9,8 +9,9 @@ function User()
     this.check = new function () {
         var _check = this;
 
-        this.runningChecks   = [];
+        this.runningChecks = [];
         this.updateIteration = 0;
+        this.result_editors = [];
 
         /**
          * Expand all checks.
@@ -443,7 +444,9 @@ function User()
             override = $('input[name="TargetCheckEditForm_' + id + '[overrideTarget]"]', row).val();
             protocol = $('input[name="TargetCheckEditForm_' + id + '[protocol]"]', row).val();
             port     = $('input[name="TargetCheckEditForm_' + id + '[port]"]', row).val();
-            result   = $('textarea[name="TargetCheckEditForm_' + id + '[result]"]', row).val();
+            result = _check.result_editors["TargetCheckEditForm_" + id + "_result"] ?
+                _check.result_editors["TargetCheckEditForm_" + id + "_result"].getData() :
+                $('textarea[name="TargetCheckEditForm_' + id + '[result]"]').val();
 
             solutions = $('input[name^="TargetCheckEditForm_' + id + '[solutions]"]:checked', row).map(
                 function () {
@@ -653,11 +656,14 @@ function User()
             name = $('input[name="TargetCustomCheckEditForm_' + id + '[name]"]', row).val();
             background = $('textarea[name="TargetCustomCheckEditForm_' + id + '[backgroundInfo]"]', row).val();
             question = $('textarea[name="TargetCustomCheckEditForm_' + id + '[question]"]', row).val();
-            result = $('textarea[name="TargetCustomCheckEditForm_' + id + '[result]"]', row).val();
             rating = $('input[name="TargetCustomCheckEditForm_' + id + '[rating]"]:checked', row).val();
             solutionTitle = $('input[name="TargetCustomCheckEditForm_' + id + '[solutionTitle]"]', row).val();
             solution = $('textarea[name="TargetCustomCheckEditForm_' + id + '[solution]"]', row).val();
             createCheck = $('input[name="TargetCustomCheckEditForm_' + id + '[createCheck]"]', row).is(":checked");
+
+            result = _check.result_editors["TargetCustomCheckEditForm_" + id + "_result"] ?
+                _check.result_editors["TargetCustomCheckEditForm_" + id + "_result"].getData() :
+                $('textarea[name="TargetCustomCheckEditForm_' + id + '[result]"]').val();
 
             if (name == undefined) {
                 name = "";
@@ -766,11 +772,14 @@ function User()
             name = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[name]"]', row).val();
             background = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[backgroundInfo]"]', row).val();
             question = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[question]"]', row).val();
-            result = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[result]"]', row).val();
             rating = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[rating]"]:checked', row).val();
             solutionTitle = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[solutionTitle]"]', row).val();
             solution = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[solution]"]', row).val();
             createCheck = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[createCheck]"]', row).is(":checked");
+
+            result = _check.result_editors["TargetCustomCheckTemplateEditForm_" + id + "_result"] ?
+                _check.result_editors["TargetCustomCheckTemplateEditForm_" + id + "_result"].getData() :
+                $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[result]"]').val();
 
             if (name == undefined) {
                 name = "";
@@ -1306,15 +1315,40 @@ function User()
             }
         };
 
+        /**
+         * Reset custom check
+         * @param id
+         */
         this.resetCustom = function (id) {
             if (confirm(system.translate("Are you sure that you want to reset this custom check?"))) {
                 _check._control(id, "reset", true);
             }
         };
 
+        /**
+         * Delete custom check
+         * @param id
+         */
         this.deleteCustom = function (id) {
             if (confirm(system.translate("Are you sure that you want to delete this custom check?"))) {
                 _check._control(id, "delete", true);
+            }
+        };
+
+        /**
+         * Toggle WYSIWYG editor
+         * @param id
+         */
+        this.toggleEditor = function (id) {
+            if (_check.result_editors[id]) {
+                _check.result_editors[id].destroy();
+                delete _check.result_editors[id];
+            } else {
+                _check.result_editors[id] = CKEDITOR.replace(id, {
+                    fullPage: false,
+                    allowedContent: false,
+                    height: "300px"
+                });
             }
         };
     };

@@ -164,6 +164,14 @@
                                             </th>
                                             <td>
                                                 <textarea name="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>[result]" class="max-width" rows="10" id="TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>_result" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>></textarea>
+                                                <br>
+
+                                                <span class="help-block pull-right">
+                                                    <a class="btn btn-default" href="#editor" onclick="user.check.toggleEditor('TargetCustomCheckTemplateEditForm_<?php echo $check->control->id; ?>_result');">
+                                                        <span class="glyphicon glyphicon-edit"></span>
+                                                        <?php echo Yii::t("app", "WYSIWYG"); ?>
+                                                    </a>
+                                                </span>
                                             </td>
                                         </tr>
                                         <tr>
@@ -309,6 +317,14 @@
                                                 </th>
                                                 <td>
                                                     <textarea name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[result]" class="max-width" rows="10" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_result" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($custom->result); ?></textarea>
+                                                    <br>
+
+                                                    <span class="help-block pull-right">
+                                                        <a class="btn btn-default" href="#editor" onclick="user.check.toggleEditor('TargetCustomCheckEditForm_<?php echo $custom->id; ?>_result');">
+                                                            <span class="glyphicon glyphicon-edit"></span>
+                                                            <?php echo Yii::t("app", "WYSIWYG"); ?>
+                                                        </a>
+                                                    </span>
                                                 </td>
                                             </tr>
                                             <tr>

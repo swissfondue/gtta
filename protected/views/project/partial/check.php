@@ -386,12 +386,21 @@
                             ?>
                         </div>
 
+                        <br>
+
+                        <span class="help-block pull-right">
+                            <a class="btn btn-default" href="#editor" onclick="user.check.toggleEditor('TargetCheckEditForm_<?php echo $tc->id; ?>_result');">
+                                <span class="glyphicon glyphicon-edit"></span>
+                                <?php echo Yii::t("app", "WYSIWYG"); ?>
+                            </a>
+                        </span>
+
                         <div class="table-result">
                             <?php
                                 if ($tc->table_result) {
                                     $table = new ResultTable();
                                     $table->parse($tc->table_result);
-                                    echo $this->renderPartial("/project/target/check/tableresult", array( "table" => $table ));
+                                    echo $this->renderPartial("/project/target/check/tableresult", array("table" => $table));
                                 }
                             ?>
                         </div>
