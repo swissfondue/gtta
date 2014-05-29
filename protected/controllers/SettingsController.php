@@ -59,7 +59,6 @@ class SettingsController extends Controller {
                 $system->report_high_damping_low = $form->reportHighDampingLow;
                 $system->report_high_damping_med = $form->reportHighDampingMed;
                 $system->copyright = $form->copyright;
-                $system->demo = true;
                 $system->language_id = $form->languageId;
                 $system->community_allow_unverified = $form->communityAllowUnverified;
                 $system->community_min_rating = $form->communityMinRating;
