@@ -3,21 +3,19 @@
 /**
  * Project controller.
  */
-class ProjectController extends Controller
-{
+class ProjectController extends Controller {
     /**
 	 * @return array action filters
 	 */
-	public function filters()
-	{
+	public function filters() {
 		return array(
             'https',
 			'checkAuth',
             'showDetails + target, attachment, checks',
-            'checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, gtcontrolcheck, gtsavecheck, savecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment',
+            'checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, gtcontrolcheck, gtsavecheck, savecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck',
             'checkAdmin + edit, users, adduser, controluser',
-            'ajaxOnly + savecheck, savecustomcheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtcontrolattachment',
-            'postOnly + savecheck, savecustomcheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment',
+            'ajaxOnly + savecheck, savecustomcheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtcontrolattachment, copycheck',
+            'postOnly + savecheck, savecustomcheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck',
             "idleOrRunning",
 		);
 	}
@@ -1195,8 +1193,7 @@ class ProjectController extends Controller
         }
 
 		$model = new TargetEditForm();
-
-        $model->categoryIds  = array();
+        $model->categoryIds = array();
         $model->referenceIds = array();
 
         if (!$newRecord) {
@@ -1207,8 +1204,9 @@ class ProjectController extends Controller
                 "target_id" => $target->id
             ));
 
-            foreach ($categories as $category)
+            foreach ($categories as $category) {
                 $model->categoryIds[] = $category->check_category_id;
+            }
 
             $references = TargetReference::model()->findAllByAttributes(array(
                 "target_id" => $target->id
@@ -1229,12 +1227,10 @@ class ProjectController extends Controller
                 $target->project_id = $project->id;
                 $target->host = $model->host;
                 $target->description = $model->description;
-
                 $target->save();
 
                 $addCategories = array();
                 $delCategories = array();
-
                 $addReferences = array();
                 $delReferences = array();
 
@@ -1325,7 +1321,7 @@ class ProjectController extends Controller
                     $targetReference->save();
                 }
 
-                $target->cleanChecks();
+                $target->syncChecks();
                 Yii::app()->user->setFlash("success", Yii::t("app", "Target saved."));
 
                 $target->refresh();
@@ -1479,7 +1475,7 @@ class ProjectController extends Controller
 
         $criteria->addInCondition("t.check_control_id", $controlIds);
         $criteria->addInCondition("t.reference_id", $referenceIds);
-        $criteria->order = "control.sort_order ASC, t.sort_order ASC";
+        $criteria->order = "control.sort_order ASC, t.sort_order ASC, tc.id ASC";
 
         if (!$category->advanced) {
             $criteria->addCondition("t.advanced = FALSE");
@@ -1492,22 +1488,19 @@ class ProjectController extends Controller
                 "params" => array("language_id" => $language)
             ),
             "targetChecks" => array(
-                "alias" => "tcs",
+                "alias" => "tc",
                 "joinType" => "LEFT JOIN",
-                "on" => "tcs.target_id = :target_id",
-                "params" => array("target_id" => $target->id)
-            ),
-            "targetCheckSolutions" => array(
-                "alias" => "tss",
-                "joinType" => "LEFT JOIN",
-                "on" => "tss.target_id = :target_id",
-                "params" => array("target_id" => $target->id)
-            ),
-            "targetCheckAttachments" => array(
-                "alias" => "tas",
-                "joinType" => "LEFT JOIN",
-                "on" => "tas.target_id = :target_id",
+                "on" => "tc.target_id = :target_id",
                 "params" => array("target_id" => $target->id),
+                "with" => array(
+                    "attachments",
+                    "inputs" => array(
+                        "alias" => "tci",
+                    ),
+                    "solutions" => array(
+                        "alias" => "tcs",
+                    ),
+                )
             ),
             "scripts" => array(
                 "joinType" => "LEFT JOIN",
@@ -1516,12 +1509,6 @@ class ProjectController extends Controller
                         "on" => "inputs.visible AND inputs.check_script_id = scripts.id",
                         "joinType" => "LEFT JOIN",
                         "with" => array(
-                            "targetInputs" => array(
-                                "alias" => "tis",
-                                "joinType" => "LEFT JOIN",
-                                "on" => "tis.target_id = :target_id",
-                                "params" => array("target_id" => $target->id)
-                            ),
                             "l10n" => array(
                                 "alias" => "l10n_i",
                                 "joinType" => "LEFT JOIN",
@@ -1704,33 +1691,33 @@ class ProjectController extends Controller
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
-                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+                throw new CHttpException(404, Yii::t("app", "Project not found."));
             }
 
             if (!$project->checkPermission()) {
-                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
             }
 
             $target = Target::model()->findByAttributes(array(
-                'id' => $target,
-                'project_id' => $project->id
+                "id" => $target,
+                "project_id" => $project->id
             ));
 
             if (!$target) {
-                throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+                throw new CHttpException(404, Yii::t("app", "Target not found."));
             }
 
-            $category = TargetCheckCategory::model()->with('category')->findByAttributes(array(
-                'target_id' => $target->id,
-                'check_category_id' => $category
+            $category = TargetCheckCategory::model()->with("category")->findByAttributes(array(
+                "target_id" => $target->id,
+                "check_category_id" => $category
             ));
 
             if (!$category) {
-                throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+                throw new CHttpException(404, Yii::t("app", "Category not found."));
             }
 
             $controls = CheckControl::model()->findAllByAttributes(array(
-                'check_category_id' => $category->check_category_id
+                "check_category_id" => $category->check_category_id
             ));
 
             $controlIds = array();
@@ -1739,23 +1726,30 @@ class ProjectController extends Controller
                 $controlIds[] = $control->id;
             }
 
+            /** @var TargetCheck $targetCheck */
+            $targetCheck = TargetCheck::model()->findByPk($check);
+
+            if (!$targetCheck) {
+                throw new CHttpException(404, Yii::t("app", "Check not found."));
+            }
+
             $criteria = new CDbCriteria();
-            $criteria->addInCondition('check_control_id', $controlIds);
+            $criteria->addInCondition("check_control_id", $controlIds);
             $criteria->addColumnCondition(array(
-                'id' => $check
+                "id" => $targetCheck->check_id
             ));
 
             $check = Check::model()->find($criteria);
 
             if (!$check) {
-                throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+                throw new CHttpException(404, Yii::t("app", "Check not found."));
             }
 
             $model = new TargetCheckEditForm();
-            $model->attributes = $_POST['TargetCheckEditForm_' . $check->id];
+            $model->attributes = $_POST["TargetCheckEditForm_" . $targetCheck->id];
 
             if (!$model->validate()) {
-                $errorText = '';
+                $errorText = "";
 
                 foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
@@ -1765,24 +1759,13 @@ class ProjectController extends Controller
                 throw new Exception($errorText);
             }
 
-            $targetCheck = TargetCheck::model()->findByAttributes(array(
-                'target_id' => $target->id,
-                'check_id'  => $check->id
-            ));
-
-            if (!$targetCheck) {
-                $targetCheck = new TargetCheck();
-                $targetCheck->target_id = $target->id;
-                $targetCheck->check_id  = $check->id;
-            }
-
             $language = Language::model()->findByAttributes(array(
-                'code' => Yii::app()->language
+                "code" => Yii::app()->language
             ));
 
             if (!$language) {
                 $language = Language::model()->findByAttributes(array(
-                    'default' => true
+                    "default" => true
                 ));
             }
 
@@ -1798,7 +1781,7 @@ class ProjectController extends Controller
                 $model->port = null;
             }
 
-            if ($model->result == '') {
+            if ($model->result == "") {
                 $model->result = null;
             }
 
@@ -1814,20 +1797,17 @@ class ProjectController extends Controller
 
             // delete old solutions
             TargetCheckSolution::model()->deleteAllByAttributes(array(
-                'target_id' => $target->id,
-                'check_id' => $check->id
+                "target_check_id" => $targetCheck->id,
             ));
 
             // delete old inputs
             TargetCheckInput::model()->deleteAllByAttributes(array(
-                'target_id' => $target->id,
-                'check_id' => $check->id
+                "target_check_id" => $targetCheck->id,
             ));
 
             // delete old vulnerabilities
             TargetCheckVuln::model()->deleteAllByAttributes(array(
-                'target_id' => $target->id,
-                'check_id' => $check->id
+                "target_check_id" => $targetCheck->id,
             ));
 
             // add solutions
@@ -1847,18 +1827,17 @@ class ProjectController extends Controller
                     }
 
                     $solution = CheckSolution::model()->findByAttributes(array(
-                        'id' => $solutionId,
-                        'check_id' => $check->id
+                        "id" => $solutionId,
+                        "check_id" => $check->id
                     ));
 
                     if (!$solution) {
-                        throw new CHttpException(404, Yii::t('app', 'Solution not found.'));
+                        throw new CHttpException(404, Yii::t("app", "Solution not found."));
                     }
 
                     $solution = new TargetCheckSolution();
-                    $solution->target_id = $target->id;
+                    $solution->target_check_id = $targetCheck->id;
                     $solution->check_solution_id = $solutionId;
-                    $solution->check_id = $check->id;
                     $solution->save();
                 }
 
@@ -1894,9 +1873,8 @@ class ProjectController extends Controller
                         $solutionL10n->save();
 
                         $checkSolution = new TargetCheckSolution();
-                        $checkSolution->target_id = $target->id;
+                        $checkSolution->target_check_id = $targetCheck->id;
                         $checkSolution->check_solution_id = $solution->id;
-                        $checkSolution->check_id = $check->id;
                         $checkSolution->save();
 
                         $targetCheck->solution = null;
@@ -1924,9 +1902,8 @@ class ProjectController extends Controller
                     foreach ($script->inputs as $hiddenInput) {
                         if (!$hiddenInput->visible) {
                             $input = new TargetCheckInput();
-                            $input->target_id = $target->id;
+                            $input->target_check_id = $targetCheck->id;
                             $input->check_input_id = $hiddenInput->id;
-                            $input->check_id = $check->id;
                             $input->value = $hiddenInput->value;
                             $input->save();
                         }
@@ -1937,28 +1914,27 @@ class ProjectController extends Controller
                 if ($model->inputs) {
                     foreach ($model->inputs as $inputId => $inputValue) {
                         $input = CheckInput::model()->findByAttributes(array(
-                            'id' => $inputId,
+                            "id" => $inputId,
                         ));
 
                         if (!$input || !$input->visible) {
-                            throw new CHttpException(404, Yii::t('app', 'Input not found.'));
+                            throw new CHttpException(404, Yii::t("app", "Input not found."));
                         }
 
-                        if ($inputValue == '') {
+                        if ($inputValue == "") {
                             $inputValue = null;
                         }
 
                         $input = new TargetCheckInput();
-                        $input->target_id = $target->id;
+                        $input->target_check_id = $targetCheck->id;
                         $input->check_input_id = $inputId;
-                        $input->check_id = $check->id;
                         $input->value = $inputValue;
                         $input->save();
                     }
                 }
             }
 
-            $response->addData('rating', $targetCheck->rating);
+            $response->addData("rating", $targetCheck->rating);
 
             if ($project->status == Project::STATUS_OPEN) {
                 $project->status = Project::STATUS_IN_PROGRESS;
@@ -1986,33 +1962,33 @@ class ProjectController extends Controller
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
-                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+                throw new CHttpException(404, Yii::t("app", "Project not found."));
             }
 
             if (!$project->checkPermission()) {
-                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
             }
 
             $target = Target::model()->findByAttributes(array(
-                'id' => $target,
-                'project_id' => $project->id
+                "id" => $target,
+                "project_id" => $project->id
             ));
 
             if (!$target) {
-                throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+                throw new CHttpException(404, Yii::t("app", "Target not found."));
             }
 
-            $category = TargetCheckCategory::model()->with('category')->findByAttributes(array(
-                'target_id' => $target->id,
-                'check_category_id' => $category
+            $category = TargetCheckCategory::model()->with("category")->findByAttributes(array(
+                "target_id" => $target->id,
+                "check_category_id" => $category
             ));
 
             if (!$category) {
-                throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+                throw new CHttpException(404, Yii::t("app", "Category not found."));
             }
 
             $controls = CheckControl::model()->findAllByAttributes(array(
-                'check_category_id' => $category->check_category_id
+                "check_category_id" => $category->check_category_id
             ));
 
             $controlIds = array();
@@ -2021,23 +1997,30 @@ class ProjectController extends Controller
                 $controlIds[] = $control->id;
             }
 
+            /** @var TargetCheck $targetCheck */
+            $targetCheck = TargetCheck::model()->findByPk($check);
+
+            if (!$targetCheck) {
+                throw new CHttpException(404, Yii::t("app", "Check not found."));
+            }
+
             $criteria = new CDbCriteria();
-            $criteria->addInCondition('check_control_id', $controlIds);
+            $criteria->addInCondition("check_control_id", $controlIds);
             $criteria->addColumnCondition(array(
-                'id' => $check
+                "id" => $targetCheck->check_id
             ));
 
             $check = Check::model()->find($criteria);
 
             if (!$check) {
-                throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+                throw new CHttpException(404, Yii::t("app", "Check not found."));
             }
 
             $model = new TargetCheckEditForm();
-            $model->attributes = $_POST['TargetCheckEditForm'];
+            $model->attributes = $_POST["TargetCheckEditForm"];
 
             if (!$model->validate()) {
-                $errorText = '';
+                $errorText = "";
 
                 foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
@@ -2045,29 +2028,6 @@ class ProjectController extends Controller
                 }
 
                 throw new Exception($errorText);
-            }
-
-            $targetCheck = TargetCheck::model()->findByAttributes(array(
-                'target_id' => $target->id,
-                'check_id' => $check->id
-            ));
-
-            if (!$targetCheck) {
-                $language = Language::model()->findByAttributes(array(
-                    "code" => Yii::app()->language
-                ));
-
-                if (!$language) {
-                    $language = Language::model()->findByAttributes(array(
-                        "default" => true
-                    ));
-                }
-
-                $targetCheck = new TargetCheck();
-                $targetCheck->target_id = $target->id;
-                $targetCheck->check_id = $check->id;
-                $targetCheck->language_id = $language->id;
-                $targetCheck->user_id = Yii::app()->user->id;
             }
 
             $targetCheck->result = $model->result;
@@ -2278,9 +2238,8 @@ class ProjectController extends Controller
                     $solutionL10n->save();
 
                     $checkSolution = new TargetCheckSolution();
-                    $checkSolution->target_id = $target->id;
+                    $checkSolution->target_check_id = $targetCheck->id;
                     $checkSolution->check_solution_id = $solution->id;
-                    $checkSolution->check_id = $check->id;
                     $checkSolution->save();
                 }
 
@@ -2604,40 +2563,22 @@ class ProjectController extends Controller
                 $controlIds[] = $control->id;
             }
 
+            $targetCheck = TargetCheck::model()->findByPk($check);
+
+            if (!$targetCheck) {
+                throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+            }
+
             $criteria = new CDbCriteria();
             $criteria->addInCondition('check_control_id', $controlIds);
             $criteria->addColumnCondition(array(
-                'id' => $check
+                'id' => $targetCheck->check_id
             ));
 
             $check = Check::model()->find($criteria);
 
             if (!$check) {
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
-            }
-
-            $targetCheck = TargetCheck::model()->findByAttributes(array(
-                'target_id' => $target->id,
-                'check_id' => $check->id
-            ));
-
-            if (!$targetCheck) {
-                $language = Language::model()->findByAttributes(array(
-                    "code" => Yii::app()->language
-                ));
-
-                if (!$language) {
-                    $language = Language::model()->findByAttributes(array(
-                        "default" => true
-                    ));
-                }
-
-                $targetCheck = new TargetCheck();
-                $targetCheck->target_id = $target->id;
-                $targetCheck->check_id = $check->id;
-                $targetCheck->user_id = Yii::app()->user->id;
-                $targetCheck->language_id = $language->id;
-                $targetCheck->save();
             }
 
             $model = new TargetCheckAttachmentUploadForm();
@@ -2655,8 +2596,7 @@ class ProjectController extends Controller
             }
 
             $attachment = new TargetCheckAttachment();
-            $attachment->target_id = $target->id;
-            $attachment->check_id = $check->id;
+            $attachment->target_check_id = $targetCheck->id;
             $attachment->name = $model->attachment->name;
             $attachment->type = $model->attachment->type;
             $attachment->size = $model->attachment->size;
@@ -2781,21 +2721,17 @@ class ProjectController extends Controller
     /**
      * Control attachment.
      */
-    public function actionControlAttachment()
-    {
+    public function actionControlAttachment() {
         $response = new AjaxResponse();
 
-        try
-        {
+        try {
             $model = new TargetCheckAttachmentControlForm();
-            $model->attributes = $_POST['TargetCheckAttachmentControlForm'];
+            $model->attributes = $_POST["TargetCheckAttachmentControlForm"];
 
-            if (!$model->validate())
-            {
-                $errorText = '';
+            if (!$model->validate()) {
+                $errorText = "";
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -2803,35 +2739,38 @@ class ProjectController extends Controller
                 throw new Exception($errorText);
             }
 
-            $path       = $model->path;
+            $path = $model->path;
             $attachment = TargetCheckAttachment::model()->with(array(
-                'target' => array(
-                    'with' => 'project'
+                "targetCheck" => array(
+                    "with" => array(
+                        "target" => array(
+                            "with" => "project"
+                        )
+                    )
                 )
             ))->findByAttributes(array(
-                'path' => $path
+                "path" => $path
             ));
 
-            if ($attachment === null)
-                throw new CHttpException(404, Yii::t('app', 'Attachment not found.'));
+            if ($attachment === null) {
+                throw new CHttpException(404, Yii::t("app", "Attachment not found."));
+            }
 
-            if (!$attachment->target->project->checkPermission())
-                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            if (!$attachment->targetCheck->target->project->checkPermission()) {
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
+            }
 
-            switch ($model->operation)
-            {
-                case 'delete':
+            switch ($model->operation) {
+                case "delete":
                     $attachment->delete();
-                    @unlink(Yii::app()->params['attachments']['path'] . '/' . $attachment->path);
+                    @unlink(Yii::app()->params["attachments"]["path"] . "/" . $attachment->path);
                     break;
 
                 default:
-                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    throw new CHttpException(403, Yii::t("app", "Unknown operation."));
                     break;
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -2971,36 +2910,42 @@ class ProjectController extends Controller
     /**
      * Get attachment.
      */
-    public function actionAttachment($path)
-    {
+    public function actionAttachment($path) {
         $attachment = TargetCheckAttachment::model()->with(array(
-            'target' => array(
-                'with' => 'project'
+            "targetCheck" => array(
+                "with" => array(
+                    "target" => array(
+                        "with" => "project"
+                    )
+                )
             )
         ))->findByAttributes(array(
-            'path' => $path
+            "path" => $path
         ));
 
-        if ($attachment === null)
-            throw new CHttpException(404, Yii::t('app', 'Attachment not found.'));
+        if ($attachment === null) {
+            throw new CHttpException(404, Yii::t("app", "Attachment not found."));
+        }
 
-        if (!$attachment->target->project->checkPermission())
-            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+        if (!$attachment->targetCheck->target->project->checkPermission()) {
+            throw new CHttpException(403, Yii::t("app", "Access denied."));
+        }
 
-        $filePath = Yii::app()->params['attachments']['path'] . '/' . $attachment->path;
+        $filePath = Yii::app()->params["attachments"]["path"] . "/" . $attachment->path;
 
-        if (!file_exists($filePath))
-            throw new CHttpException(404, Yii::t('app', 'Attachment not found.'));
+        if (!file_exists($filePath)) {
+            throw new CHttpException(404, Yii::t("app", "Attachment not found."));
+        }
 
         // give user a file
-        header('Content-Description: File Transfer');
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="' . str_replace('"', '', $attachment->name) . '"');
-        header('Content-Transfer-Encoding: binary');
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Pragma: public');
-        header('Content-Length: ' . $attachment->size);
+        header("Content-Description: File Transfer");
+        header("Content-Type: application/octet-stream");
+        header("Content-Disposition: attachment; filename=\"" . str_replace("\"", "", $attachment->name) . "\"");
+        header("Content-Transfer-Encoding: binary");
+        header("Expires: 0");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Pragma: public");
+        header("Content-Length: " . $attachment->size);
 
         ob_clean();
         flush();
@@ -3101,35 +3046,36 @@ class ProjectController extends Controller
                 $controlIds[] = $control->id;
             }
 
+            /** @var TargetCheck $targetCheck */
+            $targetCheck = TargetCheck::model()->findByPk($check);
+            
+            if (!$targetCheck) {
+                throw new CHttpException(404, Yii::t("app", "Check not found."));
+            }
+
             $criteria = new CDbCriteria();
             $criteria->addInCondition('check_control_id', $controlIds);
             $criteria->addColumnCondition(array(
-                'id' => $check
+                'id' => $targetCheck->check_id
             ));
 
             $check = Check::model()->find($criteria);
 
-            if (!$check)
+            if (!$check) {
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+            }
 
             if ($this->_system->demo && !$check->demo) {
                 throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
             }
 
-            $targetCheck = TargetCheck::model()->findByAttributes(array(
-                'target_id' => $target->id,
-                'check_id' => $check->id
-            ));
-
             $model = new EntryControlForm();
             $model->attributes = $_POST['EntryControlForm'];
 
-            if (!$model->validate())
-            {
+            if (!$model->validate()) {
                 $errorText = '';
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -3141,30 +3087,21 @@ class ProjectController extends Controller
                 'code' => Yii::app()->language
             ));
 
-            if (!$language)
+            if (!$language) {
                 $language = Language::model()->findByAttributes(array(
-                    'default' => true
+                    "default" => true
                 ));
-
-            if (!$targetCheck)
-            {
-                $targetCheck = new TargetCheck();
-                $targetCheck->target_id   = $target->id;
-                $targetCheck->check_id    = $check->id;
-                $targetCheck->user_id     = Yii::app()->user->id;
-                $targetCheck->language_id = $language->id;
             }
 
-            switch ($model->operation)
-            {
-                case 'start':
-                    if (!in_array($targetCheck->status, array( TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED )))
-                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            switch ($model->operation)             {
+                case "start":
+                    if (!in_array($targetCheck->status, array(TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED))) {
+                        throw new CHttpException(403, Yii::t("app", "Access denied."));
+                    }
 
                     // delete solutions
                     TargetCheckSolution::model()->deleteAllByAttributes(array(
-                        'target_id' => $target->id,
-                        'check_id'  => $check->id
+                        "target_check_id" => $targetCheck->id,
                     ));
 
                     try {
@@ -3173,7 +3110,7 @@ class ProjectController extends Controller
                             array(System::STATUS_IDLE, System::STATUS_RUNNING)
                         );
                     } catch (Exception $e) {
-                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                        throw new CHttpException(403, Yii::t("app", "Access denied."));
                     }
 
                     $targetCheck->status = TargetCheck::STATUS_IN_PROGRESS;
@@ -3184,9 +3121,9 @@ class ProjectController extends Controller
 
                     break;
 
-                case 'stop':
+                case "stop":
                     if ($targetCheck->status != TargetCheck::STATUS_IN_PROGRESS) {
-                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                        throw new CHttpException(403, Yii::t("app", "Access denied."));
                     }
 
                     $targetCheck->status = TargetCheck::STATUS_STOP;
@@ -3194,53 +3131,54 @@ class ProjectController extends Controller
 
                     break;
 
-                case 'reset':
+                case "reset":
                     if (!in_array($targetCheck->status, array(TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED))) {
-                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+                        throw new CHttpException(403, Yii::t("app", "Access denied."));
                     }
-
-                    // delete vulns
-                    TargetCheckVuln::model()->deleteAllByAttributes(array(
-                        'target_id' => $target->id,
-                        'check_id' => $check->id
-                    ));
 
                     // delete solutions
                     TargetCheckSolution::model()->deleteAllByAttributes(array(
-                        'target_id' => $target->id,
-                        'check_id'  => $check->id
+                        "target_check_id" => $targetCheck->id,
                     ));
 
                     // delete inputs
                     TargetCheckInput::model()->deleteAllByAttributes(array(
-                        'target_id' => $target->id,
-                        'check_id'  => $check->id
+                        "target_check_id" => $targetCheck->id,
                     ));
 
                     // delete vulnerabilities
                     TargetCheckVuln::model()->deleteAllByAttributes(array(
-                        'target_id' => $target->id,
-                        'check_id'  => $check->id
+                        "target_check_id" => $targetCheck->id,
                     ));
 
                     // delete files
                     TargetCheckAttachment::model()->deleteAllByAttributes(array(
-                        'target_id' => $target->id,
-                        'check_id'  => $check->id
+                        "target_check_id" => $targetCheck->id,
                     ));
 
-                    $targetCheck->delete();
+                    $targetCheck->result = null;
+                    $targetCheck->target_file = null;
+                    $targetCheck->pid = null;
+                    $targetCheck->started = null;
+                    $targetCheck->status = TargetCheck::STATUS_OPEN;
+                    $targetCheck->result_file = null;
+                    $targetCheck->protocol = $check->protocol;
+                    $targetCheck->port = $check->port;
+                    $targetCheck->override_target = null;
+                    $targetCheck->table_result = null;
+                    $targetCheck->solution = null;
+                    $targetCheck->solution_title = null;
+                    $targetCheck->save();
 
-                    $response->addData('automated', $check->automated);
-                    $response->addData('protocol',  $check->protocol);
-                    $response->addData('port',      $check->port);
-
+                    $response->addData("automated", $check->automated);
+                    $response->addData("protocol",  $check->protocol);
+                    $response->addData("port", $check->port);
                     $inputValues = array();
 
                     // get default input values
                     if ($check->automated) {
                         $scripts = CheckScript::model()->findAllByAttributes(array(
-                            'check_id' => $check->id
+                            "check_id" => $check->id
                         ));
 
                         $scriptIds = array();
@@ -3257,23 +3195,66 @@ class ProjectController extends Controller
 
                         foreach ($inputs as $input) {
                             $inputValues[] = array(
-                                'id' => 'TargetCheckEditForm_' . $check->id . '_inputs_' . $input->id,
-                                'value' => $input->value
+                                "id" => "TargetCheckEditForm_" . $targetCheck->id . "_inputs_" . $input->id,
+                                "value" => $input->value
                             );
                         }
                     }
 
-                    $response->addData('inputs', $inputValues);
+                    $response->addData("inputs", $inputValues);
+
+                    break;
+
+                case "copy":
+                    $copy = new TargetCheck();
+                    $copy->target_id = $targetCheck->target_id;
+                    $copy->check_id = $targetCheck->check_id;
+                    $copy->status = TargetCheck::STATUS_OPEN;
+                    $copy->user_id = Yii::app()->user->id;
+                    $copy->rating = TargetCheck::RATING_NONE;
+                    $copy->language_id = $language->id;
+                    $copy->save();
+
+                    $response->addData("id", $copy->id);
+
+                    break;
+
+                case "delete":
+                    $count = count($targetCheck->check->targetChecks);
+
+                    if ($count <= 1) {
+                        throw new CHttpException(403, Yii::t("app", "Only duplicate checks can be removed."));
+                    }
+
+                    // delete solutions
+                    TargetCheckSolution::model()->deleteAllByAttributes(array(
+                        "target_check_id" => $targetCheck->id,
+                    ));
+
+                    // delete inputs
+                    TargetCheckInput::model()->deleteAllByAttributes(array(
+                        "target_check_id" => $targetCheck->id,
+                    ));
+
+                    // delete vulnerabilities
+                    TargetCheckVuln::model()->deleteAllByAttributes(array(
+                        "target_check_id" => $targetCheck->id,
+                    ));
+
+                    // delete files
+                    TargetCheckAttachment::model()->deleteAllByAttributes(array(
+                        "target_check_id" => $targetCheck->id,
+                    ));
+
+                    $targetCheck->delete();
 
                     break;
 
                 default:
-                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    throw new CHttpException(403, Yii::t("app", "Unknown operation."));
                     break;
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -3949,39 +3930,41 @@ class ProjectController extends Controller
     /**
      * Update checks function.
      */
-    public function actionUpdateChecks($id, $target, $category)
-    {
+    public function actionUpdateChecks($id, $target, $category) {
         $response = new AjaxResponse();
 
-        try
-        {
-            $id       = (int) $id;
-            $target   = (int) $target;
+        try {
+            $id = (int) $id;
+            $target = (int) $target;
             $category = (int) $category;
 
             $project = Project::model()->findByPk($id);
 
-            if (!$project)
+            if (!$project) {
                 throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+            }
 
-            if (!$project->checkPermission())
+            if (!$project->checkPermission()) {
                 throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
 
             $target = Target::model()->findByAttributes(array(
-                'id'         => $target,
+                'id' => $target,
                 'project_id' => $project->id
             ));
 
-            if (!$target)
+            if (!$target) {
                 throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+            }
 
             $category = TargetCheckCategory::model()->with('category')->findByAttributes(array(
-                'target_id'         => $target->id,
+                'target_id' => $target->id,
                 'check_category_id' => $category
             ));
 
-            if (!$category)
+            if (!$category) {
                 throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+            }
 
             $controls = CheckControl::model()->findAllByAttributes(array(
                 'check_category_id' => $category->check_category_id
@@ -3989,18 +3972,17 @@ class ProjectController extends Controller
 
             $controlIds = array();
 
-            foreach ($controls as $control)
+            foreach ($controls as $control) {
                 $controlIds[] = $control->id;
+            }
 
             $model = new TargetCheckUpdateForm();
             $model->attributes = $_POST['TargetCheckUpdateForm'];
 
-            if (!$model->validate())
-            {
+            if (!$model->validate()) {
                 $errorText = '';
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -4009,36 +3991,29 @@ class ProjectController extends Controller
             }
 
             $checkIds = explode(',', $model->checks);
-
             $criteria = new CDbCriteria();
-            $criteria->params = array(
-                'target_id'   => $target->id
-            );
+            $criteria->addInCondition('c.check_control_id', $controlIds);
+            $criteria->addInCondition('t.id', $checkIds);
+            $criteria->addColumnCondition(array("t.target_id" => $target->id));
+            $criteria->together = true;
 
-            $criteria->addInCondition('check_control_id', $controlIds);
-            $criteria->addInCondition('id', $checkIds);
-
-            $checks = Check::model()->with(array(
-                'targetChecks' => array(
-                    'alias'    => 'tcs',
-                    'joinType' => 'INNER JOIN',
-                    'on'       => 'tcs.target_id = :target_id',
-                    'params'   => array('target_id' => $target->id)
-                ),
+            $checks = TargetCheck::model()->with(array(
+                "check" => array(
+                    "alias" => "c",
+                )
             ))->findAll($criteria);
-
             $checkData = array();
 
-            foreach ($checks as $check) {
-                $time = $check->targetChecks[0]->started;
+            foreach ($checks as $targetCheck) {
+                $time = $targetCheck->started;
                 $startedText = null;
 
                 if ($time) {
                     $started = new DateTime($time);
                     $time = mktime() - strtotime($time);
-                    $user = $check->targetChecks[0]->user;
+                    $user = $targetCheck->user;
 
-                    if ($check->targetChecks[0]->status != TargetCheck::STATUS_FINISHED) {
+                    if ($targetCheck->status != TargetCheck::STATUS_FINISHED) {
                         $startedText = Yii::t("app", "Started by {user} on {date} at {time}", array(
                             "{user}" => $user->name ? $user->name : $user->email,
                             "{date}" => $started->format("d.m.Y"),
@@ -4051,15 +4026,14 @@ class ProjectController extends Controller
 
                 $table = null;
 
-                if ($check->targetChecks[0]->table_result) {
+                if ($targetCheck->table_result) {
                     $table = new ResultTable();
-                    $table->parse($check->targetChecks[0]->table_result);
+                    $table->parse($targetCheck->table_result);
                 }
 
                 $attachmentList = array();
                 $attachments = TargetCheckAttachment::model()->findAllByAttributes(array(
-                    "target_id" => $target->id,
-                    "check_id" => $check->id
+                    "target_check_id" => $targetCheck->id
                 ));
 
                 foreach ($attachments as $attachment) {
@@ -4071,10 +4045,10 @@ class ProjectController extends Controller
                 }
 
                 $checkData[] = array(
-                    "id" => $check->id,
-                    "result" => $check->targetChecks[0]->result,
+                    "id" => $targetCheck->id,
+                    "result" => $targetCheck->result,
                     "tableResult" => $table ? $this->renderPartial("/project/target/check/tableresult", array("table" => $table), true) : "",
-                    "finished" => $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED,
+                    "finished" => $targetCheck->status == TargetCheck::STATUS_FINISHED,
                     "time" => $time,
                     "attachmentControlUrl" => $this->createUrl("project/controlattachment"),
                     "attachments" => $attachmentList,
@@ -4636,22 +4610,21 @@ class ProjectController extends Controller
         $checkCount = TargetCheck::model()->count($criteria);
         $paginator  = new Paginator($checkCount, $page);
 
-        Yii::app()->user->returnUrl = $this->createUrl('project/vulns', array( 'id' => $project->id, 'page' => $page ));
-
-        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
-        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
-        $this->breadcrumbs[] = array(Yii::t('app', 'Vulns'), '');
+        Yii::app()->user->returnUrl = $this->createUrl("project/vulns", array("id" => $project->id, "page" => $page));
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
+        $this->breadcrumbs[] = array(Yii::t("app", "Vulns"), "");
 
         // display the page
         $this->pageTitle = $project->name;
-		$this->render('vuln/index', array(
-            'project' => $project,
-            'checks' => $checks,
-            'p' => $paginator,
-            'ratings' => TargetCheck::getRatingNames(),
-            'statuses' => array(
-                TargetCheckVuln::STATUS_OPEN => Yii::t('app', 'Open'),
-                TargetCheckVuln::STATUS_RESOLVED => Yii::t('app', 'Resolved'),
+		$this->render("vuln/index", array(
+            "project" => $project,
+            "checks" => $checks,
+            "p" => $paginator,
+            "ratings" => TargetCheck::getRatingNames(),
+            "statuses" => array(
+                TargetCheckVuln::STATUS_OPEN => Yii::t("app", "Open"),
+                TargetCheckVuln::STATUS_RESOLVED => Yii::t("app", "Resolved"),
             ),
         ));
     }
@@ -4659,136 +4632,133 @@ class ProjectController extends Controller
     /**
      * Vulnerability edit page.
      */
-	public function actionEditVuln($id, $target, $check)
-	{
-        $id        = (int) $id;
-        $target    = (int) $target;
-        $check     = (int) $check;
+	public function actionEditVuln($id, $target, $check) {
+        $id = (int) $id;
+        $target = (int) $target;
+        $check = (int) $check;
         $newRecord = false;
 
         $project = Project::model()->findByPk($id);
 
-        if (!$project)
-            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+        if (!$project) {
+            throw new CHttpException(404, Yii::t("app", "Project not found."));
+        }
 
         $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
+            "code" => Yii::app()->language
         ));
 
-        if ($language)
+        if ($language) {
             $language = $language->id;
+        }
 
         $check = TargetCheck::model()->with(array(
-            'check' => array(
-                'with' => array(
-                    'l10n' => array(
-                        'joinType' => 'LEFT JOIN',
-                        'on'       => 'l10n.language_id = :language_id',
-                        'params'   => array( 'language_id' => $language )
+            "check" => array(
+                "with" => array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "l10n.language_id = :language_id",
+                        "params" => array("language_id" => $language)
                     ),
                 ),
             )
         ))->findByAttributes(array(
-            'check_id'  => $check,
-            'target_id' => $target
+            "check_id" => $check,
+            "target_id" => $target
         ));
 
-        if (!$check || !in_array($check->rating, array(TargetCheck::RATING_LOW_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_HIGH_RISK)))
-            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+        if (!$check || !in_array($check->rating, array(TargetCheck::RATING_LOW_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_HIGH_RISK))) {
+            throw new CHttpException(404, Yii::t("app", "Check not found."));
+        }
 
         $vuln = TargetCheckVuln::model()->findByAttributes(array(
-            'check_id'  => $check->check_id,
-            'target_id' => $check->target_id
+            "target_check_id" => $check->id,
         ));
 
-        if (!$vuln)
-        {
+        if (!$vuln) {
             $vuln = new TargetCheckVuln();
-            $vuln->check_id  = $check->check_id;
-            $vuln->target_id = $check->target_id;
+            $vuln->target_check_id = $check->id;
             $newRecord = true;
         }
 
 		$model = new VulnEditForm();
 
-        if (!$newRecord)
-        {
-            $model->status   = $vuln->status;
-            $model->userId   = $vuln->user_id;
+        if (!$newRecord) {
+            $model->status = $vuln->status;
+            $model->userId = $vuln->user_id;
             $model->deadline = $vuln->deadline;
+        } else {
+            $model->deadline = date("Y-m-d");
         }
-        else
-            $model->deadline = date('Y-m-d');
 
 		// collect user input data
-		if (isset($_POST['VulnEditForm']))
-		{
-			$model->attributes = $_POST['VulnEditForm'];
+		if (isset($_POST["VulnEditForm"])) {
+			$model->attributes = $_POST["VulnEditForm"];
 
-            if (!$model->userId)
+            if (!$model->userId) {
                 $model->userId = null;
+            }
 
-			if ($model->validate())
-            {
-                $vuln->status   = $model->status;
-                $vuln->user_id  = $model->userId;
+			if ($model->validate()) {
+                $vuln->status = $model->status;
+                $vuln->user_id = $model->userId;
                 $vuln->deadline = $model->deadline;
-
                 $vuln->save();
 
-                Yii::app()->user->setFlash('success', Yii::t('app', 'Vulnerability saved.'));
-
+                Yii::app()->user->setFlash("success", Yii::t("app", "Vulnerability saved."));
                 $project->refresh();
-
                 $this->redirect(Yii::app()->user->returnUrl);
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
-            else
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
 		}
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
-        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
-        $this->breadcrumbs[] = array(Yii::t('app', 'Vulns'), $this->createUrl('project/vulns', array( 'id' => $project->id )));
-        $this->breadcrumbs[] = array($check->check->localizedName, '');
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array( "id" => $project->id )));
+        $this->breadcrumbs[] = array(Yii::t("app", "Vulns"), $this->createUrl("project/vulns", array( "id" => $project->id )));
+        $this->breadcrumbs[] = array($check->check->localizedName, "");
 
         $admins = User::model()->findAllByAttributes(array(
-            'role' => User::ROLE_ADMIN
+            "role" => User::ROLE_ADMIN
         ));
 
         $excludeIds = array();
 
-        foreach ($admins as $admin)
+        foreach ($admins as $admin) {
             $excludeIds[] = $admin->id;
+        }
 
         $clients = User::model()->findAllByAttributes(array(
-            'role'      => User::ROLE_CLIENT,
-            'client_id' => $project->client_id
+            "role" => User::ROLE_CLIENT,
+            "client_id" => $project->client_id
         ));
 
-        foreach ($clients as $client)
+        foreach ($clients as $client) {
             $excludeIds[] = $client->id;
+        }
 
         $criteria = new CDbCriteria();
         $criteria->addColumnCondition(array(
-            'project_id' => $project->id
+            "project_id" => $project->id
         ));
-        $criteria->order = 'name ASC, email ASC';
+        $criteria->order = "name ASC, email ASC";
 
-        if (count($excludeIds))
-            $criteria->addNotInCondition('user_id', $excludeIds);
+        if (count($excludeIds)) {
+            $criteria->addNotInCondition("user_id", $excludeIds);
+        }
 
-        $users = ProjectUser::model()->with('user')->findAll($criteria);
+        $users = ProjectUser::model()->with("user")->findAll($criteria);
 
 		// display the page
         $this->pageTitle = $check->check->localizedName;
-		$this->render('vuln/edit', array(
-            'model'    => $model,
-            'project'  => $project,
-            'admins'   => $admins,
-            'users'    => $users,
-            'statuses' => array(
-                TargetCheckVuln::STATUS_OPEN     => Yii::t('app', 'Open'),
-                TargetCheckVuln::STATUS_RESOLVED => Yii::t('app', 'Resolved'),
+		$this->render("vuln/edit", array(
+            "model" => $model,
+            "project" => $project,
+            "admins" => $admins,
+            "users" => $users,
+            "statuses" => array(
+                TargetCheckVuln::STATUS_OPEN => Yii::t("app", "Open"),
+                TargetCheckVuln::STATUS_RESOLVED => Yii::t("app", "Resolved"),
             )
         ));
 	}

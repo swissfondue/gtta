@@ -3,34 +3,37 @@
 /**
  * Vulnerability Tracker class.
  */
-class VulntrackerCommand extends ConsoleCommand
-{
+class VulntrackerCommand extends ConsoleCommand {
     /**
      * Check vulnerabilities.
      */
     private function _checkVulns() {
         $criteria = new CDbCriteria();
-        $criteria->addInCondition('t.status', array(
+        $criteria->addInCondition("t.status", array(
             Project::STATUS_OPEN,
             Project::STATUS_IN_PROGRESS,
         ));
         $criteria->together = true;
 
         $projects = Project::model()->with(array(
-            'targets' => array(
-                'with' => array(
-                    'vulns' => array(
-                        'with' => 'targetCheck'
-                    )
+            "targets" => array(
+                "with" => array(
+                    "targetChecks" => array(                            
+                        "with" => array(
+                            "vuln" => array(
+                                "alias" => "v",
+                            ),
+                        ),
+                    ),
                 ),
             ),
-            'gtChecks' => array(
-                'with' => array(
-                    'vuln'
+            "gtChecks" => array(
+                "with" => array(
+                    "vuln"
                 )
             ),
-            'project_users' => array(
-                'with' => 'user'
+            "project_users" => array(
+                "with" => "user"
             )
         ))->findAll($criteria);
 
@@ -64,8 +67,8 @@ class VulntrackerCommand extends ConsoleCommand
                     break;
                 }
 
-                foreach ($target->vulns as $vuln) {
-                    if ($vuln->overdued) {
+                foreach ($target->targetChecks as $tc) {
+                    if ($tc->vuln->overdued) {
                         $overdued++;
                         break;
                     }

@@ -1465,7 +1465,7 @@ class ReportController extends Controller {
                     }
 
                     $criteria = new CDbCriteria();
-                    $criteria->order = 't.sort_order ASC';
+                    $criteria->order = 't.sort_order ASC, tcs.id ASC';
                     $criteria->addInCondition('t.reference_id', $referenceIds);
                     $criteria->addColumnCondition(array(
                         't.check_control_id' => $control->id
@@ -1498,31 +1498,26 @@ class ReportController extends Controller {
                                 "status" => TargetCheck::STATUS_FINISHED,
                                 "hidden" => TargetCheck::RATING_HIDDEN,
                             ),
-                        ),
-                        "targetCheckSolutions" => array(
-                            "alias" => "tss",
-                            "joinType" => "LEFT JOIN",
-                            "on" => "tss.target_id = :target_id",
-                            "params" => array("target_id" => $target->id),
                             "with" => array(
-                                "solution" => array(
-                                    "alias" => "tss_s",
+                                "solutions" => array(
+                                    "alias" => "tss",
                                     "joinType" => "LEFT JOIN",
                                     "with" => array(
-                                        "l10n" => array(
-                                            "alias" => "tss_s_l10n",
-                                            "on" => "tss_s_l10n.language_id = :language_id",
-                                            "params" => array("language_id" => $language)
+                                        "solution" => array(
+                                            "alias" => "tss_s",
+                                            "joinType" => "LEFT JOIN",
+                                            "with" => array(
+                                                "l10n" => array(
+                                                    "alias" => "tss_s_l10n",
+                                                    "on" => "tss_s_l10n.language_id = :language_id",
+                                                    "params" => array("language_id" => $language)
+                                                )
+                                            )
                                         )
                                     )
-                                )
+                                ),
+                                "attachments",
                             )
-                        ),
-                        "targetCheckAttachments" => array(
-                            "alias" => "tas",
-                            "joinType" => "LEFT JOIN",
-                            "on" => "tas.target_id = :target_id",
-                            "params" => array("target_id" => $target->id)
                         ),
                         "_reference"
                     ))->findAll($criteria);
@@ -1532,111 +1527,116 @@ class ReportController extends Controller {
                     }
 
                     foreach ($checks as $check) {
-                        $checkData = array(
-                            "id" => $check->id,
-                            "custom" => false,
-                            "name" => $check->localizedName,
-                            "background" => $this->_prepareProjectReportText($check->localizedBackgroundInfo),
-                            "question" => $this->_prepareProjectReportText($check->localizedQuestion),
-                            "result" => $check->targetChecks[0]->result,
-                            "tableResult" => $check->targetChecks[0]->table_result,
-                            "rating" => 0,
-                            "ratingName" => $ratings[$check->targetChecks[0]->rating],
-                            "ratingColor" => "#999999",
-                            "solutions" => array(),
-                            "images" => array(),
-                            "reference" => $check->_reference->name,
-                            "referenceUrl" => $check->_reference->url,
-                            "referenceCode" => $check->reference_code,
-                            "referenceCodeUrl" => $check->reference_url,
-                            "info" => $check->targetChecks[0]->rating == TargetCheck::RATING_INFO,
-                            "separate" => in_array($category->check_category_id, $templateCategoryIds),
-                        );
+                        $ctr = 0;
 
-                        if ($check->targetChecks[0]->solution) {
-                            $checkData["solutions"][] = $this->_prepareProjectReportText($check->targetChecks[0]->solution);
-                        }
+                        foreach ($check->targetChecks as $tc) {
+                            $checkData = array(
+                                "id" => $check->id,
+                                "custom" => false,
+                                "name" => $check->localizedName . ($ctr > 0 ? " " . ($ctr + 1) : ""),
+                                "background" => $this->_prepareProjectReportText($check->localizedBackgroundInfo),
+                                "question" => $this->_prepareProjectReportText($check->localizedQuestion),
+                                "result" => $tc->result,
+                                "tableResult" => $tc->table_result,
+                                "rating" => 0,
+                                "ratingName" => $ratings[$tc->rating],
+                                "ratingColor" => "#999999",
+                                "solutions" => array(),
+                                "images" => array(),
+                                "reference" => $check->_reference->name,
+                                "referenceUrl" => $check->_reference->url,
+                                "referenceCode" => $check->reference_code,
+                                "referenceCodeUrl" => $check->reference_url,
+                                "info" => $tc->rating == TargetCheck::RATING_INFO,
+                                "separate" => in_array($category->check_category_id, $templateCategoryIds),
+                            );
 
-                        if ($checkData["info"]) {
-                            $controlData["info"]++;
-                            $categoryData["info"]++;
-                            $targetData["info"]++;
-                            $hasInfo = true;
-                        }
-
-                        if ($checkData["separate"]) {
-                            $controlData["separate"]++;
-                            $categoryData["separate"]++;
-
-                            if (!in_array($category->check_category_id, $targetData["separate"])) {
-                                $targetData["separate"][] = $category->check_category_id;
+                            if ($tc->solution) {
+                                $checkData["solutions"][] = $this->_prepareProjectReportText($tc->solution);
                             }
 
-                            $targetData["separateCount"]++;
-
-                            $hasSeparate = true;
-                        }
-
-                        $checkData["rating"] = $check->targetChecks[0]->rating;
-
-                        switch ($check->targetChecks[0]->rating) {
-                            case TargetCheck::RATING_INFO:
-                                $checkData["ratingColor"] = "#3A87AD";
-                                $checkData["ratingValue"] = 0;
-                                $checksInfo++;
-                                break;
-
-                            case TargetCheck::RATING_LOW_RISK:
-                                $checkData["ratingColor"] = "#53A254";
-                                $checkData["ratingValue"] = 1;
-                                $checksLow++;
-                                break;
-
-                            case TargetCheck::RATING_MED_RISK:
-                                $checkData["ratingColor"] = "#DACE2F";
-                                $checkData["ratingValue"] = 2;
-                                $checksMed++;
-                                break;
-
-                            case TargetCheck::RATING_HIGH_RISK:
-                                $checkData["ratingColor"] = "#D63515";
-                                $checkData["ratingValue"] = 3;
-                                $checksHigh++;
-                                break;
-                        }
-
-                        if ($check->targetCheckSolutions) {
-                            foreach ($check->targetCheckSolutions as $solution) {
-                                $checkData["solutions"][] = $this->_prepareProjectReportText($solution->solution->localizedSolution);
+                            if ($checkData["info"]) {
+                                $controlData["info"]++;
+                                $categoryData["info"]++;
+                                $targetData["info"]++;
+                                $hasInfo = true;
                             }
-                        }
 
-                        if ($check->targetCheckAttachments) {
-                            foreach ($check->targetCheckAttachments as $attachment) {
-                                if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
-                                    $checkData["images"][] = Yii::app()->params["attachments"]["path"] . "/" . $attachment->path;
+                            if ($checkData["separate"]) {
+                                $controlData["separate"]++;
+                                $categoryData["separate"]++;
+
+                                if (!in_array($category->check_category_id, $targetData["separate"])) {
+                                    $targetData["separate"][] = $category->check_category_id;
+                                }
+
+                                $targetData["separateCount"]++;
+
+                                $hasSeparate = true;
+                            }
+
+                            $checkData["rating"] = $tc->rating;
+
+                            switch ($tc->rating) {
+                                case TargetCheck::RATING_INFO:
+                                    $checkData["ratingColor"] = "#3A87AD";
+                                    $checkData["ratingValue"] = 0;
+                                    $checksInfo++;
+                                    break;
+
+                                case TargetCheck::RATING_LOW_RISK:
+                                    $checkData["ratingColor"] = "#53A254";
+                                    $checkData["ratingValue"] = 1;
+                                    $checksLow++;
+                                    break;
+
+                                case TargetCheck::RATING_MED_RISK:
+                                    $checkData["ratingColor"] = "#DACE2F";
+                                    $checkData["ratingValue"] = 2;
+                                    $checksMed++;
+                                    break;
+
+                                case TargetCheck::RATING_HIGH_RISK:
+                                    $checkData["ratingColor"] = "#D63515";
+                                    $checkData["ratingValue"] = 3;
+                                    $checksHigh++;
+                                    break;
+                            }
+
+                            if ($tc->solutions) {
+                                foreach ($tc->solutions as $solution) {
+                                    $checkData["solutions"][] = $this->_prepareProjectReportText($solution->solution->localizedSolution);
                                 }
                             }
-                        }
 
-                        if (in_array($check->targetChecks[0]->rating, array(TargetCheck::RATING_HIGH_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_LOW_RISK))) {
-                            $reducedChecks[] = array(
-                                "target" => array(
-                                    "id" => $target->id,
-                                    "host" => $target->host,
-                                    "description" => $target->description
-                                ),
-                                "id" => $checkData["id"],
-                                "name" => $checkData["name"],
-                                "question" => $checkData["question"],
-                                "solution" => $checkData["solutions"] ? implode("\n", $checkData["solutions"]) : "",
-                                "rating" => $checkData["rating"],
-                                "result" => $checkData["result"],
-                                "ratingValue" => $checkData["ratingValue"],
-                            );
-                        }
+                            if ($tc->attachments) {
+                                foreach ($tc->attachments as $attachment) {
+                                    if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
+                                        $checkData["images"][] = Yii::app()->params["attachments"]["path"] . "/" . $attachment->path;
+                                    }
+                                }
+                            }
 
-                        $controlData["checks"][] = $checkData;
+                            if (in_array($tc->rating, array(TargetCheck::RATING_HIGH_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_LOW_RISK))) {
+                                $reducedChecks[] = array(
+                                    "target" => array(
+                                        "id" => $target->id,
+                                        "host" => $target->host,
+                                        "description" => $target->description
+                                    ),
+                                    "id" => $checkData["id"],
+                                    "name" => $checkData["name"],
+                                    "question" => $checkData["question"],
+                                    "solution" => $checkData["solutions"] ? implode("\n", $checkData["solutions"]) : "",
+                                    "rating" => $checkData["rating"],
+                                    "result" => $checkData["result"],
+                                    "ratingValue" => $checkData["ratingValue"],
+                                );
+                            }
+
+                            $controlData["checks"][] = $checkData;
+                            $ctr++;
+                        }
                     }
 
                     $controlData["rating"] = $this->_getChecksRating($controlData["checks"]);
@@ -3125,9 +3125,11 @@ class ReportController extends Controller {
                     }
 
                     foreach ($checks as $check) {
-                        $checksData[] = array(
-                            "rating" => $check->targetChecks[0]->rating
-                        );
+                        foreach ($check->targetChecks as $tc) {
+                            $checksData[] = array(
+                                "rating" => $tc->rating
+                            );
+                        }
                     }
                 }
 
@@ -3576,13 +3578,13 @@ class ReportController extends Controller {
                     }
 
                     $checks = Check::model()->with(array(
-                        'targetChecks' => array(
-                            'alias'    => 'tcs',
-                            'joinType' => 'INNER JOIN',
-                            'on'       => 'tcs.target_id = :target_id AND tcs.status = :status',
-                            'params'   => array(
-                                'target_id' => $target->id,
-                                'status'    => TargetCheck::STATUS_FINISHED,
+                        "targetChecks" => array(
+                            "alias" => "tcs",
+                            "joinType" => "INNER JOIN",
+                            "on" => "tcs.target_id = :target_id AND tcs.status = :status",
+                            "params" => array(
+                                "target_id" => $target->id,
+                                "status" => TargetCheck::STATUS_FINISHED,
                             ),
                         ),
                     ))->findAll($criteria);
@@ -3592,29 +3594,30 @@ class ReportController extends Controller {
                     }
 
                     foreach ($checks as $check) {
-                        switch ($check->targetChecks[0]->rating) {
-                            case TargetCheck::RATING_HIDDEN:
-                            case TargetCheck::RATING_INFO:
-                                $controlData['degree'] += 0;
-                                break;
+                        foreach ($check->targetChecks as $tc) {
+                            switch ($tc->rating) {
+                                case TargetCheck::RATING_HIDDEN:
+                                case TargetCheck::RATING_INFO:
+                                    $controlData['degree'] += 0;
+                                    break;
 
-                            case TargetCheck::RATING_LOW_RISK:
-                                $controlData['degree'] += 1;
-                                break;
+                                case TargetCheck::RATING_LOW_RISK:
+                                    $controlData['degree'] += 1;
+                                    break;
 
-                            case TargetCheck::RATING_MED_RISK:
-                                $controlData['degree'] += 2;
-                                break;
+                                case TargetCheck::RATING_MED_RISK:
+                                    $controlData['degree'] += 2;
+                                    break;
 
-                            case TargetCheck::RATING_HIGH_RISK:
-                                $controlData['degree'] += 3;
-                                break;
+                                case TargetCheck::RATING_HIGH_RISK:
+                                    $controlData['degree'] += 3;
+                                    break;
+                            }
                         }
                     }
 
                     $maxDegree = count($checks) * 3;
                     $controlData['degree'] = round(100 - $controlData['degree'] / $maxDegree * 100);
-
                     $targetData['controls'][] = $controlData;
                 }
             }
@@ -4702,7 +4705,7 @@ class ReportController extends Controller {
 
                 foreach ($controls as $control) {
                     $criteria = new CDbCriteria();
-                    $criteria->order = 't.sort_order ASC';
+                    $criteria->order = 't.sort_order ASC, tcs.id ASC';
                     $criteria->addInCondition('t.reference_id', $referenceIds);
                     $criteria->addColumnCondition(array(
                         't.check_control_id' => $control->id
@@ -4721,46 +4724,44 @@ class ReportController extends Controller {
                     }
 
                     $checks = Check::model()->with(array(
-                        'l10n' => array(
-                            'joinType' => 'LEFT JOIN',
-                            'on'       => 'l10n.language_id = :language_id',
-                            'params'   => array( 'language_id' => $language )
+                        "l10n" => array(
+                            "joinType" => "LEFT JOIN",
+                            "on" => "l10n.language_id = :language_id",
+                            "params" => array("language_id" => $language)
                         ),
-                        'targetChecks' => array(
-                            'alias'    => 'tcs',
-                            'joinType' => 'INNER JOIN',
-                            'on'       => 'tcs.target_id = :target_id AND tcs.status = :status AND tcs.rating != :hidden',
-                            'params'   => array(
-                                'target_id' => $target->id,
-                                'status'    => TargetCheck::STATUS_FINISHED,
-                                'hidden'    => TargetCheck::RATING_HIDDEN,
+                        "targetChecks" => array(
+                            "alias" => "tcs",
+                            "joinType" => "INNER JOIN",
+                            "on" => "tcs.target_id = :target_id AND tcs.status = :status AND tcs.rating != :hidden",
+                            "params" => array(
+                                "target_id" => $target->id,
+                                "status" => TargetCheck::STATUS_FINISHED,
+                                "hidden" => TargetCheck::RATING_HIDDEN,
                             ),
-                            'with' => array(
-                                'vuln' => array(
-                                    'with' => 'user'
-                                )
-                            )
-                        ),
-                        'targetCheckSolutions' => array(
-                            'alias'    => 'tss',
-                            'joinType' => 'LEFT JOIN',
-                            'on'       => 'tss.target_id = :target_id',
-                            'params'   => array( 'target_id' => $target->id ),
-                            'with'     => array(
-                                'solution' => array(
-                                    'alias'    => 'tss_s',
-                                    'joinType' => 'LEFT JOIN',
-                                    'with'     => array(
-                                        'l10n' => array(
-                                            'alias'  => 'tss_s_l10n',
-                                            'on'     => 'tss_s_l10n.language_id = :language_id',
-                                            'params' => array( 'language_id' => $language )
+                            "with" => array(
+                                "vuln" => array(
+                                    "with" => "user"
+                                ),
+                                "solutions" => array(
+                                    "alias" => "tss",
+                                    "joinType" => "LEFT JOIN",
+                                    "with" => array(
+                                        "solution" => array(
+                                            "alias" => "tss_s",
+                                            "joinType" => "LEFT JOIN",
+                                            "with" => array(
+                                                "l10n" => array(
+                                                    "alias" => "tss_s_l10n",
+                                                    "on" => "tss_s_l10n.language_id = :language_id",
+                                                    "params" => array("language_id" => $language)
+                                                )
+                                            )
                                         )
                                     )
-                                )
+                                ),
                             )
                         ),
-                        '_reference'
+                        "_reference"
                     ))->findAll($criteria);
 
                     if (!$checks) {
@@ -4768,67 +4769,72 @@ class ReportController extends Controller {
                     }
 
                     foreach ($checks as $check) {
-                        if (!in_array($check->targetChecks[0]->rating, $model->ratings)) {
-                            continue;
-                        }
+                        $ctr = 0;
 
-                        $row = array();
-
-                        if (in_array(TargetCheck::COLUMN_TARGET, $model->columns)) {
-                            $row[TargetCheck::COLUMN_TARGET] = $target->host;
-                        }
-
-                        if (in_array(TargetCheck::COLUMN_NAME, $model->columns)) {
-                            $row[TargetCheck::COLUMN_NAME] = $check->localizedName;
-                        }
-
-                        if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns)) {
-                            $row[TargetCheck::COLUMN_REFERENCE] = $check->_reference->name .
-                                ($check->reference_code ? '-' . $check->reference_code : '');
-                        }
-
-                        if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
-                            $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($check->localizedBackgroundInfo);
-                        }
-
-                        if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns)) {
-                            $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareVulnExportText($check->localizedQuestion);
-                        }
-
-                        if (in_array(TargetCheck::COLUMN_RESULT, $model->columns)) {
-                            $row[TargetCheck::COLUMN_RESULT] = $check->targetChecks[0]->result;
-                        }
-
-                        if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns)) {
-                            $solutions = array();
-
-                            foreach ($check->targetCheckSolutions as $solution) {
-                                $solutions[] = $this->_prepareVulnExportText($solution->solution->localizedSolution);
+                        foreach ($check->targetChecks as $tc) {
+                            if (!in_array($tc->rating, $model->ratings)) {
+                                continue;
                             }
 
-                            $row[TargetCheck::COLUMN_SOLUTION] = implode("\n", $solutions);
-                        }
+                            $row = array();
 
-                        if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $model->columns)) {
-                            $user = $check->targetChecks[0] && $check->targetChecks[0]->vuln && $check->targetChecks[0]->vuln->user ? $check->targetChecks[0]->vuln->user : null;
-
-                            if ($user) {
-                                $row[TargetCheck::COLUMN_ASSIGNED_USER] = $user->name ? $user->name : $user->email;
-                            } else {
-                                $row[TargetCheck::COLUMN_ASSIGNED_USER] = '';
+                            if (in_array(TargetCheck::COLUMN_TARGET, $model->columns)) {
+                                $row[TargetCheck::COLUMN_TARGET] = $target->host;
                             }
-                        }
 
-                        if (in_array(TargetCheck::COLUMN_RATING, $model->columns)) {
-                            $row[TargetCheck::COLUMN_RATING] = $ratings[$check->targetChecks[0]->rating];
-                        }
+                            if (in_array(TargetCheck::COLUMN_NAME, $model->columns)) {
+                                $row[TargetCheck::COLUMN_NAME] = $check->localizedName . ($ctr > 0 ? " " . ($ctr + 1) : "");
+                            }
 
-                        if (in_array(TargetCheck::COLUMN_STATUS, $model->columns)) {
-                            $vuln = $check->targetChecks[0] && $check->targetChecks[0]->vuln ? $check->targetChecks[0]->vuln : null;
-                            $row[TargetCheck::COLUMN_STATUS] = $statuses[$vuln ? $vuln->status : TargetCheckVuln::STATUS_OPEN];
-                        }
+                            if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns)) {
+                                $row[TargetCheck::COLUMN_REFERENCE] = $check->_reference->name .
+                                    ($check->reference_code ? '-' . $check->reference_code : '');
+                            }
 
-                        $data[] = $row;
+                            if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
+                                $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($check->localizedBackgroundInfo);
+                            }
+
+                            if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns)) {
+                                $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareVulnExportText($check->localizedQuestion);
+                            }
+
+                            if (in_array(TargetCheck::COLUMN_RESULT, $model->columns)) {
+                                $row[TargetCheck::COLUMN_RESULT] = $tc->result;
+                            }
+
+                            if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns)) {
+                                $solutions = array();
+
+                                foreach ($tc->solutions as $solution) {
+                                    $solutions[] = $this->_prepareVulnExportText($solution->solution->localizedSolution);
+                                }
+
+                                $row[TargetCheck::COLUMN_SOLUTION] = implode("\n", $solutions);
+                            }
+
+                            if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $model->columns)) {
+                                $user = $tc->vuln && $tc->vuln->user ? $tc->vuln->user : null;
+
+                                if ($user) {
+                                    $row[TargetCheck::COLUMN_ASSIGNED_USER] = $user->name ? $user->name : $user->email;
+                                } else {
+                                    $row[TargetCheck::COLUMN_ASSIGNED_USER] = '';
+                                }
+                            }
+
+                            if (in_array(TargetCheck::COLUMN_RATING, $model->columns)) {
+                                $row[TargetCheck::COLUMN_RATING] = $ratings[$tc->rating];
+                            }
+
+                            if (in_array(TargetCheck::COLUMN_STATUS, $model->columns)) {
+                                $vuln = $tc->vuln ? $tc->vuln : null;
+                                $row[TargetCheck::COLUMN_STATUS] = $statuses[$vuln ? $vuln->status : TargetCheckVuln::STATUS_OPEN];
+                            }
+
+                            $data[] = $row;
+                            $ctr++;
+                        }
                     }
                 }
             }

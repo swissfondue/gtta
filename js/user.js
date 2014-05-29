@@ -1209,6 +1209,12 @@ function User()
                         $("div[data-id=custom-" + id + "]").fadeOut("slow", undefined, function () {
                             $("div[data-id=custom-" + id + ']').remove();
                         });
+                    } else if (!custom && operation == "delete") {
+                        $("div[data-id=" + id + "]").fadeOut("slow", undefined, function () {
+                            $("div[data-id=" + id + ']').remove();
+                        });
+                    } else if (!custom && operation == "copy") {
+                        location.reload();
                     }
                 },
 
@@ -1277,6 +1283,26 @@ function User()
         this.reset = function (id) {
             if (confirm(system.translate('Are you sure that you want to reset this check?'))) {
                 _check._control(id, "reset");
+            }
+        };
+
+        /**
+         * Copy check.
+         * @param id
+         */
+        this.copy = function (id) {
+            if (confirm(system.translate("Are you sure that you want to copy this check?"))) {
+                _check._control(id, "copy");
+            }
+        };
+
+        /**
+         * Delete check.
+         * @param id
+         */
+        this.del = function (id) {
+            if (confirm(system.translate("Are you sure that you want to delete this check?"))) {
+                _check._control(id, "delete");
             }
         };
 

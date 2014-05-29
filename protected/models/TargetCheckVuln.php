@@ -3,81 +3,75 @@
 /**
  * This is the model class for table "target_check_vulns".
  *
- * The followings are the available columns in table 'target_check_vulns':
- * @property integer $target_id
- * @property integer $check_id
+ * The followings are the available columns in table "target_check_vulns":
+ * @property integer $target_check_id
  * @property integer $user_id
  * @property string $deadline
  * @property string $status
  */
-class TargetCheckVuln extends ActiveRecord
-{
+class TargetCheckVuln extends ActiveRecord {
     /**
      * Vulnerability statuses.
      */
-    const STATUS_OPEN     = 'open';
-    const STATUS_RESOLVED = 'resolved';
+    const STATUS_OPEN = 0;
+    const STATUS_RESOLVED = 100;
 
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
 	 * @return TargetCheckVuln the static model class
 	 */
-	public static function model($className=__CLASS__)
-	{
+	public static function model($className=__CLASS__) {
 		return parent::model($className);
 	}
 
 	/**
 	 * @return string the associated database table name
 	 */
-	public function tableName()
-	{
-		return 'target_check_vulns';
+	public function tableName() {
+		return "target_check_vulns";
 	}
 
 	/**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
+	public function rules() {
 		return array(
-            array( 'target_id, check_id', 'required' ),
-            array( 'target_id, check_id, user_id', 'numerical', 'integerOnly' => true ),
-            array( 'status', 'in', 'range' => array( self::STATUS_OPEN, self::STATUS_RESOLVED ) ),
+            array("target_check_id", "required"),
+            array("target_check_id, user_id", "numerical", "integerOnly" => true),
+            array("status", "in", "range" => array(self::STATUS_OPEN, self::STATUS_RESOLVED)),
 		);
 	}
 
     /**
 	 * @return array relational rules.
 	 */
-	public function relations()
-	{
+	public function relations() {
 		return array(
-            'target'      => array( self::BELONGS_TO, 'Target',      'target_id' ),
-            'check'       => array( self::BELONGS_TO, 'Check',       'check_id' ),
-            'user'        => array( self::BELONGS_TO, 'User',        'user_id' ),
-            'targetCheck' => array( self::BELONGS_TO, 'TargetCheck', array( 'target_id', 'check_id' ) ),
+            "user" => array(self::BELONGS_TO, "User", "user_id"),
+            "targetCheck" => array(self::BELONGS_TO, "TargetCheck", "target_check_id"),
 		);
 	}
 
     /**
      * Check if vulnerability is overdued.
      */
-    public function getOverdued()
-    {
-        if (!$this->deadline)
+    public function getOverdued() {
+        if (!$this->deadline) {
             return false;
+        }
 
-        if ($this->status == self::STATUS_RESOLVED)
+        if ($this->status == self::STATUS_RESOLVED) {
             return false;
+        }
 
-        $deadline = new DateTime($this->deadline . ' 00:00:00');
-        $today    = new DateTime();
+        $deadline = new DateTime($this->deadline . " 00:00:00");
+        $today = new DateTime();
         $today->setTime(0, 0, 0);
 
-        if ($today > $deadline)
+        if ($today > $deadline) {
             return true;
+        }
 
         return false;
     }

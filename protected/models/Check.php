@@ -83,9 +83,6 @@ class Check extends ActiveRecord {
             "control" => array(self::BELONGS_TO, "CheckControl", "check_control_id"),
             "_reference" => array(self::BELONGS_TO, "Reference", "reference_id"),
             "targetChecks" => array(self::HAS_MANY, "TargetCheck", "check_id"),
-            "targetCheckInputs" => array(self::HAS_MANY, "TargetCheckInput", "check_id"),
-            "targetCheckSolutions" => array(self::HAS_MANY, "TargetCheckSolution", "check_id"),
-            "targetCheckAttachments" => array(self::HAS_MANY, "TargetCheckAttachment", "check_id"),
             "results" => array(self::HAS_MANY, "CheckResult", "check_id"),
             "solutions" => array(self::HAS_MANY, "CheckSolution", "check_id"),
             "scripts" => array(self::HAS_MANY, "CheckScript", "check_id"),
@@ -135,14 +132,6 @@ class Check extends ActiveRecord {
         }
 
         return $this->question;
-    }
-
-    /**
-     * @return boolean is running.
-     */
-    public function getIsRunning() {
-        return $this->automated && $this->targetChecks &&
-            in_array($this->targetChecks[0]->status, array(TargetCheck::STATUS_IN_PROGRESS, TargetCheck::STATUS_STOP));
     }
 
     /**

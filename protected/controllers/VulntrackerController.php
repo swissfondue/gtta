@@ -219,33 +219,31 @@ class VulntrackerController extends Controller {
         $newRecord = false;
 
         $check = TargetCheck::model()->with(array(
-            'check' => array(
-                'with' => array(
-                    'l10n' => array(
-                        'joinType' => 'LEFT JOIN',
-                        'on'       => 'l10n.language_id = :language_id',
-                        'params'   => array( 'language_id' => $language )
+            "check" => array(
+                "with" => array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "l10n.language_id = :language_id",
+                        "params"   => array( "language_id" => $language )
                     ),
                 ),
             )
         ))->findByAttributes(array(
-            'check_id'  => $check,
-            'target_id' => $target
+            "check_id"  => $check,
+            "target_id" => $target
         ));
 
         if (!$check || !in_array($check->rating, $this->_allowedRiskValues)) {
-            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
+            throw new CHttpException(404, Yii::t("app", "Check not found."));
         }
 
         $vuln = TargetCheckVuln::model()->findByAttributes(array(
-            'check_id'  => $check->check_id,
-            'target_id' => $check->target_id
+            "target_check_id" => $check->id,
         ));
 
         if (!$vuln) {
             $vuln = new TargetCheckVuln();
-            $vuln->check_id  = $check->check_id;
-            $vuln->target_id = $check->target_id;
+            $vuln->target_check_id = $check->id;
             $newRecord = true;
         }
 

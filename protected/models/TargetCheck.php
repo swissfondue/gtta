@@ -3,7 +3,8 @@
 /**
  * This is the model class for table "target_checks".
  *
- * The followings are the available columns in table 'target_checks':
+ * The followings are the available columns in table "target_checks":
+ * @property integer $id
  * @property integer $target_id
  * @property integer $check_id
  * @property string $result
@@ -22,15 +23,19 @@
  * @property string $solution
  * @property string $solution_title
  * @property User $user
+ * @property TargetCheckInput[] $inputs
+ * @property TargetCheckAttachment[] $attachments
+ * @property TargetCheckSolution[] $solutions
+ * @property TargetCheckVuln $vuln
  */
 class TargetCheck extends ActiveRecord {
     /**
      * Check statuses.
      */
-    const STATUS_OPEN = "open";
-    const STATUS_IN_PROGRESS = "in_progress";
-    const STATUS_STOP = "stop";
-    const STATUS_FINISHED = "finished";
+    const STATUS_OPEN = 0;
+    const STATUS_IN_PROGRESS = 10;
+    const STATUS_STOP = 50;
+    const STATUS_FINISHED = 100;
 
     /**
      * Result ratings.
@@ -71,7 +76,7 @@ class TargetCheck extends ActiveRecord {
 	 * @return string the associated database table name
 	 */
 	public function tableName() {
-		return 'target_checks';
+		return "target_checks";
 	}
 
     /**
@@ -111,12 +116,12 @@ class TargetCheck extends ActiveRecord {
 	 */
 	public function rules() {
 		return array(
-            array('target_id, check_id', 'required'),
-            array('target_id, check_id, pid, port, language_id, user_id', 'numerical', 'integerOnly' => true),
-            array('target_file, result_file, protocol, override_target', 'length', 'max' => 1000),
-            array('status', 'in', 'range' => array(self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_STOP, self::STATUS_FINISHED)),
-            array('rating', 'in', 'range' => self::getValidRatings()),
-            array('result, started, table_result, solution, solution_title', 'safe'),
+            array("target_id, check_id", "required"),
+            array("target_id, check_id, pid, port, language_id, user_id", "numerical", "integerOnly" => true),
+            array("target_file, result_file, protocol, override_target", "length", "max" => 1000),
+            array("status", "in", "range" => array(self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_STOP, self::STATUS_FINISHED)),
+            array("rating", "in", "range" => self::getValidRatings()),
+            array("result, started, table_result, solution, solution_title", "safe"),
 		);
 	}
 
@@ -125,11 +130,14 @@ class TargetCheck extends ActiveRecord {
 	 */
 	public function relations() {
 		return array(
-            'target'   => array( self::BELONGS_TO, 'Target',          'target_id'   ),
-            'check'    => array( self::BELONGS_TO, 'Check',           'check_id'    ),
-            'language' => array( self::BELONGS_TO, 'Language',        'language_id' ),
-            'user'     => array( self::BELONGS_TO, 'User',            'user_id'     ),
-            'vuln'     => array( self::HAS_ONE,    'TargetCheckVuln', array( 'target_id', 'check_id' ) ),
+            "target" => array(self::BELONGS_TO, "Target", "target_id"),
+            "check" => array(self::BELONGS_TO, "Check", "check_id"),
+            "language" => array(self::BELONGS_TO, "Language", "language_id"),
+            "user" => array(self::BELONGS_TO, "User", "user_id"),
+            "vuln" => array(self::HAS_ONE, "TargetCheckVuln", "target_check_id"),
+            "inputs" => array(self::HAS_MANY, "TargetCheckInput", "target_check_id"),
+            "solutions" => array(self::HAS_MANY, "TargetCheckSolution", "target_check_id"),
+            "attachments" => array(self::HAS_MANY, "TargetCheckAttachment", "target_check_id"),
 		);
 	}
 
@@ -137,17 +145,17 @@ class TargetCheck extends ActiveRecord {
      * Set automation error.
      */
     public function automationError($error) {
-        $uniqueHash = strtoupper(substr(hash('sha256', time() . rand() . $error), 0, 16));
+        $uniqueHash = strtoupper(substr(hash("sha256", time() . rand() . $error), 0, 16));
 
-        Yii::log($uniqueHash . ' ' . $error, 'error');
+        Yii::log($uniqueHash . " " . $error, "error");
         Yii::getLogger()->flush(true);
 
-        $message = Yii::t('app', 'Internal server error. Please send this error code to the administrator - {code}.', array(
-            '{code}' => $uniqueHash
+        $message = Yii::t("app", "Internal server error. Please send this error code to the administrator - {code}.", array(
+            "{code}" => $uniqueHash
         ));
 
         if (!$this->result) {
-            $this->result = '';
+            $this->result = "";
         } else {
             $this->result .= "\n";
         }
@@ -155,5 +163,13 @@ class TargetCheck extends ActiveRecord {
         $this->result .= $message;
         $this->status = TargetCheck::STATUS_FINISHED;
         $this->save();
+    }
+
+    /**
+     * Check if check is running
+     * @return boolean is running.
+     */
+    public function getIsRunning() {
+        return in_array($this->status, array(self::STATUS_IN_PROGRESS, self::STATUS_STOP));
     }
 }

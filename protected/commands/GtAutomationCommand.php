@@ -286,7 +286,7 @@ class GtautomationCommand extends ConsoleCommand {
             ),
             'language'
         ))->findByAttributes(array(
-            'status' => TargetCheck::STATUS_IN_PROGRESS,
+            'status' => ProjectGtCheck::STATUS_IN_PROGRESS,
             'pid' => null,
             'project_id' => $projectId,
             'gt_check_id' => $checkId
@@ -396,7 +396,7 @@ class GtautomationCommand extends ConsoleCommand {
             }
         }
 
-        $check->status = TargetCheck::STATUS_FINISHED;
+        $check->status = ProjectGtCheck::STATUS_FINISHED;
         $check->save();
     }
     

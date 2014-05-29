@@ -15,7 +15,7 @@ class AutomationCommand extends ConsoleCommand {
 
         foreach ($checks as $check) {
             ProcessManager::backgroundExec(
-                Yii::app()->params['yiicPath'] . '/yiic automation ' . $check->target_id . ' ' . $check->check_id
+                Yii::app()->params['yiicPath'] . '/yiic automation ' . $check->id
             );
         }
     }
@@ -43,8 +43,7 @@ class AutomationCommand extends ConsoleCommand {
     private function _processStoppingChecks() {
         $criteria = new CDbCriteria();
         $criteria->addCondition('status = :status');
-        $criteria->params = array( 'status' => TargetCheck::STATUS_STOP );
-
+        $criteria->params = array('status' => TargetCheck::STATUS_STOP);
         $checks = TargetCheck::model()->findAll($criteria);
 
         foreach ($checks as $check) {
@@ -82,7 +81,6 @@ class AutomationCommand extends ConsoleCommand {
         $criteria = new CDbCriteria();
         $criteria->addCondition('pid IS NOT NULL');
         $criteria->addInCondition('status', array(TargetCheck::STATUS_IN_PROGRESS, TargetCheck::STATUS_STOP));
-
         $checks = TargetCheck::model()->findAll($criteria);
 
         foreach ($checks as $check) {
@@ -104,29 +102,27 @@ class AutomationCommand extends ConsoleCommand {
     /**
      * Generate a file name for automated checks.
      */
-    private function _generateFileName()
-    {
+    private function _generateFileName() {
         $name = null;
 
-        while (true)
-        {
+        while (true) {
             $name = hash('sha256', rand() . time() . rand());
-
             $check = TargetCheckInput::model()->findByAttributes(array(
                 'file' => $name
             ));
 
-            if ($check)
+            if ($check) {
                 continue;
+            }
 
             $criteria = new CDbCriteria();
             $criteria->addCondition('target_file = :file OR result_file = :file');
-            $criteria->params = array( 'file' => $name );
-
+            $criteria->params = array('file' => $name);
             $check = TargetCheck::model()->find($criteria);
 
-            if ($check)
+            if ($check) {
                 continue;
+            }
 
             break;
         }
@@ -224,11 +220,7 @@ class AutomationCommand extends ConsoleCommand {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->addColumnCondition(array(
-            'target_id' => $check->target_id,
-            'check_id'  => $check->check_id,
-        ));
-
+        $criteria->addColumnCondition(array('target_check_id' => $check->id));
         $criteria->addInCondition('check_input_id', $inputIds);
         $criteria->order = 'input.sort_order ASC';
 
@@ -307,8 +299,7 @@ class AutomationCommand extends ConsoleCommand {
                 $mimeType = finfo_file($fileInfo, $image->src, FILEINFO_MIME_TYPE);
 
                 $attachment = new TargetCheckAttachment();
-                $attachment->check_id = $check->check_id;
-                $attachment->target_id = $check->target_id;
+                $attachment->target_check_id = $check->id;
                 $attachment->name = basename($image->src);
                 $attachment->type = $mimeType;
                 $attachment->size = filesize($image->src);
@@ -329,20 +320,18 @@ class AutomationCommand extends ConsoleCommand {
     /**
      * Check starter.
      */
-    private function _startCheck($targetId, $checkId) {
-        $check = TargetCheck::model()->with('check', 'language')->findByAttributes(array(
-            'status' => TargetCheck::STATUS_IN_PROGRESS,
-            'pid' => null,
-            'target_id' => $targetId,
-            'check_id' => $checkId
+    private function _startCheck($checkId) {
+        $check = TargetCheck::model()->with("check", "language", "target")->findByAttributes(array(
+            "status" => TargetCheck::STATUS_IN_PROGRESS,
+            "pid" => null,
+            "id" => $checkId
         ));
-
-        $target = Target::model()->findByPk($targetId);
 
         if (!$check) {
             return;
         }
 
+        $target = $check->target;
         $language = $check->language;
 
         if (!$language) {
@@ -447,15 +436,14 @@ class AutomationCommand extends ConsoleCommand {
     public function run($args) {
         // start checks
         if (count($args) > 0) {
-            if (count($args) != 2) {
+            if (count($args) != 1) {
                 die("Invalid number of arguments.");
             }
 
-            $targetId = (int) $args[0];
-            $checkId = (int) $args[1];
+            $checkId = (int) $args[0];
 
-            if ($targetId && $checkId) {
-                $this->_startCheck($targetId, $checkId);
+            if ($checkId) {
+                $this->_startCheck($checkId);
             } else {
                 die("Invalid arguments.");
             }
