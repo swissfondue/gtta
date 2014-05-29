@@ -4627,8 +4627,7 @@ class ReportController extends Controller {
     /**
      * Prepare text for vulnerabilities report.
      */
-    private function _prepareVulnExportText($text)
-    {
+    private function _prepareVulnExportText($text) {
         $text = str_replace(array("\r", "\n"), '', $text);
         $text = str_replace(array("<br>", "<br/>", "<br />"), "\n", $text);
         $text = strip_tags($text);
@@ -4808,6 +4807,10 @@ class ReportController extends Controller {
 
                                 foreach ($tc->solutions as $solution) {
                                     $solutions[] = $this->_prepareVulnExportText($solution->solution->localizedSolution);
+                                }
+
+                                if ($tc->solution) {
+                                    $solutions[] = $this->_prepareVulnExportText($tc->solution);
                                 }
 
                                 $row[TargetCheck::COLUMN_SOLUTION] = implode("\n", $solutions);
