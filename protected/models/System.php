@@ -33,6 +33,8 @@
  * @property boolean $community_allow_unverified
  * @property string $integration_key
  * @property string $community_catalogs_cache
+ * @property boolean $checklist_poc
+ * @property boolean $checklist_links
  * @property Language $language
  */
 class System extends ActiveRecord {
@@ -94,7 +96,7 @@ class System extends ActiveRecord {
             array("status", "in", "range" => self::validStatuses()),
             array("report_low_pedestal, report_med_pedestal, report_high_pedestal, report_max_rating, report_med_damping_low, report_high_damping_low, report_high_damping_med, demo_check_limit", "numerical", "min" => 0),
             array("community_min_rating", "numerical", "min" => 0, "max" => 5),
-            array("demo, community_allow_unverified", "boolean"),
+            array("demo, community_allow_unverified, checklist_poc, checklist_links", "boolean"),
             array("backup, timezone, update_check_time, update_time, pid", "safe"),
 		);
 	}

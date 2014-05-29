@@ -406,6 +406,26 @@
                         </div>
                     </td>
                 </tr>
+                <?php if ($this->_system->checklist_poc): ?>
+                    <tr>
+                        <th>
+                            <?php echo Yii::t("app", "PoC"); ?>
+                        </th>
+                        <td>
+                            <textarea name="TargetCheckEditForm_<?php echo $tc->id; ?>[poc]" class="max-width wysiwyg" rows="10" id="TargetCheckEditForm_<?php echo $tc->id; ?>_poc" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($tc->poc); ?></textarea>
+                        </td>
+                    </tr>
+                <?php endif; ?>
+                <?php if ($this->_system->checklist_links): ?>
+                    <tr>
+                        <th>
+                            <?php echo Yii::t("app", "Links"); ?>
+                        </th>
+                        <td>
+                            <textarea name="TargetCheckEditForm_<?php echo $tc->id; ?>[links]" class="max-width wysiwyg" rows="10" id="TargetCheckEditForm_<?php echo $tc->id; ?>_links" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($tc->links); ?></textarea>
+                        </td>
+                    </tr>
+                <?php endif; ?>
                 <?php if ($check->results && User::checkRole(User::ROLE_USER)): ?>
                     <tr>
                         <th>

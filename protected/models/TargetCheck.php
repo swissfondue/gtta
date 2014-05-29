@@ -22,6 +22,8 @@
  * @property string $table_result
  * @property string $solution
  * @property string $solution_title
+ * @property string $poc
+ * @property string $links
  * @property User $user
  * @property TargetCheckInput[] $inputs
  * @property TargetCheckAttachment[] $attachments
@@ -121,7 +123,7 @@ class TargetCheck extends ActiveRecord {
             array("target_file, result_file, protocol, override_target", "length", "max" => 1000),
             array("status", "in", "range" => array(self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_STOP, self::STATUS_FINISHED)),
             array("rating", "in", "range" => self::getValidRatings()),
-            array("result, started, table_result, solution, solution_title", "safe"),
+            array("result, started, table_result, solution, solution_title, poc, links", "safe"),
 		);
 	}
 

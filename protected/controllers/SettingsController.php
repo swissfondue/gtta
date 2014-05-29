@@ -41,11 +41,15 @@ class SettingsController extends Controller {
         $form->languageId = $system->language_id;
         $form->communityAllowUnverified = $system->community_allow_unverified;
         $form->communityMinRating = $system->community_min_rating;
+        $form->checklistPoc = $system->checklist_poc;
+        $form->checklistLinks = $system->checklist_links;
 
         // collect form input data
 		if (isset($_POST["SettingsEditForm"])) {
 			$form->attributes = $_POST["SettingsEditForm"];
             $form->communityAllowUnverified = isset($_POST["SettingsEditForm"]["communityAllowUnverified"]);
+            $form->checklistPoc = isset($_POST["SettingsEditForm"]["checklistPoc"]);
+            $form->checklistLinks = isset($_POST["SettingsEditForm"]["checklistLinks"]);
 
 			if ($form->validate()) {
                 $system->workstation_id = $form->workstationId ? $form->workstationId : null;
@@ -61,6 +65,8 @@ class SettingsController extends Controller {
                 $system->copyright = $form->copyright;
                 $system->language_id = $form->languageId;
                 $system->community_allow_unverified = $form->communityAllowUnverified;
+                $system->checklist_poc= $form->checklistPoc;
+                $system->checklist_links = $form->checklistLinks;
                 $system->community_min_rating = $form->communityMinRating;
                 $system->save();
 

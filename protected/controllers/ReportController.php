@@ -1020,6 +1020,34 @@ class ReportController extends Controller {
                                 $row++;
                             }
 
+                            if ($check["poc"] && $this->_system->checklist_poc) {
+                                $table->addRow();
+                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($this->thinBorder);
+                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 2)->setBorder($this->thinBorder);
+
+                                $table->writeToCell($row, 1, Yii::t("app", "PoC"));
+                                $table->writeToCell($row, 2, $check["poc"]);
+
+                                $row++;
+                            }
+                            
+                            if ($check["links"] && $this->_system->checklist_links) {
+                                $table->addRow();
+                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($this->thinBorder);
+                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 2)->setBorder($this->thinBorder);
+
+                                $table->writeToCell($row, 1, Yii::t("app", "Links"));
+                                $table->writeToCell($row, 2, $check["links"]);
+
+                                $row++;
+                            }
+
                             if ($check['solutions']) {
                                 $table->addRows(count($check['solutions']));
 
@@ -1379,6 +1407,8 @@ class ReportController extends Controller {
                             "background" => $this->_prepareProjectReportText($check->background_info),
                             "question" => $this->_prepareProjectReportText($check->question),
                             "result" => $check->result,
+                            "poc" => $check->poc,
+                            "links" => $check->links,
                             "tableResult" => null,
                             "rating" => $check->rating,
                             "ratingName" => $ratings[$check->rating],
@@ -1456,6 +1486,8 @@ class ReportController extends Controller {
                                 "solution" => $checkData["solutions"] ? implode("\n", $checkData["solutions"]) : "",
                                 "rating" => $checkData["rating"],
                                 "result" => $checkData["result"],
+                                "poc" => $checkData["poc"],
+                                "links" => $checkData["links"],
                                 "ratingValue" => $checkData["ratingValue"],
                                 "custom" => true,
                             );
@@ -1537,6 +1569,8 @@ class ReportController extends Controller {
                                 "background" => $this->_prepareProjectReportText($check->localizedBackgroundInfo),
                                 "question" => $this->_prepareProjectReportText($check->localizedQuestion),
                                 "result" => $tc->result,
+                                "poc" => $tc->poc,
+                                "links" => $tc->links,
                                 "tableResult" => $tc->table_result,
                                 "rating" => 0,
                                 "ratingName" => $ratings[$tc->rating],
@@ -1630,6 +1664,8 @@ class ReportController extends Controller {
                                     "solution" => $checkData["solutions"] ? implode("\n", $checkData["solutions"]) : "",
                                     "rating" => $checkData["rating"],
                                     "result" => $checkData["result"],
+                                    "poc" => $checkData["poc"],
+                                    "links" => $checkData["links"],
                                     "ratingValue" => $checkData["ratingValue"],
                                 );
                             }

@@ -75,6 +75,16 @@ class SettingsEditForm extends CFormModel {
     public $communityAllowUnverified;
 
     /**
+     * @var bool show POC in checklist
+     */
+    public $checklistPoc;
+
+    /**
+     * @var bool show links in checklist
+     */
+    public $checklistLinks;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
@@ -84,7 +94,7 @@ class SettingsEditForm extends CFormModel {
             array("workstationId", "length", "is" => 36),
             array("workstationKey, copyright", "length", "max" => 1000),
             array("communityMinRating", "numerical", "min" => 0, "max" => 5),
-            array("communityAllowUnverified", "boolean"),
+            array("communityAllowUnverified, checklistPoc, checklistLinks", "boolean"),
             array("reportLowPedestal, reportMedPedestal, reportHighPedestal, reportMaxRating, reportMedDampingLow, reportHighDampingLow, reportHighDampingMed", "numerical", "min" => 0),
             array("reportLowPedestal", "compare", "compareAttribute" => "reportMedPedestal", "operator" => "<="),
             array("reportMedPedestal", "compare", "compareAttribute" => "reportHighPedestal", "operator" => "<="),
@@ -112,6 +122,8 @@ class SettingsEditForm extends CFormModel {
             "languageId" => Yii::t("app", "Default Language"),
             "communityMinRating" => Yii::t("app", "Community Min Rating"),
             "communityAllowUnverified" => Yii::t("app", "Community Allow Unverified"),
+            "checklistPoc" => Yii::t("app", "Checklist POC"),
+            "checklistLinks" => Yii::t("app", "Checklist Links"),
 		);
 	}
 

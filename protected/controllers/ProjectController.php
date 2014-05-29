@@ -1785,6 +1785,14 @@ class ProjectController extends Controller {
                 $model->result = null;
             }
 
+            if ($model->poc == "") {
+                $model->poc = null;
+            }
+
+            if ($model->links == "") {
+                $model->links = null;
+            }
+
             $targetCheck->user_id = Yii::app()->user->id;
             $targetCheck->language_id = $language->id;
             $targetCheck->override_target = $model->overrideTarget;
@@ -1793,6 +1801,8 @@ class ProjectController extends Controller {
             $targetCheck->result = $model->result;
             $targetCheck->status = TargetCheck::STATUS_FINISHED;
             $targetCheck->rating = $model->rating;
+            $targetCheck->poc = $model->poc;
+            $targetCheck->links = $model->links;
             $targetCheck->save();
 
             // delete old solutions
@@ -2146,6 +2156,14 @@ class ProjectController extends Controller {
                 $form->result = null;
             }
 
+            if (!$form->poc) {
+                $form->poc = null;
+            }
+
+            if (!$form->links) {
+                $form->links = null;
+            }
+
             if (!$form->solution) {
                 $form->solution = null;
             }
@@ -2220,6 +2238,8 @@ class ProjectController extends Controller {
                 $targetCheck->result = $form->result;
                 $targetCheck->status = TargetCheck::STATUS_FINISHED;
                 $targetCheck->rating = $form->rating;
+                $targetCheck->poc = $form->poc;
+                $targetCheck->links = $form->links;
                 $targetCheck->save();
 
                 if ($form->solutionTitle && $form->solution) {
@@ -2257,6 +2277,8 @@ class ProjectController extends Controller {
                 $customCheck->solution_title = $form->solutionTitle;
                 $customCheck->solution = $form->solution;
                 $customCheck->rating = $form->rating;
+                $customCheck->poc = $form->poc;
+                $customCheck->links = $form->links;
                 $customCheck->save();
 
                 $response->addData("rating", $customCheck->rating);
