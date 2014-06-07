@@ -2057,7 +2057,7 @@ class ProjectController extends Controller {
     /**
      * Save custom check.
      */
-    public function actionSaveCustomCheck($id, $target) {
+    public function actionSaveCustomCheck($id, $target, $category) {
         $response = new AjaxResponse();
 
         try {
@@ -2097,12 +2097,12 @@ class ProjectController extends Controller {
             }
 
             if ($form->id) {
-                $customCheck = TargetCustomCheck::model()->findByAttributes(array(
+                $customCheck = TargetCustomCheck::model()->with("control")->findByAttributes(array(
                     "id" => $form->id,
                     "target_id" => $target->id,
                 ));
 
-                if (!$customCheck) {
+                if (!$customCheck || $customCheck->control->check_category_id != $category) {
                     throw new CHttpException(404, Yii::t("app", "Custom check not found."));
                 }
 
@@ -2110,7 +2110,7 @@ class ProjectController extends Controller {
             } else {
                 $control = CheckControl::model()->findByPk($form->controlId);
 
-                if (!$control) {
+                if (!$control || $control->check_category_id != $category) {
                     throw new CHttpException(404, Yii::t("app", "Control not found."));
                 }
 
@@ -3286,7 +3286,7 @@ class ProjectController extends Controller {
     /**
      * Control check function.
      */
-    public function actionControlCustomCheck($id, $target) {
+    public function actionControlCustomCheck($id, $target, $category) {
         $response = new AjaxResponse();
 
         try {
@@ -3326,12 +3326,12 @@ class ProjectController extends Controller {
             }
 
             /** @var TargetCustomCheck $customCheck */
-            $customCheck = TargetCustomCheck::model()->findByAttributes(array(
+            $customCheck = TargetCustomCheck::model()->with("control")->findByAttributes(array(
                 "id" => $form->id,
                 "target_id" => $target->id,
             ));
 
-            if (!$customCheck) {
+            if (!$customCheck || $customCheck->control->check_category_id != $category) {
                 throw new CHttpException(404, Yii::t("app", "Check not found."));
             }
 
@@ -4784,4 +4784,201 @@ class ProjectController extends Controller {
             )
         ));
 	}
+
+    /**
+     * Upload custom attachment function.
+     */
+    function actionUploadCustomAttachment($id, $target, $category, $check) {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $target = (int) $target;
+            $category = (int) $category;
+            $check = (int) $check;
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new CHttpException(404, Yii::t("app", "Project not found."));
+            }
+
+            if (!$project->checkPermission()) {
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
+            }
+
+            $target = Target::model()->findByAttributes(array(
+                "id" => $target,
+                "project_id" => $project->id
+            ));
+
+            if (!$target) {
+                throw new CHttpException(404, Yii::t("app", "Target not found."));
+            }
+
+            $category = TargetCheckCategory::model()->with("category")->findByAttributes(array(
+                "target_id"         => $target->id,
+                "check_category_id" => $category
+            ));
+
+            if (!$category) {
+                throw new CHttpException(404, Yii::t("app", "Category not found."));
+            }
+
+            $controls = CheckControl::model()->findAllByAttributes(array(
+                "check_category_id" => $category->check_category_id
+            ));
+
+            $controlIds = array();
+
+            foreach ($controls as $control) {
+                $controlIds[] = $control->id;
+            }
+
+            $customCheck = TargetCustomCheck::model()->findByPk($check);
+
+            if (!$customCheck || !in_array($customCheck->check_control_id, $controlIds)) {
+                throw new CHttpException(404, Yii::t("app", "Check not found."));
+            }
+
+            $model = new TargetCustomCheckAttachmentUploadForm();
+            $model->attachment = CUploadedFile::getInstanceByName("TargetCustomCheckAttachmentUploadForm[attachment]");
+
+            if (!$model->validate()) {
+                $errorText = "";
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $attachment = new TargetCustomCheckAttachment();
+            $attachment->target_custom_check_id = $customCheck->id;
+            $attachment->name = $model->attachment->name;
+            $attachment->type = $model->attachment->type;
+            $attachment->size = $model->attachment->size;
+            $attachment->path = hash("sha256", $attachment->name . rand() . time());
+            $attachment->save();
+
+            $model->attachment->saveAs(Yii::app()->params["attachments"]["path"] . "/" . $attachment->path);
+
+            $response->addData("name", CHtml::encode($attachment->name));
+            $response->addData("url", $this->createUrl("project/customattachment", array("path" => $attachment->path)));
+            $response->addData("path", $attachment->path);
+            $response->addData("controlUrl", $this->createUrl("project/controlcustomattachment"));
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Get custom attachment.
+     */
+    public function actionCustomAttachment($path) {
+        $attachment = TargetCustomCheckAttachment::model()->with(array(
+            "targetCustomCheck" => array(
+                "with" => array(
+                    "target" => array(
+                        "with" => "project"
+                    )
+                )
+            )
+        ))->findByAttributes(array(
+            "path" => $path
+        ));
+
+        if ($attachment === null) {
+            throw new CHttpException(404, Yii::t("app", "Attachment not found."));
+        }
+
+        if (!$attachment->targetCustomCheck->target->project->checkPermission()) {
+            throw new CHttpException(403, Yii::t("app", "Access denied."));
+        }
+
+        $filePath = Yii::app()->params["attachments"]["path"] . "/" . $attachment->path;
+
+        if (!file_exists($filePath)) {
+            throw new CHttpException(404, Yii::t("app", "Attachment not found."));
+        }
+
+        // give user a file
+        header("Content-Description: File Transfer");
+        header("Content-Type: application/octet-stream");
+        header("Content-Disposition: attachment; filename=\"" . str_replace("\"", "", $attachment->name) . "\"");
+        header("Content-Transfer-Encoding: binary");
+        header("Expires: 0");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Pragma: public");
+        header("Content-Length: " . $attachment->size);
+
+        ob_clean();
+        flush();
+
+        readfile($filePath);
+
+        exit();
+    }
+
+    /**
+     * Control custom attachment.
+     */
+    public function actionControlCustomAttachment() {
+        $response = new AjaxResponse();
+
+        try {
+            $model = new TargetCustomCheckAttachmentControlForm();
+            $model->attributes = $_POST["TargetCustomCheckAttachmentControlForm"];
+
+            if (!$model->validate()) {
+                $errorText = "";
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $path = $model->path;
+            $attachment = TargetCustomCheckAttachment::model()->with(array(
+                "targetCustomCheck" => array(
+                    "with" => array(
+                        "target" => array(
+                            "with" => "project"
+                        )
+                    )
+                )
+            ))->findByAttributes(array(
+                "path" => $path
+            ));
+
+            if ($attachment === null) {
+                throw new CHttpException(404, Yii::t("app", "Attachment not found."));
+            }
+
+            if (!$attachment->targetCustomCheck->target->project->checkPermission()) {
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
+            }
+
+            switch ($model->operation) {
+                case "delete":
+                    $attachment->delete();
+                    @unlink(Yii::app()->params["attachments"]["path"] . "/" . $attachment->path);
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t("app", "Unknown operation."));
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
 }

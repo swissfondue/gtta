@@ -1020,30 +1020,29 @@ function User()
          */
         this.initTargetCheckAttachmentUploadForms = function () {
             $('input[name^="TargetCheckAttachmentUploadForm"]').each(function () {
-                var url  = $(this).data('upload-url'),
-                    id   = $(this).data('id'),
+                var url = $(this).data("upload-url"),
+                    id = $(this).data("id"),
                     data = {};
 
-                data['YII_CSRF_TOKEN'] = system.csrf;
+                data["YII_CSRF_TOKEN"] = system.csrf;
 
                 $(this).fileupload({
-                    dataType: 'json',
+                    dataType: "json",
                     url: url,
                     forceIframeTransport: true,
                     timeout: 120000,
                     formData: data,
                     dropZone:$('input[name^="TargetCheckAttachmentUploadForm"]'),
 
-                    done : function (e, data) {
-                        $('.loader-image').hide();
-                        $('#upload-message-' + id).hide();
-                        $('#upload-link-' + id).show();
+                    done: function (e, data) {
+                        $(".loader-image").hide();
+                        $("#upload-message-" + id).hide();
+                        $("#upload-link-" + id).show();
 
                         var json = data.result;
 
-                        if (json.status == 'error')
-                        {
-                            system.showMessage('error', json.errorText);
+                        if (json.status == "error") {
+                            system.showMessage("error", json.errorText);
                             return;
                         }
 
@@ -1051,27 +1050,29 @@ function User()
 
                         var tr = '<tr data-path="' + data.path + '" data-control-url="' + data.controlUrl + '">' +
                                  '<td class="name"><a href="' + data.url + '">' + data.name + '</a></td>' +
-                                 '<td class="actions"><a href="#del" title="' + system.translate('Delete') +
+                                 '<td class="actions"><a href="#del" title="' + system.translate("Delete") +
                                  '" onclick="user.check.delAttachment(\'' + data.path + '\');"><i class="icon icon-remove"></i></a></td></tr>';
 
-                        if ($('div.check-form[data-id="' + id + '"] .attachment-list').length == 0)
-                            $('div.check-form[data-id="' + id + '"] .upload-message').after('<table class="table attachment-list"><tbody></tbody></table>');
+                        if ($('div.check-form[data-id="' + id + '"] .attachment-list').length == 0) {
+                            $('div.check-form[data-id="' + id + '"] .upload-message')
+                                .after('<table class="table attachment-list"><tbody></tbody></table>');
+                        }
 
                         $('div.check-form[data-id="' + id + '"] .attachment-list').show();
                         $('div.check-form[data-id="' + id + '"] .attachment-list > tbody').append(tr);
                     },
 
-                    fail : function (e, data) {
-                        $('.loader-image').hide();
-                        $('#upload-message-' + id).hide();
-                        $('#upload-link-' + id).show();
-                        system.showMessage('error', system.translate('Request failed, please try again.'));
+                    fail: function (e, data) {
+                        $(".loader-image").hide();
+                        $("#upload-message-" + id).hide();
+                        $("#upload-link-" + id).show();
+                        system.showMessage("error", system.translate("Request failed, please try again."));
                     },
 
-                    start : function (e) {
-                        $('.loader-image').show();
-                        $('#upload-link-' + id).hide();
-                        $('#upload-message-' + id).show();
+                    start: function (e) {
+                        $(".loader-image").show();
+                        $("#upload-link-" + id).hide();
+                        $("#upload-message-" + id).show();
                     }
                 });
             });
@@ -1081,49 +1082,47 @@ function User()
          * Control attachment function.
          */
         this._controlAttachment = function(path, operation) {
-            var url = $('tr[data-path=' + path + ']').data('control-url');
+            var url = $("tr[data-path=" + path + "]").data("control-url");
 
             $.ajax({
-                dataType : 'json',
-                url      : url,
-                timeout  : system.ajaxTimeout,
-                type     : 'POST',
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
 
                 data : {
-                    'TargetCheckAttachmentControlForm[operation]' : operation,
-                    'TargetCheckAttachmentControlForm[path]'      : path,
-                    'YII_CSRF_TOKEN'                              : system.csrf
+                    "TargetCheckAttachmentControlForm[operation]": operation,
+                    "TargetCheckAttachmentControlForm[path]": path,
+                    "YII_CSRF_TOKEN": system.csrf
                 },
 
                 success : function (data, textStatus) {
-                    $('.loader-image').hide();
+                    $(".loader-image").hide();
 
-                    if (data.status == 'error')
-                    {
-                        system.showMessage('error', data.errorText);
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
                         return;
                     }
 
-                    if (operation == 'delete')
-                    {
-                        $('tr[data-path=' + path + ']').fadeOut('slow', undefined, function () {
-                            var table = $('tr[data-path=' + path + ']').parent().parent();
+                    if (operation == "delete") {
+                        $("tr[data-path=" + path + "]").fadeOut("slow", undefined, function () {
+                            var table = $("tr[data-path=" + path + "]").parent().parent();
 
-                            $('tr[data-path=' + path + ']').remove();
+                            $("tr[data-path=" + path + "]").remove();
 
-                            if ($('tbody > tr', table).length == 0)
+                            if ($("tbody > tr", table).length == 0)
                                 table.hide();
                         });
                     }
                 },
 
                 error : function(jqXHR, textStatus, e) {
-                    $('.loader-image').hide();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    $(".loader-image").hide();
+                    system.showMessage("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend : function (jqXHR, settings) {
-                    $('.loader-image').show();
+                    $(".loader-image").show();
                 }
             });
         };
@@ -1132,8 +1131,131 @@ function User()
          * Delete attachment.
          */
         this.delAttachment = function (path) {
-            if (confirm(system.translate('Are you sure that you want to delete this object?')))
-                _check._controlAttachment(path, 'delete');
+            if (confirm(system.translate("Are you sure that you want to delete this object?"))) {
+                _check._controlAttachment(path, "delete");
+            }
+        };
+
+        /**
+         * Initialize custom attachments form.
+         */
+        this.initTargetCustomCheckAttachmentUploadForms = function () {
+            $('input[name^="TargetCustomCheckAttachmentUploadForm"]').each(function () {
+                var url = $(this).data("upload-url"),
+                    id = $(this).data("id"),
+                    data = {};
+
+                data["YII_CSRF_TOKEN"] = system.csrf;
+
+                $(this).fileupload({
+                    dataType: "json",
+                    url: url,
+                    forceIframeTransport: true,
+                    timeout: 120000,
+                    formData: data,
+                    dropZone:$('input[name^="TargetCustomCheckAttachmentUploadForm"]'),
+
+                    done: function (e, data) {
+                        $(".loader-image").hide();
+                        $("#upload-custom-message-" + id).hide();
+                        $("#upload-custom-link-" + id).show();
+
+                        var json = data.result;
+
+                        if (json.status == "error") {
+                            system.showMessage("error", json.errorText);
+                            return;
+                        }
+
+                        data = json.data;
+
+                        var tr = '<tr data-path="' + data.path + '" data-control-url="' + data.controlUrl + '">' +
+                                 '<td class="name"><a href="' + data.url + '">' + data.name + '</a></td>' +
+                                 '<td class="actions"><a href="#del" title="' + system.translate("Delete") +
+                                 '" onclick="user.check.delCustomAttachment(\'' + data.path + '\');"><i class="icon icon-remove"></i></a></td></tr>';
+
+                        if ($('div.check-form[data-id="custom-' + id + '"] .attachment-list').length == 0) {
+                            $('div.check-form[data-id="custom-' + id + '"] .upload-message')
+                                .after('<table class="table attachment-list"><tbody></tbody></table>');
+                        }
+
+                        $('div.check-form[data-id="custom-' + id + '"] .attachment-list').show();
+                        $('div.check-form[data-id="custom-' + id + '"] .attachment-list > tbody').append(tr);
+                    },
+
+                    fail: function (e, data) {
+                        $(".loader-image").hide();
+                        $("#upload-custom-message-" + id).hide();
+                        $("#upload-custom-link-" + id).show();
+                        system.showMessage("error", system.translate("Request failed, please try again."));
+                    },
+
+                    start: function (e) {
+                        $(".loader-image").show();
+                        $("#upload-custom-link-" + id).hide();
+                        $("#upload-custom-message-" + id).show();
+                    }
+                });
+            });
+        };
+
+        /**
+         * Control custom attachment function.
+         */
+        this._controlCustomAttachment = function(path, operation) {
+            var url = $("tr[data-path=" + path + "]").data("control-url");
+
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data : {
+                    "TargetCustomCheckAttachmentControlForm[operation]": operation,
+                    "TargetCustomCheckAttachmentControlForm[path]": path,
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
+                        return;
+                    }
+
+                    if (operation == "delete") {
+                        $("tr[data-path=" + path + "]").fadeOut("slow", undefined, function () {
+                            var table = $("tr[data-path=" + path + "]").parent().parent();
+
+                            $("tr[data-path=" + path + "]").remove();
+
+                            if ($("tbody > tr", table).length == 0) {
+                                table.hide();
+                            }
+                        });
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.showMessage("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
+         * Delete custom attachment.
+         */
+        this.delCustomAttachment = function (path) {
+            if (confirm(system.translate("Are you sure that you want to delete this object?"))) {
+                _check._controlCustomAttachment(path, "delete");
+            }
         };
 
         /**

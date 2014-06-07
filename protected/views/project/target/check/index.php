@@ -104,7 +104,7 @@
                         </div>
 
                         <div class="control-body<?php if ($collapseControls) echo " hide"; ?>" data-id="<?php echo $check->control->id; ?>">
-                            <div id="custom-template-<?php echo $check->control->id; ?>" class="check-header" data-id="custom-template-<?php echo $check->control->id; ?>" data-control-url="<?php echo $this->createUrl("project/controlcustomcheck", array("id" => $project->id, "target" => $target->id)); ?>">
+                            <div id="custom-template-<?php echo $check->control->id; ?>" class="check-header" data-id="custom-template-<?php echo $check->control->id; ?>" data-control-url="<?php echo $this->createUrl("project/controlcustomcheck", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id)); ?>">
                                 <table class="check-header">
                                     <tbody>
                                         <tr>
@@ -123,7 +123,7 @@
                                 </table>
                             </div>
 
-                            <div class="check-form hide" data-id="custom-template-<?php echo $check->control->id; ?>" data-save-url="<?php echo $this->createUrl("project/savecustomcheck", array("id" => $project->id, "target" => $target->id)); ?>">
+                            <div class="check-form hide" data-id="custom-template-<?php echo $check->control->id; ?>" data-save-url="<?php echo $this->createUrl("project/savecustomcheck", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id)); ?>">
                                 <table class="table check-form">
                                     <tbody>
                                         <tr>
@@ -249,7 +249,7 @@
                             </div>
 
                             <?php foreach ($check->control->customChecks as $custom): ?>
-                                <div id="custom-<?php echo $custom->id; ?>" class="check-header" data-id="custom-<?php echo $custom->id; ?>" data-control-url="<?php echo $this->createUrl("project/controlcustomcheck", array("id" => $project->id, "target" => $target->id)); ?>">
+                                <div id="custom-<?php echo $custom->id; ?>" class="check-header" data-id="custom-<?php echo $custom->id; ?>" data-control-url="<?php echo $this->createUrl("project/controlcustomcheck", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id)); ?>">
                                     <table class="check-header">
                                         <tbody>
                                             <tr>
@@ -296,7 +296,7 @@
                                     </table>
                                 </div>
 
-                                <div class="check-form hide" data-id="custom-<?php echo $custom->id; ?>" data-save-url="<?php echo $this->createUrl("project/savecustomcheck", array("id" => $project->id, "target" => $target->id)); ?>">
+                                <div class="check-form hide" data-id="custom-<?php echo $custom->id; ?>" data-save-url="<?php echo $this->createUrl("project/savecustomcheck", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id)); ?>">
                                     <table class="table check-form">
                                         <tbody>
                                             <tr>
@@ -383,6 +383,38 @@
                                                     <textarea name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[solution]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_solution" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($custom->solution); ?></textarea>
                                                 </td>
                                             </tr>
+                                            <?php if (User::checkRole(User::ROLE_USER) || $tc->attachments): ?>
+                                                <tr>
+                                                    <th>
+                                                        <?php echo Yii::t("app", "Attachments"); ?>
+                                                    </th>
+                                                    <td class="text">
+                                                        <div class="file-input" id="upload-custom-link-<?php echo $custom->id; ?>">
+                                                            <a href="#attachment"><?php echo Yii::t("app", "New Attachment"); ?></a>
+                                                            <input type="file" name="TargetCustomCheckAttachmentUploadForm[attachment]" data-id="<?php echo $custom->id; ?>" data-upload-url="<?php echo $this->createUrl("project/uploadcustomattachment", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $custom->id)); ?>">
+                                                        </div>
+
+                                                        <div class="upload-message hide" id="upload-custom-message-<?php echo $custom->id; ?>"><?php echo Yii::t("app", "Uploading..."); ?></div>
+
+                                                        <table class="table attachment-list<?php if (!$custom->attachments) echo " hide"; ?>">
+                                                            <tbody>
+                                                                <?php if ($custom->attachments): ?>
+                                                                    <?php foreach ($custom->attachments as $attachment): ?>
+                                                                        <tr data-path="<?php echo $attachment->path; ?>" data-control-url="<?php echo $this->createUrl("project/controlcustomattachment"); ?>">
+                                                                            <td class="name">
+                                                                                <a href="<?php echo $this->createUrl("project/customattachment", array("path" => $attachment->path)); ?>"><?php echo CHtml::encode($attachment->name); ?></a>
+                                                                            </td>
+                                                                            <td class="actions">
+                                                                                <a href="#del" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="user.check.delCustomAttachment('<?php echo $attachment->path; ?>');"><i class="icon icon-remove"></i></a>
+                                                                            </td>
+                                                                        </tr>
+                                                                    <?php endforeach; ?>
+                                                                <?php endif; ?>
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            <?php endif; ?>
                                             <tr>
                                                 <th>
                                                     <?php echo Yii::t("app", "Result Rating"); ?>
@@ -511,6 +543,7 @@
 <?php if (User::checkRole(User::ROLE_USER)): ?>
     $(function () {
         user.check.initTargetCheckAttachmentUploadForms();
+        user.check.initTargetCustomCheckAttachmentUploadForms();
         user.check.initAutosave();
 
         user.check.runningChecks = [

@@ -105,8 +105,6 @@ return array(
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>" => "project/checks",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/save" => "project/savecategory",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/save" => "project/savecheck",
-                "project/<id:\d+>/target/<target:\d+>/save-custom" => "project/savecustomcheck",
-                "project/<id:\d+>/target/<target:\d+>/control-custom" => "project/controlcustomcheck",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/autosave" => "project/autosavecheck",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/control" => "project/controlcheck",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/copy" => "project/copycheck",
@@ -116,6 +114,13 @@ return array(
                 "project/attachment/control" => "project/controlattachment",
                 "project/target/control" => "project/controltarget",
                 "project/search" => "project/search",
+
+                // custom checks
+                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/custom-check/save" => "project/savecustomcheck",
+                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/custom-check/control" => "project/controlcustomcheck",
+                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/custom-check/<check:\d+>/attachment/new" => "project/uploadcustomattachment",
+                "project/custom-attachment/<path:[a-z\d]+>/download" => "project/customattachment",
+                "project/custom-attachment/control" => "project/controlcustomattachment",
 
                 // reports
                 "reports/project"     => "report/project",

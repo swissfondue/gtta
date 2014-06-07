@@ -1373,7 +1373,8 @@ class ReportController extends Controller {
                     "customChecks" => array(
                         "alias" => "custom",
                         "on" => "custom.target_id = :target_id",
-                        "params" => array("target_id" => $target->id)
+                        "params" => array("target_id" => $target->id),
+                        "with" => "attachments",
                     ),
                     "l10n" => array(
                         "joinType" => "LEFT JOIN",
@@ -1471,6 +1472,14 @@ class ReportController extends Controller {
                                 $checkData["ratingValue"] = 3;
                                 $checksHigh++;
                                 break;
+                        }
+
+                        if ($check->attachments) {
+                            foreach ($check->attachments as $attachment) {
+                                if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
+                                    $checkData["images"][] = Yii::app()->params["attachments"]["path"] . "/" . $attachment->path;
+                                }
+                            }
                         }
 
                         if (in_array($check->rating, array(TargetCustomCheck::RATING_HIGH_RISK, TargetCustomCheck::RATING_MED_RISK, TargetCustomCheck::RATING_LOW_RISK))) {

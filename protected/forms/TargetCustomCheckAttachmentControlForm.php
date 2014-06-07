@@ -1,9 +1,9 @@
 <?php
 
 /**
- * This is the model class for controlling target check attachments.
+ * This is the model class for controlling target custom check attachments.
  */
-class TargetCheckAttachmentControlForm extends CFormModel {
+class TargetCustomCheckAttachmentControlForm extends CFormModel {
     /**
      * @var string path.
      */

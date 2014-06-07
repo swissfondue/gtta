@@ -1,9 +1,9 @@
 <?php
 
 /**
- * This is the model class for target check attachment upload form.
+ * This is the model class for target custom check attachment upload form.
  */
-class TargetCheckAttachmentUploadForm extends CFormModel {
+class TargetCustomCheckAttachmentUploadForm extends CFormModel {
 	/**
      * @var CUploadedFile uploaded file.
      */
