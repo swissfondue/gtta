@@ -44,16 +44,16 @@
             <?php if (!User::checkRole(User::ROLE_CLIENT)): ?>
                 <tr>
                     <th>
-                        <?php echo Yii::t('app', 'Client'); ?>
+                        <?php echo Yii::t("app", "Client"); ?>
                     </th>
                     <td>
-                        <a href="<?php echo $this->createUrl('client/view', array( 'id' => $client->id )); ?>"><?php echo CHtml::encode($client->name); ?></a>
+                        <a href="<?php echo $this->createUrl("client/view", array("id" => $client->id)); ?>"><?php echo CHtml::encode($client->name); ?></a>
                     </td>
                 </tr>
             <?php endif; ?>
             <tr>
                 <th>
-                    <?php echo Yii::t('app', 'Year'); ?>
+                    <?php echo Yii::t("app", "Year"); ?>
                 </th>
                 <td>
                     <?php echo CHtml::encode($project->year); ?>
@@ -61,7 +61,7 @@
             </tr>
             <tr>
                 <th>
-                    <?php echo Yii::t('app', 'Deadline'); ?>
+                    <?php echo Yii::t("app", "Deadline"); ?>
                 </th>
                 <td>
                     <?php echo CHtml::encode($project->deadline); ?>
@@ -69,10 +69,28 @@
             </tr>
             <tr>
                 <th>
-                    <?php echo Yii::t('app', 'Status'); ?>
+                    <?php echo Yii::t("app", "Status"); ?>
                 </th>
                 <td>
                     <?php echo $statuses[$project->status]; ?>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <?php echo Yii::t("app", "Hours"); ?>
+                </th>
+                <td>
+                    <?php echo sprintf("%.1f", $project->userHoursSpent); ?> /
+                    <?php echo sprintf("%.1f", $project->hours_allocated); ?>
+                    (<?php echo sprintf("%.2f", $project->hours_allocated > 0 ? 100 * $project->userHoursSpent / $project->hours_allocated : 0); ?>%)
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <?php echo Yii::t("app", "Remain"); ?>
+                </th>
+                <td>
+                    <?php echo sprintf("%.1f", $project->hours_allocated - $project->userHoursSpent); ?>
                 </td>
             </tr>
         </tbody>

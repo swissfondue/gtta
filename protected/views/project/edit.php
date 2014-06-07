@@ -68,6 +68,16 @@
                     <?php endif; ?>
                 </div>
             </div>
+            
+            <div class="control-group <?php if ($model->getError("hoursAllocated")) echo "error"; ?>">
+                <label class="control-label" for="ProjectEditForm_hoursAllocated"><?php echo Yii::t("app", "Hours Allocated"); ?></label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" id="ProjectEditForm_hoursAllocated" name="ProjectEditForm[hoursAllocated]" value="<?php echo CHtml::encode($model->hoursAllocated); ?>">
+                    <?php if ($model->getError("hoursAllocated")): ?>
+                        <p class="help-block"><?php echo $model->getError("hoursAllocated"); ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
 
             <div class="control-group <?php if ($model->getError('clientId')) echo 'error'; ?>">
                 <label class="control-label" for="ProjectEditForm_clientId"><?php echo Yii::t('app', 'Client'); ?></label>

@@ -173,6 +173,10 @@ fieldset hr {
     vertical-align:top;
 }
 
+.user-list .hours {
+    width: 50px;
+}
+
 .info-block {
     background-color:#f0f0f0;
     margin:5px 0 15px 0;
@@ -200,7 +204,7 @@ fieldset hr {
 }
 
 .client-details td {
-    padding:2px 5px 2px 0px;
+    padding:3px 5px 2px 0px;
 }
 
 .client-details tbody tr:hover td,

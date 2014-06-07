@@ -13,6 +13,9 @@
  * @property string $vuln_overdue
  * @property boolean $guided_test
  * @property string $start_date
+ * @property float $hours_allocated
+ * @property float $userHoursAllocated
+ * @property float $userHoursSpent
  */
 class Project extends ActiveRecord {
     /**
@@ -73,6 +76,7 @@ class Project extends ActiveRecord {
             array("year", "length", "max" => 4),
             array("guided_test", "boolean"),
             array("status", "in", "range" => self::getValidStatuses()),
+            array("hours_allocated", "numerical", "min" => 0),
 		);
 	}
 
@@ -88,6 +92,8 @@ class Project extends ActiveRecord {
             "targets" => array(self::HAS_MANY, "Target", "project_id"),
             "modules" => array(self::HAS_MANY, "ProjectGtModule", "project_id"),
             "gtChecks" => array(self::HAS_MANY, "ProjectGtCheck", "project_id"),
+            "userHoursAllocated" => array(self::STAT, "ProjectUser", "project_id", "select" => "SUM(hours_allocated)"),
+            "userHoursSpent" => array(self::STAT, "ProjectUser", "project_id", "select" => "SUM(hours_spent)")
 		);
 	}
 

@@ -93,9 +93,10 @@ return array(
 
                 // project users
                 "project/<id:\d+>/users/<page:\d+>" => "project/users",
-                "project/<id:\d+>/users"            => "project/users",
-                "project/<id:\d+>/user/add"         => "project/adduser",
-                "project/<id:\d+>/user/control"     => "project/controluser",
+                "project/<id:\d+>/users" => "project/users",
+                "project/<id:\d+>/user/<user:\d+>" => "project/edituser",
+                "project/<id:\d+>/user/new" => "project/edituser",
+                "project/<id:\d+>/user/control" => "project/controluser",
 
                 // project target and checks
                 "project/<id:\d+>/target/<target:\d+>/<page:\d+>" => "project/target",

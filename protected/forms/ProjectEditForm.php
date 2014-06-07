@@ -40,7 +40,27 @@ class ProjectEditForm extends CFormModel {
      */
     public $clientId;
 
-	/**
+    /**
+     * @var float hours allocated.
+     */
+    public $hoursAllocated;
+
+    /**
+     * @var integer project id.
+     */
+    private $_projectId;
+
+    /**
+     * Constructor
+     * @param string $scenario
+     * @param null $projectId
+     */
+    public function __construct($scenario="", $projectId=null) {
+        parent::__construct($scenario);
+        $this->_projectId = $projectId;
+    }
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
@@ -53,6 +73,8 @@ class ProjectEditForm extends CFormModel {
             array("deadline, startDate", "date", "allowEmpty" => false, "format" => "yyyy-MM-dd"),
             array("clientId", "checkClient"),
             array("status", "in", "range" => Project::getValidStatuses()),
+            array("hoursAllocated", "numerical", "min" => 0),
+            array("hoursAllocated", "checkHours"),
 		);
 	}
     
@@ -67,6 +89,7 @@ class ProjectEditForm extends CFormModel {
             "deadline" => Yii::t("app", "Deadline"),
             "status" => Yii::t("app", "Status"),
             "clientId" => Yii::t("app", "Client"),
+            "hoursAllocated" => Yii::t("app", "Hours Allocated"),
 		);
 	}
 
@@ -78,6 +101,34 @@ class ProjectEditForm extends CFormModel {
 
         if (!$client) {
             $this->addError("clientId", Yii::t("app", "Client not found."));
+            return false;
+        }
+
+        return true;
+	}
+
+    /**
+	 * Checks if user has provided a valid value for hours allocated.
+	 */
+	public function checkHours($attribute, $params) {
+        if (!$this->_projectId) {
+            return true;
+        }
+
+		$project = Project::model()->with("userHoursAllocated")->findByPk($this->_projectId);
+
+        if (!$project) {
+            return true;
+        }
+
+        if ($this->hoursAllocated < $project->userHoursAllocated) {
+            $this->addError(
+                "hoursAllocated",
+                Yii::t("app", "Hours allocated for this project can't be less than {hours}.", array(
+                    "{hours}" => sprintf("%.1f", $project->userHoursAllocated),
+                ))
+            );
+
             return false;
         }
 
