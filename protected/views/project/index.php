@@ -69,7 +69,7 @@
                                 <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                     <td class="auditors">
                                         <?php
-                                            $projectUsers = $project->project_users;
+                                            $projectUsers = $project->projectUsers;
                                             $auditors = array();
 
                                             foreach ($projectUsers as $user) {

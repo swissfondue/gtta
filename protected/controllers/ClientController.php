@@ -102,19 +102,19 @@ class ClientController extends Controller
         else
         {
             $projects = Project::model()->with(array(
-                'project_users' => array(
+                'projectUsers' => array(
                     'joinType' => 'INNER JOIN',
-                    'on'       => 'project_users.user_id = :user_id',
-                    'params'   => array(
+                    'on' => 'projectUsers.user_id = :user_id',
+                    'params' => array(
                         'user_id' => Yii::app()->user->id,
                     ),
                 ),
             ))->findAll($criteria);
 
             $projectCount = Project::model()->with(array(
-                'project_users' => array(
+                'projectUsers' => array(
                     'joinType' => 'INNER JOIN',
-                    'on'       => 'project_users.user_id = :user_id',
+                    'on' => 'projectUsers.user_id = :user_id',
                     'params'   => array(
                         'user_id' => Yii::app()->user->id,
                     ),

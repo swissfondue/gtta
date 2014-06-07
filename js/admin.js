@@ -1181,6 +1181,38 @@ function Admin()
             }
         };
     };
+
+    /**
+     * Time tracker object
+     */
+    this.timeTracker = new function () {
+        var _timeTracker = this;
+
+        /**
+         * Expand project.
+         */
+        this.expandProject = function (id) {
+            $("div.project-body[data-id=" + id + "]").slideDown("slow");
+        };
+
+        /**
+         * Collapse project.
+         */
+        this.collapseProject = function (id) {
+            $("div.project-body[data-id=" + id + "]").slideUp("slow");
+        };
+
+        /**
+         * Toggle project.
+         */
+        this.toggleProject = function (id) {
+            if ($("div.project-body[data-id=" + id + "]").is(":visible")) {
+                _timeTracker.collapseProject(id);
+            } else {
+                _timeTracker.expandProject(id);
+            }
+        };
+    };
 }
 
 var admin = new Admin();

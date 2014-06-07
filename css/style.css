@@ -1029,3 +1029,47 @@ table.table-result td {
 .check-header.limited, .check-list .limited, .checkbox.limited, .category-list .limited td {
     opacity:0.3;
 }
+
+div.project-header {
+    border-top:1px solid #ddd;
+}
+
+div.project-header:first-child {
+    border-top:none;
+}
+
+div.project-body {
+    padding-left:20px;
+    border-top:1px solid #ddd;
+}
+
+div.user {
+    padding:0;
+    border-top:1px solid #ddd;
+}
+
+div.user:first-child {
+    border-top:none;
+}
+
+table.user {
+    width:100%;
+}
+
+table.user td {
+    padding:8px;
+}
+
+table.project-header {
+    padding-bottom:0;
+    margin-bottom:0;
+    width:100%;
+}
+
+table.project-header td {
+    border:none;
+}
+
+table.project-header td.hours, table.project-header th.hours, table.user td.hours {
+    width:100px;
+}

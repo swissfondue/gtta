@@ -88,7 +88,7 @@ class Project extends ActiveRecord {
 			"client" => array(self::BELONGS_TO, "Client", "client_id"),
             "details" => array(self::HAS_MANY, "ProjectDetail", "project_id"),
             "users" => array(self::MANY_MANY, "User", "project_users(project_id, user_id)"),
-            "project_users" => array(self::HAS_MANY, "ProjectUser", "project_id"),
+            "projectUsers" => array(self::HAS_MANY, "ProjectUser", "project_id"),
             "targets" => array(self::HAS_MANY, "Target", "project_id"),
             "modules" => array(self::HAS_MANY, "ProjectGtModule", "project_id"),
             "gtChecks" => array(self::HAS_MANY, "ProjectGtCheck", "project_id"),

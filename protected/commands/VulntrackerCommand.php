@@ -32,7 +32,7 @@ class VulntrackerCommand extends ConsoleCommand {
                     "vuln"
                 )
             ),
-            "project_users" => array(
+            "projectUsers" => array(
                 "with" => "user"
             )
         ))->findAll($criteria);
@@ -51,7 +51,7 @@ class VulntrackerCommand extends ConsoleCommand {
             $admins = array();
             $overdued = 0;
 
-            foreach ($project->project_users as $user) {
+            foreach ($project->projectUsers as $user) {
                 if ($user->admin) {
                     $admins[] = $user->user;
                 }

@@ -66,13 +66,14 @@ return array(
                 "app/file/<section:[a-z]+>/<subsection:[a-z]+>/<file:[a-z0-9\-\.]+>" => "app/file",
 
                 // projects
-                "projects/<page:\d+>"         => "project/index",
-                "projects"                    => "project/index",
+                "projects/<page:\d+>" => "project/index",
+                "projects" => "project/index",
                 "project/<id:\d+>/<page:\d+>" => "project/view",
-                "project/<id:\d+>"            => "project/view",
-                "project/<id:\d+>/edit"       => "project/edit",
-                "project/new"                 => "project/edit",
-                "project/control"             => "project/control",
+                "project/<id:\d+>" => "project/view",
+                "project/<id:\d+>/edit" => "project/edit",
+                "project/<id:\d+>/track-time" => "project/tracktime",
+                "project/new" => "project/edit",
+                "project/control" => "project/control",
 
                 // guided test
                 "project/<id:\d+>/gt" => "project/gt",
@@ -124,11 +125,11 @@ return array(
                 "project/custom-attachment/control" => "project/controlcustomattachment",
 
                 // reports
-                "reports/project"     => "report/project",
-                "reports/comparison"  => "report/comparison",
+                "reports/project" => "report/project",
+                "reports/comparison" => "report/comparison",
                 "reports/fulfillment" => "report/fulfillment",
                 "reports/risk-matrix" => "report/riskmatrix",
-                "reports/effort"      => "report/effort",
+                "reports/effort" => "report/effort",
                 "reports/vuln-export" => "report/vulnexport",
 
                 // project planner
@@ -136,10 +137,13 @@ return array(
                 "project-planner/control" => "planner/control",
                 "project-planner/data" => "planner/data",
 
+                // time tracker
+                "time-tracker" => "timetracker/index",
+
                 // vulnerability tracker
-                "vuln-tracker"                                             => "vulntracker/index",
-                "vuln-tracker/<id:\d+>/<page:\d+>"                         => "vulntracker/vulns",
-                "vuln-tracker/<id:\d+>"                                    => "vulntracker/vulns",
+                "vuln-tracker" => "vulntracker/index",
+                "vuln-tracker/<id:\d+>/<page:\d+>" => "vulntracker/vulns",
+                "vuln-tracker/<id:\d+>" => "vulntracker/vulns",
                 "vuln-tracker/<id:\d+>/vuln/<target:\d+>/<check:\d+>/edit" => "vulntracker/edit",
 
                 // clients

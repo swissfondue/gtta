@@ -18,6 +18,7 @@
 
     <div class="pull-right buttons">
         <?php if (User::checkRole(User::ROLE_USER)): ?>
+            <a class="btn" href="<?php echo $this->createUrl("project/tracktime", array("id" => $project->id)); ?>"><i class="icon icon-time"></i> <?php echo Yii::t("app", "Track Time"); ?></a>&nbsp;
             <a class="btn" href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id )); ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New Target'); ?></a>&nbsp;
             <?php if (count($project->targets) == 0): ?>
                 <a class="btn" href="#gt" onclick="user.project.toggleGuidedTest('<?php echo $this->createUrl('project/control'); ?>', <?php echo $project->id; ?>);"><i class="icon icon-hand-right"></i> <?php echo Yii::t('app', 'Guided Test'); ?></a>

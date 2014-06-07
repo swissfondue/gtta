@@ -60,7 +60,16 @@
                             <?php endif; ?>
 
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
-                                <li <?php if (Yii::app()->controller->id == "planner") echo 'class="active"'; ?>><a href="<?php echo $this->createUrl("planner/index"); ?>"><?php echo Yii::t('app', "Project Planner"); ?></a></li>
+                                <li class="dropdown <?php if (in_array(Yii::app()->controller->id, array("planner", "timetracker"))) echo "active"; ?>">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                        <?php echo Yii::t("app", "Planning"); ?>
+                                        <b class="caret"></b>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li <?php if (Yii::app()->controller->id == "planner") echo 'class="active"'; ?>><a href="<?php echo $this->createUrl("planner/index"); ?>"><?php echo Yii::t('app', "Project Planner"); ?></a></li>
+                                        <li <?php if (Yii::app()->controller->id == "timetracker") echo 'class="active"'; ?>><a href="<?php echo $this->createUrl("timetracker/index"); ?>"><?php echo Yii::t('app', "Time Tracker"); ?></a></li>
+                                    </ul>
+                                </li>
                             <?php endif; ?>
 
                             <li <?php if (Yii::app()->controller->id == 'vulntracker') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('vulntracker/index'); ?>"><?php echo Yii::t('app', 'Vulnerability Tracker'); ?></a></li>

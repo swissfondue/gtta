@@ -66,6 +66,8 @@ class ProjectUserEditForm extends CFormModel {
 		return array(
 			"userId" => Yii::t("app", "User"),
             "admin" => Yii::t("app", "Admin"),
+            "hoursAllocated" => Yii::t("app", "Hours Allocated"),
+            "hoursSpent" => Yii::t("app", "Hours Spent"),
 		);
 	}
 

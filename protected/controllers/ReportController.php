@@ -434,8 +434,8 @@ class ReportController extends Controller {
 
         $admin = Yii::t("app", "N/A");
 
-        if ($this->project["project"]->project_users) {
-            foreach ($this->project["project"]->project_users as $user) {
+        if ($this->project["project"]->projectUsers) {
+            foreach ($this->project["project"]->projectUsers as $user) {
                 if ($user->admin) {
                     $admin = $user->user->name ? $user->user->name : $user->user->email;
                     break;
@@ -2126,7 +2126,7 @@ class ReportController extends Controller {
         }
 
         $project = Project::model()->with(array(
-            'project_users' => array(
+            'projectUsers' => array(
                 'with' => 'user'
             ),
             'client',

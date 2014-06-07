@@ -298,10 +298,10 @@ class AppController extends Controller {
                         $projects = Project::model()->findAll($criteria);
                     else
                         $projects = Project::model()->with(array(
-                            'project_users' => array(
+                            'projectUsers' => array(
                                 'joinType' => 'INNER JOIN',
-                                'on'       => 'project_users.user_id = :user_id',
-                                'params'   => array(
+                                'on' => 'projectUsers.user_id = :user_id',
+                                'params' => array(
                                     'user_id' => Yii::app()->user->id,
                                 ),
                             ),

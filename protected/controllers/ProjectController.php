@@ -9,13 +9,13 @@ class ProjectController extends Controller {
 	 */
 	public function filters() {
 		return array(
-            'https',
-			'checkAuth',
-            'showDetails + target, attachment, checks',
-            'checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, gtcontrolcheck, gtsavecheck, savecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck',
-            'checkAdmin + edit, users, edituser, controluser',
-            'ajaxOnly + savecheck, savecustomcheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtcontrolattachment, copycheck',
-            'postOnly + savecheck, savecustomcheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck',
+            "https",
+			"checkAuth",
+            "showDetails + target, attachment, checks",
+            "checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, gtcontrolcheck, gtsavecheck, savecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck, tracktime",
+            "checkAdmin + edit, users, edituser, controluser",
+            "ajaxOnly + savecheck, savecustomcheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtcontrolattachment, copycheck",
+            "postOnly + savecheck, savecustomcheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck",
             "idleOrRunning",
 		);
 	}
@@ -101,9 +101,9 @@ class ProjectController extends Controller {
             $projectCount = Project::model()->count($criteria);
         } else {
             $projects = Project::model()->with(array(
-                "project_users" => array(
+                "projectUsers" => array(
                     "joinType" => "INNER JOIN",
-                    "on" => "project_users.user_id = :user_id",
+                    "on" => "projectUsers.user_id = :user_id",
                     "params" => array(
                         "user_id" => Yii::app()->user->id,
                     ),
@@ -112,9 +112,9 @@ class ProjectController extends Controller {
             ))->findAll($criteria);
 
             $projectCount = Project::model()->with(array(
-                "project_users" => array(
+                "projectUsers" => array(
                     "joinType" => "INNER JOIN",
-                    "on" => "project_users.user_id = :user_id",
+                    "on" => "projectUsers.user_id = :user_id",
                     "params" => array(
                         "user_id" => Yii::app()->user->id,
                     ),
@@ -4289,9 +4289,9 @@ class ProjectController extends Controller {
                     $projects = Project::model()->with('client')->findAll($criteria);
                 else
                     $projects = Project::model()->with(array(
-                        'project_users' => array(
+                        'projectUsers' => array(
                             'joinType' => 'INNER JOIN',
-                            'on'       => 'project_users.user_id = :user_id',
+                            'on'       => 'projectUsers.user_id = :user_id',
                             'params'   => array(
                                 'user_id' => Yii::app()->user->id,
                             ),
@@ -5014,4 +5014,57 @@ class ProjectController extends Controller {
 
         echo $response->serialize();
     }
+
+    /**
+     * Project track time page.
+     */
+	public function actionTrackTime($id) {
+        $id = (int) $id;
+        $project = Project::model()->findByPk($id);
+
+        if (!$project) {
+            throw new CHttpException(404, Yii::t("app", "Project not found."));
+        }
+
+        if (!$project->checkPermission()) {
+            throw new CHttpException(403, Yii::t("app", "Access denied."));
+        }
+
+		$form = new ProjectTrackTimeForm();
+        $user = ProjectUser::model()->with("user")->findByAttributes(array(
+            "user_id" => Yii::app()->user->id,
+            "project_id" => $project->id,
+        ));
+
+        if (!$user) {
+            throw new CHttpException(403, Yii::t("app", "User should be added to the project to be able to track time."));
+        }
+
+		// collect user input data
+		if (isset($_POST["ProjectTrackTimeForm"])) {
+			$form->attributes = $_POST["ProjectTrackTimeForm"];
+
+			if ($form->validate()) {
+                $user->hours_spent += $form->hoursSpent;
+                $user->save();
+
+                Yii::app()->user->setFlash("success", Yii::t("app", "User saved."));
+                $this->redirect(array("project/view", "id" => $project->id));
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+		}
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
+        $this->breadcrumbs[] = array(Yii::t("app", "Track Time"), "");
+
+		// display the page
+        $this->pageTitle = Yii::t("app", "Track Time");
+		$this->render("tracktime", array(
+            "form" => $form,
+            "project" => $project,
+            "user" => $user,
+        ));
+	}
 }
