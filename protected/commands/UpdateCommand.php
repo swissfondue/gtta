@@ -272,19 +272,23 @@ class UpdateCommand extends ConsoleCommand {
             return;
         }
 
-        if ($system->pid != null) {
-            if (ProcessManager::isRunning($system->pid)) {
+        if ($system->update_pid != null) {
+            if (ProcessManager::isRunning($system->update_pid)) {
                 return;
             }
 
             SystemManager::updateStatus(System::STATUS_IDLE);
-            $system->pid = null;
-            $system->save();
+            System::model()->updateByPk(1, array(
+                "update_pid" => null,
+            ));
 
             return;
         }
 
-        $system->pid = posix_getpgid(getmypid());
+        System::model()->updateByPk(1, array(
+            "update_pid" => posix_getpgid(getmypid()),
+        ));
+
         $system->save();
         $targetVersion = $system->update_version;
 
@@ -345,12 +349,13 @@ class UpdateCommand extends ConsoleCommand {
                 throw $exception;
             }
 
-            $system->version = $system->update_version;
-            $system->version_description = $system->update_description;
-            $system->update_version = null;
-            $system->update_description = null;
-            $system->update_time = new CDbExpression("NOW()");
-            $system->save();
+            System::model()->updateByPk(1, array(
+                "version" => $system->update_version,
+                "version_description" => $system->update_description,
+                "update_version" => null,
+                "update_description" => null,
+                "update_time" => new CDbExpression("NOW()"),
+            ));
         } catch (Exception $e) {
             $exception = $e;
         }
@@ -359,8 +364,9 @@ class UpdateCommand extends ConsoleCommand {
         try {
             $this->_cleanup($targetVersion, $finished);
             SystemManager::updateStatus(System::STATUS_IDLE);
-            $system->pid = null;
-            $system->save();
+            System::model()->updateByPk(1, array(
+                "update_pid" => null,
+            ));
         } catch (Exception $e) {
             // swallow exceptions
         }

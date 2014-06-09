@@ -27,8 +27,9 @@ class SystemManager {
             }
 
             if (!$error) {
-                $system->status = $newStatus;
-                $system->save();
+                System::model()->updateByPk(1, array(
+                    "status" => $newStatus,
+                ));
             }
 
             flock($fp, LOCK_UN);
