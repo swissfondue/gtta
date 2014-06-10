@@ -292,6 +292,11 @@ class UpdateCommand extends ConsoleCommand {
         $system->save();
         $targetVersion = $system->update_version;
 
+        if (!$targetVersion) {
+            SystemManager::updateStatus(System::STATUS_IDLE);
+            return;
+        }
+
         $finished = false;
         $exception = null;
 
