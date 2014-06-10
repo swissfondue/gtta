@@ -289,7 +289,6 @@ class UpdateCommand extends ConsoleCommand {
             "update_pid" => posix_getpgid(getmypid()),
         ));
 
-        $system->save();
         $targetVersion = $system->update_version;
 
         if (!$targetVersion) {
