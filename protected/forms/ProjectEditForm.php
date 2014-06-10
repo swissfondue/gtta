@@ -65,7 +65,7 @@ class ProjectEditForm extends CFormModel {
 	 */
 	public function rules() {
 		return array(
-			array("name, year, deadline, status, clientId", "required", "on" => self::ADMIN_SCENARIO),
+			array("name, year, deadline, status, clientId, hoursAllocated", "required", "on" => self::ADMIN_SCENARIO),
             array("status", "required", "on" => self::USER_SCENARIO),
             array("name", "length", "max" => 1000),
             array("year", "length", "max" => 4, "min" => 4),
