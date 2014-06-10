@@ -44,6 +44,18 @@ class CommunityShareCommand extends ConsoleCommand {
      * Share check preparations
      */
     private function _share() {
+        $packages = Package::model()->findAllByAttributes(array(
+            "status" => Package::STATUS_SHARE
+        ));
+
+        $checks = Check::model()->findAllByAttributes(array(
+            "status" => Check::STATUS_SHARE
+        ));
+
+        if (!count($packages) && !count($checks)) {
+            return;
+        }
+
         /** @var System $system */
         $system = System::model()->findByPk(1);
 
