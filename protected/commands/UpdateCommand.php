@@ -23,6 +23,7 @@ class UpdateCommand extends ConsoleCommand {
      * @param $targetVersion string
      * @param $workstationId string
      * @param $workstationKey string
+     * @throws Exception
      */
     private function _getUpdate($targetVersion, $workstationId, $workstationKey) {
         $updateDir = Yii::app()->params["update"]["directory"];
@@ -255,14 +256,6 @@ class UpdateCommand extends ConsoleCommand {
     }
 
     /**
-     * Regenerate script VM
-     */
-    private function _regenerateVM() {
-        $vm = new VMManager();
-        $vm->regenerate();
-    }
-
-    /**
      * Update
      */
     private function _update() {
@@ -318,13 +311,6 @@ class UpdateCommand extends ConsoleCommand {
                         try {
                             $this->_changeLink($targetVersion);
                             $this->_deletePreviousVersions();
-
-                            try {
-                                $this->_regenerateVM();
-                            } catch (Exception $e) {
-                                // ignore errors during VM regeneration
-                            }
-
                             $finished = true;
                         } catch (Exception $e) {
                             $this->_revertCrontab();
@@ -371,6 +357,8 @@ class UpdateCommand extends ConsoleCommand {
             System::model()->updateByPk(1, array(
                 "update_pid" => null,
             ));
+
+            SystemManager::updateStatus(System::STATUS_REGENERATE_SANDBOX);
         } catch (Exception $e) {
             // swallow exceptions
         }
