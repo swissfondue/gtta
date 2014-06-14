@@ -16,7 +16,7 @@
  * @property string $update_check_time
  * @property string $update_time
  * @property integer $status
- * @property integer $update_pid
+ * @property integer $pid
  * @property float $report_low_pedestal
  * @property float $report_med_pedestal
  * @property float $report_high_pedestal
@@ -97,7 +97,7 @@ class System extends ActiveRecord {
             array("report_low_pedestal, report_med_pedestal, report_high_pedestal, report_max_rating, report_med_damping_low, report_high_damping_low, report_high_damping_med, demo_check_limit", "numerical", "min" => 0),
             array("community_min_rating", "numerical", "min" => 0, "max" => 5),
             array("demo, community_allow_unverified, checklist_poc, checklist_links", "boolean"),
-            array("backup, timezone, update_check_time, update_time, update_pid", "safe"),
+            array("backup, timezone, update_check_time, update_time, pid", "safe"),
 		);
 	}
 

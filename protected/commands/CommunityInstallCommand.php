@@ -75,21 +75,21 @@ class CommunityInstallCommand extends ConsoleCommand {
             return;
         }
 
-        if ($system->update_pid !== null) {
-            if (ProcessManager::isRunning($system->update_pid)) {
+        if ($system->pid !== null) {
+            if (ProcessManager::isRunning($system->pid)) {
                 return;
             }
 
             SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_COMMUNITY_INSTALL);
             System::model()->updateByPk(1, array(
-                "update_pid" => null,
+                "pid" => null,
             ));
 
             return;
         }
 
         System::model()->updateByPk(1, array(
-            "update_pid" => posix_getpgid(getmypid()),
+            "pid" => posix_getpgid(getmypid()),
         ));
         $exception = null;
 
@@ -106,7 +106,7 @@ class CommunityInstallCommand extends ConsoleCommand {
             $this->_finish($system->integration_key);
             SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_COMMUNITY_INSTALL);
             System::model()->updateByPk(1, array(
-                "update_pid" => null,
+                "pid" => null,
             ));
         } catch (Exception $e) {
             // swallow exceptions

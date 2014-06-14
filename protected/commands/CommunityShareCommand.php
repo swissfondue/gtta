@@ -64,21 +64,21 @@ class CommunityShareCommand extends ConsoleCommand {
             System::STATUS_COMMUNITY_SHARE
         ));
 
-        if ($system->update_pid !== null) {
-            if (ProcessManager::isRunning($system->update_pid)) {
+        if ($system->pid !== null) {
+            if (ProcessManager::isRunning($system->pid)) {
                 return;
             }
 
             SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_COMMUNITY_SHARE);
             System::model()->updateByPk(1, array(
-                "update_pid" => null,
+                "pid" => null,
             ));
 
             return;
         }
 
         System::model()->updateByPk(1, array(
-            "update_pid" => posix_getpgid(getmypid()),
+            "pid" => posix_getpgid(getmypid()),
         ));
         $exception = null;
 
@@ -93,7 +93,7 @@ class CommunityShareCommand extends ConsoleCommand {
         try {
             SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_COMMUNITY_SHARE);
             System::model()->updateByPk(1, array(
-                "update_pid" => null,
+                "pid" => null,
             ));
         } catch (Exception $e) {
             // swallow exceptions

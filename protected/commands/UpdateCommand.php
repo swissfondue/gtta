@@ -265,21 +265,21 @@ class UpdateCommand extends ConsoleCommand {
             return;
         }
 
-        if ($system->update_pid != null) {
-            if (ProcessManager::isRunning($system->update_pid)) {
+        if ($system->pid != null) {
+            if (ProcessManager::isRunning($system->pid)) {
                 return;
             }
 
             SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_UPDATING);
             System::model()->updateByPk(1, array(
-                "update_pid" => null,
+                "pid" => null,
             ));
 
             return;
         }
 
         System::model()->updateByPk(1, array(
-            "update_pid" => posix_getpgid(getmypid()),
+            "pid" => posix_getpgid(getmypid()),
         ));
 
         $targetVersion = $system->update_version;
@@ -355,7 +355,7 @@ class UpdateCommand extends ConsoleCommand {
             $this->_cleanup($targetVersion, $finished);
             SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_UPDATING);
             System::model()->updateByPk(1, array(
-                "update_pid" => null,
+                "pid" => null,
             ));
 
             SystemManager::updateStatus(System::STATUS_REGENERATE_SANDBOX, System::STATUS_IDLE);
