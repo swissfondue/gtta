@@ -69,7 +69,7 @@ class CommunityShareCommand extends ConsoleCommand {
                 return;
             }
 
-            SystemManager::updateStatus(System::STATUS_IDLE);
+            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_COMMUNITY_SHARE);
             System::model()->updateByPk(1, array(
                 "update_pid" => null,
             ));
@@ -91,7 +91,7 @@ class CommunityShareCommand extends ConsoleCommand {
 
         // "finally" block emulation
         try {
-            SystemManager::updateStatus(System::STATUS_IDLE);
+            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_COMMUNITY_SHARE);
             System::model()->updateByPk(1, array(
                 "update_pid" => null,
             ));

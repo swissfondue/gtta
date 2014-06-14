@@ -80,7 +80,7 @@ class CommunityInstallCommand extends ConsoleCommand {
                 return;
             }
 
-            SystemManager::updateStatus(System::STATUS_IDLE);
+            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_COMMUNITY_INSTALL);
             System::model()->updateByPk(1, array(
                 "update_pid" => null,
             ));
@@ -104,7 +104,7 @@ class CommunityInstallCommand extends ConsoleCommand {
         // "finally" block emulation
         try {
             $this->_finish($system->integration_key);
-            SystemManager::updateStatus(System::STATUS_IDLE);
+            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_COMMUNITY_INSTALL);
             System::model()->updateByPk(1, array(
                 "update_pid" => null,
             ));

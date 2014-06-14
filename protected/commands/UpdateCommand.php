@@ -270,7 +270,7 @@ class UpdateCommand extends ConsoleCommand {
                 return;
             }
 
-            SystemManager::updateStatus(System::STATUS_IDLE);
+            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_UPDATING);
             System::model()->updateByPk(1, array(
                 "update_pid" => null,
             ));
@@ -285,7 +285,7 @@ class UpdateCommand extends ConsoleCommand {
         $targetVersion = $system->update_version;
 
         if (!$targetVersion) {
-            SystemManager::updateStatus(System::STATUS_IDLE);
+            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_UPDATING);
             return;
         }
 
@@ -353,12 +353,12 @@ class UpdateCommand extends ConsoleCommand {
         // "finally" block emulation
         try {
             $this->_cleanup($targetVersion, $finished);
-            SystemManager::updateStatus(System::STATUS_IDLE);
+            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_UPDATING);
             System::model()->updateByPk(1, array(
                 "update_pid" => null,
             ));
 
-            SystemManager::updateStatus(System::STATUS_REGENERATE_SANDBOX);
+            SystemManager::updateStatus(System::STATUS_REGENERATE_SANDBOX, System::STATUS_IDLE);
         } catch (Exception $e) {
             // swallow exceptions
         }

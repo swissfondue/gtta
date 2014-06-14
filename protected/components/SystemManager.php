@@ -19,7 +19,7 @@ class SystemManager {
 
         $fp = fopen(Yii::app()->params["systemStatusLock"], "w");
 
-        if (flock($fp, LOCK_EX | LOCK_NB)) {
+        if (flock($fp, LOCK_EX)) {
             $system = System::model()->findByPk(1);
 
             if ($allowedStatuses !== null && !in_array($system->status, $allowedStatuses)) {

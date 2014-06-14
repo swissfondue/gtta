@@ -48,7 +48,7 @@ class ConsoleCommand extends CConsoleCommand {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->addInCondition('status', array(TargetCheck::STATUS_IN_PROGRESS, TargetCheck::STATUS_STOP));
+        $criteria->addInCondition("status", array(TargetCheck::STATUS_IN_PROGRESS, TargetCheck::STATUS_STOP));
         $checks = TargetCheck::model()->findAll($criteria);
 
         if (count($checks) > 0) {
@@ -56,13 +56,13 @@ class ConsoleCommand extends CConsoleCommand {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->addInCondition('status', array(ProjectGtCheck::STATUS_IN_PROGRESS, ProjectGtCheck::STATUS_STOP));
+        $criteria->addInCondition("status", array(ProjectGtCheck::STATUS_IN_PROGRESS, ProjectGtCheck::STATUS_STOP));
         $checks = ProjectGtCheck::model()->findAll($criteria);
 
         if (count($checks) > 0) {
             return;
         }
 
-        SystemManager::updateStatus(System::STATUS_IDLE);
+        SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_RUNNING);
     }
 }

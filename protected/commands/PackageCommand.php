@@ -74,7 +74,7 @@ class PackageCommand extends ConsoleCommand {
 
                     if (count($packages) == 0) {
                         try {
-                            SystemManager::updateStatus(System::STATUS_IDLE);
+                            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER);
                         } catch (Exception $e) {
                             // swallow exceptions
                         }
