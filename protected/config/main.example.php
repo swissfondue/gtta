@@ -22,6 +22,8 @@ return array(
 		"application.components.*",
         "application.components.formats.*",
         "application.components.processors.*",
+        "application.components.reports.*",
+        "application.components.reports.docx.*",
         "application.extensions.PHPRtfLite.*",
         "application.extensions.PHPRtfLite.PHPRtfLite.*",
 	),
@@ -283,28 +285,31 @@ return array(
                 "gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>/dependency/new" => "gt/editdependency",
 
                 // report templates
-                "report-templates/<page:\d+>"   => "reporttemplate/index",
-                "report-templates"              => "reporttemplate/index",
+                "report-templates/<page:\d+>" => "reporttemplate/index",
+                "report-templates" => "reporttemplate/index",
                 "report-template/<id:\d+>/edit" => "reporttemplate/edit",
-                "report-template/new"           => "reporttemplate/edit",
-                "report-template/control"       => "reporttemplate/control",
+                "report-template/new" => "reporttemplate/edit",
+                "report-template/control" => "reporttemplate/control",
                 "report-template/<id:\d+>/header/new" => "reporttemplate/uploadheaderimage",
-                "report-template/<id:\d+>/header"     => "reporttemplate/headerimage",
-                "report-template/header/control"      => "reporttemplate/controlheaderimage",
+                "report-template/<id:\d+>/header" => "reporttemplate/headerimage",
+                "report-template/header/control" => "reporttemplate/controlheaderimage",
+                "report-template/<id:\d+>/file/new" => "reporttemplate/uploadfile",
+                "report-template/<id:\d+>/file" => "reporttemplate/file",
+                "report-template/header/file" => "reporttemplate/controlfile",
 
                 // summary blocks
-                "report-template/<id:\d+>/summary-blocks/<page:\d+>"        => "reporttemplate/summary",
-                "report-template/<id:\d+>/summary-blocks"                   => "reporttemplate/summary",
+                "report-template/<id:\d+>/summary-blocks/<page:\d+>" => "reporttemplate/summary",
+                "report-template/<id:\d+>/summary-blocks" => "reporttemplate/summary",
                 "report-template/<id:\d+>/summary-block/<summary:\d+>/edit" => "reporttemplate/editsummary",
-                "report-template/<id:\d+>/summary-block/new"                => "reporttemplate/editsummary",
-                "report-template/summary-block/control"                     => "reporttemplate/controlsummary",
+                "report-template/<id:\d+>/summary-block/new" => "reporttemplate/editsummary",
+                "report-template/summary-block/control" => "reporttemplate/controlsummary",
 
                 // report template sections
-                "report-template/<id:\d+>/sections/<page:\d+>"        => "reporttemplate/sections",
-                "report-template/<id:\d+>/sections"                   => "reporttemplate/sections",
+                "report-template/<id:\d+>/sections/<page:\d+>" => "reporttemplate/sections",
+                "report-template/<id:\d+>/sections" => "reporttemplate/sections",
                 "report-template/<id:\d+>/section/<section:\d+>/edit" => "reporttemplate/editsection",
-                "report-template/<id:\d+>/section/new"                => "reporttemplate/editsection",
-                "report-template/section/control"                     => "reporttemplate/controlsection",
+                "report-template/<id:\d+>/section/new" => "reporttemplate/editsection",
+                "report-template/section/control" => "reporttemplate/controlsection",
 
                 // risk classification categories (templates)
                 "risks/<page:\d+>"         => "risk/index",
@@ -429,7 +434,12 @@ return array(
             "maxCellPadding" => 5.0,
 
             "headerImages" => array(
-                "path"    => BASE_DIR . "/files/header-images",
+                "path" => BASE_DIR . "/files/header-images",
+                "maxSize" => 10 * 1024 * 1024, // 10 megabytes
+            ),
+
+            "file" => array(
+                "path" => BASE_DIR . "/files/report-templates",
                 "maxSize" => 10 * 1024 * 1024, // 10 megabytes
             ),
         ),

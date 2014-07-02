@@ -140,12 +140,14 @@ class FileManager {
      * @param $source
      * @param $destination
      */
-    public static function zipDirectory(ZipArchive $zip, $source, $destination) {
+    public static function zipDirectory(ZipArchive $zip, $source, $destination=null) {
         if (!is_dir($source)) {
             return;
         }
 
-        $zip->addEmptyDir($destination);
+        if ($destination) {
+            $zip->addEmptyDir($destination);
+        }
 
         foreach (scandir($source) as $file) {
             if ($file == "." || $file == "..") {
@@ -153,7 +155,12 @@ class FileManager {
             }
 
             $srcPath = $source . "/" . $file;
-            $dstPath = $destination . "/" . $file;
+
+            if ($destination) {
+                $dstPath = $destination . "/" . $file;
+            } else {
+                $dstPath = $file;
+            }
 
             if (is_dir($srcPath)) {
                 self::zipDirectory($zip, $srcPath, $dstPath);

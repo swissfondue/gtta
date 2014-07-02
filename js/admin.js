@@ -372,8 +372,129 @@ function Admin()
          * Delete header image.
          */
         this.delHeaderImage = function (id) {
-            if (confirm(system.translate('Are you sure that you want to delete this object?')))
+            if (confirm(system.translate('Are you sure that you want to delete this object?'))) {
                 _reportTemplate._controlHeaderImage(id, 'delete');
+            }
+        };
+
+        /**
+         * Report type change handler
+         */
+        this.onTypeChange = function () {
+            var type = $("#ReportTemplateEditForm_type").val();
+
+            if (type == 0) {
+                $(".docx-report").slideUp("slow", function () {
+                    $(".rtf-report").slideDown("fast");
+                });
+            } else {
+                $(".rtf-report").slideUp("slow", function () {
+                    $(".docx-report").slideDown("fast");
+                });
+            }
+        };
+
+        /**
+         * Initialize file template upload form.
+         */
+        this.initTemplateUploadForm = function () {
+            $('input[name^="ReportTemplateFileUploadForm"]').each(function () {
+                var url = $(this).data("upload-url"),
+                    data = {};
+
+                data["YII_CSRF_TOKEN"] = system.csrf;
+
+                $(this).fileupload({
+                    dataType: "json",
+                    url: url,
+                    forceIframeTransport: true,
+                    timeout: 120000,
+                    formData: data,
+                    dropZone: $('input[name^="ReportTemplateFileUploadForm"]'),
+
+                    done: function (e, data) {
+                        $(".loader-image").hide();
+                        $(".upload-message").hide();
+                        $(".file-input").show();
+
+                        var json = data.result;
+
+                        if (json.status == "error") {
+                            system.showMessage("error", json.errorText);
+                            return;
+                        }
+
+                        data = json.data;
+                        $(".template-file-link").html("<a href=\"" + data.url + "\">" + system.translate("Download") + "</a>");
+                        $(".delete-file-link").show();
+                    },
+
+                    fail: function (e, data) {
+                        $(".loader-image").hide();
+                        $(".upload-message").hide();
+                        $(".file-input").show();
+                        system.showMessage("error", system.translate("Request failed, please try again."));
+                    },
+
+                    start: function (e) {
+                        $(".loader-image").show();
+                        $(".file-input").hide();
+                        $(".upload-message").show();
+                    }
+                });
+            });
+        };
+
+        /**
+         * Control template file function.
+         */
+        this._controlTemplate = function(id, operation) {
+            var url = $(".template-file").data("control-url");
+
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data: {
+                    "EntryControlForm[operation]": operation,
+                    "EntryControlForm[id]": id,
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+
+                success: function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
+                        return;
+                    }
+
+                    if (operation == "delete") {
+                        $(".template-file-link").html(system.translate("No template file."));
+                        $(".delete-file-link").hide();
+                    }
+                },
+
+                error: function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.showMessage("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend: function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
+         * Delete template file.
+         */
+        this.delTemplate = function (id) {
+            if (confirm(system.translate("Are you sure that you want to delete this object?"))) {
+                _reportTemplate._controlTemplate(id, "delete");
+            }
         };
     };
 

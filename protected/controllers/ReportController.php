@@ -1725,6 +1725,18 @@ class ReportController extends Controller {
         $this->project["hasInfo"] = $hasInfo;
         $this->project["hasSeparate"] = $hasSeparate;
 
+        $data = array(
+            "data" => $data,
+            "targets" => $targets,
+            "project" => $project,
+            "rating" => $totalRating,
+            "checks" => $totalCheckCount,
+            "checksInfo" => $checksInfo,
+            "checksLow" => $checksLow,
+            "checksMed" => $checksMed,
+            "checksHigh" => $checksHigh,
+        );
+
         return $data;
     }
 
@@ -2108,6 +2120,17 @@ class ReportController extends Controller {
         $this->project['hasInfo'] = $hasInfo;
         $this->project['hasSeparate'] = $hasSeparate;
 
+        $data = array(
+            "data" => $data,
+            "targets" => $projectTargets,
+            "project" => $project,
+            "rating" => $totalRating,
+            "checks" => $totalCheckCount,
+            "checksInfo" => $checksInfo,
+            "checksMed" => $checksMed,
+            "checksHigh" => $checksHigh,
+        );
+
         return $data;
     }
 
@@ -2207,6 +2230,15 @@ class ReportController extends Controller {
             $data = $this->_projectReport($targetIds, $templateCategoryIds, $project, $language);
         }
 
+        if ($template->type == ReportTemplate::TYPE_DOCX) {
+            $plugin = ReportPlugin::getPlugin($template, $data);
+            $plugin->generate();
+            $plugin->sendOverHttp();
+
+            exit();
+        }
+
+        $data = $data["data"];
         $fileName = Yii::t('app', 'Penetration Test Report') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
 
         $this->_rtfSetup($model);

@@ -1,0 +1,107 @@
+<?php
+
+/**
+ * Unlink report on exit
+ */
+function unlinkReportOnExit($path) {
+    FileManager::unlink($path);
+}
+
+/**
+ * Report plugin class
+ */
+abstract class ReportPlugin {
+    /**
+     * @var boolean report generated
+     */
+    protected $_generated = false;
+
+    /**
+     * @var ReportTemplate template
+     */
+    protected $_template;
+
+    /**
+     * @var array checks data
+     */
+    protected $_data;
+
+    /**
+     * @var string file name
+     */
+    protected $_fileName = null;
+
+    /**
+     * @var string file path
+     */
+    protected $_filePath = null;
+
+    /**
+     * Constructor
+     * @param ReportTemplate $template
+     * @param array $data
+     */
+    public function __construct(ReportTemplate $template, $data=array()) {
+        $this->_template = $template;
+        $this->_data = $data;
+    }
+
+    /**
+     * Get plugin for given type
+     * @param ReportTemplate $template
+     * @param $data
+     * @return ReportPlugin
+     * @throws Exception
+     */
+    public static function getPlugin(ReportTemplate $template, $data) {
+        $plugins = array(
+            ReportTemplate::TYPE_RTF => "RtfReport",
+            ReportTemplate::TYPE_DOCX => "DocxReport",
+        );
+
+        if (!array_key_exists($template->type, $plugins)) {
+            throw new Exception(Yii::t("app", "Invalid report type: {type}.", array("{type}" => $template->type)));
+        }
+
+        $plugin = $plugins[$template->type];
+
+        return new $plugin($template, $data);
+    }
+
+    /**
+     * Generate report
+     */
+    abstract public function generate();
+
+    public function sendOverHttp($unlink=true, $exit=true) {
+        if (!$this->_generated) {
+            throw new Exception(Yii::t("app", "Report not generated yet."));
+        }
+
+        header("Content-Description: File Transfer");
+        header("Content-Type: application/octet-stream");
+        header("Content-Disposition: attachment; filename=\"" . $this->_fileName . "\"");
+        header("Content-Transfer-Encoding: binary");
+        header("Expires: 0");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Pragma: public");
+        header("Content-Length: " . filesize($this->_filePath));
+        ob_clean();
+        flush();
+
+        if ($unlink) {
+            @ignore_user_abort(true);
+            @register_shutdown_function("unlinkReportOnExit", $this->_filePath);
+        }
+
+        readfile($this->_filePath);
+
+        if ($unlink) {
+            FileManager::unlink($this->_filePath);
+        }
+
+        if ($exit) {
+            exit();
+        }
+    }
+}

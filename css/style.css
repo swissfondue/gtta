@@ -144,6 +144,7 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 .reference-list .actions,
 .effort-list .actions,
 .risk-list .actions,
+.report-template-list .actions,
 .risk-template-list .actions,
 .summary-list .actions,
 .section-list .actions {
@@ -756,7 +757,7 @@ table.control-header td {
     border:none;
 }
 
-.header-image, .logo-image {
+.header-image, .logo-image, .template-file {
     margin-bottom:10px;
 }
 
@@ -1071,5 +1072,9 @@ table.project-header td {
 }
 
 table.project-header td.hours, table.project-header th.hours, table.user td.hours {
+    width:100px;
+}
+
+.report-template-list .type {
     width:100px;
 }

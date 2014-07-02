@@ -366,7 +366,7 @@ function System() {
 
             if ((!guided && $('.report-target-list input:checked').length == 0) ||
                 $('#ProjectReportForm_templateId').val() == 0 ||
-                ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() == 0)
+                ($("#ProjectReportForm_templateId option:selected").data("type") == 0 && $('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() == 0)
             ) {
                 $('.form-actions > button[type="submit"]').prop('disabled', true);
             } else {
@@ -487,6 +487,16 @@ function System() {
 
                 _report._projectFormSwitchButton();
             } else if (e.id == 'ProjectReportForm_templateId') {
+                var type = $("#ProjectReportForm_templateId option:selected").data("type");
+
+                if (type != undefined) {
+                    if (type == 0) {
+                        $(".rtf-report").slideDown("slow");
+                    } else if (type == 1) {
+                        $(".rtf-report").slideUp("slow");
+                    }
+                }
+
                 _report._projectFormSwitchButton();
             } else if (e.id == 'ProjectReportForm_options_matrix') {
                 _report._riskMatrixTargets = [];

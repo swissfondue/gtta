@@ -25,12 +25,14 @@
  * @property string $poc
  * @property string $links
  * @property User $user
+ * @property Check $check
+ * @property Target $target
  * @property TargetCheckInput[] $inputs
  * @property TargetCheckAttachment[] $attachments
  * @property TargetCheckSolution[] $solutions
  * @property TargetCheckVuln $vuln
  */
-class TargetCheck extends ActiveRecord {
+class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     /**
      * Check statuses.
      */
@@ -173,5 +175,73 @@ class TargetCheck extends ActiveRecord {
      */
     public function getIsRunning() {
         return in_array($this->status, array(self::STATUS_IN_PROGRESS, self::STATUS_STOP));
+    }
+
+
+    /**
+     * Get variable value
+     * @param $name
+     * @param VariableScope $scope
+     * @return mixed
+     * @throws Exception
+     */
+    public function getVariable($name, VariableScope $scope) {
+        $check = $this->check;
+        $names = $this->getRatingNames();
+        $abbreviations = array(
+            self::RATING_NONE => "none",
+            self::RATING_NO_VULNERABILITY => "no_vuln",
+            self::RATING_HIDDEN => "hidden",
+            self::RATING_INFO =>  "info",
+            self::RATING_LOW_RISK => "low",
+            self::RATING_MED_RISK => "med",
+            self::RATING_HIGH_RISK => "high",
+        );
+
+        $checkData = array(
+            "name" => $check->getLocalizedName(),
+            "background_info" => $check->getLocalizedBackgroundInfo(),
+            "hints" => $check->getLocalizedHints(),
+            "question" => $check->getLocalizedQuestion(),
+            "rating" => $abbreviations[$this->rating],
+            "rating_name" => $names[$this->rating],
+            "target" => $this->override_target ? $this->override_target : $this->target->host,
+            "links" => $this->links,
+            "poc" => $this->poc,
+            "result" => $this->result,
+            "reference" => $check->_reference->name . ($check->reference_code ? "-" . $check->reference_code : ""),
+            "solution" => array(),
+            "attachments" => "dummy attachments",
+        );
+
+        if ($this->solution) {
+            $checkData["solution"][] = $this->solution;
+        }
+
+        if ($this->solutions) {
+            foreach ($this->solutions as $solution) {
+                $checkData["solution"][] = $solution->solution->localizedSolution;
+            }
+        }
+
+        $checkData["solution"] = implode("\n\n", $checkData["solution"]);
+
+        if (!in_array($name, array_keys($checkData))) {
+            throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+        }
+
+        return $checkData[$name];
+    }
+
+    /**
+     * Get list
+     * @param $name
+     * @param $filters
+     * @param VariableScope $scope
+     * @return array
+     * @throws Exception
+     */
+    public function getList($name, $filters, VariableScope $scope) {
+        throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
     }
 }

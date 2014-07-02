@@ -309,6 +309,7 @@ class ProjectController extends Controller {
             "targets"  => $targets,
             "p"        => $paginator,
             "statuses" => array(
+                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
                 Project::STATUS_OPEN        => Yii::t("app", "Open"),
                 Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
                 Project::STATUS_FINISHED    => Yii::t("app", "Finished"),

@@ -3,11 +3,10 @@
 /**
  * This is the model class for project report form.
  */
-class ProjectReportForm extends CFormModel
-{
-    const INFO_LOCATION_TARGET   = 'target';
-    const INFO_LOCATION_TABLE    = 'table';
-    const INFO_LOCATION_APPENDIX = 'appendix';
+class ProjectReportForm extends CFormModel {
+    const INFO_LOCATION_TARGET = "target";
+    const INFO_LOCATION_TABLE = "table";
+    const INFO_LOCATION_APPENDIX = "appendix";
 
     /**
      * @var string font size.
@@ -67,32 +66,30 @@ class ProjectReportForm extends CFormModel
     /**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
+	public function rules() {
 		return array(
-            array( 'fontSize, fontFamily, pageMargin, cellPadding', 'required' ),
-            array( 'fontSize', 'numerical', 'integerOnly' => true, 'min' => Yii::app()->params['reports']['minFontSize'], 'max' => Yii::app()->params['reports']['maxFontSize'] ),
-            array( 'cellPadding', 'numerical', 'min' => Yii::app()->params['reports']['minCellPadding'], 'max' => Yii::app()->params['reports']['maxCellPadding'] ),
-            array( 'pageMargin', 'numerical', 'min' => Yii::app()->params['reports']['minPageMargin'], 'max' => Yii::app()->params['reports']['maxPageMargin'] ),
-            array( 'fontFamily', 'in', 'range' => Yii::app()->params['reports']['fonts'] ),
-            array( 'infoChecksLocation', 'in', 'range' => array( self::INFO_LOCATION_TARGET, self::INFO_LOCATION_TABLE, self::INFO_LOCATION_APPENDIX ) ),
-            array( 'clientId, projectId, targetIds, options, templateId', 'safe' ),
+            array("fontSize, fontFamily, pageMargin, cellPadding", "required"),
+            array("fontSize", "numerical", "integerOnly" => true, "min" => Yii::app()->params["reports"]["minFontSize"], "max" => Yii::app()->params["reports"]["maxFontSize"]),
+            array("cellPadding", "numerical", "min" => Yii::app()->params["reports"]["minCellPadding"], "max" => Yii::app()->params["reports"]["maxCellPadding"]),
+            array("pageMargin", "numerical", "min" => Yii::app()->params["reports"]["minPageMargin"], "max" => Yii::app()->params["reports"]["maxPageMargin"]),
+            array("fontFamily", "in", "range" => Yii::app()->params["reports"]["fonts"]),
+            array("infoChecksLocation", "in", "range" => array(self::INFO_LOCATION_TARGET, self::INFO_LOCATION_TABLE, self::INFO_LOCATION_APPENDIX)),
+            array("clientId, projectId, targetIds, options, templateId", "safe"),
 		);
 	}
 
     /**
 	 * @return array customized attribute labels (name=>label)
 	 */
-	public function attributeLabels()
-	{
+	public function attributeLabels() {
 		return array(
-            'fontSize'    => Yii::t('app', 'Font Size'),
-            'fontFamily'  => Yii::t('app', 'Font Family'),
-            'pageMargin'  => Yii::t('app', 'Page Margin'),
-            'cellPadding' => Yii::t('app', 'Cell Padding'),
-            'clientId'    => Yii::t('app', 'Client'),
-			'projectId'   => Yii::t('app', 'Project'),
-			'targetIds'   => Yii::t('app', 'Targets'),
+            "fontSize" => Yii::t("app", "Font Size"),
+            "fontFamily" => Yii::t("app", "Font Family"),
+            "pageMargin" => Yii::t("app", "Page Margin"),
+            "cellPadding" => Yii::t("app", "Cell Padding"),
+            "clientId" => Yii::t("app", "Client"),
+			"projectId" => Yii::t("app", "Project"),
+			"targetIds" => Yii::t("app", "Targets"),
 		);
 	}
 }

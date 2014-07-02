@@ -18,6 +18,8 @@ return array(
 		"application.components.*",
         "application.components.formats.*",
         "application.components.processors.*",
+        "application.components.reports.*",
+        "application.components.reports.docx.*",
         "ext.yii-mail.YiiMailMessage",
 	),
 

@@ -4,6 +4,11 @@
  * This is the model class for report template edit form.
  */
 class ReportTemplateEditForm extends LocalizedFormModel {
+    /**
+     * @var int type.
+     */
+    public $type;
+
 	/**
      * @var string name.
      */
@@ -94,7 +99,8 @@ class ReportTemplateEditForm extends LocalizedFormModel {
 	 */
 	public function rules() {
 		return array(
-			array("name", "required"),
+			array("type, name", "required"),
+            array("type", "in", "range" => ReportTemplate::getValidTypes()),
             array("name", "length", "max" => 1000),
             array("intro, appendix, localizedItems, vulnsIntro, infoChecksIntro, securityLevelIntro, vulnDistributionIntro, reducedIntro, highDescription, medDescription, lowDescription, noneDescription, noVulnDescription, infoDescription, degreeIntro, riskIntro, footer", "safe"),
 		);
@@ -105,6 +111,7 @@ class ReportTemplateEditForm extends LocalizedFormModel {
 	 */
 	public function attributeLabels() {
 		return array(
+            "type" => Yii::t("app", "Type"),
 			"name" => Yii::t("app", "Name"),
             "intro" => Yii::t("app", "Introduction"),
             "appendix" => Yii::t("app", "Appendix"),

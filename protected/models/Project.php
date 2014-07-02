@@ -17,7 +17,7 @@
  * @property float $userHoursAllocated
  * @property float $userHoursSpent
  */
-class Project extends ActiveRecord {
+class Project extends ActiveRecord implements IVariableScopeObject {
     /**
      * Project statuses.
      */
@@ -141,5 +141,168 @@ class Project extends ActiveRecord {
         }
 
         return false;
+    }
+
+    /**
+     * Get variable value
+     * @param $name
+     * @param VariableScope $scope
+     * @return mixed
+     * @throws Exception
+     */
+    public function getVariable($name, VariableScope $scope) {
+        $vars = array(
+            "name",
+            "year"
+        );
+
+        if (!in_array($name, $vars)) {
+            throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+        }
+
+        return $this->$name;
+    }
+
+    /**
+     * Get list
+     * @param $name
+     * @param array $filters
+     * @param VariableScope $scope
+     * @return array
+     * @throws Exception
+     */
+    public function getList($name, $filters, VariableScope $scope) {
+        $lists = array(
+            "target",
+            "category",
+            "check",
+        );
+
+        if (!in_array($name, $lists)) {
+            throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+        }
+
+        $data = array();
+
+        switch ($name) {
+            case "target":
+                $data = $this->targets;
+                break;
+
+            case "category":
+                $targetIds = array();
+
+                foreach ($this->targets as $target) {
+                    $targetIds[] = $target->id;
+                }
+
+                $language = Language::model()->findByAttributes(array(
+                    "code" => Yii::app()->language
+                ));
+
+                if ($language) {
+                    $language = $language->id;
+                }
+
+                $criteria = new CDbCriteria();
+                $criteria->addInCondition("target_id", $targetIds);
+                $criteria->order = "l10n.name ASC";
+                $criteria->together = true;
+
+                $targetCategories = TargetCheckCategory::model()->with(array(
+                    "category" => array(
+                        "with" => array(
+                            "l10n" => array(
+                                "joinType" => "LEFT JOIN",
+                                "on" => "l10n.language_id = :language_id",
+                                "params" => array("language_id" => $language)
+                            ),
+                        ),
+                    ),
+                ))->findAll($criteria);
+
+                $categories = array();
+                $ids = array();
+
+                foreach ($targetCategories as $tc) {
+                    if (in_array($tc->check_category_id, $ids)) {
+                        continue;
+                    }
+
+                    $categories[] = $tc->category;
+                    $ids[] = $tc->check_category_id;
+                }
+
+                $data = $categories;
+
+                break;
+
+            case "check":
+                $targetIds = array();
+
+                foreach ($this->targets as $target) {
+                    $targetIds[] = $target->id;
+                }
+
+                $language = Language::model()->findByAttributes(array(
+                    "code" => Yii::app()->language
+                ));
+
+                if ($language) {
+                    $language = $language->id;
+                }
+
+                $criteria = new CDbCriteria();
+                $criteria->addInCondition("target_id", $targetIds);
+                $criteria->addColumnCondition(array("t.status" => TargetCheck::STATUS_FINISHED));
+                $criteria->addNotInCondition("t.rating", array(TargetCheck::RATING_HIDDEN));
+                $criteria->together = true;
+
+                $checks = TargetCheck::model()->with(array(
+                    "check" => array(
+                        "with" => array(
+                            "l10n" => array(
+                                "joinType" => "LEFT JOIN",
+                                "on" => "l10n.language_id = :language_id",
+                                "params" => array("language_id" => $language)
+                            ),
+                            "_reference",
+                        ),
+                    ),
+
+                    "solutions" => array(
+                        "alias" => "tss",
+                        "joinType" => "LEFT JOIN",
+                        "with" => array(
+                            "solution" => array(
+                                "alias" => "tss_s",
+                                "joinType" => "LEFT JOIN",
+                                "with" => array(
+                                    "l10n" => array(
+                                        "alias" => "tss_s_l10n",
+                                        "on" => "tss_s_l10n.language_id = :language_id",
+                                        "params" => array("language_id" => $language)
+                                    )
+                                )
+                            )
+                        )
+                    ),
+
+                    "attachments",
+                ))->findAll($criteria);
+
+                $data = $checks;
+
+                break;
+        }
+
+        if ($filters) {
+            foreach ($filters as $filter) {
+                $filter = new ListFilter($filter, $scope);
+                $data = $filter->apply($data);
+            }
+        }
+
+        return $data;
     }
 }

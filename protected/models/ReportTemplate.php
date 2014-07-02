@@ -24,9 +24,17 @@
  * @property string $none_description
  * @property string $no_vuln_description
  * @property string $info_description
+ * @property integer $type
+ * @property string $file_path
  */
 class ReportTemplate extends ActiveRecord {
-	/**
+    /**
+     * Constants
+     */
+    const TYPE_RTF = 0;
+    const TYPE_DOCX = 1;
+
+    /**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
 	 * @return ReportTemplate the static model class
@@ -42,13 +50,36 @@ class ReportTemplate extends ActiveRecord {
 		return "report_templates";
 	}
 
+    /**
+     * Get valid types
+     * @return array
+     */
+    public static function getValidTypeNames() {
+        return array(
+            self::TYPE_RTF => Yii::t("app", "RTF"),
+            self::TYPE_DOCX => Yii::t("app", "DOCX"),
+        );
+    }
+
+    /**
+     * Get valid types
+     * @return array
+     */
+    public static function getValidTypes() {
+        return array(
+            self::TYPE_RTF,
+            self::TYPE_DOCX
+        );
+    }
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
 		return array(
-            array("name", "required"),
-            array("name, header_image_path, header_image_type", "length", "max" => 1000),
+            array("name, type", "required"),
+            array("name, header_image_path, header_image_type, file_path", "length", "max" => 1000),
+            array("type", "in", "range" => self::getValidTypes()),
             array("intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro, none_description, no_vuln_description, info_description", "safe"),
 		);
 	}
