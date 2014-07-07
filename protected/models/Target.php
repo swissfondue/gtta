@@ -151,7 +151,7 @@ class Target extends ActiveRecord implements IVariableScopeObject {
     public function getVariable($name, VariableScope $scope) {
         $vars = array(
             "host",
-            "description"
+            "description",
         );
 
         if (!in_array($name, $vars)) {

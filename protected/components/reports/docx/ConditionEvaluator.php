@@ -33,19 +33,8 @@ class ConditionEvaluator {
         $params = mb_substr($condition, $openingBrace + 1, $closingBrace - $openingBrace - 1);
         $this->_params = new ParameterParser($params);
         $name = mb_substr($condition, 0, $openingBrace);
-        $scopeName = null;
-
-        if (mb_strpos($name, ".") !== false) {
-            $data = explode(".", $name);
-
-            if (count($data) > 2) {
-                throw new Exception(Yii::t("app", "Only one scope level is supported."));
-            }
-
-            list($scopeName, $name) = $data;
-        }
-
-        $this->_value = $scope->getStack()->get($scopeName)->getVariable($name, $scope);
+        $evaluator = new VariableEvaluator($name, $scope);
+        $this->_value = $evaluator->evaluate();
     }
 
     /**

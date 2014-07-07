@@ -153,11 +153,16 @@ class Project extends ActiveRecord implements IVariableScopeObject {
     public function getVariable($name, VariableScope $scope) {
         $vars = array(
             "name",
-            "year"
+            "year",
+            "rating",
         );
 
         if (!in_array($name, $vars)) {
             throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+        }
+
+        if ($name == "rating") {
+            return $scope->getStack()->getGlobal("rating");
         }
 
         return $this->$name;

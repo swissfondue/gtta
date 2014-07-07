@@ -39,7 +39,7 @@ class DocxReport extends ReportPlugin {
         );
 
         $this->_filePath = Yii::app()->params["tmpPath"] . "/" . hash("sha256", time() . rand() . $this->_fileName);
-        $this->_scope = new VariableScopeStack();
+        $this->_scope = new VariableScopeStack($this->_data);
         $this->_scope->push(VariableScope::SCOPE_PROJECT, $this->_data["project"]);
     }
 
@@ -211,11 +211,240 @@ class DocxReport extends ReportPlugin {
     }
 
     /**
+     * Get text run blocks array
+     * @param $text
+     * @param array $attributes
+     * @return array
+     */
+    private function _getTextRunBlocks($text, $attributes=array()) {
+        $block = array();
+        $blocks = array();
+        $pos = 0;
+        $text = str_replace("&nbsp;", " ", $text);
+
+        while (true) {
+            $pos = mb_strpos($text, "<", $pos);
+
+            if ($pos === false) {
+                break;
+            }
+
+            if (mb_substr($text, $pos, 4) == "<br>" || mb_substr($text, $pos, 5) == "<br/>" || mb_substr($text, $pos, 6) == "<br />") {
+                $endPos = mb_strpos($text, ">", $pos);
+                $subText = mb_substr($text, 0, $pos);
+                $block[] = $subText;
+
+                $text = mb_substr($text, $endPos + 1);
+
+                if (!$text) {
+                    $text = "";
+                }
+
+                $pos = 0;
+            } else if (mb_substr($text, $pos, 3) == "<b>") {
+                $endPos = mb_strpos($text, "</b>", $pos);
+
+                if ($endPos === false) {
+                    break;
+                }
+
+                $block[] = mb_substr($text, 0, $pos);
+                $blocks[] = array(
+                    "attributes" => $attributes,
+                    "block" => $block,
+                );
+
+                $subText = mb_substr($text, $pos + 3, $endPos - $pos - 3);
+                $merged = array_merge($attributes, array("bold"));
+
+                foreach ($this->_getTextRunBlocks($subText, $merged) as $run) {
+                    $blocks[] = array(
+                        "attributes" => $run["attributes"],
+                        "block" => $run["block"],
+                    );
+                }
+
+                $block = array();
+                $text = mb_substr($text, $endPos + 4);
+
+                if (!$text) {
+                    $text = null;
+                }
+
+                $pos = 0;
+            } else if (mb_substr($text, $pos, 4) == "<em>") {
+                $endPos = mb_strpos($text, "</em>", $pos);
+
+                if ($endPos === false) {
+                    break;
+                }
+
+                $block[] = mb_substr($text, 0, $pos);
+                $blocks[] = array(
+                    "attributes" => $attributes,
+                    "block" => $block,
+                );
+
+                $subText = mb_substr($text, $pos + 4, $endPos - $pos - 4);
+                $merged = array_merge($attributes, array("italic"));
+
+                foreach ($this->_getTextRunBlocks($subText, $merged) as $run) {
+                    $blocks[] = array(
+                        "attributes" => $run["attributes"],
+                        "block" => $run["block"],
+                    );
+                }
+
+                $block = array();
+                $text = mb_substr($text, $endPos + 5);
+
+                if (!$text) {
+                    $text = null;
+                }
+
+                $pos = 0;
+            } else if (mb_substr($text, $pos, 3) == "<u>") {
+                $endPos = mb_strpos($text, "</u>", $pos);
+
+                if ($endPos === false) {
+                    break;
+                }
+
+                $block[] = mb_substr($text, 0, $pos);
+                $blocks[] = array(
+                    "attributes" => $attributes,
+                    "block" => $block,
+                );
+
+                $subText = mb_substr($text, $pos + 3, $endPos - $pos - 3);
+                $merged = array_merge($attributes, array("underline"));
+
+                foreach ($this->_getTextRunBlocks($subText, $merged) as $run) {
+                    $blocks[] = array(
+                        "attributes" => $run["attributes"],
+                        "block" => $run["block"],
+                    );
+                }
+
+                $block = array();
+                $text = mb_substr($text, $endPos + 4);
+
+                if (!$text) {
+                    $text = null;
+                }
+
+                $pos = 0;
+            } else {
+                $pos = $pos + 1;
+            }
+        }
+
+        if ($text !== null) {
+            $block[] = $text;
+        }
+
+        if ($block) {
+            $blocks[] = array(
+                "attributes" => $attributes,
+                "block" => $block,
+            );
+        }
+
+        return $blocks;
+    }
+
+    /**
+     * Insert text
+     * @param DOMDocument $xml
+     * @param DOMNode $parentNode
+     * @param $text
+     */
+    private function _insertText(DOMDocument $xml, DOMNode $parentNode, $text) {
+        $ns = $xml->lookupNamespaceUri("w");
+
+        // ul, ol, li
+        $runs = $this->_getTextRunBlocks($text);
+
+        foreach ($runs as $run) {
+            $textRun = $xml->createElementNS($ns, "w:r");
+            $runProperties = $xml->createElementNS($ns, "w:rPr");
+
+            if (in_array("bold", $run["attributes"])) {
+                $runProperties->appendChild($xml->createElementNS($ns, "w:b"));
+            }
+
+            if (in_array("italic", $run["attributes"])) {
+                $runProperties->appendChild($xml->createElementNS($ns, "w:i"));
+            }
+
+            if (in_array("underline", $run["attributes"])) {
+                $underline = $xml->createElementNS($ns, "w:u");
+                $underline->setAttribute("w:val", "single");
+                $runProperties->appendChild($underline);
+            }
+
+            if ($run["attributes"]) {
+                $textRun->appendChild($runProperties);
+            }
+
+            $counter = 0;
+
+            foreach ($run["block"] as $textBlock) {
+                $textNode = $xml->createElementNS($ns, "w:t");
+                $textNode->setAttribute("xml:space", "preserve");
+                $textNode->appendChild($xml->createTextNode($textBlock));
+                $textRun->appendChild($textNode);
+
+                $counter++;
+
+                if ($counter < count($run["block"])) {
+                    $textRun->appendChild($xml->createElementNS($ns, "w:br"));
+                }
+            }
+
+            $parentNode->appendChild($textRun);
+        }
+    }
+
+    /**
      * Insert variable values
      * @param DOMDocument $xml
      * @param DOMElement $context
      */
     private function _insertVariables(DOMDocument $xml, DOMElement $context=null) {
+        while (true) {
+            $xpath = new DOMXPath($xml);
+            $xpath->registerNamespace("w", $xml->documentElement->lookupNamespaceUri("w"));
+            $query = sprintf(".//w:sdt/w:sdtPr/w:tag[starts-with(@w:val, \"%s:\")]", self::TAG_VAR);
+            $vars = $xpath->query($query, $context);
+
+            if (!$vars->length) {
+                break;
+            }
+
+            $block = $vars->item(0);
+            $blockBody = $block->parentNode->parentNode;
+            $blockContent = $xpath->query("w:sdtContent", $blockBody)->item(0);
+            $textRun = $xpath->query(".//w:r", $blockContent)->item(0);
+
+            $name = mb_substr($block->getAttribute("w:val"), strlen(self::TAG_VAR) + 1);
+            $evaluator = new VariableEvaluator($name, $this->_scope->get());
+            $value = $evaluator->evaluate();
+            $this->_insertText($xml, $textRun->parentNode, $value);
+
+            // remove placeholders
+            $textRun->parentNode->removeChild($textRun);
+            $blockBody->removeChild($block->parentNode);
+        }
+
+        // remove placeholer styles
+        $xpath = new DOMXPath($xml);
+        $xpath->registerNamespace("w", $xml->documentElement->lookupNamespaceUri("w"));
+        $styles = $xpath->query(".//w:rStyle[starts-with(@w:val, \"PlaceholderText\")]", $context);
+
+        foreach ($styles as $style) {
+            $style->parentNode->removeChild($style);
+        }
     }
 
     /**

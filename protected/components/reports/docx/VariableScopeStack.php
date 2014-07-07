@@ -11,6 +11,20 @@ class VariableScopeStack {
     private $_stack = array();
 
     /**
+     * Global report data
+     * @var array
+     */
+    private $_globalData = array();
+
+    /**
+     * Constructor
+     * @param array $globalData
+     */
+    public function __construct($globalData=array()) {
+        $this->_globalData = $globalData;
+    }
+
+    /**
      * Push scope to stack
      * @param string $name
      * @param IVariableScopeObject $object
@@ -68,5 +82,14 @@ class VariableScopeStack {
         }
 
         return $scope;
+    }
+
+    /**
+     * Get global data
+     * @param $name
+     * @return mixed
+     */
+    public function getGlobal($name) {
+        return $this->_globalData[$name];
     }
 }
