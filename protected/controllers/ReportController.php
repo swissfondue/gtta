@@ -931,9 +931,31 @@ class ReportController extends Controller {
                                 $table->getCell($row, 1)->setBorder($this->thinBorder);
                                 $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                 $table->getCell($row, 2)->setBorder($this->thinBorder);
-
                                 $table->writeToCell($row, 1, Yii::t('app', 'Result'));
-                                $table->writeToCell($row, 2, $check['result']);
+
+                                $htmlTests = array(
+                                    "<b>",
+                                    "<em>",
+                                    "<u>",
+                                    "<ul>",
+                                    "<ol>",
+                                    "<br />",
+                                );
+
+                                $isHtml = false;
+
+                                foreach ($htmlTests as $test) {
+                                    if (mb_strpos($check["result"], $test) !== false) {
+                                        $isHtml = true;
+                                        break;
+                                    }
+                                }
+
+                                if ($isHtml) {
+                                    $this->_renderText($table->getCell($row, 2), $check["result"], false);
+                                } else {
+                                    $table->writeToCell($row, 2, $check["result"]);
+                                }
 
                                 $row++;
                             }
