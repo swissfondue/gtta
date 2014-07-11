@@ -73,7 +73,12 @@ class TargetCheckCategory extends ActiveRecord {
         foreach ($controls as $control) {
             $controlIds[] = $control->id;
 
-            foreach ($control->customChecks as $custom) {
+            $customChecks = TargetCustomCheck::model()->findAllByAttributes(array(
+                "check_control_id" => $control->id,
+                "target_id" => $this->target_id,
+            ));
+
+            foreach ($customChecks as $custom) {
                 $checkCount++;
                 $finishedCount++;
 
