@@ -66,7 +66,7 @@ class TargetCheckCategory extends ActiveRecord {
         $medCount = 0;
         $highCount = 0;
 
-        $controls = CheckControl::model()->with("customChecks")->findAllByAttributes(array(
+        $controls = CheckControl::model()->findAllByAttributes(array(
              "check_category_id" => $this->check_category_id
         ));
 
@@ -166,8 +166,92 @@ class TargetCheckCategory extends ActiveRecord {
         $this->low_risk_count = $lowCount;
         $this->med_risk_count = $medCount;
         $this->high_risk_count = $highCount;
-
         $this->save();
+    }
+
+    /**
+     * Actualize checks within target category
+     */
+    public function reindexChecks() {
+        $controlIds = array();
+        $referenceIds = array();
+
+        $controls = CheckControl::model()->findAllByAttributes(array(
+             "check_category_id" => $this->check_category_id
+        ));
+
+        foreach ($controls as $control) {
+            $controlIds[] = $control->id;
+        }
+
+        $references = TargetReference::model()->findAllByAttributes(array(
+            "target_id" => $this->target_id
+        ));
+
+        foreach ($references as $reference) {
+            $referenceIds[] = $reference->reference_id;
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->addInCondition("check_control_id", $controlIds);
+        $criteria->addInCondition("reference_id", $referenceIds);
+
+        if (!$this->advanced) {
+            $criteria->addCondition("t.advanced = FALSE");
+        }
+
+        $admin = null;
+
+        foreach ($this->target->project->projectUsers as $user) {
+            if ($user->admin) {
+                $admin = $user->user_id;
+                break;
+            }
+        }
+
+        if ($admin == null) {
+            $admin = User::model()->findByAttributes(array("role" => User::ROLE_ADMIN));
+
+            if ($admin) {
+                $admin = $admin->id;
+            }
+        }
+
+        $language = Language::model()->findByAttributes(array("default" => true));
+        $checks = Check::model()->findAll($criteria);
+        $checkIds = array();
+
+        // delete unneeded target checks
+        foreach ($checks as $check) {
+            $checkIds[] = $check->id;
+        }
+
+        $criteria = new CDBCriteria();
+        $criteria->addColumnCondition(array("target_id" => $this->target_id));
+        $criteria->addNotInCondition("check_id", $checkIds);
+        TargetCheck::model()->deleteAll($criteria);
+
+        $targetChecks = TargetCheck::model()->findAllByAttributes(array("target_id" => $this->target_id));
+        $checkIds = array();
+
+        foreach ($targetChecks as $check) {
+            $checkIds[] = $check->check_id;
+        }
+
+        foreach ($checks as $check) {
+            if (in_array($check->id, $checkIds)) {
+                continue;
+            }
+
+            $targetCheck = new TargetCheck();
+            $targetCheck->target_id = $this->target_id;
+            $targetCheck->check_id = $check->id;
+            $targetCheck->user_id = $admin;
+            $targetCheck->language_id = $language->id;
+            $targetCheck->status = TargetCheck::STATUS_OPEN;
+            $targetCheck->rating = TargetCheck::RATING_NONE;
+            $targetCheck->save();
+        }
     }
 
     /**

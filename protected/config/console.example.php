@@ -85,6 +85,10 @@ return array(
             "lockFile" => "/tmp/gtta.stats"
         ),
 
+        "targetCheckSync" => array(
+            "lockFile" => "/tmp/gtta.target-check-sync"
+        ),
+
         "update" => array(
             "lockFile" => "/tmp/gtta.update",
             "keyFile" => BASE_DIR . "/security/keys/update-server.pub",

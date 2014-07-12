@@ -1048,7 +1048,7 @@ class CheckController extends Controller
                 $check->reference_code = $model->referenceCode;
                 $check->reference_url = $model->referenceUrl;
                 $check->effort = $model->effort;
-
+                $check->status = Check::STATUS_INSTALLED;
                 $check->save();
 
                 if ($newRecord) {
