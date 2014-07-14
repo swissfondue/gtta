@@ -14,8 +14,8 @@ class ProjectController extends Controller {
             "showDetails + target, attachment, checks",
             "checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, gtcontrolcheck, gtsavecheck, savecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck, tracktime",
             "checkAdmin + edit, users, edituser, controluser",
-            "ajaxOnly + savecheck, savecustomcheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtcontrolattachment, copycheck",
-            "postOnly + savecheck, savecustomcheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck",
+            "ajaxOnly + savecheck, savecustomcheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtcontrolattachment, copycheck, controlchecklist, check",
+            "postOnly + savecheck, savecustomcheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck, controlchecklist, check",
             "idleOrRunning",
 		);
 	}
@@ -103,7 +103,7 @@ class ProjectController extends Controller {
             $projects = Project::model()->with(array(
                 "projectUsers" => array(
                     "joinType" => "INNER JOIN",
-                    "on" => "projectUsers.user_id = :user_id",
+                    "on" => "user_id = :user_id",
                     "params" => array(
                         "user_id" => Yii::app()->user->id,
                     ),
@@ -114,7 +114,7 @@ class ProjectController extends Controller {
             $projectCount = Project::model()->with(array(
                 "projectUsers" => array(
                     "joinType" => "INNER JOIN",
-                    "on" => "projectUsers.user_id = :user_id",
+                    "on" => "user_id = :user_id",
                     "params" => array(
                         "user_id" => Yii::app()->user->id,
                     ),
@@ -1473,122 +1473,38 @@ class ProjectController extends Controller {
             throw new CHttpException(404, Yii::t("app", "Category not found."));
         }
 
-        $controlIds = array();
-        $referenceIds = array();
-
-        $controls = CheckControl::model()->findAllByAttributes(array(
-            "check_category_id" => $category->check_category_id
-        ));
-
-        foreach ($controls as $control) {
-            $controlIds[] = $control->id;
-        }
-
-        $references = TargetReference::model()->findAllByAttributes(array(
-            "target_id" => $target->id
-        ));
-
-        foreach ($references as $reference) {
-            $referenceIds[] = $reference->reference_id;
-        }
-
         $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(array("t.check_category_id" => $category->check_category_id));
+        $criteria->order = "t.sort_order ASC";
 
-        $criteria->addInCondition("t.check_control_id", $controlIds);
-        $criteria->addInCondition("t.reference_id", $referenceIds);
-        $criteria->order = "control.sort_order ASC, t.sort_order ASC, tc.id ASC";
-
-        if (!$category->advanced) {
-            $criteria->addCondition("t.advanced = FALSE");
-        }
-
-        $checks = Check::model()->with(array(
+        $controls = CheckControl::model()->with(array(
+            "customChecks" => array(
+                "alias" => "custom",
+                "on" => "custom.target_id = :target_id",
+                "params" => array("target_id" => $target->id)
+            ),
             "l10n" => array(
                 "joinType" => "LEFT JOIN",
                 "on" => "l10n.language_id = :language_id",
                 "params" => array("language_id" => $language)
             ),
-            "targetChecks" => array(
-                "alias" => "tc",
-                "joinType" => "LEFT JOIN",
-                "on" => "tc.target_id = :target_id",
-                "params" => array("target_id" => $target->id),
+            "checks" => array(
                 "with" => array(
-                    "attachments",
-                    "inputs" => array(
-                        "alias" => "tci",
-                    ),
-                    "solutions" => array(
-                        "alias" => "tcs",
-                    ),
-                )
-            ),
-            "scripts" => array(
-                "joinType" => "LEFT JOIN",
-                "with" => array(
-                    "inputs" => array(
-                        "on" => "inputs.visible AND inputs.check_script_id = scripts.id",
+                    "targetChecks" => array(
                         "joinType" => "LEFT JOIN",
-                        "with" => array(
-                            "l10n" => array(
-                                "alias" => "l10n_i",
-                                "joinType" => "LEFT JOIN",
-                                "on" => "l10n_i.language_id = :language_id",
-                                "params" => array("language_id" => $language)
-                            )
-                        ),
-                        "order" => "inputs.sort_order ASC"
-                    ),
-                )
-            ),
-            "results" => array(
-                "joinType" => "LEFT JOIN",
-                "with" => array(
-                    "l10n" => array(
-                        "alias" => "l10n_r",
-                        "joinType" => "LEFT JOIN",
-                        "on" => "l10n_r.language_id = :language_id",
-                        "params" => array("language_id" => $language)
-                    )
-                ),
-                "order" => "results.sort_order ASC"
-            ),
-            "solutions" => array(
-                "joinType" => "LEFT JOIN",
-                "with" => array(
-                    "l10n" => array(
-                        "alias" => "l10n_s",
-                        "joinType" => "LEFT JOIN",
-                        "on" => "l10n_s.language_id = :language_id",
-                        "params" => array("language_id" => $language)
-                    )
-                ),
-                "order" => "solutions.sort_order ASC"
-            ),
-            "control" => array(
-                "joinType" => "LEFT JOIN",
-                "with" => array(
-                    "customChecks" => array(
-                        "alias" => "custom",
-                        "on" => "custom.target_id = :target_id",
-                        "params" => array("target_id" => $target->id)
-                    ),
-                    "l10n" => array(
-                        "alias" => "l10n_c",
-                        "joinType" => "LEFT JOIN",
-                        "on" => "l10n_c.language_id = :language_id",
-                        "params" => array("language_id" => $language)
+                        "alias" => "tc",
+                        "on" => "tc.target_id = :target_id",
+                        "params" => array("target_id" => $target->id),
                     )
                 )
-            ),
-            "_reference"
+            )
         ))->findAll($criteria);
 
-        $controlStats = array();
+        $stats = array();
 
-        foreach ($checks as $check) {
-            if (!isset($controlStats[$check->check_control_id])) {
-                $controlStats[$check->check_control_id] = array(
+        foreach ($controls as $control) {
+            if (!isset($stats[$control->id])) {
+                $stats[$control->id] = array(
                     "checks" => 0,
                     "finished" => 0,
                     "info" => 0,
@@ -1597,26 +1513,26 @@ class ProjectController extends Controller {
                     "highRisk" => 0,
                 );
 
-                if ($check->control->customChecks) {
-                    foreach ($check->control->customChecks as $customCheck) {
-                        $controlStats[$check->check_control_id]["checks"]++;
-                        $controlStats[$check->check_control_id]["finished"]++;
+                if ($control->customChecks) {
+                    foreach ($control->customChecks as $customCheck) {
+                        $stats[$control->id]["checks"]++;
+                        $stats[$control->id]["finished"]++;
 
                         switch ($customCheck->rating) {
                             case TargetCustomCheck::RATING_INFO:
-                                $controlStats[$check->check_control_id]["info"]++;
+                                $stats[$control->id]["info"]++;
                                 break;
 
                             case TargetCustomCheck::RATING_LOW_RISK:
-                                $controlStats[$check->check_control_id]["lowRisk"]++;
+                                $stats[$control->id]["lowRisk"]++;
                                 break;
 
                             case TargetCustomCheck::RATING_MED_RISK:
-                                $controlStats[$check->check_control_id]["medRisk"]++;
+                                $stats[$control->id]["medRisk"]++;
                                 break;
 
                             case TargetCustomCheck::RATING_HIGH_RISK:
-                                $controlStats[$check->check_control_id]["highRisk"]++;
+                                $stats[$control->id]["highRisk"]++;
                                 break;
 
                             default:
@@ -1626,33 +1542,39 @@ class ProjectController extends Controller {
                 }
             }
 
-            $controlStats[$check->check_control_id]["checks"]++;
+            $stats[$control->id]["checks"]++;
 
-            if ($check->targetChecks && $check->targetChecks[0] && $check->targetChecks[0]->status == TargetCheck::STATUS_FINISHED) {
-                $controlStats[$check->check_control_id]["finished"]++;
+            foreach ($control->checks as $check) {
+                foreach ($check->targetChecks as $tc) {
+                    $stats[$control->id]["checks"]++;
 
-                switch ($check->targetChecks[0]->rating) {
-                    case TargetCheck::RATING_INFO:
-                        $controlStats[$check->check_control_id]["info"]++;
-                        break;
+                    if ($tc->status == TargetCheck::STATUS_FINISHED) {
+                        $stats[$control->id]["finished"]++;
+                    }
 
-                    case TargetCheck::RATING_LOW_RISK:
-                        $controlStats[$check->check_control_id]["lowRisk"]++;
-                        break;
+                    switch ($tc->rating) {
+                        case TargetCheck::RATING_INFO:
+                            $stats[$control->id]["info"]++;
+                            break;
 
-                    case TargetCheck::RATING_MED_RISK:
-                        $controlStats[$check->check_control_id]["medRisk"]++;
-                        break;
+                        case TargetCheck::RATING_LOW_RISK:
+                            $stats[$control->id]["lowRisk"]++;
+                            break;
 
-                    case TargetCheck::RATING_HIGH_RISK:
-                        $controlStats[$check->check_control_id]["highRisk"]++;
-                        break;
+                        case TargetCheck::RATING_MED_RISK:
+                            $stats[$control->id]["medRisk"]++;
+                            break;
+
+                        case TargetCheck::RATING_HIGH_RISK:
+                            $stats[$control->id]["highRisk"]++;
+                            break;
+                    }
                 }
             }
         }
 
         $criteria = new CDbCriteria();
-        $criteria->order  = "t.host ASC";
+        $criteria->order = "t.host ASC";
         $criteria->addCondition("t.project_id = :project_id");
         $criteria->params = array("project_id" => $project->id);
         $criteria->together = true;
@@ -1671,10 +1593,12 @@ class ProjectController extends Controller {
         ))->findAll($criteria);
 
         $client = Client::model()->findByPk($project->client_id);
-
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
-        $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array( "id" => $project->id )));
-        $this->breadcrumbs[] = array($target->host, $this->createUrl("project/target", array( "id" => $project->id, "target" => $target->id )));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
+        $this->breadcrumbs[] = array($target->host, $this->createUrl("project/target", array(
+            "id" => $project->id,
+            "target" => $target->id
+        )));
         $this->breadcrumbs[] = array($category->category->localizedName, "");
 
         // display the page
@@ -1684,7 +1608,7 @@ class ProjectController extends Controller {
             "target" => $target,
             "client" => $client,
             "category" => $category,
-            "checks" => $checks,
+            "controls" => $controls,
             "statuses" => array(
                 Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
                 Project::STATUS_OPEN => Yii::t("app", "Open"),
@@ -1692,10 +1616,274 @@ class ProjectController extends Controller {
                 Project::STATUS_FINISHED => Yii::t("app", "Finished"),
             ),
             "ratings" => TargetCheck::getRatingNames(),
-            "controlStats" => $controlStats,
+            "stats" => $stats,
             "quickTargets" => $quickTargets,
         ));
 	}
+
+    /**
+     * List of checks in control
+     * @param $id
+     * @param $target
+     * @param $category
+     * @param $control
+     * @throws CHttpException
+     */
+    public function actionControlChecklist($id, $target, $category, $control) {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $target = (int) $target;
+            $category = (int) $category;
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new CHttpException(404, Yii::t("app", "Project not found."));
+            }
+
+            if (!$project->checkPermission()) {
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
+            }
+
+            $target = Target::model()->findByAttributes(array(
+                "id" => $target,
+                "project_id" => $project->id
+            ));
+
+            if (!$target) {
+                throw new CHttpException(404, Yii::t("app", "Target not found."));
+            }
+
+            $language = Language::model()->findByAttributes(array(
+                "code" => Yii::app()->language
+            ));
+
+            if ($language) {
+                $language = $language->id;
+            }
+
+            $category = TargetCheckCategory::model()->findByAttributes(array(
+                "target_id" => $target->id,
+                "check_category_id" => $category
+            ));
+
+            if (!$category) {
+                throw new CHttpException(404, Yii::t("app", "Category not found."));
+            }
+
+            $control = CheckControl::model()->findByAttributes(array(
+                "id" => $control,
+                "check_category_id" => $category->check_category_id,
+            ));
+
+            if (!$control) {
+                throw new CHttpException(404, Yii::t("app", "Control not found."));
+            }
+
+            $referenceIds = array();
+            $references = TargetReference::model()->findAllByAttributes(array(
+                "target_id" => $target->id
+            ));
+
+            foreach ($references as $reference) {
+                $referenceIds[] = $reference->reference_id;
+            }
+
+            $criteria = new CDbCriteria();
+            $criteria->addColumnCondition(array("t.check_control_id" => $control->id));
+            $criteria->addInCondition("t.reference_id", $referenceIds);
+            $criteria->order = "t.sort_order ASC, tc.id ASC";
+
+            if (!$category->advanced) {
+                $criteria->addCondition("t.advanced = FALSE");
+            }
+
+            $checks = Check::model()->with(array(
+                "l10n" => array(
+                    "joinType" => "LEFT JOIN",
+                    "on" => "l10n.language_id = :language_id",
+                    "params" => array("language_id" => $language)
+                ),
+                "targetChecks" => array(
+                    "alias" => "tc",
+                    "joinType" => "LEFT JOIN",
+                    "on" => "tc.target_id = :target_id",
+                    "params" => array("target_id" => $target->id),
+                ),
+            ))->findAll($criteria);
+
+            $html = "";
+
+            foreach ($checks as $check) {
+                $number = 0;
+
+                foreach ($check->targetChecks as $tc) {
+                    $html .= $this->renderPartial("partial/check-header", array(
+                        "project" => $project,
+                        "target" => $target,
+                        "category" => $category,
+                        "check" => $check,
+                        "tc" => $tc,
+                        "limited" => ($this->_system->demo && !$check->demo),
+                        "number" => $number,
+                        "ratings" => TargetCheck::getRatingNames(),
+                    ), true);
+
+                    $number++;
+                }
+            }
+
+            $response->addData("html", $html);
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Check form
+     * @param $id
+     * @param $target
+     * @param $category
+     * @param $check
+     * @throws CHttpException
+     */
+    public function actionCheck($id, $target, $category, $check) {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $target = (int) $target;
+            $category = (int) $category;
+            $check = (int) $check;
+
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new CHttpException(404, Yii::t("app", "Project not found."));
+            }
+
+            if (!$project->checkPermission()) {
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
+            }
+
+            $target = Target::model()->findByAttributes(array(
+                "id" => $target,
+                "project_id" => $project->id
+            ));
+
+            if (!$target) {
+                throw new CHttpException(404, Yii::t("app", "Target not found."));
+            }
+
+            $category = TargetCheckCategory::model()->with("category")->findByAttributes(array(
+                "target_id" => $target->id,
+                "check_category_id" => $category
+            ));
+
+            if (!$category) {
+                throw new CHttpException(404, Yii::t("app", "Category not found."));
+            }
+
+            $language = Language::model()->findByAttributes(array(
+                "code" => Yii::app()->language
+            ));
+
+            if (!$language) {
+                $language = Language::model()->findByAttributes(array(
+                    "default" => true
+                ));
+            }
+
+            /** @var TargetCheck $check */
+            $check = TargetCheck::model()->with(array(
+                "check" => array(
+                    "with" => array(
+                        "l10n" => array(
+                            "joinType" => "LEFT JOIN",
+                            "on" => "l10n.language_id = :language_id",
+                            "params" => array("language_id" => $language->id)
+                        ),
+                        "scripts" => array(
+                            "joinType" => "LEFT JOIN",
+                            "with" => array(
+                                "inputs" => array(
+                                    "on" => "inputs.visible AND inputs.check_script_id = scripts.id",
+                                    "joinType" => "LEFT JOIN",
+                                    "with" => array(
+                                        "l10n" => array(
+                                            "alias" => "l10n_i",
+                                            "joinType" => "LEFT JOIN",
+                                            "on" => "l10n_i.language_id = :language_id",
+                                            "params" => array("language_id" => $language->id)
+                                        )
+                                    ),
+                                    "order" => "inputs.sort_order ASC"
+                                ),
+                            )
+                        ),
+                        "results" => array(
+                            "joinType" => "LEFT JOIN",
+                            "with" => array(
+                                "l10n" => array(
+                                    "alias" => "l10n_r",
+                                    "joinType" => "LEFT JOIN",
+                                    "on" => "l10n_r.language_id = :language_id",
+                                    "params" => array("language_id" => $language->id)
+                                )
+                            ),
+                            "order" => "results.sort_order ASC"
+                        ),
+                        "solutions" => array(
+                            "joinType" => "LEFT JOIN",
+                            "with" => array(
+                                "l10n" => array(
+                                    "alias" => "l10n_s",
+                                    "joinType" => "LEFT JOIN",
+                                    "on" => "l10n_s.language_id = :language_id",
+                                    "params" => array("language_id" => $language->id)
+                                )
+                            ),
+                            "order" => "solutions.sort_order ASC"
+                        ),
+                        "_reference"
+                    ),
+                ),
+                "attachments",
+                "inputs" => array(
+                    "alias" => "tci",
+                ),
+                "solutions" => array(
+                    "alias" => "tcs",
+                ),
+            ))->findByAttributes(array(
+                "id" => $check,
+                "target_id" => $target->id
+            ));
+
+            if (!$check) {
+                throw new CHttpException(404, Yii::t("app", "Check not found."));
+            }
+
+            // display the check form
+            $html = $this->renderPartial("partial/check-form", array(
+                "project" => $project,
+                "target" => $target,
+                "category" => $category,
+                "check" => $check,
+                "limited" => ($this->_system->demo && !$check->check->demo),
+                "ratings" => TargetCheck::getRatingNames(),
+            ), true);
+
+            $response->addData("html", $html);
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
 
     /**
      * Save check.
@@ -1748,7 +1936,10 @@ class ProjectController extends Controller {
             }
 
             /** @var TargetCheck $targetCheck */
-            $targetCheck = TargetCheck::model()->findByPk($check);
+            $targetCheck = TargetCheck::model()->findByAttributes(array(
+                "id" => $check,
+                "target_id" => $target->id,
+            ));
 
             if (!$targetCheck) {
                 throw new CHttpException(404, Yii::t("app", "Check not found."));
@@ -2029,7 +2220,10 @@ class ProjectController extends Controller {
             }
 
             /** @var TargetCheck $targetCheck */
-            $targetCheck = TargetCheck::model()->findByPk($check);
+            $targetCheck = TargetCheck::model()->findByAttributes(array(
+                "id" => $check,
+                "target_id" => $target->id,
+            ));
 
             if (!$targetCheck) {
                 throw new CHttpException(404, Yii::t("app", "Check not found."));
@@ -2584,11 +2778,12 @@ class ProjectController extends Controller {
                 'project_id' => $project->id
             ));
 
-            if (!$target)
+            if (!$target) {
                 throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+            }
 
             $category = TargetCheckCategory::model()->with('category')->findByAttributes(array(
-                'target_id'         => $target->id,
+                'target_id' => $target->id,
                 'check_category_id' => $category
             ));
 
@@ -2606,7 +2801,10 @@ class ProjectController extends Controller {
                 $controlIds[] = $control->id;
             }
 
-            $targetCheck = TargetCheck::model()->findByPk($check);
+            $targetCheck = TargetCheck::model()->findByAttributes(array(
+                "id" => $check,
+                "target_id" => $target->id,
+            ));
 
             if (!$targetCheck) {
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
@@ -3090,7 +3288,10 @@ class ProjectController extends Controller {
             }
 
             /** @var TargetCheck $targetCheck */
-            $targetCheck = TargetCheck::model()->findByPk($check);
+            $targetCheck = TargetCheck::model()->findByAttributes(array(
+                "id" => $check,
+                "target_id" => $target->id,
+            ));
             
             if (!$targetCheck) {
                 throw new CHttpException(404, Yii::t("app", "Check not found."));

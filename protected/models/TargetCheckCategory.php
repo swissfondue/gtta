@@ -192,14 +192,6 @@ class TargetCheckCategory extends ActiveRecord {
             $referenceIds[] = $reference->reference_id;
         }
 
-        $criteria = new CDbCriteria();
-        $criteria->addInCondition("check_control_id", $controlIds);
-        $criteria->addInCondition("reference_id", $referenceIds);
-
-        if (!$this->advanced) {
-            $criteria->addCondition("t.advanced = FALSE");
-        }
-
         $admin = null;
 
         foreach ($this->target->project->projectUsers as $user) {
@@ -218,18 +210,14 @@ class TargetCheckCategory extends ActiveRecord {
         }
 
         $language = Language::model()->findByAttributes(array("default" => true));
-        $checks = Check::model()->findAll($criteria);
-        $checkIds = array();
 
-        // delete unneeded target checks
-        foreach ($checks as $check) {
-            $checkIds[] = $check->id;
+        $criteria = new CDbCriteria();
+        $criteria->addInCondition("check_control_id", $controlIds);
+        $criteria->addInCondition("reference_id", $referenceIds);
+
+        if (!$this->advanced) {
+            $criteria->addCondition("t.advanced = FALSE");
         }
-
-        $criteria = new CDBCriteria();
-        $criteria->addColumnCondition(array("target_id" => $this->target_id));
-        $criteria->addNotInCondition("check_id", $checkIds);
-        TargetCheck::model()->deleteAll($criteria);
 
         $targetChecks = TargetCheck::model()->findAllByAttributes(array("target_id" => $this->target_id));
         $checkIds = array();
@@ -237,6 +225,8 @@ class TargetCheckCategory extends ActiveRecord {
         foreach ($targetChecks as $check) {
             $checkIds[] = $check->check_id;
         }
+
+        $checks = Check::model()->findAll($criteria);
 
         foreach ($checks as $check) {
             if (in_array($check->id, $checkIds)) {

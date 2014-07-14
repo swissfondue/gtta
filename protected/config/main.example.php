@@ -108,6 +108,8 @@ return array(
                 "project/<id:\d+>/target/new" => "project/edittarget",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>" => "project/checks",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/save" => "project/savecategory",
+                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/control/<control:\d+>" => "project/controlchecklist",
+                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>" => "project/check",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/save" => "project/savecheck",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/autosave" => "project/autosavecheck",
                 "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/control" => "project/controlcheck",
@@ -445,7 +447,6 @@ return array(
         ),
 
         "tmpPath" => "/tmp",
-        "collapseCheckCount" => 20,
 
         "security" => array(
             "ca" => BASE_DIR . "/security/ca/ca.crt",

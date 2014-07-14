@@ -14,36 +14,6 @@ function User()
         this.result_editors = [];
 
         /**
-         * Expand all checks.
-         */
-        this.expandAll = function () {
-            $('div.control-body').slideDown('fast', undefined, function () {
-                $('div.check-form').slideDown('slow');
-            });
-        };
-
-        /**
-         * Collapse all checks.
-         */
-        this.collapseAll = function () {
-            $('div.check-form').slideUp('fast', undefined, function () {
-                $('div.control-body').slideUp('slow');
-            });
-        };
-
-        /**
-         * Start all automated checks.
-         */
-        this.startAll = function () {
-            $('div.check-header[data-type="automated"][data-limited="0"]').each(function () {
-                var id = $(this).data('id');
-
-                if (!_check.isRunning(id))
-                    _check.start(id);
-            });
-        };
-
-        /**
          * Update status of running checks.
          */
         this.update = function (url) {
@@ -52,12 +22,11 @@ function User()
             if (this.runningChecks.length > 0)
                 _check.updateIteration++;
 
-            for (i = 0; i < _check.runningChecks.length; i++)
-            {
+            for (i = 0; i < _check.runningChecks.length; i++) {
                 var check, headingRow, minutes, seconds, time;
 
-                check      = _check.runningChecks[i];
-                headingRow = $('div.check-header[data-id=' + check.id + ']');
+                check = _check.runningChecks[i];
+                headingRow = $('div.check-header[data-type=check][data-id=' + check.id + ']');
 
                 if (check.time > -1)
                 {
@@ -122,21 +91,21 @@ function User()
                                 check = data.checks[i];
 
                                 $('#TargetCheckEditForm_' + check.id + '_result').val(check.result);
-                                $('div.check-form[data-id="' + check.id + '"] div.table-result').html(check.tableResult);
+                                $('div.check-form[data-type=check][data-id="' + check.id + '"] div.table-result').html(check.tableResult);
 
                                 if (check.startedText) {
-                                    $('div.check-form[data-id="' + check.id + '"] .automated-info-block')
+                                    $('div.check-form[data-type=check][data-id="' + check.id + '"] .automated-info-block')
                                         .html(check.startedText)
                                         .show();
                                 } else {
-                                    $('div.check-form[data-id="' + check.id + '"] .automated-info-block').hide();
+                                    $('div.check-form[data-type=check][data-id="' + check.id + '"] .automated-info-block').hide();
                                 }
 
                                 // attachments
                                 if (check.attachments.length > 0) {
                                     var table, tbody;
 
-                                    table = $('div.check-form[data-id="' + check.id + '"] .attachment-list');
+                                    table = $('div.check-form[data-type=check][data-id="' + check.id + '"] .attachment-list');
                                     tbody = table.find("tbody");
                                     tbody.find("tr").remove();
 
@@ -179,24 +148,21 @@ function User()
                                     table.show();
                                 }
 
-                                for (k = 0; k < _check.runningChecks.length; k++)
-                                {
+                                for (k = 0; k < _check.runningChecks.length; k++) {
                                     var innerCheck = _check.runningChecks[k];
 
-                                    if (innerCheck.id == check.id)
-                                    {
-                                        checkIdx        = k;
+                                    if (innerCheck.id == check.id) {
+                                        checkIdx = k;
                                         innerCheck.time = check.time;
 
                                         break;
                                     }
                                 }
 
-                                if (check.finished)
-                                {
+                                if (check.finished) {
                                     _check.runningChecks.splice(checkIdx, 1);
 
-                                    var headerRow = $('div.check-header[data-id=' + check.id + ']');
+                                    var headerRow = $('div.check-header[data-type=check][data-id=' + check.id + ']');
 
                                     headerRow.removeClass('in-progress');
                                     $('td.status', headerRow).html('&nbsp;');
@@ -244,16 +210,156 @@ function User()
         };
 
         /**
+         * Expand custom template.
+         * @param id
+         * @param callback
+         */
+        this.expandCustomTemplate = function (id, callback) {
+            var selector = $("div.check-form[data-type=custom-template][data-id=" + id + "]");
+
+            selector.slideDown("slow", undefined, function () {
+                if (callback) {
+                    callback();
+                }
+            });
+        };
+
+        /**
+         * Collapse custom template.
+         * @param id
+         * @param callback
+         */
+        this.collapseCustomTemplate = function (id, callback) {
+            var selector = $("div.check-form[data-type=custom-template][data-id=" + id + "]");
+
+            selector.slideUp("slow", undefined, function () {
+                if (callback) {
+                    callback();
+                }
+            });
+        };
+
+        /**
+         * Toggle custom template.
+         * @param id
+         */
+        this.toggleCustomTemplate = function (id) {
+            var visible = $("div.check-form[data-type=custom-template][data-id=" + id + "]").is(":visible");
+
+            if (visible) {
+                _check.collapseCustomTemplate(id, null);
+            } else {
+                _check.expandCustomTemplate(id, null);
+            }
+        };
+
+        /**
+         * Expand custom check.
+         * @param id
+         * @param callback
+         */
+        this.expandCustomCheck = function (id, callback) {
+            var selector = $("div.check-form[data-type=custom-check][data-id=" + id + "]");
+
+            selector.slideDown("slow", undefined, function () {
+                if (callback) {
+                    callback();
+                }
+            });
+        };
+
+        /**
+         * Collapse custom check.
+         * @param id
+         * @param callback
+         */
+        this.collapseCustomCheck = function (id, callback) {
+            var selector = $("div.check-form[data-type=custom-check][data-id=" + id + "]");
+
+            selector.slideUp("slow", undefined, function () {
+                if (callback) {
+                    callback();
+                }
+            });
+        };
+
+        /**
+         * Toggle custom template.
+         * @param id
+         */
+        this.toggleCustomCheck = function (id) {
+            var visible = $("div.check-form[data-type=custom-check][data-id=" + id + "]").is(":visible");
+
+            if (visible) {
+                _check.collapseCustomCheck(id, null);
+            } else {
+                _check.expandCustomCheck(id, null);
+            }
+        };
+
+        /**
          * Expand.
          * @param id
          * @param callback
          */
         this.expand = function (id, callback) {
-            var selector = $("div.check-form[data-id=" + id + "]");
-                
-            selector.slideDown("slow", undefined, function () {
-                if (callback) {
-                    callback();
+            var header, form, url;
+
+            header = $("div.check-header[data-type=check][data-id=" + id + "]");
+            form = $("div.check-form[data-type=check][data-id=" + id + "]");
+
+            if (header.data("limited")) {
+                form.slideDown("slow", function () {
+                    if (callback) {
+                        callback();
+                    }
+                });
+
+                return;
+            }
+
+            url = header.data("check-url");
+
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data : {
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $(".loader-image").hide();
+                    $("a[data-type=check-link][data-id=" + id + "]").removeClass("disabled");
+
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
+                        return;
+                    }
+
+                    form.html(data.data.html);
+                    $(".wysiwyg", form).ckeditor();
+                    _check.initTargetCheckAttachmentUploadForms(id);
+                    _check.initAutosave(id);
+
+                    form.slideDown("slow", function () {
+                        if (callback) {
+                            callback();
+                        }
+                    });
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    $("a[data-type=check-link][data-id=" + id + "]").removeClass("disabled");
+                    system.showMessage("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $(".loader-image").show();
+                    $("a[data-type=check-link][data-id=" + id + "]").addClass("disabled");
                 }
             });
         };
@@ -264,9 +370,13 @@ function User()
          * @param callback
          */
         this.collapse = function (id, callback) {
-            var selector = $("div.check-form[data-id=" + id + "]");
+            var selector = $("div.check-form[data-type=check][data-id=" + id + "]");
             
             selector.slideUp("slow", undefined, function () {
+                if (!selector.data("limited")) {
+                    $("div.check-form[data-type=check][data-id=" + id + "]").html("");
+                }
+
                 if (callback) {
                     callback();
                 }
@@ -278,7 +388,11 @@ function User()
          * @param id
          */
         this.toggle = function (id) {
-            var visible = $("div.check-form[data-id=" + id + "]").is(":visible");
+            if ($("a[data-type=check-link][data-id=" + id + "]").hasClass("disabled")) {
+                return;
+            }
+
+            var visible = $("div.check-form[data-type=check][data-id=" + id + "]").is(":visible");
 
             if (visible) {
                 _check.collapse(id, null);
@@ -290,25 +404,76 @@ function User()
         /**
          * Expand control.
          */
-        this.expandControl = function (id) {
-            $('div.control-body[data-id=' + id + ']').slideDown('slow');
+        this.expandControl = function (id, callback) {
+            var url = $("div[data-id=" + id + "][data-type=control]").data("checklist-url");
+
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data : {
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $(".loader-image").hide();
+                    $("a[data-type=control-link][data-id=" + id + "]").removeClass("disabled");
+
+                    if (data.status == "error") {
+                        system.showMessage("error", data.errorText);
+                        return;
+                    }
+
+                    var body = $("div.control-body[data-id=" + id + "]");
+
+                    body.append(data.data.html);
+                    body.slideDown("slow", function () {
+                        if (callback) {
+                            callback();
+                        }
+                    });
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    $("a[data-type=control-link][data-id=" + id + "]").removeClass("disabled");
+                    system.showMessage("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $(".loader-image").show();
+                    $("a[data-type=control-link][data-id=" + id + "]").addClass("disabled");
+                }
+            });
         };
 
         /**
          * Collapse control.
          */
-        this.collapseControl = function (id) {
-            $('div.control-body[data-id=' + id + ']').slideUp('slow');
+        this.collapseControl = function (id, callback) {
+            $("div.control-body[data-id=" + id + "]").slideUp("slow", function () {
+                $("div.control-body[data-id=" + id + "] div[data-type=check]").remove();
+
+                if (callback) {
+                    callback();
+                }
+            });
         };
 
         /**
          * Toggle control.
          */
         this.toggleControl = function (id) {
-            if ($('div.control-body[data-id=' + id + ']').is(':visible')) {
-                _check.collapseControl(id);
+            if ($("a[data-type=control-link][data-id=" + id + "]").hasClass("disabled")) {
+                return;
+            }
+
+            if ($("div.control-body[data-id=" + id + "]").is(":visible")) {
+                _check.collapseControl(id, null);
             } else {
-                _check.expandControl(id);
+                _check.expandControl(id, null);
             }
         };
 
@@ -369,8 +534,8 @@ function User()
          */
         this.setLoading = function (id, custom) {
             var row = custom ?
-                $('div.check-form[data-id="custom-' + id + '"]') :
-                $('div.check-form[data-id="' + id + '"]');
+                $('div.check-form[data-type=custom-check][data-id=' + id + ']') :
+                $('div.check-form[data-type=check][data-id="' + id + '"]');
 
             $('.loader-image').show();
             $('input[type="text"]', row).prop('readonly', true);
@@ -385,8 +550,8 @@ function User()
          */
         this.setLoaded = function (id, custom) {
             var row = custom ?
-                $('div.check-form[data-id="custom-' + id + '"]') :
-                $('div.check-form[data-id="' + id + '"]');
+                $('div.check-form[data-type=custom-check][data-id=' + id + ']') :
+                $('div.check-form[data-type=check][data-id="' + id + '"]');
 
             $('.loader-image').hide();
             $('input[type="text"]', row).prop('readonly', false);
@@ -403,7 +568,7 @@ function User()
             var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, solutions, rating, data,
                 solution, solutionTitle, saveSolution, poc, links;
 
-            row = $('div.check-form[data-id="' + id + '"]');
+            row = $('div.check-form[data-type=check][data-id="' + id + '"]');
 
             texts = $('input[type="text"][name^="TargetCheckEditForm_' + id + '[inputs]"]', row).map(
                 function () {
@@ -540,8 +705,8 @@ function User()
         this.save = function (id, goToNext) {
             var row, headerRow, data, url, nextRow, rating;
 
-            headerRow = $('div.check-header[data-id="' + id + '"]');
-            row = $('div.check-form[data-id="' + id + '"]');
+            headerRow = $('div.check-header[data-type=check][data-id="' + id + '"]');
+            row = $('div.check-form[data-type=check][data-id="' + id + '"]');
             url = row.data('save-url');
 
             data = _check.getData(id);
@@ -584,7 +749,7 @@ function User()
                     if (data.newSolution) {
                         var solution = data.newSolution;
 
-                        $('div.check-form[data-id="' + id + '"] ul.solutions').append(
+                        $('div.check-form[data-type=check][data-id="' + id + '"] ul.solutions').append(
                             $("<li></li>")
                                 .append(
                                     $("<div></div>")
@@ -636,13 +801,12 @@ function User()
 
                     if (goToNext) {
                         _check.collapse(id, function () {
-                            nextRow = $('div.check-form[data-id="' + id + '"] + div + div.check-form');
+                            nextRow = $('div.check-form[data-type=check][data-id="' + id + '"] + div + div.check-form');
 
                             if (!nextRow.length)
-                                nextRow = $('div.check-form[data-id="' + id + '"]').parent().next().next().find('div.check-form:first');
+                                nextRow = $('div.check-form[data-type=check][data-id="' + id + '"]').parent().next().next().find('div.check-form:first');
 
-                            if (nextRow.length)
-                            {
+                            if (nextRow.length) {
                                 _check.expand(nextRow.data('id'), function () {
                                     location.href = '#check-' + nextRow.data('id');
                                 });
@@ -669,7 +833,7 @@ function User()
         this.getCustomData = function (id) {
             var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck, poc, links;
 
-            row = $('div.check-form[data-id="custom-' + id + '"]');
+            row = $('div.check-form[data-type=custom-check][data-id=' + id + ']');
 
             name = $('input[name="TargetCustomCheckEditForm_' + id + '[name]"]', row).val();
             background = $('textarea[name="TargetCustomCheckEditForm_' + id + '[backgroundInfo]"]', row).val();
@@ -744,12 +908,11 @@ function User()
          * @param id
          */
         this.saveCustom = function (id) {
-            var row, headerRow, data, url, nextRow, rating;
+            var row, headerRow, data, url;
 
-            headerRow = $('div.check-header[data-id="custom-' + id + '"]');
-            row = $('div.check-form[data-id="custom-' + id + '"]');
+            headerRow = $('div.check-header[data-type=custom-check][data-id=' + id + ']');
+            row = $('div.check-form[data-type=custom-check][data-id=' + id + ']');
             url = row.data("save-url");
-
             data = _check.getCustomData(id);
             data.push({name: "YII_CSRF_TOKEN", value: system.csrf, id: id});
 
@@ -803,8 +966,7 @@ function User()
         this.getCustomTemplateData = function (id) {
             var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck, poc, links;
 
-            row = $('div.check-form[data-id="custom-template-' + id + '"]');
-
+            row = $('div.check-form[data-type=custom-template][data-id=' + id + ']');
             name = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[name]"]', row).val();
             background = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[backgroundInfo]"]', row).val();
             question = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[question]"]', row).val();
@@ -878,14 +1040,15 @@ function User()
          * @param id
          */
         this.saveCustomTemplate = function (id) {
-            var row, headerRow, data, url, nextRow, rating;
+            var row, data, url;
 
-            headerRow = $('div.check-header[data-id="custom-template-' + id + '"]');
-            row = $('div.check-form[data-id="custom-template-' + id + '"]');
+            row = $('div.check-form[data-type=custom-template][data-id=' + id + ']');
             url = row.data("save-url");
-
             data = _check.getCustomTemplateData(id);
-            data.push({name: "YII_CSRF_TOKEN", value: system.csrf});
+            data.push({
+                name: "YII_CSRF_TOKEN",
+                value: system.csrf
+            });
 
             $.ajax({
                 dataType: "json",
@@ -902,7 +1065,6 @@ function User()
                         return;
                     }
 
-                    data = data.data;
                     location.reload();
                 },
 
@@ -923,7 +1085,7 @@ function User()
         this.autosave = function (id) {
             var row, headerRow, data, url, nextRow;
 
-            row = $('div.check-form[data-id="' + id + '"]');
+            row = $('div.check-form[data-type=check][data-id="' + id + '"]');
             url = row.data('autosave-url');
 
             data = {
@@ -961,14 +1123,11 @@ function User()
         /**
          * Init autosave function for check id
          */
-        this.initAutosave = function () {
-            $(".check-form").each(function () {
-                var id, row;
+        this.initAutosave = function (id) {
+            $("div.check-form[data-type=check]").each(function () {
+                var id = $(this).data("id");
 
-                id = $(this).data("id");
-                row = $('div.check-form[data-id="' + id + '"]');
-
-                $('textarea[name="TargetCheckEditForm_' + id + '[result]"]', row).on("paste", function () {
+                $('textarea[name="TargetCheckEditForm_' + id + '[result]"]', $(this)).on("paste", function () {
                     setTimeout(function () {
                         _check.autosave(id);
                     }, 100);
@@ -1018,8 +1177,8 @@ function User()
         /**
          * Initialize attachments form.
          */
-        this.initTargetCheckAttachmentUploadForms = function () {
-            $('input[name^="TargetCheckAttachmentUploadForm"]').each(function () {
+        this.initTargetCheckAttachmentUploadForms = function (id) {
+            $('div.check-form[data-type=check][data-id=' + id + '] input[name^="TargetCheckAttachmentUploadForm"]').each(function () {
                 var url = $(this).data("upload-url"),
                     id = $(this).data("id"),
                     data = {};
@@ -1053,13 +1212,13 @@ function User()
                                  '<td class="actions"><a href="#del" title="' + system.translate("Delete") +
                                  '" onclick="user.check.delAttachment(\'' + data.path + '\');"><i class="icon icon-remove"></i></a></td></tr>';
 
-                        if ($('div.check-form[data-id="' + id + '"] .attachment-list').length == 0) {
-                            $('div.check-form[data-id="' + id + '"] .upload-message')
+                        if ($('div.check-form[data-type=check][data-id="' + id + '"] .attachment-list').length == 0) {
+                            $('div.check-form[data-type=check][data-id="' + id + '"] .upload-message')
                                 .after('<table class="table attachment-list"><tbody></tbody></table>');
                         }
 
-                        $('div.check-form[data-id="' + id + '"] .attachment-list').show();
-                        $('div.check-form[data-id="' + id + '"] .attachment-list > tbody').append(tr);
+                        $('div.check-form[data-type=check][data-id="' + id + '"] .attachment-list').show();
+                        $('div.check-form[data-type=check][data-id="' + id + '"] .attachment-list > tbody').append(tr);
                     },
 
                     fail: function (e, data) {
@@ -1174,13 +1333,13 @@ function User()
                                  '<td class="actions"><a href="#del" title="' + system.translate("Delete") +
                                  '" onclick="user.check.delCustomAttachment(\'' + data.path + '\');"><i class="icon icon-remove"></i></a></td></tr>';
 
-                        if ($('div.check-form[data-id="custom-' + id + '"] .attachment-list').length == 0) {
-                            $('div.check-form[data-id="custom-' + id + '"] .upload-message')
+                        if ($('div.check-form[data-type=custom-check][data-id=' + id + '] .attachment-list').length == 0) {
+                            $('div.check-form[data-type=custom-check][data-id=' + id + '] .upload-message')
                                 .after('<table class="table attachment-list"><tbody></tbody></table>');
                         }
 
-                        $('div.check-form[data-id="custom-' + id + '"] .attachment-list').show();
-                        $('div.check-form[data-id="custom-' + id + '"] .attachment-list > tbody').append(tr);
+                        $('div.check-form[data-type=custom-check][data-id=' + id + '] .attachment-list').show();
+                        $('div.check-form[data-type=custom-check][data-id=' + id + '] .attachment-list > tbody').append(tr);
                     },
 
                     fail: function (e, data) {
@@ -1268,12 +1427,12 @@ function User()
             var row, headerRow, url;
 
             headerRow = custom ?
-                $('div.check-header[data-id="custom-' + id + '"]') :
-                $('div.check-header[data-id="' + id + '"]');
+                $('div.check-header[data-type=custom-check][data-id=' + id + ']') :
+                $('div.check-header[data-type=check][data-id="' + id + '"]');
 
             row = custom ?
-                $('div.check-form[data-id="custom-' + id + '"]') :
-                $('div.check-form[data-id="' + id + '"]');
+                $('div.check-form[data-type=custom-check][data-id=' + id + ']') :
+                $('div.check-form[data-type=check][data-id="' + id + '"]');
 
             url = headerRow.data("control-url");
 
@@ -1420,8 +1579,8 @@ function User()
         this.start = function (id) {
             var row, headerRow, data, url, nextRow, rating;
 
-            headerRow = $('div.check-header[data-id="' + id + '"]');
-            row = $('div.check-form[data-id="' + id + '"]');
+            headerRow = $('div.check-header[data-type=check][data-id="' + id + '"]');
+            row = $('div.check-form[data-type=check][data-id="' + id + '"]');
             url = row.data('save-url');
 
             data = _check.getData(id);
