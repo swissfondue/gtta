@@ -274,6 +274,7 @@ class DocxReport extends ReportPlugin {
 
         while (true) {
             $pos = mb_strpos($text, "<", $pos);
+            $found = false;
 
             if ($pos === false) {
                 break;
@@ -291,100 +292,58 @@ class DocxReport extends ReportPlugin {
                 }
 
                 $pos = 0;
-            } else if (mb_substr($text, $pos, 3) == "<b>") {
-                $endPos = mb_strpos($text, "</b>", $pos);
-
-                if ($endPos === false) {
-                    break;
-                }
-
-                $block[] = mb_substr($text, 0, $pos);
-                $blocks[] = array(
-                    "attributes" => $attributes,
-                    "block" => $block,
-                );
-
-                $subText = mb_substr($text, $pos + 3, $endPos - $pos - 3);
-                $merged = array_merge($attributes, array("bold"));
-
-                foreach ($this->_getTextRunBlocks($subText, $merged, $replaceLineFeeds) as $run) {
-                    $blocks[] = array(
-                        "attributes" => $run["attributes"],
-                        "block" => $run["block"],
-                    );
-                }
-
-                $block = array();
-                $text = mb_substr($text, $endPos + 4);
-
-                if (!$text) {
-                    $text = null;
-                }
-
-                $pos = 0;
-            } else if (mb_substr($text, $pos, 4) == "<em>") {
-                $endPos = mb_strpos($text, "</em>", $pos);
-
-                if ($endPos === false) {
-                    break;
-                }
-
-                $block[] = mb_substr($text, 0, $pos);
-                $blocks[] = array(
-                    "attributes" => $attributes,
-                    "block" => $block,
-                );
-
-                $subText = mb_substr($text, $pos + 4, $endPos - $pos - 4);
-                $merged = array_merge($attributes, array("italic"));
-
-                foreach ($this->_getTextRunBlocks($subText, $merged, $replaceLineFeeds) as $run) {
-                    $blocks[] = array(
-                        "attributes" => $run["attributes"],
-                        "block" => $run["block"],
-                    );
-                }
-
-                $block = array();
-                $text = mb_substr($text, $endPos + 5);
-
-                if (!$text) {
-                    $text = null;
-                }
-
-                $pos = 0;
-            } else if (mb_substr($text, $pos, 3) == "<u>") {
-                $endPos = mb_strpos($text, "</u>", $pos);
-
-                if ($endPos === false) {
-                    break;
-                }
-
-                $block[] = mb_substr($text, 0, $pos);
-                $blocks[] = array(
-                    "attributes" => $attributes,
-                    "block" => $block,
-                );
-
-                $subText = mb_substr($text, $pos + 3, $endPos - $pos - 3);
-                $merged = array_merge($attributes, array("underline"));
-
-                foreach ($this->_getTextRunBlocks($subText, $merged, $replaceLineFeeds) as $run) {
-                    $blocks[] = array(
-                        "attributes" => $run["attributes"],
-                        "block" => $run["block"],
-                    );
-                }
-
-                $block = array();
-                $text = mb_substr($text, $endPos + 4);
-
-                if (!$text) {
-                    $text = null;
-                }
-
-                $pos = 0;
+                $found = true;
             } else {
+                $tags = array(
+                    "b" => "bold",
+                    "strong" => "bold",
+                    "em" => "italic",
+                    "i" => "italic",
+                    "u" => "underline",
+                );
+
+                foreach ($tags as $tag => $attribute) {
+                    $tagLength = strlen($tag) + 2;
+
+                    if (mb_substr($text, $pos, $tagLength) == "<" . $tag . ">") {
+                        $endPos = mb_strpos($text, "</" . $tag . ">", $pos);
+
+                        if ($endPos === false) {
+                            break;
+                        }
+
+                        $block[] = mb_substr($text, 0, $pos);
+                        $blocks[] = array(
+                            "attributes" => $attributes,
+                            "block" => $block,
+                        );
+
+                        $subText = mb_substr($text, $pos + $tagLength, $endPos - $pos - $tagLength);
+                        $merged = array_merge($attributes, array($attribute));
+
+                        foreach ($this->_getTextRunBlocks($subText, $merged, $replaceLineFeeds) as $run) {
+                            $blocks[] = array(
+                                "attributes" => $run["attributes"],
+                                "block" => $run["block"],
+                            );
+                        }
+
+                        $block = array();
+                        $text = mb_substr($text, $endPos + $tagLength + 1);
+
+                        if (!$text) {
+                            $text = null;
+                        }
+
+                        $pos = 0;
+                        $found = true;
+
+                        break;
+                    }
+                }
+            }
+
+            if (!$found) {
                 $pos = $pos + 1;
             }
         }
@@ -420,148 +379,94 @@ class DocxReport extends ReportPlugin {
                 break;
             }
 
-            if (mb_substr($text, $pos, 4) == "<ul>") {
-                $endPos = mb_strpos($text, "</ul>", $pos);
+            $tags = array(
+                "ul" => "bullet",
+                "ol" => "decimal",
+            );
 
-                if ($endPos === false) {
-                    break;
-                }
+            $found = false;
 
-                $paragraphs[] = array(
-                    "attributes" => array(),
-                    "runs" => $this->_getTextRunBlocks(mb_substr($text, 0, $pos), array(), $replaceLineFeeds),
-                );
+            foreach ($tags as $tag => $type) {
+                $tagLength = strlen($tag) + 2;
 
-                $listText = mb_substr($text, $pos + 4, $endPos - $pos - 4);
-                $liPos = 0;
+                if (mb_substr($text, $pos, $tagLength) == "<" . $tag . ">") {
+                    $endPos = mb_strpos($text, "</" . $tag . ">", $pos);
 
-                while (true) {
-                    $liPos = mb_strpos($listText, "<", $liPos);
-
-                    if ($liPos === false) {
+                    if ($endPos === false) {
                         break;
                     }
 
-                    if (mb_substr($listText, $liPos, 4) == "<li>") {
-                        $endLiPos = mb_strpos($listText, "</li>", $liPos);
+                    $paragraphs[] = array(
+                        "attributes" => array(),
+                        "runs" => $this->_getTextRunBlocks(mb_substr($text, 0, $pos), array(), $replaceLineFeeds),
+                    );
 
-                        if ($endLiPos === false) {
+                    $listText = mb_substr($text, $pos + $tagLength, $endPos - $pos - $tagLength);
+                    $liPos = 0;
+
+                    while (true) {
+                        $liPos = mb_strpos($listText, "<", $liPos);
+
+                        if ($liPos === false) {
                             break;
                         }
 
-                        $paragraphs[] = array(
-                            "attributes" => array(
-                                "type" => "list",
-                                "list" => array(
-                                    "numberingId" => $this->_numberingId,
-                                    "abstractNumberingId" => $this->_abstractNumberingId,
-                                    "type" => "bullet",
+                        if (mb_substr($listText, $liPos, 4) == "<li>") {
+                            $endLiPos = mb_strpos($listText, "</li>", $liPos);
+
+                            if ($endLiPos === false) {
+                                break;
+                            }
+
+                            $paragraphs[] = array(
+                                "attributes" => array(
+                                    "type" => "list",
+                                    "list" => array(
+                                        "numberingId" => $this->_numberingId,
+                                        "abstractNumberingId" => $this->_abstractNumberingId,
+                                        "type" => $type,
+                                    ),
                                 ),
-                            ),
-                            "runs" => $this->_getTextRunBlocks(
-                                mb_substr($listText, $liPos + 4, $endLiPos - $liPos - 4),
-                                array(),
-                                $replaceLineFeeds
-                            ),
-                        );
+                                "runs" => $this->_getTextRunBlocks(
+                                    mb_substr($listText, $liPos + 4, $endLiPos - $liPos - 4),
+                                    array(),
+                                    $replaceLineFeeds
+                                ),
+                            );
 
-                        $listText = mb_substr($listText, $endLiPos + 5);
-                        $liPos = 0;
-                    } else {
-                        $liPos++;
+                            $listText = mb_substr($listText, $endLiPos + 5);
+                            $liPos = 0;
+                        } else {
+                            $liPos++;
+                        }
                     }
-                }
 
-                $text = mb_substr($text, $endPos + 5);
+                    $text = mb_substr($text, $endPos + $tagLength + 1);
 
-                if (!$text) {
-                    $text = null;
-                }
+                    if (!$text) {
+                        $text = null;
+                    }
 
-                $pos = 0;
+                    $pos = 0;
 
-                if (!in_array($this->_abstractNumberingId, array_keys($this->_lists))) {
-                    $this->_lists[$this->_abstractNumberingId] = array(
-                        "abstractNumberingId" => $this->_abstractNumberingId,
-                        "numberingId" => $this->_numberingId,
-                        "type" => "bullet",
-                    );
-                }
+                    if (!in_array($this->_abstractNumberingId, array_keys($this->_lists))) {
+                        $this->_lists[$this->_abstractNumberingId] = array(
+                            "abstractNumberingId" => $this->_abstractNumberingId,
+                            "numberingId" => $this->_numberingId,
+                            "type" => $type,
+                        );
+                    }
 
-                $this->_numberingId++;
-                $this->_abstractNumberingId++;
-            } else if (mb_substr($text, $pos, 4) == "<ol>") {
-                $endPos = mb_strpos($text, "</ol>", $pos);
+                    $this->_numberingId++;
+                    $this->_abstractNumberingId++;
+                    $found = true;
 
-                if ($endPos === false) {
                     break;
                 }
+            }
 
-                $paragraphs[] = array(
-                    "attributes" => array(),
-                    "runs" => $this->_getTextRunBlocks(mb_substr($text, 0, $pos), array(), $replaceLineFeeds),
-                );
-
-                $listText = mb_substr($text, $pos + 4, $endPos - $pos - 4);
-                $liPos = 0;
-
-                while (true) {
-                    $liPos = mb_strpos($listText, "<", $liPos);
-
-                    if ($liPos === false) {
-                        break;
-                    }
-
-                    if (mb_substr($listText, $liPos, 4) == "<li>") {
-                        $endLiPos = mb_strpos($listText, "</li>", $liPos);
-
-                        if ($endLiPos === false) {
-                            break;
-                        }
-
-                        $paragraphs[] = array(
-                            "attributes" => array(
-                                "type" => "list",
-                                "list" => array(
-                                    "numberingId" => $this->_numberingId,
-                                    "abstractNumberingId" => $this->_abstractNumberingId,
-                                    "type" => "decimal",
-                                ),
-                            ),
-                            "runs" => $this->_getTextRunBlocks(
-                                mb_substr($listText, $liPos + 4, $endLiPos - $liPos - 4),
-                                array(),
-                                $replaceLineFeeds
-                            ),
-                        );
-
-                        $listText = mb_substr($listText, $endLiPos + 5);
-                        $liPos = 0;
-                    } else {
-                        $liPos++;
-                    }
-                }
-
-                $text = mb_substr($text, $endPos + 5);
-
-                if (!$text) {
-                    $text = null;
-                }
-
-                $pos = 0;
-
-                if (!in_array($this->_abstractNumberingId, array_keys($this->_lists))) {
-                    $this->_lists[$this->_abstractNumberingId] = array(
-                        "abstractNumberingId" => $this->_abstractNumberingId,
-                        "numberingId" => $this->_numberingId,
-                        "type" => "decimal",
-                    );
-                }
-
-                $this->_numberingId++;
-                $this->_abstractNumberingId++;
-            } else {
-                $pos++;
+            if (!$found) {
+                $pos += 1;
             }
         }
 
