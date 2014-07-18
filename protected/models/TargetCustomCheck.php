@@ -23,7 +23,7 @@
  * @property User $user
  * @property TargetCustomCheckAttachment[] $attachments
  */
-class TargetCustomCheck extends ActiveRecord {
+class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
     /**
      * Result ratings.
      */
@@ -112,4 +112,85 @@ class TargetCustomCheck extends ActiveRecord {
             "attachments" => array(self::HAS_MANY, "TargetCustomCheckAttachment", "target_custom_check_id"),
 		);
 	}
+
+    /**
+     * Get variable value
+     * @param $name
+     * @param VariableScope $scope
+     * @return mixed
+     * @throws Exception
+     */
+    public function getVariable($name, VariableScope $scope) {
+        $names = $this->getRatingNames();
+        $abbreviations = array(
+            self::RATING_NONE => "none",
+            self::RATING_NO_VULNERABILITY => "no_vuln",
+            self::RATING_HIDDEN => "hidden",
+            self::RATING_INFO =>  "info",
+            self::RATING_LOW_RISK => "low",
+            self::RATING_MED_RISK => "med",
+            self::RATING_HIGH_RISK => "high",
+        );
+
+        $checkData = array(
+            "name" => $this->name ? $this->name : "CUSTOM-CHECK-" . $this->reference,
+            "background_info" => $this->background_info,
+            "hints" => "",
+            "question" => $this->question,
+            "rating" => $abbreviations[$this->rating],
+            "rating_name" => $names[$this->rating],
+            "target" => $this->target->host,
+            "links" => $this->links,
+            "poc" => $this->poc,
+            "result" => $this->result,
+            "reference" => "CUSTOM-CHECK-" . $this->reference,
+            "solution" => $this->solution,
+        );
+
+        if (!in_array($name, array_keys($checkData))) {
+            throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+        }
+
+        return $checkData[$name];
+    }
+
+    /**
+     * Get list
+     * @param $name
+     * @param $filters
+     * @param VariableScope $scope
+     * @return array
+     * @throws Exception
+     */
+    public function getList($name, $filters, VariableScope $scope) {
+        $lists = array(
+            "attachment",
+        );
+
+        if (!in_array($name, $lists)) {
+            throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+        }
+
+        $data = array();
+
+        switch ($name) {
+            case "attachment":
+                foreach ($this->attachments as $attachment) {
+                    if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
+                        $data[] = $attachment;
+                    }
+                }
+
+                break;
+        }
+
+        if ($filters) {
+            foreach ($filters as $filter) {
+                $filter = new ListFilter($filter, $scope);
+                $data = $filter->apply($data);
+            }
+        }
+
+        return $data;
+    }
 }

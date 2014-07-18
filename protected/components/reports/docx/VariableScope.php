@@ -12,6 +12,7 @@ class VariableScope {
     const SCOPE_CATEGORY = "category";
     const SCOPE_CONTROL = "control";
     const SCOPE_CHECK = "check";
+    const SCOPE_ATTACHMENT = "attachment";
 
     /**
      * @var string name
@@ -39,6 +40,7 @@ class VariableScope {
             self::SCOPE_CATEGORY,
             self::SCOPE_CONTROL,
             self::SCOPE_CHECK,
+            self::SCOPE_ATTACHMENT,
         );
     }
 

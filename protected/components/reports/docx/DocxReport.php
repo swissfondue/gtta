@@ -681,18 +681,18 @@ class DocxReport extends ReportPlugin {
     }
 
     /**
-     * Insert images
+     * Insert attached image
      * @param DOMDocument $xml
      * @param DOMNode $parentNode
-     * @param array $images
+     * @param array $image
      */
-    private function _insertImages(DOMDocument $xml, DOMNode $parentNode, $images) {
+    private function _insertImage(DOMDocument $xml, DOMNode $parentNode, $image) {
         $w = $xml->lookupNamespaceUri("w");
         $wp = $xml->lookupNamespaceUri("wp");
         $a = "http://schemas.openxmlformats.org/drawingml/2006/main";
         $pic = "http://schemas.openxmlformats.org/drawingml/2006/picture";
 
-        if (!$images) {
+        if (!$image) {
             return;
         }
 
@@ -702,93 +702,99 @@ class DocxReport extends ReportPlugin {
             FileManager::createDir($mediaDir, 0777);
         }
 
-        foreach ($images as $image) {
-            $extensions = array(
-                "image/jpeg" => "jpg",
-                "image/png" => "png",
-                "image/gif" => "gif",
-                "image/pjpeg" => "jpg",
-            );
+        $extensions = array(
+            "image/jpeg" => "jpg",
+            "image/png" => "png",
+            "image/gif" => "gif",
+            "image/pjpeg" => "jpg",
+        );
 
-            $internalName = hash("sha256", time() . rand() . $image["file"]) . "." . $extensions[$image["type"]];
-            FileManager::copy($image["file"], $mediaDir . "/" . $internalName);
+        $internalName = hash("sha256", time() . rand() . $image["file"]) . "." . $extensions[$image["type"]];
+        FileManager::copy($image["file"], $mediaDir . "/" . $internalName);
 
-            $img = array(
-                "name" => $image["name"],
-                "internalName" => $internalName,
-                "relationId" => $this->_relationId++,
-                "drawingObjectPropertyId" => $this->_drawingObjectPropertyId++,
-                "nonVisualDrawingPropertyId" => $this->_nonVisualDrawingPropertyId++,
-                "width" => 3172968,
-                "height" => 3172968,
-            );
+        list($wpx, $hpx) = getimagesize($image["file"]);
+        $ratio = $wpx / $hpx;
+        $width = $this->_pixelsToEmu($wpx);
+        $height = $this->_pixelsToEmu($hpx);
 
-            $this->_images[] = $img;
-
-            $run = $xml->createElementNS($w, "w:r");
-            $drawing = $xml->createElementNS($w, "w:drawing");
-            $inline = $xml->createElementNS($wp, "wp:inline");
-
-            $extent = $xml->createElementNS($wp, "wp:extent");
-            $extent->setAttribute("cx", $img["width"]);
-            $extent->setAttribute("cy", $img["height"]);
-            $inline->appendChild($extent);
-
-            $docPr = $xml->createElementNS($wp, "wp:docPr");
-            $docPr->setAttribute("id", (string) $img["drawingObjectPropertyId"]);
-            $docPr->setAttribute("name", $img["name"]);
-            $inline->appendChild($docPr);
-
-            $frame = $xml->createElementNS($wp, "wp:cNvGraphicFramePr");
-            $frameLocks = $xml->createElementNS($a, "a:graphicFrameLocks");
-            $frameLocks->setAttribute("noChangeAspect", "1");
-            $frame->appendChild($frameLocks);
-            $inline->appendChild($frame);
-
-            $graphic = $xml->createElementNS($a, "a:graphic");
-            $data = $xml->createElementNS($a, "a:graphicData");
-            $picture = $xml->createElementNS($pic, "pic:pic");
-            $props = $xml->createElementNS($pic, "pic:nvPicPr");
-            $cnvPr = $xml->createElementNS($pic, "pic:cNvPr");
-            $cnvPr->setAttribute("id", $img["nonVisualDrawingPropertyId"]);
-            $cnvPr->setAttribute("name", $img["name"]);
-            $props->appendChild($cnvPr);
-            $props->appendChild($xml->createElementNS($pic, "pic:cNvPicPr"));
-            $picture->appendChild($props);
-
-            $blip = $xml->createElementNS($pic, "pic:blipFill");
-            $aBlip = $xml->createElementNS($a, "a:blip");
-            $aBlip->setAttribute("r:embed", "rId" . $img["relationId"]);
-            $aBlip->setAttribute("cstate", "print");
-            $blip->appendChild($aBlip);
-            $stretch = $xml->createElementNS($a, "a:stretch");
-            $stretch->appendChild($xml->createElementNS($a, "a:fillRect"));
-            $blip->appendChild($stretch);
-            $picture->appendChild($blip);
-
-            $sppr = $xml->createElementNS($pic, "pic:spPr");
-            $xfrm = $xml->createElementNS($a, "a:xfrm");
-            $off = $xml->createElementNS($a, "a:off");
-            $off->setAttribute("x", "0");
-            $off->setAttribute("y", "0");
-            $xfrm->appendChild($off);
-            $ext = $xml->createElementNS($a, "a:ext");
-            $ext->setAttribute("cx", $img["width"]);
-            $ext->setAttribute("cy", $img["height"]);
-            $xfrm->appendChild($ext);
-            $sppr->appendChild($xfrm);
-            $geom = $xml->createElementNS($a, "a:prstGeom");
-            $geom->setAttribute("prst", "rect");
-            $sppr->appendChild($geom);
-            $picture->appendChild($sppr);
-
-            $data->appendChild($picture);
-            $graphic->appendChild($data);
-            $inline->appendChild($graphic);
-            $drawing->appendChild($inline);
-            $run->appendChild($drawing);
-            $parentNode->appendChild($run);
+        if ($width > $this->_documentWidth) {
+            $width = $this->_documentWidth;
+            $height = (int) round($width / $ratio);
         }
+
+        $run = $xml->createElementNS($w, "w:r");
+        $drawing = $xml->createElementNS($w, "w:drawing");
+        $inline = $xml->createElementNS($wp, "wp:inline");
+
+        $extent = $xml->createElementNS($wp, "wp:extent");
+        $extent->setAttribute("cx", $width);
+        $extent->setAttribute("cy", $height);
+        $inline->appendChild($extent);
+
+        $docPr = $xml->createElementNS($wp, "wp:docPr");
+        $docPr->setAttribute("id", (string) $this->_drawingObjectPropertyId);
+        $docPr->setAttribute("name", $image["name"]);
+        $inline->appendChild($docPr);
+
+        $frame = $xml->createElementNS($wp, "wp:cNvGraphicFramePr");
+        $frameLocks = $xml->createElementNS($a, "a:graphicFrameLocks");
+        $frameLocks->setAttribute("noChangeAspect", "1");
+        $frame->appendChild($frameLocks);
+        $inline->appendChild($frame);
+
+        $graphic = $xml->createElementNS($a, "a:graphic");
+        $data = $xml->createElementNS($a, "a:graphicData");
+        $data->setAttribute("uri", "http://schemas.openxmlformats.org/drawingml/2006/picture");
+        $picture = $xml->createElementNS($pic, "pic:pic");
+        $props = $xml->createElementNS($pic, "pic:nvPicPr");
+        $cnvPr = $xml->createElementNS($pic, "pic:cNvPr");
+        $cnvPr->setAttribute("id", $this->_nonVisualDrawingPropertyId);
+        $cnvPr->setAttribute("name", $image["name"]);
+        $props->appendChild($cnvPr);
+        $props->appendChild($xml->createElementNS($pic, "pic:cNvPicPr"));
+        $picture->appendChild($props);
+
+        $blip = $xml->createElementNS($pic, "pic:blipFill");
+        $aBlip = $xml->createElementNS($a, "a:blip");
+        $aBlip->setAttribute("r:embed", "rId" . $this->_relationId);
+        $aBlip->setAttribute("cstate", "print");
+        $blip->appendChild($aBlip);
+        $stretch = $xml->createElementNS($a, "a:stretch");
+        $stretch->appendChild($xml->createElementNS($a, "a:fillRect"));
+        $blip->appendChild($stretch);
+        $picture->appendChild($blip);
+
+        $sppr = $xml->createElementNS($pic, "pic:spPr");
+        $xfrm = $xml->createElementNS($a, "a:xfrm");
+        $off = $xml->createElementNS($a, "a:off");
+        $off->setAttribute("x", "0");
+        $off->setAttribute("y", "0");
+        $xfrm->appendChild($off);
+        $ext = $xml->createElementNS($a, "a:ext");
+        $ext->setAttribute("cx", $width);
+        $ext->setAttribute("cy", $height);
+        $xfrm->appendChild($ext);
+        $sppr->appendChild($xfrm);
+        $geom = $xml->createElementNS($a, "a:prstGeom");
+        $geom->setAttribute("prst", "rect");
+        $sppr->appendChild($geom);
+        $picture->appendChild($sppr);
+
+        $data->appendChild($picture);
+        $graphic->appendChild($data);
+        $inline->appendChild($graphic);
+        $drawing->appendChild($inline);
+        $run->appendChild($drawing);
+        $parentNode->appendChild($run);
+
+        $this->_images[] = array(
+            "relationId" => $this->_relationId,
+            "internalName" => $internalName,
+        );
+
+        $this->_relationId++;
+        $this->_drawingObjectPropertyId++;
+        $this->_nonVisualDrawingPropertyId++;
     }
 
     /**
@@ -828,8 +834,8 @@ class DocxReport extends ReportPlugin {
                 $replaceLineFeeds = true;
             }
 
-            if ($this->_scope->get()->getName() == VariableScope::SCOPE_CHECK && $name == "attachments") {
-                $this->_insertImages($xml, $parent, /*$value*/array());
+            if ($this->_scope->get()->getName() == VariableScope::SCOPE_ATTACHMENT && $name == "image") {
+                $this->_insertImage($xml, $parent, $value);
             } else {
                 $this->_insertText($xml, $parent, $value, $replaceLineFeeds);
             }
@@ -857,15 +863,37 @@ class DocxReport extends ReportPlugin {
     }
 
     /**
+     * Convert twips to EMU
+     * @param $twips
+     * @param $dpi
+     * @return integer
+     */
+    private function _twipsToEMU($twips, $dpi=72) {
+        return (int) round($twips / 20 / $dpi * 914400);
+    }
+
+    /**
+     * Convert pixels to EMU
+     * @param $pixels
+     * @param int $dpi
+     * @return int
+     */
+    private function _pixelsToEmu($pixels, $dpi=72) {
+        return (int) round($pixels * 914400 / $dpi);
+    }
+
+    /**
      * Parse template data
      * @param DOMDocument $xml
      */
     private function _parseTemplate(DOMDocument $xml) {
         $xpath = new DOMXPath($xml);
+        $xpath->registerNamespace("w", $xml->documentElement->lookupNamespaceUri("w"));
         $xpath->registerNamespace("wp", $xml->documentElement->lookupNamespaceUri("wp"));
         $xpath->registerNamespace("pic", $xml->documentElement->lookupNamespaceUri("pic"));
         $drawingObjectProperties = $xpath->query(".//wp:docPr");
 
+        // count images
         foreach ($drawingObjectProperties as $property) {
             $id = (int) $property->getAttribute("id");
 
@@ -878,6 +906,7 @@ class DocxReport extends ReportPlugin {
             $this->_drawingObjectPropertyId++;
         }
 
+        // count images
         $nonVisualDrawingProperties = $xpath->query(".//pic:cNvPr");
 
         foreach ($nonVisualDrawingProperties as $property) {
@@ -891,6 +920,29 @@ class DocxReport extends ReportPlugin {
         if ($this->_nonVisualDrawingPropertyId > 0) {
             $this->_nonVisualDrawingPropertyId++;
         }
+
+        // parse document size (for images width calculation)
+        $pageSize = $xpath->query(".//w:pgSz");
+
+        if ($pageSize->length) {
+            $pageSize = $pageSize->item(0);
+            $this->_documentWidth = (int) $pageSize->getAttribute("w:w");
+        }
+
+        $margin = $xpath->query(".//w:pgMar");
+
+        if ($margin->length) {
+            $margin = $margin->item(0);
+            $left = (int) $margin->getAttribute("w:left");
+            $right = (int) $margin->getAttribute("w:right");
+            $this->_documentWidth = $this->_documentWidth - $left - $right;
+        }
+
+        if (!$this->_documentWidth) {
+            $this->_documentWidth = 11906;
+        }
+
+        $this->_documentWidth = $this->_twipsToEMU($this->_documentWidth);
     }
 
     /**
@@ -1082,6 +1134,51 @@ class DocxReport extends ReportPlugin {
     }
 
     /**
+     * Insert additional content types
+     * @param $template
+     * @return string
+     */
+    private function _insertContentTypes($template) {
+        $xml = new DOMDocument();
+        $xml->loadXML($template);
+
+        $lastContentType = null;
+        $xpath = new DOMXPath($xml);
+        $contentTypes = $xpath->query("/Default");
+
+        foreach ($contentTypes as $ct) {
+            if ($ct->nextSibling->tagName != "Default") {
+                $lastContentType = $ct;
+                break;
+            }
+        }
+
+        if ($lastContentType) {
+            $lastContentType = $lastContentType->nextSibling;
+        }
+
+        $types = array(
+            "jpg" => "image/jpeg",
+            "png" => "image/png",
+            "gif" => "image/gif",
+        );
+
+        foreach ($types as $ext => $type) {
+            $node = $xml->createElement("Default");
+            $node->setAttribute("Extension", $ext);
+            $node->setAttribute("ContentType", $type);
+
+            if ($lastContentType) {
+                $xml->documentElement->insertBefore($node, $lastContentType->nextSibling);
+            } else {
+                $xml->documentElement->appendChild($node);
+            }
+        }
+
+        return $xml->saveXML();
+    }
+
+    /**
      * Generate report
      */
     public function generate() {
@@ -1123,6 +1220,11 @@ class DocxReport extends ReportPlugin {
 
             // insert relations
             @file_put_contents($relationsXml, $this->_insertRelations($relations));
+
+            // insert content types
+            $contentXml = $this->_templateDir . "/[Content_Types].xml";
+            $contentTypes = @file_get_contents($contentXml);
+            @file_put_contents($contentXml, $this->_insertContentTypes($contentTypes));
 
             $zip = new ZipArchive();
 

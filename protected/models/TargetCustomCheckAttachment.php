@@ -11,7 +11,7 @@
  * @property integer $size
  * @property TargetCustomCheck $targetCustomCheck
  */
-class TargetCustomCheckAttachment extends ActiveRecord {
+class TargetCustomCheckAttachment extends ActiveRecord implements IVariableScopeObject {
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -47,4 +47,40 @@ class TargetCustomCheckAttachment extends ActiveRecord {
             "targetCustomCheck" => array(self::BELONGS_TO, "TargetCustomCheck", "target_custom_check_id"),
 		);
 	}
+
+    /**
+     * Get variable value
+     * @param $name
+     * @param VariableScope $scope
+     * @return mixed
+     * @throws Exception
+     */
+    public function getVariable($name, VariableScope $scope) {
+        $data = array(
+            "name" => $this->name,
+            "image" => array(
+                "name" => $this->name,
+                "file" => Yii::app()->params["attachments"]["path"] . "/" . $this->path,
+                "type" => $this->type,
+            )
+        );
+
+        if (!in_array($name, array_keys($data))) {
+            throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+        }
+
+        return $data[$name];
+    }
+
+    /**
+     * Get list
+     * @param $name
+     * @param $filters
+     * @param VariableScope $scope
+     * @return array
+     * @throws Exception
+     */
+    public function getList($name, $filters, VariableScope $scope) {
+        throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+    }
 }

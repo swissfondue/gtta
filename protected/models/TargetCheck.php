@@ -211,7 +211,6 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "result" => $this->result,
             "reference" => $check->_reference->name . ($check->reference_code ? "-" . $check->reference_code : ""),
             "solution" => array(),
-            "attachments" => array(),
         );
 
         if ($this->solution) {
@@ -223,16 +222,6 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         }
 
         $checkData["solution"] = implode("<br><br>", $checkData["solution"]);
-
-        foreach ($this->attachments as $attachment) {
-            if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
-                $checkData["attachments"][] = array(
-                    "name" => $attachment->name,
-                    "file" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path,
-                    "type" => $attachment->type,
-                );
-            }
-        }
 
         if (!in_array($name, array_keys($checkData))) {
             throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
@@ -250,6 +239,34 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      * @throws Exception
      */
     public function getList($name, $filters, VariableScope $scope) {
-        throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+        $lists = array(
+            "attachment",
+        );
+
+        if (!in_array($name, $lists)) {
+            throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+        }
+
+        $data = array();
+
+        switch ($name) {
+            case "attachment":
+                foreach ($this->attachments as $attachment) {
+                    if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
+                        $data[] = $attachment;
+                    }
+                }
+
+                break;
+        }
+
+        if ($filters) {
+            foreach ($filters as $filter) {
+                $filter = new ListFilter($filter, $scope);
+                $data = $filter->apply($data);
+            }
+        }
+
+        return $data;
     }
 }

@@ -140,6 +140,20 @@ class CheckControl extends ActiveRecord implements IVariableScopeObject {
                     $language = $language->id;
                 }
 
+                // custom checks
+                $criteria = new CDbCriteria();
+                $criteria->addInCondition("t.target_id", $targetIds);
+                $criteria->addColumnCondition(array("t.check_control_id" => $this->id));
+                $criteria->addNotInCondition("t.rating", array(TargetCheck::RATING_HIDDEN));
+                $criteria->together = true;
+
+                $checks = TargetCustomCheck::model()->with(array("attachments"))->findAll($criteria);
+
+                foreach ($checks as $check) {
+                    $data[] = $check;
+                }
+
+                // regular checks
                 $criteria = new CDbCriteria();
                 $criteria->addInCondition("t.target_id", $targetIds);
                 $criteria->addInCondition("t.check_id", $checkIds);
@@ -180,7 +194,9 @@ class CheckControl extends ActiveRecord implements IVariableScopeObject {
                     "attachments",
                 ))->findAll($criteria);
 
-                $data = $checks;
+                foreach ($checks as $check) {
+                    $data[] = $check;
+                }
 
                 break;
         }

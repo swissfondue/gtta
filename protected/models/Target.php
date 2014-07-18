@@ -232,6 +232,19 @@ class Target extends ActiveRecord implements IVariableScopeObject {
                     $language = $language->id;
                 }
 
+                // custom checks
+                $criteria = new CDbCriteria();
+                $criteria->addColumnCondition(array("t.target_id" => $this->id));
+                $criteria->addNotInCondition("t.rating", array(TargetCheck::RATING_HIDDEN));
+                $criteria->together = true;
+
+                $checks = TargetCustomCheck::model()->with(array("attachments"))->findAll($criteria);
+
+                foreach ($checks as $check) {
+                    $data[] = $check;
+                }
+
+                // regular checks
                 $criteria = new CDbCriteria();
                 $criteria->addColumnCondition(array(
                     "t.target_id" => $this->id,
@@ -273,7 +286,9 @@ class Target extends ActiveRecord implements IVariableScopeObject {
                     "attachments",
                 ))->findAll($criteria);
 
-                $data = $checks;
+                foreach ($checks as $check) {
+                    $data[] = $check;
+                }
 
                 break;
         }
