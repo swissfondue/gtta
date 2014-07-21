@@ -124,6 +124,36 @@ class CommunityApiClient {
     }
 
     /**
+     * Get reference info
+     * @param $reference
+     * @return mixed response
+     */
+    public function getReference($reference) {
+        $response = $this->_sendRequest("reference/$reference");
+        return $this->_parseResponse($response);
+    }
+
+    /**
+     * Get category info
+     * @param $category
+     * @return mixed response
+     */
+    public function getCategory($category) {
+        $response = $this->_sendRequest("category/$category");
+        return $this->_parseResponse($response);
+    }
+
+    /**
+     * Get control info
+     * @param $control
+     * @return mixed response
+     */
+    public function getControl($control) {
+        $response = $this->_sendRequest("control/$control");
+        return $this->_parseResponse($response);
+    }
+
+    /**
      * Share reference
      * @param $reference
      * @return mixed response
@@ -160,15 +190,6 @@ class CommunityApiClient {
      */
     public function shareCheck($check) {
         $response = $this->_sendRequest("check", json_encode($check));
-        return $this->_parseResponse($response);
-    }
-
-    /**
-     * Get catalogs
-     * @return mixed response
-     */
-    public function getCatalogs() {
-        $response = $this->_sendRequest("catalogs");
         return $this->_parseResponse($response);
     }
 

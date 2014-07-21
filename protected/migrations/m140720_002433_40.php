@@ -14,6 +14,7 @@ class m140720_002433_40 extends CDbMigration {
         $this->addColumn("references", "status", "integer NOT NULL DEFAULT 1");
         $this->dropColumn("checks", "external_control_id");
         $this->dropColumn("checks", "external_reference_id");
+        $this->dropColumn("system", "community_catalogs_cache");
 
         return true;
 	}
@@ -28,6 +29,7 @@ class m140720_002433_40 extends CDbMigration {
         $this->dropColumn("references", "status");
         $this->addColumn("checks", "external_control_id", "bigint");
         $this->addColumn("checks", "external_reference_id", "bigint");
+        $this->addColumn("system", "community_catalogs_cache", "character varying");
         
 		return true;
 	}

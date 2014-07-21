@@ -39,28 +39,19 @@ class CommunityInstallCommand extends ConsoleCommand {
         $pm = new PackageManager();
 
         foreach ($packages as $package) {
-            $pm->createPackage($package);
+            $pm->create($package);
         }
     }
 
     /**
      * Install checks
      * @param $checks
-     * @param $integrationKey
      */
-    private function _installChecks($checks, $integrationKey) {
-        $api = new CommunityApiClient($integrationKey);
-        $catalogs = $api->getCatalogs();
-
-        /** @var System $system */
-        $system = System::model()->findByPk(1);
-        $system->community_catalogs_cache = json_encode($catalogs);
-        $system->save();
-
-        $cm = new CheckManager($catalogs);
+    private function _installChecks($checks) {
+        $cm = new CheckManager();
 
         foreach ($checks as $check) {
-            $cm->createCheck($check);
+            $cm->create($check);
         }
     }
 
@@ -96,7 +87,7 @@ class CommunityInstallCommand extends ConsoleCommand {
         try {
             $installCandidates = $this->_status($system->integration_key);
             $this->_installPackages($installCandidates->packages);
-            $this->_installChecks($installCandidates->checks, $system->integration_key);
+            $this->_installChecks($installCandidates->checks);
         } catch (Exception $e) {
             $exception = $e;
         }

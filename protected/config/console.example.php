@@ -126,9 +126,6 @@ return array(
             "share" => array(
                 "lockFile" => "/tmp/gtta.community-share",
             ),
-            "refresh" => array(
-                "lockFile" => "/tmp/gtta.community-refresh",
-            ),
         ),
 
         "packages" => $mainConfig["params"]["packages"],

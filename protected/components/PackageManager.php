@@ -1137,7 +1137,7 @@ class PackageManager {
      * @return Package
      * @throws Exception
      */
-    public function createPackage($package) {
+    public function create($package) {
         /** @var System $system */
         $system = System::model()->findByPk(1);
         $api = new CommunityApiClient($system->integration_key);
@@ -1159,7 +1159,7 @@ class PackageManager {
         }
 
         foreach ($package->dependencies as $dep) {
-            $this->createPackage($dep->id);
+            $this->create($dep->id);
         }
 
         $tmpData = $this->_getTemporaryPackageData();
@@ -1244,8 +1244,14 @@ class PackageManager {
 
         /** @var System $system */
         $system = System::model()->findByPk(1);
-        $api = new CommunityApiClient($system->integration_key);
-        $package->external_id = $api->sharePackage($zipPath)->id;
+
+        try {
+            $api = new CommunityApiClient($system->integration_key);
+            $package->external_id = $api->sharePackage($zipPath)->id;
+        } catch (Exception $e) {
+            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
+        }
+
         $package->status = Check::STATUS_INSTALLED;
         $package->save();
 

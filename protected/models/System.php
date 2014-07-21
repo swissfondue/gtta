@@ -32,7 +32,6 @@
  * @property float $community_min_rating
  * @property boolean $community_allow_unverified
  * @property string $integration_key
- * @property string $community_catalogs_cache
  * @property boolean $checklist_poc
  * @property boolean $checklist_links
  * @property Language $language

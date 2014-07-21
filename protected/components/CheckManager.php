@@ -4,137 +4,15 @@
  * Check manager class
  */
 class CheckManager {
-    private $_catalogs = null;
     private $_languages = array();
 
     /**
      * Constructor
-     * @param $catalogs
      */
-    public function __construct($catalogs=null) {
-        $this->_catalogs = $catalogs;
-
+    public function __construct() {
         foreach (Language::model()->findAll() as $language) {
             $this->_languages[$language->code] = $language->id;
         }
-    }
-
-    /**
-     * Check if catalogs value has been correctly set
-     */
-    private function _checkCatalogs() {
-        if (!$this->_catalogs) {
-            throw new Exception("Catalogs value should be set.");
-        }
-    }
-
-    /**
-     * Get catalog category
-     * @param $id
-     * @return mixed
-     * @throws Exception
-     */
-    private function _getCatalogCategory($id) {
-        $this->_checkCatalogs();
-
-        $cat = null;
-
-        foreach ($this->_catalogs->categories as $category) {
-            if ($category->id == $id) {
-                $cat = $category;
-                break;
-            }
-        }
-
-        if ($cat == null) {
-            throw new Exception("Category not found.");
-        }
-
-        return $cat;
-    }
-
-    /**
-     * Get catalog control
-     * @param $id
-     * @return mixed
-     * @throws Exception
-     */
-    private function _getCatalogControl($id) {
-        $this->_checkCatalogs();
-
-        $ctrl = null;
-
-        foreach ($this->_catalogs->categories as $category) {
-            foreach ($category->controls as $control) {
-                if ($control->id == $id) {
-                    $ctrl = $control;
-                    break;
-                }
-            }
-
-            if ($ctrl != null) {
-                break;
-            }
-        }
-
-        if ($ctrl == null) {
-            throw new Exception("Control not found.");
-        }
-
-        return $ctrl;
-    }
-
-    /**
-     * Get catalog reference
-     * @param $id
-     * @return mixed
-     * @throws Exception
-     */
-    private function _getCatalogReference($id) {
-        $this->_checkCatalogs();
-
-        $ref = null;
-
-        foreach ($this->_catalogs->references as $reference) {
-            if ($reference->id == $id) {
-                $ref = $reference;
-                break;
-            }
-        }
-
-        if ($ref == null) {
-            throw new Exception("Reference not found.");
-        }
-
-        return $ref;
-    }
-
-    /**
-     * Get category id
-     * @param $externalId
-     * @return CheckCategory
-     */
-    private function _getCategoryId($externalId) {
-        $category = CheckCategory::model()->findByAttributes(array("external_id" => $externalId));
-
-        if (!$category) {
-            $data = $this->_getCatalogCategory($externalId);
-
-            $category = new CheckCategory();
-            $category->external_id = $externalId;
-            $category->name = $data->name;
-            $category->save();
-
-            foreach ($data->l10n as $l10n) {
-                $l = new CheckCategoryL10n();
-                $l->language_id = $this->_languages[$l10n->code];
-                $l->check_category_id = $category->id;
-                $l->name = $l10n->name;
-                $l->save();
-            }
-        }
-
-        return $category->id;
     }
 
     /**
@@ -146,22 +24,8 @@ class CheckManager {
         $control = CheckControl::model()->findByAttributes(array("external_id" => $externalId));
 
         if (!$control) {
-            $data = $this->_getCatalogControl($externalId);
-
-            $control = new CheckControl();
-            $control->check_category_id = $this->_getCategoryId($data->category_id);
-            $control->external_id = $externalId;
-            $control->name = $data->name;
-            $control->sort_order = $data->sort_order;
-            $control->save();
-
-            foreach ($data->l10n as $l10n) {
-                $l = new CheckControlL10n();
-                $l->language_id = $this->_languages[$l10n->code];
-                $l->check_control_id = $control->id;
-                $l->name = $l10n->name;
-                $l->save();
-            }
+            $cm = new ControlManager();
+            $control = $cm->create($externalId);
         }
 
         return $control->id;
@@ -176,13 +40,8 @@ class CheckManager {
         $reference = Reference::model()->findByAttributes(array("external_id" => $externalId));
 
         if (!$reference) {
-            $data = $this->_getCatalogReference($externalId);
-
-            $reference = new Reference();
-            $reference->external_id = $externalId;
-            $reference->name = $data->name;
-            $reference->url = $data->url;
-            $reference->save();
+            $rm = new ReferenceManager();
+            $reference = $rm->create($externalId);
         }
 
         return $reference->id;
@@ -194,25 +53,25 @@ class CheckManager {
      * @return Check
      * @throws Exception
      */
-    public function createCheck($check) {
+    public function create($check) {
         /** @var System $system */
         $system = System::model()->findByPk(1);
         $api = new CommunityApiClient($system->integration_key);
         $check = $api->getCheck($check)->check;
 
         if ($check->status == CommunityApiClient::STATUS_UNVERIFIED && !$system->community_allow_unverified) {
-            throw new Exception("Installing unverified checks is prohibited.");
+            throw new Exception(Yii::t("app", "Installing unverified checks is prohibited."));
         }
 
         if ($system->community_min_rating > 0 && $check->rating < $system->community_min_rating) {
-            throw new Exception("Check rating is below the system rating limit.");
+            throw new Exception(Yii::t("app", "Check rating is below the system rating limit."));
         }
 
         $id = $check->id;
         $existingCheck = Check::model()->findByAttributes(array("external_id" => $id));
 
         if ($existingCheck) {
-            return;
+            return $existingCheck;
         }
 
         $control = $this->_getControlId($check->control_id);
@@ -297,7 +156,7 @@ class CheckManager {
             $pkg = Package::model()->find($criteria);
 
             if (!$pkg) {
-                $pkg = $pm->createPackage($script->package_id);
+                $pkg = $pm->create($script->package_id);
             }
 
             $s = new CheckScript();
@@ -326,6 +185,8 @@ class CheckManager {
                 }
             }
         }
+
+        return $c;
     }
 
     /**
@@ -495,8 +356,13 @@ class CheckManager {
             $data["scripts"][] = $s;
         }
 
-        $api = new CommunityApiClient($system->integration_key);
-        $check->external_id = $api->shareCheck(array("check" => $data))->id;
+        try {
+            $api = new CommunityApiClient($system->integration_key);
+            $check->external_id = $api->shareCheck(array("check" => $data))->id;
+        } catch (Exception $e) {
+            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
+        }
+
         $check->status = Check::STATUS_INSTALLED;
         $check->save();
     }
