@@ -24,8 +24,6 @@
  * @property integer $status
  * @property integer $external_id
  * @property string $create_time
- * @property integer external_control_id
- * @property integer external_reference_id
  * @property TargetCheck[] $targetChecks
  * @property CheckL10n[] $l10n
  * @property CheckScript[] $scripts
@@ -61,7 +59,7 @@ class Check extends ActiveRecord {
             array("name, check_control_id, sort_order", "required"),
             array("name, protocol, reference_code, reference_url", "length", "max" => 1000),
             array(
-                "check_control_id, reference_id, port, effort, sort_order, external_id, status, external_control_id, external_reference_id",
+                "check_control_id, reference_id, port, effort, sort_order, external_id, status",
                 "numerical",
                 "integerOnly" => true
             ),

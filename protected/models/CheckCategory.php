@@ -7,8 +7,12 @@
  * @property integer $id
  * @property string $name
  * @property integer $external_id
+ * @property integer $status
  */
 class CheckCategory extends ActiveRecord implements IVariableScopeObject {
+    const STATUS_INSTALLED = 1;
+    const STATUS_SHARE = 2;
+
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -31,7 +35,11 @@ class CheckCategory extends ActiveRecord implements IVariableScopeObject {
 	public function rules() {
 		return array(
             array("name", "required"),
-            array("external_id", "numerical", "integerOnly" => true),
+            array("external_id, status", "numerical", "integerOnly" => true),
+            array("status", "in", "range" => array(
+                self::STATUS_INSTALLED,
+                self::STATUS_SHARE,
+            )),
 		);
 	}
 

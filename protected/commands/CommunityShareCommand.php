@@ -5,12 +5,54 @@
  */
 class CommunityShareCommand extends ConsoleCommand {
     /**
+     * Share references
+     */
+    private function _shareReferences() {
+        $rm = new ReferenceManager();
+        $references = Reference::model()->findAllByAttributes(array(
+            "status" => Reference::STATUS_SHARE,
+        ));
+
+        foreach ($references as $reference) {
+            $rm->share($reference);
+        }
+    }
+
+    /**
+     * Share categories
+     */
+    private function _shareCategories() {
+        $cm = new CategoryManager();
+        $categories = CheckCategory::model()->findAllByAttributes(array(
+            "status" => CheckCategory::STATUS_SHARE,
+        ));
+
+        foreach ($categories as $category) {
+            $cm->share($category);
+        }
+    }
+
+    /**
+     * Share controls
+     */
+    private function _shareControls() {
+        $cm = new ControlManager();
+        $controls = CheckControl::model()->findAllByAttributes(array(
+            "status" => CheckControl::STATUS_SHARE,
+        ));
+
+        foreach ($controls as $control) {
+            $cm->share($control);
+        }
+    }
+
+    /**
      * Install packages
      */
     private function _sharePackages() {
         $pm = new PackageManager();
         $packages = Package::model()->with("dependencies")->findAllByAttributes(array(
-            "status" => Package::STATUS_SHARE
+            "status" => Package::STATUS_SHARE,
         ));
 
         foreach ($packages as $package) {
@@ -32,7 +74,7 @@ class CommunityShareCommand extends ConsoleCommand {
     private function _shareChecks() {
         $cm = new CheckManager();
         $checks = Check::model()->findAllByAttributes(array(
-            "status" => Check::STATUS_SHARE
+            "status" => Check::STATUS_SHARE,
         ));
 
         foreach ($checks as $check) {
@@ -44,15 +86,27 @@ class CommunityShareCommand extends ConsoleCommand {
      * Share check preparations
      */
     private function _share() {
-        $packages = Package::model()->findAllByAttributes(array(
-            "status" => Package::STATUS_SHARE
+        $references = Reference::model()->countByAttributes(array(
+            "status" => Reference::STATUS_SHARE,
         ));
 
-        $checks = Check::model()->findAllByAttributes(array(
-            "status" => Check::STATUS_SHARE
+        $categories = CheckCategory::model()->countByAttributes(array(
+            "status" => CheckCategory::STATUS_SHARE,
         ));
 
-        if (!count($packages) && !count($checks)) {
+        $controls = CheckControl::model()->countByAttributes(array(
+            "status" => CheckControl::STATUS_SHARE,
+        ));
+
+        $packages = Package::model()->countByAttributes(array(
+            "status" => Package::STATUS_SHARE,
+        ));
+
+        $checks = Check::model()->countByAttributes(array(
+            "status" => Check::STATUS_SHARE,
+        ));
+
+        if (!$references && !$categories && !$controls && !$packages && !$checks) {
             return;
         }
 
@@ -83,6 +137,9 @@ class CommunityShareCommand extends ConsoleCommand {
         $exception = null;
 
         try {
+            $this->_shareReferences();
+            $this->_shareCategories();
+            $this->_shareControls();
             $this->_sharePackages();
             $this->_shareChecks();
         } catch (Exception $e) {

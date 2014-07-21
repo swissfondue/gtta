@@ -1,8 +1,9 @@
 <div class="active-header">
     <div class="pull-right">
         <ul class="nav nav-pills">
-            <li class="active"><a href="<?php echo $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
-            <li><a href="<?php echo $this->createUrl('check/editcontrol', array( 'id' => $category->id, 'control' => $control->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+            <li class="active"><a href="<?php echo $this->createUrl("check/viewcontrol", array("id" => $category->id, "control" => $control->id)); ?>"><?php echo Yii::t("app", "View"); ?></a></li>
+            <li><a href="<?php echo $this->createUrl("check/editcontrol", array("id" => $category->id, "control" => $control->id)); ?>"><?php echo Yii::t("app", "Edit"); ?></a></li>
+            <li><a href="<?php echo $this->createUrl("check/sharecontrol", array("id" => $category->id, "control" => $control->id)); ?>"><?php echo Yii::t("app", "Share"); ?></a></li>
         </ul>
     </div>
 

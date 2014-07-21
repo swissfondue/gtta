@@ -242,8 +242,11 @@ return array(
                 "check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/script/<script:\d+>/input/new"              => "check/editinput",
                 "check/control/check/input/control" => "check/controlinput",
 
-                // check share
-                "check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/share" => "check/share",
+                // check sharing
+                "check/share" => "check/share",
+                "check/<id:\d+>/share" => "check/sharecategory",
+                "check/<id:\d+>/control/<control:\d+>/share" => "check/sharecontrol",
+                "check/<id:\d+>/control/<control:\d+>/check/<check:\d+>/share" => "check/sharecheck",
 
                 // references
                 "references/<page:\d+>"   => "reference/index",

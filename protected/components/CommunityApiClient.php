@@ -124,6 +124,36 @@ class CommunityApiClient {
     }
 
     /**
+     * Share reference
+     * @param $reference
+     * @return mixed response
+     */
+    public function shareReference($reference) {
+        $response = $this->_sendRequest("reference", json_encode($reference));
+        return $this->_parseResponse($response);
+    }
+
+    /**
+     * Share category
+     * @param $category
+     * @return mixed response
+     */
+    public function shareCategory($category) {
+        $response = $this->_sendRequest("category", json_encode($category));
+        return $this->_parseResponse($response);
+    }
+
+    /**
+     * Share control
+     * @param $control
+     * @return mixed response
+     */
+    public function shareControl($control) {
+        $response = $this->_sendRequest("control", json_encode($control));
+        return $this->_parseResponse($response);
+    }
+
+    /**
      * Share check info
      * @param $check
      * @return mixed response

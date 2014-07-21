@@ -1203,20 +1203,22 @@ class PackageManager {
      * @throws Exception
      */
     public function prepareSharing(Package $package) {
-        if ($package->external_id || !$package->isActive()) {
+        if ($package->system) {
+            return;
+        }
+
+        if (!$package->isActive()) {
             throw new Exception("Invalid package.");
         }
 
         foreach ($package->dependencies as $dep) {
-            if ($dep->external_id) {
-                continue;
-            }
-
             $this->prepareSharing($dep);
         }
 
-        $package->status = Package::STATUS_SHARE;
-        $package->save();
+        if (!$package->external_id) {
+            $package->status = Package::STATUS_SHARE;
+            $package->save();
+        }
     }
 
     /**

@@ -159,7 +159,7 @@ class CheckController extends Controller
 
         // display the page
         $this->pageTitle = $category->localizedName;
-		$this->render("view", array(
+		$this->render("category/view", array(
             "controls" => $controls,
             "p" => $paginator,
             "category" => $category,
@@ -276,10 +276,10 @@ class CheckController extends Controller
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Category') : $category->localizedName;
-		$this->render('edit', array(
-            'model'     => $model,
-            'category'  => $category,
-            'languages' => $languages,
+		$this->render("category/edit", array(
+            "model" => $model,
+            "category" => $category,
+            "languages" => $languages,
         ));
 	}
 
@@ -526,12 +526,12 @@ class CheckController extends Controller
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Control') : $control->localizedName;
-		$this->render('control/edit', array(
-            'model'      => $model,
-            'category'   => $category,
-            'control'    => $control,
-            'languages'  => $languages,
-            'categories' => $categories
+		$this->render("category/control/edit", array(
+            "model" => $model,
+            "category" => $category,
+            "control" => $control,
+            "languages" => $languages,
+            "categories" => $categories
         ));
 	}
 
@@ -735,7 +735,7 @@ class CheckController extends Controller
 
         // display the page
         $this->pageTitle = $control->localizedName;
-		$this->render('control/index', array(
+		$this->render('category/control/index', array(
             'checks'   => $checks,
             'p'        => $paginator,
             'category' => $category,
@@ -1163,7 +1163,7 @@ class CheckController extends Controller
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Check') : $check->localizedName;
-		$this->render('control/check/edit', array(
+		$this->render('category/control/check/edit', array(
             'model' => $model,
             'category' => $category,
             'control' => $control,
@@ -1399,7 +1399,7 @@ class CheckController extends Controller
 
 		// display the page
         $this->pageTitle = Yii::t('app', 'Copy Check');
-		$this->render('control/check/copy', array(
+		$this->render('category/control/check/copy', array(
             'model'      => $model,
             'category'   => $category,
             'control'    => $control,
@@ -1620,7 +1620,7 @@ class CheckController extends Controller
 
         // display the page
         $this->pageTitle = $check->localizedName;
-		$this->render('control/check/result/index', array(
+		$this->render('category/control/check/result/index', array(
             'results'  => $check_results,
             'p'        => $paginator,
             'check'    => $check,
@@ -1828,7 +1828,7 @@ class CheckController extends Controller
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Result') : $result->localizedTitle;
-		$this->render('control/check/result/edit', array(
+		$this->render('category/control/check/result/edit', array(
             'model'     => $model,
             'category'  => $category,
             'control'   => $control,
@@ -1980,7 +1980,7 @@ class CheckController extends Controller
 
         // display the page
         $this->pageTitle = $check->localizedName;
-		$this->render('control/check/solution/index', array(
+		$this->render('category/control/check/solution/index', array(
             'solutions' => $check_solutions,
             'p'         => $paginator,
             'check'     => $check,
@@ -2179,7 +2179,7 @@ class CheckController extends Controller
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Solution') : $solution->localizedTitle;
-		$this->render('control/check/solution/edit', array(
+		$this->render('category/control/check/solution/edit', array(
             'model'     => $model,
             'category'  => $category,
             'control'   => $control,
@@ -2324,7 +2324,7 @@ class CheckController extends Controller
 
         // display the page
         $this->pageTitle = $check->localizedName;
-		$this->render('control/check/script/index', array(
+		$this->render('category/control/check/script/index', array(
             'scripts'  => $check_scripts,
             'p'  => $paginator,
             'check' => $check,
@@ -2456,7 +2456,7 @@ class CheckController extends Controller
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Script') : $script->package->name;
-		$this->render('control/check/script/edit', array(
+		$this->render('category/control/check/script/edit', array(
             'model' => $model,
             'category' => $category,
             'control' => $control,
@@ -2626,7 +2626,7 @@ class CheckController extends Controller
 
         // display the page
         $this->pageTitle = $script->package->name;
-		$this->render('control/check/script/input/index', array(
+		$this->render('category/control/check/script/input/index', array(
             'inputs'   => $check_inputs,
             'p'        => $paginator,
             'check'    => $check,
@@ -2871,7 +2871,7 @@ class CheckController extends Controller
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Input') : $input->localizedName;
-		$this->render('control/check/script/input/edit', array(
+		$this->render('category/control/check/script/input/edit', array(
             'model'     => $model,
             'category'  => $category,
             'control'   => $control,
@@ -2996,13 +2996,168 @@ class CheckController extends Controller
     }
 
     /**
+     * Share all checks
+     * @throws CHttpException
+     */
+    public function actionShare() {
+        $form = new ShareForm();
+
+		if (isset($_POST["ShareForm"])) {
+			$form->attributes = $_POST["ShareForm"];
+
+			if ($form->validate()) {
+                $categories = CheckCategory::model()->findAll();
+                $cm = new CategoryManager();
+
+                foreach ($categories as $category) {
+                    $cm->prepareSharing($category, true);
+                }
+
+                Yii::app()->user->setFlash("success", Yii::t("app", "All checks scheduled for sharing."));
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+		}
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Checks"), $this->createUrl("check/index"));
+        $this->breadcrumbs[] = array(Yii::t("app", "Share"), "");
+
+        // display the page
+        $this->pageTitle = Yii::t("app", "Share");
+		$this->render("share", array(
+            "form" => $form,
+        ));
+    }
+
+    /**
+     * Share category
+     * @param $id
+     * @throws CHttpException
+     */
+    public function actionShareCategory($id) {
+        $id = (int) $id;
+        $category = CheckCategory::model()->findByPk($id);
+
+        if (!$category) {
+            throw new CHttpException(404, Yii::t("app", "Category not found."));
+        }
+
+        $form = new ShareForm();
+
+		if (isset($_POST["ShareForm"])) {
+			$form->attributes = $_POST["ShareForm"];
+
+			if ($form->validate()) {
+                $cm = new CategoryManager();
+                $cm->prepareSharing($category, true);
+
+                Yii::app()->user->setFlash("success", Yii::t("app", "Category scheduled for sharing."));
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+		}
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Checks"), $this->createUrl("check/index"));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl("check/view", array(
+            "id" => $category->id
+        )));
+        $this->breadcrumbs[] = array(Yii::t("app", "Share"), "");
+
+        // display the page
+        $this->pageTitle = $category->localizedName;
+		$this->render("category/share", array(
+            "form" => $form,
+            "category" => $category,
+        ));
+    }
+
+    /**
+     * Share control
+     * @param $id
+     * @param $control
+     * @throws CHttpException
+     */
+    public function actionShareControl($id, $control) {
+        $id = (int) $id;
+        $control = (int) $control;
+
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        $category = CheckCategory::model()->with(array(
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array("language_id" => $language)
+            )
+        ))->findByPk($id);
+
+        if (!$category) {
+            throw new CHttpException(404, Yii::t("app", "Category not found."));
+        }
+
+        $control = CheckControl::model()->with(array(
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array("language_id" => $language)
+            )
+        ))->findByAttributes(array(
+            "id" => $control,
+            "check_category_id" => $category->id
+        ));
+
+        if (!$control) {
+            throw new CHttpException(404, Yii::t("app", "Control not found."));
+        }
+
+        $form = new ShareForm();
+
+		if (isset($_POST["ShareForm"])) {
+			$form->attributes = $_POST["ShareForm"];
+
+			if ($form->validate()) {
+                $cm = new ControlManager();
+                $cm->prepareSharing($control, true);
+
+                Yii::app()->user->setFlash("success", Yii::t("app", "Control scheduled for sharing."));
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+		}
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Checks"), $this->createUrl("check/index"));
+        $this->breadcrumbs[] = array($category->localizedName, $this->createUrl("check/view", array(
+            "id" => $category->id
+        )));
+        $this->breadcrumbs[] = array($control->localizedName, $this->createUrl("check/viewcontrol", array(
+            "id" => $category->id,
+            "control" => $control->id
+        )));
+        $this->breadcrumbs[] = array(Yii::t("app", "Share"), "");
+
+        // display the page
+        $this->pageTitle = $category->localizedName;
+		$this->render("category/control/share", array(
+            "form" => $form,
+            "category" => $category,
+            "control" => $control,
+        ));
+    }
+
+    /**
      * Share check
      * @param $id
      * @param $control
      * @param $check
      * @throws CHttpException
      */
-    public function actionShare($id, $control, $check) {
+    public function actionShareCheck($id, $control, $check) {
         $id = (int) $id;
         $control = (int) $control;
         $check = (int) $check;
@@ -3061,30 +3216,20 @@ class CheckController extends Controller
             throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
         }
 
-        $form = new ShareCheckForm();
+        $form = new ShareForm();
 
-		if (isset($_POST["ShareCheckForm"])) {
-			$form->attributes = $_POST["ShareCheckForm"];
+		if (isset($_POST["ShareForm"])) {
+			$form->attributes = $_POST["ShareForm"];
 
 			if ($form->validate()) {
-                try {
-                    $cm = new CheckManager();
-                    $cm->prepareSharing($check, $form->externalControlId, $form->externalReferenceId);
-                } catch (Exception $e) {
-                    throw new CHttpException(403, Yii::t("app", "Access denied."));
-                }
+                $cm = new CheckManager();
+                $cm->prepareSharing($check);
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "Check scheduled for sharing."));
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
 		}
-
-        $catalogs = json_decode($this->_system->community_catalogs_cache);
-
-        if (!$catalogs) {
-            throw new CHttpException(403, Yii::t("app", "No community catalogs."));
-        }
 
         $this->breadcrumbs[] = array(Yii::t("app", "Checks"), $this->createUrl("check/index"));
         $this->breadcrumbs[] = array($category->localizedName, $this->createUrl("check/view", array(
@@ -3103,11 +3248,10 @@ class CheckController extends Controller
 
         // display the page
         $this->pageTitle = $check->localizedName;
-		$this->render("control/check/share", array(
+		$this->render("category/control/check/share", array(
             "category" => $category,
             "control" => $control,
             "check" => $check,
-            "catalogs" => $catalogs,
             "form" => $form,
         ));
     }

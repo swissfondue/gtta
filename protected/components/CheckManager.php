@@ -348,12 +348,10 @@ class CheckManager {
     /**
      * Prepare check sharing
      * @param Check $check
-     * @param integer $externalControlId
-     * @param integer $externalReferenceId
      * @throws Exception
      */
-    public function prepareSharing(Check $check, $externalControlId, $externalReferenceId) {
-        if ($check->external_id || $check->status != Check::STATUS_INSTALLED) {
+    public function prepareSharing(Check $check) {
+        if ($check->status != Check::STATUS_INSTALLED) {
             throw new Exception("Invalid check.");
         }
 
@@ -361,35 +359,41 @@ class CheckManager {
 
         if ($check->automated) {
             foreach ($check->scripts as $script) {
-                $package = $script->package;
-
-                if ($package->external_id) {
-                    continue;
-                }
-
-                $pm->prepareSharing($package);
+                $pm->prepareSharing($script->package);
             }
         }
 
-        $check->external_control_id = $externalControlId;
-        $check->external_reference_id = $externalReferenceId;
-        $check->status = Package::STATUS_SHARE;
-        $check->save();
+        $control = $check->control;
+        $reference = $check->_reference;
+
+        if (!$control->external_id) {
+            $cm = new ControlManager();
+            $cm->prepareSharing($control);
+        }
+
+        if (!$reference->external_id) {
+            $rm = new ReferenceManager();
+            $rm->prepareSharing($reference);
+        }
+
+        if (!$check->external_id) {
+            $check->status = Check::STATUS_SHARE;
+            $check->save();
+        }
     }
 
     /**
-     * Serialize check
+     * Serialize and share check
      * @param Check $check
-     * @return array
      * @throws Exception
      */
     public function share(Check $check) {
         /** @var System $system */
         $system = System::model()->findByPk(1);
 
-        $target = array(
-            "control_id" => $check->external_control_id,
-            "reference_id" => $check->external_reference_id,
+        $data = array(
+            "control_id" => $check->control->external_id,
+            "reference_id" => $check->_reference->external_id,
             "reference_code" => $check->reference_code,
             "reference_url" => $check->reference_url,
             "name" => $check->name,
@@ -409,7 +413,7 @@ class CheckManager {
         );
 
         foreach ($check->l10n as $l10n) {
-            $target["l10n"][] = array(
+            $data["l10n"][] = array(
                 "code" => $l10n->language->code,
                 "name" => $l10n->name,
                 "background_info" => $l10n->background_info,
@@ -434,7 +438,7 @@ class CheckManager {
                 );
             }
 
-            $target["results"][] = $r;
+            $data["results"][] = $r;
         }
 
         foreach ($check->solutions as $solution) {
@@ -453,7 +457,7 @@ class CheckManager {
                 );
             }
 
-            $target["solutions"][] = $s;
+            $data["solutions"][] = $s;
         }
 
         foreach ($check->scripts as $script) {
@@ -488,11 +492,11 @@ class CheckManager {
                 $s["inputs"][] = $i;
             }
 
-            $target["scripts"][] = $s;
+            $data["scripts"][] = $s;
         }
 
         $api = new CommunityApiClient($system->integration_key);
-        $check->external_id = $api->shareCheck(array("check" => $target))->id;
+        $check->external_id = $api->shareCheck(array("check" => $data))->id;
         $check->status = Check::STATUS_INSTALLED;
         $check->save();
     }

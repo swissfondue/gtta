@@ -1,6 +1,7 @@
 <div class="active-header">
     <div class="pull-right">
-        <a class="btn" href="<?php echo $this->createUrl('check/edit') ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New Category'); ?></a>
+        <a class="btn" href="<?php echo $this->createUrl("check/edit") ?>"><i class="icon icon-plus"></i> <?php echo Yii::t("app", "New Category"); ?></a>&nbsp;
+        <a class="btn" href="<?php echo $this->createUrl("check/share") ?>"><i class="icon icon-globe"></i> <?php echo Yii::t("app", "Share All"); ?></a>
     </div>
 
     <div class="pull-right">

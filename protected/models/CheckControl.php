@@ -9,9 +9,13 @@
  * @property string $name
  * @property integer $sort_order
  * @property integer $external_id
+ * @property integer $status
  * @property TargetCustomCheck[] $customChecks
  */
 class CheckControl extends ActiveRecord implements IVariableScopeObject {
+    const STATUS_INSTALLED = 1;
+    const STATUS_SHARE = 2;
+
     // nearest sort order
     public $nearest_sort_order;
 
@@ -37,8 +41,11 @@ class CheckControl extends ActiveRecord implements IVariableScopeObject {
 	public function rules() {
 		return array(
             array("name, check_category_id, sort_order", "required"),
-            array("check_category_id, sort_order", "numerical", "integerOnly" => true),
-            array("external_id", "numerical", "integerOnly" => true),
+            array("check_category_id, sort_order, external_id, status", "numerical", "integerOnly" => true),
+            array("status", "in", "range" => array(
+                self::STATUS_INSTALLED,
+                self::STATUS_SHARE,
+            )),
 		);
 	}
 

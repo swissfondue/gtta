@@ -2,8 +2,9 @@
     <?php if (!$category->isNewRecord): ?>
         <div class="pull-right">
             <ul class="nav nav-pills">
-                <li><a href="<?php echo $this->createUrl('check/view', array( 'id' => $category->id )); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
-                <li class="active"><a href="<?php echo $this->createUrl('check/edit', array( 'id' => $category->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+                <li><a href="<?php echo $this->createUrl("check/view", array("id" => $category->id)); ?>"><?php echo Yii::t("app", "View"); ?></a></li>
+                <li class="active"><a href="<?php echo $this->createUrl("check/edit", array("id" => $category->id)); ?>"><?php echo Yii::t("app", "Edit"); ?></a></li>
+                <li><a href="<?php echo $this->createUrl("check/sharecategory", array("id" => $category->id)); ?>"><?php echo Yii::t("app", "Share"); ?></a></li>
             </ul>
         </div>
     <?php endif; ?>
