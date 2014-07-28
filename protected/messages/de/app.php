@@ -172,7 +172,7 @@ return array (
   'This module is already planned.' => 'Dieses Modul ist bereits geplant',
   'This package is required by other objects and cannot be deleted.' => 'Dieses Paket wird von anderen Objekten benötigt und kann daher nicht gelöscht werden',
   'Time Tracker' => 'Zeit Überwachung',
-  'Track Time' => 'Zeit überwachen
+  'Track Time' => 'Zeit überwachen',
   'Unable to create the package.' => 'Kann das Paket nicht erstellen',
   'Unable to create the report.' => 'Kann den Bericht nicht erstellen',
   'Unable to install deb dependency: {dependency}.' => 'Kann die Deb Abhängkeit nicht installieren: {dependency}.',
