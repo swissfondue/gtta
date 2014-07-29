@@ -13,6 +13,7 @@
                 <li><a href="#whatsnew">What's New?</a></li>
                 <li><a href="#general">General</a></li>
                 <li><a href="#metasploit">Metasploit</a></li>
+                <li><a href="#custom-reports">Custom Reports</a></li>
                 <li>
                     <a href="#guided">Guided Tests</a>
 
@@ -179,6 +180,454 @@ set threads 3</pre>
                         </div>
                     </li>
                 </ol>
+            </p>
+
+            <p id="custom-reports" class="section">
+                <h2>Custom Reports</h2>
+
+                <p>
+                    Downloads:
+
+                    <ul>
+                        <li>
+                            <a href="<?php echo $this->createUrl("app/file", array("section" => "help", "subsection" => "custom-reports", "file" => "report.docx")); ?>">Example Report Template</a>
+                        </li>
+                    </ul>
+                </p>
+
+                <p>
+                    You can generate project report using a custom Word template. In order to make a proper Word template,
+                    you should have a Microsoft Windows machine with Microsoft Word 2010 or more. Please note, that
+                    older Microsoft Word versions or Microsoft Word for Mac OS are not suitable for creating custom templates.
+                </p>
+
+                <p>
+                    First of all, you need to enable the <em>Developer</em> tab in Word - you will need it for inserting
+                    variables and lists into the template. Please refer to <a target="_blank" href="http://msdn.microsoft.com/en-us/library/bb608625.aspx">Microsoft Office documentation</a>
+                    on how to do this. After that tab is enabled, switch to it and enable the <em>Design Mode</em>.
+                    You need this mode to make all lists and variables visible.
+
+                    <div class="help-images">
+                        <a class="fancybox" title="Design Mode" href="<?php echo $this->createUrl("app/file", array("section" => "help", "subsection" => "custom-reports", "file" => "1.png")); ?>"><img src="<?php echo $this->createUrl("app/file", array("section" => "help", "subsection" => "custom-reports", "file" => "1-small.png")); ?>" alt="Design Mode"></a>
+                    </div>
+                </p>
+
+                <p>
+                    There are 2 ways to insert data into the template:
+                </p>
+
+                <p id="custom-reports-text">
+                    <h3>Text Variables</h3>
+
+                    <p>
+                        Simple global variables insert some static data into the report. All variables
+                        look like a usual text within curly brackets (for example, <em>{variable_name}</em>).
+                        The following variables are supported:
+                    </p>
+
+                    <ul>
+                        <li>{project} - project name</li>
+                        <li>{company} - project company name</li>
+                        <li>{year} - project year</li>
+                        <li>{start_date} - project start date</li>
+                        <li>{deadline} - project deadline date</li>
+                        <li>{rating} - project rating</li>
+                        <li>{date} - current date</li>
+                        <li>{time} - current time</li>
+                        <li>{admin_name} - project admin name</li>
+                        <li>{admin_email} - project admin e-mail address</li>
+                        <li>{auditor_name} - current user name</li>
+                        <li>{auditor_email} - current user e-mail address</li>
+                        <li>{target_count} - project target count</li>
+                        <li>{check_count} - project check count</li>
+                        <li>{high_check_count} - check count with "High Risk" rating</li>
+                        <li>{med_check_count} - check count with "Medium Risk" rating</li>
+                        <li>{low_check_count} - check count with "Low Risk" rating</li>
+                        <li>{info_check_count} - check count with "Info" rating</li>
+                    </ul>
+                </p>
+
+                <p id="custom-reports-content-control">
+                    <h3>Content Control</h3>
+
+                    <p>
+                        Content control blocks are responsible for inserting lists and variables
+                        into the report. You can insert content control blocks by pressing the <em>Rich Text Content Control</em>
+                        button in the <em>Developer</em> tab.
+
+                        <div class="help-images">
+                            <a class="fancybox" title="Rich Text Content Control" href="<?php echo $this->createUrl("app/file", array("section" => "help", "subsection" => "custom-reports", "file" => "2.png")); ?>"><img src="<?php echo $this->createUrl("app/file", array("section" => "help", "subsection" => "custom-reports", "file" => "2-small.png")); ?>" alt="Rich Text Content Control"></a>
+                        </div>
+                    </p>
+
+                    <p>
+                        After the content control is inserted into the template, you should press the <em>Properties</em>
+                        button to edit its properties. The title of the content control doesn't affect anything - you can
+                        put there anything you want, so you can easily know what that control does. The system uses the
+                        field named <em>Tag</em>.
+
+                        <div class="help-images">
+                            <a class="fancybox" title="Properties" href="<?php echo $this->createUrl("app/file", array("section" => "help", "subsection" => "custom-reports", "file" => "3.png")); ?>"><img src="<?php echo $this->createUrl("app/file", array("section" => "help", "subsection" => "custom-reports", "file" => "3-small.png")); ?>" alt="Properties"></a>
+                        </div>
+                    </p>
+
+                    <p>
+                         There are 4 different types of control tags which you can use in your templates:
+                    </p>
+
+                    <ul>
+                        <li>
+                            <em>variable</em> - you can use variables to insert content into the report, in conditions
+                            and list filters. A variable tag looks like this:
+
+                            <pre>var:SCOPE.NAME</pre>
+
+                            <ul>
+                                <li>
+                                    <p>
+                                        <em>SCOPE</em> - an optional variable visibility scope. <em>Scope</em> is an object,
+                                        from which the variable will get its value. The reporting engine uses <em>scopes</em>
+                                        to access variables in lists. You can skip the scope specification for
+                                        a variable, then the system will take the corresponding value from the current scope.
+                                        See the <a href="#scopes-explanation">detailed scopes explanation</a> for more info.
+                                    </p>
+
+                                </li>
+                                <li>
+                                    <em>NAME</em> - variable name. Available variable names depend on object you get that
+                                    variable from. See the <a href="#variable-list">full list of all available objects and their variables</a>
+                                    for more info.
+                                </li>
+                            </ul>
+
+                            <p>
+                                Example:
+                            </p>
+
+                            <pre>var:project.name</pre>
+                        </li>
+
+                        <li>
+                            <em>list</em> - a list of objects. For example, it could be a list of targets within a project
+                            or a list of checks within a control. A list looks as follows:
+
+                            <pre>list:SCOPE.NAME</pre>
+
+                             <ul>
+                                <li>
+                                    <p>
+                                        <em>SCOPE</em> - an optional list visibility scope. <em>Scope</em> is an object,
+                                        from which the variable will get its list. The reporting engine uses <em>scopes</em>
+                                        to access variables in lists. You can skip the scope specification for
+                                        a list, then the system will take the corresponding value from the current scope.
+                                        See the <a href="#scopes-explanation">detailed scopes explanation</a> for more info.
+                                    </p>
+
+                                </li>
+                                <li>
+                                    <em>NAME</em> - list name. Available list names depend on object you get that
+                                    list from. See the <a href="#variable-list">full list of all available list names</a>
+                                    for more info.
+                                </li>
+                            </ul>
+
+                            You can nest multiple list types into each other, so, for example if you use
+                            <em>list:category</em> on the top level, it will contain all categories across all targets within
+                            that project. Then you can create a list called <em>list:check</em> within it and that list will
+                            contain all checks within that particular category for all targets. The same is for other
+                            lists - if you create a target list, which has category list and which has check list, then
+                            you will get a checklist for each category within each target. Please refer to a <a href="#variable-list">list of
+                            possible object lists</a> below.
+                        </li>
+
+                        <li>
+                            <em>filter</em> - you can filter lists by using filter on certain list item variable. A list
+                            with a filter looks like this:
+
+                            <pre>list:LIST|filter:VARIABLE(VALUE)</pre>
+
+                            <ul>
+                                <li>
+                                    <em>LIST</em> - the name of a list variable. For example, it could be <em>project.target</em>,
+                                    which would refer to the project target list. See the <a href="#variable-list">full list of all available objects and their variables</a>
+                                    for more info.
+                                </li>
+                                <li>
+                                    <em>VARIABLE</em> - the name of some variable within the list item. So, if you have a list of checks,
+                                    then it should be a check variable, etc. Please note that it's not allowed to use a
+                                    scope specifier here, only variable names are allowed. For example, if you have a list of checks,
+                                    it could be <em>rating</em>, which would refer to the check rating. You can check a full
+                                    list of variables for corresponding objects above, in the "variable" section.
+                                </li>
+                                <li>
+                                    <em>VALUE</em> - the scalar value (number or text), against which the variable is checked.
+                                </li>
+                            </ul>
+
+                            <br>
+
+                            <p>
+                                For example, if you want to have a list of only high-risk checks, then the following tag
+                                should be used:
+                                <pre>list:check|filter:rating(high)</pre>
+                            </p>
+
+                            <p>
+                                You can use filters for every list and on every variable, but currently that mostly makes sense
+                                only for check lists and check ratings.
+                            </p>
+                        </li>
+
+                        <li>
+                            <em>condition</em> - condition block. If the condition is true, then the text inside this content control
+                            is inserted into the report, otherwise the content block is removed. The condition tag looks like this:
+
+                            <pre>if:VARIABLE(VALUE)</pre>
+
+                            <ul>
+                                <li>
+                                    <em>VARIABLE</em> - the name of some variable. For example, it could be <em>project.rating</em>,
+                                    which would refer to the project overall rating. You can check a full list of available variables above,
+                                    in the "variable" section.
+                                </li>
+                                <li>
+                                    <em>VALUE</em> - is the value, against which the variable is checked. There are 3 value
+                                    types supported:
+
+                                    <ul>
+                                        <li>
+                                            scalar value (some number or text) - checks if the variable specified
+                                            is equal to the value provided. For example, you need to check if project rating
+                                            is equal to 5:
+                                            <pre>if:project.rating(5)</pre>
+                                        </li>
+                                        <li>
+                                            list of numbers or text values - checks if the variable specified is equal
+                                            to one of the values provided. For example, you need to check if id is equal
+                                            to 1, 2 or 3:
+                                            <pre>if:id(1,2,3)</pre>
+                                        </li>
+                                        <li>
+                                            range of numbers - checks if the variable specified is within the given
+                                            range (the range includes both starting and ending values). For example,
+                                            you check if rating is >= 2 and <= 5 as follows:
+                                            <pre>if:rating(2..5)</pre>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <br>
+
+                    <p id="variable-list">
+                        <h3>List of Available Objects, Variables and Lists</h3>
+                    </p>
+
+                    <ul>
+                        <li>
+                            <p>
+                                <em>project</em> - this object represents the whole project, for which the report is generated.
+                                This is the default scope for the report - in other words, when you use a variable
+                                which is outside of any list and without a scope specified, it will get its value from the
+                                project object.
+                            </p>
+
+                            <p>Variables:</p>
+
+                            <ul>
+                                <li>name - project name</li>
+                                <li>year - project year</li>
+                                <li>rating - project total rating, calculated over all targets</li>
+                            </ul>
+
+                            <br>
+
+                            <p>Lists:</p>
+
+                            <ul>
+                                <li>target - a list of targets in project</li>
+                                <li>category - a list of all categories in all targets in project</li>
+                                <li>check - a list of all checks in project</li>
+                            </ul>
+
+                            <br>&nbsp;
+                        </li>
+                        <li>
+                            <p>
+                                <em>target</em> - this object represents one particular target from the project's target
+                                list. You can access this object from within the <em>project.target</em> list.
+                            </p>
+
+                            <p>Variables:</p>
+
+                            <ul>
+                                <li>host - target host</li>
+                                <li>description - target description</li>
+                            </ul>
+
+                            <br>
+
+                            <p>Lists:</p>
+
+                            <ul>
+                                <li>category - category list for target</li>
+                                <li>check - a list of checks for target</li>
+                            </ul>
+
+                            <br>&nbsp;
+                        </li>
+                        <li>
+                            <p>
+                                <em>category</em> - this object represents one particular category for project's or
+                                target's category list. You can access this object from within the <em>project.category</em>
+                                list or from <em>target.category</em> list.
+                            </p>
+
+                            <p>Variables:</p>
+
+                            <ul>
+                                <li>name - category name</li>
+                            </ul>
+
+                            <br>
+
+                            <p>Lists:</p>
+
+                            <ul>
+                                <li>control - a list of controls within category</li>
+                                <li>check - a list of category's checks</li>
+                            </ul>
+
+                            <br>&nbsp;
+                        </li>
+                        <li>
+                            <p>
+                                <em>control</em> - this object is a single control for category's control list. You can
+                                access this kind of object from within the <em>category.control</em> list.
+                            </p>
+
+                            <p>Variables:</p>
+
+                            <ul>
+                                <li>name - control name</li>
+                            </ul>
+
+                            <br>
+
+                            <p>Lists:</p>
+
+                            <ul>
+                                <li>check - a list of checks in control</li>
+                            </ul>
+
+                            <br>&nbsp;
+                        </li>
+                        <li>
+                            <p>
+                                <em>check</em> - the object is a check representation for project's, target's, category's
+                                or control's list of checks. You can access this object from <em>project.check</em>,
+                                <em>target.check</em>, <em>category.check</em> or <em>control.check</em> lists.
+                            </p>
+
+                            <p>Variables:</p>
+
+                            <ul>
+                                <li>name - check name</li>
+                                <li>background_info - check background info</li>
+                                <li>hints - check hints</li>
+                                <li>question - check question</li>
+                                <li>
+                                    rating - check rating (text constant representation). Possible values:
+
+                                    <ul>
+                                        <li>high</li>
+                                        <li>med</li>
+                                        <li>low</li>
+                                        <li>info</li>
+                                        <li>hidden</li>
+                                        <li>no_vuln</li>
+                                        <li>none</li>
+                                    </ul>
+                                </li>
+                                <li>rating_name - check rating name (like "High Risk" for high risk, etc.)</li>
+                                <li>target - check target host</li>
+                                <li>links - check links</li>
+                                <li>poc - check proof of concept</li>
+                                <li>result - check result</li>
+                                <li>reference - check reference name</li>
+                                <li>
+                                    solution - check solution. If a check has multiple solutions, this variable will
+                                    hold a concatenated value.
+                                </li>
+                            </ul>
+
+                            <br>
+
+                            <p>Lists:</p>
+
+                            <ul>
+                                <li>attachment - a list of attachments for check</li>
+                            </ul>
+
+                            <br>&nbsp;
+                        </li>
+                        <li>
+                            <p>
+                                <em>attachment</em> - the object is an attachment representation for check's attachment
+                                list. You can access this object from within the <em>check.attachment</em> list.
+                            </p>
+
+                            <p>Variables:</p>
+
+                            <ul>
+                                <li>name - attachment file name (with extension)</li>
+                                <li>
+                                    image - attachment body. You can use this variable to insert the actual attachment
+                                    image into the place you need.
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <br>
+
+                    <p id="scopes-explanation">
+                        <h3>Scopes Explanation</h3>
+                    </p>
+
+                    <p>
+                        Scopes mechanism comes into action when you use object lists. For example, when you use some variables within
+                        a <em>category</em> list, your current scope will be tied to a <em>category</em> from that list. So, if you use a variable
+                        named <em>name</em> without any explicit scope specification inside that block, the system will know that it needs
+                        to insert there the name of a particular <em>category</em> from that list.
+                        </p>
+
+                    <p>
+                        Then, for example, within that <em>category</em> block you need to have a list of <em>controls</em>. And
+                        inside the control block you use a variable named <em>name</em> without scope specification.
+                        In this case the system will get the value from the particular <em>control</em>, because
+                        <em>control</em> is the current variable scope.
+                    </p>
+
+                    <p>
+                        If you have multiple nested lists, you can access to variables of the upper level lists by specifying
+                        the scope modififer. For example, you have 3 nested lists: <em>targets</em> &rarr; <em>categories</em> &rarr; <em>checks</em>.
+                        You can access target's variables from the check or category block by specifying the scope, for example:
+                        <em>var:target.host</em> (<em>target</em> here is the desired variable scope).
+                    </p>
+
+                    <p>
+                        The default scope for the report is a <em>project</em> object. In other words,
+                        when you use a variable without a scope specified and which is not inside any lists, it will
+                        get its value from the <em>project</em> object.
+                    </p>
+
+                    <p>
+                        Please download the <a href="<?php echo $this->createUrl("app/file", array("section" => "help", "subsection" => "custom-reports", "file" => "report.docx")); ?>">example report template</a> for the working example.
+                    </p>
+                </p>
             </p>
 
             <p id="guided" class="section">

@@ -65,7 +65,7 @@ return array(
                 "app/object-list" => "app/objectlist",
                 "app/logo" => "app/logo",
                 "app/help" => "app/help",
-                "app/file/<section:[a-z]+>/<subsection:[a-z]+>/<file:[a-z0-9\-\.]+>" => "app/file",
+                "app/file/<section:[a-z\-]+>/<subsection:[a-z\-]+>/<file:[a-z0-9\-\.]+>" => "app/file",
 
                 // projects
                 "projects/<page:\d+>" => "project/index",
