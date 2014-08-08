@@ -647,6 +647,33 @@ class ReportController extends Controller {
     }
 
     /**
+     * Check if content is HTML
+     * @param $content
+     * @return bool
+     */
+    private function _isHtml($content) {
+        $htmlTests = array(
+            "<b>",
+            "<em>",
+            "<u>",
+            "<ul>",
+            "<ol>",
+            "<br />",
+        );
+
+        $isHtml = false;
+
+        foreach ($htmlTests as $test) {
+            if (mb_strpos($content, $test) !== false) {
+                $isHtml = true;
+                break;
+            }
+        }
+
+        return $isHtml;
+    }
+
+    /**
      * Generate a vulnerability list.
      */
     private function _generateVulnerabilityList($data, &$section, $sectionNumber, $type = self::NORMAL_VULN_LIST, $infoLocation = null, $categoryId = null)
@@ -933,25 +960,7 @@ class ReportController extends Controller {
                                 $table->getCell($row, 2)->setBorder($this->thinBorder);
                                 $table->writeToCell($row, 1, Yii::t('app', 'Result'));
 
-                                $htmlTests = array(
-                                    "<b>",
-                                    "<em>",
-                                    "<u>",
-                                    "<ul>",
-                                    "<ol>",
-                                    "<br />",
-                                );
-
-                                $isHtml = false;
-
-                                foreach ($htmlTests as $test) {
-                                    if (mb_strpos($check["result"], $test) !== false) {
-                                        $isHtml = true;
-                                        break;
-                                    }
-                                }
-
-                                if ($isHtml) {
+                                if ($this->_isHtml($check["result"])) {
                                     $this->_renderText($table->getCell($row, 2), $check["result"], false);
                                 } else {
                                     $table->writeToCell($row, 2, $check["result"]);
@@ -2802,11 +2811,21 @@ class ReportController extends Controller {
                     }
 
                     $cell = $table->getCell($row, 3);
-                    $cell->writeText($problem);
+
+                    if ($this->_isHtml($problem)) {
+                        $this->_renderText($cell, $problem, false);
+                    } else {
+                        $cell->writeText($problem);
+                    }
 
                     if ($details) {
                         $cell->writeText("<br>");
-                        $cell->writeText($details);
+
+                        if ($this->_isHtml($problem)) {
+                            $this->_renderText($cell, $details, false);
+                        } else {
+                            $cell->writeText($details);
+                        }
                     }
 
                     $cell = $table->getCell($row, 4);
