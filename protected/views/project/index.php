@@ -141,8 +141,8 @@
             <?php endif; ?>
         </div>
         <div class="span4">
-            <div id="filter-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock("#filter");"><i class="icon-chevron-up"></i></div>
-            <h3><a href="#toggle" onclick="system.toggleBlock("#filter");"><?php echo Yii::t("app", "Filter"); ?></a></h3>
+            <div id="filter-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#filter');"><i class="icon-chevron-up"></i></div>
+            <h3><a href="#toggle" onclick="system.toggleBlock('#filter');"><?php echo Yii::t("app", "Filter"); ?></a></h3>
 
             <div class="info-block" id="filter">
                 <table class="table client-details">
