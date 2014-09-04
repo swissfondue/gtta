@@ -30,7 +30,18 @@ class ProjectController extends Controller {
             throw new CHttpException(404, Yii::t("app", "Page not found."));
 
         $cookies = Yii::app()->request->cookies;
-        $statusCookie = isset($cookies["project_filter_status"]) ? $cookies["project_filter_status"]->value : "";
+
+        if (isset($cookies["project_filter_status"])) {
+            // if cookie value is empty string: (int) empty_string = 0 == Project::STATUS_OPEN
+            if (strlen($cookies["project_filter_status"]->value)) {
+                $statusCookie = $cookies["project_filter_status"]->value;
+            } else {
+                $statusCookie = sprintf('%d, %d', Project::STATUS_OPEN, Project::STATUS_IN_PROGRESS);
+            }
+        } else {
+            $statusCookie = sprintf('%d, %d', Project::STATUS_OPEN, Project::STATUS_IN_PROGRESS);
+        }
+
         $statuses = explode(",", $statusCookie);
         $filtered = array();
 
