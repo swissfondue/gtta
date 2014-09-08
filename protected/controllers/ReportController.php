@@ -3774,7 +3774,7 @@ class ReportController extends Controller {
             $criteria->addColumnCondition(array(
                 "project_id" => $projectId,
                 "target" => $target,
-                "status" => ProjectGtCheck::STATUS_FINISHED,
+                "t.status" => ProjectGtCheck::STATUS_FINISHED,
             ));
 
             $checks = ProjectGtCheck::model()->with(array(

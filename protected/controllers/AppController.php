@@ -524,7 +524,7 @@ class AppController extends Controller {
                         $criteria->addColumnCondition(array(
                             "project_id" => $project->id,
                             "target" => $target,
-                            "status" => ProjectGtCheck::STATUS_FINISHED,
+                            "t.status" => ProjectGtCheck::STATUS_FINISHED,
                         ));
 
                         $criteria->addInCondition("rating", array(
