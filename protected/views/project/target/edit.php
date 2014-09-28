@@ -6,6 +6,11 @@
                 <li class="active"><a href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
             </ul>
         </div>
+        <div class="pull-right buttons">
+            <?php if (User::checkRole(User::ROLE_USER)): ?>
+                <a class="btn" href="<?php echo $this->createUrl('project/edittarget', array('id' => $project->id)); ?>"><i class="icon icon-plus"></i> <?php echo Yii::t("app", "Add Another Target"); ?></a>&nbsp;
+            <?php endif; ?>
+        </div>
     <?php endif; ?>
 
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
