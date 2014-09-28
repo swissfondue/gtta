@@ -1051,7 +1051,7 @@ class ReportController extends Controller {
                                 $row++;
                             }
 
-                            if ($check["poc"] && $this->_system->checklist_poc) {
+                            if (isset($check["poc"]) && $check["poc"] && $this->_system->checklist_poc) {
                                 $table->addRow();
                                 $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                 $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
@@ -1065,7 +1065,7 @@ class ReportController extends Controller {
                                 $row++;
                             }
                             
-                            if ($check["links"] && $this->_system->checklist_links) {
+                            if (isset($check["links"]) && $check["links"] && $this->_system->checklist_links) {
                                 $table->addRow();
                                 $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                 $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
@@ -2002,23 +2002,23 @@ class ReportController extends Controller {
                         }
 
                         $checkData = array(
-                            'id' => $check->gt_check_id,
-                            'name' => $innerCheck->localizedName,
-                            'background' => $this->_prepareProjectReportText($innerCheck->localizedBackgroundInfo),
-                            'question' => $this->_prepareProjectReportText($innerCheck->localizedQuestion),
-                            'result' => $check->result,
-                            'tableResult' => $check->table_result,
-                            'rating' => 0,
-                            'ratingName' => $ratings[$check->rating],
-                            'ratingColor' => '#999999',
-                            'solutions' => array(),
-                            'images' => array(),
-                            'reference' => $innerCheck->_reference->name,
-                            'referenceUrl' => $innerCheck->_reference->url,
-                            'referenceCode' => $innerCheck->reference_code,
-                            'referenceCodeUrl' => $innerCheck->reference_url,
-                            'info' => $check->rating == ProjectGtCheck::RATING_INFO,
-                            'separate' => in_array($category["id"], $templateCategoryIds),
+                            "id" => $check->gt_check_id,
+                            "name" => $innerCheck->localizedName,
+                            "background" => $this->_prepareProjectReportText($innerCheck->localizedBackgroundInfo),
+                            "question" => $this->_prepareProjectReportText($innerCheck->localizedQuestion),
+                            "result" => $check->result,
+                            "tableResult" => $check->table_result,
+                            "rating" => 0,
+                            "ratingName" => $ratings[$check->rating],
+                            "ratingColor" => "#999999",
+                            "solutions" => array(),
+                            "images" => array(),
+                            "reference" => $innerCheck->_reference->name,
+                            "referenceUrl" => $innerCheck->_reference->url,
+                            "referenceCode" => $innerCheck->reference_code,
+                            "referenceCodeUrl" => $innerCheck->reference_url,
+                            "info" => $check->rating == ProjectGtCheck::RATING_INFO,
+                            "separate" => in_array($category["id"], $templateCategoryIds),
                         );
 
                         if ($check->solution) {
@@ -3774,7 +3774,7 @@ class ReportController extends Controller {
             $criteria->addColumnCondition(array(
                 "project_id" => $projectId,
                 "target" => $target,
-                "status" => ProjectGtCheck::STATUS_FINISHED,
+                "t.status" => ProjectGtCheck::STATUS_FINISHED,
             ));
 
             $checks = ProjectGtCheck::model()->with(array(
