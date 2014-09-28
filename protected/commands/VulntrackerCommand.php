@@ -68,7 +68,7 @@ class VulntrackerCommand extends ConsoleCommand {
                 }
 
                 foreach ($target->targetChecks as $tc) {
-                    if ($tc->vuln->overdued) {
+                    if ($tc->vuln && $tc->vuln->overdued) {
                         $overdued++;
                         break;
                     }
