@@ -92,6 +92,7 @@ class ReportTemplate extends ActiveRecord {
             "l10n" => array(self::HAS_MANY, "ReportTemplateL10n", "report_template_id"),
             "summary" => array(self::HAS_MANY, "ReportTemplateSummary", "report_template_id"),
             "sections" => array(self::HAS_MANY, "ReportTemplateSection", "report_template_id"),
+            "ratingImages" => array(self::HAS_MANY, "ReportTemplateSection", "report_template_id"),
 		);
 	}
 
@@ -279,5 +280,23 @@ class ReportTemplate extends ActiveRecord {
         }
 
         return $this->footer;
+    }
+
+    /**
+     * Returns high rating image if current template
+     * @return CActiveRecord
+     */
+    public function getRatingImage($id) {
+        $id = (int) $id;
+
+        $criteria = new CDbCriteria();
+        $criteria->addCondition('report_template_id =:report_template_id');
+        $criteria->addCondition('rating_id =:rating_id');
+        $criteria->params = array(
+            'report_template_id' => $this->id,
+            'rating_id' => $id
+        );
+
+        return ReportTemplatesRatingImages::model()->find($criteria);
     }
 }

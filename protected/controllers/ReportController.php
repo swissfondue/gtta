@@ -676,7 +676,7 @@ class ReportController extends Controller {
     /**
      * Generate a vulnerability list.
      */
-    private function _generateVulnerabilityList($data, &$section, $sectionNumber, $type = self::NORMAL_VULN_LIST, $infoLocation = null, $categoryId = null)
+    private function _generateVulnerabilityList($data, &$section, $sectionNumber, $type = self::NORMAL_VULN_LIST, $ratingImages, $infoLocation = null, $categoryId = null)
     {
         $targetNumber = 1;
 
@@ -1137,27 +1137,27 @@ class ReportController extends Controller {
 
                             switch ($check["rating"]) {
                                 case TargetCheck::RATING_HIGH_RISK:
-                                    $image = Yii::app()->basePath . "/../images/high.png";
+                                    $image = $ratingImages[TargetCheck::RATING_HIGH_RISK];
                                     break;
 
                                 case TargetCheck::RATING_MED_RISK:
-                                    $image = Yii::app()->basePath . "/../images/med.png";
+                                    $image = $ratingImages[TargetCheck::RATING_MED_RISK];
                                     break;
 
                                 case TargetCheck::RATING_LOW_RISK:
-                                    $image = Yii::app()->basePath . "/../images/low.png";
+                                    $image = $ratingImages[TargetCheck::RATING_LOW_RISK];
                                     break;
 
                                 case TargetCheck::RATING_NONE:
-                                    $image = Yii::app()->basePath . "/../images/none.png";
+                                    $image = $ratingImages[TargetCheck::RATING_NONE];
                                     break;
 
                                 case TargetCheck::RATING_NO_VULNERABILITY:
-                                    $image = Yii::app()->basePath . "/../images/no_vuln.png";
+                                    $image = $ratingImages[TargetCheck::RATING_NO_VULNERABILITY];
                                     break;
 
                                 case TargetCheck::RATING_INFO:
-                                    $image = Yii::app()->basePath . "/../images/info.png";
+                                    $image = $ratingImages[TargetCheck::RATING_INFO];
                                     break;
                             }
 
@@ -2288,6 +2288,8 @@ class ReportController extends Controller {
             )
         ));
 
+        $ratingImages = $this->_getRatingImages($template);
+
         // title
         if (in_array('title', $options))
         {
@@ -2691,12 +2693,12 @@ class ReportController extends Controller {
             $table->getCell(1, 2)->writeText(Yii::t('app', 'Meaning'));
             $table->getCell(1, 3)->writeText(Yii::t('app', 'Description'));
 
-            $table->addImageToCell(2, 1, Yii::app()->basePath . '/../images/high.png');
-            $table->addImageToCell(3, 1, Yii::app()->basePath . '/../images/med.png');
-            $table->addImageToCell(4, 1, Yii::app()->basePath . '/../images/low.png');
-            $table->addImageToCell(5, 1, Yii::app()->basePath . '/../images/none.png');
-            $table->addImageToCell(6, 1, Yii::app()->basePath . '/../images/no_vuln.png');
-            $table->addImageToCell(7, 1, Yii::app()->basePath . '/../images/info.png');
+            $table->addImageToCell(2, 1, $ratingImages[TargetCheck::RATING_HIGH_RISK]);
+            $table->addImageToCell(3, 1, $ratingImages[TargetCheck::RATING_MED_RISK]);
+            $table->addImageToCell(4, 1, $ratingImages[TargetCheck::RATING_MED_RISK]);
+            $table->addImageToCell(5, 1, $ratingImages[TargetCheck::RATING_NONE]);
+            $table->addImageToCell(6, 1, $ratingImages[TargetCheck::RATING_NO_VULNERABILITY]);
+            $table->addImageToCell(7, 1, $ratingImages[TargetCheck::RATING_INFO]);
 
             $table->getCell(2, 2)->writeText(Yii::t('app', 'High Risk'), $this->textFont);
             $table->getCell(3, 2)->writeText(Yii::t('app', 'Med Risk'), $this->textFont);
@@ -2835,27 +2837,27 @@ class ReportController extends Controller {
 
                     switch ($check['rating']) {
                         case TargetCheck::RATING_HIGH_RISK:
-                            $image = Yii::app()->basePath . '/../images/high.png';
+                            $image = $ratingImages[TargetCheck::RATING_HIGH_RISK];
                             break;
 
                         case TargetCheck::RATING_MED_RISK:
-                            $image = Yii::app()->basePath . '/../images/med.png';
+                            $image = $ratingImages[TargetCheck::RATING_MED_RISK];
                             break;
 
                         case TargetCheck::RATING_LOW_RISK:
-                            $image = Yii::app()->basePath . '/../images/low.png';
+                            $image = $ratingImages[TargetCheck::RATING_LOW_RISK];
                             break;
 
                         case TargetCheck::RATING_NONE:
-                            $image = Yii::app()->basePath . '/../images/none.png';
+                            $image = $ratingImages[TargetCheck::RATING_NONE];
                             break;
 
                         case TargetCheck::RATING_NO_VULNERABILITY:
-                            $image = Yii::app()->basePath . '/../images/no_vuln.png';
+                            $image = $ratingImages[TargetCheck::RATING_NO_VULNERABILITY];
                             break;
 
                         case TargetCheck::RATING_INFO:
-                            $image = Yii::app()->basePath . '/../images/info.png';
+                            $image = $ratingImages[TargetCheck::RATING_INFO];
                             break;
                     }
 
@@ -2940,6 +2942,7 @@ class ReportController extends Controller {
                     $section,
                     $sectionNumber . '.' . $subsectionNumber,
                     self::SEPARATE_VULN_LIST,
+                    $ratingImages,
                     $model->infoChecksLocation,
                     $scn->check_category_id
                 );
@@ -2965,7 +2968,7 @@ class ReportController extends Controller {
             $this->_renderText($section, $template->localizedVulnsIntro . "<br><br>");
         }
 
-        $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::NORMAL_VULN_LIST, $model->infoChecksLocation);
+        $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::NORMAL_VULN_LIST, $ratingImages, $model->infoChecksLocation);
 
         $subsectionNumber++;
 
@@ -2987,7 +2990,7 @@ class ReportController extends Controller {
                 $this->_renderText($section, $template->localizedInfoChecksIntro . "<br><br>");
             }
 
-            $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::APPENDIX_VULN_LIST);
+            $this->_generateVulnerabilityList($data, $section, $sectionNumber . '.' . $subsectionNumber, self::APPENDIX_VULN_LIST, $ratingImages);
         }
 
         $section->insertPageBreak();
@@ -3034,6 +3037,61 @@ class ReportController extends Controller {
         readfile($filePath);
 
         exit();
+    }
+
+    private function _getRatingImages ($template) {
+        $images = array();
+
+        $high = $template->getRatingImage(TargetCheck::RATING_HIGH_RISK);
+
+        if ($high) {
+            $images[TargetCheck::RATING_HIGH_RISK] = Yii::app()->params['reports']['ratingImages']['path'] . "/" . $high->path;
+        } else {
+            $images[TargetCheck::RATING_HIGH_RISK] = Yii::app()->basePath . '/../images/high.png';
+        }
+
+        $med = $template->getRatingImage(TargetCheck::RATING_MED_RISK);
+
+        if ($med) {
+            $images[TargetCheck::RATING_MED_RISK] = Yii::app()->params['reports']['ratingImages']['path'] . "/" . $med->path;
+        } else {
+            $images[TargetCheck::RATING_MED_RISK] = Yii::app()->basePath . '/../images/med.png';
+        }
+
+        $low = $template->getRatingImage(TargetCheck::RATING_LOW_RISK);
+
+        if ($low) {
+            $images[TargetCheck::RATING_LOW_RISK] = Yii::app()->params['reports']['ratingImages']['path'] . "/" . $low->path;
+        } else {
+            $images[TargetCheck::RATING_LOW_RISK] = Yii::app()->basePath . '/../images/low.png';
+        }
+
+        $info = $template->getRatingImage(TargetCheck::RATING_INFO);
+
+        if ($info) {
+            $images[TargetCheck::RATING_INFO] = Yii::app()->params['reports']['ratingImages']['path'] . "/" . $info->path;
+        } else {
+            $images[TargetCheck::RATING_INFO] = Yii::app()->basePath . '/../images/info.png';
+        }
+
+        $none = $template->getRatingImage(TargetCheck::RATING_NONE);
+
+        if ($none) {
+            $images[TargetCheck::RATING_NONE] = Yii::app()->params['reports']['ratingImages']['path'] . "/" . $none->path;
+        } else {
+            $images[TargetCheck::RATING_NONE] = Yii::app()->basePath . '/../images/none.png';
+        }
+
+        $noVuln = $template->getRatingImage(TargetCheck::RATING_NO_VULNERABILITY);
+
+        if ($noVuln) {
+            $images[TargetCheck::RATING_NO_VULNERABILITY] = Yii::app()->params['reports']['ratingImages']['path'] . "/" . $noVuln->path;
+        } else {
+            $images[TargetCheck::RATING_NO_VULNERABILITY] = Yii::app()->basePath . '/../images/no_vuln.png';
+        }
+
+        return $images;
+
     }
 
     /**

@@ -515,6 +515,182 @@ class ReporttemplateController extends Controller {
     }
 
     /**
+     * Get rating image
+     * @param $id
+     * @param $rating
+     * @throws CHttpException
+     */
+    function actionRatingImage($id, $rating) {
+        $id = (int) $id;
+
+        $template = ReportTemplate::model()->findByPk($id);
+
+        if ($template === null) {
+            throw new CHttpException(404, Yii::t("app", "Template not found."));
+        }
+
+        $image = $template->getRatingImage($rating);
+
+        if (!$image) {
+            throw new CHttpException(404, Yii::t("app", "Rating image not found."));
+        }
+
+        $filePath = Yii::app()->params["reports"]["ratingImages"]["path"] . "/" . $image->path;
+
+        if (!file_exists($filePath)) {
+            throw new CHttpException(404, Yii::t("app", "Rating image not found."));
+        }
+
+        $extension = "jpg";
+
+        if ($image->type == "image/png") {
+            $extension = "png";
+        }
+
+        // give user a file
+        header("Content-Description: File Transfer");
+        header("Content-Type: " . $image->type);
+        header("Content-Disposition: attachment; filename=\"header-image." . $extension . "\"");
+        header("Content-Transfer-Encoding: binary");
+        header("Expires: 0");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Pragma: public");
+        header("Content-Length: " . filesize($filePath));
+
+        ob_clean();
+        flush();
+        readfile($filePath);
+
+        exit();
+    }
+
+    /**
+     * Control header image.
+     */
+    public function actionControlRatingImage($id) {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+
+            $model = new EntryControlForm();
+            $model->attributes = $_POST["EntryControlForm"];
+
+            if (!$model->validate()) {
+                $errorText = "";
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $template = ReportTemplate::model()->findByPk($id);
+
+            if ($template === null) {
+                throw new CHttpException(404, Yii::t("app", "Template not found."));
+            }
+
+            $image = $template->getRatingImage($model->id);
+
+            if (!$image) {
+                throw new CHttpException(404, Yii::t("app", "Rating image not found."));
+            }
+
+            switch ($model->operation) {
+                case "delete":
+                    @unlink(Yii::app()->params["reports"]["headerImages"]["path"] . "/" . $image->path);
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addCondition('report_template_id = :report_template_id');
+                    $criteria->addCondition('rating_id = :rating_id');
+                    $criteria->params = array(
+                        'report_template_id' => $template->id,
+                        'rating_id' => $model->id,
+                    );
+
+                    ReportTemplatesRatingImages::model()->deleteAll($criteria);
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t("app", "Unknown operation."));
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Upload rating image function
+     * @param $id
+     * @param $rating
+     */
+    function actionUploadRatingImage($id, $rating) {
+        $response = new AjaxResponse();
+
+        try {
+            $tId = (int) $id;
+            $rId = (int) $rating;
+
+            $template = ReportTemplate::model()->findByPk($tId);
+
+            if (!$template) {
+                throw new CHttpException(404, Yii::t("app", "Template not found."));
+            }
+
+            $uploadForm = new ReportTemplateRatingImageUploadForm();
+            $uploadForm->image = CUploadedFile::getInstanceByName("ReportTemplateRatingImageUploadForm[image]");
+
+            if (!$uploadForm->validate()) {
+                $errorText = "";
+
+                foreach ($uploadForm->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $criteria = new CDbCriteria();
+            $criteria->addCondition('report_template_id = :report_template_id');
+            $criteria->addCondition('rating_id = :rating_id');
+            $criteria->params = array(
+                'report_template_id' => $id,
+                'rating_id' => $rId,
+            );
+
+            $image = ReportTemplatesRatingImages::model()->find($criteria);
+
+            // delete the old image
+            if ($image) {
+                @unlink(Yii::app()->params["reports"]["headerImages"]["path"] . "/" . $image->path);
+            }
+
+            ReportTemplatesRatingImages::model()->deleteAll($criteria);
+
+            $newImage = new ReportTemplatesRatingImages();
+            $newImage->report_template_id = $template->id;
+            $newImage->rating_id = $rId;
+            $newImage->type = $uploadForm->image->type;
+            $newImage->path = hash("sha256", $uploadForm->image->name . rand() . time());
+            $newImage->save();
+            $uploadForm->image->saveAs(Yii::app()->params["reports"]["ratingImages"]["path"] . "/" . $newImage->path);
+
+            $response->addData("url", $this->createUrl("reporttemplate/ratingimage", array( "id" => $template->id, "rating" => $rId )));
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
      * Display a list of summary blocks.
      */
 	public function actionSummary($id, $page=1) {

@@ -235,7 +235,7 @@
                         <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
                             <div class="control-group">
                                 <label class="control-label"><?php echo Yii::t('app', 'Header Image'); ?></label>
-                                <div class="controls form-text">
+                                <div class="controls form-text image-wrapper" data-image-type="header">
                                     <div class="header-image" data-control-url="<?php echo $this->createUrl('reporttemplate/controlheaderimage'); ?>">
                                         <?php if ($template->header_image_path): ?>
                                             <img src="<?php echo $this->createUrl('reporttemplate/headerimage', array( 'id' => $template->id )); ?>" width="400">
@@ -251,6 +251,168 @@
                                     <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
 
                                     <a class="delete-header-link<?php if (!$template->header_image_path) echo ' hide'; ?>" href="#delete-header-image" onclick="admin.reportTemplate.delHeaderImage(<?php echo $template->id; ?>);"><?php echo Yii::t('app', 'Delete Header Image'); ?></a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <hr>
+
+                    <?php if (!$template->isNewRecord): ?>
+                        <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
+                            <div class="control-group">
+                                <label class="control-label"><?php echo Yii::t('app', 'High Rating Image'); ?></label>
+                                <div class="controls form-text image-wrapper" data-image-type="rating" data-item-id="<?php echo TargetCheck::RATING_HIGH_RISK; ?>">
+                                    <div class="rating-image" data-control-url="<?php echo $this->createUrl('reporttemplate/controlratingimage', array('id' => $template->id)); ?>">
+                                        <?php if ($template->getRatingImage(TargetCheck::RATING_HIGH_RISK)): ?>
+                                            <img src="<?php echo $this->createUrl('reporttemplate/ratingimage', array('id' => $template->id, 'rating' => TargetCheck::RATING_HIGH_RISK)); ?>" width="32">
+                                        <?php else: ?>
+                                            <?php echo Yii::t('app', 'No rating image.'); ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="file-input">
+                                        <a href="#high-rating-image"><?php echo Yii::t('app', 'Upload High Rating Image'); ?></a>
+                                        <input type="file" name="ReportTemplateRatingImageUploadForm[image]" data-upload-url="<?php echo $this->createUrl('reporttemplate/uploadratingimage', array('id' => $template->id, 'rating' => TargetCheck::RATING_HIGH_RISK)); ?>">
+                                    </div>
+
+                                    <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+
+                                    <a class="delete-rating-image-link<?php if (!$template->getRatingImage(TargetCheck::RATING_HIGH_RISK)) echo ' hide'; ?>" href="#delete-rating-image" onclick="admin.reportTemplate.delRatingImage(<?php echo TargetCheck::RATING_HIGH_RISK; ?>);"><?php echo Yii::t('app', 'Delete High Rating Image'); ?></a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <hr>
+
+                    <?php if (!$template->isNewRecord): ?>
+                        <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
+                            <div class="control-group">
+                                <label class="control-label"><?php echo Yii::t('app', 'Medium Rating Image'); ?></label>
+                                <div class="controls form-text image-wrapper" data-image-type="rating" data-item-id="<?php echo TargetCheck::RATING_MED_RISK ?>">
+                                    <div class="rating-image" data-control-url="<?php echo $this->createUrl('reporttemplate/controlratingimage', array('id' => $template->id)); ?>">
+                                        <?php if ($template->getRatingImage(TargetCheck::RATING_MED_RISK)): ?>
+                                            <img src="<?php echo $this->createUrl('reporttemplate/ratingimage', array('id' => $template->id, 'rating' => TargetCheck::RATING_MED_RISK)); ?>" width="32">
+                                        <?php else: ?>
+                                            <?php echo Yii::t('app', 'No rating image.'); ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="file-input">
+                                        <a href="#high-rating-image"><?php echo Yii::t('app', 'Upload Medium Rating Image'); ?></a>
+                                        <input type="file" name="ReportTemplateRatingImageUploadForm[image]" data-upload-url="<?php echo $this->createUrl('reporttemplate/uploadratingimage', array('id' => $template->id, 'rating' => TargetCheck::RATING_MED_RISK)); ?>">
+                                    </div>
+
+                                    <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+
+                                    <a class="delete-rating-image-link<?php if (!$template->getRatingImage(TargetCheck::RATING_MED_RISK)) echo ' hide'; ?>" href="#delete-rating-image" onclick="admin.reportTemplate.delRatingImage(<?php echo TargetCheck::RATING_MED_RISK; ?>);"><?php echo Yii::t('app', 'Delete Medium Rating Image'); ?></a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <hr>
+
+                    <?php if (!$template->isNewRecord): ?>
+                        <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
+                            <div class="control-group">
+                                <label class="control-label"><?php echo Yii::t('app', 'Low Rating Image'); ?></label>
+                                <div class="controls form-text image-wrapper" data-image-type="rating" data-item-id="<?php echo TargetCheck::RATING_LOW_RISK ?>">
+                                    <div class="rating-image" data-control-url="<?php echo $this->createUrl('reporttemplate/controlratingimage', array('id' => $template->id)); ?>">
+                                        <?php if ($template->getRatingImage(TargetCheck::RATING_LOW_RISK)): ?>
+                                            <img src="<?php echo $this->createUrl('reporttemplate/ratingimage', array('id' => $template->id, 'rating' => TargetCheck::RATING_LOW_RISK)); ?>" width="32">
+                                        <?php else: ?>
+                                            <?php echo Yii::t('app', 'No rating image.'); ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="file-input">
+                                        <a href="#high-rating-image"><?php echo Yii::t('app', 'Upload Low Rating Image'); ?></a>
+                                        <input type="file" name="ReportTemplateRatingImageUploadForm[image]" data-upload-url="<?php echo $this->createUrl('reporttemplate/uploadratingimage', array('id' => $template->id, 'rating' => TargetCheck::RATING_LOW_RISK)); ?>">
+                                    </div>
+
+                                    <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+
+                                    <a class="delete-rating-image-link<?php if (!$template->getRatingImage(TargetCheck::RATING_LOW_RISK)) echo ' hide'; ?>" href="#delete-rating-image" onclick="admin.reportTemplate.delRatingImage(<?php echo TargetCheck::RATING_LOW_RISK; ?>);"><?php echo Yii::t('app', 'Delete Low Rating Image'); ?></a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <hr>
+
+                    <?php if (!$template->isNewRecord): ?>
+                        <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
+                            <div class="control-group">
+                                <label class="control-label"><?php echo Yii::t('app', 'Information Image'); ?></label>
+                                <div class="controls form-text image-wrapper" data-image-type="rating" data-item-id="<?php echo TargetCheck::RATING_INFO ?>">
+                                    <div class="rating-image" data-control-url="<?php echo $this->createUrl('reporttemplate/controlratingimage', array('id' => $template->id)); ?>">
+                                        <?php if ($template->getRatingImage(TargetCheck::RATING_INFO)): ?>
+                                            <img src="<?php echo $this->createUrl('reporttemplate/ratingimage', array('id' => $template->id, 'rating' => TargetCheck::RATING_INFO)); ?>" width="32">
+                                        <?php else: ?>
+                                            <?php echo Yii::t('app', 'No rating image.'); ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="file-input">
+                                        <a href="#high-rating-image"><?php echo Yii::t('app', 'Upload Information Image'); ?></a>
+                                        <input type="file" name="ReportTemplateRatingImageUploadForm[image]" data-upload-url="<?php echo $this->createUrl('reporttemplate/uploadratingimage', array('id' => $template->id, 'rating' => TargetCheck::RATING_INFO)); ?>">
+                                    </div>
+
+                                    <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+
+                                    <a class="delete-rating-image-link<?php if (!$template->getRatingImage(TargetCheck::RATING_INFO)) echo ' hide'; ?>" href="#delete-rating-image" onclick="admin.reportTemplate.delRatingImage(<?php echo TargetCheck::RATING_INFO; ?>);"><?php echo Yii::t('app', 'Delete Information Image'); ?></a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <hr>
+
+                    <?php if (!$template->isNewRecord): ?>
+                        <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
+                            <div class="control-group">
+                                <label class="control-label"><?php echo Yii::t('app', 'No Test Done Image'); ?></label>
+                                <div class="controls form-text image-wrapper" data-image-type="rating" data-item-id="<?php echo TargetCheck::RATING_NONE ?>">
+                                    <div class="rating-image" data-control-url="<?php echo $this->createUrl('reporttemplate/controlratingimage', array('id' => $template->id)); ?>">
+                                        <?php if ($template->getRatingImage(TargetCheck::RATING_NONE)): ?>
+                                            <img src="<?php echo $this->createUrl('reporttemplate/ratingimage', array('id' => $template->id, 'rating' => TargetCheck::RATING_NONE)); ?>" width="32">
+                                        <?php else: ?>
+                                            <?php echo Yii::t('app', 'No rating image.'); ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="file-input">
+                                        <a href="#high-rating-image"><?php echo Yii::t('app', 'Upload \'No Test Done\' Image'); ?></a>
+                                        <input type="file" name="ReportTemplateRatingImageUploadForm[image]" data-upload-url="<?php echo $this->createUrl('reporttemplate/uploadratingimage', array('id' => $template->id, 'rating' => TargetCheck::RATING_NONE)); ?>">
+                                    </div>
+
+                                    <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+
+                                    <a class="delete-rating-image-link<?php if (!$template->getRatingImage(TargetCheck::RATING_NONE)) echo ' hide'; ?>" href="#delete-rating-image" onclick="admin.reportTemplate.delRatingImage(<?php echo TargetCheck::RATING_NONE; ?>);"><?php echo Yii::t('app', 'Delete \'No Test Done\' Image'); ?></a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <hr>
+
+                    <?php if (!$template->isNewRecord): ?>
+                        <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
+                            <div class="control-group">
+                                <label class="control-label"><?php echo Yii::t('app', 'No Vulnerability Image'); ?></label>
+                                <div class="controls form-text image-wrapper" data-image-type="rating" data-item-id="<?php echo TargetCheck::RATING_NO_VULNERABILITY ?>">
+                                    <div class="rating-image" data-control-url="<?php echo $this->createUrl('reporttemplate/controlratingimage', array('id' => $template->id)); ?>">
+                                        <?php if ($template->getRatingImage(TargetCheck::RATING_NO_VULNERABILITY)): ?>
+                                            <img src="<?php echo $this->createUrl('reporttemplate/ratingimage', array('id' => $template->id, 'rating' => TargetCheck::RATING_NO_VULNERABILITY)); ?>" width="32">
+                                        <?php else: ?>
+                                            <?php echo Yii::t('app', 'No rating image.'); ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="file-input">
+                                        <a href="#high-rating-image"><?php echo Yii::t('app', 'Upload \'No Vulnerability\' Image'); ?></a>
+                                        <input type="file" name="ReportTemplateRatingImageUploadForm[image]" data-upload-url="<?php echo $this->createUrl('reporttemplate/uploadratingimage', array('id' => $template->id, 'rating' => TargetCheck::RATING_NO_VULNERABILITY)); ?>">
+                                    </div>
+
+                                    <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+
+                                    <a class="delete-rating-image-link<?php if (!$template->getRatingImage(TargetCheck::RATING_NO_VULNERABILITY)) echo ' hide'; ?>" href="#delete-rating-image" onclick="admin.reportTemplate.delRatingImage(<?php echo TargetCheck::RATING_NO_VULNERABILITY; ?>);"><?php echo Yii::t('app', 'Delete \'No Vulnerability\' Image'); ?></a>
                                 </div>
                             </div>
                         </div>
@@ -286,6 +448,7 @@
                         </div>
                     <?php endif; ?>
                 </div>
+
                 <div class="span4">
                     <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
                         <div id="rtf-var-list-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#rtf-var-list');"><i class="icon-chevron-up"></i></div>
@@ -472,5 +635,6 @@
         $(".wysiwyg").ckeditor();
         admin.reportTemplate.initHeaderImageUploadForm();
         admin.reportTemplate.initTemplateUploadForm();
+        admin.reportTemplate.initRatingImageUploadForm();
     });
 </script>
