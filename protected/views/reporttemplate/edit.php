@@ -256,8 +256,6 @@
                         </div>
                     <?php endif; ?>
 
-                    <hr>
-
                     <?php if (!$template->isNewRecord): ?>
                         <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
                             <div class="control-group">
@@ -282,8 +280,6 @@
                             </div>
                         </div>
                     <?php endif; ?>
-
-                    <hr>
 
                     <?php if (!$template->isNewRecord): ?>
                         <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
@@ -310,8 +306,6 @@
                         </div>
                     <?php endif; ?>
 
-                    <hr>
-
                     <?php if (!$template->isNewRecord): ?>
                         <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
                             <div class="control-group">
@@ -336,8 +330,6 @@
                             </div>
                         </div>
                     <?php endif; ?>
-
-                    <hr>
 
                     <?php if (!$template->isNewRecord): ?>
                         <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
@@ -364,8 +356,6 @@
                         </div>
                     <?php endif; ?>
 
-                    <hr>
-
                     <?php if (!$template->isNewRecord): ?>
                         <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
                             <div class="control-group">
@@ -390,8 +380,6 @@
                             </div>
                         </div>
                     <?php endif; ?>
-
-                    <hr>
 
                     <?php if (!$template->isNewRecord): ?>
                         <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
