@@ -26,6 +26,8 @@ class ProjectController extends Controller {
 	public function actionIndex($page=1) {
         $page = (int) $page;
 
+        $defaultStatuses = sprintf('%d, %d', Project::STATUS_OPEN, Project::STATUS_IN_PROGRESS);
+
         if ($page < 1)
             throw new CHttpException(404, Yii::t("app", "Page not found."));
 
@@ -36,10 +38,10 @@ class ProjectController extends Controller {
             if (strlen($cookies["project_filter_status"]->value)) {
                 $statusCookie = $cookies["project_filter_status"]->value;
             } else {
-                $statusCookie = sprintf('%d, %d', Project::STATUS_OPEN, Project::STATUS_IN_PROGRESS);
+                $statusCookie = $defaultStatuses;
             }
         } else {
-            $statusCookie = sprintf('%d, %d', Project::STATUS_OPEN, Project::STATUS_IN_PROGRESS);
+            $statusCookie = $defaultStatuses;
         }
 
         $statuses = explode(",", $statusCookie);
