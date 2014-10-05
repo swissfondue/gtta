@@ -1,3 +1,5 @@
+<script src="/ckeditor/ckeditor.js"></script>
+<script src="/ckeditor/adapters/jquery.js"></script>
 <div class="active-header">
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 </div>
@@ -23,10 +25,21 @@
             </div>
         </div>
 
+        <div class="control-group <?php if ($form->getError('description')) echo 'error'; ?>">
+            <label class="control-label" for="ProjectTrackTimeForm_description"><?php echo Yii::t('app', 'Description'); ?></label>
+            <div class="controls">
+                <textarea class="wysiwyg" id="ProjectTrackTimeForm_description" name="ProjectTrackTimeForm[description]">
+                    <?php echo CHtml::encode($form->description); ?></textarea>
+                <?php if ($form->getError('description')): ?>
+                    <p class="help-block"><?php echo $form->getError('description'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <div class="control-group <?php if ($form->getError("hoursSpent")) echo "error"; ?>">
             <label class="control-label" for="ProjectTrackTimeForm_hoursSpent"><?php echo Yii::t("app", "Hours Spent"); ?></label>
             <div class="controls">
-                <input type="text" class="input-xlarge" id="ProjectTrackTimeForm_hoursSpent" name="ProjectTrackTimeForm[hoursSpent]" value="<?php echo CHtml::encode($form->hoursSpent); ?>">
+                <input type="text" class="input-xlarge" id="ProjectTrackTimeForm_hoursSpent" name="ProjectTrackTimeForm[hoursSpent]">
                 <?php if ($form->getError("hoursSpent")): ?>
                     <p class="help-block"><?php echo $form->getError("hoursSpent"); ?></p>
                 <?php endif; ?>
@@ -38,3 +51,8 @@
         </div>
     </fieldset>
 </form>
+<script>
+    $(function () {
+        $(".wysiwyg").ckeditor();
+    });
+</script>

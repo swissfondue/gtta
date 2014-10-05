@@ -12,6 +12,8 @@
                 <li><a href="<?php echo $this->createUrl('project/details', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Details'); ?></a></li>
             <?php endif; ?>
 
+            <li><a href="<?php echo $this->createUrl('project/time', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Time'); ?></a></li>
+
             <li><a href="<?php echo $this->createUrl('vulntracker/vulns', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Vulnerabilities'); ?></a></li>
         </ul>
     </div>

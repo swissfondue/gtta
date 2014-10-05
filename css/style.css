@@ -7,6 +7,10 @@ hr {
     margin-top:10px;
 }
 
+a[disabled] {
+    pointer-events: none;
+}
+
 .table tbody tr:hover td,
 .table tbody tr:hover th {
     background:none;
@@ -279,6 +283,19 @@ fieldset hr {
 .detail-list .detail .content {
     font-size:80%;
     color:#909090;
+}
+
+.time-records-list .time-added {
+    width: 150px;
+}
+
+.time-records-list .time-logged {
+    width: 100px;
+}
+
+.time-records-list .content {
+    font-size: 80%;
+    color: #909090;
 }
 
 h3 a {
