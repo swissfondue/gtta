@@ -73,7 +73,6 @@ return array(
                 "project/<id:\d+>/<page:\d+>" => "project/view",
                 "project/<id:\d+>" => "project/view",
                 "project/<id:\d+>/edit" => "project/edit",
-                "project/<id:\d+>/track-time" => "project/tracktime",
                 "project/new" => "project/edit",
                 "project/control" => "project/control",
 
@@ -94,6 +93,13 @@ return array(
                 "project/<id:\d+>/detail/new"               => "project/editdetail",
                 "project/detail/control"                    => "project/controldetail",
 
+                //project time
+                "project/<id:\d+>/time" => "project/time",
+                "project/<id:\d+>/time/<page:\d+>" => "project/time",
+                "project/<id:\d+>/time/new" => "project/tracktime",
+                "project/<id:\d+>/time/control" => "project/controltime",
+                "project/<id:\d+>/time/control" => "project/controltime",
+
                 // project users
                 "project/<id:\d+>/users/<page:\d+>" => "project/users",
                 "project/<id:\d+>/users" => "project/users",
@@ -106,25 +112,25 @@ return array(
                 "project/<id:\d+>/target/<target:\d+>" => "project/target",
                 "project/<id:\d+>/target/<target:\d+>/edit" => "project/edittarget",
                 "project/<id:\d+>/target/new" => "project/edittarget",
-                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>" => "project/checks",
-                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/save" => "project/savecategory",
-                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/control/<control:\d+>" => "project/controlchecklist",
-                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>" => "project/check",
-                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/save" => "project/savecheck",
-                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/autosave" => "project/autosavecheck",
-                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/control" => "project/controlcheck",
-                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/copy" => "project/copycheck",
-                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/update" => "project/updatechecks",
-                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/check/<check:\d+>/attachment/new" => "project/uploadattachment",
+                "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>" => "project/checks",
+                "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/save" => "project/savecategory",
+                "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/control/<control:\d+>" => "project/controlchecklist",
+                "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/check/<check:\d+>" => "project/check",
+                "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/check/<check:\d+>/save" => "project/savecheck",
+                "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/check/<check:\d+>/autosave" => "project/autosavecheck",
+                "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/check/<check:\d+>/control" => "project/controlcheck",
+                "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/check/<check:\d+>/copy" => "project/copycheck",
+                "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/update" => "project/updatechecks",
+                "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/check/<check:\d+>/attachment/new" => "project/uploadattachment",
                 "project/attachment/<path:[a-z\d]+>/download" => "project/attachment",
                 "project/attachment/control" => "project/controlattachment",
                 "project/target/control" => "project/controltarget",
                 "project/search" => "project/search",
 
                 // custom checks
-                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/custom-check/save" => "project/savecustomcheck",
-                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/custom-check/control" => "project/controlcustomcheck",
-                "project/<id:\d+>/target/<target:\d+>/check/<category:\d+>/custom-check/<check:\d+>/attachment/new" => "project/uploadcustomattachment",
+                "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/custom-check/save" => "project/savecustomcheck",
+                "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/custom-check/control" => "project/controlcustomcheck",
+                "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/custom-check/<check:\d+>/attachment/new" => "project/uploadcustomattachment",
                 "project/custom-attachment/<path:[a-z\d]+>/download" => "project/customattachment",
                 "project/custom-attachment/control" => "project/controlcustomattachment",
 
@@ -135,6 +141,7 @@ return array(
                 "reports/risk-matrix" => "report/riskmatrix",
                 "reports/effort" => "report/effort",
                 "reports/vuln-export" => "report/vulnexport",
+                "reports/<id:\d+>/tracked-time" => "report/trackedtime",
 
                 // project planner
                 "project-planner" => "planner/index",
