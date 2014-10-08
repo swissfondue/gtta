@@ -26,18 +26,26 @@ class ProjectController extends Controller {
 	public function actionIndex($page=1) {
         $page = (int) $page;
 
-        if ($page < 1)
+        if ($page < 1) {
             throw new CHttpException(404, Yii::t("app", "Page not found."));
+        }
 
         $cookies = Yii::app()->request->cookies;
-        $statusCookie = isset($cookies["project_filter_status"]) ? $cookies["project_filter_status"]->value : "";
-        $statuses = explode(",", $statusCookie);
         $filtered = array();
 
-        foreach ($statuses as $s) {
-            if (in_array((int) $s, Project::getValidStatuses())) {
-                $filtered[] = (int) $s;
+        if (isset($cookies["project_filter_status"]) && strlen($cookies["project_filter_status"]->value)) {
+            $statusCookie = $cookies["project_filter_status"]->value;
+            $statuses = explode(",", $statusCookie);
+
+            foreach ($statuses as $s) {
+                if (in_array((int) $s, Project::getValidStatuses())) {
+                    $filtered[] = (int) $s;
+                }
             }
+        }
+
+        if (!$filtered) {
+            $filtered = array(Project::STATUS_OPEN, Project::STATUS_IN_PROGRESS);
         }
 
         $showStatuses = $filtered;
