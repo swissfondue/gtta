@@ -9,7 +9,7 @@
  * @property string $image_type
  * @property string $image_path
  */
-class ReportTemplateRatingImages extends ActiveRecord {
+class ReportTemplateRatingImage extends ActiveRecord {
     /**
      * Returns the static model of the specified AR class.
      * @param string $className active record class name.

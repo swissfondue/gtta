@@ -611,7 +611,7 @@ class ReporttemplateController extends Controller {
                         'rating_id' => $model->id,
                     );
 
-                    ReportTemplateRatingImages::model()->deleteAll($criteria);
+                    ReportTemplateRatingImage::model()->deleteAll($criteria);
                     break;
 
                 default:
@@ -665,16 +665,16 @@ class ReporttemplateController extends Controller {
                 'rating_id' => $rId,
             );
 
-            $image = ReportTemplateRatingImages::model()->find($criteria);
+            $image = ReportTemplateRatingImage::model()->find($criteria);
 
             // delete the old image
             if ($image) {
                 @unlink(Yii::app()->params["reports"]["headerImages"]["path"] . "/" . $image->path);
             }
 
-            ReportTemplateRatingImages::model()->deleteAll($criteria);
+            ReportTemplateRatingImage::model()->deleteAll($criteria);
 
-            $newImage = new ReportTemplateRatingImages();
+            $newImage = new ReportTemplateRatingImage();
             $newImage->report_template_id = $template->id;
             $newImage->rating_id = $rId;
             $newImage->type = $uploadForm->image->type;
