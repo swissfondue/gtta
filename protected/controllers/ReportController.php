@@ -2695,7 +2695,7 @@ class ReportController extends Controller {
 
             $table->addImageToCell(2, 1, $ratingImages[TargetCheck::RATING_HIGH_RISK]);
             $table->addImageToCell(3, 1, $ratingImages[TargetCheck::RATING_MED_RISK]);
-            $table->addImageToCell(4, 1, $ratingImages[TargetCheck::RATING_MED_RISK]);
+            $table->addImageToCell(4, 1, $ratingImages[TargetCheck::RATING_LOW_RISK]);
             $table->addImageToCell(5, 1, $ratingImages[TargetCheck::RATING_NONE]);
             $table->addImageToCell(6, 1, $ratingImages[TargetCheck::RATING_NO_VULNERABILITY]);
             $table->addImageToCell(7, 1, $ratingImages[TargetCheck::RATING_INFO]);

@@ -1,15 +1,15 @@
 <?php
 
 /**
- * This is the model class for table "report_templates_rating_images".
+ * This is the model class for table "report_template_rating_images".
  *
- * The followings are the available columns in table 'report_templates_rating_images':
+ * The followings are the available columns in table 'report_template_rating_images':
  * @property integer $template_id
  * @property integer $rating_id
  * @property string $image_type
  * @property string $image_path
  */
-class ReportTemplatesRatingImages extends ActiveRecord {
+class ReportTemplateRatingImages extends ActiveRecord {
     /**
      * Returns the static model of the specified AR class.
      * @param string $className active record class name.
@@ -23,7 +23,7 @@ class ReportTemplatesRatingImages extends ActiveRecord {
      * @return string the associated database table name
      */
     public function tableName() {
-        return "report_templates_rating_images";
+        return "report_template_rating_images";
     }
 
     /**

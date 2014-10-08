@@ -297,6 +297,6 @@ class ReportTemplate extends ActiveRecord {
             'rating_id' => $id
         );
 
-        return ReportTemplatesRatingImages::model()->find($criteria);
+        return ReportTemplateRatingImages::model()->find($criteria);
     }
 }
