@@ -26,31 +26,26 @@ class ProjectController extends Controller {
 	public function actionIndex($page=1) {
         $page = (int) $page;
 
-        $defaultStatuses = sprintf('%d, %d', Project::STATUS_OPEN, Project::STATUS_IN_PROGRESS);
-
-        if ($page < 1)
+        if ($page < 1) {
             throw new CHttpException(404, Yii::t("app", "Page not found."));
-
-        $cookies = Yii::app()->request->cookies;
-
-        if (isset($cookies["project_filter_status"])) {
-            // if cookie value is empty string: (int) empty_string = 0 == Project::STATUS_OPEN
-            if (strlen($cookies["project_filter_status"]->value)) {
-                $statusCookie = $cookies["project_filter_status"]->value;
-            } else {
-                $statusCookie = $defaultStatuses;
-            }
-        } else {
-            $statusCookie = $defaultStatuses;
         }
 
-        $statuses = explode(",", $statusCookie);
+        $cookies = Yii::app()->request->cookies;
         $filtered = array();
 
-        foreach ($statuses as $s) {
-            if (in_array((int) $s, Project::getValidStatuses())) {
-                $filtered[] = (int) $s;
+        if (isset($cookies["project_filter_status"]) && strlen($cookies["project_filter_status"]->value)) {
+            $statusCookie = $cookies["project_filter_status"]->value;
+            $statuses = explode(",", $statusCookie);
+
+            foreach ($statuses as $s) {
+                if (in_array((int) $s, Project::getValidStatuses())) {
+                    $filtered[] = (int) $s;
+                }
             }
+        }
+
+        if (!$filtered) {
+            $filtered = array(Project::STATUS_OPEN, Project::STATUS_IN_PROGRESS);
         }
 
         $showStatuses = $filtered;
