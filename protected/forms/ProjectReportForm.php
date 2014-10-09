@@ -8,6 +8,9 @@ class ProjectReportForm extends CFormModel {
     const INFO_LOCATION_TABLE = "table";
     const INFO_LOCATION_APPENDIX = "appendix";
 
+    const FILE_TYPE_RTF = 0;
+    const FILE_TYPE_ZIP = 1;
+
     /**
      * @var string font size.
      */
@@ -64,11 +67,16 @@ class ProjectReportForm extends CFormModel {
     public $options;
 
     /**
+     * @var type of report file (rtf | zip)
+     */
+    public $fileType;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
 		return array(
-            array("fontSize, fontFamily, pageMargin, cellPadding", "required"),
+            array("fontSize, fontFamily, pageMargin, cellPadding, fileType", "required"),
             array("fontSize", "numerical", "integerOnly" => true, "min" => Yii::app()->params["reports"]["minFontSize"], "max" => Yii::app()->params["reports"]["maxFontSize"]),
             array("cellPadding", "numerical", "min" => Yii::app()->params["reports"]["minCellPadding"], "max" => Yii::app()->params["reports"]["maxCellPadding"]),
             array("pageMargin", "numerical", "min" => Yii::app()->params["reports"]["minPageMargin"], "max" => Yii::app()->params["reports"]["maxPageMargin"]),

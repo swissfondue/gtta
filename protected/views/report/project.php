@@ -108,6 +108,10 @@
                         <input type="checkbox" id="ProjectReportForm_options_appendix" name="ProjectReportForm[options][]" value="appendix" onchange="system.report.projectFormChange(this);" checked>
                         <?php echo Yii::t('app', 'Appendix Section'); ?>
                     </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="ProjectReportForm_options_attachments" name="ProjectReportForm[options][]" value="attachments" onchange="system.report.projectFormChange(this);" checked>
+                        <?php echo Yii::t('app', 'Attachments Section'); ?>
+                    </label>
                 </div>
             </div>
 
@@ -121,6 +125,20 @@
                         <?php endforeach; ?>
                     </select>
                     <p class="help-block hide"><?php echo Yii::t('app', 'This template has no categories.'); ?></p>
+                </div>
+            </div>
+
+            <div class="control-group" id="file-type">
+                <label class="control-label" for="ProjectReportForm_fileType"><?php echo Yii::t('app', 'Download File Type'); ?></label>
+                <div class="controls">
+                    <label class="radio">
+                        <input type="radio" name="ProjectReportForm[fileType]" value="<?php echo ProjectReportForm::FILE_TYPE_RTF; ?>" checked="checked" >
+                        <?php echo Yii::t('app', 'RTF'); ?>
+                    </label>
+                    <label class="radio">
+                        <input type="radio" name="ProjectReportForm[fileType]" value="<?php echo ProjectReportForm::FILE_TYPE_ZIP; ?>" >
+                        <?php echo Yii::t('app', 'RTF + Attachments'); ?>
+                    </label>
                 </div>
             </div>
         </div>

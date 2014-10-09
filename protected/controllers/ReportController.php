@@ -1344,6 +1344,7 @@ class ReportController extends Controller {
         $checksMed = 0;
         $checksLow = 0;
         $checksInfo = 0;
+        $reportAttachments = array();
 
         $reducedChecks = array();
         $ratings = TargetCheck::getRatingNames();
@@ -1509,6 +1510,13 @@ class ReportController extends Controller {
                             foreach ($check->attachments as $attachment) {
                                 if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
                                     $checkData["images"][] = Yii::app()->params["attachments"]["path"] . "/" . $attachment->path;
+                                } else {
+                                    $reportAttachments[] = array(
+                                        "host" => $target->host,
+                                        "check" => $check->name,
+                                        "filename" => $attachment->name,
+                                        "path" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path,
+                                    );
                                 }
                             }
                         }
@@ -1687,6 +1695,13 @@ class ReportController extends Controller {
                                 foreach ($tc->attachments as $attachment) {
                                     if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
                                         $checkData["images"][] = Yii::app()->params["attachments"]["path"] . "/" . $attachment->path;
+                                    } else {
+                                        $reportAttachments[] = array(
+                                            "host" => $target->host,
+                                            "check" => $check->name,
+                                            "filename" => $attachment->name,
+                                            "path" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path,
+                                        );
                                     }
                                 }
                             }
@@ -1766,6 +1781,7 @@ class ReportController extends Controller {
             "checksLow" => $checksLow,
             "checksMed" => $checksMed,
             "checksHigh" => $checksHigh,
+            "attachments" => $reportAttachments
         );
 
         return $data;
@@ -1849,6 +1865,7 @@ class ReportController extends Controller {
         $checksMed = 0;
         $checksLow = 0;
         $checksInfo = 0;
+        $reportAttachments = array();
 
         $reducedChecks = array();
         $ratings = ProjectGtCheck::getRatingNames();
@@ -2083,6 +2100,13 @@ class ReportController extends Controller {
                             foreach ($check->attachments as $attachment) {
                                 if (in_array($attachment->type, array('image/jpeg', 'image/png', 'image/gif', 'image/pjpeg'))) {
                                     $checkData['images'][] = Yii::app()->params['attachments']['path'] . '/' . $attachment->path;
+                                } else {
+                                    $reportAttachments[] = array(
+                                        "host" => $target->host,
+                                        "check" => $check->name,
+                                        "filename" => $attachment->name,
+                                        "path" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path,
+                                    );
                                 }
                             }
                         }
@@ -2160,6 +2184,7 @@ class ReportController extends Controller {
             "checksInfo" => $checksInfo,
             "checksMed" => $checksMed,
             "checksHigh" => $checksHigh,
+            "attachments" => $reportAttachments
         );
 
         return $data;
@@ -2269,8 +2294,10 @@ class ReportController extends Controller {
             exit();
         }
 
+        $reportAttachments = $data["attachments"];
         $data = $data["data"];
         $fileName = Yii::t('app', 'Penetration Test Report') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
+        $zipFileName = Yii::t('app', 'Penetration Test Report') . ' - ' . $project->name . ' (' . $project->year . ').zip';
 
         $this->_rtfSetup($model);
         $section = $this->rtf->addSection();
@@ -3010,7 +3037,66 @@ class ReportController extends Controller {
 
             $this->_renderText($section, $template->localizedAppendix, false);
 
+            $section->insertPageBreak();
             $sectionNumber++;
+        }
+
+        // attachments
+        if (in_array('attachments', $options)) {
+            $this->toc->writeHyperLink(
+                '#attachments',
+                $sectionNumber . '. ' . Yii::t('app', 'Attachments') . "\n",
+                $this->textFont
+            );
+
+            $section->writeBookmark(
+                'attachments',
+                $sectionNumber . '. ' . Yii::t('app', 'Attachments'),
+                $this->h2Font,
+                $this->h3Par
+            );
+
+            $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+            $table->addRows(count($reportAttachments) + 1);
+            $table->addColumnsList(array(
+                $this->docWidth * 0.3,
+                $this->docWidth * 0.3,
+                $this->docWidth * 0.3,
+            ));
+
+            $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
+            $table->setFontForCellRange($this->boldFont, 1, 1, 1, 3);
+            $table->setFontForCellRange($this->textFont, 2, 1, count($reportAttachments) + 1, 3);
+            $table->setBorderForCellRange($this->thinBorder, 1, 1, count($reportAttachments) + 1, 3);
+            $table->setFirstRowAsHeader();
+
+            // set paddings
+            for ($row = 1; $row <= count($reportAttachments) + 1; $row++) {
+                for ($col = 1; $col <= 3; $col++) {
+                    $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+
+                    if ($row > 1) {
+                        $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                    } else {
+                        $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+                    }
+                }
+            }
+
+            $row = 1;
+
+            $table->getCell($row, 1)->writeText(Yii::t('app', 'Host'));
+            $table->getCell($row, 2)->writeText(Yii::t('app', 'Check'));
+            $table->getCell($row, 3)->writeText(Yii::t('app', 'File'));
+
+            $row++;
+
+            foreach ($reportAttachments as $attachment) {
+                $table->getCell($row, 1)->writeText($attachment['host']);
+                $table->getCell($row, 2)->writeText($attachment['check']);
+                $table->getCell($row, 3)->writeText($attachment['filename']);
+                $row++;
+            }
         }
 
         $hashName = hash('sha256', rand() . time() . $fileName);
@@ -3018,7 +3104,58 @@ class ReportController extends Controller {
 
         $this->rtf->save($filePath);
 
-        // give user a file
+        if ($model->fileType == ProjectReportForm::FILE_TYPE_RTF) {
+            $reportData = array('name' => $fileName, 'path' => $filePath);
+            $this->_generateReportFile($reportData);
+        } else {
+            if ($model->fileType == ProjectReportForm::FILE_TYPE_ZIP) {
+                $reportData = array('name' => $fileName, 'path' => $filePath, 'zipName' => $zipFileName);
+                $this->_generateReportFile($reportData, $reportAttachments);
+            }
+        }
+
+        exit();
+    }
+
+    /**
+     * Gives report file to user
+     * @param $filepath
+     * @param null $attachments
+     */
+    private function _generateReportFile ($data, $attachments = null) {
+        if ($attachments !== null) {
+            $reportFileName = $data['name'];
+            $reportFilePath = $data['path'];
+            $fileName = $data['zipName'];
+            $hashName = hash('sha256', rand() . time() . $fileName);
+            $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
+
+            $zip = new ZipArchive();
+
+            if ($zip->open($filePath, ZipArchive::CREATE) !== true) {
+                throw new Exception("Unable to create report archive: $fileName");
+            }
+
+            FileManager::zipFile($zip, $reportFilePath, $reportFileName);
+
+            $zip->addEmptyDir('attachments');
+
+            foreach ($attachments as $attachment) {
+                $hostDir = 'attachments/' . $attachment['host'];
+
+                if (!$zip->locateName($hostDir)) {
+                    $zip->addEmptyDir($hostDir);
+                }
+
+                FileManager::zipFile($zip, $attachment["path"], $hostDir . '/' . $attachment["filename"]);
+            }
+
+            $zip->close();
+        } else {
+            $fileName = $data['name'];
+            $filePath = $data['path'];
+        }
+
         header('Content-Description: File Transfer');
         header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
@@ -3032,8 +3169,21 @@ class ReportController extends Controller {
         flush();
 
         readfile($filePath);
+        FileManager::unlink($filePath);
+    }
 
-        exit();
+    private function _generateFileAttachmentsList ($attachments) {
+        $text = "<br/>";
+
+        foreach ($attachments as $attachment) {
+            $text = $text . sprintf("Host '%s'  -  Check '%s'  -  GTTA File '%s' attached <br/>",
+                    $attachment["host"],
+                    $attachment["check"],
+                    $attachment["filename"]
+                );
+        }
+
+        return $text;
     }
 
     /**
