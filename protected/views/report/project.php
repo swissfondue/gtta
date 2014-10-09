@@ -108,6 +108,10 @@
                         <input type="checkbox" id="ProjectReportForm_options_appendix" name="ProjectReportForm[options][]" value="appendix" onchange="system.report.projectFormChange(this);" checked>
                         <?php echo Yii::t('app', 'Appendix Section'); ?>
                     </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="ProjectReportForm_options_attachments" name="ProjectReportForm[options][]" value="attachments" onchange="system.report.projectFormChange(this);" checked>
+                        <?php echo Yii::t('app', 'Attachments Section'); ?>
+                    </label>
                 </div>
             </div>
 

@@ -3021,7 +3021,7 @@ class ReportController extends Controller {
         $sectionNumber++;
 
         // appendix
-        if (in_array('appendix', $options) && ($template->localizedAppendix || $reportAttachments)) {
+        if (in_array('appendix', $options) && $template->localizedAppendix) {
             $this->toc->writeHyperLink(
                 '#appendix',
                 $sectionNumber . '. ' . Yii::t('app', 'Appendix') . "\n",
@@ -3035,12 +3035,68 @@ class ReportController extends Controller {
                 $this->h3Par
             );
 
-            $attachmentsList = $this->_generateFileAttachmentsList($reportAttachments);
-
             $this->_renderText($section, $template->localizedAppendix, false);
-            $this->_renderText($section, $attachmentsList, false);
 
+            $section->insertPageBreak();
             $sectionNumber++;
+        }
+
+        // attachments
+        if (in_array('attachments', $options)) {
+            $this->toc->writeHyperLink(
+                '#attachments',
+                $sectionNumber . '. ' . Yii::t('app', 'Attachments') . "\n",
+                $this->textFont
+            );
+
+            $section->writeBookmark(
+                'attachments',
+                $sectionNumber . '. ' . Yii::t('app', 'Attachments'),
+                $this->h2Font,
+                $this->h3Par
+            );
+
+            $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+            $table->addRows(count($reportAttachments) + 1);
+            $table->addColumnsList(array(
+                $this->docWidth * 0.3,
+                $this->docWidth * 0.3,
+                $this->docWidth * 0.3,
+            ));
+
+            $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
+            $table->setFontForCellRange($this->boldFont, 1, 1, 1, 3);
+            $table->setFontForCellRange($this->textFont, 2, 1, count($reportAttachments) + 1, 3);
+            $table->setBorderForCellRange($this->thinBorder, 1, 1, count($reportAttachments) + 1, 3);
+            $table->setFirstRowAsHeader();
+
+            // set paddings
+            for ($row = 1; $row <= count($reportAttachments) + 1; $row++) {
+                for ($col = 1; $col <= 3; $col++) {
+                    $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+
+                    if ($row > 1) {
+                        $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                    } else {
+                        $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+                    }
+                }
+            }
+
+            $row = 1;
+
+            $table->getCell($row, 1)->writeText(Yii::t('app', 'Host'));
+            $table->getCell($row, 2)->writeText(Yii::t('app', 'Check'));
+            $table->getCell($row, 3)->writeText(Yii::t('app', 'File'));
+
+            $row++;
+
+            foreach ($reportAttachments as $attachment) {
+                $table->getCell($row, 1)->writeText($attachment['host']);
+                $table->getCell($row, 2)->writeText($attachment['check']);
+                $table->getCell($row, 3)->writeText($attachment['filename']);
+                $row++;
+            }
         }
 
         $hashName = hash('sha256', rand() . time() . $fileName);
