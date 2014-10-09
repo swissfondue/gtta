@@ -298,6 +298,9 @@ return array(
                 "report-template/<id:\d+>/header/new" => "reporttemplate/uploadheaderimage",
                 "report-template/<id:\d+>/header" => "reporttemplate/headerimage",
                 "report-template/header/control" => "reporttemplate/controlheaderimage",
+                "report-template/<id:\d+>/rating/<rating:\d+>/new" => "reporttemplate/uploadratingimage",
+                "report-template/<id:\d+>/rating/<rating:\d+>" => "reporttemplate/ratingimage",
+                "report-template/<id:\d+>/rating/control" => "reporttemplate/controlratingimage",
                 "report-template/<id:\d+>/file/new" => "reporttemplate/uploadfile",
                 "report-template/<id:\d+>/file" => "reporttemplate/file",
                 "report-template/header/file" => "reporttemplate/controlfile",
@@ -440,6 +443,11 @@ return array(
 
             "headerImages" => array(
                 "path" => BASE_DIR . "/files/header-images",
+                "maxSize" => 10 * 1024 * 1024, // 10 megabytes
+            ),
+
+            "ratingImages" => array(
+                "path" => BASE_DIR . "/files/rating-images",
                 "maxSize" => 10 * 1024 * 1024, // 10 megabytes
             ),
 

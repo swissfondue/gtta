@@ -273,6 +273,8 @@ function Admin()
 
                 data['YII_CSRF_TOKEN'] = system.csrf;
 
+                var imageWrapper = $('.image-wrapper[data-image-type=header]');
+
                 $(this).fileupload({
                     dataType             : 'json',
                     url                  : url,
@@ -283,8 +285,8 @@ function Admin()
 
                     done : function (e, data) {
                         $('.loader-image').hide();
-                        $('.upload-message').hide();
-                        $('.file-input').show();
+                        imageWrapper.find('.upload-message').hide();
+                        imageWrapper.find('.file-input').show();
 
                         var json = data.result;
 
@@ -309,15 +311,15 @@ function Admin()
 
                     fail : function (e, data) {
                         $('.loader-image').hide();
-                        $('.upload-message').hide();
-                        $('.file-input').show();
+                        imageWrapper.find('.upload-message').hide();
+                        imageWrapper.find('.file-input').show();
                         system.showMessage('error', system.translate('Request failed, please try again.'));
                     },
 
                     start : function (e) {
                         $('.loader-image').show();
-                        $('.file-input').hide();
-                        $('.upload-message').show();
+                        imageWrapper.find('.file-input').hide();
+                        imageWrapper.find('.upload-message').show();
                     }
                 });
             });
@@ -374,6 +376,126 @@ function Admin()
         this.delHeaderImage = function (id) {
             if (confirm(system.translate('Are you sure that you want to delete this object?'))) {
                 _reportTemplate._controlHeaderImage(id, 'delete');
+            }
+        };
+
+        /**
+         * Initialize header image upload form.
+         */
+        this.initRatingImageUploadForm = function () {
+            $('.image-wrapper[data-image-type=rating]').each(function () {
+                var input = $(this).find('input[name^="ReportTemplateRatingImageUploadForm"]');
+                var url = input.data('upload-url');
+                var data = {};
+                var imageWrapper = $(this);
+                var itemId = imageWrapper.data('item-id');
+
+                data['YII_CSRF_TOKEN'] = system.csrf;
+
+                $(this).fileupload({
+                    dataType             : 'json',
+                    url                  : url,
+                    forceIframeTransport : true,
+                    timeout              : 120000,
+                    formData             : data,
+                    dropZone:$('input[name^="ReportTemplateRatingImageUploadForm"]'),
+
+                    done : function (e, data) {
+                        imageWrapper.find('.upload-message').hide();
+                        imageWrapper.find('.file-input').show();
+
+                        var json = data.result;
+
+                        if (json.status == 'error')
+                        {
+                            system.showMessage('error', json.errorText);
+                            return;
+                        }
+
+                        data = json.data;
+
+                        // refresh the image
+                        var d = new Date();
+
+                        var rImage = imageWrapper.find('.rating-image');
+
+                        if (rImage.find('img').length)
+                            rImage.find('img').attr('src', data.url + '?' + d.getTime());
+                        else
+                            rImage.html('<img src="' + data.url + '?' + d.getTime() + '" width="32">');
+
+                        imageWrapper.find('.delete-rating-image-link').show();
+                    },
+
+                    fail : function (e, data) {
+                        $('.loader-image').hide();
+                        imageWrapper.find('.upload-message').hide();
+                        imageWrapper.find('.file-input').show();
+                        system.showMessage('error', system.translate('Request failed, please try again.'));
+                    },
+
+                    start : function (e) {
+                        $('.loader-image').show();
+                        imageWrapper.find('.file-input').hide();
+                        imageWrapper.find('.upload-message').show();
+                    }
+                });
+            });
+        };
+
+        /**
+         * Control header image function.
+         */
+        this._controlRatingImage = function(id, operation) {
+            var imageWrapper = $('.image-wrapper[data-image-type=rating][data-item-id=' + id + ']');
+            var picBlock = imageWrapper.find('.rating-image');
+            var url = picBlock.data('control-url');
+
+            $.ajax({
+                dataType : 'json',
+                url      : url,
+                timeout  : system.ajaxTimeout,
+                type     : 'POST',
+
+                data : {
+                    'EntryControlForm[operation]' : operation,
+                    'EntryControlForm[id]'        : id,
+                    'YII_CSRF_TOKEN'              : system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $('.loader-image').hide();
+
+                    if (data.status == 'error')
+                    {
+                        system.showMessage('error', data.errorText);
+                        return;
+                    }
+
+                    if (operation == 'delete')
+                    {
+                        picBlock.html(system.translate('No rating image.'));
+                        imageWrapper.find('.delete-rating-image-link').hide();
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $('.loader-image').hide();
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $('.loader-image').show();
+                }
+            });
+        };
+
+        /**
+         * Delete header image.
+         */
+        this.delRatingImage = function (id) {
+            if (confirm(system.translate('Are you sure that you want to delete this object?'))) {
+                _reportTemplate._controlRatingImage(id, 'delete');
             }
         };
 

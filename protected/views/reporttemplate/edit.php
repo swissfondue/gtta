@@ -235,7 +235,7 @@
                         <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
                             <div class="control-group">
                                 <label class="control-label"><?php echo Yii::t('app', 'Header Image'); ?></label>
-                                <div class="controls form-text">
+                                <div class="controls form-text image-wrapper" data-image-type="header">
                                     <div class="header-image" data-control-url="<?php echo $this->createUrl('reporttemplate/controlheaderimage'); ?>">
                                         <?php if ($template->header_image_path): ?>
                                             <img src="<?php echo $this->createUrl('reporttemplate/headerimage', array( 'id' => $template->id )); ?>" width="400">
@@ -255,6 +255,44 @@
                             </div>
                         </div>
                     <?php endif; ?>
+
+                    <?php
+                        $ratings = array(
+                            'No Test Done' => TargetCheck::RATING_NONE,
+                            'No Vulnerability' => TargetCheck::RATING_NO_VULNERABILITY,
+                            'Low Risk' => TargetCheck::RATING_LOW_RISK,
+                            'Medium Risk' => TargetCheck::RATING_MED_RISK,
+                            'High Risk' => TargetCheck::RATING_HIGH_RISK,
+                            'Information' => TargetCheck::RATING_INFO,
+                        );
+                    ?>
+
+                    <?php foreach ($ratings as $title => $rating): ?>
+                        <?php if (!$template->isNewRecord && $model->type == ReportTemplate::TYPE_RTF): ?>
+                            <div class="rtf-report">
+                                <div class="control-group">
+                                    <label class="control-label"><?php echo Yii::t('app', "$title Image"); ?></label>
+                                    <div class="controls form-text image-wrapper" data-image-type="rating" data-item-id="<?php echo $rating ?>">
+                                        <div class="rating-image" data-control-url="<?php echo $this->createUrl('reporttemplate/controlratingimage', array('id' => $template->id)); ?>">
+                                            <?php if ($template->getRatingImage($rating)): ?>
+                                                <img src="<?php echo $this->createUrl('reporttemplate/ratingimage', array('id' => $template->id, 'rating' => $rating)); ?>" width="32">
+                                            <?php else: ?>
+                                                <?php echo Yii::t('app', "No rating image."); ?>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="file-input">
+                                            <a href="#rating-image"><?php echo Yii::t('app', 'Upload'); ?></a>
+                                            <input type="file" name="ReportTemplateRatingImageUploadForm[image]" data-upload-url="<?php echo $this->createUrl('reporttemplate/uploadratingimage', array('id' => $template->id, 'rating' => $rating)); ?>">
+                                        </div>
+
+                                        <div class="upload-message hide"><?php echo Yii::t('app', 'Uploading...'); ?></div>
+
+                                        <a class="delete-rating-image-link<?php if (!$template->getRatingImage(TargetCheck::RATING_MED_RISK)) echo ' hide'; ?>" href="#delete-rating-image" onclick="admin.reportTemplate.delRatingImage(<?php echo $rating; ?>);"><?php echo Yii::t('app', 'Delete Rating Image'); ?></a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
 
                     <?php if (!$template->isNewRecord): ?>
                         <div class="docx-report <?php if ($model->type == ReportTemplate::TYPE_RTF) echo "hide"; ?>">
@@ -286,6 +324,7 @@
                         </div>
                     <?php endif; ?>
                 </div>
+
                 <div class="span4">
                     <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
                         <div id="rtf-var-list-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#rtf-var-list');"><i class="icon-chevron-up"></i></div>
@@ -472,5 +511,6 @@
         $(".wysiwyg").ckeditor();
         admin.reportTemplate.initHeaderImageUploadForm();
         admin.reportTemplate.initTemplateUploadForm();
+        admin.reportTemplate.initRatingImageUploadForm();
     });
 </script>
