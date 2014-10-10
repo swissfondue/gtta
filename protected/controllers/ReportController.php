@@ -1602,10 +1602,6 @@ class ReportController extends Controller {
                         "_reference"
                     ))->findAll($criteria);
 
-                    if (!$checks) {
-                        continue;
-                    }
-
                     foreach ($checks as $check) {
                         $ctr = 0;
 
