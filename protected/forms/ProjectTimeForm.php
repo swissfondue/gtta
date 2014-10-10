@@ -3,7 +3,7 @@
 /**
  * This is the model class for project track time form.
  */
-class ProjectTrackTimeForm extends CFormModel {
+class ProjectTimeForm extends CFormModel {
     /**
      * @var float hours spent.
      */

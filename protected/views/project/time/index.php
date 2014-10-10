@@ -20,12 +20,15 @@
                 <table class="table time-records-list">
                     <tbody>
                     <tr>
+                        <th class="time-added"><?php echo Yii::t('app', 'Time Added'); ?></th>
                         <th class="user"><?php echo Yii::t('app', 'User'); ?></th>
                         <th class="time-logged"><?php echo Yii::t('app', 'Time Logged'); ?></th>
-                        <th class="time-added"><?php echo Yii::t('app', 'Time Added'); ?></th>
                     </tr>
                     <?php foreach ($records as $record): ?>
                         <tr data-id="<?php echo $record->id; ?>" data-control-url="<?php echo $this->createUrl('project/controltime'); ?>">
+                            <td class="time-added">
+                                <?php echo DateTimeFormat::toISO($record->create_time); ?>
+                            </td>
                             <td class="user">
                                 <a href="<?php echo $this->createUrl('user/edit', array( 'id' => $record->user_id )); ?>">
                                     <?php echo CHtml::encode($record->user ? ($record->user->name ? $record->user->name : $record->user->email) : $record->user_name); ?>
@@ -36,9 +39,6 @@
                             </td>
                             <td class="time-logged">
                                 <?php echo sprintf("%.1f", $record->hours); ?>
-                            </td>
-                            <td class="time-added">
-                                <?php echo DateTimeFormat::toISO($record->create_time); ?>
                             </td>
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                 <td class="actions">

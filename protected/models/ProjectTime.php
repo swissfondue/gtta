@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This is the model class for table "project_track_time_records".
+ * This is the model class for table "project_time".
  *
  * The followings are the available columns in table 'target_references':
  * @property integer id (pk)
@@ -11,7 +11,7 @@
  * @property string description
  * @property timestamp create_time
  */
-class ProjectTrackTimeRecord extends ActiveRecord
+class ProjectTime extends ActiveRecord
 {
     /**
      * Returns the static model of the specified AR class.
@@ -28,7 +28,7 @@ class ProjectTrackTimeRecord extends ActiveRecord
      */
     public function tableName()
     {
-        return 'project_track_time_records';
+        return 'project_time';
     }
 
     /**

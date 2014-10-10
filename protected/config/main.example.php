@@ -98,7 +98,6 @@ return array(
                 "project/<id:\d+>/time/<page:\d+>" => "project/time",
                 "project/<id:\d+>/time/new" => "project/tracktime",
                 "project/<id:\d+>/time/control" => "project/controltime",
-                "project/<id:\d+>/time/control" => "project/controltime",
 
                 // project users
                 "project/<id:\d+>/users/<page:\d+>" => "project/users",

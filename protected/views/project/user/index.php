@@ -34,7 +34,7 @@
                                     <?php echo sprintf("%.1f", $user->hours_allocated); ?>
                                 </td>
                                 <td class="hours">
-                                    <?php echo sprintf("%.1f", $user->hours_spent); ?>
+                                    <?php echo sprintf("%.1f", $user->hoursSpent); ?>
                                 </td>
                                 <td class="role">
                                     <?php if ($user->admin): ?>

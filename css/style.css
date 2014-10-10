@@ -286,11 +286,15 @@ fieldset hr {
 }
 
 .time-records-list .time-added {
-    width: 150px;
+    width: 130px;
 }
 
 .time-records-list .time-logged {
     width: 100px;
+}
+
+.time-records-list .user {
+    width: 320px;
 }
 
 .time-records-list .content {

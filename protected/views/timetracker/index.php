@@ -49,7 +49,7 @@
                                                 <?php echo $user->hours_allocated; ?>
                                             </td>
                                             <td class="hours">
-                                                <?php echo $user->hours_spent; ?>
+                                                <?php echo $user->hoursSpent; ?>
                                             </td>
                                         </tr>
                                     </tbody>

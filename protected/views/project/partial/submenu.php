@@ -10,7 +10,9 @@
         <li <?php if ($page == 'details') echo "class=\"active\"" ?>><a href="<?php echo $this->createUrl('project/details', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Details'); ?></a></li>
     <?php endif; ?>
 
+    <?php if (User::checkRole(User::ROLE_USER)): ?>
     <li <?php if ($page == 'time') echo "class=\"active\"" ?>><a href="<?php echo $this->createUrl('project/time', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Time'); ?></a></li>
+    <?php endif; ?>
 
     <li <?php if ($page == 'vulns') echo "class=\"active\"" ?>><a href="<?php echo $this->createUrl('vulntracker/vulns', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Vulnerabilities'); ?></a></li>
 </ul>

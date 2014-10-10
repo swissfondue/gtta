@@ -5413,9 +5413,9 @@ class ReportController extends Controller {
 
     /**
      * Generates project tracked time report
-     * @param $form
+     * @param $id
      */
-    private function _generateTrackedTimeReport ($id) {
+    private function _generateTrackedTimeReport($id) {
         $projectId = (int) $id;
         $project = Project::model()->findByPk($projectId);
 
@@ -5431,23 +5431,49 @@ class ReportController extends Controller {
 
         $records = $project->timeRecords;
 
-        $fileName = Yii::t('app', 'Tracked Time Export') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
+        $fileName = Yii::t('app', 'Time Tracking Report') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
 
         $this->_rtfSetup();
         $section = $this->rtf->addSection();
 
         // main title
-        $section->writeText(Yii::t("app", "Positions"), $this->h2Font, $this->centerTitlePar);
+        $section->writeText(Yii::t("app", "Time Tracking Report"), $this->h2Font, $this->centerTitlePar);
+        $section->writeText(" ", $this->h2Font, $this->noPar);
 
         $table = $section->addTable(PHPRtfLite_Table::ALIGN_CENTER);
 
+        $table->addColumnsList(array( $this->docWidth * 0.3, $this->docWidth * 0.5, $this->docWidth * 0.2 ));
+        $table->addRows(count($records) + 1);
+
+        $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
+        $table->setFontForCellRange($this->boldFont, 1, 1, 1, 3);
+        $table->setFontForCellRange($this->textFont, 2, 1, count($records) + 1, 3);
+        $table->setBorderForCellRange($this->thinBorder, 1, 1, count($records) + 1, 3);
+        $table->setFirstRowAsHeader();
+
+        // set paddings
+        for ($row = 1; $row <= count($records) + 1; $row++) {
+            for ($col = 1; $col <= 3; $col++) {
+                $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+
+                if ($row > 1) {
+                    $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                } else {
+                    $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+                }
+            }
+        }
+
         $row = 1;
-        $table->addColumnsList(array( $this->docWidth * 0.2, $this->docWidth * 0.8 ));
+
+        $table->getCell($row, 1)->writeText(Yii::t('app', 'Time Added'));
+        $table->getCell($row, 2)->writeText(Yii::t('app', 'Description'));
+        $table->getCell($row, 3)->writeText(Yii::t('app', 'Time Logged'));
+
+        $row++;
 
         // filling positions list
         foreach ($records as $record) {
-            $date = new DateTime($record->create_time);
-            $table->addRows(1);
             $table->getCell($row, 1)->setCellPaddings(
                 $this->cellPadding,
                 $this->cellPadding,
@@ -5460,13 +5486,14 @@ class ReportController extends Controller {
                 $this->cellPadding,
                 $this->cellPadding
             );
-            $table->getCell($row, 1)->writeText($date->format('d.m.Y'), $this->textFont, $this->noPar);
-            $table->getCell($row, 2)->writeText($record->description . '; ' . $record->hours . 'h;', $this->textFont, $this->noPar);
+            $table->getCell($row, 1)->writeText(DateTimeFormat::toISO($record->create_time), $this->textFont, $this->noPar);
+            $table->getCell($row, 2)->writeText($record->description, $this->textFont, $this->noPar);
+            $table->getCell($row, 3)->writeText($record->hours . ' h', $this->textFont, $this->noPar);
             $row++;
         }
 
         // total hours
-        $section->writeText(Yii::t("app", "Summary") . ': ' . $project->trackedTime . 'h', $this->h3Font, $this->rightPar);
+        $section->writeText(Yii::t("app", "Summary") . ': ' . $project->trackedTime . ' h', $this->h3Font, $this->rightPar);
 
         $hashName = hash('sha256', rand() . time() . $fileName);
         $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
