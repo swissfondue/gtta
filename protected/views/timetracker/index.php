@@ -26,10 +26,16 @@
                                         <a href="#project-<?php echo $project->id; ?>" onclick="admin.timeTracker.toggleProject(<?php echo $project->id; ?>);"><?php echo CHtml::encode($project->name); ?></a>
                                     </td>
                                     <td class="hours">
-                                        <?php echo $project->hours_allocated; ?>
+                                        <?php
+                                            $allocated = $project->hours_allocated;
+                                            echo sprintf("%.1f h", $allocated ? $allocated : 0.0);
+                                        ?>
                                     </td>
                                     <td class="hours">
-                                        <?php echo $project->userHoursSpent; ?>
+                                        <?php
+                                            $spent = $project->userHoursSpent;
+                                            echo sprintf("%.1f h", $spent ? $spent : 0.0);
+                                        ?>
                                     </td>
                                 </tr>
                             </tbody>
@@ -46,10 +52,13 @@
                                                 <?php echo $user->user->name ? CHtml::encode($user->user->name) : $user->user->email; ?>
                                             </td>
                                             <td class="hours">
-                                                <?php echo $user->hours_allocated; ?>
+                                                <?php echo $user->hours_allocated; ?> h
                                             </td>
                                             <td class="hours">
-                                                <?php echo $user->hours_spent; ?>
+                                                <?php
+                                                    $spent = $user->hoursSpent;
+                                                    echo sprintf("%.1f h", $spent ? $spent : 0.0);
+                                                ?>
                                             </td>
                                         </tr>
                                     </tbody>

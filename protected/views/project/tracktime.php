@@ -1,3 +1,5 @@
+<script src="/ckeditor/ckeditor.js"></script>
+<script src="/ckeditor/adapters/jquery.js"></script>
 <div class="active-header">
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 </div>
@@ -18,15 +20,25 @@
         <div class="control-group">
             <label class="control-label"><?php echo Yii::t("app", "Spent So Far"); ?></label>
             <div class="controls form-text">
-                <?php echo sprintf("%.1f", $user->hours_spent); ?> /
+                <?php echo sprintf("%.1f", $user->hoursSpent); ?> /
                 <?php echo sprintf("%.1f", $user->hours_allocated); ?>
             </div>
         </div>
 
-        <div class="control-group <?php if ($form->getError("hoursSpent")) echo "error"; ?>">
-            <label class="control-label" for="ProjectTrackTimeForm_hoursSpent"><?php echo Yii::t("app", "Hours Spent"); ?></label>
+        <div class="control-group <?php if ($form->getError('description')) echo 'error'; ?>">
+            <label class="control-label" for="ProjectTimeForm_description"><?php echo Yii::t('app', 'Description'); ?></label>
             <div class="controls">
-                <input type="text" class="input-xlarge" id="ProjectTrackTimeForm_hoursSpent" name="ProjectTrackTimeForm[hoursSpent]" value="<?php echo CHtml::encode($form->hoursSpent); ?>">
+                <textarea class="input-xlarge" rows="4" id="ProjectTimeForm_description" name="ProjectTimeForm[description]"><?php echo CHtml::encode($form->description); ?></textarea>
+                <?php if ($form->getError('description')): ?>
+                    <p class="help-block"><?php echo $form->getError('description'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($form->getError("hoursSpent")) echo "error"; ?>">
+            <label class="control-label" for="ProjectTimeForm_hoursSpent"><?php echo Yii::t("app", "Hours Spent"); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="ProjectTimeForm_hoursSpent" name="ProjectTimeForm[hoursSpent]">
                 <?php if ($form->getError("hoursSpent")): ?>
                     <p class="help-block"><?php echo $form->getError("hoursSpent"); ?></p>
                 <?php endif; ?>

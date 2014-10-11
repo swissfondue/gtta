@@ -93,7 +93,9 @@ class Project extends ActiveRecord implements IVariableScopeObject {
             "modules" => array(self::HAS_MANY, "ProjectGtModule", "project_id"),
             "gtChecks" => array(self::HAS_MANY, "ProjectGtCheck", "project_id"),
             "userHoursAllocated" => array(self::STAT, "ProjectUser", "project_id", "select" => "SUM(hours_allocated)"),
-            "userHoursSpent" => array(self::STAT, "ProjectUser", "project_id", "select" => "SUM(hours_spent)")
+            "userHoursSpent" => array(self::STAT, "ProjectTime", "project_id", "select" => "SUM(hours)"),
+            "trackedTime" => array(self::STAT, "ProjectTime", "project_id", "select" => "SUM(hours)"),
+            "timeRecords" => array(self::HAS_MANY, "ProjectTime", "project_id"),
 		);
 	}
 

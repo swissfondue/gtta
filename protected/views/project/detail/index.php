@@ -1,16 +1,6 @@
 <div class="active-header">
     <div class="pull-right">
-        <ul class="nav nav-pills">
-            <li><a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
-            <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
-                <li><a href="<?php echo $this->createUrl('project/edit', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
-                <li><a href="<?php echo $this->createUrl('project/users', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Users'); ?></a></li>
-            <?php endif; ?>
-            <?php if (User::checkRole(User::ROLE_ADMIN) || User::checkRole(User::ROLE_CLIENT)): ?>
-                <li class="active"><a href="<?php echo $this->createUrl('project/details', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Details'); ?></a></li>
-            <?php endif; ?>
-            <li><a href="<?php echo $this->createUrl('vulntracker/vulns', array( 'id' => $project->id )); ?>"><?php echo Yii::t('app', 'Vulnerabilities'); ?></a></li>
-        </ul>
+        <?php echo $this->renderPartial('partial/submenu', array( 'page' => 'details', 'project' => $project )); ?>
     </div>
 
     <div class="pull-right buttons">

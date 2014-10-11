@@ -3,19 +3,25 @@
 /**
  * This is the model class for project track time form.
  */
-class ProjectTrackTimeForm extends CFormModel {
+class ProjectTimeForm extends CFormModel {
     /**
      * @var float hours spent.
      */
     public $hoursSpent;
 
     /**
+     * @var description of track time record
+     */
+    public $description;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
 		return array(
-			array("hoursSpent", "required"),
-            array("hoursSpent", "numerical", "min" => 0),
+			array( "hoursSpent", "required" ),
+            array( "hoursSpent", "numerical", "min" => 0 ),
+            array( "description", "safe" )
 		);
 	}
     

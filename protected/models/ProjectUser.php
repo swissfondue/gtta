@@ -45,4 +45,23 @@ class ProjectUser extends ActiveRecord {
             "user" => array(self::BELONGS_TO, "User", "user_id"),
 		);
 	}
+
+    /**
+     * Returns hours spent
+     */
+    public function getHoursSpent() {
+        $criteria = new CDbCriteria();
+        $criteria->addCondition("user_id=:user_id");
+        $criteria->addCondition("project_id=:project_id");
+        $criteria->params = array("user_id" => $this->user_id, "project_id" => $this->project_id);
+        $records = ProjectTime::model()->findAll($criteria);
+
+        $hours = 0;
+
+        foreach ($records as $record) {
+            $hours += $record->hours;
+        }
+
+        return $hours;
+    }
 }

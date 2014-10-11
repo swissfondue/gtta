@@ -10,7 +10,7 @@ class ReportController extends Controller {
     private $fontFamily;
     private $thinBorder, $thinBorderTL, $thinBorderBR;
     private $h1Font, $h2Font, $h3Font, $textFont, $boldFont, $linkFont, $footerFont, $smallBoldFont;
-    private $titlePar, $h3Par, $centerPar, $leftPar, $noPar;
+    private $titlePar, $centerTitlePar, $h3Par, $centerPar, $leftPar, $rightPar, $noPar;
     private $docWidth;
     private $project;
     private $toc;
@@ -561,7 +561,7 @@ class ReportController extends Controller {
     /**
      * Set up RTF variables
      */
-    private function _rtfSetup($model)
+    private function _rtfSetup($model=null)
     {
         // include all PHPRtfLite libraries
         Yii::setPathOfAlias('rtf', Yii::app()->basePath . '/extensions/PHPRtfLite/PHPRtfLite');
@@ -569,13 +569,25 @@ class ReportController extends Controller {
         PHPRtfLite_Autoloader::setBaseDir(Yii::app()->basePath . '/extensions/PHPRtfLite');
         Yii::registerAutoloader(array( 'PHPRtfLite_Autoloader', 'autoload' ), true);
 
+        if ($model) {
+            $pageMargin = $model->pageMargin;
+            $cellPadding = $model->cellPadding;
+            $fontSize = $model->fontSize;
+            $fontFamily = $model->fontFamily;
+        } else {
+            $pageMargin = Yii::app()->params["reports"]["pageMargin"];
+            $cellPadding = Yii::app()->params["reports"]["cellPadding"];
+            $fontSize = Yii::app()->params["reports"]["fontSize"];
+            $fontFamily = Yii::app()->params["reports"]["font"];
+        }
+
         $this->rtf = new PHPRtfLite();
         $this->rtf->setCharset('UTF-8');
-        $this->rtf->setMargins($model->pageMargin, $model->pageMargin, $model->pageMargin, $model->pageMargin);
+        $this->rtf->setMargins($pageMargin, $pageMargin, $pageMargin, $pageMargin);
 
-        $this->cellPadding = $model->cellPadding;
-        $this->fontSize = $model->fontSize;
-        $this->fontFamily = $model->fontFamily;
+        $this->cellPadding = $cellPadding;
+        $this->fontSize = $fontSize;
+        $this->fontFamily = $fontFamily;
 
         // borders
         $this->thinBorder = new PHPRtfLite_Border(
@@ -606,23 +618,23 @@ class ReportController extends Controller {
         $this->smallBoldFont = new PHPRtfLite_Font(round($this->fontSize * 0.8), $this->fontFamily);
         $this->smallBoldFont->setBold();
 
-        $this->h1Font = new PHPRtfLite_Font($model->fontSize * 2, $model->fontFamily);
+        $this->h1Font = new PHPRtfLite_Font($fontSize * 2, $fontFamily);
         $this->h1Font->setBold();
 
-        $this->h2Font = new PHPRtfLite_Font(round($model->fontSize * 1.7), $model->fontFamily);
+        $this->h2Font = new PHPRtfLite_Font(round($fontSize * 1.7), $fontFamily);
         $this->h2Font->setBold();
 
-        $this->h3Font = new PHPRtfLite_Font(round($model->fontSize * 1.3), $model->fontFamily);
+        $this->h3Font = new PHPRtfLite_Font(round($fontSize * 1.3), $fontFamily);
         $this->h3Font->setBold();
 
-        $this->textFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
+        $this->textFont = new PHPRtfLite_Font($fontSize, $fontFamily);
 
-        $this->footerFont = new PHPRtfLite_Font(round($model->fontSize * 0.6), $model->fontFamily);
+        $this->footerFont = new PHPRtfLite_Font(round($fontSize * 0.6), $fontFamily);
 
-        $this->boldFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily);
+        $this->boldFont = new PHPRtfLite_Font($fontSize, $fontFamily);
         $this->boldFont->setBold();
 
-        $this->linkFont = new PHPRtfLite_Font($model->fontSize, $model->fontFamily, '#0088CC');
+        $this->linkFont = new PHPRtfLite_Font($fontSize, $fontFamily, '#0088CC');
         $this->linkFont->setUnderline();
 
         // paragraphs
@@ -633,17 +645,24 @@ class ReportController extends Controller {
         $this->h3Par = new PHPRtfLite_ParFormat();
         $this->h3Par->setSpaceAfter(10);
 
+        $this->centerTitlePar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
+        $this->centerTitlePar->setSpaceBefore(10);
+        $this->centerTitlePar->setSpaceAfter(10);
+
         $this->centerPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_CENTER);
         $this->centerPar->setSpaceAfter(0);
 
         $this->leftPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_LEFT);
         $this->leftPar->setSpaceAfter(20);
 
+        $this->rightPar = new PHPRtfLite_ParFormat(PHPRtfLite_ParFormat::TEXT_ALIGN_RIGHT);
+        $this->rightPar->setSpaceAfter(0);
+
         $this->noPar = new PHPRtfLite_ParFormat();
         $this->noPar->setSpaceBefore(0);
         $this->noPar->setSpaceAfter(0);
 
-        $this->docWidth = 21.0 - 2 * $model->pageMargin;
+        $this->docWidth = 21.0 - 2 * $pageMargin;
     }
 
     /**
@@ -5531,7 +5550,6 @@ class ReportController extends Controller {
         exit();
     }
 
-
     /**
      * Show vulnerability export report form.
      */
@@ -5591,5 +5609,120 @@ class ReportController extends Controller {
                 TargetCheck::COLUMN_STATUS => Yii::t('app', 'Status'),
             )
         ));
+    }
+
+    /**
+     * Report project tracked time
+     * @param $id
+     */
+    public function actionTrackedTime($id) {
+        $projectId = (int) $id;
+        $this->_generateTrackedTimeReport($projectId);
+    }
+
+    /**
+     * Generates project tracked time report
+     * @param $id
+     */
+    private function _generateTrackedTimeReport($id) {
+        $projectId = (int) $id;
+        $project = Project::model()->findByPk($projectId);
+
+        if ($project === null) {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
+            return;
+        }
+
+        if (!$project->checkPermission()) {
+            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
+            return;
+        }
+
+        $records = $project->timeRecords;
+
+        $fileName = Yii::t('app', 'Time Tracking Report') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
+
+        $this->_rtfSetup();
+        $section = $this->rtf->addSection();
+
+        // main title
+        $section->writeText(Yii::t("app", "Time Tracking Report"), $this->h2Font, $this->centerTitlePar);
+        $section->writeText(" ", $this->h2Font, $this->noPar);
+
+        $table = $section->addTable(PHPRtfLite_Table::ALIGN_CENTER);
+
+        $table->addColumnsList(array( $this->docWidth * 0.3, $this->docWidth * 0.5, $this->docWidth * 0.2 ));
+        $table->addRows(count($records) + 1);
+
+        $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
+        $table->setFontForCellRange($this->boldFont, 1, 1, 1, 3);
+        $table->setFontForCellRange($this->textFont, 2, 1, count($records) + 1, 3);
+        $table->setBorderForCellRange($this->thinBorder, 1, 1, count($records) + 1, 3);
+        $table->setFirstRowAsHeader();
+
+        // set paddings
+        for ($row = 1; $row <= count($records) + 1; $row++) {
+            for ($col = 1; $col <= 3; $col++) {
+                $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+
+                if ($row > 1) {
+                    $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                } else {
+                    $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+                }
+            }
+        }
+
+        $row = 1;
+
+        $table->getCell($row, 1)->writeText(Yii::t('app', 'Time Added'));
+        $table->getCell($row, 2)->writeText(Yii::t('app', 'Description'));
+        $table->getCell($row, 3)->writeText(Yii::t('app', 'Time Logged'));
+
+        $row++;
+
+        // filling positions list
+        foreach ($records as $record) {
+            $table->getCell($row, 1)->setCellPaddings(
+                $this->cellPadding,
+                $this->cellPadding,
+                $this->cellPadding,
+                $this->cellPadding
+            );
+            $table->getCell($row, 2)->setCellPaddings(
+                $this->cellPadding,
+                $this->cellPadding,
+                $this->cellPadding,
+                $this->cellPadding
+            );
+            $table->getCell($row, 1)->writeText(DateTimeFormat::toISO($record->create_time), $this->textFont, $this->noPar);
+            $table->getCell($row, 2)->writeText($record->description, $this->textFont, $this->noPar);
+            $table->getCell($row, 3)->writeText($record->hours . ' h', $this->textFont, $this->noPar);
+            $row++;
+        }
+
+        // total hours
+        $section->writeText(Yii::t("app", "Summary") . ': ' . $project->trackedTime . ' h', $this->h3Font, $this->rightPar);
+
+        $hashName = hash('sha256', rand() . time() . $fileName);
+        $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
+        $this->rtf->save($filePath);
+
+        // give user a file
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filePath));
+
+        ob_clean();
+        flush();
+
+        readfile($filePath);
+
+        exit();
     }
 }

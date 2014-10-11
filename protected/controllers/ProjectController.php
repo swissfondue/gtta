@@ -12,8 +12,8 @@ class ProjectController extends Controller {
             "https",
 			"checkAuth",
             "showDetails + target, attachment, checks",
-            "checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, gtcontrolcheck, gtsavecheck, savecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck, tracktime",
-            "checkAdmin + edit, users, edituser, controluser",
+            "checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, gtcontrolcheck, gtsavecheck, savecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck, time, tracktime",
+            "checkAdmin + edit, users, edituser, controluser, controltime",
             "ajaxOnly + savecheck, savecustomcheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtcontrolattachment, copycheck, controlchecklist, check",
             "postOnly + savecheck, savecustomcheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck, controlchecklist, check",
             "idleOrRunning",
@@ -820,6 +820,103 @@ class ProjectController extends Controller {
             'detail'  => $detail
         ));
 	}
+
+    /**
+     * Display list of tracked time
+     * @param $id
+     * @param int $page
+     */
+    public function actionTime($id, $page=1) {
+        $id   = (int) $id;
+        $page = (int) $page;
+
+        $project = Project::model()->findByPk($id);
+
+        if (!$project)
+            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+
+        if (!$project->checkPermission())
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
+        if ($page < 1)
+            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+
+        $criteria = new CDbCriteria();
+        $criteria->limit  = Yii::app()->params['entriesPerPage'];
+        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->order  = 't.create_time ASC';
+        $criteria->addCondition('t.project_id = :project_id');
+        $criteria->params = array( 'project_id' => $project->id );
+
+        $records = ProjectTime::model()->findAll($criteria);
+
+        $detailCount = ProjectTime::model()->count($criteria);
+        $paginator   = new Paginator($detailCount, $page);
+
+        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Time'), '');
+
+        // display the page
+        $this->pageTitle = $project->name;
+        $this->render('time/index', array(
+            'project'  => $project,
+            'records'  => $records,
+            'p'        => $paginator,
+        ));
+    }
+
+    /**
+     * Control time function
+     */
+    public function actionControlTime() {
+        $response = new AjaxResponse();
+
+        try
+        {
+            $form = new EntryControlForm();
+            $form->attributes = $_POST['EntryControlForm'];
+
+            if (!$form->validate())
+            {
+                $errorText = '';
+
+                foreach ($form->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $id     = $form->id;
+            $record = ProjectTime::model()->with('project')->findByPk($id);
+
+            if ($record === null)
+                throw new CHttpException(404, Yii::t('app', 'Record not found.'));
+
+            if (!$record->project->checkPermission())
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+
+            switch ($form->operation)
+            {
+                case 'delete':
+                    $record->delete();
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    break;
+            }
+        }
+        catch (Exception $e)
+        {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
 
     /**
      * Check form for GT.
@@ -4656,7 +4753,7 @@ class ProjectController extends Controller {
             $form->userId = $user->user_id;
             $form->admin = $user->admin;
             $form->hoursAllocated = $user->hours_allocated;
-            $form->hoursSpent = $user->hours_spent;
+            $form->hoursSpent = $user->hoursSpent;
         } else {
             $form->hoursAllocated = 0.0;
             $form->hoursSpent = 0.0;
@@ -4681,7 +4778,6 @@ class ProjectController extends Controller {
                 $user->admin = $form->admin;
                 $user->project_id = $project->id;
                 $user->hours_allocated = $form->hoursAllocated;
-                $user->hours_spent = $form->hoursSpent;
                 $user->save();
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "User saved."));
@@ -5240,7 +5336,7 @@ class ProjectController extends Controller {
             throw new CHttpException(403, Yii::t("app", "Access denied."));
         }
 
-		$form = new ProjectTrackTimeForm();
+		$form = new ProjectTimeForm();
         $user = ProjectUser::model()->with("user")->findByAttributes(array(
             "user_id" => Yii::app()->user->id,
             "project_id" => $project->id,
@@ -5251,12 +5347,16 @@ class ProjectController extends Controller {
         }
 
 		// collect user input data
-		if (isset($_POST["ProjectTrackTimeForm"])) {
-			$form->attributes = $_POST["ProjectTrackTimeForm"];
+		if (isset($_POST["ProjectTimeForm"])) {
+			$form->attributes = $_POST["ProjectTimeForm"];
 
 			if ($form->validate()) {
-                $user->hours_spent += $form->hoursSpent;
-                $user->save();
+                $record = new ProjectTime();
+                $record->user_id = $user->user->id;
+                $record->project_id = $project->id;
+                $record->hours = $form->hoursSpent;
+                $record->description = $form->description;
+                $record->save();
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "User saved."));
                 $this->redirect(array("project/view", "id" => $project->id));
@@ -5267,7 +5367,8 @@ class ProjectController extends Controller {
 
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
         $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
-        $this->breadcrumbs[] = array(Yii::t("app", "Track Time"), "");
+        $this->breadcrumbs[] = array(Yii::t("app", "Time"), $this->createUrl("project/time", array("id" => $project->id)));
+        $this->breadcrumbs[] = array(Yii::t("app", "Track"), "");
 
 		// display the page
         $this->pageTitle = Yii::t("app", "Track Time");

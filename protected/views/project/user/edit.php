@@ -42,16 +42,6 @@
                 <?php endif; ?>
             </div>
         </div>
-        
-        <div class="control-group <?php if ($form->getError("hoursSpent")) echo "error"; ?>">
-            <label class="control-label" for="ProjectUserEditForm_hoursSpent"><?php echo Yii::t("app", "Hours Spent"); ?></label>
-            <div class="controls">
-                <input type="text" class="input-xlarge" id="ProjectUserEditForm_hoursSpent" name="ProjectUserEditForm[hoursSpent]" value="<?php echo CHtml::encode($form->hoursSpent); ?>">
-                <?php if ($form->getError("hoursSpent")): ?>
-                    <p class="help-block"><?php echo $form->getError("hoursSpent"); ?></p>
-                <?php endif; ?>
-            </div>
-        </div>
 
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t("app", "Save"); ?></button>
