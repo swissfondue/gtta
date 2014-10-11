@@ -38,7 +38,7 @@
                                 </div>
                             </td>
                             <td class="time-logged">
-                                <?php echo sprintf("%.1f", $record->hours); ?>
+                                <?php echo sprintf("%.1f h", $record->hours); ?>
                             </td>
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                 <td class="actions">

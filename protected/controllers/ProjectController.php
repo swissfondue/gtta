@@ -866,9 +866,6 @@ class ProjectController extends Controller {
 
         try
         {
-            if (!User::checkRole(User::ROLE_ADMIN))
-                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
-
             $form = new EntryControlForm();
             $form->attributes = $_POST['EntryControlForm'];
 

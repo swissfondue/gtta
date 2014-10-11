@@ -5405,6 +5405,7 @@ class ReportController extends Controller {
 
     /**
      * Report project tracked time
+     * @param $id
      */
     public function actionTrackedTime($id) {
         $projectId = (int) $id;

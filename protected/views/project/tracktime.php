@@ -28,8 +28,7 @@
         <div class="control-group <?php if ($form->getError('description')) echo 'error'; ?>">
             <label class="control-label" for="ProjectTimeForm_description"><?php echo Yii::t('app', 'Description'); ?></label>
             <div class="controls">
-                <textarea class="input-xlarge" rows="4" id="ProjectTimeForm_description" name="ProjectTimeForm[description]">
-                    <?php echo CHtml::encode($form->description); ?></textarea>
+                <textarea class="input-xlarge" rows="4" id="ProjectTimeForm_description" name="ProjectTimeForm[description]"><?php echo CHtml::encode($form->description); ?></textarea>
                 <?php if ($form->getError('description')): ?>
                     <p class="help-block"><?php echo $form->getError('description'); ?></p>
                 <?php endif; ?>

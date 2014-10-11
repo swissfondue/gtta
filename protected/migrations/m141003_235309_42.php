@@ -48,6 +48,8 @@ class m141003_235309_42 extends CDbMigration {
      */
     public function safeDown() {
         $this->dropTable('project_time');
+        $this->addColumn("project_users", "hours_spent", "NUMERIC(11,1) NOT NULL DEFAULT 0.0");
+
 		return true;
 	}
 }
