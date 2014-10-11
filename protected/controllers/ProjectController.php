@@ -5372,7 +5372,7 @@ class ProjectController extends Controller {
 
 		// display the page
         $this->pageTitle = Yii::t("app", "Track Time");
-		$this->render("tracktime", array(
+		$this->render("time/track", array(
             "form" => $form,
             "project" => $project,
             "user" => $user,
