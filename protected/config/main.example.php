@@ -154,7 +154,7 @@ return array(
                 "vuln-tracker" => "vulntracker/index",
                 "vuln-tracker/<id:\d+>/<page:\d+>" => "vulntracker/vulns",
                 "vuln-tracker/<id:\d+>" => "vulntracker/vulns",
-                "vuln-tracker/<id:\d+>/vuln/<target:\d+>/<check:\d+>/edit" => "vulntracker/edit",
+                "vuln-tracker/<id:\d+>/target/<target:\d+>/<type:(check|custom)>/<check:\d+>/edit" => "vulntracker/edit",
 
                 // clients
                 "clients/<page:\d+>" => "client/index",
