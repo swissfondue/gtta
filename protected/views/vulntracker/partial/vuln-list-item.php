@@ -15,13 +15,13 @@
                 <?php endif; ?>
             </div>
         <?php else: ?>
-            <?php if ($type == 'check'): ?>
+            <?php if ($type == Yii::app()->params['checks']['types']['targetCheck']): ?>
                 <?php if ($project->checkAdmin()): ?>
                     <a href="<?php echo $this->createUrl('vulntracker/edit', array( 'id' => $project->id, 'target' => $check->target_id, 'check' => $check->check_id, 'type' => 'check' )); ?>"><?php echo CHtml::encode($check->check->localizedName); ?></a>
                 <?php else: ?>
                     <?php echo CHtml::encode($check->check->localizedName); ?>
                 <?php endif; ?>
-            <?php elseif ($type == 'custom'): ?>
+            <?php elseif ($type == Yii::app()->params['checks']['types']['targetCustomCheck']): ?>
                 <?php if ($project->checkAdmin()): ?>
                     <a href="<?php echo $this->createUrl('vulntracker/edit', array( 'id' => $project->id, 'target' => $check->target_id, 'check' => $check->id, 'type' => 'custom' )); ?>"><?php echo $check->name ? CHtml::encode($check->name) : "CUSTOM-CHECK-" . $check->reference; ?></a>
                 <?php else: ?>

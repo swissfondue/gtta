@@ -29,7 +29,7 @@
                     </tbody>
                 </table>
 
-                <?php echo $this->renderPartial('/layouts/partial/pagination', array('p' => $p, 'url' => 'vulntracker/index', 'params' => array('id' => $project->id))); ?>
+                <?php echo $this->renderPartial('/layouts/partial/pagination', array('p' => $p, 'url' => 'vulntracker/vulns', 'params' => array('id' => $project->id, 'page' => $p))); ?>
             <?php else: ?>
                 <?php echo Yii::t('app', 'No vulnerabilities yet.'); ?>
             <?php endif; ?>

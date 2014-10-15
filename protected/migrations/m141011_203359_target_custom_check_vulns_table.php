@@ -12,7 +12,7 @@ class m141011_203359_target_custom_check_vulns_table extends CDbMigration {
         $this->createTable(
             'target_custom_check_vulns',
             array(
-                'target_custom_check_id' => 'pk',
+                'target_custom_check_id' => 'bigint PRIMARY KEY',
                 'user_id' => 'bigint NOT NULL',
                 'deadline' => 'date',
                 'status' => 'bigint'

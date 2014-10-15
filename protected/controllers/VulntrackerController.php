@@ -94,7 +94,7 @@ class VulntrackerController extends Controller {
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
         $criteria->together = true;
 
-        $targetChecks = TargetCheck::model()->with(array(
+        $targetCheckRelations = array(
             'check' => array(
                 'with' => array(
                     'l10n' => array(
@@ -108,15 +108,34 @@ class VulntrackerController extends Controller {
                 'with' => 'user'
             ),
             'target',
-        ))->findAll($criteria);
+        );
+
+        $targetChecks = TargetCheck::model()->with($targetCheckRelations)->findAll($criteria);
+        $tCheckCount = count($targetChecks);
+        $totalCheckCount = (int) TargetCheck::model()->count($criteria);
 
         $criteria = new CDbCriteria();
         $criteria->addInCondition('t.target_id', $targetIds);
         $criteria->addInCondition('t.rating', $this->_allowedRiskValues);
         $criteria->order = 'target.host ASC';
-        $criteria->limit = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
         $criteria->together = true;
+
+        $totalCheckCount += (int) TargetCustomCheck::model()->count($criteria);
+
+        if ($tCheckCount == Yii::app()->params['entriesPerPage']) {
+            return array($targetChecks, array(), $totalCheckCount);
+        } elseif ($tCheckCount < Yii::app()->params['entriesPerPage'] && $tCheckCount > 0) {
+            $limit = Yii::app()->params['entriesPerPage'] - $tCheckCount;
+            $offset = 0;
+        } elseif ($tCheckCount == 0) {
+            $limit = Yii::app()->params['entriesPerPage'];
+            $offset = ($page - 1) * Yii::app()->params['entriesPerPage'] - TargetCheck::model()->count($criteria);
+        } else {
+            throw new CHttpException(500, Yii::t("app", "Invalid target checks count!"));
+        }
+
+        $criteria->limit = $limit;
+        $criteria->offset = $offset;
 
         $customChecks = TargetCustomCheck::model()->with(array(
             'vuln' => array(
@@ -125,9 +144,7 @@ class VulntrackerController extends Controller {
             'target',
         ))->findAll($criteria);
 
-        $checkCount = count($targetChecks) + count($customChecks);
-
-        return array($targetChecks, $customChecks, $checkCount);
+        return array($targetChecks, $customChecks, $totalCheckCount);
     }
 
     /**
@@ -435,11 +452,7 @@ class VulntrackerController extends Controller {
         if ($project->guided_test) {
             list($checkName, $model) = $this->_gtProjectEdit($project, $language, $check);
         } else {
-            if ($type == 'check') {
-                list($checkName, $model) = $this->_projectEdit($project, $language, $target, $check);
-            } elseif ($type == 'custom') {
-                list($checkName, $model) = $this->_projectEdit($project, $language, $target, $check, true);
-            }
+            list($checkName, $model) = $this->_projectEdit($project, $language, $target, $check, $type == Yii::app()->params['checks']['types']['targetCustomCheck']);
         }
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerability Tracker'), $this->createUrl('vulntracker/index'));

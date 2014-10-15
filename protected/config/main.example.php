@@ -463,6 +463,13 @@ return array(
             ),
         ),
 
+        "checks" => array(
+            "types" => array(
+                "targetCheck" => 'check',
+                "targetCustomCheck" => 'custom'
+            )
+        ),
+
         "tmpPath" => "/tmp",
 
         "security" => array(
