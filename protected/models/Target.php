@@ -55,6 +55,7 @@ class Target extends ActiveRecord implements IVariableScopeObject {
             "medRiskCount" => array(self::STAT, "TargetCheckCategory", "target_id", "select" => "SUM(med_risk_count)"),
             "highRiskCount" => array(self::STAT, "TargetCheckCategory", "target_id", "select" => "SUM(high_risk_count)"),
             "targetChecks" => array(self::HAS_MANY, "TargetCheck", "target_id"),
+            "targetCustomChecks" => array(self::HAS_MANY, "TargetCustomCheck", "target_id"),
         );
 	}
 

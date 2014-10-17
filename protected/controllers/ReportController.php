@@ -5185,15 +5185,13 @@ class ReportController extends Controller {
         $statuses = $data['statuses'];
         $ctr = null;
 
-        if ($type == Yii::app()->params['checks']['types']['targetCheck']) {
+        if ($type == TargetCheck::TYPE) {
             $ctr = $data['ctr'];
         }
 
         if (!in_array($check->rating, $model->ratings)) {
             return null;
         }
-
-        $checkTypes = Yii::app()->params['checks']['types'];
 
         $row = array();
 
@@ -5202,34 +5200,34 @@ class ReportController extends Controller {
         }
 
         if (in_array(TargetCheck::COLUMN_NAME, $model->columns)) {
-            if ($type == $checkTypes['targetCheck']) {
+            if ($type == TargetCheck::TYPE) {
                 $row[TargetCheck::COLUMN_NAME] = $check->check->localizedName . ($ctr > 0 ? " " . ($ctr + 1) : "");
-            } elseif ($type == $checkTypes['targetCustomCheck']) {
+            } elseif ($type == TargetCustomCheck::TYPE) {
                 $row[TargetCheck::COLUMN_NAME] = $check->name ? $check->name : 'CUSTOM-CHECK-' . $check->reference;
             }
         }
 
         if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns)) {
-            if ($type == $checkTypes['targetCheck']) {
+            if ($type == TargetCheck::TYPE) {
                 $row[TargetCheck::COLUMN_REFERENCE] = $check->check->_reference->name .
                     ($check->check->reference_code ? '-' . $check->check->reference_code : '');
-            } elseif ($type == $checkTypes['targetCustomCheck']) {
+            } elseif ($type == TargetCustomCheck::TYPE) {
                 $row[TargetCheck::COLUMN_REFERENCE] = "CUSTOM-CHECK-" . $check->reference;
             }
         }
 
         if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
-            if ($type == $checkTypes['targetCheck']) {
+            if ($type == TargetCheck::TYPE) {
                 $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($check->check->localizedBackgroundInfo);
-            } elseif ($type == $checkTypes['targetCustomCheck']) {
+            } elseif ($type == TargetCustomCheck::TYPE) {
                 $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $check->background_info;
             }
         }
 
         if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns)) {
-            if ($type == $checkTypes['targetCheck']) {
+            if ($type == TargetCheck::TYPE) {
                 $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareVulnExportText($check->check->localizedQuestion);
-            } elseif ($type == $checkTypes['targetCustomCheck']) {
+            } elseif ($type == TargetCustomCheck::TYPE) {
                 $row[TargetCheck::COLUMN_QUESTION] = $check->question;
             }
         }
@@ -5239,7 +5237,7 @@ class ReportController extends Controller {
         }
 
         if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns)) {
-            if ($type == $checkTypes['targetCheck']) {
+            if ($type == TargetCheck::TYPE) {
                 $solutions = array();
 
                 foreach ($check->solutions as $solution) {
@@ -5251,7 +5249,7 @@ class ReportController extends Controller {
                 }
 
                 $row[TargetCheck::COLUMN_SOLUTION] = implode("\n", $solutions);
-            } elseif ($type == $checkTypes['targetCustomCheck']) {
+            } elseif ($type == TargetCustomCheck::TYPE) {
                 $row[TargetCheck::COLUMN_SOLUTION] = $check->solution;
             }
         }

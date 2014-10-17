@@ -25,6 +25,11 @@
  */
 class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
     /**
+     * Target's check type
+     */
+    const TYPE = 'custom';
+
+    /**
      * Result ratings.
      */
     const RATING_NONE = 0;

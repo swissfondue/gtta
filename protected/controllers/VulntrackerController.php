@@ -452,7 +452,7 @@ class VulntrackerController extends Controller {
         if ($project->guided_test) {
             list($checkName, $model) = $this->_gtProjectEdit($project, $language, $check);
         } else {
-            list($checkName, $model) = $this->_projectEdit($project, $language, $target, $check, $type == Yii::app()->params['checks']['types']['targetCustomCheck']);
+            list($checkName, $model) = $this->_projectEdit($project, $language, $target, $check, $type == TargetCustomCheck::TYPE);
         }
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerability Tracker'), $this->createUrl('vulntracker/index'));
