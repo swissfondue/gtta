@@ -5104,7 +5104,24 @@ class ReportController extends Controller {
                         "_reference"
                     ))->findAll($criteria);
 
-                    if (!$checks) {
+                    $criteria = new CDbCriteria();
+                    $criteria->addCondition("target_id = :target_id");
+                    $criteria->addCondition("rating != :hidden");
+                    $criteria->addCondition("check_control_id = :check_control_id");
+                    $criteria->params = array(
+                        'target_id' => $target->id,
+                        'hidden' => TargetCustomCheck::RATING_HIDDEN,
+                        'check_control_id' => $control->id
+                    );
+
+                    $customChecks = TargetCustomCheck::model()->with(array(
+                            'vuln' => array(
+                                'with' => 'user'
+                            )
+                        )
+                    )->findAll($criteria);
+
+                    if (!$checks && !$customChecks) {
                         continue;
                     }
 
@@ -5112,79 +5129,151 @@ class ReportController extends Controller {
                         $ctr = 0;
 
                         foreach ($check->targetChecks as $tc) {
-                            if (!in_array($tc->rating, $model->ratings)) {
+                            $row = $this->_getVulnExportRow(array(
+                                'type'      => 'check',
+                                'check'     => $tc,
+                                'model'     => $model,
+                                'target'    => $target,
+                                'ctr'       => $ctr,
+                                'ratings'   => $ratings,
+                                'statuses'  => $statuses,
+                            ));
+
+                            if (!$row) {
                                 continue;
-                            }
-
-                            $row = array();
-
-                            if (in_array(TargetCheck::COLUMN_TARGET, $model->columns)) {
-                                $row[TargetCheck::COLUMN_TARGET] = $target->host;
-                            }
-
-                            if (in_array(TargetCheck::COLUMN_NAME, $model->columns)) {
-                                $row[TargetCheck::COLUMN_NAME] = $check->localizedName . ($ctr > 0 ? " " . ($ctr + 1) : "");
-                            }
-
-                            if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns)) {
-                                $row[TargetCheck::COLUMN_REFERENCE] = $check->_reference->name .
-                                    ($check->reference_code ? '-' . $check->reference_code : '');
-                            }
-
-                            if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
-                                $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($check->localizedBackgroundInfo);
-                            }
-
-                            if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns)) {
-                                $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareVulnExportText($check->localizedQuestion);
-                            }
-
-                            if (in_array(TargetCheck::COLUMN_RESULT, $model->columns)) {
-                                $row[TargetCheck::COLUMN_RESULT] = $tc->result;
-                            }
-
-                            if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns)) {
-                                $solutions = array();
-
-                                foreach ($tc->solutions as $solution) {
-                                    $solutions[] = $this->_prepareVulnExportText($solution->solution->localizedSolution);
-                                }
-
-                                if ($tc->solution) {
-                                    $solutions[] = $this->_prepareVulnExportText($tc->solution);
-                                }
-
-                                $row[TargetCheck::COLUMN_SOLUTION] = implode("\n", $solutions);
-                            }
-
-                            if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $model->columns)) {
-                                $user = $tc->vuln && $tc->vuln->user ? $tc->vuln->user : null;
-
-                                if ($user) {
-                                    $row[TargetCheck::COLUMN_ASSIGNED_USER] = $user->name ? $user->name : $user->email;
-                                } else {
-                                    $row[TargetCheck::COLUMN_ASSIGNED_USER] = '';
-                                }
-                            }
-
-                            if (in_array(TargetCheck::COLUMN_RATING, $model->columns)) {
-                                $row[TargetCheck::COLUMN_RATING] = $ratings[$tc->rating];
-                            }
-
-                            if (in_array(TargetCheck::COLUMN_STATUS, $model->columns)) {
-                                $vuln = $tc->vuln ? $tc->vuln : null;
-                                $row[TargetCheck::COLUMN_STATUS] = $statuses[$vuln ? $vuln->status : TargetCheckVuln::STATUS_OPEN];
                             }
 
                             $data[] = $row;
                             $ctr++;
                         }
                     }
+
+                    foreach ($customChecks as $cc) {
+                        $row = $this->_getVulnExportRow(array(
+                            'type'      => 'custom',
+                            'check'     => $cc,
+                            'model'     => $model,
+                            'target'    => $target,
+                            'ratings'   => $ratings,
+                            'statuses'  => $statuses,
+                        ));
+
+                        if (!$row) {
+                            continue;
+                        }
+
+                        $data[] = $row;
+                    }
                 }
             }
         }
 
         return $data;
+    }
+
+    /**
+     * Returns vuln export row data
+     * @param $data
+     * @return null
+     */
+    private function _getVulnExportRow($data) {
+        $type = $data['type'];
+        $check = $data['check'];
+        $model = $data['model'];
+        $target = $data['target'];
+        $ratings = $data['ratings'];
+        $statuses = $data['statuses'];
+        $ctr = null;
+
+        if ($type == TargetCheck::TYPE) {
+            $ctr = $data['ctr'];
+        }
+
+        if (!in_array($check->rating, $model->ratings)) {
+            return null;
+        }
+
+        $row = array();
+
+        if (in_array(TargetCheck::COLUMN_TARGET, $model->columns)) {
+            $row[TargetCheck::COLUMN_TARGET] = $target->host;
+        }
+
+        if (in_array(TargetCheck::COLUMN_NAME, $model->columns)) {
+            if ($type == TargetCheck::TYPE) {
+                $row[TargetCheck::COLUMN_NAME] = $check->check->localizedName . ($ctr > 0 ? " " . ($ctr + 1) : "");
+            } elseif ($type == TargetCustomCheck::TYPE) {
+                $row[TargetCheck::COLUMN_NAME] = $check->name ? $check->name : 'CUSTOM-CHECK-' . $check->reference;
+            }
+        }
+
+        if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns)) {
+            if ($type == TargetCheck::TYPE) {
+                $row[TargetCheck::COLUMN_REFERENCE] = $check->check->_reference->name .
+                    ($check->check->reference_code ? '-' . $check->check->reference_code : '');
+            } elseif ($type == TargetCustomCheck::TYPE) {
+                $row[TargetCheck::COLUMN_REFERENCE] = "CUSTOM-CHECK-" . $check->reference;
+            }
+        }
+
+        if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
+            if ($type == TargetCheck::TYPE) {
+                $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($check->check->localizedBackgroundInfo);
+            } elseif ($type == TargetCustomCheck::TYPE) {
+                $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $check->background_info;
+            }
+        }
+
+        if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns)) {
+            if ($type == TargetCheck::TYPE) {
+                $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareVulnExportText($check->check->localizedQuestion);
+            } elseif ($type == TargetCustomCheck::TYPE) {
+                $row[TargetCheck::COLUMN_QUESTION] = $check->question;
+            }
+        }
+
+        if (in_array(TargetCheck::COLUMN_RESULT, $model->columns)) {
+            $row[TargetCheck::COLUMN_RESULT] = $check->result;
+        }
+
+        if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns)) {
+            if ($type == TargetCheck::TYPE) {
+                $solutions = array();
+
+                foreach ($check->solutions as $solution) {
+                    $solutions[] = $this->_prepareVulnExportText($solution->solution->localizedSolution);
+                }
+
+                if ($check->solution) {
+                    $solutions[] = $this->_prepareVulnExportText($check->solution);
+                }
+
+                $row[TargetCheck::COLUMN_SOLUTION] = implode("\n", $solutions);
+            } elseif ($type == TargetCustomCheck::TYPE) {
+                $row[TargetCheck::COLUMN_SOLUTION] = $check->solution;
+            }
+        }
+
+        if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $model->columns)) {
+            $user = $check->vuln && $check->vuln->user ? $check->vuln->user : null;
+
+            if ($user) {
+                $row[TargetCheck::COLUMN_ASSIGNED_USER] = $user->name ? $user->name : $user->email;
+            } else {
+                $row[TargetCheck::COLUMN_ASSIGNED_USER] = '';
+            }
+        }
+
+        if (in_array(TargetCheck::COLUMN_RATING, $model->columns)) {
+            $row[TargetCheck::COLUMN_RATING] = $ratings[$check->rating];
+        }
+
+        if (in_array(TargetCheck::COLUMN_STATUS, $model->columns)) {
+            $vuln = $check->vuln ? $check->vuln : null;
+            $row[TargetCheck::COLUMN_STATUS] = $statuses[$vuln ? $vuln->status : TargetCheckVuln::STATUS_OPEN];
+        }
+
+        return $row;
     }
 
     /**

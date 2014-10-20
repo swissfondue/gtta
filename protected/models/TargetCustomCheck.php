@@ -25,6 +25,11 @@
  */
 class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
     /**
+     * Target's check type
+     */
+    const TYPE = 'custom';
+
+    /**
      * Result ratings.
      */
     const RATING_NONE = 0;
@@ -109,6 +114,7 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
             "target" => array(self::BELONGS_TO, "Target", "target_id"),
             "control" => array(self::BELONGS_TO, "CheckControl", "check_control_id"),
             "user" => array(self::BELONGS_TO, "User", "user_id"),
+            "vuln" => array(self::HAS_ONE, "TargetCustomCheckVuln", "target_custom_check_id"),
             "attachments" => array(self::HAS_MANY, "TargetCustomCheckAttachment", "target_custom_check_id"),
 		);
 	}

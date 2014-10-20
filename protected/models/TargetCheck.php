@@ -34,6 +34,11 @@
  */
 class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     /**
+     * Target check type
+     */
+    const TYPE = 'check';
+
+    /**
      * Check statuses.
      */
     const STATUS_OPEN = 0;

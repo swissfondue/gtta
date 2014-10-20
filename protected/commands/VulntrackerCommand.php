@@ -67,8 +67,10 @@ class VulntrackerCommand extends ConsoleCommand {
                     break;
                 }
 
-                foreach ($target->targetChecks as $tc) {
-                    if ($tc->vuln && $tc->vuln->overdued) {
+                $totalChecks = array_merge($target->targetChecks, $target->targetCustomChecks);
+
+                foreach ($totalChecks as $ttc) {
+                    if ($ttc->vuln && $ttc->vuln->overdued) {
                         $overdued++;
                         break;
                     }
@@ -80,7 +82,7 @@ class VulntrackerCommand extends ConsoleCommand {
                     $overdued++;
                     break;
                 }
-            }
+            };
 
             if ($overdued > 0) {
                 foreach ($admins as $user) {

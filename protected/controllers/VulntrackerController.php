@@ -94,7 +94,7 @@ class VulntrackerController extends Controller {
         $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
         $criteria->together = true;
 
-        $checks = TargetCheck::model()->with(array(
+        $targetCheckRelations = array(
             'check' => array(
                 'with' => array(
                     'l10n' => array(
@@ -108,11 +108,43 @@ class VulntrackerController extends Controller {
                 'with' => 'user'
             ),
             'target',
+        );
+
+        $targetChecks = TargetCheck::model()->with($targetCheckRelations)->findAll($criteria);
+        $tCheckCount = count($targetChecks);
+        $totalCheckCount = (int) TargetCheck::model()->count($criteria);
+
+        $criteria = new CDbCriteria();
+        $criteria->addInCondition('t.target_id', $targetIds);
+        $criteria->addInCondition('t.rating', $this->_allowedRiskValues);
+        $criteria->order = 'target.host ASC';
+        $criteria->together = true;
+
+        $totalCheckCount += (int) TargetCustomCheck::model()->count($criteria);
+
+        if ($tCheckCount == Yii::app()->params['entriesPerPage']) {
+            return array($targetChecks, array(), $totalCheckCount);
+        } elseif ($tCheckCount < Yii::app()->params['entriesPerPage'] && $tCheckCount > 0) {
+            $limit = Yii::app()->params['entriesPerPage'] - $tCheckCount;
+            $offset = 0;
+        } elseif ($tCheckCount == 0) {
+            $limit = Yii::app()->params['entriesPerPage'];
+            $offset = ($page - 1) * Yii::app()->params['entriesPerPage'] - TargetCheck::model()->count($criteria);
+        } else {
+            throw new CHttpException(500, Yii::t("app", "Invalid target checks count!"));
+        }
+
+        $criteria->limit = $limit;
+        $criteria->offset = $offset;
+
+        $customChecks = TargetCustomCheck::model()->with(array(
+            'vuln' => array(
+                'with' => 'user'
+            ),
+            'target',
         ))->findAll($criteria);
 
-        $checkCount = TargetCheck::model()->count($criteria);
-
-        return array($checks, $checkCount);
+        return array($targetChecks, $customChecks, $totalCheckCount);
     }
 
     /**
@@ -185,7 +217,7 @@ class VulntrackerController extends Controller {
         if ($project->guided_test) {
             list($checks, $checkCount) = $this->_gtProjectVulns($project, $language, $page);
         } else {
-            list($checks, $checkCount) = $this->_projectVulns($project, $language, $page);
+            list($checks, $customChecks, $checkCount) = $this->_projectVulns($project, $language, $page);
         }
 
         $paginator = new Paginator($checkCount, $page);
@@ -199,6 +231,8 @@ class VulntrackerController extends Controller {
 		$this->render('vulns', array(
             'project' => $project,
             'checks' => $checks,
+            'customChecks' => $customChecks,
+            'checkCount' => $checkCount,
             'p' => $paginator,
             'ratings' => TargetCheck::getRatingNames(),
             'statuses' => array(
@@ -215,35 +249,52 @@ class VulntrackerController extends Controller {
      * @param $target
      * @param $check
      */
-    private function _projectEdit($project, $language, $target, $check) {
+    private function _projectEdit($project, $language, $target, $check, $customCheck = false) {
         $newRecord = false;
 
-        $check = TargetCheck::model()->with(array(
-            "check" => array(
-                "with" => array(
-                    "l10n" => array(
-                        "joinType" => "LEFT JOIN",
-                        "on" => "l10n.language_id = :language_id",
-                        "params"   => array( "language_id" => $language )
+        if ($customCheck) {
+            $check = TargetCustomCheck::model()->findByPk($check);
+        } else {
+            $check = TargetCheck::model()->with(array(
+                "check" => array(
+                    "with" => array(
+                        "l10n" => array(
+                            "joinType" => "LEFT JOIN",
+                            "on" => "l10n.language_id = :language_id",
+                            "params"   => array( "language_id" => $language )
+                        ),
                     ),
-                ),
-            )
-        ))->findByAttributes(array(
-            "check_id"  => $check,
-            "target_id" => $target
-        ));
+                )
+            ))->findByAttributes(array(
+                    "check_id"  => $check,
+                    "target_id" => $target
+                ));
+        }
+
 
         if (!$check || !in_array($check->rating, $this->_allowedRiskValues)) {
             throw new CHttpException(404, Yii::t("app", "Check not found."));
         }
 
-        $vuln = TargetCheckVuln::model()->findByAttributes(array(
-            "target_check_id" => $check->id,
-        ));
+        if ($customCheck) {
+            $vuln = TargetCustomCheckVuln::model()->findByAttributes(array(
+                "target_custom_check_id" => $check->id,
+            ));
+        } else {
+            $vuln = TargetCheckVuln::model()->findByAttributes(array(
+                "target_check_id" => $check->id,
+            ));
+        }
 
         if (!$vuln) {
-            $vuln = new TargetCheckVuln();
-            $vuln->target_check_id = $check->id;
+            if ($customCheck) {
+                $vuln = new TargetCustomCheckVuln();
+                $vuln->target_custom_check_id = $check->id;
+            } else {
+                $vuln = new TargetCheckVuln();
+                $vuln->target_check_id = $check->id;
+            }
+
             $newRecord = true;
         }
 
@@ -281,6 +332,10 @@ class VulntrackerController extends Controller {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
             }
 		}
+
+        if ($customCheck) {
+            return array($check->name, $model);
+        }
 
         return array($check->check->localizedName, $model);
     }
@@ -371,7 +426,7 @@ class VulntrackerController extends Controller {
     /**
      * Vulnerability edit page.
      */
-	public function actionEdit($id, $target, $check) {
+	public function actionEdit($id, $target, $check, $type) {
         $id = (int) $id;
         $target = (int) $target;
         $check = (int) $check;
@@ -397,7 +452,7 @@ class VulntrackerController extends Controller {
         if ($project->guided_test) {
             list($checkName, $model) = $this->_gtProjectEdit($project, $language, $check);
         } else {
-            list($checkName, $model) = $this->_projectEdit($project, $language, $target, $check);
+            list($checkName, $model) = $this->_projectEdit($project, $language, $target, $check, $type == TargetCustomCheck::TYPE);
         }
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerability Tracker'), $this->createUrl('vulntracker/index'));
