@@ -47,6 +47,9 @@ class BackupController extends Controller {
         'target_check_inputs',
         'target_check_solutions',
         'target_check_vulns',
+        'target_custom_checks',
+        'target_custom_check_attachments',
+        'target_custom_check_vulns',
         'risk_templates',
         'risk_templates_l10n',
         'risk_categories',
@@ -126,7 +129,10 @@ class BackupController extends Controller {
      * Backup file attachments.
      */
     private function _backupAttachments($attachmentsPath, $zip) {
-        $attachments = TargetCheckAttachment::model()->findAll();
+        $attachments = array_merge(
+            TargetCheckAttachment::model()->findAll(),
+            TargetCustomCheckAttachment::model()->findAll()
+        );
 
         foreach ($attachments as $attachment) {
             if (file_exists(Yii::app()->params['attachments']['path'] . '/' . $attachment->path)) {
