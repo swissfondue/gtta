@@ -182,7 +182,6 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         return in_array($this->status, array(self::STATUS_IN_PROGRESS, self::STATUS_STOP));
     }
 
-
     /**
      * Get variable value
      * @param $name
