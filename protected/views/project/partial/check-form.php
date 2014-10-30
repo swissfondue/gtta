@@ -265,6 +265,7 @@
                 <?php echo Yii::t("app", "Result"); ?>
             </th>
             <td>
+                <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[resultTitle]" class="max-width" style="display: none" id="TargetCheckEditForm_<?php echo $check->id; ?>_resultTitle" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>>
                 <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo $check->result; ?></textarea>
 
                 <?php
@@ -274,6 +275,13 @@
                         $showAuto = true;
                     }
                 ?>
+
+                <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
+                    <label class="checkbox">
+                        <input name="TargetCheckEditForm_<?php echo $check->id; ?>[saveResult]" type="checkbox" value="1" <?php if ($check->isRunning) echo "disabled"; ?> onchange="user.check.toggleField('TargetCheckEditForm_<?php echo $check->id; ?>_resultTitle')">
+                        <?php echo Yii::t("app", "Save As Generic"); ?>
+                    </label>
+                <?php endif; ?>
 
                 <div class="automated-info-block <?php if (!$showAuto) echo "hide"; ?>">
                     <?php
@@ -332,8 +340,8 @@
                 </td>
             </tr>
         <?php endif; ?>
-        <?php if ($check->check->results && User::checkRole(User::ROLE_USER)): ?>
-            <tr>
+        <?php if (User::checkRole(User::ROLE_USER)): ?>
+            <tr class="<?php echo $check->check->results ? '' : 'hide'; ?>" ">
                 <th>
                     <?php echo Yii::t("app", "Insert Result"); ?>
                 </th>
