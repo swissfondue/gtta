@@ -1,3 +1,6 @@
+<script src="/ckeditor/ckeditor.js"></script>
+<script src="/ckeditor/adapters/jquery.js"></script>
+
 <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 
 <hr>
@@ -33,12 +36,21 @@
                     <div class="control-group <?php if ($model->getError('result')) echo 'error'; ?>">
                         <label class="control-label" for="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result"><?php echo Yii::t('app', 'Result'); ?></label>
                         <div class="controls">
-                            <textarea class="wysiwyg" id="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result" name="CheckResultEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][result]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['result']) : ''; ?></textarea>
+                            <textarea class="wysiwyg <?php if (isset($model->localizedItems[$language->id])) echo (Utils::_isHtml($model->localizedItems[$language->id]['result']) ? 'html_content' : ''); ?>" id="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result" name="CheckResultEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][result]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['result']) : ''; ?></textarea>
                             <?php if ($model->getError('result')): ?>
                                 <p class="help-block"><?php echo $model->getError('result'); ?></p>
                             <?php endif; ?>
                         </div>
                     </div>
+
+                    <?php if (User::checkRole(User::ROLE_USER)): ?>
+                        <span class="help-block controls">
+                        <a class="btn btn-default" href="#editor" onclick="user.check.toggleEditor('CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result');">
+                            <span class="glyphicon glyphicon-edit"></span>
+                            <?php echo Yii::t("app", "WYSIWYG"); ?>
+                        </a>
+                    </span>
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -67,5 +79,23 @@
     $('#languages-tab a').click(function (e) {
         e.preventDefault();
         $(this).tab('show');
-    })
+    });
+
+    /**
+     * Enabling ckeditor for wysiwyg elements, which contain HTML
+     */
+    $.each($('.wysiwyg.html_content'), function (key, value) {
+        user.check.toggleEditor($(value).attr('id'));
+    });
+
+    /**
+     * Binding change event for wysiwyg elements on HTML containing
+     */
+    $('.wysiwyg').bind('input propertychange', function () {
+        if ($(this).val().isHTML()) {
+            if (!user.check.getEditor($(this).attr('id'))) {
+                user.check.enableEditor($(this).attr('id'));
+            }
+        }
+    });
 </script>

@@ -11,7 +11,7 @@ function User()
 
         this.runningChecks = [];
         this.updateIteration = 0;
-        this.result_editors = [];
+        this.ckeditors = [];
 
         /**
          * Update status of running checks.
@@ -609,8 +609,8 @@ function User()
             override = $('input[name="TargetCheckEditForm_' + id + '[overrideTarget]"]', row).val();
             protocol = $('input[name="TargetCheckEditForm_' + id + '[protocol]"]', row).val();
             port     = $('input[name="TargetCheckEditForm_' + id + '[port]"]', row).val();
-            result = _check.result_editors["TargetCheckEditForm_" + id + "_result"] ?
-                _check.result_editors["TargetCheckEditForm_" + id + "_result"].getData() :
+            result = _check.ckeditors["TargetCheckEditForm_" + id + "_result"] ?
+                _check.ckeditors["TargetCheckEditForm_" + id + "_result"].getData() :
                 $('textarea[name="TargetCheckEditForm_' + id + '[result]"]').val();
 
             if ($('textarea[name="TargetCheckEditForm_' + id + '[poc]"]', row)) {
@@ -851,8 +851,8 @@ function User()
                 links = $('textarea[name="TargetCustomCheckEditForm_' + id + '[links]"]', row).val();
             }
 
-            result = _check.result_editors["TargetCustomCheckEditForm_" + id + "_result"] ?
-                _check.result_editors["TargetCustomCheckEditForm_" + id + "_result"].getData() :
+            result = _check.ckeditors["TargetCustomCheckEditForm_" + id + "_result"] ?
+                _check.ckeditors["TargetCustomCheckEditForm_" + id + "_result"].getData() :
                 $('textarea[name="TargetCustomCheckEditForm_' + id + '[result]"]').val();
 
             if (name == undefined) {
@@ -983,8 +983,8 @@ function User()
                 links = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[links]"]', row).val();
             }
 
-            result = _check.result_editors["TargetCustomCheckTemplateEditForm_" + id + "_result"] ?
-                _check.result_editors["TargetCustomCheckTemplateEditForm_" + id + "_result"].getData() :
+            result = _check.ckeditors["TargetCustomCheckTemplateEditForm_" + id + "_result"] ?
+                _check.ckeditors["TargetCustomCheckTemplateEditForm_" + id + "_result"].getData() :
                 $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[result]"]').val();
 
             if (name == undefined) {
@@ -1671,19 +1671,44 @@ function User()
         };
 
         /**
+         * Returns editor by id
+         * @param id
+         * @returns {boolean}
+         */
+        this.getEditor = function (id) {
+            return _check.ckeditors[id];
+        };
+
+        /**
+         * Destroy editor for element
+         * @param id
+         */
+        this.destroyEditor = function (id) {
+            _check.ckeditors[id].destroy();
+            delete _check.ckeditors[id];
+        };
+
+        /**
+         * Enable editor for element
+         * @param id
+         */
+        this.enableEditor = function (id) {
+            _check.ckeditors[id] = CKEDITOR.replace(id, {
+                fullPage: false,
+                allowedContent: false,
+                height: "300px"
+            });
+        };
+
+        /**
          * Toggle WYSIWYG editor
          * @param id
          */
         this.toggleEditor = function (id) {
-            if (_check.result_editors[id]) {
-                _check.result_editors[id].destroy();
-                delete _check.result_editors[id];
+            if (_check.getEditor(id)) {
+                _check.destroyEditor(id);
             } else {
-                _check.result_editors[id] = CKEDITOR.replace(id, {
-                    fullPage: false,
-                    allowedContent: false,
-                    height: "300px"
-                });
+                _check.enableEditor(id);
             }
         };
     };
