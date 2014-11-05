@@ -359,8 +359,14 @@
                                                             <?php if ($custom->attachments): ?>
                                                                 <?php foreach ($custom->attachments as $attachment): ?>
                                                                     <tr data-path="<?php echo $attachment->path; ?>" data-control-url="<?php echo $this->createUrl("project/controlcustomattachment"); ?>">
-                                                                        <td class="name">
-                                                                            <a href="<?php echo $this->createUrl("project/customattachment", array("path" => $attachment->path)); ?>"><?php echo CHtml::encode($attachment->name); ?></a>
+                                                                        <td class="info">
+                                                                            <span contenteditable="true" class="single-line title" onblur="$(this).siblings('input').val($(this).text());">
+                                                                                <?php echo CHtml::encode($attachment->title); ?>
+                                                                            </span>
+                                                                            <input type="hidden" name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[attachmentTitles][]" data-path="<?php echo $attachment->path; ?>" value="<?php echo CHtml::encode($attachment->title); ?>">
+                                                                            <div class="name content">
+                                                                                <a href="<?php echo $this->createUrl("project/customattachment", array("path" => $attachment->path)); ?>"><?php echo CHtml::encode($attachment->name); ?></a>
+                                                                            </div>
                                                                         </td>
                                                                         <td class="actions">
                                                                             <a href="#del" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="user.check.delCustomAttachment('<?php echo $attachment->path; ?>');"><i class="icon icon-remove"></i></a>

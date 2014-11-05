@@ -565,8 +565,8 @@ function User()
          * Get check data in array.
          */
         this.getData = function (id) {
-            var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, solutions, rating, data,
-                solution, solutionTitle, saveSolution, poc, links;
+            var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, solutions,
+                attachments, rating, data, solution, solutionTitle, saveSolution, poc, links;
 
             row = $('div.check-form[data-type=check][data-id="' + id + '"]');
 
@@ -638,6 +638,15 @@ function User()
                 }
             }
 
+            attachments = $('input[name^="TargetCheckEditForm_' + id + '[attachmentTitles]"]', row).map(
+                function () {
+                    return {
+                        name : $(this).attr('name'),
+                        value: JSON.stringify({ path : $(this).data('path'), 'title' : $(this).val() })
+                    }
+                }
+            ).get();
+
             rating = $('input[name="TargetCheckEditForm_' + id + '[rating]"]:checked', row).val();
 
             if (override == undefined)
@@ -694,6 +703,10 @@ function User()
 
             for (i = 0; i < solutions.length; i++) {
                 data.push(solutions[i]);
+            }
+
+            for (i = 0; i < attachments.length; i++) {
+                data.push(attachments[i]);
             }
 
             return data;
@@ -831,7 +844,7 @@ function User()
          * @param id
          */
         this.getCustomData = function (id) {
-            var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck, poc, links;
+            var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck, poc, links, attachments;
 
             row = $('div.check-form[data-type=custom-check][data-id=' + id + ']');
 
@@ -854,6 +867,15 @@ function User()
             result = _check.result_editors["TargetCustomCheckEditForm_" + id + "_result"] ?
                 _check.result_editors["TargetCustomCheckEditForm_" + id + "_result"].getData() :
                 $('textarea[name="TargetCustomCheckEditForm_' + id + '[result]"]').val();
+
+            attachments = $('input[name^="TargetCustomCheckEditForm_' + id + '[attachmentTitles]"]', row).map(
+                function () {
+                    return {
+                        name : 'TargetCustomCheckEditForm[attachmentTitles][]',
+                        value: JSON.stringify({ path : $(this).data('path'), 'title' : $(this).val() })
+                    }
+                }
+            ).get();
 
             if (name == undefined) {
                 name = "";
@@ -899,6 +921,10 @@ function User()
             data.push({name: "TargetCustomCheckEditForm[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
             data.push({name: "TargetCustomCheckEditForm[poc]", value: poc});
             data.push({name: "TargetCustomCheckEditForm[links]", value: links});
+
+            for (i = 0; i < attachments.length; i++) {
+                data.push(attachments[i]);
+            }
 
             return data;
         };
@@ -1207,10 +1233,49 @@ function User()
 
                         data = json.data;
 
-                        var tr = '<tr data-path="' + data.path + '" data-control-url="' + data.controlUrl + '">' +
-                                 '<td class="name"><a href="' + data.url + '">' + data.name + '</a></td>' +
-                                 '<td class="actions"><a href="#del" title="' + system.translate("Delete") +
-                                 '" onclick="user.check.delAttachment(\'' + data.path + '\');"><i class="icon icon-remove"></i></a></td></tr>';
+                        var tr = $('<tr>')
+                            .attr('data-path', data.path)
+                            .attr('data-control-url', data.controlUrl)
+                            .append(
+                                $('<td>')
+                                    .addClass('info')
+                                    .append(
+                                        $('<span>')
+                                            .attr('contenteditable', 'true')
+                                            .addClass('single-line')
+                                            .addClass('title')
+                                            .blur(function () {
+                                                $(this).siblings('input').val($(this).text());
+                                            })
+                                            .text(data.title),
+                                        $('<input>')
+                                            .attr('type', 'hidden')
+                                            .attr('name', 'TargetCheckEditForm_' + data.targetCheck + '[attachmentTitles][]')
+                                            .attr('data-path', data.path)
+                                            .val(data.title),
+                                        $('<div>')
+                                            .addClass('name')
+                                            .addClass('content')
+                                            .append(
+                                                $('<a>')
+                                                    .attr('href', data.url)
+                                                    .text(data.name)
+                                            )
+                                    ),
+                                $('<td>')
+                                    .addClass('actions')
+                                    .append(
+                                        $('<a>')
+                                            .attr('href', '#del')
+                                            .attr('title', system.translate("Delete"))
+                                            .attr('onclick', 'user.check.delAttachment(\'' + data.path + '\')')
+                                            .append(
+                                                $('<i>')
+                                                    .addClass('icon')
+                                                    .addClass('icon-remove')
+                                            )
+                                    )
+                            );
 
                         if ($('div.check-form[data-type=check][data-id="' + id + '"] .attachment-list').length == 0) {
                             $('div.check-form[data-type=check][data-id="' + id + '"] .upload-message')
@@ -1328,10 +1393,49 @@ function User()
 
                         data = json.data;
 
-                        var tr = '<tr data-path="' + data.path + '" data-control-url="' + data.controlUrl + '">' +
-                                 '<td class="name"><a href="' + data.url + '">' + data.name + '</a></td>' +
-                                 '<td class="actions"><a href="#del" title="' + system.translate("Delete") +
-                                 '" onclick="user.check.delCustomAttachment(\'' + data.path + '\');"><i class="icon icon-remove"></i></a></td></tr>';
+                        var tr = $('<tr>')
+                            .attr('data-path', data.path)
+                            .attr('data-control-url', data.controlUrl)
+                            .append(
+                                $('<td>')
+                                    .addClass('info')
+                                    .append(
+                                        $('<span>')
+                                            .attr('contenteditable', 'true')
+                                            .addClass('single-line')
+                                            .addClass('title')
+                                            .blur(function () {
+                                                $(this).siblings('input').val($(this).text());
+                                            })
+                                            .text(data.title),
+                                        $('<input>')
+                                            .attr('type', 'hidden')
+                                            .attr('name', 'TargetCustomCheckEditForm_' + data.customCheck + '[attachmentTitles][]')
+                                            .attr('data-path', data.path)
+                                            .val(data.title),
+                                        $('<div>')
+                                            .addClass('name')
+                                            .addClass('content')
+                                            .append(
+                                                $('<a>')
+                                                    .attr('href', data.url)
+                                                    .text(data.name)
+                                            )
+                                    ),
+                                $('<td>')
+                                    .addClass('actions')
+                                    .append(
+                                        $('<a>')
+                                            .attr('href', '#del')
+                                            .attr('title', system.translate("Delete"))
+                                            .attr('onclick', 'user.check.delCustomAttachment(\'' + data.path + '\')')
+                                            .append(
+                                                $('<i>')
+                                                    .addClass('icon')
+                                                    .addClass('icon-remove')
+                                            )
+                                    )
+                            );
 
                         if ($('div.check-form[data-type=custom-check][data-id=' + id + '] .attachment-list').length == 0) {
                             $('div.check-form[data-type=custom-check][data-id=' + id + '] .upload-message')
@@ -2062,8 +2166,8 @@ function User()
          * Get check data in array.
          */
         this.getData = function () {
-            var i, row, textareas, texts, checkboxes, radios, target, protocol, port, result, solutions, rating, data,
-                solution, solutionTitle, saveSolution;
+            var i, row, textareas, texts, checkboxes, radios, target, protocol, port, result, solutions, attachments,
+                rating, data, solution, solutionTitle, saveSolution;
 
             row = $('div.check-form');
 
@@ -2125,6 +2229,15 @@ function User()
                 }
             }
 
+            attachments = $('input[name^="ProjectGtCheckEditForm[attachmentTitles]"]', row).map(
+                function () {
+                    return {
+                        name : $(this).attr('name'),
+                        value: JSON.stringify({ path : $(this).data('path'), 'title' : $(this).val() })
+                    }
+                }
+            ).get();
+
             rating = $('input[name="ProjectGtCheckEditForm[rating]"]:checked', row).val();
 
             if (target == undefined) {
@@ -2180,6 +2293,10 @@ function User()
 
             for (i = 0; i < solutions.length; i++) {
                 data.push(solutions[i]);
+            }
+
+            for (i = 0; i < attachments.length; i++) {
+                data.push(attachments[i]);
             }
 
             return data;
@@ -2382,10 +2499,49 @@ function User()
 
                         data = json.data;
 
-                        var tr = '<tr data-path="' + data.path + '" data-control-url="' + data.controlUrl + '">' +
-                                 '<td class="name"><a href="' + data.url + '">' + data.name + '</a></td>' +
-                                 '<td class="actions"><a href="#del" title="' + system.translate('Delete') +
-                                 '" onclick="user.gtCheck.delAttachment(\'' + data.path + '\');"><i class="icon icon-remove"></i></a></td></tr>';
+                        var tr = $('<tr>')
+                            .attr('data-path', data.path)
+                            .attr('data-control-url', data.controlUrl)
+                            .append(
+                                $('<td>')
+                                    .addClass('info')
+                                    .append(
+                                        $('<span>')
+                                            .attr('contenteditable', 'true')
+                                            .addClass('single-line')
+                                            .addClass('title')
+                                            .blur(function () {
+                                                $(this).siblings('input').val($(this).text());
+                                            })
+                                            .text(data.title),
+                                        $('<input>')
+                                            .attr('type', 'hidden')
+                                            .attr('name', 'ProjectGtCheckEditForm[attachmentTitles][]')
+                                            .attr('data-path', data.path)
+                                            .val(data.title),
+                                        $('<div>')
+                                            .addClass('name')
+                                            .addClass('content')
+                                            .append(
+                                                $('<a>')
+                                                    .attr('href', data.url)
+                                                    .text(data.name)
+                                            )
+                                    ),
+                                $('<td>')
+                                    .addClass('actions')
+                                    .append(
+                                        $('<a>')
+                                            .attr('href', '#del')
+                                            .attr('title', system.translate("Delete"))
+                                            .attr('onclick', 'user.gtCheck.delAttachment(\'' + data.path + '\')')
+                                            .append(
+                                                $('<i>')
+                                                    .addClass('icon')
+                                                    .addClass('icon-remove')
+                                            )
+                                    )
+                            );
 
                         if ($('div.check-form .attachment-list').length == 0)
                             $('div.check-form .upload-message').after('<table class="table attachment-list"><tbody></tbody></table>');
