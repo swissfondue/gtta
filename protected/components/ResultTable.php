@@ -83,8 +83,6 @@ class ResultTable
                 }
             }
 
-            error_log(print_r($tableData, 1));
-
             $this->_tables[] = $tableData;
         }
     }
