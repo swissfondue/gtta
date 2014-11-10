@@ -1901,8 +1901,6 @@ function User()
 
                         $cells = $row.find('td').not('.actions');
 
-                        console.log('1', $cells);
-
                         $.each($cells, function(key, cell) {
                             $cell = $(cell);
 
