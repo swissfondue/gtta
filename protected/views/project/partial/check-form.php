@@ -306,7 +306,7 @@
                         if ($check->table_result) {
                             $table = new ResultTable();
                             $table->parse($check->table_result);
-                            echo $this->renderPartial("/project/target/check/tableresult", array("table" => $table));
+                            echo $this->renderPartial("/project/target/check/tableresult", array("table" => $table, "check" => $check));
                         }
                     ?>
                 </div>

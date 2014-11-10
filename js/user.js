@@ -684,6 +684,7 @@ function User()
             data.push({name: "TargetCheckEditForm_" + id + "[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
             data.push({name: "TargetCheckEditForm_" + id + "[poc]", value: poc});
             data.push({name: "TargetCheckEditForm_" + id + "[links]", value: links});
+            data.push({ name: "TargetCheckEditForm_" + id + "[tableResult]", value: _check.buildTableResult(row) });
 
             if (saveSolution) {
                 data.push({name: "TargetCheckEditForm_" + id + "[saveSolution]", value: "1"});
@@ -1790,6 +1791,136 @@ function User()
                 });
             }
         };
+
+        /**
+         * Delete table result entry
+         * @param tableId
+         * @param entryId
+         */
+        this.delTableResultEntry = function (checkId, tableId, entryId) {
+            if (confirm(system.translate("Are you sure that you want to delete this object?"))) {
+                var $row = $('div.check-form[data-type=check][data-id="' + checkId + '"]');
+                var $table = $row.find('table[data-table-id=' + tableId + ']');
+                var $row = $table.find('[data-id=' + entryId + ']');
+
+                $row.fadeOut("slow", function () {
+                    $(this).remove();
+
+                    if ($table.find("tr.data").length == 0) {
+                        $table.remove();
+                    }
+                });
+            }
+        };
+
+        /**
+         * Add new enrty to table_result
+         * @param tableId
+         */
+        this.newTableResultEntry = function (checkId, tableId) {
+            var $row = $('div.check-form[data-type=check][data-id="' + checkId + '"]');
+            var $table = $row.find('table[data-table-id=' + tableId + ']');
+            var $inputs = $table.find('.new-entry input');
+
+            if ($inputs.filter(function () {
+                    return $.trim($(this).val()).length > 0
+                }).length == 0) {
+                alert(system.translate("At least one field must be filled!"));
+                return;
+            }
+
+            var newEntryId = parseInt($table.find('tr.data').last().data('id')) + 1;
+            var $newDataEntry = $('<tr>')
+                .addClass('data')
+                .attr('data-id', newEntryId);
+
+            $.each($inputs, function (key, field) {
+                $newDataEntry.append(
+                    $('<td>')
+                        .text($(field).val())
+                );
+                $(field).val('');
+            });
+
+            $newDataEntry.append(
+                $('<td>')
+                    .addClass('actions')
+                    .append(
+                        $('<a>')
+                            .attr('href', '#del')
+                            .attr('title', system.translate('Delete'))
+                            .attr('onclick', "user.check.delTableResultEntry('" + checkId + "', '" + tableId + "', '" + newEntryId + "');")
+                            .append(
+                                $('<i>')
+                                    .addClass('icon')
+                                    .addClass('icon-remove')
+                            )
+                    )
+            );
+
+            $table.find('tr.data').last().after($newDataEntry);
+        };
+
+        /**
+         * Build table_result string for check
+         * @param checkForm
+         */
+        this.buildTableResult = function (checkForm) {
+            var $tables, $titles, $title, $rows, $row, $cells, $cell, tableNode, columnsNode, columnNode, rowNode, cellNode, tableResultNode;
+
+            tableResultNode = $('<table-result>');
+
+            $tables = $(checkForm).find('table.table-result');
+
+            if ($tables.length) {
+                $.each($tables, function(key, table) {
+                    var $table = $(table);
+
+                    $titles = $table.find('.titles').find('th');
+
+                    tableNode = $('<gtta-table>');
+                    columnsNode = $('<columns>');
+
+                    $.each($titles, function(key, title) {
+                        $title = $(title);
+
+                        columnNode = $('<column>');
+                        columnNode.attr('name', $title.text().trim());
+                        columnNode.attr('width', $title.data('width'));
+
+                        columnsNode.append(columnNode);
+                    });
+
+                    tableNode.append(columnsNode);
+
+                    $rows = $table.find('tr.data');
+
+                    $.each($rows, function(key, row) {
+                        $row = $(row);
+                        rowNode = $('<row>');
+
+                        $cells = $row.find('td').not('.actions');
+
+                        console.log('1', $cells);
+
+                        $.each($cells, function(key, cell) {
+                            $cell = $(cell);
+
+                            cellNode = $('<cell>');
+                            cellNode.text($cell.text().trim());
+
+                            rowNode.append(cellNode);
+                        });
+
+                        tableNode.append(rowNode);
+                    });
+
+                    tableResultNode.append(tableNode);
+                });
+            }
+
+            return tableResultNode.html();
+        };
     };
 
     /**
@@ -2270,6 +2401,7 @@ function User()
 
             data.push({name: "ProjectGtCheckEditForm[solution]", value: solution ? solution : ""});
             data.push({name: "ProjectGtCheckEditForm[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
+            data.push({name: "ProjectGtCheckEditForm[tableResult]", value: _gtCheck.buildTableResult(row)});
 
             if (saveSolution) {
                 data.push({name: "ProjectGtCheckEditForm[saveSolution]", value: "1"});
@@ -2892,6 +3024,81 @@ function User()
          */
         this.prev = function () {
             _gtCheck._control('gt-prev');
+        };
+
+        /**
+         * Delete table result entry
+         * @param tableId
+         * @param entryId
+         */
+        this.delTableResultEntry = function (tableId, entryId) {
+            if (confirm(system.translate("Are you sure that you want to delete this object?"))) {
+                var $table = $('table[data-table-id=' + tableId + ']');
+                var $row = $table.find('[data-id=' + entryId + ']');
+
+                $row.fadeOut("slow", function () {
+                    $(this).remove();
+
+                    if ($table.find("tr.data").length == 0) {
+                        $table.remove();
+                    }
+                });
+            }
+        };
+
+        /**
+         * Add new enrty to table_result
+         * @param tableId
+         */
+        this.newTableResultEntry = function (tableId) {
+            var $table = $('table[data-table-id=' + tableId + ']');
+            var $inputs = $table.find('.new-entry input');
+
+            if ($inputs.filter(function () {
+                return $.trim($(this).val()).length > 0
+            }).length == 0) {
+                alert(system.translate("At least one field must be filled!"));
+                return;
+            }
+
+            var newEntryId = parseInt($table.find('tr.data').last().data('id')) + 1;
+            var $newDataEntry = $('<tr>')
+                .addClass('data')
+                .attr('data-id', newEntryId);
+
+            $.each($inputs, function (key, field) {
+                $newDataEntry.append(
+                    $('<td>')
+                        .text($(field).val())
+                );
+                $(field).val('');
+            });
+
+            $newDataEntry.append(
+                $('<td>')
+                    .addClass('actions')
+                    .append(
+                        $('<a>')
+                            .attr('href', '#del')
+                            .attr('title', system.translate('Delete'))
+                            .attr('onclick', "user.gtCheck.delTableResultEntry('" + tableId + "', '" + newEntryId + "');")
+                            .append(
+                                $('<i>')
+                                    .addClass('icon')
+                                    .addClass('icon-remove')
+                            )
+                    )
+            );
+
+            $table.find('tr.data').last().after($newDataEntry);
+        };
+
+        /**
+         * Build table_result string for check
+         * @param checkForm
+         */
+        this.buildTableResult = function (checkForm) {
+            return user.check.buildTableResult(checkForm);
         };
     };
 }

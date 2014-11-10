@@ -61,6 +61,11 @@ class ProjectGtCheckEditForm extends CFormModel {
      */
     public $attachmentTitles;
 
+    /**
+     * @var string tableResult
+     */
+    public $tableResult;
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
@@ -70,7 +75,7 @@ class ProjectGtCheckEditForm extends CFormModel {
             array("port", "numerical", "integerOnly" => true, "min" => 0, "max" => 65536),
             array("protocol, target, solutionTitle", "length", "max" => 1000),
             array("saveSolution", "boolean"),
-            array("inputs, result, solutions, solution, attachmentTitles", "safe"),
+            array("inputs, result, solutions, solution, attachmentTitles, tableResult", "safe"),
 		);
 	}
 }

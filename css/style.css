@@ -823,6 +823,10 @@ table.table-result td {
     padding:10px 0 10px 0;
 }
 
+table.table-result .new-entry input {
+    width: 80%;
+}
+
 .auditors a {
     text-decoration:none;
 }

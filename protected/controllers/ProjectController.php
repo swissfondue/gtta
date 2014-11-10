@@ -2110,6 +2110,10 @@ class ProjectController extends Controller {
                 $model->links = null;
             }
 
+            if ($model->tableResult == "") {
+                $model->tableResult = null;
+            }
+
             $targetCheck->user_id = Yii::app()->user->id;
             $targetCheck->language_id = $language->id;
             $targetCheck->override_target = $model->overrideTarget;
@@ -2120,6 +2124,7 @@ class ProjectController extends Controller {
             $targetCheck->rating = $model->rating;
             $targetCheck->poc = $model->poc;
             $targetCheck->links = $model->links;
+            $targetCheck->table_result = $model->tableResult;
             $targetCheck->save();
 
             // delete old solutions
@@ -4073,6 +4078,10 @@ class ProjectController extends Controller {
                 $model->result = null;
             }
 
+            if ($model->tableResult == '') {
+                $model->tableResult = null;
+            }
+
             $projectCheck->user_id = Yii::app()->user->id;
             $projectCheck->language_id = $language->id;
             $projectCheck->target = $model->target;
@@ -4081,6 +4090,7 @@ class ProjectController extends Controller {
             $projectCheck->result = $model->result;
             $projectCheck->status = ProjectGtCheck::STATUS_FINISHED;
             $projectCheck->rating = $model->rating;
+            $projectCheck->table_result = $model->tableResult;
             $projectCheck->save();
 
             // delete solutions
