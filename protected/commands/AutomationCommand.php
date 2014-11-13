@@ -347,7 +347,6 @@ class AutomationCommand extends ConsoleCommand {
 
         if (count($scripts)) {
             foreach ($scripts as $script) {
-                ProcessManager::backgroundExec('logger script \'#' . $script->id . ' started\'');
                 if (!$check->result) {
                     $check->result = '';
                 } else {
