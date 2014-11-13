@@ -565,7 +565,7 @@ function User()
          * Get check data in array.
          */
         this.getData = function (id) {
-            var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, solutions, rating, data,
+            var i, row, textareas, texts, checkboxes, radios, override, protocol, port, scripts, result, solutions, rating, data,
                 solution, solutionTitle, saveSolution, poc, links;
 
             row = $('div.check-form[data-type=check][data-id="' + id + '"]');
@@ -609,6 +609,16 @@ function User()
             override = $('input[name="TargetCheckEditForm_' + id + '[overrideTarget]"]', row).val();
             protocol = $('input[name="TargetCheckEditForm_' + id + '[protocol]"]', row).val();
             port     = $('input[name="TargetCheckEditForm_' + id + '[port]"]', row).val();
+
+            scripts = $('input[name^="TargetCheckEditForm_' + id + '[scriptsToStart]"]:checked', row).map(
+                function () {
+                    return {
+                        name: $(this).attr('name'),
+                        value: $(this).val()
+                    }
+                }
+            ).get();
+
             result = _check.result_editors["TargetCheckEditForm_" + id + "_result"] ?
                 _check.result_editors["TargetCheckEditForm_" + id + "_result"].getData() :
                 $('textarea[name="TargetCheckEditForm_' + id + '[result]"]').val();
@@ -694,6 +704,10 @@ function User()
 
             for (i = 0; i < solutions.length; i++) {
                 data.push(solutions[i]);
+            }
+
+            for (i = 0; i < scripts.length; i++) {
+                data.push(scripts[i]);
             }
 
             return data;

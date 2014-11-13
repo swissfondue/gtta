@@ -95,6 +95,7 @@
                 <?php if (count($check->check->scripts) > 1): ?>
                     <tr class="script-inputs">
                         <th>
+                            <input name="TargetCheckEditForm_<?php echo $check->id ?>[scriptsToStart][]" type="checkbox" value="<?php echo $script->id; ?>" <?php echo in_array($script->id, PgArrayManager::pgArrayDecode($check->scripts_to_start)) ? 'checked="checked"' : ''; ?> />
                             <?php echo CHtml::encode($script->package->name); ?>
                         </th>
                         <td>&nbsp;</td>
