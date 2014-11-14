@@ -28,6 +28,7 @@ class m141113_153020_languages_user_default_column_add extends CDbMigration {
     public function safeDown() {
         $this->dropIndex('user_default_test', 'languages');
         $this->dropColumn('languages', 'user_default');
+        $this->addColumn('system', 'language_id', 'bigint NOT NULL DEFAULT 1');
         return true;
 	}
 }
