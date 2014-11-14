@@ -18,6 +18,11 @@ class m141022_175351_drop_checks_l10n_reference_column extends CDbMigration {
      * @return bool
      */
     public function safeDown() {
+        $this->addColumn(
+            'checks_l10n',
+            'reference',
+            'character varying'
+        );
 		return true;
 	}
 }
