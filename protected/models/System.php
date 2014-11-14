@@ -124,7 +124,7 @@ class System extends ActiveRecord {
      */
     public function relations() {
         return array(
-            "language" => array(self::BELONGS_TO, "Language", "language_id"),
+            "language" => array(self::BELONGS_TO, "Language", "", "on" => "language.user_default IS TRUE"),
         );
     }
 }

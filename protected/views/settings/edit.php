@@ -113,7 +113,7 @@
             <div class="controls">
                 <select class="input-xlarge" id="SettingsEditForm_languageId" name="SettingsEditForm[languageId]">
                     <?php foreach ($languages as $language): ?>
-                        <option value="<?php echo $language->id; ?>" <?php if ($language->id == $system->language_id) echo "selected"; ?>><?php echo CHtml::encode($language->name); ?></option>
+                        <option value="<?php echo $language->id; ?>" <?php echo ($language->user_default ? "selected" : ''); ?>><?php echo CHtml::encode($language->name); ?></option>
                     <?php endforeach; ?>
                 </select>
                 <?php if ($form->getError('languageId')): ?>
