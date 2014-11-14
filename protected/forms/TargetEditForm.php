@@ -11,6 +11,11 @@ class TargetEditForm extends CFormModel
     public $host;
 
     /**
+     * @var integer port
+     */
+    public $port;
+
+    /**
      * @var string description.
      */
     public $description;
@@ -33,7 +38,7 @@ class TargetEditForm extends CFormModel
 		return array(
 			array( 'host', 'required' ),
             array( 'host, description', 'length', 'max' => 1000 ),
-            array( 'categoryIds, referenceIds', 'safe' ),
+            array( 'categoryIds, referenceIds, port', 'safe' ),
 		);
 	}
     

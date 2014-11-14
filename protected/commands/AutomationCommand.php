@@ -188,7 +188,9 @@ class AutomationCommand extends ConsoleCommand {
         $targetHost = $check->override_target ? $check->override_target : $target->host;
         $port = $check->port;
 
-        if (preg_match('/:(\d+)$/', $targetHost, $matches)) {
+        if ($target->port) {
+            $port = $target->port;
+        } elseif (preg_match('/:(\d+)$/', $targetHost, $matches)) {
             $port = $matches[1];
             $targetHost = substr($targetHost, 0, strrpos($targetHost, ":"));
         }

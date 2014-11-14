@@ -35,6 +35,20 @@
                 <?php endif; ?>
             </div>
         </div>
+
+        <div class="control-group <?php if ($model->getError('port')) echo 'error'; ?>">
+            <label class="control-label" for="TargetEditForm_port"><?php echo Yii::t('app', 'Port'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="TargetEditForm_port" name="TargetEditForm[port]" value="<?php echo CHtml::encode($model->port); ?>">
+                <?php if ($model->getError('port')): ?>
+                    <p class="help-block"><?php echo $model->getError('port'); ?></p>
+                <?php else: ?>
+                    <p class="help-block">
+                        <?php echo Yii::t("app", "For example, 443."); ?>
+                    </p>
+                <?php endif; ?>
+            </div>
+        </div>
         
         <div class="control-group <?php if ($model->getError('description')) echo 'error'; ?>">
             <label class="control-label" for="TargetEditForm_description"><?php echo Yii::t('app', 'Description'); ?></label>

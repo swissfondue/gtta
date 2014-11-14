@@ -1321,6 +1321,7 @@ class ProjectController extends Controller {
 
         if (!$newRecord) {
             $model->host = $target->host;
+            $model->port = $target->port;
             $model->description = $target->description;
 
             $categories = TargetCheckCategory::model()->findAllByAttributes(array(
@@ -1349,6 +1350,7 @@ class ProjectController extends Controller {
 			if ($model->validate()) {
                 $target->project_id = $project->id;
                 $target->host = $model->host;
+                $target->port = $model->port;
                 $target->description = $model->description;
                 $target->save();
 
