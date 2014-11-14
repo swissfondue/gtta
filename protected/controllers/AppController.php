@@ -10,7 +10,7 @@ class AppController extends Controller {
 	public function filters() {
 		return array(
             'https',
-			'checkAuth - login, error, maintenance, l10n, logo, verify',
+			'checkAuth - login, error, l10n, logo, verify',
             'postOnly + objectList',
             'ajaxOnly + objectList',
 		);
@@ -153,15 +153,6 @@ class AppController extends Controller {
                 ));
             }
 	    }
-	}
-
-    /**
-	 * Maintenance handler
-	 */
-	public function actionMaintenance() {
-        $this->breadcrumbs[] = array(Yii::t('app', 'Maintenance'), '');
-        $this->pageTitle = Yii::t('app', 'Maintenance');
-        $this->render('maintenance');
 	}
 
     /**
