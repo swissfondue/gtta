@@ -25,7 +25,8 @@ var _messages = {
     'No logo.'                                          : '<?php echo Yii::t('app', 'No logo.'); ?>',
     'No target specified!'                              : '<?php echo Yii::t('app', 'No target specified!'); ?>',
     "The package is ready to be installed."             : "<?php echo Yii::t("app", "The package is ready to be installed."); ?>",
-    "The package could not be installed."               : "<?php echo Yii::t("app", "The package could not be installed."); ?>"
+    "The package could not be installed."               : "<?php echo Yii::t("app", "The package could not be installed."); ?>",
+    "Check has no scripts attached."                    : "<?php echo Yii::t("app", "Check has no scripts attached."); ?>",
 };
 
 system.l10nMessages = _messages;

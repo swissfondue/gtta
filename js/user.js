@@ -1577,11 +1577,17 @@ function User()
          * Start check.
          */
         this.start = function (id) {
-            var row, headerRow, data, url, nextRow, rating;
+            var row, headerRow, data, url, scriptCount;
 
             headerRow = $('div.check-header[data-type=check][data-id="' + id + '"]');
             row = $('div.check-form[data-type=check][data-id="' + id + '"]');
             url = row.data('save-url');
+            scriptCount = parseInt(headerRow.data('script-count'));
+
+            if (scriptCount <= 0) {
+                system.showMessage('error', system.translate('Check has no scripts attached.'));
+                return;
+            }
 
             data = _check.getData(id);
             data.push({name: 'YII_CSRF_TOKEN', value: system.csrf});
