@@ -265,7 +265,6 @@
                 <?php echo Yii::t("app", "Result"); ?>
             </th>
             <td>
-                <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[resultTitle]" class="max-width" style="display: none" id="TargetCheckEditForm_<?php echo $check->id; ?>_resultTitle" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>>
                 <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo $check->result; ?></textarea>
 
                 <?php
@@ -281,6 +280,8 @@
                         <input name="TargetCheckEditForm_<?php echo $check->id; ?>[saveResult]" type="checkbox" value="1" <?php if ($check->isRunning) echo "disabled"; ?> onchange="user.check.toggleField('TargetCheckEditForm_<?php echo $check->id; ?>_resultTitle')">
                         <?php echo Yii::t("app", "Save As Generic"); ?>
                     </label>
+
+                    <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[resultTitle]" class="max-width" style="display: none" id="TargetCheckEditForm_<?php echo $check->id; ?>_resultTitle" <?php if ($check->isRunning) echo "readonly"; ?> placeholder="<?php echo Yii::t("app", "Result Title"); ?>">
                 <?php endif; ?>
 
                 <div class="automated-info-block <?php if (!$showAuto) echo "hide"; ?>">

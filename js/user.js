@@ -565,8 +565,8 @@ function User()
          * Get check data in array.
          */
         this.getData = function (id) {
-            var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, resultTitle, saveResult, solutions, rating, data,
-                solution, solutionTitle, saveSolution, poc, links;
+            var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, resultTitle, saveResult,
+                solutions, rating, data, solution, solutionTitle, saveSolution, poc, links;
 
             row = $('div.check-form[data-type=check][data-id="' + id + '"]');
 
