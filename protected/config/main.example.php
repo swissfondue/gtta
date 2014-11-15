@@ -1,6 +1,6 @@
 <?php
 
-define("YII_DEBUG", $DEPLOY_BASE_DEBUG);
+define("YII_DEBUG", false);
 define("YII_TRACE_LEVEL", 3);
 defined("BASE_DIR") || define("BASE_DIR", "/opt/gtta");
 defined("VERSION_DIR") || define("VERSION_DIR", BASE_DIR . "/current");
@@ -372,7 +372,7 @@ return array(
         "db" => array(
 			"connectionString" => "pgsql:host=localhost;port=5432;dbname=gtta",
 			"username" => "gtta",
-			"password" => "$DEPLOY_DATABASE_PASSWORD",
+			"password" => "cqxLvzTW96BbiYoPjiyMbiQpG",
 			"charset" => "utf8",
 		),
 

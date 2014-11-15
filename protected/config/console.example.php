@@ -34,11 +34,11 @@ return array(
             "logging" => false,
             "dryRun" => false,
             "transportOptions" => array(
-                "host" => "$DEPLOY_SMTP_SERVER",
-                "port" => "$DEPLOY_SMTP_PORT",
-                "username" => "$DEPLOY_SMTP_LOGIN",
-                "password" => "$DEPLOY_SMTP_PASSWORD",
-                "encryption" => "$DEPLOY_SMTP_ENCRYPTION",
+                "host" => "smtp.yandex.ru",
+                "port" => "465",
+                "username" => "gtta.test@yandex.ru",
+                "password" => "123321",
+                "encryption" => "ssl",
             )
         ),
 
@@ -63,7 +63,7 @@ return array(
         // email sender
         "email" => array(
             "lockFile" => "/tmp/gtta.email",
-            "systemEmail" => "$DEPLOY_SMTP_EMAIL",
+            "systemEmail" => "gtta.test@yandex.ru",
             "maxAttempts" => 3,
         ),
 
@@ -115,11 +115,11 @@ return array(
         "attachments" => $mainConfig["params"]["attachments"],
 
         "api" => array(
-            "url" => "$DEPLOY_API_URL",
+            "url" => "http://gta-update.does-it.net:8080",
         ),
 
         "community" => array(
-            "url" => "$DEPLOY_COMMUNITY_URL",
+            "url" => "http://community.gtta.net",
             "install" => array(
                 "lockFile" => "/tmp/gtta.community-install",
             ),
