@@ -22,9 +22,19 @@ class TargetCheckEditForm extends CFormModel {
     public $port;
 
 	/**
+     * @var string resultTitle.
+     */
+    public $resultTitle;
+
+	/**
      * @var string result.
      */
     public $result;
+
+    /**
+     * @var boolean save solution.
+     */
+    public $saveResult;
 
     /**
      * @var string rating.
@@ -73,8 +83,8 @@ class TargetCheckEditForm extends CFormModel {
 		return array(
             array("rating", "in", "range" => TargetCheck::getValidRatings()),
             array("port", "numerical", "integerOnly" => true, "min" => 0, "max" => 65536),
-            array("protocol, overrideTarget, solutionTitle", "length", "max" => 1000),
-            array("saveSolution", "boolean"),
+            array("protocol, overrideTarget, solutionTitle, resultTitle", "length", "max" => 1000),
+            array("saveSolution, saveResult", "boolean"),
             array("inputs, result, solutions, solution, poc, links", "safe"),
 		);
 	}

@@ -2115,11 +2115,56 @@ class ProjectController extends Controller {
             $targetCheck->override_target = $model->overrideTarget;
             $targetCheck->protocol = $model->protocol;
             $targetCheck->port = $model->port;
-            $targetCheck->result = $model->result;
             $targetCheck->status = TargetCheck::STATUS_FINISHED;
             $targetCheck->rating = $model->rating;
             $targetCheck->poc = $model->poc;
             $targetCheck->links = $model->links;
+
+            if (User::checkRole(User::ROLE_ADMIN) && $model->saveResult) {
+                if (!$model->resultTitle) {
+                    throw new CHttpException(403, Yii::t("app", "Please specify the result title."));
+                }
+
+                $criteria = new CDbCriteria();
+                $criteria->select = "MAX(sort_order) as max_sort_order";
+                $criteria->addColumnCondition(array("check_id" => $check->id));
+
+                $maxOrder = CheckResult::model()->find($criteria);
+                $sortOrder = 0;
+
+                if ($maxOrder && $maxOrder->max_sort_order !== null) {
+                    $sortOrder = $maxOrder->max_sort_order + 1;
+                }
+
+                $result = new CheckResult();
+                $result->check_id = $check->id;
+                $result->title = $model->resultTitle;
+                $result->result = $model->result;
+                $result->sort_order = $sortOrder;
+                $result->save();
+
+                $resultL10n = new CheckResultL10n();
+                $resultL10n->check_result_id = $result->id;
+                $resultL10n->language_id = $language->id;
+                $resultL10n->title = $model->resultTitle;
+                $resultL10n->result = $model->result;
+                $resultL10n->save();
+
+                $response->addData("newResult", array(
+                    "id" => $result->id,
+                    "title" => $result->title,
+                    "result" => $result->result,
+                    "targetCheck" => array(
+                        "id" => $targetCheck->id,
+                        "check" => array(
+                            "id" =>$check->id
+                        )
+                    )
+                ));
+            } else {
+                $targetCheck->result = $model->result;
+            }
+
             $targetCheck->save();
 
             // delete old solutions
@@ -2207,13 +2252,6 @@ class ProjectController extends Controller {
                         $targetCheck->solution = null;
                         $targetCheck->solution_title = null;
                         $targetCheck->save();
-
-                        $response->addData("newSolution", array(
-                            "id" => $solution->id,
-                            "title" => $solution->title,
-                            "solution" => $solution->solution,
-                            "multipleSolutions" => $check->multiple_solutions,
-                        ));
                     } else {
                         $targetCheck->solution = $model->solution;
                         $targetCheck->solution_title = $model->solutionTitle;
@@ -2260,6 +2298,13 @@ class ProjectController extends Controller {
                     }
                 }
             }
+
+            $response->addData("targetCheck", array(
+                'id' => $targetCheck->id,
+                "check" => array(
+                    "id" => $check->id
+                )
+            ));
 
             $response->addData("rating", $targetCheck->rating);
 
