@@ -1577,45 +1577,46 @@ function User()
          * Start check.
          */
         this.start = function (id) {
-            var row, headerRow, data, url, scriptsCount;
+            var row, headerRow, data, url, scriptCount;
 
             headerRow = $('div.check-header[data-type=check][data-id="' + id + '"]');
             row = $('div.check-form[data-type=check][data-id="' + id + '"]');
             url = row.data('save-url');
-            scriptsCount = parseInt(headerRow.data('scripts-count'));
+            scriptCount = parseInt(headerRow.data('script-count'));
 
-            if (scriptsCount > 0) {
-                data = _check.getData(id);
-                data.push({name: 'YII_CSRF_TOKEN', value: system.csrf});
-
-                _check.setLoading(id);
-
-                $.ajax({
-                    dataType: 'json',
-                    url: url,
-                    timeout: system.ajaxTimeout,
-                    type: 'POST',
-                    data: data,
-
-                    success : function (data, textStatus) {
-                        if (data.status == 'error') {
-                            _check.setLoaded(id);
-                            system.showMessage('error', data.errorText);
-
-                            return;
-                        }
-
-                        _check._control(id, 'start');
-                    },
-
-                    error : function(jqXHR, textStatus, e) {
-                        _check.setLoaded(id);
-                        system.showMessage('error', system.translate('Request failed, please try again.'));
-                    }
-                });
-            } else {
+            if (scriptCount <= 0) {
                 system.showMessage('error', system.translate('Check has no scripts attached.'));
+                return;
             }
+
+            data = _check.getData(id);
+            data.push({name: 'YII_CSRF_TOKEN', value: system.csrf});
+
+            _check.setLoading(id);
+
+            $.ajax({
+                dataType: 'json',
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: 'POST',
+                data: data,
+
+                success : function (data, textStatus) {
+                    if (data.status == 'error') {
+                        _check.setLoaded(id);
+                        system.showMessage('error', data.errorText);
+
+                        return;
+                    }
+
+                    _check._control(id, 'start');
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    _check.setLoaded(id);
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                }
+            });
         };
 
         /**
