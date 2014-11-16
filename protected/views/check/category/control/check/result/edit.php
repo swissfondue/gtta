@@ -37,20 +37,21 @@
                         <label class="control-label" for="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result"><?php echo Yii::t('app', 'Result'); ?></label>
                         <div class="controls">
                             <textarea class="wysiwyg <?php if (isset($model->localizedItems[$language->id])) echo (Utils::_isHtml($model->localizedItems[$language->id]['result']) ? 'html_content' : ''); ?>" id="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result" name="CheckResultEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][result]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['result']) : ''; ?></textarea>
+
                             <?php if ($model->getError('result')): ?>
                                 <p class="help-block"><?php echo $model->getError('result'); ?></p>
                             <?php endif; ?>
+
+                            <p class="help-block">
+                                <a class="btn btn-default" href="#editor" onclick="user.check.toggleEditor('CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result');">
+                                    <span class="glyphicon glyphicon-edit"></span>
+                                    <?php echo Yii::t("app", "WYSIWYG"); ?>
+                                </a>
+                            </p>
                         </div>
                     </div>
 
-                    <?php if (User::checkRole(User::ROLE_USER)): ?>
-                        <span class="help-block controls">
-                        <a class="btn btn-default" href="#editor" onclick="user.check.toggleEditor('CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result');">
-                            <span class="glyphicon glyphicon-edit"></span>
-                            <?php echo Yii::t("app", "WYSIWYG"); ?>
-                        </a>
-                    </span>
-                    <?php endif; ?>
+                    <div class="clearfix"></div>
                 </div>
             <?php endforeach; ?>
         </div>
