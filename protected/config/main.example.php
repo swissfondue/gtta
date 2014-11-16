@@ -493,9 +493,6 @@ return array(
     // default controller name
     "defaultController" => "app",
 
-    // maintenance mode
-    "catchAllRequest" => file_exists(dirname(__FILE__) . "/.maintenance") ? array( "app/maintenance" ) : null,
-
     // language settings
     "sourceLanguage" => "en",
     "language"       => "en",
