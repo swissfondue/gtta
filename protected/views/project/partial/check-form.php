@@ -87,11 +87,6 @@
         <?php endif; ?>
         <?php if ($check->check->scripts && $check->check->automated && User::checkRole(User::ROLE_USER)): ?>
             <?php foreach ($check->check->scripts as $script): ?>
-                <?php
-                    if (!$script->inputs) {
-                        continue;
-                    }
-                ?>
                 <?php if (count($check->check->scripts) > 1): ?>
                     <tr class="script-inputs">
                         <th>
