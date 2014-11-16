@@ -169,10 +169,10 @@ class AutomationCommand extends ConsoleCommand {
     /**
      * Create check files
      * @param $check
-     * @param $interpreter
      * @param $target
      * @param $script
      * @return array
+     * @throws VMNotFoundException
      */
     private function _createCheckFiles($check, $target, $script) {
         $vm = new VMManager();
@@ -186,11 +186,14 @@ class AutomationCommand extends ConsoleCommand {
         }
 
         $targetHost = $check->override_target ? $check->override_target : $target->host;
-        $port = $check->port;
+        $port = "";
 
-        if (preg_match('/:(\d+)$/', $targetHost, $matches)) {
-            $port = $matches[1];
-            $targetHost = substr($targetHost, 0, strrpos($targetHost, ":"));
+        if ($target->port) {
+            $port = $target->port;
+        }
+
+        if ($check->port) {
+            $port = $check->port;
         }
 
         // base data

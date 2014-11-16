@@ -6,7 +6,7 @@
         <?php foreach ($quickTargets as $qTarget): ?>
             <div class="project-quick-nav">
                 <div class="target">
-                    <a href="<?php echo $this->createUrl("project/target", array("id" => $project->id, "target" => $qTarget->id)); ?>"><?php echo CHtml::encode($qTarget->host); ?></a>
+                    <a href="<?php echo $this->createUrl("project/target", array("id" => $project->id, "target" => $qTarget->id)); ?>"><?php echo CHtml::encode($qTarget->hostPort); ?></a>
                 </div>
 
                 <?php if ($qTarget->categories): ?>

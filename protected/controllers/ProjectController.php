@@ -1263,10 +1263,10 @@ class ProjectController extends Controller {
 
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
         $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array( "id" => $project->id )));
-        $this->breadcrumbs[] = array($target->host, "");
+        $this->breadcrumbs[] = array($target->hostPort, "");
 
         // display the page
-        $this->pageTitle = $target->host . ($target->description ? " / " . $target->description : "");
+        $this->pageTitle = $target->hostPort . ($target->description ? " / " . $target->description : "");
 		$this->render("target/index", array(
             "project" => $project,
             "target" => $target,
@@ -1321,6 +1321,7 @@ class ProjectController extends Controller {
 
         if (!$newRecord) {
             $model->host = $target->host;
+            $model->port = $target->port;
             $model->description = $target->description;
 
             $categories = TargetCheckCategory::model()->findAllByAttributes(array(
@@ -1349,6 +1350,7 @@ class ProjectController extends Controller {
 			if ($model->validate()) {
                 $target->project_id = $project->id;
                 $target->host = $model->host;
+                $target->port = $model->port;
                 $target->description = $model->description;
                 $target->save();
 
@@ -1463,7 +1465,7 @@ class ProjectController extends Controller {
         if ($newRecord) {
             $this->breadcrumbs[] = array(Yii::t("app", "New Target"), "");
         } else {
-            $this->breadcrumbs[] = array($target->host, $this->createUrl("project/target", array("id" => $project->id, "target" => $target->id)));
+            $this->breadcrumbs[] = array($target->hostPort, $this->createUrl("project/target", array("id" => $project->id, "target" => $target->id)));
             $this->breadcrumbs[] = array(Yii::t("app", "Edit"), "");
         }
 
@@ -1511,7 +1513,7 @@ class ProjectController extends Controller {
         );
 
 		// display the page
-        $this->pageTitle = $newRecord ? Yii::t("app", "New Target") : $target->host . ($target->description ? " / " . $target->description : "");
+        $this->pageTitle = $newRecord ? Yii::t("app", "New Target") : $target->hostPort . ($target->description ? " / " . $target->description : "");
 		$this->render("target/edit", array(
             "model" => $model,
             "project" => $project,
@@ -1700,7 +1702,7 @@ class ProjectController extends Controller {
         $client = Client::model()->findByPk($project->client_id);
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
         $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
-        $this->breadcrumbs[] = array($target->host, $this->createUrl("project/target", array(
+        $this->breadcrumbs[] = array($target->hostPort, $this->createUrl("project/target", array(
             "id" => $project->id,
             "target" => $target->id
         )));

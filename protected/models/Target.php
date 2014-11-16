@@ -8,6 +8,7 @@
  * @property integer $project_id
  * @property string $host
  * @property string $description
+ * @property integer $port
  * @property TargetCheck[] $targetChecks
  */
 class Target extends ActiveRecord implements IVariableScopeObject {
@@ -35,6 +36,7 @@ class Target extends ActiveRecord implements IVariableScopeObject {
             array("host, project_id", "required"),
             array("host, description", "length", "max" => 1000),
             array("project_id", "numerical", "integerOnly" => true),
+            array("port", "safe"),
 		);
 	}
 
@@ -152,6 +154,8 @@ class Target extends ActiveRecord implements IVariableScopeObject {
     public function getVariable($name, VariableScope $scope) {
         $vars = array(
             "host",
+            "port",
+            "hostPort",
             "description",
         );
 
@@ -302,5 +306,12 @@ class Target extends ActiveRecord implements IVariableScopeObject {
         }
 
         return $data;
+    }
+
+    /**
+     * Get host with port
+     */
+    public function getHostPort() {
+        return $this->host . ($this->port ? ":" . $this->port : "");
     }
 }

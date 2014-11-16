@@ -11,6 +11,11 @@ class TargetEditForm extends CFormModel
     public $host;
 
     /**
+     * @var integer port
+     */
+    public $port;
+
+    /**
      * @var string description.
      */
     public $description;
@@ -33,6 +38,7 @@ class TargetEditForm extends CFormModel
 		return array(
 			array( 'host', 'required' ),
             array( 'host, description', 'length', 'max' => 1000 ),
+            array("port", "numerical", "integerOnly" => true, "min" => 1, "max" => 65535),
             array( 'categoryIds, referenceIds', 'safe' ),
 		);
 	}
@@ -45,6 +51,7 @@ class TargetEditForm extends CFormModel
 		return array(
 			'host'        => Yii::t('app', 'Host'),
             'description' => Yii::t('app', 'Description'),
+            "port" => Yii::t("app", "Port"),
 		);
 	}
 }
