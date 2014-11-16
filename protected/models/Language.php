@@ -8,6 +8,7 @@
  * @property string $name
  * @property string $code
  * @property boolean $default
+ * @property boolean $user_default
  */
 class Language extends ActiveRecord
 {   
@@ -50,7 +51,7 @@ class Language extends ActiveRecord
             'user_default' => true
         ));
 
-        if ($default) {
+        if ($default && $default->id != $this->id) {
             $default->user_default = false;
             $default->save();
         }

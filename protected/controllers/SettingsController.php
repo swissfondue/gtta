@@ -52,8 +52,8 @@ class SettingsController extends Controller {
             $form->checklistLinks = isset($_POST["SettingsEditForm"]["checklistLinks"]);
 
 			if ($form->validate()) {
-                $lId = (int) $form->languageId;
-                $lang = Language::model()->findByPk($lId);
+                $langId = (int) $form->languageId;
+                $lang = Language::model()->findByPk($langId);
 
                 if (!$lang) {
                     throw new CHttpException(404, Yii::t("app", "Language not found."));
