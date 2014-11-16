@@ -38,7 +38,7 @@ class SettingsController extends Controller {
         $form->reportHighDampingLow = $system->report_high_damping_low;
         $form->reportHighDampingMed = $system->report_high_damping_med;
         $form->copyright = $system->copyright;
-        $form->languageId = $system->language_id;
+        $form->languageId = $system->language->id;
         $form->communityAllowUnverified = $system->community_allow_unverified;
         $form->communityMinRating = $system->community_min_rating;
         $form->checklistPoc = $system->checklist_poc;
@@ -52,6 +52,15 @@ class SettingsController extends Controller {
             $form->checklistLinks = isset($_POST["SettingsEditForm"]["checklistLinks"]);
 
 			if ($form->validate()) {
+                $langId = (int) $form->languageId;
+                $lang = Language::model()->findByPk($langId);
+
+                if (!$lang) {
+                    throw new CHttpException(404, Yii::t("app", "Language not found."));
+                }
+
+                $lang->setUserDefault();
+
                 $system->workstation_id = $form->workstationId ? $form->workstationId : null;
                 $system->workstation_key = $form->workstationKey ? $form->workstationKey : null;
                 $system->timezone = $form->timezone;
@@ -63,7 +72,6 @@ class SettingsController extends Controller {
                 $system->report_high_damping_low = $form->reportHighDampingLow;
                 $system->report_high_damping_med = $form->reportHighDampingMed;
                 $system->copyright = $form->copyright;
-                $system->language_id = $form->languageId;
                 $system->community_allow_unverified = $form->communityAllowUnverified;
                 $system->checklist_poc= $form->checklistPoc;
                 $system->checklist_links = $form->checklistLinks;

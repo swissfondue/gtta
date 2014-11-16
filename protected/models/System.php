@@ -28,7 +28,6 @@
  * @property string $copyright
  * @property string $logo_type
  * @property integer $demo_check_limit
- * @property integer $language_id
  * @property float $community_min_rating
  * @property boolean $community_allow_unverified
  * @property string $integration_key
@@ -124,7 +123,7 @@ class System extends ActiveRecord {
      */
     public function relations() {
         return array(
-            "language" => array(self::BELONGS_TO, "Language", "language_id"),
+            "language" => array(self::BELONGS_TO, "Language", "", "on" => "language.user_default IS TRUE"),
         );
     }
 }

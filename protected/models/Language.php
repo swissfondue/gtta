@@ -8,6 +8,7 @@
  * @property string $name
  * @property string $code
  * @property boolean $default
+ * @property boolean $user_default
  */
 class Language extends ActiveRecord
 {   
@@ -35,10 +36,27 @@ class Language extends ActiveRecord
 	public function rules()
 	{
 		return array(
-            array( 'name, code, default', 'required' ),
+            array( 'name, code', 'required' ),
             array( 'default', 'boolean' ),
             array( 'name', 'length', 'max' => 1000 ),
             array( 'code', 'length', 'max' => 2 )
 		);
 	}
+
+    /**
+     * Set language as user's default language
+     */
+    public function setUserDefault() {
+        $default = self::model()->findByAttributes(array(
+            'user_default' => true
+        ));
+
+        if ($default && $default->id != $this->id) {
+            $default->user_default = false;
+            $default->save();
+        }
+
+        $this->user_default = true;
+        $this->save();
+    }
 }
