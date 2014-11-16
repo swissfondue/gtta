@@ -24,13 +24,11 @@
                 <?php $entryId++ ?>
             <?php endforeach; ?>
             <tr class="new-entry">
-                <?php $i = 0; ?>
-                <?php while ($i < count($tbl['columns'])): ?>
+                <?php for ($i = 0; $i < count($tbl['columns']); $i++): ?>
                     <td>
                         <input type="text" />
-                        <?php $i++ ?>
                     </td>
-                <?php endwhile; ?>
+                <?php endfor; ?>
                 <td class="actions">
                     <a href="#add" title="<?php echo Yii::t('app', 'Add'); ?>" onclick="user.check.newTableResultEntry('<?php echo $check->id; ?>', '<?php echo $tableId; ?>');"><i class="icon icon-ok"></i></a>
                 </td>
