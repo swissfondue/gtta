@@ -1131,8 +1131,7 @@ class ReportController extends Controller {
                                 $table->getCell($row, 1)->setBorder($this->thinBorder);
                                 $table->writeToCell($row, 1, Yii::t('app', 'Attachments'));
 
-                                foreach ($check['images'] as $image)
-                                {
+                                foreach ($check['images'] as $image) {
                                     $table->getCell($row, 1)->setBorder($this->thinBorder);
                                     $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                     $table->getCell($row, 2)->setBorder($this->thinBorder);
@@ -3086,6 +3085,8 @@ class ReportController extends Controller {
                 $this->h2Font,
                 $this->h3Par
             );
+
+            $section->writeText("", $this->textFont, $this->noPar);
 
             $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
             $table->addRows(count($reportAttachments) + 1);

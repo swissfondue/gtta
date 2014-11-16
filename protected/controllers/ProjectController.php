@@ -2226,16 +2226,10 @@ class ProjectController extends Controller {
                 foreach ($model->attachmentTitles as $title) {
                     $decodedTitle = json_decode($title);
 
-                    $criteria = new CDbCriteria();
-                    $criteria->addCondition('path = :path');
-                    $criteria->addCondition('target_check_id = :target_check_id');
-
-                    $criteria->params = array(
-                        'path' => $decodedTitle->path,
-                        'target_check_id' => $targetCheck->id,
-                    );
-
-                    $attachment = TargetCheckAttachment::model()->find($criteria);
+                    $attachment = TargetCheckAttachment::model()->findByAttributes(array(
+                        "path" => $decodedTitle->path,
+                        "target_check_id" => $targetCheck->id,
+                    ));
 
                     if (!$attachment) {
                         throw new CHttpException(404, 'Attachment not found.');
@@ -2628,16 +2622,10 @@ class ProjectController extends Controller {
                     foreach ($form->attachmentTitles as $title) {
                         $decodedTitle = json_decode($title);
 
-                        $criteria = new CDbCriteria();
-                        $criteria->addCondition('path = :path');
-                        $criteria->addCondition('target_custom_check_id = :target_custom_check_id');
-
-                        $criteria->params = array(
-                            'path' => $decodedTitle->path,
-                            'target_custom_check_id' => $customCheck->id,
-                        );
-
-                        $attachment = TargetCustomCheckAttachment::model()->find($criteria);
+                        $attachment = TargetCustomCheckAttachment::model()->findByAttributes(array(
+                            "path" => $decodedTitle->path,
+                            "target_custom_check_id" => $customCheck->id,
+                        ));
 
                         if (!$attachment) {
                             throw new CHttpException(404, 'Attachment not found.');
@@ -4185,18 +4173,11 @@ class ProjectController extends Controller {
                 foreach ($model->attachmentTitles as $title) {
                     $decodedTitle = json_decode($title);
 
-                    $criteria = new CDbCriteria();
-                    $criteria->addCondition('path = :path');
-                    $criteria->addCondition('project_id = :project_id');
-                    $criteria->addCondition('gt_check_id = :gt_check_id');
-
-                    $criteria->params = array(
+                    $attachment = ProjectGtCheckAttachment::model()->findByAttributes(array(
                         'path' => $decodedTitle->path,
                         'project_id' => $project->id,
                         'gt_check_id' => $check->id,
-                    );
-
-                    $attachment = ProjectGtCheckAttachment::model()->find($criteria);
+                    ));
 
                     if (!$attachment) {
                         throw new CHttpException(404, 'Attachment not found.');
