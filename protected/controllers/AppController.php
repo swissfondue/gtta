@@ -334,7 +334,7 @@ class AppController extends Controller {
                     foreach ($targets as $target)
                         $objects[] = array(
                             'id'   => $target->id,
-                            'host' => $target->host,
+                            'host' => $target->hostPort,
                         );
 
                     break;

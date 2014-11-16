@@ -30,7 +30,7 @@
                     <p class="help-block"><?php echo $model->getError('host'); ?></p>
                 <?php else: ?>
                     <p class="help-block">
-                        <?php echo Yii::t("app", "Host name or IP address. You may also specify a default port here, separated by the colon symbol (for example, google.com:443)."); ?>
+                        <?php echo Yii::t("app", "Host name or IP address."); ?>
                     </p>
                 <?php endif; ?>
             </div>
@@ -44,7 +44,7 @@
                     <p class="help-block"><?php echo $model->getError('port'); ?></p>
                 <?php else: ?>
                     <p class="help-block">
-                        <?php echo Yii::t("app", "For example, 443."); ?>
+                        <?php echo Yii::t("app", "For example, 443. You may leave this field blank."); ?>
                     </p>
                 <?php endif; ?>
             </div>

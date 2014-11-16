@@ -235,7 +235,7 @@ class ReportController extends Controller {
                     $list = new PHPRtfLite_List_Enumeration($this->rtf, PHPRtfLite_List_Enumeration::TYPE_CIRCLE);
 
                     foreach ($this->project['targets'] as $target) {
-                        $list->addItem($guided ? $target["host"] : $target->host, $this->textFont, $this->noPar);
+                        $list->addItem($guided ? $target["host"] : $target->hostPort, $this->textFont, $this->noPar);
                     }
 
                     $container->writeRtfCode('\par ');
@@ -273,7 +273,7 @@ class ReportController extends Controller {
                     $row++;
 
                     foreach ($this->project['targets'] as $target) {
-                        $table->getCell($row, 1)->writeText($guided ? $target["host"] : $target->host, $this->textFont, $this->noPar);
+                        $table->getCell($row, 1)->writeText($guided ? $target["host"] : $target->hostPort, $this->textFont, $this->noPar);
 
                         if (!$guided && $target->description) {
                             $table->getCell($row, 1)->writeText(' / ', $this->textFont);
@@ -343,7 +343,7 @@ class ReportController extends Controller {
                     $row++;
 
                     foreach ($this->project['targets'] as $target) {
-                        $table->getCell($row, 1)->writeText($guided ? $target["host"] : $target->host, $this->textFont, $this->noPar);
+                        $table->getCell($row, 1)->writeText($guided ? $target["host"] : $target->hostPort, $this->textFont, $this->noPar);
 
                         if (!$guided && $target->description) {
                             $table->getCell($row, 1)->writeText(' / ', $this->textFont);
@@ -1371,7 +1371,7 @@ class ReportController extends Controller {
         foreach ($targets as $target) {
             $targetData = array(
                 "id" => $target->id,
-                "host" => $target->host,
+                "host" => $target->hostPort,
                 "description" => $target->description,
                 "rating" => 0.0,
                 "checkCount" => 0,
@@ -1531,7 +1531,7 @@ class ReportController extends Controller {
                                     $checkData["images"][] = Yii::app()->params["attachments"]["path"] . "/" . $attachment->path;
                                 } else {
                                     $reportAttachments[] = array(
-                                        "host" => $target->host,
+                                        "host" => $target->hostPort,
                                         "check" => $check->name,
                                         "filename" => $attachment->name,
                                         "path" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path,
@@ -1544,7 +1544,7 @@ class ReportController extends Controller {
                             $reducedChecks[] = array(
                                 "target" => array(
                                     "id" => $target->id,
-                                    "host" => $target->host,
+                                    "host" => $target->hostPort,
                                     "description" => $target->description
                                 ),
                                 "id" => $checkData["id"],
@@ -1712,7 +1712,7 @@ class ReportController extends Controller {
                                         $checkData["images"][] = Yii::app()->params["attachments"]["path"] . "/" . $attachment->path;
                                     } else {
                                         $reportAttachments[] = array(
-                                            "host" => $target->host,
+                                            "host" => $target->hostPort,
                                             "check" => $check->name,
                                             "filename" => $attachment->name,
                                             "path" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path,
@@ -1725,7 +1725,7 @@ class ReportController extends Controller {
                                 $reducedChecks[] = array(
                                     "target" => array(
                                         "id" => $target->id,
-                                        "host" => $target->host,
+                                        "host" => $target->hostPort,
                                         "description" => $target->description
                                     ),
                                     "id" => $checkData["id"],
@@ -2117,7 +2117,7 @@ class ReportController extends Controller {
                                     $checkData['images'][] = Yii::app()->params['attachments']['path'] . '/' . $attachment->path;
                                 } else {
                                     $reportAttachments[] = array(
-                                        "host" => $target->host,
+                                        "host" => $target->hostPort,
                                         "check" => $check->name,
                                         "filename" => $attachment->name,
                                         "path" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path,
@@ -3368,7 +3368,7 @@ class ReportController extends Controller {
 
         foreach ($targets1 as $target1) {
             foreach ($targets2 as $target2) {
-                if ($target2->host == $target1->host) {
+                if ($target2->hostPort == $target1->hostPort) {
                     $data[] = array(
                         $target1,
                         $target2
@@ -3387,7 +3387,7 @@ class ReportController extends Controller {
 
         foreach ($data as $targets) {
             $targetData = array(
-                'host' => $targets[0]->host,
+                'host' => $targets[0]->hostPort,
                 'ratings' => array()
             );
 
@@ -3846,7 +3846,7 @@ class ReportController extends Controller {
         foreach ($targets as $target) {
             $targetData = array(
                 'id'          => $target->id,
-                'host'        => $target->host,
+                'host'        => $target->hostPort,
                 'description' => $target->description,
                 'controls'    => array(),
             );
@@ -4464,7 +4464,7 @@ class ReportController extends Controller {
             }
 
             $data[] = array(
-                'host' => $target->host,
+                'host' => $target->hostPort,
                 'description' => $target->description,
                 'matrix' => $mtrx
             );
@@ -5196,7 +5196,7 @@ class ReportController extends Controller {
         $row = array();
 
         if (in_array(TargetCheck::COLUMN_TARGET, $model->columns)) {
-            $row[TargetCheck::COLUMN_TARGET] = $target->host;
+            $row[TargetCheck::COLUMN_TARGET] = $target->hostPort;
         }
 
         if (in_array(TargetCheck::COLUMN_NAME, $model->columns)) {

@@ -37,9 +37,11 @@
                             <tr data-id="<?php echo $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controltarget'); ?>">
                                 <td class="target">
                                     <?php if (User::checkRole(User::ROLE_USER) || Yii::app()->user->getShowDetails()): ?>
-                                        <a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo CHtml::encode($target->host); ?></a>
+                                        <a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )); ?>">
+                                            <?php echo CHtml::encode($target->hostPort); ?>
+                                        </a>
                                     <?php else: ?>
-                                        <?php echo CHtml::encode($target->host); ?>
+                                        <?php echo CHtml::encode($target->hostPort); ?>
                                     <?php endif; ?>
 
                                     <?php if ($target->description): ?>
