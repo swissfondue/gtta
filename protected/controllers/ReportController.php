@@ -952,7 +952,7 @@ class ReportController extends Controller {
                                 $table->getCell($row, 2)->setBorder($this->thinBorder);
                                 $table->writeToCell($row, 1, Yii::t('app', 'Result'));
 
-                                if (Utils::_isHtml($check["result"])) {
+                                if (Utils::isHtml($check["result"])) {
                                     $this->_renderText($table->getCell($row, 2), $check["result"], false);
                                 } else {
                                     $table->writeToCell($row, 2, $check["result"]);
@@ -2829,7 +2829,7 @@ class ReportController extends Controller {
 
                     $cell = $table->getCell($row, 3);
 
-                    if (Utils::_isHtml($problem)) {
+                    if (Utils::isHtml($problem)) {
                         $this->_renderText($cell, $problem, false);
                     } else {
                         $cell->writeText($problem);
@@ -2838,7 +2838,7 @@ class ReportController extends Controller {
                     if ($details) {
                         $cell->writeText("<br>");
 
-                        if (Utils::_isHtml($problem)) {
+                        if (Utils::isHtml($problem)) {
                             $this->_renderText($cell, $details, false);
                         } else {
                             $cell->writeText($details);

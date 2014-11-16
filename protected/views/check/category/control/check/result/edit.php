@@ -36,7 +36,7 @@
                     <div class="control-group <?php if ($model->getError('result')) echo 'error'; ?>">
                         <label class="control-label" for="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result"><?php echo Yii::t('app', 'Result'); ?></label>
                         <div class="controls">
-                            <textarea class="wysiwyg <?php if (isset($model->localizedItems[$language->id])) echo (Utils::_isHtml($model->localizedItems[$language->id]['result']) ? 'html_content' : ''); ?>" id="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result" name="CheckResultEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][result]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['result']) : ''; ?></textarea>
+                            <textarea class="wysiwyg <?php if (isset($model->localizedItems[$language->id])) echo (Utils::isHtml($model->localizedItems[$language->id]['result']) ? 'html_content' : ''); ?>" id="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result" name="CheckResultEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][result]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['result']) : ''; ?></textarea>
 
                             <?php if ($model->getError('result')): ?>
                                 <p class="help-block"><?php echo $model->getError('result'); ?></p>

@@ -527,6 +527,7 @@ function User()
             }
 
             textarea.val(result + '\n' + textarea.val());
+            textarea.trigger('change');
         };
 
         /**

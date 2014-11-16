@@ -9,7 +9,7 @@ class Utils {
      * @param $content
      * @return bool
      */
-    public static function _isHtml($content) {
+    public static function isHtml($content) {
         $htmlTests = array(
             "<b>",
             "<em>",
