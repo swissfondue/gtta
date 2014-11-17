@@ -345,85 +345,87 @@ class AutomationCommand extends ConsoleCommand {
         $filesPath = Yii::app()->params['automation']['filesPath'];
         $scripts = $check->scriptsToStart;
 
-        if (count($scripts)) {
-            foreach ($scripts as $script) {
-                if (!$check->result) {
-                    $check->result = '';
-                } else {
-                    $check->result .= "\n";
+        if (!count($scripts)) {
+            $scripts = $check->check->scripts;
+        }
+
+        foreach ($scripts as $script) {
+            if (!$check->result) {
+                $check->result = '';
+            } else {
+                $check->result .= "\n";
+            }
+
+            $now = new DateTime();
+            $package = $script->package;
+
+            $data = Yii::t("app", "The {script} script was used within this check against {target} on {date} at {time}", array(
+                "{script}" => $package->name,
+                "{target}" => $check->override_target ? $check->override_target : $target->host,
+                "{date}" => $now->format("d.m.Y"),
+                "{time}" => $now->format("H:i:s"),
+            ));
+
+            $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
+
+            try {
+                $check->pid = posix_getpgid(getmypid());
+                $check->started = $now->format("Y-m-d H:i:s");
+                $check->target_file = $this->_generateFileName();
+                $check->result_file = $this->_generateFileName();
+                $check->save();
+
+                $inputFiles = $this->_createCheckFiles($check, $target, $script);
+
+                $command = array(
+                    "python",
+                    "/opt/gtta/run_script.py",
+                    $package->name,
+                    "--pid=" . $check->pid,
+                );
+
+                $command[] = $filesPath . '/' . $check->target_file;
+                $command[] = $filesPath . '/' . $check->result_file;
+
+                foreach ($inputFiles as $input) {
+                    $command[] = $filesPath . '/' . $input;
                 }
 
-                $now = new DateTime();
-                $package = $script->package;
+                $vm = new VMManager();
 
-                $data = Yii::t("app", "The {script} script was used within this check against {target} on {date} at {time}", array(
-                    "{script}" => $package->name,
-                    "{target}" => $check->override_target ? $check->override_target : $target->host,
-                    "{date}" => $now->format("d.m.Y"),
-                    "{time}" => $now->format("H:i:s"),
-                ));
+                if ($vm->isRunning()) {
+                    $output = $vm->runCommand(implode(" ", $command), false);
+                    $fileOutput = file_get_contents($vm->virtualizePath($filesPath . '/' . $check->result_file));
+                    $data = $fileOutput ? $fileOutput : $output;
 
-                $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
-
-                try {
-                    $check->pid = posix_getpgid(getmypid());
-                    $check->started = $now->format("Y-m-d H:i:s");
-                    $check->target_file = $this->_generateFileName();
-                    $check->result_file = $this->_generateFileName();
-                    $check->save();
-
-                    $inputFiles = $this->_createCheckFiles($check, $target, $script);
-
-                    $command = array(
-                        "python",
-                        "/opt/gtta/run_script.py",
-                        $package->name,
-                        "--pid=" . $check->pid,
-                    );
-
-                    $command[] = $filesPath . '/' . $check->target_file;
-                    $command[] = $filesPath . '/' . $check->result_file;
-
-                    foreach ($inputFiles as $input) {
-                        $command[] = $filesPath . '/' . $input;
-                    }
-
-                    $vm = new VMManager();
-
-                    if ($vm->isRunning()) {
-                        $output = $vm->runCommand(implode(" ", $command), false);
-                        $fileOutput = file_get_contents($vm->virtualizePath($filesPath . '/' . $check->result_file));
-                        $data = $fileOutput ? $fileOutput : $output;
-
-                        $check->refresh();
-                        $check->pid = null;
-                        $check->result .= $data;
-
-                        if (!$data) {
-                            $check->result .= Yii::t('app', 'No output.');
-                        }
-
-                        $this->_getTables($check);
-                        $this->_getImages($check);
-                    } else {
-                        throw new VMNotFoundException(Yii::t("app", "Sandbox is not running, please regenerate it."));
-                    }
-
-                    $check->save();
-
-                    $started = new DateTime($check->started);
-                    $interval = time() - $started->getTimestamp();
-
-                    if ($interval > Yii::app()->params['automation']['minNotificationInterval']) {
-                        $this->_sendNotification($check, $target);
-                    }
-                } catch (VMNotFoundException $e) {
                     $check->refresh();
                     $check->pid = null;
-                    $check->result .= $e->getMessage();
-                } catch (Exception $e) {
-                    $check->automationError($e->getMessage());
+                    $check->result .= $data;
+
+                    if (!$data) {
+                        $check->result .= Yii::t('app', 'No output.');
+                    }
+
+                    $this->_getTables($check);
+                    $this->_getImages($check);
+                } else {
+                    throw new VMNotFoundException(Yii::t("app", "Sandbox is not running, please regenerate it."));
                 }
+
+                $check->save();
+
+                $started = new DateTime($check->started);
+                $interval = time() - $started->getTimestamp();
+
+                if ($interval > Yii::app()->params['automation']['minNotificationInterval']) {
+                    $this->_sendNotification($check, $target);
+                }
+            } catch (VMNotFoundException $e) {
+                $check->refresh();
+                $check->pid = null;
+                $check->result .= $e->getMessage();
+            } catch (Exception $e) {
+                $check->automationError($e->getMessage());
             }
         }
 
@@ -452,6 +454,8 @@ class AutomationCommand extends ConsoleCommand {
 
             exit();
         }
+
+        ProcessManager::backgroundExec('logger "automation started!"');
 
         // one instance check
         $fp = fopen(Yii::app()->params["automation"]["lockFile"], "w");

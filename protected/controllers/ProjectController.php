@@ -2130,7 +2130,7 @@ class ProjectController extends Controller {
                 }
             }
 
-            $model->scriptsToStart = PgArrayManager::pgArrayEncode($scripts, 'integer');
+            $model->scriptsToStart = PgArrayManager::pgArrayEncode($scripts);
 
             $targetCheck->user_id = Yii::app()->user->id;
             $targetCheck->language_id = $language->id;

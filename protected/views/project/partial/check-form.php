@@ -86,11 +86,15 @@
             <?php endif; ?>
         <?php endif; ?>
         <?php if ($check->check->scripts && $check->check->automated && User::checkRole(User::ROLE_USER)): ?>
+            <?php
+                $scriptsToStart = PgArrayManager::pgArrayDecode($check->scripts_to_start);
+                $checkAll = empty($scriptsToStart);
+            ?>
             <?php foreach ($check->check->scripts as $script): ?>
                 <?php if (count($check->check->scripts) > 1): ?>
                     <tr class="script-inputs">
                         <th>
-                            <input name="TargetCheckEditForm_<?php echo $check->id ?>[scriptsToStart][]" type="checkbox" value="<?php echo $script->id; ?>" <?php echo in_array($script->id, PgArrayManager::pgArrayDecode($check->scripts_to_start)) ? 'checked="checked"' : ''; ?> />
+                            <input name="TargetCheckEditForm_<?php echo $check->id ?>[scriptsToStart][]" type="checkbox" value="<?php echo $script->id; ?>" <?php echo ($checkAll || in_array($script->id, $scriptsToStart) ? 'checked="checked"' : ''); ?> <?php if ($check->isRunning) echo "disabled"; ?> />
                             <?php echo CHtml::encode($script->package->name); ?>
                         </th>
                         <td>&nbsp;</td>
