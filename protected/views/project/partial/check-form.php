@@ -265,7 +265,7 @@
                 <?php echo Yii::t("app", "Result"); ?>
             </th>
             <td>
-                <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo $check->result; ?></textarea>
+                <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width result <?php echo ( Utils::isHtml($check->result) ? 'html_content' : '' ); ?>" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo $check->result; ?></textarea>
 
                 <?php
                     $showAuto = false;
@@ -518,3 +518,18 @@
         <?php endif; ?>
     </tbody>
 </table>
+<script>
+    $.each($('.html_content'), function () {
+        user.check.enableEditor($(this).attr('id'));
+    });
+
+    $('#TargetCheckEditForm_' + <?php echo $check->id; ?> + '_result').unbind('change input propertychange');
+    $('#TargetCheckEditForm_' + <?php echo $check->id; ?> + '_result').bind('change input propertychange', function () {
+        var val = $(this).val();
+        var id = $(this).attr('id');
+
+        if ($(this).val().isHTML()) {
+            user.check.enableEditor(id);
+        }
+    });
+</script>

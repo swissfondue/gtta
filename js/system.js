@@ -1409,3 +1409,26 @@ Number.prototype.zeroPad = function (size)
 
     return s;
 };
+
+/**
+ * Check if text contains HTML
+ * @returns {boolean}
+ */
+String.prototype.isHTML = function () {
+    var htmlTest = [
+        "<b>",
+        "<em>",
+        "<u>",
+        "<ul>",
+        "<ol>",
+        "<br />"
+    ];
+
+    for (var i = 0; i < htmlTest.length; i++) {
+        if (this.indexOf(htmlTest[i]) > -1) {
+            return true;
+        }
+    }
+
+    return false;
+};
