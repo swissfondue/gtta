@@ -7,7 +7,6 @@
  * @property integer $id
  * @property string $file_name
  * @property integer $type
- * @property boolean $system
  * @property string $name
  * @property string $version
  * @property integer $status
@@ -72,7 +71,6 @@ class Package extends ActiveRecord {
                 self::STATUS_DELETE,
                 self::STATUS_ERROR
             )),
-            array("system", "boolean"),
             array("create_time", "safe"),
 		);
 	}
@@ -91,6 +89,7 @@ class Package extends ActiveRecord {
     /**
      * Get status name
      * @return string
+     * @throws Exception
      */
     public function getStatusName() {
         $names = array(

@@ -41,7 +41,7 @@ class PackageController extends Controller {
             Package::STATUS_ERROR
         ));
 
-        $criteria->order = "t.system DESC, t.name ASC";
+        $criteria->order = "t.name ASC";
         $scripts = Package::model()->findAll($criteria);
 
         $scriptCount = Package::model()->count($criteria);
@@ -79,7 +79,7 @@ class PackageController extends Controller {
             Package::STATUS_ERROR
         ));
 
-        $criteria->order = "t.system DESC, t.name ASC";
+        $criteria->order = "t.name ASC";
         $libraries = Package::model()->findAll($criteria);
 
         $libCount = Package::model()->count($criteria);
@@ -190,10 +190,6 @@ class PackageController extends Controller {
 
             switch ($model->operation) {
                 case "delete":
-                    if ($package->system) {
-                        throw new CHttpException(403, Yii::t("app", "System packages cannot be deleted."));
-                    }
-
                     $pm = new PackageManager();
 
                     if ($pm->hasDependentObjects($package)) {

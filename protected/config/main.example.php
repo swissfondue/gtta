@@ -473,14 +473,8 @@ return array(
 
         "packages" => array(
             "path" => array(
-                "user" => array(
-                    "scripts" => BASE_DIR . "/scripts",
-                    "libraries" => BASE_DIR . "/scripts/lib",
-                ),
-                "system" => array(
-                    "scripts" => BASE_DIR . "/scripts/system/",
-                    "libraries" => BASE_DIR . "/scripts/system/lib",
-                ),
+                "scripts" => BASE_DIR . "/scripts",
+                "libraries" => BASE_DIR . "/scripts/lib",
             ),
             "tmpPath" => "/tmp/gtta-package",
             "maxSize" => 100 * 1024 * 1024, // 100 megabytes

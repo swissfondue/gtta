@@ -12,7 +12,6 @@ class PackageManager {
     const SECTION_NAME = "name";
     const SECTION_TYPE = "type";
     const SECTION_VERSION = "version";
-    const SECTION_SYSTEM = "system";
     const SECTION_DESCRIPTION = "description";
     const SECTION_VALUE = "value";
     const SECTION_DEPENDENCIES = "dependencies";
@@ -294,7 +293,6 @@ class PackageManager {
             $name = $this->_getSection($package, self::SECTION_NAME);
             $version = $this->_getSection($package, self::SECTION_VERSION);
             $type = $this->_getSection($package, self::SECTION_TYPE);
-            $system = $this->_getSection($package, self::SECTION_SYSTEM);
         } catch (MissingSectionException $e) {
             throw new Exception(
                 Yii::t("app", "Missing package section:: {section}.", array(
@@ -318,11 +316,6 @@ class PackageManager {
         }
 
         $type = $this->_convertPackageType($type);
-
-        if (!is_bool($system)) {
-            throw new Exception(Yii::t("app", "Unexpected package system value."));
-        }
-
         $deps = $this->_getSection($package, self::SECTION_DEPENDENCIES, false);
 
         if ($deps) {
@@ -395,7 +388,6 @@ class PackageManager {
         $allowedTopLevel = array(
             self::SECTION_NAME,
             self::SECTION_TYPE,
-            self::SECTION_SYSTEM,
             self::SECTION_VERSION,
             self::SECTION_DESCRIPTION,
             self::SECTION_DEPENDENCIES,
@@ -412,7 +404,6 @@ class PackageManager {
             self::SECTION_TYPE => $type,
             self::SECTION_NAME => $name,
             self::SECTION_VERSION => $version,
-            self::SECTION_SYSTEM => $system,
             self::SECTION_DEPENDENCIES => $dependencies,
             self::SECTION_INPUTS => $inputs,
             "path" => $path,
@@ -586,12 +577,11 @@ class PackageManager {
      * Validate package by path
      * @param $package mixed package
      * @param $strict boolean strict dependency validation
-     * @param $allowSystem boolean
      * @param $allowSameName boolean
      * @return array
      * @throws Exception
      */
-    private function _validate($package, $strict=true, $allowSystem=false, $allowSameName=false) {
+    private function _validate($package, $strict=true, $allowSameName=false) {
         if (is_object($package) && $package instanceof Package) {
             $package = $this->_parse($this->getPath($package));
         }
@@ -611,10 +601,6 @@ class PackageManager {
             if ($pkg) {
                 throw new Exception(Yii::t("app", "Package with the same name already exists."));
             }
-        }
-
-        if (!$allowSystem && $package[self::SECTION_SYSTEM]) {
-            throw new Exception(Yii::t("app", "System packages are not allowed."));
         }
 
         if ($package[self::SECTION_TYPE] == Package::TYPE_SCRIPT) {
@@ -657,7 +643,6 @@ class PackageManager {
             $pkg->file_name = $id;
             $pkg->name = $package[self::SECTION_NAME];
             $pkg->type = $package[self::SECTION_TYPE];
-            $pkg->system = $package[self::SECTION_SYSTEM];
             $pkg->version = $package[self::SECTION_VERSION];
             $pkg->status = Package::STATUS_INSTALL;
             $pkg->save();
@@ -871,7 +856,7 @@ class PackageManager {
         try {
             $this->_extract($zipPath, $packagePath);
             $parsedPackage = $this->_parse($this->_getRootPath($packagePath));
-            $this->_validate($parsedPackage, false, false, true);
+            $this->_validate($parsedPackage, false, true);
 
             $destinationPath = $this->getPath($package);
             FileManager::rmDir($destinationPath);
@@ -898,7 +883,7 @@ class PackageManager {
             $this->_installDependencies($parsedPackage);
 
             // validate again
-            $this->_validate($parsedPackage, true, false, true);
+            $this->_validate($parsedPackage, true, true);
 
             // copy check to VM
             FileManager::createDir($vm->virtualizePath($destinationPath), 0755);
@@ -974,10 +959,6 @@ class PackageManager {
             throw new Exception(Yii::t("app", "This package is required by other objects and cannot be deleted."));
         }
 
-        if ($package->system) {
-            throw new Exception(Yii::t("app", "System packages cannot be deleted."));
-        }
-
         FileManager::rmDir($this->getPath($package));
 
         PackageDependency::model()->deleteAllByAttributes(array(
@@ -1030,12 +1011,7 @@ class PackageManager {
      * @return string path
      */
     public function getPath(Package $package) {
-        $paths = Yii::app()->params["packages"]["path"]["user"];
-
-        if ($package->system) {
-            $paths = Yii::app()->params["packages"]["path"]["system"];
-        }
-
+        $paths = Yii::app()->params["packages"]["path"];
         $path = null;
 
         if ($package->type == Package::TYPE_LIBRARY) {
@@ -1060,6 +1036,7 @@ class PackageManager {
      * Get package entry point
      * @param Package $package
      * @return string entry point
+     * @throws Exception
      */
     public function getEntryPoint(Package $package) {
         $entryPoint = null;
@@ -1108,8 +1085,7 @@ class PackageManager {
         // core package goes first
         $core = Package::model()->findByAttributes(array(
             "name" => "core",
-            "type" => Package::TYPE_LIBRARY,
-            "system" => true
+            "type" => Package::TYPE_LIBRARY
         ));
 
         if (!$core) {
@@ -1117,17 +1093,17 @@ class PackageManager {
         }
 
         $this->_installDependencies($core);
-        $this->_validate($core, true, true, true);
+        $this->_validate($core, true, true);
 
         $criteria = new CDbCriteria();
         $criteria->addColumnCondition(array("status" => Package::STATUS_INSTALLED));
         $criteria->addNotInCondition("id", array($core->id));
-        $criteria->order = "system DESC, type ASC, name ASC";
+        $criteria->order = "type ASC, name ASC";
         $packages = Package::model()->findAll($criteria);
 
         foreach ($packages as $package) {
             $this->_installDependencies($package);
-            $this->_validate($package, true, true, true);
+            $this->_validate($package, true, true);
         }
     }
 
@@ -1203,10 +1179,6 @@ class PackageManager {
      * @throws Exception
      */
     public function prepareSharing(Package $package) {
-        if ($package->system) {
-            return;
-        }
-
         if (!$package->isActive()) {
             throw new Exception("Invalid package.");
         }
