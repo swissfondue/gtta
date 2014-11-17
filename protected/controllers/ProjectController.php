@@ -12,10 +12,10 @@ class ProjectController extends Controller {
             "https",
 			"checkAuth",
             "showDetails + target, attachment, checks",
-            "checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, gtcontrolcheck, gtsavecheck, savecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck, time, tracktime",
+            "checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, gtcontrolcheck, gtsavecheck, savecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck, time, tracktime, controlcategory",
             "checkAdmin + edit, users, edituser, controluser, controltime",
-            "ajaxOnly + savecheck, savecustomcheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtcontrolattachment, copycheck, controlchecklist, check",
-            "postOnly + savecheck, savecustomcheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck, controlchecklist, check",
+            "ajaxOnly + savecheck, savecustomcheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtcontrolattachment, copycheck, controlchecklist, check, controlcategory",
+            "postOnly + savecheck, savecustomcheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck, controlchecklist, check, controlcategory",
             "idleOrRunning",
 		);
 	}
@@ -5425,4 +5425,95 @@ class ProjectController extends Controller {
             "user" => $user,
         ));
 	}
+
+    /**
+     * Control target category function.
+     */
+    public function actionControlCategory($id, $target) {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $target = (int) $target;
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new CHttpException(404, Yii::t("app", "Project not found."));
+            }
+
+            if (!$project->checkPermission()) {
+                throw new CHttpException(403, Yii::t("app", "Access denied."));
+            }
+
+            $target = Target::model()->findByAttributes(array(
+                "id" => $target,
+                "project_id" => $project->id
+            ));
+
+            if (!$target) {
+                throw new CHttpException(404, Yii::t("app", "Target not found."));
+            }
+
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate()) {
+                $errorText = "";
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $category = TargetCheckCategory::model()->findByAttributes(array(
+                "target_id" => $target->id,
+                "check_category_id" => $model->id,
+            ));
+
+            if (!$category) {
+                throw new CHttpException(404, Yii::t("app", "Category not found."));
+            }
+
+            switch ($model->operation)             {
+                case "delete":
+                    $controls = CheckControl::model()->findAllByAttributes(array(
+                        "check_category_id" => $category->check_category_id
+                    ));
+
+                    $controlIds = array();
+
+                    foreach ($controls as $control) {
+                        $controlIds[] = $control->id;
+                    }
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addInCondition("check_control_id", $controlIds);
+                    $checks = Check::model()->findAll($criteria);
+                    $checkIds = array();
+
+                    foreach ($checks as $check) {
+                        $checkIds[] = $check->id;
+                    }
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addColumnCondition(array("target_id" => $target->id));
+                    $criteria->addInCondition("check_id", $checkIds);
+                    TargetCheck::model()->deleteAll($criteria);
+                    $category->delete();
+
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t("app", "Unknown operation."));
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
 }

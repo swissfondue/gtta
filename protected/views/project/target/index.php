@@ -47,7 +47,7 @@
                                     }
                                 }
                             ?>
-                            <tr<?php if ($limited) echo ' class="limited"'; ?>>
+                            <tr<?php if ($limited) echo ' class="limited"'; ?> data-id="<?php echo $category->check_category_id; ?>" data-control-url="<?php echo $this->createUrl("project/controlcategory", array("id" => $project->id, "target" => $target->id)); ?>">
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('project/checks', array( 'id' => $project->id, 'target' => $target->id, 'category' => $category->check_category_id )); ?>"><?php echo CHtml::encode($category->category->localizedName); ?></a>
                                 </td>
@@ -66,7 +66,7 @@
                                 </td>
                                 <?php if (User::checkRole(User::ROLE_USER)): ?>
                                     <td class="actions">
-                                        <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="category.del(<?php echo $category->check_category_id; ?>);"><i class="icon icon-remove"></i></a>
+                                        <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $category->check_category_id; ?>);"><i class="icon icon-remove"></i></a>
                                     </td>
                                 <?php endif; ?>
                             </tr>
