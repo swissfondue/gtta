@@ -472,11 +472,9 @@
                                                 <?php echo CHtml::encode($attachment->title); ?>
                                             </span>
                                             <input type="hidden" name="TargetCheckEditForm_<?php echo $check->id; ?>[attachmentTitles][]" data-path="<?php echo $attachment->path; ?>" value="<?php echo CHtml::encode($attachment->title); ?>">
-                                            <div class="name content">
-                                                <a href="<?php echo $this->createUrl("project/attachment", array("path" => $attachment->path)); ?>"><?php echo CHtml::encode($attachment->name); ?></a>
-                                            </div>
                                         </td>
                                         <td class="actions">
+                                            <a href="<?php echo $this->createUrl("project/attachment", array("path" => $attachment->path)); ?>" title="<?php echo Yii::t("app", "Download"); ?>"><i class="icon icon-download"></i></a>
                                             <a href="#del" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="user.check.delAttachment('<?php echo $attachment->path; ?>');"><i class="icon icon-remove"></i></a>
                                         </td>
                                     </tr>
