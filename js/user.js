@@ -642,7 +642,7 @@ function User()
                 function () {
                     return {
                         name : $(this).attr('name'),
-                        value: JSON.stringify({ path : $(this).data('path'), 'title' : $(this).val() })
+                        value: JSON.stringify({ path : $(this).data('path'), 'title' : $(this).val().trim() })
                     }
                 }
             ).get();
@@ -873,7 +873,7 @@ function User()
                 function () {
                     return {
                         name : 'TargetCustomCheckEditForm[attachmentTitles][]',
-                        value: JSON.stringify({ path : $(this).data('path'), 'title' : $(this).val() })
+                        value: JSON.stringify({ path : $(this).data('path'), 'title' : $(this).val().trim() })
                     }
                 }
             ).get();
@@ -1253,19 +1253,19 @@ function User()
                                             .attr('type', 'hidden')
                                             .attr('name', 'TargetCheckEditForm_' + data.targetCheck + '[attachmentTitles][]')
                                             .attr('data-path', data.path)
-                                            .val(data.title),
-                                        $('<div>')
-                                            .addClass('name')
-                                            .addClass('content')
-                                            .append(
-                                                $('<a>')
-                                                    .attr('href', data.url)
-                                                    .text(data.name)
-                                            )
+                                            .val(data.title)
                                     ),
                                 $('<td>')
                                     .addClass('actions')
                                     .append(
+                                        $('<a>')
+                                            .attr('href', data.url)
+                                            .attr('title', system.translate("Download"))
+                                            .append(
+                                                $('<i>')
+                                                    .addClass('icon')
+                                                    .addClass('icon-download')
+                                            ),
                                         $('<a>')
                                             .attr('href', '#del')
                                             .attr('title', system.translate("Delete"))
@@ -1413,19 +1413,19 @@ function User()
                                             .attr('type', 'hidden')
                                             .attr('name', 'TargetCustomCheckEditForm_' + data.customCheck + '[attachmentTitles][]')
                                             .attr('data-path', data.path)
-                                            .val(data.title),
-                                        $('<div>')
-                                            .addClass('name')
-                                            .addClass('content')
-                                            .append(
-                                                $('<a>')
-                                                    .attr('href', data.url)
-                                                    .text(data.name)
-                                            )
+                                            .val(data.title)
                                     ),
                                 $('<td>')
                                     .addClass('actions')
                                     .append(
+                                        $('<a>')
+                                            .attr('href', data.url)
+                                            .attr('title', system.translate("Download"))
+                                            .append(
+                                                $('<i>')
+                                                    .addClass('icon')
+                                                    .addClass('icon-download')
+                                            ),
                                         $('<a>')
                                             .attr('href', '#del')
                                             .attr('title', system.translate("Delete"))

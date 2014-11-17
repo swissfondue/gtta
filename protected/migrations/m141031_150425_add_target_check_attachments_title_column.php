@@ -28,6 +28,7 @@ class m141031_150425_add_target_check_attachments_title_column extends CDbMigrat
         $this->execute("UPDATE target_check_attachments SET title = name");
         $this->execute("UPDATE target_custom_check_attachments SET title = name");
         $this->execute("UPDATE project_gt_check_attachments SET title = name");
+
         return true;
 	}
 
@@ -39,6 +40,7 @@ class m141031_150425_add_target_check_attachments_title_column extends CDbMigrat
         $this->dropColumn('target_check_attachments', 'title');
         $this->dropColumn('target_custom_check_attachments', 'title');
         $this->dropColumn('project_gt_check_attachments', 'title');
+
 		return true;
 	}
 }
