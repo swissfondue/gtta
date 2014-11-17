@@ -1104,13 +1104,13 @@ class ReportController extends Controller {
                                 $table->getCell($row, 1)->setBorder($this->thinBorder);
                                 $table->writeToCell($row, 1, Yii::t('app', 'Attachments'));
 
-                                foreach ($check['images'] as $image)
-                                {
+                                foreach ($check['images'] as $image) {
                                     $table->getCell($row, 1)->setBorder($this->thinBorder);
                                     $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                     $table->getCell($row, 2)->setBorder($this->thinBorder);
 
-                                    $table->addImageToCell($row, 2, $image, new PHPRtfLite_ParFormat(), $this->docWidth * 0.78);
+                                    $table->writeToCell($row, 2, $image['title']);
+                                    $table->addImageToCell($row, 2, $image['image'], new PHPRtfLite_ParFormat(), $this->docWidth * 0.78);
 
                                     $row++;
                                 }
@@ -1501,10 +1501,14 @@ class ReportController extends Controller {
                         if ($check->attachments) {
                             foreach ($check->attachments as $attachment) {
                                 if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
-                                    $checkData["images"][] = Yii::app()->params["attachments"]["path"] . "/" . $attachment->path;
+                                    $checkData["images"][] = array(
+                                        'title' => $attachment->title,
+                                        'image' => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path
+                                    );
                                 } else {
                                     $reportAttachments[] = array(
                                         "host" => $target->hostPort,
+                                        "title" => $attachment->title,
                                         "check" => $check->name,
                                         "filename" => $attachment->name,
                                         "path" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path,
@@ -1682,10 +1686,14 @@ class ReportController extends Controller {
                             if ($tc->attachments) {
                                 foreach ($tc->attachments as $attachment) {
                                     if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
-                                        $checkData["images"][] = Yii::app()->params["attachments"]["path"] . "/" . $attachment->path;
+                                        $checkData["images"][] = array(
+                                            'title' => $attachment->title,
+                                            'image' => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path
+                                        );
                                     } else {
                                         $reportAttachments[] = array(
                                             "host" => $target->hostPort,
+                                            "title" => $attachment->title,
                                             "check" => $check->name,
                                             "filename" => $attachment->name,
                                             "path" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path,
@@ -2087,10 +2095,14 @@ class ReportController extends Controller {
                         if ($check->attachments) {
                             foreach ($check->attachments as $attachment) {
                                 if (in_array($attachment->type, array('image/jpeg', 'image/png', 'image/gif', 'image/pjpeg'))) {
-                                    $checkData['images'][] = Yii::app()->params['attachments']['path'] . '/' . $attachment->path;
+                                    $checkData['images'][] = array(
+                                        'title' => $attachment->title,
+                                        'image' => Yii::app()->params['attachments']['path'] . '/' . $attachment->path
+                                    );
                                 } else {
                                     $reportAttachments[] = array(
                                         "host" => $target->hostPort,
+                                        "title" => $attachment->title,
                                         "check" => $check->name,
                                         "filename" => $attachment->name,
                                         "path" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path,
@@ -3047,23 +3059,26 @@ class ReportController extends Controller {
                 $this->h3Par
             );
 
+            $section->writeText("", $this->textFont, $this->noPar);
+
             $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
             $table->addRows(count($reportAttachments) + 1);
             $table->addColumnsList(array(
-                $this->docWidth * 0.3,
-                $this->docWidth * 0.3,
-                $this->docWidth * 0.3,
+                $this->docWidth * 0.25,
+                $this->docWidth * 0.25,
+                $this->docWidth * 0.25,
+                $this->docWidth * 0.25,
             ));
 
-            $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
-            $table->setFontForCellRange($this->boldFont, 1, 1, 1, 3);
-            $table->setFontForCellRange($this->textFont, 2, 1, count($reportAttachments) + 1, 3);
-            $table->setBorderForCellRange($this->thinBorder, 1, 1, count($reportAttachments) + 1, 3);
+            $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 4);
+            $table->setFontForCellRange($this->boldFont, 1, 1, 1, 4);
+            $table->setFontForCellRange($this->textFont, 2, 1, count($reportAttachments) + 1, 4);
+            $table->setBorderForCellRange($this->thinBorder, 1, 1, count($reportAttachments) + 1, 4);
             $table->setFirstRowAsHeader();
 
             // set paddings
             for ($row = 1; $row <= count($reportAttachments) + 1; $row++) {
-                for ($col = 1; $col <= 3; $col++) {
+                for ($col = 1; $col <= 4; $col++) {
                     $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
 
                     if ($row > 1) {
@@ -3076,16 +3091,18 @@ class ReportController extends Controller {
 
             $row = 1;
 
-            $table->getCell($row, 1)->writeText(Yii::t('app', 'Host'));
-            $table->getCell($row, 2)->writeText(Yii::t('app', 'Check'));
-            $table->getCell($row, 3)->writeText(Yii::t('app', 'File'));
+            $table->getCell($row, 1)->writeText(Yii::t('app', 'Title'));
+            $table->getCell($row, 2)->writeText(Yii::t('app', 'Host'));
+            $table->getCell($row, 3)->writeText(Yii::t('app', 'Check'));
+            $table->getCell($row, 4)->writeText(Yii::t('app', 'File'));
 
             $row++;
 
             foreach ($reportAttachments as $attachment) {
-                $table->getCell($row, 1)->writeText($attachment['host']);
-                $table->getCell($row, 2)->writeText($attachment['check']);
-                $table->getCell($row, 3)->writeText($attachment['filename']);
+                $table->getCell($row, 1)->writeText($attachment['title']);
+                $table->getCell($row, 2)->writeText($attachment['host']);
+                $table->getCell($row, 3)->writeText($attachment['check']);
+                $table->getCell($row, 4)->writeText($attachment['filename']);
                 $row++;
             }
         }

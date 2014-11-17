@@ -525,14 +525,25 @@ table.check-form > tbody > tr > td {
     cursor:pointer;
 }
 
-.attachment-list .name {
-    padding-left:0;
+.attachment-list .info {
+    padding-left: 0;
+}
+
+.attachment-list .title {
+    padding: 0;
+    border-top: none;
+    display: block;
+    max-width: 350px;
+    color: #0088cc;
 }
 
 .attachment-list td {
     border-top:1px solid #ddd;
     padding-top:10px;
     padding-bottom:10px;
+}
+.attachment-list .actions {
+    width: 60px;
 }
 
 .upload-message {
@@ -814,6 +825,10 @@ table.table-result th {
 table.table-result td {
     border-top:1px solid #ddd;
     padding:10px 0 10px 0;
+}
+
+table.table-result .new-entry input {
+    width: 80%;
 }
 
 .auditors a {
@@ -1098,4 +1113,18 @@ table.project-header td.hours, table.project-header th.hours, table.user td.hour
 
 .report-template-list .type {
     width:100px;
+}
+
+[contenteditable="true"].single-line {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+[contenteditable="true"].single-line br {
+    display: none;
+}
+
+[contenteditable="true"].single-line * {
+    display: inline;
+    white-space: nowrap;
 }

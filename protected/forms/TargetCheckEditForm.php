@@ -47,6 +47,11 @@ class TargetCheckEditForm extends CFormModel {
     public $solutions;
 
     /**
+     * @var array attachment_titles.
+     */
+    public $attachmentTitles;
+
+    /**
      * @var string solution.
      */
     public $solution;
@@ -76,6 +81,11 @@ class TargetCheckEditForm extends CFormModel {
      */
     public $links;
 
+    /**
+     * @var string table_result
+     */
+    public $tableResult;
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
@@ -85,7 +95,7 @@ class TargetCheckEditForm extends CFormModel {
             array("port", "numerical", "integerOnly" => true, "min" => 0, "max" => 65536),
             array("protocol, overrideTarget, solutionTitle, resultTitle", "length", "max" => 1000),
             array("saveSolution, saveResult", "boolean"),
-            array("inputs, result, solutions, solution, poc, links", "safe"),
+            array("inputs, result, solutions, solution, poc, links, attachmentTitles, tableResult", "safe"),
 		);
 	}
 }

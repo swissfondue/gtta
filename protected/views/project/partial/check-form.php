@@ -315,7 +315,7 @@
                         if ($check->table_result) {
                             $table = new ResultTable();
                             $table->parse($check->table_result);
-                            echo $this->renderPartial("/project/target/check/tableresult", array("table" => $table));
+                            echo $this->renderPartial("/project/target/check/tableresult", array("table" => $table, "check" => $check));
                         }
                     ?>
                 </div>
@@ -476,10 +476,14 @@
                             <?php if ($check->attachments): ?>
                                 <?php foreach ($check->attachments as $attachment): ?>
                                     <tr data-path="<?php echo $attachment->path; ?>" data-control-url="<?php echo $this->createUrl("project/controlattachment"); ?>">
-                                        <td class="name">
-                                            <a href="<?php echo $this->createUrl("project/attachment", array("path" => $attachment->path)); ?>"><?php echo CHtml::encode($attachment->name); ?></a>
+                                        <td class="info">
+                                            <span contenteditable="true" class="single-line title" onblur="$(this).siblings('input').val($(this).text());">
+                                                <?php echo CHtml::encode($attachment->title); ?>
+                                            </span>
+                                            <input type="hidden" name="TargetCheckEditForm_<?php echo $check->id; ?>[attachmentTitles][]" data-path="<?php echo $attachment->path; ?>" value="<?php echo CHtml::encode($attachment->title); ?>">
                                         </td>
                                         <td class="actions">
+                                            <a href="<?php echo $this->createUrl("project/attachment", array("path" => $attachment->path)); ?>" title="<?php echo Yii::t("app", "Download"); ?>"><i class="icon icon-download"></i></a>
                                             <a href="#del" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="user.check.delAttachment('<?php echo $attachment->path; ?>');"><i class="icon icon-remove"></i></a>
                                         </td>
                                     </tr>

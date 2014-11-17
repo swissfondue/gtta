@@ -2112,6 +2112,10 @@ class ProjectController extends Controller {
                 $model->links = null;
             }
 
+            if ($model->tableResult == "") {
+                $model->tableResult = null;
+            }
+
             $targetCheck->user_id = Yii::app()->user->id;
             $targetCheck->language_id = $language->id;
             $targetCheck->override_target = $model->overrideTarget;
@@ -2167,6 +2171,7 @@ class ProjectController extends Controller {
                 $targetCheck->result = $model->result;
             }
 
+            $targetCheck->table_result = $model->tableResult;
             $targetCheck->save();
 
             // delete old solutions
@@ -2259,6 +2264,24 @@ class ProjectController extends Controller {
                         $targetCheck->solution_title = $model->solutionTitle;
                         $targetCheck->save();
                     }
+                }
+            }
+
+            if (count($model->attachmentTitles)) {
+                foreach ($model->attachmentTitles as $title) {
+                    $decodedTitle = json_decode($title);
+
+                    $attachment = TargetCheckAttachment::model()->findByAttributes(array(
+                        "path" => $decodedTitle->path,
+                        "target_check_id" => $targetCheck->id,
+                    ));
+
+                    if (!$attachment) {
+                        throw new CHttpException(404, 'Attachment not found.');
+                    }
+
+                    $attachment->title = $decodedTitle->title;
+                    $attachment->save();
                 }
             }
 
@@ -2646,6 +2669,25 @@ class ProjectController extends Controller {
                 $customCheck->rating = $form->rating;
                 $customCheck->poc = $form->poc;
                 $customCheck->links = $form->links;
+
+                if (count($form->attachmentTitles)) {
+                    foreach ($form->attachmentTitles as $title) {
+                        $decodedTitle = json_decode($title);
+
+                        $attachment = TargetCustomCheckAttachment::model()->findByAttributes(array(
+                            "path" => $decodedTitle->path,
+                            "target_custom_check_id" => $customCheck->id,
+                        ));
+
+                        if (!$attachment) {
+                            throw new CHttpException(404, 'Attachment not found.');
+                        }
+
+                        $attachment->title = $decodedTitle->title;
+                        $attachment->save();
+                    }
+                }
+
                 $customCheck->save();
 
                 $response->addData("rating", $customCheck->rating);
@@ -2991,6 +3033,7 @@ class ProjectController extends Controller {
             $attachment = new TargetCheckAttachment();
             $attachment->target_check_id = $targetCheck->id;
             $attachment->name = $model->attachment->name;
+            $attachment->title = $model->attachment->name;
             $attachment->type = $model->attachment->type;
             $attachment->size = $model->attachment->size;
             $attachment->path = hash('sha256', $attachment->name . rand() . time());
@@ -2999,9 +3042,11 @@ class ProjectController extends Controller {
             $model->attachment->saveAs(Yii::app()->params['attachments']['path'] . '/' . $attachment->path);
 
             $response->addData('name', CHtml::encode($attachment->name));
+            $response->addData('title', CHtml::encode($attachment->title));
             $response->addData('url', $this->createUrl('project/attachment', array( 'path' => $attachment->path )));
             $response->addData('path', $attachment->path);
             $response->addData('controlUrl', $this->createUrl('project/controlattachment'));
+            $response->addData('targetCheck', $targetCheck->id);
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
@@ -3093,6 +3138,7 @@ class ProjectController extends Controller {
             $attachment->project_id = $project->id;
             $attachment->gt_check_id = $check->id;
             $attachment->name = $model->attachment->name;
+            $attachment->title = $model->attachment->name;
             $attachment->type = $model->attachment->type;
             $attachment->size = $model->attachment->size;
             $attachment->path = hash('sha256', $attachment->name . rand() . time());
@@ -3101,6 +3147,7 @@ class ProjectController extends Controller {
             $model->attachment->saveAs(Yii::app()->params['attachments']['path'] . '/' . $attachment->path);
 
             $response->addData('name', CHtml::encode($attachment->name));
+            $response->addData('title', CHtml::encode($attachment->title));
             $response->addData('url', $this->createUrl('project/gtattachment', array('path' => $attachment->path)));
             $response->addData('path', $attachment->path);
             $response->addData('controlUrl', $this->createUrl('project/gtcontrolattachment'));
@@ -4066,6 +4113,10 @@ class ProjectController extends Controller {
                 $model->result = null;
             }
 
+            if ($model->tableResult == '') {
+                $model->tableResult = null;
+            }
+
             $projectCheck->user_id = Yii::app()->user->id;
             $projectCheck->language_id = $language->id;
             $projectCheck->target = $model->target;
@@ -4074,6 +4125,7 @@ class ProjectController extends Controller {
             $projectCheck->result = $model->result;
             $projectCheck->status = ProjectGtCheck::STATUS_FINISHED;
             $projectCheck->rating = $model->rating;
+            $projectCheck->table_result = $model->tableResult;
             $projectCheck->save();
 
             // delete solutions
@@ -4171,6 +4223,25 @@ class ProjectController extends Controller {
                         $projectCheck->solution_title = $model->solutionTitle;
                         $projectCheck->save();
                     }
+                }
+            }
+
+            if (count($model->attachmentTitles)) {
+                foreach ($model->attachmentTitles as $title) {
+                    $decodedTitle = json_decode($title);
+
+                    $attachment = ProjectGtCheckAttachment::model()->findByAttributes(array(
+                        'path' => $decodedTitle->path,
+                        'project_id' => $project->id,
+                        'gt_check_id' => $check->id,
+                    ));
+
+                    if (!$attachment) {
+                        throw new CHttpException(404, 'Attachment not found.');
+                    }
+
+                    $attachment->title = $decodedTitle->title;
+                    $attachment->save();
                 }
             }
 
@@ -5243,6 +5314,7 @@ class ProjectController extends Controller {
             $attachment = new TargetCustomCheckAttachment();
             $attachment->target_custom_check_id = $customCheck->id;
             $attachment->name = $model->attachment->name;
+            $attachment->title = $model->attachment->name;
             $attachment->type = $model->attachment->type;
             $attachment->size = $model->attachment->size;
             $attachment->path = hash("sha256", $attachment->name . rand() . time());
@@ -5251,9 +5323,11 @@ class ProjectController extends Controller {
             $model->attachment->saveAs(Yii::app()->params["attachments"]["path"] . "/" . $attachment->path);
 
             $response->addData("name", CHtml::encode($attachment->name));
+            $response->addData("title", CHtml::encode($attachment->title));
             $response->addData("url", $this->createUrl("project/customattachment", array("path" => $attachment->path)));
             $response->addData("path", $attachment->path);
             $response->addData("controlUrl", $this->createUrl("project/controlcustomattachment"));
+            $response->addData("customCheck", $customCheck->id);
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
