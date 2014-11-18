@@ -213,7 +213,7 @@ class CheckManager {
      */
     public function prepareSharing(Check $check) {
         if ($check->status != Check::STATUS_INSTALLED) {
-            throw new Exception("Invalid check.");
+            return;
         }
 
         $pm = new PackageManager();
