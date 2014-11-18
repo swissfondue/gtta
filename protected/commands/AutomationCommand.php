@@ -455,8 +455,6 @@ class AutomationCommand extends ConsoleCommand {
             exit();
         }
 
-        ProcessManager::backgroundExec('logger "automation started!"');
-
         // one instance check
         $fp = fopen(Yii::app()->params["automation"]["lockFile"], "w");
         
