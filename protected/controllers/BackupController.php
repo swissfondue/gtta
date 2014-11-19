@@ -223,7 +223,7 @@ class BackupController extends Controller {
      * Backup database.
      */
     private function _backupDatabase($dbPath, $zip) {
-        $dumpPath = Yii::app()->params['tmpPath'] . '/' . hash('sha256', rand() . time());
+        $dumpPath = Yii::app()->params['backups']['tmpFilesPath'] . '/' . hash('sha256', rand() . time());
         $dump     = fopen($dumpPath, 'w');
 
         // backup tables
@@ -249,7 +249,8 @@ class BackupController extends Controller {
         try {
             $backupName = Yii::app()->name . ' ' . Yii::t('app', 'Backup') . ' ' . date('Ymd-Hi');
             $fileName = md5($backupName . rand() . time());
-            $backupPath = Yii::app()->params['tmpPath'] . '/' . $fileName . '.zip';
+            FileManager::createDir(Yii::app()->params['backups']['tmpFilesPath'], 0777);
+            $backupPath = Yii::app()->params['backups']['tmpFilesPath'] . '/' . $fileName . '.zip';
 
             $zip = new ZipArchive();
 

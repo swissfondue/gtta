@@ -76,7 +76,7 @@ class ReportController extends Controller {
         imagefilledpolygon($image, $bottomArrow, count($bottomArrow) / 2, $color);
 
         $hashName = hash('sha256', rand() . time() . rand());
-        $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName . '.png';
+        $filePath = Yii::app()->params["reports"]["tmpFilesPath"] . '/' . $hashName . '.png';
 
         imagepng($image, $filePath, 0);
         imagedestroy($image);
@@ -170,7 +170,7 @@ class ReportController extends Controller {
         $this->_centerImageText($image, Yii::t('app', 'Low Risk') . ' (' . $this->project['checksLow'] . ')', $font, $lineColor, 10, 390, 290, 180);
 
         $hashName = hash('sha256', rand() . time() . rand());
-        $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName . '.png';
+        $filePath = Yii::app()->params["reports"]["tmpFilesPath"] . '/' . $hashName . '.png';
 
         imagepng($image, $filePath, 0);
         imagedestroy($image);
@@ -2280,6 +2280,8 @@ class ReportController extends Controller {
             $templateCategoryIds[] = $section->check_category_id;
         }
 
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
+
         if ($project->guided_test) {
             $data = $this->_gtProjectReport($templateCategoryIds, $project, $language);
         } else {
@@ -2328,7 +2330,7 @@ class ReportController extends Controller {
                 if ($template->header_image_type == 'image/png')
                     $extension = 'png';
 
-                $filePath = Yii::app()->params['tmpPath'] . '/' . $template->header_image_path . '.' . $extension;
+                $filePath = Yii::app()->params['reports']['tmpFilesPath'] . '/' . $template->header_image_path . '.' . $extension;
 
                 if (@copy(
                     Yii::app()->params['reports']['headerImages']['path'] . '/' . $template->header_image_path,
@@ -2358,7 +2360,7 @@ class ReportController extends Controller {
                 if ($client->logo_type == 'image/png')
                     $extension = 'png';
 
-                $filePath = Yii::app()->params['tmpPath'] . '/' . $client->logo_path . '.' . $extension;
+                $filePath = Yii::app()->params['clientLogos']['tmpFilesPath'] . '/' . $client->logo_path . '.' . $extension;
 
                 if (@copy(
                     Yii::app()->params['clientLogos']['path'] . '/' . $client->logo_path,
@@ -3108,7 +3110,7 @@ class ReportController extends Controller {
         }
 
         $hashName = hash('sha256', rand() . time() . $fileName);
-        $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
+        $filePath = Yii::app()->params['reports']['tmpFilesPath'] . '/' . $hashName;
 
         $this->rtf->save($filePath);
 
@@ -3136,7 +3138,7 @@ class ReportController extends Controller {
             $reportFilePath = $data['path'];
             $fileName = $data['zipName'];
             $hashName = hash('sha256', rand() . time() . $fileName);
-            $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
+            $filePath = Yii::app()->params['reports']['tmpFilesPath'] . '/' . $hashName;
 
             $zip = new ZipArchive();
 
@@ -3709,7 +3711,7 @@ class ReportController extends Controller {
 
         $fileName = Yii::t('app', 'Projects Comparison') . '.rtf';
         $hashName = hash('sha256', rand() . time() . $fileName);
-        $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
+        $filePath = Yii::app()->params['reports']['tmpFilesPath'] . '/' . $hashName;
 
         $this->rtf->save($filePath);
 
@@ -3797,7 +3799,7 @@ class ReportController extends Controller {
         imagecopyresampled($image, $scale, 0, 0, 0, 0, 301, 30, 301, 30);
 
         $hashName = hash('sha256', rand() . time() . rand());
-        $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName . '.png';
+        $filePath = Yii::app()->params['reports']['tmpFilesPath'] . '/' . $hashName . '.png';
 
         imagepng($image, $filePath, 0);
         imagedestroy($image);
@@ -4272,7 +4274,7 @@ class ReportController extends Controller {
         if (!$fullReport && !$findWeakest) {
             $fileName = Yii::t('app', 'Degree of Fulfillment') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
             $hashName = hash('sha256', rand() . time() . $fileName);
-            $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
+            $filePath = Yii::app()->params['reports']['tmpFilesPath'] . '/' . $hashName;
 
             $this->rtf->save($filePath);
 
@@ -4787,7 +4789,7 @@ class ReportController extends Controller {
         if (!$fullReport) {
             $fileName = Yii::t('app', 'Risk Matrix') . ' - ' . $project->name . ' (' . $project->year . ').rtf';
             $hashName = hash('sha256', rand() . time() . $fileName);
-            $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
+            $filePath = Yii::app()->params['reports']['tmpFilesPath'] . '/' . $hashName;
 
             $this->rtf->save($filePath);
 
@@ -5780,7 +5782,7 @@ class ReportController extends Controller {
         $section->writeText(Yii::t("app", "Summary") . ': ' . $project->trackedTime . ' h', $this->h3Font, $this->rightPar);
 
         $hashName = hash('sha256', rand() . time() . $fileName);
-        $filePath = Yii::app()->params['tmpPath'] . '/' . $hashName;
+        $filePath = Yii::app()->params['reports']['tmpFilesPath'] . '/' . $hashName;
         $this->rtf->save($filePath);
 
         // give user a file
