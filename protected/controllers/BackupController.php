@@ -149,10 +149,7 @@ class BackupController extends Controller {
      * Backup user packages.
      */
     private function _backupPackages($packagesPath, $zip) {
-        $packages = Package::model()->findAllByAttributes(array(
-            "system" => false
-        ));
-
+        $packages = Package::model()->findAll();
         $pm = new PackageManager();
 
         foreach ($packages as $package) {
