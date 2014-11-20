@@ -156,7 +156,7 @@ class VMManager {
             $this->runCommand("echo \"deb http://security.debian.org/ wheezy/updates main contrib non-free\" >> /etc/apt/sources.list");
             $this->runCommand("apt-get -y update");
 
-            $scriptsPath = Yii::app()->params["packages"]["path"]["user"]["scripts"];
+            $scriptsPath = Yii::app()->params["packages"]["path"]["scripts"];
             $filesPath = Yii::app()->params["automation"]["filesPath"];
 
             FileManager::createDir($this->virtualizePath($scriptsPath), 0777, true);
