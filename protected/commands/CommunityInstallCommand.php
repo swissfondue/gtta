@@ -12,8 +12,8 @@ class CommunityInstallCommand extends ConsoleCommand {
     private function _status($integrationKey) {
         $cm = new CheckManager();
         $pm = new PackageManager();
-
         $api = new CommunityApiClient($integrationKey);
+
         return $api->status(array(
             "checks" => $cm->getExternalIds(),
             "packages" => $pm->getExternalIds(),

@@ -577,11 +577,10 @@ class PackageManager {
      * Validate package by path
      * @param $package mixed package
      * @param $strict boolean strict dependency validation
-     * @param $allowSameName boolean
      * @return array
      * @throws Exception
      */
-    private function _validate($package, $strict=true, $allowSameName=false) {
+    private function _validate($package, $strict=true) {
         if (is_object($package) && $package instanceof Package) {
             $package = $this->_parse($this->getPath($package));
         }
@@ -590,17 +589,6 @@ class PackageManager {
 
         if (in_array($package[self::SECTION_NAME], $this->_getForbiddenPackageNames())) {
             throw new Exception(Yii::t("app", "Invalid package name."));
-        }
-
-        if (!$allowSameName) {
-            $pkg = Package::model()->findByAttributes(array(
-                "type" => $package[self::SECTION_TYPE],
-                "name" => $package[self::SECTION_NAME]
-            ));
-
-            if ($pkg) {
-                throw new Exception(Yii::t("app", "Package with the same name already exists."));
-            }
         }
 
         if ($package[self::SECTION_TYPE] == Package::TYPE_SCRIPT) {
@@ -639,7 +627,15 @@ class PackageManager {
             $package = $this->_parse($this->_getRootPath($packagePath));
             $this->_validate($package, false);
 
-            $pkg = new Package();
+            $pkg = Package::model()->findByAttributes(array(
+                "type" => $package[self::SECTION_TYPE],
+                "name" => $package[self::SECTION_NAME]
+            ));
+
+            if (!$pkg) {
+                $pkg = new Package();
+            }
+
             $pkg->file_name = $id;
             $pkg->name = $package[self::SECTION_NAME];
             $pkg->type = $package[self::SECTION_TYPE];
@@ -856,7 +852,7 @@ class PackageManager {
         try {
             $this->_extract($zipPath, $packagePath);
             $parsedPackage = $this->_parse($this->_getRootPath($packagePath));
-            $this->_validate($parsedPackage, false, true);
+            $this->_validate($parsedPackage, false);
 
             $destinationPath = $this->getPath($package);
             FileManager::rmDir($destinationPath);
@@ -883,7 +879,7 @@ class PackageManager {
             $this->_installDependencies($parsedPackage);
 
             // validate again
-            $this->_validate($parsedPackage, true, true);
+            $this->_validate($parsedPackage, true);
 
             // copy check to VM
             FileManager::createDir($vm->virtualizePath($destinationPath), 0755);
@@ -1093,7 +1089,7 @@ class PackageManager {
         }
 
         $this->_installDependencies($core);
-        $this->_validate($core, true, true);
+        $this->_validate($core, true);
 
         $criteria = new CDbCriteria();
         $criteria->addColumnCondition(array("status" => Package::STATUS_INSTALLED));
@@ -1103,7 +1099,7 @@ class PackageManager {
 
         foreach ($packages as $package) {
             $this->_installDependencies($package);
-            $this->_validate($package, true, true);
+            $this->_validate($package, true);
         }
     }
 
@@ -1135,6 +1131,14 @@ class PackageManager {
         }
 
         foreach ($package->dependencies as $dep) {
+            $checkDependency = Package::model()->findByAttributes(array(
+                "external_id" => $dep->id,
+            ));
+
+            if ($checkDependency) {
+                continue;
+            }
+
             $this->create($dep->id);
         }
 
