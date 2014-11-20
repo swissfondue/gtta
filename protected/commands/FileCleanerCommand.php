@@ -5,7 +5,7 @@
  */
 
 class FileCleanerCommand extends ConsoleCommand {
-    const LIFETIME = 3600;
+    const LIFETIME = 1;
 
     /**
      * Check if file is old
@@ -21,29 +21,24 @@ class FileCleanerCommand extends ConsoleCommand {
     }
 
     /**
-     * List of temporary check files
+     * List of temporary check files (input, target, result files)
      * @return array
      */
     private function _checksTmp() {
         $dir = Yii::app()->params['automation']['filesPath'];
-        $targetChecks = TargetCheck::model()->findAll();
+        $dirEntries = glob($dir . '/*');
+
+        // `glob` may return false, if permission denied, for example
+        if ($dirEntries == false) {
+            $dirEntries = array();
+        }
+
         $files = array();
 
-        foreach ($targetChecks as $check) {
-            if ($check->result_file) {
-                $filePath = $dir . '/' . $check->result_file;
-
-                if (file_exists($filePath) && self::_oldFile($filePath)) {
-                    $files[] = $filePath;
-                }
-            }
-
-            if ($check->target_file) {
-                $filePath = $dir . '/' . $check->target_file;
-
-                if (file_exists($filePath) && self::_oldFile($filePath)) {
-                    $files[] = $filePath;
-                }
+        // exclude dirs & new files
+        foreach ($dirEntries as $key => $entry) {
+            if (!is_dir($entry) && $this->_oldFile($entry)) {
+                $files[] = $entry;
             }
         }
 
@@ -57,13 +52,12 @@ class FileCleanerCommand extends ConsoleCommand {
     private function _reportTmp() {
         $files = glob(Yii::app()->params['reports']['tmpFilesPath'] . '/*');
 
-        // `glob` may return false, if permission denied, for example
         if ($files == false) {
             $files = array();
         }
 
         foreach ($files as $key => $file) {
-            if (!self::_oldFile($file)) {
+            if (!$this->_oldFile($file)) {
                 unset($files[$key]);
             }
         }
@@ -83,7 +77,7 @@ class FileCleanerCommand extends ConsoleCommand {
         }
 
         foreach ($files as $key => $file) {
-            if (!self::_oldFile($file)) {
+            if (!$this->_oldFile($file)) {
                 unset($files[$key]);
             }
         }
@@ -134,38 +128,37 @@ class FileCleanerCommand extends ConsoleCommand {
         $templatesDir = Yii::app()->params['reports']['file']['path'];
 
         $templates = ReportTemplate::model()->findAll();
-        $headers = array();
-        $templateFiles = array();
+        $paths = array();
 
         foreach ($templates as $template) {
             if ($template->type == ReportTemplate::TYPE_RTF) {
                 if ($template->header_image_path) {
-                    $headers[] = $headersDir . '/' . $template->header_image_path;
+                    $paths[] = $headersDir . '/' . $template->header_image_path;
                 }
             } else if ($template->type == ReportTemplate::TYPE_DOCX) {
                 if ($template->file_path) {
-                    $templateFiles[] = $templatesDir . '/' . $template->file_path;
+                    $paths[] = $templatesDir . '/' . $template->file_path;
                 }
             }
         }
 
-        $data = array();
-        $files = glob($headersDir . '/*');
+        $unused = array();
+        $headers = glob($headersDir . '/*');
 
-        if (!$files) {
-            $files = array();
+        if (!$headers) {
+            $headers = array();
         }
 
-        $data['headers'] = array_diff($files, $headers);
-        $files = glob($templatesDir . '/*');
+        $docs = glob($templatesDir . '/*');
 
-        if (!$files) {
-            $files = array();
+        if (!$docs) {
+            $docs = array();
         }
 
-        $data['templates'] = array_diff($files, $templateFiles);
+        $files = array_merge($headers, $docs);
+        $unused = array_diff($files, $paths);
 
-        return $data;
+        return $unused;
     }
 
     /**
@@ -205,7 +198,7 @@ class FileCleanerCommand extends ConsoleCommand {
         }
 
         foreach ($files as $key => $file) {
-            if (!self::_oldFile($file)) {
+            if (!$this->_oldFile($file)) {
                 unset($files[$key]);
             }
         }
@@ -217,7 +210,7 @@ class FileCleanerCommand extends ConsoleCommand {
      * List of old temporary logos & unused client logos
      */
     private function _logos() {
-        return array_merge(self::_tmpLogos(), self::_unusedLogos());
+        return array_merge($this->_tmpLogos(), $this->_unusedLogos());
     }
 
     /**
@@ -247,8 +240,11 @@ class FileCleanerCommand extends ConsoleCommand {
      * Remove files
      * @param $files
      */
-    private function _clean($files) {
+    private function _clean() {
+        $files = func_get_args();
+
         foreach ($files as $category) {
+            error_log(print_r($category, 1));
             foreach ($category as $file) {
                 unlink($file);
             }
@@ -264,19 +260,15 @@ class FileCleanerCommand extends ConsoleCommand {
 
         if (flock($fp, LOCK_EX | LOCK_NB)) {
             try {
-                $files = array();
-
-                $reportTemplates = self::_reportTemplates();
-                $files['automation'] = self::_checksTmp();
-                $files['report_tmp'] = self::_reportTmp();
-                $files['backups'] = self::_backups();
-                $files['attachments'] = self::_attachments();
-                $files['headers'] = $reportTemplates['headers'];
-                $files['templates'] = $reportTemplates['templates'];
-                $files['logos'] = self::_logos();
-                $files['rating_images'] = self::_ratingImages();
-
-                $this->_clean($files);
+                $this->_clean(
+                    $this->_checksTmp(),
+                    $this->_reportTmp(),
+                    $this->_backups(),
+                    $this->_attachments(),
+                    $this->_reportTemplates(),
+                    $this->_logos(),
+                    $this->_ratingImages()
+                );
             } catch (Exception $e) {
                 Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
             }
