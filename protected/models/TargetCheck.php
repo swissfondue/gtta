@@ -273,4 +273,33 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
 
         return $data;
     }
+
+    /**
+     * Returns scripts_to_start as a list of CheckScript objects
+     * @return array|null
+     */
+    public function getScriptsToStart() {
+        $scriptIds = PgArrayManager::pgArrayDecode($this->scripts_to_start);
+
+        if (empty($scriptIds)) {
+            return null;
+        }
+
+        $scripts = CheckScript::model()->with(
+            array(
+                'check' => array(
+                    'with' => array(
+                        'targetChecks' => array(
+                            'alias' => 'ttc',
+                            'joinType' => 'LEFT JOIN',
+                            'on' => 'ttc.id = :target_check_id',
+                            'params' => array('target_check_id' => $this->id)
+                        )
+                    )
+                ),
+            )
+        )->findAllByAttributes(array('id' => $scriptIds));
+
+        return $scripts;
+    }
 }

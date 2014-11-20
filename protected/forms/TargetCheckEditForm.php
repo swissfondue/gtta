@@ -21,6 +21,11 @@ class TargetCheckEditForm extends CFormModel {
      */
     public $port;
 
+    /**
+     * @var array scriptsToStart
+     */
+    public $scriptsToStart;
+
 	/**
      * @var string resultTitle.
      */
@@ -95,7 +100,7 @@ class TargetCheckEditForm extends CFormModel {
             array("port", "numerical", "integerOnly" => true, "min" => 0, "max" => 65536),
             array("protocol, overrideTarget, solutionTitle, resultTitle", "length", "max" => 1000),
             array("saveSolution, saveResult", "boolean"),
-            array("inputs, result, solutions, solution, poc, links, attachmentTitles, tableResult", "safe"),
+            array("inputs, result, solutions, solution, poc, links, attachmentTitles, tableResult, scriptsToStart", "safe"),
 		);
 	}
 }

@@ -2116,6 +2116,28 @@ class ProjectController extends Controller {
                 $model->tableResult = null;
             }
 
+            $scripts = array();
+
+            if (!empty($model->scriptsToStart)) {
+                foreach ($model->scriptsToStart as $scriptId) {
+                    $criteria = new CDbCriteria();
+                    $criteria->addCondition('id = :id');
+                    $criteria->addCondition('check_id = :check_id');
+                    $criteria->params = array(
+                        'id' => $scriptId,
+                        'check_id' => $targetCheck->check->id
+                    );
+
+                    $script = CheckScript::model()->find($criteria);
+
+                    if ($script) {
+                        $scripts[] = $script->id;
+                    }
+                }
+            }
+
+            $model->scriptsToStart = PgArrayManager::pgArrayEncode($scripts);
+
             $targetCheck->user_id = Yii::app()->user->id;
             $targetCheck->language_id = $language->id;
             $targetCheck->override_target = $model->overrideTarget;
@@ -2172,6 +2194,7 @@ class ProjectController extends Controller {
             }
 
             $targetCheck->table_result = $model->tableResult;
+            $targetCheck->scripts_to_start = $model->scriptsToStart;
             $targetCheck->save();
 
             // delete old solutions

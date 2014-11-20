@@ -346,7 +346,11 @@ class AutomationCommand extends ConsoleCommand {
         Yii::app()->language = $language->code;
 
         $filesPath = Yii::app()->params['automation']['filesPath'];
-        $scripts = $check->check->scripts;
+        $scripts = $check->scriptsToStart;
+
+        if (!count($scripts)) {
+            $scripts = $check->check->scripts;
+        }
 
         foreach ($scripts as $script) {
             if (!$check->result) {

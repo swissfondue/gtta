@@ -567,7 +567,7 @@ function User()
          */
         this.getData = function (id) {
             var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, solutions, resultTitle, saveResult,
-                attachments, rating, data, solution, solutionTitle, saveSolution, poc, links;
+                attachments, rating, data, solution, solutionTitle, saveSolution, poc, links, scripts;
 
             row = $('div.check-form[data-type=check][data-id="' + id + '"]');
 
@@ -614,6 +614,16 @@ function User()
             result = _check.ckeditors["TargetCheckEditForm_" + id + "_result"] ?
                 _check.ckeditors["TargetCheckEditForm_" + id + "_result"].getData() :
                 $('textarea[name="TargetCheckEditForm_' + id + '[result]"]').val();
+
+            scripts = $('input[name^="TargetCheckEditForm_' + id + '[scriptsToStart]"]:checked', row).map(
+                function () {
+                    return {
+                        name: $(this).attr('name'),
+                        value: $(this).val()
+                    }
+                }
+            ).get();
+                
             saveResult = $('input[name="TargetCheckEditForm_' + id + '[saveResult]"]', row).is(":checked");
 
             if ($('textarea[name="TargetCheckEditForm_' + id + '[poc]"]', row)) {
@@ -716,6 +726,10 @@ function User()
 
             for (i = 0; i < attachments.length; i++) {
                 data.push(attachments[i]);
+            }
+
+            for (i = 0; i < scripts.length; i++) {
+                data.push(scripts[i]);
             }
 
             return data;
