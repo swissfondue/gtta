@@ -111,8 +111,17 @@ return array(
             "pidsPath" => "/tmp",
         ),
 
+        // cleans unused files
+        "filecleaner" => array(
+            'lockFile' => '/tmp/gtta.file-cleaner'
+        ),
+
         "yiicPath" => dirname(__FILE__) . "/../",
         "attachments" => $mainConfig["params"]["attachments"],
+        "backups" => $mainConfig["params"]["backups"],
+        "reports" => $mainConfig["params"]["reports"],
+        "clientLogos" => $mainConfig["params"]["clientLogos"],
+        "systemLogo" => $mainConfig["params"]["systemLogo"],
 
         "api" => array(
             "url" => "http://gta-update.does-it.net:8080",

@@ -190,7 +190,8 @@ class ClientController extends Controller
                 $client->save();
 
                 if ($newRecord && $model->logoPath) {
-                    $filePath = Yii::app()->params["tmpPath"] . "/" . $model->logoPath;
+                    FileManager::createDir(Yii::app()->params["clientLogos"]["tmpFilesPath"], 0777);
+                    $filePath = Yii::app()->params["clientLogos"]["tmpFilesPath"] . "/" . $model->logoPath;
 
                     if (file_exists($filePath)) {
                         $client->logo_path = $model->logoPath;
@@ -387,7 +388,8 @@ class ClientController extends Controller
                 $model->image->saveAs(Yii::app()->params["clientLogos"]["path"] . "/" . $path);
                 $response->addData("url", $this->createUrl("client/logo", array("id" => $client->id)));
             } else {
-                $model->image->saveAs(Yii::app()->params["tmpPath"] . "/" . $path);
+                FileManager::createDir(Yii::app()->params["clientLogos"]["tmpFilesPath"], 0777);
+                $model->image->saveAs(Yii::app()->params["clientLogos"]["tmpFilesPath"] . "/" . $path);
                 $response->addData("url", $this->createUrl("client/tmplogo", array("path" => $path)));
                 $response->addData("path", $path);
             }

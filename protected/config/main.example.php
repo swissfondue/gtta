@@ -408,11 +408,13 @@ return array(
 
         "backups" => array(
             "maxSize" => 100 * 1024 * 1024, // 100 megabytes
+            'tmpFilesPath' => '/tmp/backups',
         ),
 
         "clientLogos" => array(
             "path" => BASE_DIR . "/files/logos",
             "maxSize" => 10 * 1024 * 1024, // 10 megabytes
+            "tmpFilesPath" => '/tmp/logos'
         ),
 
         "systemLogo" => array(
@@ -462,6 +464,8 @@ return array(
                 "path" => BASE_DIR . "/files/report-templates",
                 "maxSize" => 10 * 1024 * 1024, // 10 megabytes
             ),
+
+            "tmpFilesPath" => "/tmp/report-files"
         ),
 
         "tmpPath" => "/tmp",
