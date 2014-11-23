@@ -9,6 +9,13 @@ class m140216_063143_22 extends CDbMigration {
      * @return bool
      */
     public function safeUp() {
+        // skip for new version builds
+        $system = $this->getDbConnection()->createCommand("SELECT version FROM system")->query();
+
+        if (!$system->count()) {
+            return true;
+        }
+        
         $this->insert("packages", array(
             "name" => "shell",
             "type" => Package::TYPE_SCRIPT,

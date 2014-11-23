@@ -31,7 +31,7 @@ class m140130_145541_15 extends CDbMigration {
             ));
 
 
-        if ($package) {
+        if ($package->count()) {
             foreach ($package as $pkg) {
                 $package = $pkg["id"];
                 break;

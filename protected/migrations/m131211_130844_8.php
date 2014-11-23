@@ -137,11 +137,10 @@ class m131211_130844_8 extends CDbMigration {
             array("www_file_scanner", Package::TYPE_SCRIPT),
         );
 
-        // new versions workaround - in new versions the system will fetch packages from the community server,
-        // so we don't need to insert them here
+        // skip for new version builds
         $system = $this->getDbConnection()->createCommand("SELECT version FROM system")->query();
 
-        if (!$system || !$system["version"]) {
+        if (!$system->count()) {
             return true;
         }
 
