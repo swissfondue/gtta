@@ -15,7 +15,7 @@ class m140213_020747_20 extends CDbMigration {
         if (!$system->count()) {
             return true;
         }
-        
+
         $this->insert("packages", array(
             "name" => "telnet_banner",
             "type" => Package::TYPE_SCRIPT,

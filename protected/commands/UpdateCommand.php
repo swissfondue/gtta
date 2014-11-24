@@ -10,7 +10,6 @@ class UpdateCommand extends ConsoleCommand {
     const ARCHIVE_FILE = "gtta.zip";
     const SIGNATURE_FILE = "gtta.sig";
     const WEB_DIRECTORY = "web";
-    const SCRIPTS_DIRECTORY = "scripts";
     const TOOLS_DIRECTORY = "tools";
     const INSTALL_SCRIPTS_DIRECTORY = "install";
     const INSTALL_SCRIPT = "install.sh";
@@ -65,16 +64,10 @@ class UpdateCommand extends ConsoleCommand {
         $dstDir = $params["versions"] . "/" . $targetVersion;
 
         FileManager::copyRecursive($srcDir . "/" . self::WEB_DIRECTORY, $dstDir . "/" . self::WEB_DIRECTORY);
-        FileManager::copyRecursive($srcDir . "/" . self::SCRIPTS_DIRECTORY, $dstDir . "/" . self::SCRIPTS_DIRECTORY);
         FileManager::copyRecursive($srcDir . "/" . self::TOOLS_DIRECTORY, $dstDir . "/" . self::TOOLS_DIRECTORY);
 
         $protectedDir = $dstDir . "/" . self::WEB_DIRECTORY . "/protected";
-
         FileManager::chmod($protectedDir . "/yiic", 0750);
-        FileManager::chmod($dstDir . "/" . self::TOOLS_DIRECTORY . "/backup.sh", 0750);
-        FileManager::chmod($dstDir . "/" . self::TOOLS_DIRECTORY . "/setup/system/gtta-init.sh", 0750);
-        FileManager::chmod($dstDir . "/" . self::TOOLS_DIRECTORY . "/setup/system/gtta-setup.sh", 0750);
-
         ProcessManager::runCommand(sprintf("chown -R %s:%s %s", self::GTTA_USER, self::GTTA_GROUP, $dstDir));
 
         // update configuration
@@ -233,7 +226,6 @@ class UpdateCommand extends ConsoleCommand {
         $versionDir = Yii::app()->params["update"]["versions"] . "/" . $targetVersion;
         FileManager::createDir($versionDir, 0750);
         FileManager::createDir($versionDir . "/" . self::WEB_DIRECTORY, 0750);
-        FileManager::createDir($versionDir . "/" . self::SCRIPTS_DIRECTORY, 0750);
         FileManager::createDir($versionDir . "/" . self::TOOLS_DIRECTORY, 0750);
     }
 

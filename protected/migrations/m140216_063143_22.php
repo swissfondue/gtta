@@ -15,7 +15,7 @@ class m140216_063143_22 extends CDbMigration {
         if (!$system->count()) {
             return true;
         }
-        
+
         $this->insert("packages", array(
             "name" => "shell",
             "type" => Package::TYPE_SCRIPT,

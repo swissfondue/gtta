@@ -15,7 +15,7 @@ class m140214_013058_21 extends CDbMigration {
         if (!$system->count()) {
             return true;
         }
-        
+
         $this->insert("packages", array(
             "name" => "telnet_bruteforce",
             "type" => Package::TYPE_SCRIPT,
