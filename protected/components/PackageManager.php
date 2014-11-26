@@ -249,7 +249,11 @@ class PackageManager {
      * @return string
      */
     private function _getRootPath($path) {
-        $contents = FileManager::getDirectoryContents($path);
+        try {
+            $contents = FileManager::getDirectoryContents($path);
+        } catch (Exception $e) {
+            throw new CHttpException(404, Yii::t("app", "Package not found"));
+        }
 
         if (count($contents) == 1 && is_dir($path . "/" . $contents[0])) {
             $path = $path . "/" . $contents[0];
