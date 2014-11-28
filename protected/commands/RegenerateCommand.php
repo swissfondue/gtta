@@ -9,22 +9,22 @@ class RegenerateCommand extends ConsoleCommand {
      * @param array $args list of command-line arguments.
      */
     public function run($args) {
-        // one instance check
-        if ($this->lock()) {
-            if ($this->_system->status == System::STATUS_REGENERATE_SANDBOX) {
-                try {
-                    $vm = new VMManager();
-                    $vm->regenerate();
-                } catch (Exception $e) {
-                    Yii::log($e->getMessage(), CLogger::LEVEL_ERROR);
-                }
+        $this->start();
+    }
 
-                SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_REGENERATE_SANDBOX);
+    /**
+     * Execute
+     */
+    protected function exec() {
+        if ($this->_system->status == System::STATUS_REGENERATE_SANDBOX) {
+            try {
+                $vm = new VMManager();
+                $vm->regenerate();
+            } catch (Exception $e) {
+                Yii::log($e->getMessage(), CLogger::LEVEL_ERROR);
             }
 
-            $this->unlock();
+            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_REGENERATE_SANDBOX);
         }
-
-        $this->closeLockHandle();
     }
 } 

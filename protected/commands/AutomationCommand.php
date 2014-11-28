@@ -458,25 +458,25 @@ class AutomationCommand extends ConsoleCommand {
             exit();
         }
 
-        // one instance check
-        if ($this->lock()) {
-            for ($i = 0; $i < 10; $i++) {
-                $this->_system->refresh();
+        $this->start();
+    }
 
-                if ($this->_system->status == System::STATUS_RUNNING) {
-                    $this->_processStartingChecks();
-                    $this->_processStoppingChecks();
-                    $this->_processRunningChecks();
+    /**
+     * Execute
+     */
+    protected function exec() {
+        for ($i = 0; $i < 10; $i++) {
+            $this->_system->refresh();
 
-                    $this->_checkSystemIsRunning();
-                }
+            if ($this->_system->status == System::STATUS_RUNNING) {
+                $this->_processStartingChecks();
+                $this->_processStoppingChecks();
+                $this->_processRunningChecks();
 
-                sleep(5);
+                $this->_checkSystemIsRunning();
             }
 
-            $this->unlock();
+            sleep(5);
         }
-
-        $this->closeLockHandle();
     }
 }

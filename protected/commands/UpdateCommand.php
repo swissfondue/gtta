@@ -365,16 +365,17 @@ class UpdateCommand extends ConsoleCommand {
      * @param array $args list of command-line arguments.
      */
     public function run($args) {
-        if ($this->lock()) {
-            try {
-                $this->_update();
-            } catch (Exception $e) {
-                Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
-            }
+        $this->start();
+    }
 
-            $this->unlock();
+    /**
+     * Execute
+     */
+    protected function exec() {
+        try {
+            $this->_update();
+        } catch (Exception $e) {
+            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
         }
-
-        $this->closeLockHandle();
     }
 }

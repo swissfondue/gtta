@@ -51,12 +51,13 @@ class EmailCommand extends ConsoleCommand
      * @param array $args list of command-line arguments.
      */
     public function run($args) {
-        // one instance check
-        if ($this->lock()) {
-            $this->_sendEmails();
-            $this->unlock();
-        }
+        $this->start();
+    }
 
-        $this->closeLockHandle();
+    /**
+     * Execute
+     */
+    protected function exec() {
+        $this->_sendEmails();
     }
 }

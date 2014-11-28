@@ -250,24 +250,25 @@ class FileCleanerCommand extends ConsoleCommand {
      * @param array $args
      */
     public function run($args) {
-        if ($this->lock()) {
-            try {
-                $this->_clean(array_merge(
-                    $this->_getCheckFiles(),
-                    $this->_getReportFiles(),
-                    $this->_getBackups(),
-                    $this->_getAttachments(),
-                    $this->_getReportTemplates(),
-                    $this->_getLogos(),
-                    $this->_getRatingImages()
-                ));
-            } catch (Exception $e) {
-                Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
-            }
+        $this->start();
+    }
 
-            $this->unlock();
+    /**
+     * Execute
+     */
+    protected function exec() {
+        try {
+            $this->_clean(array_merge(
+                $this->_getCheckFiles(),
+                $this->_getReportFiles(),
+                $this->_getBackups(),
+                $this->_getAttachments(),
+                $this->_getReportTemplates(),
+                $this->_getLogos(),
+                $this->_getRatingImages()
+            ));
+        } catch (Exception $e) {
+            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
         }
-
-        $this->closeLockHandle();
     }
 }

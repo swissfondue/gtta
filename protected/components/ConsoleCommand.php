@@ -115,4 +115,16 @@ class ConsoleCommand extends CConsoleCommand {
 
         SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_RUNNING);
     }
+
+    /**
+     * Locks and executes the command
+     */
+    protected function start() {
+        if ($this->lock()) {
+            $this->exec();
+            $this->unlock();
+        }
+
+        $this->closeLockHandle();
+    }
 }

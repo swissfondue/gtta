@@ -19,16 +19,17 @@ class StatsCommand extends ConsoleCommand {
      * @param array $args list of command-line arguments.
      */
     public function run($args) {
-        if ($this->lock()) {
-            try {
-                $this->_process();
-            } catch (Exception $e) {
-                Yii::log($e->getMessage(), "error");
-            }
+        $this->start();
+    }
 
-            $this->unlock();
+    /**
+     * Execute
+     */
+    protected function exec() {
+        try {
+            $this->_process();
+        } catch (Exception $e) {
+            Yii::log($e->getMessage(), "error");
         }
-
-        $this->closeLockHandle();
     }
 }

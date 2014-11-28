@@ -53,38 +53,38 @@ class PackageCommand extends ConsoleCommand {
      * @param array $args list of command-line arguments.
      */
     public function run($args) {
-        // one instance check
-        if ($this->lock()) {
-            for ($i = 0; $i < 10; $i++) {
-                $this->_system->refresh();
+        $this->start();
+    }
 
-                if ($this->_system->status == System::STATUS_PACKAGE_MANAGER) {
-                    try {
-                        $this->_installPackages();
-                        $this->_deletePackages();
-                    } catch (Exception $e) {
-                        Yii::log($e->getMessage(), CLogger::LEVEL_ERROR);
-                    }
+    /**
+     * Execute
+     */
+    protected function exec() {
+        for ($i = 0; $i < 10; $i++) {
+            $this->_system->refresh();
 
-                    $criteria = new CDbCriteria();
-                    $criteria->addInCondition("status", array(Package::STATUS_INSTALL, Package::STATUS_DELETE));
-                    $packages = Package::model()->findAll($criteria);
-
-                    if (count($packages) == 0) {
-                        try {
-                            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER);
-                        } catch (Exception $e) {
-                            // swallow exceptions
-                        }
-                    }
+            if ($this->_system->status == System::STATUS_PACKAGE_MANAGER) {
+                try {
+                    $this->_installPackages();
+                    $this->_deletePackages();
+                } catch (Exception $e) {
+                    Yii::log($e->getMessage(), CLogger::LEVEL_ERROR);
                 }
 
-                sleep(5);
+                $criteria = new CDbCriteria();
+                $criteria->addInCondition("status", array(Package::STATUS_INSTALL, Package::STATUS_DELETE));
+                $packages = Package::model()->findAll($criteria);
+
+                if (count($packages) == 0) {
+                    try {
+                        SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER);
+                    } catch (Exception $e) {
+                        // swallow exceptions
+                    }
+                }
             }
 
-            $this->unlock();
+            sleep(5);
         }
-
-        $this->closeLockHandle();
     }
 } 

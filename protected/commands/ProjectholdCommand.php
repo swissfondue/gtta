@@ -36,11 +36,13 @@ class ProjectholdCommand extends ConsoleCommand
      * @param array $args list of command-line arguments.
      */
     public function run($args) {
-        if ($this->lock()) {
-            $this->_process();
-            $this->unlock();
-        }
+        $this->start();
+    }
 
-        $this->closeLockHandle();
+    /**
+     * Execute
+     */
+    protected function exec() {
+        $this->_process();
     }
 }
