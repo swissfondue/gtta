@@ -10,9 +10,7 @@ class RegenerateCommand extends ConsoleCommand {
      */
     public function run($args) {
         // one instance check
-        $fp = fopen(Yii::app()->params["regenerate"]["lockFile"], "w");
-
-        if (flock($fp, LOCK_EX | LOCK_NB)) {
+        if ($this->lock()) {
             if ($this->_system->status == System::STATUS_REGENERATE_SANDBOX) {
                 try {
                     $vm = new VMManager();
@@ -24,9 +22,9 @@ class RegenerateCommand extends ConsoleCommand {
                 SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_REGENERATE_SANDBOX);
             }
 
-            flock($fp, LOCK_UN);
+            $this->unlock();
         }
 
-        fclose($fp);
+        $this->closeLockHandle();
     }
 } 

@@ -62,35 +62,11 @@ return array(
 
         // email sender
         "email" => array(
-            "lockFile" => "/tmp/gtta.email",
             "systemEmail" => "gtta.test@yandex.ru",
             "maxAttempts" => 3,
         ),
 
-        // vulnerability tracker
-        "vulntracker" => array(
-            "lockFile" => "/tmp/gtta.vulntracker",
-        ),
-
-        // project hold
-        "projectHold" => array(
-            "lockFile" => "/tmp/gtta.project-hold",
-        ),
-
-        "checkupdate" => array(
-            "lockFile" => "/tmp/gtta.check-update",
-        ),
-
-        "stats" => array(
-            "lockFile" => "/tmp/gtta.stats"
-        ),
-
-        "targetCheckSync" => array(
-            "lockFile" => "/tmp/gtta.target-check-sync"
-        ),
-
         "update" => array(
-            "lockFile" => "/tmp/gtta.update",
             "keyFile" => BASE_DIR . "/security/keys/update-server.pub",
             "directory" => "/tmp/gtta-update",
             "versions" => BASE_DIR . "/versions",
@@ -98,22 +74,11 @@ return array(
             "deployConfig" => BASE_DIR . "/config/gtta.ini",
         ),
 
-        "regenerate" => array(
-            "lockFile" => "/tmp/gtta.regenerate",
-        ),
-
         // checks automation
         "automation" => array(
             "minNotificationInterval" => 5 * 60, // 5 minutes
-            "lockFile" => "/tmp/gtta.automation",
-            "gtLockFile" => "/tmp/gtta.gt-automation",
             "filesPath" => BASE_DIR . "/files",
             "pidsPath" => "/tmp",
-        ),
-
-        // cleans unused files
-        "filecleaner" => array(
-            'lockFile' => '/tmp/gtta.file-cleaner'
         ),
 
         "yiicPath" => dirname(__FILE__) . "/../",
@@ -129,12 +94,6 @@ return array(
 
         "community" => array(
             "url" => "http://community.gtta.net",
-            "install" => array(
-                "lockFile" => "/tmp/gtta.community-install",
-            ),
-            "share" => array(
-                "lockFile" => "/tmp/gtta.community-share",
-            ),
         ),
 
         "packages" => $mainConfig["params"]["packages"],

@@ -8,6 +8,8 @@ class ConsoleCommand extends CConsoleCommand {
      * @var $_system System
      */
     protected $_system = null;
+    private $_lockFile = null;
+    private $_fileHandle = null;
 
     /**
      * Init a command object.
@@ -21,6 +23,54 @@ class ConsoleCommand extends CConsoleCommand {
 
         date_default_timezone_set($system->timezone);
         $this->_system = $system;
+        $this->_lockFile = $this->_lockFileName();
+    }
+
+    /**
+     * Returns lock file's name
+     * @return mixed|string
+     */
+    private function _lockFileName() {
+        $className = get_called_class();
+
+        $fileName = str_replace('Command', '', $className);
+        $fileName = preg_replace("/(?<=\\w)(?=[A-Z])/", "-$1", $fileName);
+        $fileName = Yii::app()->params['tmpPath'] . '/' . Yii::app()->name . '.' . $fileName;
+        $fileName = strtolower($fileName);
+
+        return $fileName;
+    }
+
+    /**
+     * Lock command lock file
+     * @return bool
+     */
+    protected function lock() {
+        $this->_fileHandle = fopen($this->_lockFile, "w");
+
+        if (flock($this->_fileHandle, LOCK_EX | LOCK_NB)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Unlock command lock file
+     */
+    protected function unlock() {
+        if ($this->_fileHandle) {
+            flock($this->_fileHandle, LOCK_UN);
+        }
+    }
+
+    /**
+     * Close lock file stream
+     */
+    protected function closeLockHandle() {
+        if ($this->_fileHandle) {
+            fclose($this->_fileHandle);
+        }
     }
 
     /**

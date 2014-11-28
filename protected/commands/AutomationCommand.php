@@ -459,9 +459,7 @@ class AutomationCommand extends ConsoleCommand {
         }
 
         // one instance check
-        $fp = fopen(Yii::app()->params["automation"]["lockFile"], "w");
-        
-        if (flock($fp, LOCK_EX | LOCK_NB)) {
+        if ($this->lock()) {
             for ($i = 0; $i < 10; $i++) {
                 $this->_system->refresh();
 
@@ -476,9 +474,9 @@ class AutomationCommand extends ConsoleCommand {
                 sleep(5);
             }
 
-            flock($fp, LOCK_UN);
+            $this->unlock();
         }
-        
-        fclose($fp);
+
+        $this->closeLockHandle();
     }
 }

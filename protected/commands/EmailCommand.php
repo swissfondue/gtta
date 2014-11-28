@@ -3,7 +3,7 @@
 /**
  * Email sender class. 
  */
-class EmailCommand extends CConsoleCommand
+class EmailCommand extends ConsoleCommand
 {
     /**
      * Sends emails from the database queue. 
@@ -52,13 +52,11 @@ class EmailCommand extends CConsoleCommand
      */
     public function run($args) {
         // one instance check
-        $fp = fopen(Yii::app()->params['email']['lockFile'], "w");
-        
-        if (flock($fp, LOCK_EX | LOCK_NB)) {
+        if ($this->lock()) {
             $this->_sendEmails();
-            flock($fp, LOCK_UN);
+            $this->unlock();
         }
-        
-        fclose($fp);
+
+        $this->closeLockHandle();
     }
 }

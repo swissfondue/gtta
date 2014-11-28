@@ -54,9 +54,7 @@ class PackageCommand extends ConsoleCommand {
      */
     public function run($args) {
         // one instance check
-        $fp = fopen(Yii::app()->params["packages"]["lockFile"], "w");
-
-        if (flock($fp, LOCK_EX | LOCK_NB)) {
+        if ($this->lock()) {
             for ($i = 0; $i < 10; $i++) {
                 $this->_system->refresh();
 
@@ -84,9 +82,9 @@ class PackageCommand extends ConsoleCommand {
                 sleep(5);
             }
 
-            flock($fp, LOCK_UN);
+            $this->unlock();
         }
 
-        fclose($fp);
+        $this->closeLockHandle();
     }
 } 

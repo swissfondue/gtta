@@ -482,7 +482,6 @@ return array(
             ),
             "tmpPath" => "/tmp/gtta-package",
             "maxSize" => 100 * 1024 * 1024, // 100 megabytes
-            "lockFile" => "/tmp/gtta.package",
         ),
 
         "filesPath" => VERSION_DIR . "/web/files",

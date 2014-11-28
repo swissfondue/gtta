@@ -166,18 +166,16 @@ class CommunityShareCommand extends ConsoleCommand {
      * @param array $args list of command-line arguments.
      */
     public function run($args) {
-        $fp = fopen(Yii::app()->params["community"]["share"]["lockFile"], "w");
-
-        if (flock($fp, LOCK_EX | LOCK_NB)) {
+        if ($this->lock()) {
             try {
                 $this->_share();
             } catch (Exception $e) {
                 Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
             }
 
-            flock($fp, LOCK_UN);
+            $this->unlock();
         }
-        
-        fclose($fp);
+
+        $this->closeLockHandle();
     }
 }

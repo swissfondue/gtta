@@ -250,9 +250,7 @@ class FileCleanerCommand extends ConsoleCommand {
      * @param array $args
      */
     public function run($args) {
-        $fp = fopen(Yii::app()->params["filecleaner"]["lockFile"], "w");
-
-        if (flock($fp, LOCK_EX | LOCK_NB)) {
+        if ($this->lock()) {
             try {
                 $this->_clean(array_merge(
                     $this->_getCheckFiles(),
@@ -267,9 +265,9 @@ class FileCleanerCommand extends ConsoleCommand {
                 Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
             }
 
-            flock($fp, LOCK_UN);
+            $this->unlock();
         }
 
-        fclose($fp);
+        $this->closeLockHandle();
     }
 }
