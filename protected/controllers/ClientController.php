@@ -503,7 +503,7 @@ class ClientController extends Controller
      * Get temporary logo.
      */
     public function actionTmpLogo($path) {
-        $filePath = Yii::app()->params["tmpPath"] . "/" . $path;
+        $filePath = Yii::app()->params["clientLogos"]["tmpFilesPath"] . "/" . $path;
 
         if (!file_exists($filePath)) {
             throw new CHttpException(404, Yii::t("app", "Logo not found."));
