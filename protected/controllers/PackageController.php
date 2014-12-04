@@ -270,7 +270,12 @@ class PackageController extends Controller {
         }
 
         $pm = new PackageManager();
-        $data = $pm->getData($package);
+
+        try {
+            $data = $pm->getData($package);
+        } catch (Exception $e) {
+            throw new CHttpException(404, Yii::t("app", "Package not found."));
+        }
 
         if ($package->type == Package::TYPE_LIBRARY) {
             $this->breadcrumbs[] = array(Yii::t("app", "Libraries"), $this->createUrl("package/libraries"));
