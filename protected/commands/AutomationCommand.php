@@ -437,48 +437,46 @@ class AutomationCommand extends ConsoleCommand {
     }
     
     /**
-     * Runs the command
-     * @param array $args list of command-line arguments.
+     * Run unlocked
+     * @param array $args
      */
-    public function run($args) {
+    protected function runUnlocked($args) {
         // start checks
-        if (count($args) > 0) {
-            if (count($args) != 1) {
-                die("Invalid number of arguments.");
-            }
-
-            $checkId = (int) $args[0];
-
-            if ($checkId) {
-                $this->_startCheck($checkId);
-            } else {
-                die("Invalid arguments.");
-            }
-
-            exit();
+        if (count($args) <= 0) {
+            return;
         }
 
-        // one instance check
-        $fp = fopen(Yii::app()->params["automation"]["lockFile"], "w");
-        
-        if (flock($fp, LOCK_EX | LOCK_NB)) {
-            for ($i = 0; $i < 10; $i++) {
-                $this->_system->refresh();
+        if (count($args) != 1) {
+            die("Invalid number of arguments.");
+        }
 
-                if ($this->_system->status == System::STATUS_RUNNING) {
-                    $this->_processStartingChecks();
-                    $this->_processStoppingChecks();
-                    $this->_processRunningChecks();
+        $checkId = (int) $args[0];
 
-                    $this->_checkSystemIsRunning();
-                }
+        if ($checkId) {
+            $this->_startCheck($checkId);
+        } else {
+            die("Invalid arguments.");
+        }
 
-                sleep(5);
+        exit();
+    }
+
+    /**
+     * Run locked
+     * @param array $args
+     */
+    protected function runLocked($args) {
+        for ($i = 0; $i < 10; $i++) {
+            $this->_system->refresh();
+
+            if ($this->_system->status == System::STATUS_RUNNING) {
+                $this->_processStartingChecks();
+                $this->_processStoppingChecks();
+                $this->_processRunningChecks();
+                $this->_checkSystemIsRunning();
             }
 
-            flock($fp, LOCK_UN);
+            sleep(5);
         }
-        
-        fclose($fp);
     }
 }

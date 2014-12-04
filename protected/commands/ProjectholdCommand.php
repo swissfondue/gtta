@@ -30,19 +30,12 @@ class ProjectholdCommand extends ConsoleCommand
             $project->save();
         }
     }
-    
+
     /**
-     * Runs the command
-     * @param array $args list of command-line arguments.
+     * Run
+     * @param array $args
      */
-    public function run($args) {
-        $fp = fopen(Yii::app()->params["projectHold"]["lockFile"], "w");
-        
-        if (flock($fp, LOCK_EX | LOCK_NB)) {
-            $this->_process();
-            flock($fp, LOCK_UN);
-        }
-        
-        fclose($fp);
+    protected function runLocked($args) {
+        $this->_process();
     }
 }

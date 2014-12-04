@@ -114,23 +114,15 @@ class VulntrackerCommand extends ConsoleCommand {
             }
         }
     }
-    
-    /**
-     * Runs the command
-     * @param array $args list of command-line arguments.
-     */
-    public function run($args) {
-        $fp = fopen(Yii::app()->params["vulntracker"]["lockFile"], "w");
-        
-        if (flock($fp, LOCK_EX | LOCK_NB)) {
-            for ($i = 0; $i < 10; $i++) {
-                $this->_checkVulns();
-                sleep(5);
-            }
 
-            flock($fp, LOCK_UN);
+    /**
+     * Run
+     * @param array $args
+     */
+    protected function runLocked($args) {
+        for ($i = 0; $i < 10; $i++) {
+            $this->_checkVulns();
+            sleep(5);
         }
-        
-        fclose($fp);
     }
 }

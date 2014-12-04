@@ -56,24 +56,12 @@ class CheckUpdateCommand extends ConsoleCommand {
             }
         }
     }
-    
+
     /**
-     * Runs the command
-     * @param array $args list of command-line arguments.
+     * Run
+     * @param array $args
      */
-    public function run($args) {
-        $fp = fopen(Yii::app()->params["checkupdate"]["lockFile"], "w");
-
-        if (flock($fp, LOCK_EX | LOCK_NB)) {
-            try {
-                $this->_checkUpdate();
-            } catch (Exception $e) {
-                Yii::log($e->getMessage(), "error");
-            }
-
-            flock($fp, LOCK_UN);
-        }
-        
-        fclose($fp);
+    protected function runLocked($args) {
+        $this->_checkUpdate();
     }
 }

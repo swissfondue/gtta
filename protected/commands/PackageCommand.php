@@ -49,44 +49,35 @@ class PackageCommand extends ConsoleCommand {
     }
 
     /**
-     * Runs the command
-     * @param array $args list of command-line arguments.
+     * Run
+     * @param array $args
      */
-    public function run($args) {
-        // one instance check
-        $fp = fopen(Yii::app()->params["packages"]["lockFile"], "w");
+    protected function runLocked($args) {
+        for ($i = 0; $i < 10; $i++) {
+            $this->_system->refresh();
 
-        if (flock($fp, LOCK_EX | LOCK_NB)) {
-            for ($i = 0; $i < 10; $i++) {
-                $this->_system->refresh();
-
-                if ($this->_system->status == System::STATUS_PACKAGE_MANAGER) {
-                    try {
-                        $this->_installPackages();
-                        $this->_deletePackages();
-                    } catch (Exception $e) {
-                        Yii::log($e->getMessage(), CLogger::LEVEL_ERROR);
-                    }
-
-                    $criteria = new CDbCriteria();
-                    $criteria->addInCondition("status", array(Package::STATUS_INSTALL, Package::STATUS_DELETE));
-                    $packages = Package::model()->findAll($criteria);
-
-                    if (count($packages) == 0) {
-                        try {
-                            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER);
-                        } catch (Exception $e) {
-                            // swallow exceptions
-                        }
-                    }
+            if ($this->_system->status == System::STATUS_PACKAGE_MANAGER) {
+                try {
+                    $this->_installPackages();
+                    $this->_deletePackages();
+                } catch (Exception $e) {
+                    Yii::log($e->getMessage(), CLogger::LEVEL_ERROR);
                 }
 
-                sleep(5);
+                $criteria = new CDbCriteria();
+                $criteria->addInCondition("status", array(Package::STATUS_INSTALL, Package::STATUS_DELETE));
+                $packages = Package::model()->findAll($criteria);
+
+                if (count($packages) == 0) {
+                    try {
+                        SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER);
+                    } catch (Exception $e) {
+                        // swallow exceptions
+                    }
+                }
             }
 
-            flock($fp, LOCK_UN);
+            sleep(5);
         }
-
-        fclose($fp);
     }
 } 

@@ -401,49 +401,48 @@ class GtautomationCommand extends ConsoleCommand {
     }
     
     /**
-     * Runs the command
-     * @param array $args list of command-line arguments.
+     * Run unlocked
+     * @param array $args
      */
-    public function run($args) {
+    public function runUnlocked($args) {
         // start checks
-        if (count($args) > 0) {
-            if (count($args) != 2) {
-                die("Invalid number of arguments.");
-            }
-
-            $projectId = (int) $args[0];
-            $checkId = (int) $args[1];
-
-            if ($projectId && $checkId) {
-                $this->_startCheck($projectId, $checkId);
-            } else {
-                die("Invalid arguments.");
-            }
-
-            exit();
+        if (count($args) <= 0) {
+            return;
         }
 
-        // one instance check
-        $fp = fopen(Yii::app()->params["automation"]["gtLockFile"], "w");
-        
-        if (flock($fp, LOCK_EX | LOCK_NB)) {
-            for ($i = 0; $i < 10; $i++) {
-                $this->_system->refresh();
+        if (count($args) != 2) {
+            die("Invalid number of arguments.");
+        }
 
-                if ($this->_system->status == System::STATUS_RUNNING) {
-                    $this->_processStartingChecks();
-                    $this->_processStoppingChecks();
-                    $this->_processRunningChecks();
+        $projectId = (int) $args[0];
+        $checkId = (int) $args[1];
 
-                    $this->_checkSystemIsRunning();
-                }
+        if ($projectId && $checkId) {
+            $this->_startCheck($projectId, $checkId);
+        } else {
+            die("Invalid arguments.");
+        }
 
-                sleep(5);
+        exit();
+    }
+
+    /**
+     * Run locked
+     * @param array $args
+     */
+    protected function runLocked($args) {
+        for ($i = 0; $i < 10; $i++) {
+            $this->_system->refresh();
+
+            if ($this->_system->status == System::STATUS_RUNNING) {
+                $this->_processStartingChecks();
+                $this->_processStoppingChecks();
+                $this->_processRunningChecks();
+
+                $this->_checkSystemIsRunning();
             }
 
-            flock($fp, LOCK_UN);
+            sleep(5);
         }
-        
-        fclose($fp);
     }
 }
