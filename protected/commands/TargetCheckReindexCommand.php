@@ -5,9 +5,10 @@
  */
 class TargetCheckReindexCommand extends ConsoleCommand {
     /**
-     * Sync target checks
+     * Run
+     * @param array $args
      */
-    private function _process() {
+    protected function runLocked($args) {
         if ($this->_system->status != System::STATUS_IDLE) {
             return;
         }
@@ -17,25 +18,6 @@ class TargetCheckReindexCommand extends ConsoleCommand {
         /** @var TargetCheckCategory $tc */
         foreach ($targetCategories as $tc) {
             $tc->reindexChecks();
-        }
-    }
-    
-    /**
-     * Runs the command
-     * @param array $args list of command-line arguments.
-     */
-    public function run($args) {
-        $this->start();
-    }
-
-    /**
-     * Execute
-     */
-    protected function exec() {
-        try {
-            $this->_process();
-        } catch (Exception $e) {
-            Yii::log($e->getMessage(), "error");
         }
     }
 }

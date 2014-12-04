@@ -56,23 +56,12 @@ class CheckUpdateCommand extends ConsoleCommand {
             }
         }
     }
-    
-    /**
-     * Runs the command
-     * @param array $args list of command-line arguments.
-     */
-    public function run($args) {
-        $this->start();
-    }
 
     /**
-     * Execute
+     * Run
+     * @param array $args
      */
-    protected function exec() {
-        try {
-            $this->_checkUpdate();
-        } catch (Exception $e) {
-            Yii::log($e->getMessage(), "error");
-        }
+    protected function runLocked($args) {
+        $this->_checkUpdate();
     }
 }

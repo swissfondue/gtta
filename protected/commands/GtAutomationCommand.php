@@ -401,35 +401,36 @@ class GtautomationCommand extends ConsoleCommand {
     }
     
     /**
-     * Runs the command
-     * @param array $args list of command-line arguments.
+     * Run unlocked
+     * @param array $args
      */
-    public function run($args) {
+    public function runUnlocked($args) {
         // start checks
-        if (count($args) > 0) {
-            if (count($args) != 2) {
-                die("Invalid number of arguments.");
-            }
-
-            $projectId = (int) $args[0];
-            $checkId = (int) $args[1];
-
-            if ($projectId && $checkId) {
-                $this->_startCheck($projectId, $checkId);
-            } else {
-                die("Invalid arguments.");
-            }
-
-            exit();
+        if (count($args) <= 0) {
+            return;
         }
 
-        $this->start();
+        if (count($args) != 2) {
+            die("Invalid number of arguments.");
+        }
+
+        $projectId = (int) $args[0];
+        $checkId = (int) $args[1];
+
+        if ($projectId && $checkId) {
+            $this->_startCheck($projectId, $checkId);
+        } else {
+            die("Invalid arguments.");
+        }
+
+        exit();
     }
 
     /**
-     * Execute
+     * Run locked
+     * @param array $args
      */
-    protected function exec() {
+    protected function runLocked($args) {
         for ($i = 0; $i < 10; $i++) {
             $this->_system->refresh();
 

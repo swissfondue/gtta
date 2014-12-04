@@ -107,24 +107,12 @@ class CommunityInstallCommand extends ConsoleCommand {
             throw $exception;
         }
     }
-    
-    /**
-     * Runs the command
-     * @param array $args list of command-line arguments.
-     */
-    public function run($args) {
-        $this->start();
-    }
 
     /**
-     * Execute
+     * Run
+     * @param array $args
      */
-    protected function exec() {
-        try {
-            $this->_install();
-        } catch (Exception $e) {
-            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
-        }
-
+    protected function runLocked($args) {
+        $this->_install();
     }
 }

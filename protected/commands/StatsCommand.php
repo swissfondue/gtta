@@ -5,31 +5,15 @@
  */
 class StatsCommand extends ConsoleCommand {
     /**
-     * Check update
+     * Run
+     * @param array $args
      */
-    private function _process() {
-        if ($this->_system->status == System::STATUS_IDLE) {
-            TargetCheckCategory::updateAllStats();
-            ProjectPlanner::updateAllStats();
+    protected function runLocked($args) {
+        if ($this->_system->status != System::STATUS_IDLE) {
+            return;
         }
-    }
-    
-    /**
-     * Runs the command
-     * @param array $args list of command-line arguments.
-     */
-    public function run($args) {
-        $this->start();
-    }
 
-    /**
-     * Execute
-     */
-    protected function exec() {
-        try {
-            $this->_process();
-        } catch (Exception $e) {
-            Yii::log($e->getMessage(), "error");
-        }
+        TargetCheckCategory::updateAllStats();
+        ProjectPlanner::updateAllStats();
     }
 }

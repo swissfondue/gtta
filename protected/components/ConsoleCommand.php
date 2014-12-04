@@ -47,12 +47,7 @@ class ConsoleCommand extends CConsoleCommand {
      */
     protected function lock() {
         $this->_fileHandle = fopen($this->_lockFile, "w");
-
-        if (flock($this->_fileHandle, LOCK_EX | LOCK_NB)) {
-            return true;
-        }
-
-        return false;
+        return flock($this->_fileHandle, LOCK_EX | LOCK_NB);
     }
 
     /**
@@ -61,14 +56,6 @@ class ConsoleCommand extends CConsoleCommand {
     protected function unlock() {
         if ($this->_fileHandle) {
             flock($this->_fileHandle, LOCK_UN);
-        }
-    }
-
-    /**
-     * Close lock file stream
-     */
-    protected function closeLockHandle() {
-        if ($this->_fileHandle) {
             fclose($this->_fileHandle);
         }
     }
@@ -117,14 +104,30 @@ class ConsoleCommand extends CConsoleCommand {
     }
 
     /**
-     * Locks and executes the command
+     * Run unlocked
      */
-    protected function start() {
+    protected function runUnlocked($args) {}
+
+    /**
+     * Run locked
+     */
+    protected function runLocked($args) {}
+
+    /**
+     * Locks and executes the command
+     * @param array $args
+     */
+    public function run($args) {
+        $this->runUnlocked($args);
+
         if ($this->lock()) {
-            $this->exec();
+            try {
+                $this->runLocked($args);
+            } catch (Exception $e) {
+                Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
+            }
+
             $this->unlock();
         }
-
-        $this->closeLockHandle();
     }
 }

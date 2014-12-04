@@ -114,19 +114,12 @@ class VulntrackerCommand extends ConsoleCommand {
             }
         }
     }
-    
-    /**
-     * Runs the command
-     * @param array $args list of command-line arguments.
-     */
-    public function run($args) {
-        $this->start();
-    }
 
     /**
-     * Execute
+     * Run
+     * @param array $args
      */
-    protected function exec() {
+    protected function runLocked($args) {
         for ($i = 0; $i < 10; $i++) {
             $this->_checkVulns();
             sleep(5);

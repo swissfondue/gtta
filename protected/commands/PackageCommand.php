@@ -49,17 +49,10 @@ class PackageCommand extends ConsoleCommand {
     }
 
     /**
-     * Runs the command
-     * @param array $args list of command-line arguments.
+     * Run
+     * @param array $args
      */
-    public function run($args) {
-        $this->start();
-    }
-
-    /**
-     * Execute
-     */
-    protected function exec() {
+    protected function runLocked($args) {
         for ($i = 0; $i < 10; $i++) {
             $this->_system->refresh();
 
