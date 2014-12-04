@@ -164,7 +164,7 @@ class VMManager {
             FileManager::copyRecursive($scriptsPath, $this->virtualizePath($scriptsPath));
 
             FileManager::copy(
-                implode("/", array(VERSION_DIR, self::TOOLS_DIRECTORY, self::RUN_SCRIPT)),
+                implode("/", array(BASE_DIR, "current", self::TOOLS_DIRECTORY, self::RUN_SCRIPT)),
                 $this->virtualizePath(BASE_DIR . "/" . self::RUN_SCRIPT)
             );
 

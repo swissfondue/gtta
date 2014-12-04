@@ -57,48 +57,7 @@ return array(
 	),
 
     // parameters
-    "params" => array(
-        "tmpPath" => $mainConfig["params"]["tmpPath"],
-
-        // email sender
-        "email" => array(
-            "systemEmail" => "gtta.test@yandex.ru",
-            "maxAttempts" => 3,
-        ),
-
-        "update" => array(
-            "keyFile" => BASE_DIR . "/security/keys/update-server.pub",
-            "directory" => "/tmp/gtta-update",
-            "versions" => BASE_DIR . "/versions",
-            "currentVersionLink" => BASE_DIR . "/current",
-            "deployConfig" => BASE_DIR . "/config/gtta.ini",
-        ),
-
-        // checks automation
-        "automation" => array(
-            "minNotificationInterval" => 5 * 60, // 5 minutes
-            "filesPath" => BASE_DIR . "/files",
-            "pidsPath" => "/tmp",
-        ),
-
-        "yiicPath" => dirname(__FILE__) . "/../",
-        "attachments" => $mainConfig["params"]["attachments"],
-        "backups" => $mainConfig["params"]["backups"],
-        "reports" => $mainConfig["params"]["reports"],
-        "clientLogos" => $mainConfig["params"]["clientLogos"],
-        "systemLogo" => $mainConfig["params"]["systemLogo"],
-
-        "api" => array(
-            "url" => "http://gta-update.does-it.net:8080",
-        ),
-
-        "community" => array(
-            "url" => "http://community.gtta.net",
-        ),
-
-        "packages" => $mainConfig["params"]["packages"],
-        "systemStatusLock" => $mainConfig["params"]["systemStatusLock"],
-    ),
+    "params" => $mainConfig["params"],
     
     "commandMap" => array(
         "migrate" => array(
