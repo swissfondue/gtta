@@ -21,7 +21,7 @@ class PackageController extends Controller {
 	}
 
     /**
-     * Display a list of scripts.
+     * Display a list of packages.
      */
 	public function actionIndex($page=1) {
         $page = (int) $page;
@@ -33,78 +33,39 @@ class PackageController extends Controller {
         $criteria = new CDbCriteria();
         $criteria->limit = Yii::app()->params["entriesPerPage"];
         $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
-        $criteria->addColumnCondition(array("type" => Package::TYPE_SCRIPT));
         $criteria->addInCondition("status", array(
             Package::STATUS_INSTALL,
             Package::STATUS_INSTALLED,
             Package::STATUS_SHARE,
             Package::STATUS_ERROR
         ));
+        $criteria->order = 't.type ASC, t.name ASC';
 
-        $criteria->order = "t.name ASC";
-        $scripts = Package::model()->findAll($criteria);
+        $packages = Package::model()->findAll($criteria);
 
         $scriptCount = Package::model()->count($criteria);
         $paginator = new Paginator($scriptCount, $page);
 
-        $this->breadcrumbs[] = array(Yii::t("app", "Scripts"), "");
+        $this->breadcrumbs[] = array(Yii::t("app", "Packages"), "");
 
         // display the page
-        $this->pageTitle = Yii::t("app", "Scripts");
+        $this->pageTitle = Yii::t("app", "Packages");
 		$this->render("index", array(
-            "scripts" => $scripts,
+            "packages" => $packages,
             "p" => $paginator,
             "system" => $this->_system,
         ));
 	}
 
     /**
-     * Display a list of libraries.
-     */
-    public function actionLibraries($page=1) {
-        $page = (int) $page;
-
-        if ($page < 1) {
-            throw new CHttpException(404, Yii::t("app", "Page not found."));
-        }
-
-        $criteria = new CDbCriteria();
-        $criteria->limit = Yii::app()->params["entriesPerPage"];
-        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
-        $criteria->addColumnCondition(array("type" => Package::TYPE_LIBRARY));
-        $criteria->addInCondition("status", array(
-            Package::STATUS_INSTALL,
-            Package::STATUS_INSTALLED,
-            Package::STATUS_SHARE,
-            Package::STATUS_ERROR
-        ));
-
-        $criteria->order = "t.name ASC";
-        $libraries = Package::model()->findAll($criteria);
-
-        $libCount = Package::model()->count($criteria);
-        $paginator = new Paginator($libCount, $page);
-
-        $this->breadcrumbs[] = array(Yii::t("app", "Libraries"), "");
-
-        // display the page
-        $this->pageTitle = Yii::t("app", "Libraries");
-		$this->render("library/index", array(
-            "libraries" => $libraries,
-            "p" => $paginator,
-            "system" => $this->_system,
-        ));
-    }
-
-    /**
-     * Edit package
+     * New package
      * @param $type int package
      */
-	private function _editPackage($type) {
-		$model = new PackageEditForm();
+	private function _newPackage() {
+		$model = new PackageAddForm();
 
-		if (isset($_POST["PackageEditForm"])) {
-			$model->attributes = $_POST["PackageEditForm"];
+		if (isset($_POST["PackageAddForm"])) {
+			$model->attributes = $_POST["PackageAddForm"];
 
 			if ($model->validate()) {
                 try {
@@ -121,43 +82,27 @@ class PackageController extends Controller {
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "Package scheduled for installation."));
 
-                if ($type == Package::TYPE_SCRIPT) {
-                    $this->redirect(array("package/index"));
-                } elseif ($type == Package::TYPE_LIBRARY) {
-                    $this->redirect(array("package/libraries"));
-                }
+                $this->redirect(array("package/index"));
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
 		}
 
         // display the page
-		$this->render("edit", array(
+		$this->render("new", array(
             "model" => $model,
-            "type" => $type,
         ));
 	}
 
     /**
-     * Edit script
+     * New package
      */
-    public function actionEditScript() {
-        $this->breadcrumbs[] = array(Yii::t("app", "Scripts"), $this->createUrl("package/index"));
-        $this->breadcrumbs[] = array(Yii::t("app", "New Script"), "");
-        $this->pageTitle = Yii::t("app", "New Script");
+    public function actionNew() {
+        $this->breadcrumbs[] = array(Yii::t("app", "Packages"), $this->createUrl("package/index"));
+        $this->breadcrumbs[] = array(Yii::t("app", "New Package"), "");
+        $this->pageTitle = Yii::t("app", "New Package");
 
-        $this->_editPackage(Package::TYPE_SCRIPT);
-    }
-
-    /**
-     * Edit library
-     */
-    public function actionEditLibrary() {
-        $this->breadcrumbs[] = array(Yii::t("app", "Libraries"), $this->createUrl("package/libraries"));
-        $this->breadcrumbs[] = array(Yii::t("app", "New Library"), "");
-        $this->pageTitle = Yii::t("app", "New Library");
-
-        $this->_editPackage(Package::TYPE_LIBRARY);
+        $this->_newPackage();
     }
 
     /**
@@ -231,7 +176,6 @@ class PackageController extends Controller {
 
         try {
             $model = new PackageUploadForm();
-            $model->attributes = $_POST["PackageUploadForm"];
             $model->file = CUploadedFile::getInstanceByName("PackageUploadForm[file]");
 
             if (!$model->validate()) {
@@ -272,12 +216,7 @@ class PackageController extends Controller {
         $pm = new PackageManager();
         $data = $pm->getData($package);
 
-        if ($package->type == Package::TYPE_LIBRARY) {
-            $this->breadcrumbs[] = array(Yii::t("app", "Libraries"), $this->createUrl("package/libraries"));
-        } else {
-            $this->breadcrumbs[] = array(Yii::t("app", "Scripts"), $this->createUrl("package/index"));
-        }
-
+        $this->breadcrumbs[] = array(Yii::t("app", "Packages"), $this->createUrl("package/index"));
         $this->breadcrumbs[] = array($package->name, "");
 
         // display the page
@@ -319,12 +258,7 @@ class PackageController extends Controller {
             }
 		}
 
-        if ($package->type == Package::TYPE_LIBRARY) {
-            $this->breadcrumbs[] = array(Yii::t("app", "Libraries"), $this->createUrl("package/libraries"));
-        } else {
-            $this->breadcrumbs[] = array(Yii::t("app", "Scripts"), $this->createUrl("package/index"));
-        }
-
+        $this->breadcrumbs[] = array(Yii::t("app", "Packages"), $this->createUrl("package/index"));
         $this->breadcrumbs[] = array($package->name, $this->createUrl("package/view", array("id" => $id)));
         $this->breadcrumbs[] = array(Yii::t("app", "Share"), "");
 

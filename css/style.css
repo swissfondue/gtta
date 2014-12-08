@@ -132,8 +132,7 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
     padding-top:3px;
 }
 
-.library-list .actions,
-.script-list .actions,
+.package-list .actions,
 .category-list .actions,
 .result-list .actions,
 .solution-list .actions,
@@ -318,9 +317,7 @@ h3 a:hover {
     white-space:nowrap;
 }
 
-
-.library-list .status,
-.script-list .status {
+.package-list .status {
     width:70px;
     text-align:right;
     white-space:nowrap;
