@@ -1905,67 +1905,7 @@ class ProjectController extends Controller {
             }
 
             /** @var TargetCheck $check */
-            $check = TargetCheck::model()->with(array(
-                "check" => array(
-                    "with" => array(
-                        "l10n" => array(
-                            "joinType" => "LEFT JOIN",
-                            "on" => "l10n.language_id = :language_id",
-                            "params" => array("language_id" => $language->id)
-                        ),
-                        "scripts" => array(
-                            "joinType" => "LEFT JOIN",
-                            "with" => array(
-                                "inputs" => array(
-                                    "on" => "inputs.visible AND inputs.check_script_id = scripts.id",
-                                    "joinType" => "LEFT JOIN",
-                                    "with" => array(
-                                        "l10n" => array(
-                                            "alias" => "l10n_i",
-                                            "joinType" => "LEFT JOIN",
-                                            "on" => "l10n_i.language_id = :language_id",
-                                            "params" => array("language_id" => $language->id)
-                                        )
-                                    ),
-                                    "order" => "inputs.sort_order ASC"
-                                ),
-                            )
-                        ),
-                        "results" => array(
-                            "joinType" => "LEFT JOIN",
-                            "with" => array(
-                                "l10n" => array(
-                                    "alias" => "l10n_r",
-                                    "joinType" => "LEFT JOIN",
-                                    "on" => "l10n_r.language_id = :language_id",
-                                    "params" => array("language_id" => $language->id)
-                                )
-                            ),
-                            "order" => "results.sort_order ASC"
-                        ),
-                        "solutions" => array(
-                            "joinType" => "LEFT JOIN",
-                            "with" => array(
-                                "l10n" => array(
-                                    "alias" => "l10n_s",
-                                    "joinType" => "LEFT JOIN",
-                                    "on" => "l10n_s.language_id = :language_id",
-                                    "params" => array("language_id" => $language->id)
-                                )
-                            ),
-                            "order" => "solutions.sort_order ASC"
-                        ),
-                        "_reference"
-                    ),
-                ),
-                "attachments",
-                "inputs" => array(
-                    "alias" => "tci",
-                ),
-                "solutions" => array(
-                    "alias" => "tcs",
-                ),
-            ))->findByAttributes(array(
+            $check = TargetCheck::model()->findByAttributes(array(
                 "id" => $check,
                 "target_id" => $target->id
             ));
@@ -1973,6 +1913,34 @@ class ProjectController extends Controller {
             if (!$check) {
                 throw new CHttpException(404, Yii::t("app", "Check not found."));
             }
+
+            /** @var l10n $lang */
+            $lang = array(
+                "l10n" => array(
+                    "on" => "l10n.language_id = :language_id",
+                    "params" => array("language_id" => $language->id)
+                )
+            );
+
+            $check->check = Check::model()->with($lang)->findByPk($check->check_id);
+
+            foreach ($check->check->scripts as $script) {
+                $criteria = new CDbCriteria();
+                $criteria->addColumnCondition(array(
+                    "visible" => true,
+                    "check_script_id" => $script->id,
+                ));
+                $criteria->order = 'sort_order ASC';
+
+                $script->inputs = CheckInput::model()->with($lang)->findAll($criteria);
+            }
+
+            $criteria = new CDbCriteria
+            $criteria->addColumnCondition(array("check_id" => $check->check->id));
+            $criteria->order = 'sort_order ASC';
+
+            $check->check->results = CheckResult::model()->with($lang)->findAll($criteria);
+            $check->check->solutions = CheckSolution::model()->with($lang)->findAll($criteria);
 
             // display the check form
             $html = $this->renderPartial("partial/check-form", array(
