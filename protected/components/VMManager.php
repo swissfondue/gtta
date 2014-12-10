@@ -156,7 +156,7 @@ class VMManager {
             sleep(60);
 
             // change APT sources
-            $this->runCommand("echo \"deb http://ftp.debian.org/debian wheezy main contrib non-free\" > /etc/apt/sources.list");
+            $this->runCommand("echo \"deb ftp://ftp.debian.org/debian wheezy main contrib non-free\" > /etc/apt/sources.list");
             $this->runCommand("echo \"deb http://security.debian.org/ wheezy/updates main contrib non-free\" >> /etc/apt/sources.list");
             $this->runCommand("apt-get -y update");
 
