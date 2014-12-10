@@ -193,6 +193,7 @@ class PackageManager {
      * @param $section
      * @param bool $required
      * @return mixed
+     * @throws MissingSectionException
      */
     private function _getSection($hash, $section, $required=true) {
         if (!isset($hash[$section]) && $required) {
@@ -881,7 +882,7 @@ class PackageManager {
             // validate again
             $this->_validate($parsedPackage, true);
 
-            // copy check to VM
+            // copy package to VM
             FileManager::createDir($vm->virtualizePath($destinationPath), 0755);
             FileManager::copyRecursive($destinationPath, $vm->virtualizePath($destinationPath));
 
@@ -1085,7 +1086,7 @@ class PackageManager {
         ));
 
         if (!$core) {
-            throw new Exception();
+            throw new Exception(Yii::t("app", "No core package found."));
         }
 
         $this->_installDependencies($core);
@@ -1232,5 +1233,90 @@ class PackageManager {
         $package->save();
 
         FileManager::unlink($zipPath);
+    }
+
+    /**
+     * Install package from path (for testing purposes)
+     * @param string $path
+     * @throws Exception
+     */
+    public function installFromPath($path) {
+        $vm = new VMManager();
+        $exception = null;
+        $pkg = null;
+
+        try {
+            $package = $this->_parse($path);
+            $this->_validate($package, false);
+
+            $pkg = new Package();
+            $pkg->name = $package[self::SECTION_NAME];
+            $pkg->type = $package[self::SECTION_TYPE];
+            $pkg->version = $package[self::SECTION_VERSION];
+            $pkg->file_name = null;
+            $pkg->status = Package::STATUS_INSTALLED;
+            $pkg->save();
+
+            // install dependencies
+            $dependencies = $this->_getSection($package, self::SECTION_DEPENDENCIES, false);
+            $this->_installDependencies($package);
+
+            // validate again
+            $this->_validate($package, true);
+
+            // copy package to VM
+            FileManager::createDir($vm->virtualizePath($path), 0755);
+            FileManager::copyRecursive($path, $vm->virtualizePath($path));
+
+            // create library dependencies
+            foreach ($dependencies[self::DEPENDENCY_TYPE_LIBRARY] as $dependency) {
+                $library = Package::model()->findByAttributes(array(
+                    "type" => Package::TYPE_LIBRARY,
+                    "name" => $dependency
+                ));
+
+                if (!$library) {
+                    throw new Exception(
+                        Yii::t("app", "Unsatisfied library dependency: {library}.", array("{library}" => $dependency))
+                    );
+                }
+
+                $packageDep = new PackageDependency();
+                $packageDep->from_package_id = $pkg->id;
+                $packageDep->to_package_id = $library->id;
+                $packageDep->save();
+            }
+
+            // create script dependencies
+            foreach ($dependencies[self::DEPENDENCY_TYPE_SCRIPT] as $dependency) {
+                $script = Package::model()->findByAttributes(array(
+                    "type" => Package::TYPE_SCRIPT,
+                    "name" => $dependency
+                ));
+
+                if (!$script) {
+                    throw new Exception(
+                        Yii::t("app", "Unsatisfied script dependency: {script}.", array("{script}" => $dependency))
+                    );
+                }
+
+                $packageDep = new PackageDependency();
+                $packageDep->from_package_id = $pkg->id;
+                $packageDep->to_package_id = $script->id;
+                $packageDep->save();
+            }
+        } catch (Exception $e) {
+            $exception = $e;
+
+            if ($pkg) {
+                PackageDependency::model()->deleteAllByAttributes(array(
+                    "from_package_id" => $pkg->id
+                ));
+            }
+        }
+
+        if ($exception) {
+            throw $exception;
+        }
     }
 }

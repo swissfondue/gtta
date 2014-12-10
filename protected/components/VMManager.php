@@ -27,6 +27,8 @@ class VMManager {
      * Run VM command
      * @param $command
      * @param $params
+     * @param $throwException
+     * @return string
      */
     private function _command($command, $params=null, $throwException=true) {
         if (is_array($params)) {
@@ -115,8 +117,10 @@ class VMManager {
 
     /**
      * Regenerate virtual machine
+     * @param boolean $firstTime
+     * @throws Exception
      */
-    public function regenerate() {
+    public function regenerate($firstTime=false) {
         $this->_stopAndDestroy();
 
         $this->_command("create", array(
@@ -152,7 +156,7 @@ class VMManager {
             sleep(60);
 
             // change APT sources
-            $this->runCommand("echo \"deb http://ftp.de.debian.org/debian wheezy main contrib non-free\" > /etc/apt/sources.list");
+            $this->runCommand("echo \"deb http://ftp.debian.org/debian wheezy main contrib non-free\" > /etc/apt/sources.list");
             $this->runCommand("echo \"deb http://security.debian.org/ wheezy/updates main contrib non-free\" >> /etc/apt/sources.list");
             $this->runCommand("apt-get -y update");
 
@@ -168,9 +172,10 @@ class VMManager {
                 $this->virtualizePath(BASE_DIR . "/" . self::RUN_SCRIPT)
             );
 
-            // install dependencies
-            $pm = new PackageManager();
-            $pm->installAllDependencies();
+            if (!$firstTime) {
+                $pm = new PackageManager();
+                $pm->installAllDependencies();
+            }
         } catch (Exception $e) {
             $this->_stopAndDestroy();
             throw $e;
