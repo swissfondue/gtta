@@ -1926,17 +1926,17 @@ class ProjectController extends Controller {
 
             foreach ($check->check->scripts as $script) {
                 $criteria = new CDbCriteria();
-                $criteria->addCondition("visible = TRUE");
-                $criteria->addCondition("check_script_id = :check_script_id");
-                $criteria->params = array( "check_script_id" => $script->id );
+                $criteria->addColumnCondition(array(
+                    "visible" => true,
+                    "check_script_id" => $script->id,
+                ));
                 $criteria->order = 'sort_order ASC';
 
                 $script->inputs = CheckInput::model()->with($lang)->findAll($criteria);
             }
 
-            $criteria = new CDbCriteria();
-            $criteria->addCondition('check_id = :check_id');
-            $criteria->params = array( 'check_id' => $check->check->id );
+            $criteria = new CDbCriteria
+            $criteria->addColumnCondition(array("check_id" => $check->check->id));
             $criteria->order = 'sort_order ASC';
 
             $check->check->results = CheckResult::model()->with($lang)->findAll($criteria);
