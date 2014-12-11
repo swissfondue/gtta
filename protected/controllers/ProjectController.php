@@ -1935,7 +1935,7 @@ class ProjectController extends Controller {
                 $script->inputs = CheckInput::model()->with($lang)->findAll($criteria);
             }
 
-            $criteria = new CDbCriteria
+            $criteria = new CDbCriteria();
             $criteria->addColumnCondition(array("check_id" => $check->check->id));
             $criteria->order = 'sort_order ASC';
 
