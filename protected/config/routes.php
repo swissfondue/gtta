@@ -136,8 +136,8 @@ return array(
     "package/<id:\d+>/share"    => "package/share",
     "package/control"           => "package/control",
     "package/upload"            => "package/upload",
-    "scripts/regenerate"        => "package/regenerate",
-    "scripts/regenerate-status" => "package/regeneratestatus",
+    "packages/regenerate"        => "package/regenerate",
+    "packages/regenerate-status" => "package/regeneratestatus",
 
     // checks
     "checks/<page:\d+>"         => "check/index",
