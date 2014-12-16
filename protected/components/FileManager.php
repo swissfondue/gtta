@@ -183,22 +183,53 @@ class FileManager {
     /**
      * Get directory contents
      * @param $source
+     * @param bool $recursive
      * @return array
      * @throws Exception
      */
-    public static function getDirectoryContents($source) {
+    public static function getDirectoryContents($source, $recursive=false) {
         if (!is_dir($source)) {
             throw new Exception("Not a directory: $source");
         }
 
+        $contents = self::_dirContents($source, $recursive);
+
+        return $contents;
+    }
+
+    /**
+     * Get file content
+     * @param $path
+     */
+    public static function getFileContent($path) {
+        if (!is_file($path)) {
+            return null;
+        }
+
+        return file_get_contents($path);
+    }
+
+    /**
+     * Directory contents
+     * @param $source
+     * @param bool $r (recursive)
+     * @param string $prefix
+     * @return array
+     */
+    private function _dirContents($source, $r=false, $prefix='') {
         $contents = array();
 
-        foreach (scandir($source) as $file) {
-            if ($file == "." || $file == "..") {
+        foreach (scandir($source) as $item) {
+            if ($item == "." || $item == "..") {
                 continue;
             }
 
-            $contents[] = $file;
+            if (is_dir($source . DIRECTORY_SEPARATOR . $item) && $r) {
+                $contents = array_merge($contents, self::_dirContents($source . DIRECTORY_SEPARATOR . $item, $r, $prefix . $item . DIRECTORY_SEPARATOR));
+                continue;
+            }
+
+            $contents[] = $prefix . $item;
         }
 
         return $contents;
@@ -218,5 +249,22 @@ class FileManager {
         $fileInfo = finfo_open();
 
         return finfo_file($fileInfo, $filePath, FILEINFO_MIME_TYPE);
+    }
+
+    /**
+     * Update file content or create new one if not exist
+     * @param $path
+     * @param $content
+     */
+    public static function updateFile($path, $content) {
+        if (!file_exists($path)) {
+            try {
+                self::createDir(dirname($path),  0770, true);
+            } catch (Exception $e) {
+                throw $e;
+            }
+        }
+
+        file_put_contents($path, $content);
     }
 }

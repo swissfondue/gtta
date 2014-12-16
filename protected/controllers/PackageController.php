@@ -228,6 +228,116 @@ class PackageController extends Controller {
     }
 
     /**
+     * Edit package
+     * @param $id
+     */
+    public function actionEdit($id) {
+        $id = (int) $id;
+        $package = Package::model()->findByPk($id);
+
+        if (!$package) {
+            throw new CHttpException(404, "Package not found.");
+        }
+
+        $this->_editPackage($package);
+    }
+
+    /**
+     * Edit package file
+     * @param $package
+     */
+    private function _editPackage(Package $package) {
+        $this->breadcrumbs[] = array(Yii::t("app", "Packages"), $this->createUrl("package/index"));
+        $this->breadcrumbs[] = array($package->name, $this->createUrl("package/view", array("id" => $package->id)));
+        $this->breadcrumbs[] = array(Yii::t("app", "Edit"), "");
+        $this->pageTitle = $package->name;
+
+        $selected = null;
+        $files = array();
+        $pm = new PackageManager();
+        $form = new PackageEditForm();
+
+        try {
+            if (isset($_POST['PackageEditForm'])) {
+                $form->attributes = $_POST['PackageEditForm'];
+
+                if ($form->validate()) {
+                    $path = $pm->getPath($package) . DIRECTORY_SEPARATOR . $form->path;
+                    $content = $form->content;
+
+                    switch ($form->operation) {
+                        case 'save':
+                            FileManager::updateFile($path, $content);
+                            $selected = $form->path;
+                            Yii::app()->user->setFlash("success", Yii::t("app", "File successfully saved."));
+                            break;
+                        case 'delete':
+                            FileManager::unlink($path);
+                            $form = new PackageEditForm();
+                            Yii::app()->user->setFlash("success", Yii::t("app", "File successfully deleted."));
+                            break;
+                        default:
+                            break;
+                    }
+                } else {
+                    Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+                }
+            }
+
+            $files = FileManager::getDirectoryContents($pm->getPath($package), true);
+        } catch (Exception $e) {
+            throw $e;
+        }
+
+        $this->render("edit", array(
+            "files" => $files,
+            "selected" => $selected,
+            "package" => $package,
+            "form" => $form
+        ));
+    }
+
+    /**
+     * Get package file content
+     * @param $id
+     */
+    public function actionFile($id) {
+        $id = (int) $id;
+        $package = Package::model()->findByPk($id);
+
+        if (!$package) {
+            throw new CHttpException(404, Yii::t("app", "Package not found."));
+        }
+
+        $response = new AjaxResponse();
+
+        try {
+            $model = new PackageLoadFileForm();
+            $model->attributes = $_POST['PackageLoadFileForm'];
+
+            if (!$model->validate()) {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $pm = new PackageManager();
+
+            $content = FileManager::getFileContent($pm->getPath($package) . DIRECTORY_SEPARATOR . $model->path);
+            $response->addData('file_content', $content);
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
      * Share package
      * @param $id
      * @throws CHttpException
