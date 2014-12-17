@@ -104,9 +104,6 @@ class VulntrackerController extends Controller {
                     ),
                 ),
             ),
-            'vuln' => array(
-                'with' => 'user'
-            ),
             'target',
         );
 
@@ -138,9 +135,6 @@ class VulntrackerController extends Controller {
         $criteria->offset = $offset;
 
         $customChecks = TargetCustomCheck::model()->with(array(
-            'vuln' => array(
-                'with' => 'user'
-            ),
             'target',
         ))->findAll($criteria);
 
@@ -236,8 +230,8 @@ class VulntrackerController extends Controller {
             'p' => $paginator,
             'ratings' => TargetCheck::getRatingNames(),
             'statuses' => array(
-                TargetCheckVuln::STATUS_OPEN => Yii::t('app', 'Open'),
-                TargetCheckVuln::STATUS_RESOLVED => Yii::t('app', 'Resolved'),
+                TargetCheck::STATUS_VULN_OPEN => Yii::t('app', 'Open'),
+                TargetCheck::STATUS_VULN_RESOLVED => Yii::t('app', 'Resolved'),
             ),
         ));
     }
@@ -276,37 +270,11 @@ class VulntrackerController extends Controller {
             throw new CHttpException(404, Yii::t("app", "Check not found."));
         }
 
-        if ($customCheck) {
-            $vuln = TargetCustomCheckVuln::model()->findByAttributes(array(
-                "target_custom_check_id" => $check->id,
-            ));
-        } else {
-            $vuln = TargetCheckVuln::model()->findByAttributes(array(
-                "target_check_id" => $check->id,
-            ));
-        }
+        $model = new VulnEditForm();
 
-        if (!$vuln) {
-            if ($customCheck) {
-                $vuln = new TargetCustomCheckVuln();
-                $vuln->target_custom_check_id = $check->id;
-            } else {
-                $vuln = new TargetCheckVuln();
-                $vuln->target_check_id = $check->id;
-            }
-
-            $newRecord = true;
-        }
-
-		$model = new VulnEditForm();
-
-        if (!$newRecord) {
-            $model->status = $vuln->status;
-            $model->userId = $vuln->user_id;
-            $model->deadline = $vuln->deadline;
-        } else {
-            $model->deadline = date('Y-m-d');
-        }
+        $model->status = $check->vuln_status;
+        $model->userId = $check->vuln_user_id;
+        $model->deadline = $check->vuln_deadline ? $check->vuln_deadline : date('Y-m-d');
 
 		// collect user input data
 		if (isset($_POST['VulnEditForm'])) {
@@ -317,11 +285,11 @@ class VulntrackerController extends Controller {
             }
 
 			if ($model->validate()) {
-                $vuln->status = $model->status;
-                $vuln->user_id = $model->userId;
-                $vuln->deadline = $model->deadline;
+                $check->vuln_status = $model->status;
+                $check->vuln_user_id = $model->userId;
+                $check->vuln_deadline = $model->deadline;
 
-                $vuln->save();
+                $check->save();
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Vulnerability saved.'));
 
@@ -498,8 +466,8 @@ class VulntrackerController extends Controller {
             'admins' => $admins,
             'users' => $users,
             'statuses' => array(
-                TargetCheckVuln::STATUS_OPEN => Yii::t('app', 'Open'),
-                TargetCheckVuln::STATUS_RESOLVED => Yii::t('app', 'Resolved'),
+                TargetCheck::STATUS_VULN_OPEN => Yii::t('app', 'Open'),
+                TargetCheck::STATUS_VULN_RESOLVED => Yii::t('app', 'Resolved'),
             )
         ));
 	}

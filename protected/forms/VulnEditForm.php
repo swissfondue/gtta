@@ -29,7 +29,7 @@ class VulnEditForm extends CFormModel
             array( 'status', 'required' ),
             array( 'deadline', 'date', 'allowEmpty' => true, 'format' => 'yyyy-MM-dd' ),
             array( 'userId', 'checkUser' ),
-            array( 'status', 'in', 'range' => array( TargetCheckVuln::STATUS_OPEN, TargetCheckVuln::STATUS_RESOLVED ) ),
+            array( 'status', 'in', 'range' => array( TargetCheck::STATUS_VULN_OPEN, TargetCheck::STATUS_VULN_RESOLVED ) ),
 		);
 	}
     

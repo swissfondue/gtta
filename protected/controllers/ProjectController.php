@@ -1935,7 +1935,7 @@ class ProjectController extends Controller {
                 $script->inputs = CheckInput::model()->with($lang)->findAll($criteria);
             }
 
-            $criteria = new CDbCriteria
+            $criteria = new CDbCriteria();
             $criteria->addColumnCondition(array("check_id" => $check->check->id));
             $criteria->order = 'sort_order ASC';
 
@@ -2175,10 +2175,9 @@ class ProjectController extends Controller {
                 "target_check_id" => $targetCheck->id,
             ));
 
-            // delete old vulnerabilities
-            TargetCheckVuln::model()->deleteAllByAttributes(array(
-                "target_check_id" => $targetCheck->id,
-            ));
+            $targetCheck->vuln_user_id = null;
+            $targetCheck->vuln_deadline = null;
+            $targetCheck->vuln_status = null;
 
             // add solutions
             if ($model->solutions) {
@@ -3580,10 +3579,9 @@ class ProjectController extends Controller {
                         "target_check_id" => $targetCheck->id,
                     ));
 
-                    // delete vulnerabilities
-                    TargetCheckVuln::model()->deleteAllByAttributes(array(
-                        "target_check_id" => $targetCheck->id,
-                    ));
+                    $targetCheck->vuln_user_id = null;
+                    $targetCheck->vuln_deadline = null;
+                    $targetCheck->vuln_status = null;
 
                     // delete files
                     TargetCheckAttachment::model()->deleteAllByAttributes(array(
@@ -3667,11 +3665,6 @@ class ProjectController extends Controller {
 
                     // delete inputs
                     TargetCheckInput::model()->deleteAllByAttributes(array(
-                        "target_check_id" => $targetCheck->id,
-                    ));
-
-                    // delete vulnerabilities
-                    TargetCheckVuln::model()->deleteAllByAttributes(array(
                         "target_check_id" => $targetCheck->id,
                     ));
 
@@ -5093,8 +5086,8 @@ class ProjectController extends Controller {
             "p" => $paginator,
             "ratings" => TargetCheck::getRatingNames(),
             "statuses" => array(
-                TargetCheckVuln::STATUS_OPEN => Yii::t("app", "Open"),
-                TargetCheckVuln::STATUS_RESOLVED => Yii::t("app", "Resolved"),
+                TargetCheck::STATUS_VULN_OPEN => Yii::t("app", "Open"),
+                TargetCheck::STATUS_VULN_RESOLVED => Yii::t("app", "Resolved"),
             ),
         ));
     }
@@ -5141,25 +5134,10 @@ class ProjectController extends Controller {
             throw new CHttpException(404, Yii::t("app", "Check not found."));
         }
 
-        $vuln = TargetCheckVuln::model()->findByAttributes(array(
-            "target_check_id" => $check->id,
-        ));
-
-        if (!$vuln) {
-            $vuln = new TargetCheckVuln();
-            $vuln->target_check_id = $check->id;
-            $newRecord = true;
-        }
-
 		$model = new VulnEditForm();
-
-        if (!$newRecord) {
-            $model->status = $vuln->status;
-            $model->userId = $vuln->user_id;
-            $model->deadline = $vuln->deadline;
-        } else {
-            $model->deadline = date("Y-m-d");
-        }
+        $model->status = $check->vuln_status;
+        $model->userId = $check->vuln_user_id;
+        $model->deadline = $check->vuln_deadline ? $check->vuln_deadline : date('Y-m-d');
 
 		// collect user input data
 		if (isset($_POST["VulnEditForm"])) {
@@ -5170,10 +5148,10 @@ class ProjectController extends Controller {
             }
 
 			if ($model->validate()) {
-                $vuln->status = $model->status;
-                $vuln->user_id = $model->userId;
-                $vuln->deadline = $model->deadline;
-                $vuln->save();
+                $check->vuln_status = $model->status;
+                $check->vuln_user_id = $model->userId;
+                $check->vuln_deadline = $model->deadline;
+                $check->save();
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "Vulnerability saved."));
                 $project->refresh();
@@ -5227,8 +5205,8 @@ class ProjectController extends Controller {
             "admins" => $admins,
             "users" => $users,
             "statuses" => array(
-                TargetCheckVuln::STATUS_OPEN => Yii::t("app", "Open"),
-                TargetCheckVuln::STATUS_RESOLVED => Yii::t("app", "Resolved"),
+                TargetCheck::STATUS_VULN_OPEN => Yii::t("app", "Open"),
+                TargetCheck::STATUS_VULN_RESOLVED => Yii::t("app", "Resolved"),
             )
         ));
 	}

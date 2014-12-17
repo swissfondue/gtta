@@ -22,12 +22,21 @@
  * @property CheckControl $control
  * @property User $user
  * @property TargetCustomCheckAttachment[] $attachments
+ * @property integer $vuln_user_id
+ * @property date $vuln_deadline
+ * @property integer $vuln_status
  */
 class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
     /**
      * Target's check type
      */
     const TYPE = 'custom';
+
+    /**
+     * Vuln statuses
+     */
+    const STATUS_VULN_OPEN = 0;
+    const STATUS_VULN_RESOLVED = 100;
 
     /**
      * Result ratings.
@@ -114,7 +123,7 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
             "target" => array(self::BELONGS_TO, "Target", "target_id"),
             "control" => array(self::BELONGS_TO, "CheckControl", "check_control_id"),
             "user" => array(self::BELONGS_TO, "User", "user_id"),
-            "vuln" => array(self::HAS_ONE, "TargetCustomCheckVuln", "target_custom_check_id"),
+            "vulnUser" => array(self::BELONGS_TO, "User", "vuln_user_id"),
             "attachments" => array(self::HAS_MANY, "TargetCustomCheckAttachment", "target_custom_check_id"),
 		);
 	}
@@ -198,5 +207,29 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
         }
 
         return $data;
+    }
+
+    /**
+     * Get vuln overdued
+     * @return bool
+     */
+    public function getVulnOverdued() {
+        if (!$this->vuln_deadline) {
+            return false;
+        }
+
+        if ($this->vuln_status == self::STATUS_VULN_RESOLVED) {
+            return false;
+        }
+
+        $deadline = new DateTime($this->vuln_deadline . " 00:00:00");
+        $today = new DateTime();
+        $today->setTime(0, 0, 0);
+
+        if ($today > $deadline) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -30,7 +30,9 @@
  * @property TargetCheckInput[] $inputs
  * @property TargetCheckAttachment[] $attachments
  * @property TargetCheckSolution[] $solutions
- * @property TargetCheckVuln $vuln
+ * @property integer $vuln_user_id
+ * @property date $vuln_deadline
+ * @property integer $vuln_status
  */
 class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     /**
@@ -45,6 +47,12 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     const STATUS_IN_PROGRESS = 10;
     const STATUS_STOP = 50;
     const STATUS_FINISHED = 100;
+
+    /**
+     * Vuln statuses
+     */
+    const STATUS_VULN_OPEN = 0;
+    const STATUS_VULN_RESOLVED = 100;
 
     /**
      * Result ratings.
@@ -143,7 +151,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "check" => array(self::BELONGS_TO, "Check", "check_id"),
             "language" => array(self::BELONGS_TO, "Language", "language_id"),
             "user" => array(self::BELONGS_TO, "User", "user_id"),
-            "vuln" => array(self::HAS_ONE, "TargetCheckVuln", "target_check_id"),
+            "vulnUser" => array(self::BELONGS_TO, "User", "vuln_user_id"),
             "inputs" => array(self::HAS_MANY, "TargetCheckInput", "target_check_id"),
             "solutions" => array(self::HAS_MANY, "TargetCheckSolution", "target_check_id"),
             "attachments" => array(self::HAS_MANY, "TargetCheckAttachment", "target_check_id"),
@@ -301,5 +309,29 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         )->findAllByAttributes(array('id' => $scriptIds));
 
         return $scripts;
+    }
+
+    /**
+     * Get vuln overdued
+     * @return bool
+     */
+    public function getVulnOverdued() {
+        if (!$this->vuln_deadline) {
+            return false;
+        }
+
+        if ($this->vuln_status == self::STATUS_VULN_RESOLVED) {
+            return false;
+        }
+
+        $deadline = new DateTime($this->vuln_deadline . " 00:00:00");
+        $today = new DateTime();
+        $today->setTime(0, 0, 0);
+
+        if ($today > $deadline) {
+            return true;
+        }
+
+        return false;
     }
 }
