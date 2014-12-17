@@ -59,10 +59,9 @@ class PackageController extends Controller {
 
     /**
      * New package
-     * @param $type int package
      */
-	private function _newPackage() {
-		$model = new PackageAddForm();
+    public function actionNew() {
+        $model = new PackageAddForm();
 
 		if (isset($_POST["PackageAddForm"])) {
 			$model->attributes = $_POST["PackageAddForm"];
@@ -88,21 +87,14 @@ class PackageController extends Controller {
             }
 		}
 
-        // display the page
-		$this->render("new", array(
-            "model" => $model,
-        ));
-	}
-
-    /**
-     * New package
-     */
-    public function actionNew() {
         $this->breadcrumbs[] = array(Yii::t("app", "Packages"), $this->createUrl("package/index"));
         $this->breadcrumbs[] = array(Yii::t("app", "New Package"), "");
         $this->pageTitle = Yii::t("app", "New Package");
 
-        $this->_newPackage();
+        // display the page
+		$this->render("new", array(
+            "model" => $model,
+        ));
     }
 
     /**
