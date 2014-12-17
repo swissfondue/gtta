@@ -26,7 +26,7 @@
                     <?php endforeach; ?>
                 </select>
                 &nbsp;
-                <a class="del-button <?php if ($form->operation != 'save') echo 'hide'; ?>" href="#del" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="admin.pkg.fileEdit('delete');">
+                <a class="del-button <?php if ($form->operation != 'save') echo 'hide'; ?>" href="#del" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="admin.pkg.fileEdit('<?php echo PackageEditForm::OPERATION_DELETE; ?>');">
                     <i class="icon icon-remove"></i>
                 </a>
             </div>
@@ -45,7 +45,7 @@
         <div class="control-group <?php if ($form->getError('content')) echo 'error'; ?>">
             <label class="control-label" for="PackageEditForm_content"><?php echo Yii::t('app', 'Content'); ?></label>
             <div class="controls">
-                <textarea class="input-xxlarge" rows="20" id="PackageEditForm_content" name="PackageEditForm[content]" wrap="off"><?php echo CHtml::encode($form->content); ?></textarea>
+                <textarea class="input-xxlarge monospace" rows="20" id="PackageEditForm_content" name="PackageEditForm[content]" wrap="off"><?php echo CHtml::encode($form->content); ?></textarea>
                 <?php if ($form->getError('content')): ?>
                     <p class="help-block"><?php echo $form->getError('content'); ?></p>
                 <?php endif; ?>
@@ -55,7 +55,7 @@
         <input type="hidden" id="PackageEditForm_operation" name="PackageEditForm[operation]" />
 
         <div class="form-actions">
-            <button type="submit" class="btn" onclick="admin.pkg.fileEdit('save');"><?php echo Yii::t('app', 'Save'); ?></button>
+            <button type="submit" class="btn" onclick="admin.pkg.fileEdit('<?php echo PackageEditForm::OPERATION_SAVE; ?>');"><?php echo Yii::t('app', 'Save'); ?></button>
         </div>
     </fieldset>
 </form>

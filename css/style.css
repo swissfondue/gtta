@@ -878,6 +878,11 @@ table.table-result .new-entry input {
     color:#666;
 }
 
+.monospace {
+    font-family:monospace;
+    white-space:pre;
+}
+
 .small-block {
     font-size:80%;
     color:#999;

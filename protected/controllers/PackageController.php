@@ -230,6 +230,7 @@ class PackageController extends Controller {
     /**
      * Edit package
      * @param $id
+     * @throws CHttpException
      */
     public function actionEdit($id) {
         $id = (int) $id;
@@ -238,19 +239,6 @@ class PackageController extends Controller {
         if (!$package) {
             throw new CHttpException(404, "Package not found.");
         }
-
-        $this->_editPackage($package);
-    }
-
-    /**
-     * Edit package file
-     * @param $package
-     */
-    private function _editPackage(Package $package) {
-        $this->breadcrumbs[] = array(Yii::t("app", "Packages"), $this->createUrl("package/index"));
-        $this->breadcrumbs[] = array($package->name, $this->createUrl("package/view", array("id" => $package->id)));
-        $this->breadcrumbs[] = array(Yii::t("app", "Edit"), "");
-        $this->pageTitle = $package->name;
 
         $selected = null;
         $files = array();
@@ -266,16 +254,20 @@ class PackageController extends Controller {
                     $content = $form->content;
 
                     switch ($form->operation) {
-                        case 'save':
+                        case PackageEditForm::OPERATION_SAVE:
                             FileManager::updateFile($path, $content);
                             $selected = $form->path;
                             Yii::app()->user->setFlash("success", Yii::t("app", "File successfully saved."));
+
                             break;
-                        case 'delete':
+
+                        case PackageEditForm::OPERATION_DELETE:
                             FileManager::unlink($path);
                             $form = new PackageEditForm();
                             Yii::app()->user->setFlash("success", Yii::t("app", "File successfully deleted."));
+
                             break;
+
                         default:
                             break;
                     }
@@ -288,6 +280,11 @@ class PackageController extends Controller {
         } catch (Exception $e) {
             throw $e;
         }
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Packages"), $this->createUrl("package/index"));
+        $this->breadcrumbs[] = array($package->name, $this->createUrl("package/view", array("id" => $package->id)));
+        $this->breadcrumbs[] = array(Yii::t("app", "Edit"), "");
+        $this->pageTitle = $package->name;
 
         $this->render("edit", array(
             "files" => $files,

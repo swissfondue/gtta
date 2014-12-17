@@ -258,11 +258,7 @@ class FileManager {
      */
     public static function updateFile($path, $content) {
         if (!file_exists($path)) {
-            try {
-                self::createDir(dirname($path),  0770, true);
-            } catch (Exception $e) {
-                throw $e;
-            }
+            self::createDir(dirname($path), 0770, true);
         }
 
         file_put_contents($path, $content);
