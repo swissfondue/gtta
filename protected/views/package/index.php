@@ -1,13 +1,6 @@
 <div class="active-header">
-    <div class="pull-right">
-        <ul class="nav nav-pills">
-            <li class="active"><a href="<?php echo $this->createUrl("package/index"); ?>"><?php echo Yii::t("app", "Scripts"); ?></a></li>
-            <li><a href="<?php echo $this->createUrl("package/libraries"); ?>"><?php echo Yii::t("app", "Libraries"); ?></a></li>
-        </ul>
-    </div>
-
     <div class="pull-right buttons">
-        <a class="btn" href="<?php echo $this->createUrl("package/editscript") ?>"><i class="icon icon-plus"></i> <?php echo Yii::t("app", "New Script"); ?></a>&nbsp;
+        <a class="btn" href="<?php echo $this->createUrl("package/new") ?>"><i class="icon icon-plus"></i> <?php echo Yii::t("app", "New Package"); ?></a>&nbsp;
 
         <?php
             $disabled = false;
@@ -29,28 +22,28 @@
 <div class="container">
     <div class="row">
         <div class="span8">
-            <?php if (count($scripts) > 0): ?>
-                <table class="table script-list">
+            <?php if (count($packages) > 0): ?>
+                <table class="table package-list">
                     <tbody>
                         <tr>
-                            <th class="name"><?php echo Yii::t("app", "Script"); ?></th>
+                            <th class="name"><?php echo Yii::t("app", "Package"); ?></th>
                             <th class="status">&nbsp;</th>
                             <th class="actions">&nbsp;</th>
                         </tr>
-                        <?php foreach ($scripts as $script): ?>
-                            <tr data-id="<?php echo $script->id; ?>" data-control-url="<?php echo $this->createUrl("package/control"); ?>">
+                        <?php foreach ($packages as $package): ?>
+                            <tr data-id="<?php echo $package->id; ?>" data-control-url="<?php echo $this->createUrl("package/control"); ?>">
                                 <td class="name">
-                                    <?php if ($script->isActive()): ?>
-                                        <a href="<?php echo $this->createUrl("package/view", array("id" => $script->id)); ?>"><?php echo CHtml::encode($script->name); ?><?php echo $script->version ? " " . $script->version : ""; ?></a>
+                                    <?php if ($package->isActive()): ?>
+                                        <a href="<?php echo $this->createUrl("package/view", array("id" => $package->id)); ?>"><?php echo CHtml::encode($package->name); ?><?php echo $package->version ? " " . $package->version : ""; ?></a>
                                     <?php else: ?>
-                                        <?php echo CHtml::encode($script->name); ?><?php echo $script->version ? " " . $script->version : ""; ?>
+                                        <?php echo CHtml::encode($package->name); ?><?php echo $package->version ? " " . $package->version : ""; ?>
                                     <?php endif; ?>
                                 </td>
                                 <td class="status">
                                     <?php
                                         $labelClass = "";
 
-                                        switch ($script->status) {
+                                        switch ($package->status) {
                                             case Package::STATUS_INSTALL:
                                                 $labelClass = "label-install";
                                                 break;
@@ -64,11 +57,11 @@
                                                 break;
                                         }
                                     ?>
-                                    <span class="label <?php echo $labelClass; ?>"><?php echo $script->statusName; ?></span>
+                                    <span class="label <?php echo $labelClass; ?>"><?php echo $package->statusName; ?></span>
                                 </td>
                                 <td class="actions">
-                                    <?php if ($script->status != Package::STATUS_INSTALL && in_array($system->status, array(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER))): ?>
-                                        <a href="#del" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="system.control.del(<?php echo $script->id; ?>);"><i class="icon icon-remove"></i></a>
+                                    <?php if ($package->status != Package::STATUS_INSTALL && in_array($system->status, array(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER))): ?>
+                                        <a href="#del" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="system.control.del(<?php echo $package->id; ?>);"><i class="icon icon-remove"></i></a>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -78,7 +71,7 @@
 
                 <?php echo $this->renderPartial("/layouts/partial/pagination", array("p" => $p, "url" => "package/index", 'params' => array())); ?>
             <?php else: ?>
-                <?php echo Yii::t("app", "No scripts yet."); ?>
+                <?php echo Yii::t("app", "No packages yet."); ?>
             <?php endif; ?>
         </div>
     </div>

@@ -934,8 +934,7 @@ function Admin()
                 var url = $(this).data("upload-url"), data;
 
                 data = {
-                    "YII_CSRF_TOKEN": system.csrf,
-                    "PackageUploadForm[type]": $(this).data("package-type")
+                    "YII_CSRF_TOKEN": system.csrf
                 };
 
                 $(this).fileupload({
@@ -961,7 +960,7 @@ function Admin()
                         data = json.data;
 
                         // show package data
-                        $("#PackageEditForm_id").val(data.pkg.id);
+                        $("#PackageAddForm_id").val(data.pkg.id);
 
                         $("#package_type")
                             .html(data.pkg.type)
@@ -982,7 +981,7 @@ function Admin()
                     },
 
                     fail: function (e, data) {
-                        $("#PackageEditForm_id").val(0);
+                        $("#PackageAddForm_id").val(0);
                         $(".loader-image").hide();
                         $(".upload-message").hide();
                         $(".file-input").show();
@@ -991,7 +990,7 @@ function Admin()
                     },
 
                     start: function (e) {
-                        $("#PackageEditForm_id").val(0);
+                        $("#PackageAddForm_id").val(0);
 
                         $(".loader-image").show();
                         $(".file-input").hide();

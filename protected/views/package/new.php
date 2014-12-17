@@ -10,7 +10,7 @@
 
 <form class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
-    <input type="hidden" id="PackageEditForm_id" name="PackageEditForm[id]" value="<?php echo $model->id; ?>">
+    <input type="hidden" id="PackageAddForm_id" name="PackageAddForm[id]" value="<?php echo $model->id; ?>">
 
     <fieldset>
         <div class="control-group">
@@ -18,7 +18,7 @@
             <div class="controls form-text">
                 <div class="file-input">
                     <a href="#logo"><?php echo Yii::t("app", "Upload Package"); ?></a>
-                    <input type="file" name="PackageUploadForm[file]" data-upload-url="<?php echo $this->createUrl("package/upload"); ?>" data-package-type="<?php echo $type; ?>">
+                    <input type="file" name="PackageUploadForm[file]" data-upload-url="<?php echo $this->createUrl("package/upload"); ?>">
                 </div>
 
                 <div class="upload-message hide"><?php echo Yii::t("app", "Uploading..."); ?></div>

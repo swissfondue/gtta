@@ -696,10 +696,6 @@ class PackageManager {
             $this->_extract($zipPath, $packagePath);
             $package = $this->_parse($this->_getRootPath($packagePath));
             $this->_validate($package, false);
-
-            if ($package[self::SECTION_TYPE] != $model->type) {
-                throw new Exception(Yii::t("app", "Invalid package type."));
-            }
         } catch (Exception $e) {
             FileManager::unlink($zipPath);
             $exception = $e;

@@ -5,11 +5,6 @@
  */
 class PackageUploadForm extends CFormModel {
     /**
-     * @var integer int.
-     */
-    public $type;
-
-    /**
      * @var CUploadedFile file.
      */
     public $file;
@@ -19,9 +14,8 @@ class PackageUploadForm extends CFormModel {
 	 */
 	public function rules() {
 		return array(
-			array("type, file", "required"),
-            array("type", "in", "range" => array(Package::TYPE_LIBRARY, Package::TYPE_SCRIPT)),
-            array( 
+			array("file", "required"),
+            array(
                 "file",
                 "file",
                 "maxSize" => Yii::app()->params["packages"]["maxSize"],
@@ -36,7 +30,6 @@ class PackageUploadForm extends CFormModel {
 	 */
 	public function attributeLabels() {
 		return array(
-            "type" => Yii::t("app", "Type"),
             "file" => Yii::t("app", "File"),
         );
 	}
