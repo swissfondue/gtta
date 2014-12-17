@@ -5071,9 +5071,6 @@ class ReportController extends Controller {
                                 "hidden" => TargetCheck::RATING_HIDDEN,
                             ),
                             "with" => array(
-                                "vuln" => array(
-                                    "with" => "user"
-                                ),
                                 "solutions" => array(
                                     "alias" => "tss",
                                     "joinType" => "LEFT JOIN",
@@ -5106,12 +5103,7 @@ class ReportController extends Controller {
                         'check_control_id' => $control->id
                     );
 
-                    $customChecks = TargetCustomCheck::model()->with(array(
-                            'vuln' => array(
-                                'with' => 'user'
-                            )
-                        )
-                    )->findAll($criteria);
+                    $customChecks = TargetCustomCheck::model()->findAll($criteria);
 
                     if (!$checks && !$customChecks) {
                         continue;
