@@ -4994,8 +4994,8 @@ class ReportController extends Controller {
         $ratings = TargetCheck::getRatingNames();
 
         $statuses = array(
-            TargetCheckVuln::STATUS_OPEN => Yii::t('app', 'Open'),
-            TargetCheckVuln::STATUS_RESOLVED => Yii::t('app', 'Resolved'),
+            TargetCheck::STATUS_VULN_OPEN => Yii::t('app', 'Open'),
+            TargetCheck::STATUS_VULN_RESOLVED => Yii::t('app', 'Resolved'),
         );
 
         foreach ($targets as $target) {
@@ -5071,9 +5071,6 @@ class ReportController extends Controller {
                                 "hidden" => TargetCheck::RATING_HIDDEN,
                             ),
                             "with" => array(
-                                "vuln" => array(
-                                    "with" => "user"
-                                ),
                                 "solutions" => array(
                                     "alias" => "tss",
                                     "joinType" => "LEFT JOIN",
@@ -5106,12 +5103,7 @@ class ReportController extends Controller {
                         'check_control_id' => $control->id
                     );
 
-                    $customChecks = TargetCustomCheck::model()->with(array(
-                            'vuln' => array(
-                                'with' => 'user'
-                            )
-                        )
-                    )->findAll($criteria);
+                    $customChecks = TargetCustomCheck::model()->findAll($criteria);
 
                     if (!$checks && !$customChecks) {
                         continue;
@@ -5247,7 +5239,7 @@ class ReportController extends Controller {
         }
 
         if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $model->columns)) {
-            $user = $check->vuln && $check->vuln->user ? $check->vuln->user : null;
+            $user = $check->vulnUser ? $check->vulnUser : null;
 
             if ($user) {
                 $row[TargetCheck::COLUMN_ASSIGNED_USER] = $user->name ? $user->name : $user->email;
@@ -5261,8 +5253,7 @@ class ReportController extends Controller {
         }
 
         if (in_array(TargetCheck::COLUMN_STATUS, $model->columns)) {
-            $vuln = $check->vuln ? $check->vuln : null;
-            $row[TargetCheck::COLUMN_STATUS] = $statuses[$vuln ? $vuln->status : TargetCheckVuln::STATUS_OPEN];
+            $row[TargetCheck::COLUMN_STATUS] = $statuses[$check->vuln_status ? $check->vuln_status : TargetCheck::STATUS_VULN_OPEN];
         }
 
         return $row;
@@ -5326,8 +5317,8 @@ class ReportController extends Controller {
         $ratings = ProjectGtCheck::getRatingNames();
 
         $statuses = array(
-            TargetCheckVuln::STATUS_OPEN => Yii::t('app', 'Open'),
-            TargetCheckVuln::STATUS_RESOLVED => Yii::t('app', 'Resolved'),
+            TargetCheck::STATUS_VULN_OPEN => Yii::t('app', 'Open'),
+            TargetCheck::STATUS_VULN_RESOLVED => Yii::t('app', 'Resolved'),
         );
 
         foreach ($gtChecks as $check) {
@@ -5378,7 +5369,7 @@ class ReportController extends Controller {
             }
 
             if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $model->columns)) {
-                $user = $check->vuln && $check->vuln->user ? $check->vuln->user : null;
+                $user = $check->vulnUser ? $check->vulnUser : null;
 
                 if ($user) {
                     $row[TargetCheck::COLUMN_ASSIGNED_USER] = $user->name ? $user->name : $user->email;
@@ -5392,7 +5383,7 @@ class ReportController extends Controller {
             }
 
             if (in_array(TargetCheck::COLUMN_STATUS, $model->columns)) {
-                $row[TargetCheck::COLUMN_STATUS] = $statuses[$check->vuln ? $check->vuln->status : TargetCheckVuln::STATUS_OPEN];
+                $row[TargetCheck::COLUMN_STATUS] = $statuses[$check->vuln_status ? $check->vuln_status : TargetCheck::STATUS_VULN_OPEN];
             }
 
             $data[] = $row;

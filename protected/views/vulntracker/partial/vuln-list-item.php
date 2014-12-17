@@ -1,4 +1,4 @@
-<tr<?php if (User::checkRole(User::ROLE_USER) && $check->vuln && $check->vuln->overdued && $check->vuln->status == TargetCheckVuln::STATUS_OPEN) echo ' class="delete-row"'; ?>>
+<tr<?php if (User::checkRole(User::ROLE_USER) && $check->vulnOverdued && $check->vuln_status == TargetCheck::STATUS_VULN_OPEN) echo ' class="delete-row"'; ?>>
     <td class="check">
         <?php if ($project->guided_test): ?>
             <?php if ($project->checkAdmin()): ?>
@@ -40,14 +40,14 @@
     </td>
     <?php if (User::checkRole(User::ROLE_USER)): ?>
         <td class="assigned">
-            <?php if ($check->vuln && $check->vuln->user_id): ?>
-                <?php echo $check->vuln->user->name ? CHtml::encode($check->vuln->user->name) : $check->vuln->user->email; ?>
+            <?php if ($check->vulnUser): ?>
+                <?php echo $check->vulnUser->name ? CHtml::encode($check->vulnUser->name) : $check->vulnUser->email; ?>
             <?php else: ?>
                 <i class="icon icon-minus"></i>
             <?php endif; ?>
-            <?php if ($check->vuln && $check->vuln->deadline): ?>
+            <?php if ($check->vuln_deadline): ?>
                 <div class="description">
-                    <?php echo $check->vuln->deadline; ?>
+                    <?php echo $check->vuln_deadline; ?>
                 </div>
             <?php endif; ?>
         </td>
@@ -73,14 +73,14 @@
     <?php endif; ?>
     <td class="status">
         <?php
-        $status = $check->vuln ? $check->vuln->status : TargetCheckVuln::STATUS_OPEN;
+        $status = $check->vuln_status ? $check->vuln_status : TargetCheck::STATUS_VULN_OPEN;
 
         switch ($status) {
-            case TargetCheckVuln::STATUS_OPEN:
+            case TargetCheck::STATUS_VULN_OPEN:
                 echo '<span class="label">' . $statuses[$status] . '</span>';
                 break;
 
-            case TargetCheckVuln::STATUS_RESOLVED:
+            case TargetCheck::STATUS_VULN_RESOLVED:
                 echo '<span class="label label-finished">' . $statuses[$status] . '</span>';
                 break;
         }

@@ -18,13 +18,7 @@ class VulntrackerCommand extends ConsoleCommand {
         $projects = Project::model()->with(array(
             "targets" => array(
                 "with" => array(
-                    "targetChecks" => array(                            
-                        "with" => array(
-                            "vuln" => array(
-                                "alias" => "v",
-                            ),
-                        ),
-                    ),
+                    "targetChecks"
                 ),
             ),
             "gtChecks" => array(
@@ -70,7 +64,7 @@ class VulntrackerCommand extends ConsoleCommand {
                 $totalChecks = array_merge($target->targetChecks, $target->targetCustomChecks);
 
                 foreach ($totalChecks as $ttc) {
-                    if ($ttc->vuln && $ttc->vuln->overdued) {
+                    if ($ttc->vulnOverdued) {
                         $overdued++;
                         break;
                     }
@@ -78,7 +72,7 @@ class VulntrackerCommand extends ConsoleCommand {
             }
 
             foreach ($project->gtChecks as $check) {
-                if ($check->vuln && $check->vuln->overdued) {
+                if ($check->vuln->overdued) {
                     $overdued++;
                     break;
                 }
