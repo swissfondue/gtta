@@ -257,6 +257,8 @@ class PackageController extends Controller {
                         case PackageEditForm::OPERATION_SAVE:
                             FileManager::updateFile($path, $content);
                             $selected = $form->path;
+                            $package->modified = true;
+                            $package->save();
                             Yii::app()->user->setFlash("success", Yii::t("app", "File successfully saved."));
 
                             break;
@@ -264,6 +266,8 @@ class PackageController extends Controller {
                         case PackageEditForm::OPERATION_DELETE:
                             FileManager::unlink($path);
                             $form = new PackageEditForm();
+                            $package->modified = true;
+                            $package->save();
                             Yii::app()->user->setFlash("success", Yii::t("app", "File successfully deleted."));
 
                             break;
