@@ -156,10 +156,8 @@
 
                             if ($input->targetInputs) {
                                 foreach ($input->targetInputs as $inputValue) {
-                                    if ($inputValue->check_input_id == $input->id && $inputValue->target_check_id == $check->id) {
-                                        $value = $inputValue->value;
-                                        break;
-                                    }
+                                    $value = $inputValue->value;
+                                    break;
                                 }
                             }
 
@@ -178,10 +176,8 @@
 
                             if ($input->targetInputs) {
                                 foreach ($input->targetInputs as $inputValue) {
-                                    if ($inputValue->check_input_id == $input->id && $inputValue->target_check_id == $check->id) {
-                                        $value = $inputValue->value;
-                                        break;
-                                    }
+                                    $value = $inputValue->value;
+                                    break;
                                 }
                             }
 
@@ -200,10 +196,8 @@
 
                             if ($input->targetInputs) {
                                 foreach ($input->targetInputs as $inputValue) {
-                                    if ($inputValue->check_input_id == $input->id && $inputValue->target_check_id == $check->id) {
-                                        $value = $inputValue->value;
-                                        break;
-                                    }
+                                    $value = $inputValue->value;
+                                    break;
                                 }
                             }
                         ?>
@@ -225,10 +219,8 @@
 
                             if ($input->targetInputs) {
                                 foreach ($input->targetInputs as $inputValue) {
-                                    if ($inputValue->check_input_id == $input->id && $inputValue->target_check_id == $check->id) {
-                                        $value = $inputValue->value;
-                                        break;
-                                    }
+                                    $value = $inputValue->value;
+                                    break;
                                 }
                             }
 

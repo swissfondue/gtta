@@ -1932,7 +1932,15 @@ class ProjectController extends Controller {
                 ));
                 $criteria->order = 'sort_order ASC';
 
-                $script->inputs = CheckInput::model()->with($lang)->findAll($criteria);
+                $script->inputs = CheckInput::model()->with(array_merge(array(
+                        "targetInputs" => array(
+                            "alias" => "ti",
+                            "on" => "ti.target_check_id = :tc_id",
+                            "params" => array("tc_id" => $check->id),
+                        )
+                    ),
+                    $lang
+                ))->findAll($criteria);
             }
 
             $criteria = new CDbCriteria();
