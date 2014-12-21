@@ -1056,6 +1056,92 @@ function Admin()
                 }
             });
         };
+
+        /**
+         * File select changed
+         * @param val
+         */
+        this.fileSelectChanged = function (val) {
+            $('#PackageEditForm_content').val('');
+
+            if (val == '0') {
+                $('#PackageEditForm_path')
+                    .val('')
+                    .closest('.control-group')
+                    .show();
+                $('#PackageEditForm_file').siblings('.del-button').hide();
+            } else {
+                $('#PackageEditForm_path')
+                    .val(val)
+                    .closest('.control-group')
+                    .hide();
+                $('#PackageEditForm_file').siblings('.del-button').show();
+                this.loadFileContent();
+            }
+        };
+
+        /**
+         * Load package file content
+         * @param package
+         */
+        this.loadFileContent = function () {
+            var url = $('#PackageEditForm_file').data('url');
+            var path = $('#PackageEditForm_file').val();
+
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data: {
+                    "PackageLoadFileForm[path]": path,
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+                'success' : function (response) {
+                    var content = response.data.file_content;
+
+                    $('[id^=PackageEditForm]').removeAttr('disabled');
+                    $('#PackageEditForm_content').val(content);
+
+                    $(".loader-image").hide();
+                },
+
+                'error' : function (data) {
+                    $('[id^=PackageEditForm]').removeAttr('disabled');
+                    $(".loader-image").hide();
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                },
+
+                'beforeSend' : function () {
+                    $('[id^=PackageEditForm]').attr('disabled', 'disabled');
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
+         * Package file edit
+         * @param operation
+         */
+        this.fileEdit = function (operation) {
+            switch (operation) {
+                case 'save':
+                    $('#PackageEditForm_operation').val('save');
+                    break;
+                case 'delete':
+                    if (!confirm(system.translate("Are you sure that you want to delete this object?"))) {
+                        return;
+                    }
+
+                    $('#PackageEditForm_operation').val('delete');
+                    break;
+                default:
+                    system.showMessage('error', 'Unknown operation type.');
+            }
+
+            $('#PackageEdit').submit();
+        };
     };
 
     /**

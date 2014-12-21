@@ -130,10 +130,12 @@ return array(
 
     // software packages
     "package/new"               => "package/new",
+    "package/<id:\d+>/edit"     => "package/edit",
     "packages/<page:\d+>"       => "package/index",
     "packages"                  => "package/index",
     "package/<id:\d+>"          => "package/view",
     "package/<id:\d+>/share"    => "package/share",
+    "package/<id:\d+>/file"     => "package/file",
     "package/control"           => "package/control",
     "package/upload"            => "package/upload",
     "packages/regenerate"        => "package/regenerate",

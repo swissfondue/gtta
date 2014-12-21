@@ -2,6 +2,7 @@
     <div class="pull-right">
         <ul class="nav nav-pills">
             <li><a href="<?php echo $this->createUrl("package/view", array("id" => $package->id)); ?>"><?php echo Yii::t("app", "View"); ?></a></li>
+            <li><a href="<?php echo $this->createUrl("package/edit", array("id" => $package->id)); ?>"><?php echo Yii::t("app", "Edit"); ?></a></li>
             <li class="active"><a href="<?php echo $this->createUrl("package/share", array("id" => $package->id)); ?>"><?php echo Yii::t("app", "Share"); ?></a></li>
         </ul>
     </div>
