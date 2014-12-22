@@ -43,6 +43,8 @@ class SettingsController extends Controller {
         $form->communityMinRating = $system->community_min_rating;
         $form->checklistPoc = $system->checklist_poc;
         $form->checklistLinks = $system->checklist_links;
+        $form->email = $system->email;
+        $form->mailMaxAttempts = $system->mail_max_attempts;
 
         // collect form input data
 		if (isset($_POST["SettingsEditForm"])) {
@@ -76,6 +78,8 @@ class SettingsController extends Controller {
                 $system->checklist_poc= $form->checklistPoc;
                 $system->checklist_links = $form->checklistLinks;
                 $system->community_min_rating = $form->communityMinRating;
+                $system->email = $form->email;
+                $system->mail_max_attempts = $form->mailMaxAttempts;
                 $system->save();
 
                 $this->_system->refresh();

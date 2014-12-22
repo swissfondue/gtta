@@ -224,6 +224,30 @@
             </div>
         </div>
 
+        <hr>
+
+        <h3><?php echo Yii::t("app", "Mail Settings"); ?></h3>
+
+        <div class="control-group <?php if ($form->getError('email')) echo 'error'; ?>">
+            <label class="control-label" for="SettingsEditForm_email"><?php echo Yii::t('app', 'E-mail'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="SettingsEditForm_email" name="SettingsEditForm[email]" value="<?php echo CHtml::encode($form->email); ?>">
+                <?php if ($form->getError('email')): ?>
+                    <p class="help-block"><?php echo $form->getError('email'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($form->getError('mailMaxAttempts')) echo 'error'; ?>">
+            <label class="control-label" for="SettingsEditForm_mailMaxAttempts"><?php echo Yii::t('app', 'Max Attempts'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="SettingsEditForm_mailMaxAttempts" name="SettingsEditForm[mailMaxAttempts]" value="<?php echo CHtml::encode($form->mailMaxAttempts); ?>">
+                <?php if ($form->getError('mailMaxAttempts')): ?>
+                    <p class="help-block"><?php echo $form->getError('mailMaxAttempts'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>
         </div>

@@ -10,10 +10,19 @@ class EmailCommand extends ConsoleCommand
      */
     private function _sendEmails()
     {
+        $system = System::model()->findByPk(1);
+
+        if (!$system->email || !$system->mail_max_attempts) {
+            throw new Exception('Invalid mail settings.');
+        }
+
+        $maxAttempts = $system->mail_max_attempts;
+        $systemMail = $system->email;
+
         $emails = Email::model()->with('user')->findAll(
             array(
                 'condition' => 'NOT sent AND attempts < :max_attempts',
-                'params'    => array( 'max_attempts' => Yii::app()->params['email']['maxAttempts'] ),
+                'params'    => array( 'max_attempts' => $maxAttempts ),
                 'order'     => 't.id ASC'
             )
         );
@@ -25,7 +34,7 @@ class EmailCommand extends ConsoleCommand
             try
             {
                 $message          = new YiiMailMessage();
-                $message->from    = array( Yii::app()->params['email']['systemEmail'] => Yii::app()->name );
+                $message->from    = array( $systemMail => Yii::app()->name );
                 $message->to      = $email->user->email;
                 $message->subject = $email->subject;
                 $message->setBody($email->content, 'text/html', 'utf-8');

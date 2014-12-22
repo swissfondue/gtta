@@ -85,6 +85,16 @@ class SettingsEditForm extends CFormModel {
     public $checklistLinks;
 
     /**
+     * @var string email
+     */
+    public $email;
+
+    /**
+     * @var integer mail max attempts
+     */
+    public $mailMaxAttempts;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
@@ -100,6 +110,9 @@ class SettingsEditForm extends CFormModel {
             array("reportMedPedestal", "compare", "compareAttribute" => "reportHighPedestal", "operator" => "<="),
             array("reportHighPedestal", "compare", "compareAttribute" => "reportMaxRating", "operator" => "<="),
             array("languageId", "checkLanguage"),
+            array("email", "email"),
+            array("mailMaxAttempts", "numerical", "integerOnly" => true, "min" => 0),
+            array("mailMaxAttempts", "default", "value" => null),
 		);
 	}
     
@@ -124,6 +137,8 @@ class SettingsEditForm extends CFormModel {
             "communityAllowUnverified" => Yii::t("app", "Community Allow Unverified"),
             "checklistPoc" => Yii::t("app", "Checklist POC"),
             "checklistLinks" => Yii::t("app", "Checklist Links"),
+            "email" => Yii::t("app", "Email"),
+            "mailMaxAttempts" => Yii::t("app", "Mail Max Attempts"),
 		);
 	}
 
