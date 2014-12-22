@@ -20,6 +20,7 @@ return array(
         "application.components.processors.*",
         "application.components.reports.*",
         "application.components.reports.docx.*",
+        "application.jobs.*",
         "ext.yii-mail.YiiMailMessage",
 	),
 

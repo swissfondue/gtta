@@ -27,13 +27,15 @@ class ProcessManager {
 
     /**
      * Kill process
-     * @param $pid integer process id
+     * @param int $pid integer process id
+     * @param int $signal
      * @return boolean
      */
-    public static function killProcess($pid) {
-        exec("kill -9 -" . $pid);
+    public static function killProcess($pid, $signal=9) {
+        exec("kill -$signal $pid");
         return self::isRunning($pid);
     }
+
 
     /**
      * Run a background command
