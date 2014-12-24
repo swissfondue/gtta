@@ -228,6 +228,53 @@
 
         <h3><?php echo Yii::t("app", "Mail Settings"); ?></h3>
 
+        <div class="control-group <?php if ($form->getError('mailHost')) echo 'error'; ?>">
+            <label class="control-label" for="SettingsEditForm_mailHost"><?php echo Yii::t('app', 'Host'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="SettingsEditForm_mailHost" name="SettingsEditForm[mailHost]" value="<?php echo CHtml::encode($form->mailHost); ?>">
+                <?php if ($form->getError('mailHost')): ?>
+                    <p class="help-block"><?php echo $form->getError('mailHost'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($form->getError('mailPort')) echo 'error'; ?>">
+            <label class="control-label" for="SettingsEditForm_mailPort"><?php echo Yii::t('app', 'Port'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="SettingsEditForm_mailPort" name="SettingsEditForm[mailPort]" value="<?php echo CHtml::encode($form->mailPort); ?>">
+                <?php if ($form->getError('mailPort')): ?>
+                    <p class="help-block"><?php echo $form->getError('mailPort'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($form->getError('mailUsername')) echo 'error'; ?>">
+            <label class="control-label" for="SettingsEditForm_mailUsername"><?php echo Yii::t('app', 'Username'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="SettingsEditForm_mailUsername" name="SettingsEditForm[mailUsername]" value="<?php echo CHtml::encode($form->mailUsername); ?>">
+                <?php if ($form->getError('mailUsername')): ?>
+                    <p class="help-block"><?php echo $form->getError('mailUsername'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($form->getError('mailPassword')) echo 'error'; ?>">
+            <label class="control-label" for="SettingsEditForm_mailPassword"><?php echo Yii::t('app', 'Password'); ?></label>
+            <div class="controls">
+                <input type="password" class="input-xlarge" id="SettingsEditForm_mailPassword" name="SettingsEditForm[mailPassword]" value="<?php echo CHtml::encode($form->mailPassword); ?>">
+                <?php if ($form->getError('mailPassword')): ?>
+                    <p class="help-block"><?php echo $form->getError('mailPassword'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="SettingsEditForm_mailCrypt"><?php echo Yii::t("app", "Encryption"); ?></label>
+            <div class="controls">
+                <input type="checkbox" id="SettingsEditForm_mailCrypt" name="SettingsEditForm[mailCrypt]" <?php if ($form->mailCrypt) echo 'checked="checked"'; ?>>
+            </div>
+        </div>
+
         <div class="control-group <?php if ($form->getError('email')) echo 'error'; ?>">
             <label class="control-label" for="SettingsEditForm_email"><?php echo Yii::t('app', 'E-mail'); ?></label>
             <div class="controls">

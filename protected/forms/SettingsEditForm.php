@@ -95,6 +95,31 @@ class SettingsEditForm extends CFormModel {
     public $mailMaxAttempts;
 
     /**
+     * @var string mail host
+     */
+    public $mailHost;
+
+    /**
+     * @var integer mail port
+     */
+    public $mailPort;
+
+    /**
+     * @var string mail username
+     */
+    public $mailUsername;
+
+    /**
+     * @var string mail password
+     */
+    public $mailPassword;
+
+    /**
+     * @var string mail crypt
+     */
+    public $mailCrypt;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
@@ -112,7 +137,8 @@ class SettingsEditForm extends CFormModel {
             array("languageId", "checkLanguage"),
             array("email", "email"),
             array("mailMaxAttempts", "numerical", "integerOnly" => true, "min" => 0),
-            array("mailMaxAttempts", "default", "value" => null),
+            array("mailPort", "numerical", "integerOnly" => true, "min" => 1, "max" => 65535),
+            array("mailHost, mailUsername, mailPassword", "safe"),
 		);
 	}
     
@@ -139,6 +165,11 @@ class SettingsEditForm extends CFormModel {
             "checklistLinks" => Yii::t("app", "Checklist Links"),
             "email" => Yii::t("app", "Email"),
             "mailMaxAttempts" => Yii::t("app", "Mail Max Attempts"),
+            "mailHost" => Yii::t("app", "Host"),
+            "mailPort" => Yii::t("app", "Port"),
+            "mailUsername" => Yii::t("app", "Username"),
+            "mailPassword" => Yii::t("app", "Password"),
+            "mailCrypt" => Yii::t("app", "Encryption"),
 		);
 	}
 

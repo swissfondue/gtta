@@ -33,13 +33,7 @@ return array(
             "viewPath" => "application.views.mail",
             "logging" => false,
             "dryRun" => false,
-            "transportOptions" => array(
-                "host" => "smtp.yandex.ru",
-                "port" => "465",
-                "username" => "gtta.test@yandex.ru",
-                "password" => "123321",
-                "encryption" => "ssl",
-            )
+            "transportOptions" => array()
         ),
 
         "urlManager" => $mainConfig["components"]["urlManager"],
