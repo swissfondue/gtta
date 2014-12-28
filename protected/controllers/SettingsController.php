@@ -43,6 +43,13 @@ class SettingsController extends Controller {
         $form->communityMinRating = $system->community_min_rating;
         $form->checklistPoc = $system->checklist_poc;
         $form->checklistLinks = $system->checklist_links;
+        $form->email = $system->email;
+        $form->mailMaxAttempts = $system->mail_max_attempts;
+        $form->mailHost = $system->mail_host;
+        $form->mailPort = $system->mail_port;
+        $form->mailUsername = $system->mail_username;
+        $form->mailPassword = $system->mail_password;
+        $form->mailEncryption = $system->mail_encryption;
 
         // collect form input data
 		if (isset($_POST["SettingsEditForm"])) {
@@ -50,6 +57,7 @@ class SettingsController extends Controller {
             $form->communityAllowUnverified = isset($_POST["SettingsEditForm"]["communityAllowUnverified"]);
             $form->checklistPoc = isset($_POST["SettingsEditForm"]["checklistPoc"]);
             $form->checklistLinks = isset($_POST["SettingsEditForm"]["checklistLinks"]);
+            $form->mailEncryption = isset($_POST["SettingsEditForm"]["mailEncryption"]);
 
 			if ($form->validate()) {
                 $langId = (int) $form->languageId;
@@ -76,6 +84,13 @@ class SettingsController extends Controller {
                 $system->checklist_poc= $form->checklistPoc;
                 $system->checklist_links = $form->checklistLinks;
                 $system->community_min_rating = $form->communityMinRating;
+                $system->email = $form->email;
+                $system->mail_max_attempts = $form->mailMaxAttempts;
+                $system->mail_host = $form->mailHost;
+                $system->mail_port = $form->mailPort;
+                $system->mail_username = $form->mailUsername;
+                $system->mail_password = $form->mailPassword;
+                $system->mail_encryption = $form->mailEncryption;
                 $system->save();
 
                 $this->_system->refresh();

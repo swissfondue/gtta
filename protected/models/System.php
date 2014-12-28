@@ -33,6 +33,13 @@
  * @property string $integration_key
  * @property boolean $checklist_poc
  * @property boolean $checklist_links
+ * @property email $email
+ * @property integer $mail_max_attempts
+ * @property integer $mail_host
+ * @property integer $mail_port
+ * @property integer $mail_username
+ * @property integer $mail_password
+ * @property integer $mail_encryption
  * @property Language $language
  */
 class System extends ActiveRecord {
