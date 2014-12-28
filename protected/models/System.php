@@ -39,7 +39,7 @@
  * @property integer $mail_port
  * @property integer $mail_username
  * @property integer $mail_password
- * @property integer $mail_crypt
+ * @property integer $mail_encryption
  * @property Language $language
  */
 class System extends ActiveRecord {

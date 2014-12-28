@@ -269,9 +269,9 @@
         </div>
 
         <div class="control-group">
-            <label class="control-label" for="SettingsEditForm_mailCrypt"><?php echo Yii::t("app", "Encryption"); ?></label>
+            <label class="control-label" for="SettingsEditForm_mailEncryption"><?php echo Yii::t("app", "Encryption"); ?></label>
             <div class="controls">
-                <input type="checkbox" id="SettingsEditForm_mailCrypt" name="SettingsEditForm[mailCrypt]" <?php if ($form->mailCrypt) echo 'checked="checked"'; ?>>
+                <input type="checkbox" id="SettingsEditForm_mailEncryption" name="SettingsEditForm[mailEncryption]" <?php if ($form->mailEncryption) echo 'checked="checked"'; ?>>
             </div>
         </div>
 

@@ -34,7 +34,7 @@ class EmailCommand extends ConsoleCommand
         $maxAttempts = $system->mail_max_attempts;
         $systemMail = $system->email;
 
-        $transportOptions['encryption'] = $system->mail_crypt ? 'ssl' : null;
+        $transportOptions['encryption'] = $system->mail_encryption ? 'ssl' : null;
         Yii::app()->mail->transportOptions = $transportOptions;
 
         $emails = Email::model()->with('user')->findAll(

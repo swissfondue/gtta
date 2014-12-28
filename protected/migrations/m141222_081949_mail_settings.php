@@ -41,7 +41,7 @@ class m141222_081949_mail_settings extends CDbMigration {
         );
         $this->addColumn(
             'system',
-            'mail_crypt',
+            'mail_encryption',
             'boolean NOT NULL DEFAULT FALSE'
         );
         return true;
@@ -58,7 +58,7 @@ class m141222_081949_mail_settings extends CDbMigration {
         $this->dropColumn('system', 'mail_port');
         $this->dropColumn('system', 'mail_username');
         $this->dropColumn('system', 'mail_password');
-        $this->dropColumn('system', 'mail_crypt');
+        $this->dropColumn('system', 'mail_encryption');
 		return true;
 	}
 }

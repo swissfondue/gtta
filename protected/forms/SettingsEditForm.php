@@ -115,9 +115,9 @@ class SettingsEditForm extends CFormModel {
     public $mailPassword;
 
     /**
-     * @var string mail crypt
+     * @var string mail encryption
      */
-    public $mailCrypt;
+    public $mailEncryption;
 
     /**
 	 * @return array validation rules for model attributes.
@@ -169,7 +169,7 @@ class SettingsEditForm extends CFormModel {
             "mailPort" => Yii::t("app", "Port"),
             "mailUsername" => Yii::t("app", "Username"),
             "mailPassword" => Yii::t("app", "Password"),
-            "mailCrypt" => Yii::t("app", "Encryption"),
+            "mailEncryption" => Yii::t("app", "Encryption"),
 		);
 	}
 

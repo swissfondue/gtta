@@ -49,7 +49,7 @@ class SettingsController extends Controller {
         $form->mailPort = $system->mail_port;
         $form->mailUsername = $system->mail_username;
         $form->mailPassword = $system->mail_password;
-        $form->mailCrypt = $system->mail_crypt;
+        $form->mailEncryption = $system->mail_encryption;
 
         // collect form input data
 		if (isset($_POST["SettingsEditForm"])) {
@@ -57,7 +57,7 @@ class SettingsController extends Controller {
             $form->communityAllowUnverified = isset($_POST["SettingsEditForm"]["communityAllowUnverified"]);
             $form->checklistPoc = isset($_POST["SettingsEditForm"]["checklistPoc"]);
             $form->checklistLinks = isset($_POST["SettingsEditForm"]["checklistLinks"]);
-            $form->mailCrypt = isset($_POST["SettingsEditForm"]["mailCrypt"]);
+            $form->mailEncryption = isset($_POST["SettingsEditForm"]["mailEncryption"]);
 
 			if ($form->validate()) {
                 $langId = (int) $form->languageId;
@@ -90,7 +90,7 @@ class SettingsController extends Controller {
                 $system->mail_port = $form->mailPort;
                 $system->mail_username = $form->mailUsername;
                 $system->mail_password = $form->mailPassword;
-                $system->mail_crypt = $form->mailCrypt;
+                $system->mail_encryption = $form->mailEncryption;
                 $system->save();
 
                 $this->_system->refresh();
