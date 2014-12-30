@@ -1,9 +1,18 @@
 <?php
-
 /**
- * Update command
+ * Class UpdateJob
  */
-class UpdateCommand extends ConsoleCommand {
+class UpdateJob extends BackgroundJob {
+    /**
+     * System flag
+     */
+    const SYSTEM = false;
+
+    /**
+     * Job id
+     */
+    const JOB_ID = null;
+
     const GTTA_USER = "gtta";
     const GTTA_GROUP = "gtta";
     const EXTRACTED_DIRECTORY = "gtta";
@@ -350,7 +359,7 @@ class UpdateCommand extends ConsoleCommand {
                 "pid" => null,
             ));
 
-            SystemManager::updateStatus(System::STATUS_REGENERATE_SANDBOX, System::STATUS_IDLE);
+            JobManager::enqueue(JobManager::JOB_REGENERATE);
         } catch (Exception $e) {
             // swallow exceptions
         }
@@ -361,10 +370,9 @@ class UpdateCommand extends ConsoleCommand {
     }
 
     /**
-     * Run
-     * @param array $args
+     * Perform
      */
-    protected function runLocked($args) {
+    public function perform() {
         $this->_update();
     }
 }

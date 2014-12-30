@@ -1,12 +1,20 @@
 <?php
-
 /**
- * Email sender class. 
+ * Class EmailJob
  */
-class EmailCommand extends ConsoleCommand
-{
+class EmailJob extends BackgroundJob {
     /**
-     * Sends emails from the database queue. 
+     * System flag
+     */
+    const SYSTEM = false;
+
+    /**
+     * Job id
+     */
+    const JOB_ID = null;
+
+    /**
+     * Sends emails from the database queue.
      */
     private function _sendEmails()
     {
@@ -17,11 +25,11 @@ class EmailCommand extends ConsoleCommand
                 'order'     => 't.id ASC'
             )
         );
-        
+
         foreach ($emails as $email)
         {
             $email->attempts += 1;
-            
+
             try
             {
                 $message          = new YiiMailMessage();
@@ -29,16 +37,16 @@ class EmailCommand extends ConsoleCommand
                 $message->to      = $email->user->email;
                 $message->subject = $email->subject;
                 $message->setBody($email->content, 'text/html', 'utf-8');
-                
+
                 Yii::app()->mail->send($message);
-                
+
                 $email->sent = true;
             }
             catch (Exception $e)
             {
                 // ignore
             }
-            
+
             $email->save();
 
             if ($email->sent)
@@ -50,7 +58,7 @@ class EmailCommand extends ConsoleCommand
      * Run
      * @param array $args
      */
-    protected function runLocked($args) {
+    public function perform() {
         $this->_sendEmails();
     }
 }

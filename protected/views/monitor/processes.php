@@ -19,7 +19,7 @@
                 </div>
 
                 <?php foreach ($checks as $check): ?>
-                    <div class="process-monitor<?php if ($check->status == TargetCheck::STATUS_STOP) echo ' disabled'; ?>" data-control-url="<?php echo $this->createUrl('monitor/controlprocess'); ?>" data-id="<?php echo $check->target_id; ?>-<?php echo $check->check_id; ?>">
+                    <div class="process-monitor<?php if ($check->isRunning) echo ' disabled'; ?>" data-control-url="<?php echo $this->createUrl('monitor/controlprocess'); ?>" data-id="<?php echo $check->target_id; ?>-<?php echo $check->check_id; ?>">
                         <table class="process-monitor">
                             <tbody>
                                 <tr>
@@ -35,11 +35,7 @@
                                         <a href="<?php echo $this->createUrl('user/edit', array( 'id' => $check->user_id )); ?>"><?php echo CHtml::encode($check->user->name ? $check->user->name : $check->user->email); ?></a>
                                     </td>
                                     <td class="actions">
-                                        <?php if ($check->status == TargetCheck::STATUS_IN_PROGRESS): ?>
-                                            <a href="#stop" title="<?php echo Yii::t('app', 'Stop'); ?>" onclick="admin.process.stop(<?php echo $check->target_id; ?>, <?php echo $check->check_id; ?>);"><i class="icon icon-stop"></i></a>
-                                        <?php else: ?>
-                                            <span class="disabled"><i class="icon icon-stop" title="<?php echo Yii::t('app', 'Stop'); ?>"></i></span>
-                                        <?php endif; ?>
+                                        <a href="#stop" title="<?php echo Yii::t('app', 'Stop'); ?>" onclick="admin.process.stop(<?php echo $check->target_id; ?>, <?php echo $check->check_id; ?>);"><i class="icon icon-stop"></i></a>
                                     </td>
                                 </tr>
                             </tbody>
@@ -48,7 +44,7 @@
                 <?php endforeach; ?>
 
                 <?php foreach ($gtChecks as $check): ?>
-                    <div class="process-monitor<?php if ($check->status == ProjectGtCheck::STATUS_STOP) echo ' disabled'; ?>" data-control-url="<?php echo $this->createUrl('monitor/controlprocess'); ?>" data-id="gt-<?php echo $check->project_id; ?>-<?php echo $check->gt_check_id; ?>">
+                    <div class="process-monitor" data-control-url="<?php echo $this->createUrl('monitor/controlprocess'); ?>" data-id="gt-<?php echo $check->project_id; ?>-<?php echo $check->gt_check_id; ?>">
                         <table class="process-monitor">
                             <tbody>
                                 <tr>
@@ -60,10 +56,8 @@
                                         <a href="<?php echo $this->createUrl('user/edit', array('id' => $check->user_id)); ?>"><?php echo CHtml::encode($check->user->name ? $check->user->name : $check->user->email); ?></a>
                                     </td>
                                     <td class="actions">
-                                        <?php if ($check->status == ProjectGtCheck::STATUS_IN_PROGRESS): ?>
+                                        <?php if ($check->isRunning): ?>
                                             <a href="#stop" title="<?php echo Yii::t('app', 'Stop'); ?>" onclick="admin.process.stop(<?php echo $check->project_id; ?>, <?php echo $check->gt_check_id; ?>, true);"><i class="icon icon-stop"></i></a>
-                                        <?php else: ?>
-                                            <span class="disabled"><i class="icon icon-stop" title="<?php echo Yii::t('app', 'Stop'); ?>"></i></span>
                                         <?php endif; ?>
                                     </td>
                                 </tr>

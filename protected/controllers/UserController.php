@@ -16,7 +16,7 @@ class UserController extends Controller
             'checkAdmin',
             'ajaxOnly + control, controlproject, objectlist',
             'postOnly + control, controlproject, objectlist',
-            "idleOrRunning",
+            "idle",
 		);
 	}
 

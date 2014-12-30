@@ -17,7 +17,7 @@ class VulntrackerController extends Controller {
 		return array(
             'https',
 			'checkAuth',
-            "idleOrRunning",
+            "idle",
         );
 	}
 

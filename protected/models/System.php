@@ -40,14 +40,9 @@ class System extends ActiveRecord {
      * Statuses
      */
     const STATUS_IDLE = 0;
-    const STATUS_RUNNING = 100;
     const STATUS_BACKING_UP = 200;
     const STATUS_RESTORING = 205;
     const STATUS_UPDATING = 210;
-    const STATUS_PACKAGE_MANAGER = 215;
-    const STATUS_REGENERATE_SANDBOX = 220;
-    const STATUS_COMMUNITY_INSTALL = 230;
-    const STATUS_COMMUNITY_SHARE = 240;
     const STATUS_LICENSE_EXPIRED = 500;
 
     /**
@@ -73,14 +68,9 @@ class System extends ActiveRecord {
     public static function validStatuses() {
         return array(
             self::STATUS_IDLE,
-            self::STATUS_RUNNING,
             self::STATUS_BACKING_UP,
             self::STATUS_RESTORING,
             self::STATUS_UPDATING,
-            self::STATUS_PACKAGE_MANAGER,
-            self::STATUS_REGENERATE_SANDBOX,
-            self::STATUS_COMMUNITY_INSTALL,
-            self::STATUS_COMMUNITY_SHARE,
             self::STATUS_LICENSE_EXPIRED,
         );
     }
@@ -105,14 +95,9 @@ class System extends ActiveRecord {
     public function getStringStatus() {
         $statuses = array(
             self::STATUS_IDLE => Yii::t("app", "The system is idle."),
-            self::STATUS_RUNNING => Yii::t("app", "The system is running checks."),
             self::STATUS_BACKING_UP => Yii::t("app", "The system is backing up."),
             self::STATUS_RESTORING => Yii::t("app", "The system is restoring."),
             self::STATUS_UPDATING => Yii::t("app", "The system is updating."),
-            self::STATUS_PACKAGE_MANAGER => Yii::t("app", "The system is installing or removing packages."),
-            self::STATUS_REGENERATE_SANDBOX => Yii::t("app", "The system is regenerating scripts sandbox."),
-            self::STATUS_COMMUNITY_INSTALL => Yii::t("app", "The system is installing checks or packages from the community platform."),
-            self::STATUS_COMMUNITY_SHARE => Yii::t("app", "The system is sharing checks or packages to the community platform."),
         );
 
         return $statuses[$this->status];
@@ -125,5 +110,14 @@ class System extends ActiveRecord {
         return array(
             "language" => array(self::BELONGS_TO, "Language", "", "on" => "language.user_default IS TRUE"),
         );
+    }
+
+    /**
+     * Check if system is regenerating
+     */
+    public function getIsRegenerating() {
+        $job = JobManager::buildId(RegenerateJob::JOB_ID);
+
+        return JobManager::isRunning($job);
     }
 }

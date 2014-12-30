@@ -11,9 +11,13 @@ class ReferenceManager {
      */
     public function prepareSharing(Reference $reference) {
         if (!$reference->external_id) {
-            $reference->status = Reference::STATUS_SHARE;
-            $reference->save();
+            JobManager::enqueue(JobManager::JOB_COMMUNITY_SHARE, array(
+                'type' => CommunityShareJob::TYPE_REFERENCE,
+                'obj_id' => $reference->id,
+            ));
         }
+
+
     }
 
     /**

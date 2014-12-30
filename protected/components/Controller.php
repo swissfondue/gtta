@@ -175,16 +175,6 @@ class Controller extends CController {
     }
 
     /**
-     * Check if system is IDLE or RUNNING
-     * @param $filterChain
-     * @throws CHttpException
-     */
-    public function filterIdleOrRunning($filterChain) {
-        $this->_checkSystemStatus(array(System::STATUS_IDLE, System::STATUS_RUNNING));
-        $filterChain->run();
-    }
-
-    /**
      * Check if system status is IDLE
      * @param $filterChain
      * @throws CHttpException
@@ -201,36 +191,6 @@ class Controller extends CController {
      */
     public function filterIdleOrUpdating($filterChain) {
         $this->_checkSystemStatus(array(System::STATUS_IDLE, System::STATUS_UPDATING));
-        $filterChain->run();
-    }
-
-    /**
-     * Check if system is IDLE or PACKAGE MANAGER is running
-     * @param $filterChain
-     * @throws CHttpException
-     */
-    public function filterIdleOrPackageManager($filterChain) {
-        $this->_checkSystemStatus(array(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER));
-        $filterChain->run();
-    }
-
-    /**
-     * Check if system is IDLE or in VM REGENERATE state
-     * @param $filterChain
-     * @throws CHttpException
-     */
-    public function filterIdleOrRegenerate($filterChain) {
-        $this->_checkSystemStatus(array(System::STATUS_IDLE, System::STATUS_REGENERATE_SANDBOX));
-        $filterChain->run();
-    }
-
-    /**
-     * Check if system is IDLE or in VM REGENERATE state or in PACKAGE MANAGER state
-     * @param $filterChain
-     * @throws CHttpException
-     */
-    public function filterIdleOrRegenerateOrPackageManager($filterChain) {
-        $this->_checkSystemStatus(array(System::STATUS_IDLE, System::STATUS_REGENERATE_SANDBOX, System::STATUS_PACKAGE_MANAGER));
         $filterChain->run();
     }
 }

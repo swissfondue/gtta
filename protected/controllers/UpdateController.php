@@ -67,6 +67,8 @@ class UpdateController extends Controller {
             }
 
             $updating = true;
+
+            JobManager::enqueue(JobManager::JOB_UPDATE);
         }
 
         $req = Yii::app()->request;

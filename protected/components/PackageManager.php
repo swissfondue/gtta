@@ -643,6 +643,11 @@ class PackageManager {
             $pkg->version = $package[self::SECTION_VERSION];
             $pkg->status = Package::STATUS_INSTALL;
             $pkg->save();
+
+            JobManager::enqueue(JobManager::JOB_PACKAGE, array(
+                'operation' => PackageJob::OPERATION_INSTALL,
+                'obj_id' => $pkg->id,
+            ));
         } catch (Exception $e) {
             FileManager::unlink($zipPath);
             $exception = $e;
@@ -1189,8 +1194,10 @@ class PackageManager {
         }
 
         if (!$package->external_id) {
-            $package->status = Package::STATUS_SHARE;
-            $package->save();
+            JobManager::enqueue(JobManager::JOB_COMMUNITY_SHARE, array(
+                "type" => CommunityShareJob::TYPE_PACKAGE,
+                "obj_id" => $package->id,
+            ));
         }
     }
 

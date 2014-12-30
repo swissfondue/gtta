@@ -1,24 +1,24 @@
 <?php
 
 /**
- * GT Automation class.
+ * Class GtAutomationJob
  */
-class GtautomationCommand extends ConsoleCommand {
+class GtAutomationJob extends BackgroundJob {
     /**
-     * Process starting checks.
+     * System flag
      */
-    private function _processStartingChecks() {
-        $checks = ProjectGtCheck::model()->findAllByAttributes(array(
-            'status' => ProjectGtCheck::STATUS_IN_PROGRESS,
-            'pid' => null
-        ));
+    const SYSTEM = false;
 
-        foreach ($checks as $check) {
-            ProcessManager::backgroundExec(
-                Yii::app()->params['yiicPath'] . '/yiic gtautomation ' . $check->project_id . ' ' . $check->gt_check_id
-            );
-        }
-    }
+    /**
+     * Job id
+     */
+    const JOB_ID = "@app@.gt_check.project.@proj_id@.check.@obj_id@.@operation@";
+
+    /**
+     * Operations
+     */
+    const OPERATION_START   = 'start';
+    const OPERATION_STOP    = 'stop';
 
     /**
      * Translate pid into the sandbox PID
@@ -35,70 +35,6 @@ class GtautomationCommand extends ConsoleCommand {
         }
 
         return (int) file_get_contents($pidFileName);
-    }
-
-    /**
-     * Process stopping checks.
-     */
-    private function _processStoppingChecks() {
-        $criteria = new CDbCriteria();
-        $criteria->addCondition('status = :status');
-        $criteria->params = array('status' => ProjectGtCheck::STATUS_STOP);
-
-        $checks = ProjectGtCheck::model()->findAll($criteria);
-
-        foreach ($checks as $check) {
-            $fileOutput = null;
-            $vm = new VMManager();
-
-            if ($check->pid) {
-                $vm->killProcessGroup($this->_translatePid($check->pid));
-                sleep(5);
-
-                $outFileName = $vm->virtualizePath(
-                    Yii::app()->params['automation']['filesPath'] . '/' . $check->result_file
-                );
-
-                if (file_exists($outFileName)) {
-                    $fileOutput = file_get_contents($outFileName);
-                }
-            }
-
-            if (!$check->result) {
-                $check->result = '';
-            }
-
-            $check->result .= $fileOutput ? $fileOutput : 'No output.';
-            $check->status = ProjectGtCheck::STATUS_FINISHED;
-            $check->pid = null;
-            $check->save();
-        }
-    }
-
-    /**
-     * Process running checks.
-     */
-    private function _processRunningChecks() {
-        $criteria = new CDbCriteria();
-        $criteria->addCondition('pid IS NOT NULL');
-        $criteria->addInCondition('status', array(ProjectGtCheck::STATUS_IN_PROGRESS, ProjectGtCheck::STATUS_STOP));
-
-        $checks = ProjectGtCheck::model()->findAll($criteria);
-
-        foreach ($checks as $check) {
-            // if task died for some reason
-            if (!ProcessManager::isRunning($check->pid)) {
-                $check->pid = null;
-
-                if (!$check->result) {
-                    $check->result = 'No output.';
-                }
-
-                $check->status = ProjectGtCheck::STATUS_FINISHED;
-            }
-
-            $check->save();
-        }
     }
 
     /**
@@ -286,11 +222,9 @@ class GtautomationCommand extends ConsoleCommand {
             ),
             'language'
         ))->findByAttributes(array(
-            'status' => ProjectGtCheck::STATUS_IN_PROGRESS,
-            'pid' => null,
-            'project_id' => $projectId,
-            'gt_check_id' => $checkId
-        ));
+                'project_id' => $projectId,
+                'gt_check_id' => $checkId
+            ));
 
         if (!$check) {
             return;
@@ -329,8 +263,7 @@ class GtautomationCommand extends ConsoleCommand {
             $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
 
             try {
-                $check->pid = posix_getpgid(getmypid());
-                $check->started = $now->format("Y-m-d H:i:s");
+                $pid = posix_getpgid(getmypid());
                 $check->target_file = $this->_generateFileName();
                 $check->result_file = $this->_generateFileName();
                 $check->save();
@@ -341,7 +274,7 @@ class GtautomationCommand extends ConsoleCommand {
                     "python",
                     "/opt/gtta/run_script.py",
                     $package->name,
-                    "--pid=" . $check->pid,
+                    "--pid=" . $pid,
                 );
 
                 $command[] = $filesPath . '/' . $check->target_file;
@@ -359,7 +292,6 @@ class GtautomationCommand extends ConsoleCommand {
                     $data = $fileOutput ? $fileOutput : $output;
 
                     $check->refresh();
-                    $check->pid = null;
                     $check->result .= $data;
 
                     if (!$data) {
@@ -370,7 +302,6 @@ class GtautomationCommand extends ConsoleCommand {
                     $this->_getImages($check);
                 } else {
                     $check->refresh();
-                    $check->pid = null;
                     $check->result .= Yii::t("app", "Sandbox is not running, please regenerate it.") . "\n";
                 }
 
@@ -399,50 +330,71 @@ class GtautomationCommand extends ConsoleCommand {
         $check->status = ProjectGtCheck::STATUS_FINISHED;
         $check->save();
     }
-    
+
     /**
-     * Run unlocked
-     * @param array $args
+     * Process stopping checks.
      */
-    public function runUnlocked($args) {
-        // start checks
-        if (count($args) <= 0) {
-            return;
+    private function _stopCheck($projectId, $checkId) {
+        $check = ProjectGtCheck::model()->findByAttributes(array(
+            'project_id' => $projectId,
+            'gt_check_id' => $checkId
+        ));
+
+        if (!$check) {
+            throw new Exception("Check not found.");
         }
 
-        if (count($args) != 2) {
-            die("Invalid number of arguments.");
+        $fileOutput = null;
+        $job = JobManager::buildId(GtAutomationJob::JOB_ID, array(
+            "operation" => GtAutomationJob::OPERATION_START,
+            "proj_id" => $projectId,
+            "obj_id" => $checkId,
+        ));
+        $pid = JobManager::getPid($job);
+        $vm = new VMManager();
+        $vm->killProcessGroup($this->_translatePid($pid));
+
+        sleep(5);
+
+        $outFileName = $vm->virtualizePath(
+            Yii::app()->params['automation']['filesPath'] . '/' . $check->result_file
+        );
+
+        if (file_exists($outFileName)) {
+            $fileOutput = file_get_contents($outFileName);
         }
 
-        $projectId = (int) $args[0];
-        $checkId = (int) $args[1];
-
-        if ($projectId && $checkId) {
-            $this->_startCheck($projectId, $checkId);
-        } else {
-            die("Invalid arguments.");
+        if (!$check->result) {
+            $check->result = '';
         }
 
-        exit();
+        $check->result .= $fileOutput ? $fileOutput : 'No output.';
+        $check->status = ProjectGtCheck::STATUS_FINISHED;
+        $check->save();
     }
 
     /**
-     * Run locked
-     * @param array $args
+     * Perform
      */
-    protected function runLocked($args) {
-        for ($i = 0; $i < 10; $i++) {
-            $this->_system->refresh();
-
-            if ($this->_system->status == System::STATUS_RUNNING) {
-                $this->_processStartingChecks();
-                $this->_processStoppingChecks();
-                $this->_processRunningChecks();
-
-                $this->_checkSystemIsRunning();
-            }
-
-            sleep(5);
+    public function perform() {
+        if (!isset($this->args['proj_id']) || !isset($this->args['obj_id']) || !isset($this->args['operation'])) {
+            throw new Exception("Invalid job params.");
         }
+
+        $projectId = $this->args["proj_id"];
+        $checkId = $this->args["obj_id"];
+        $operation = $this->args["operation"];
+
+        if (!in_array($operation, array($this::OPERATION_START, $this::OPERATION_STOP))) {
+            throw new Exception("Invalid operation.");
+        }
+
+        if ($operation == $this::OPERATION_START) {
+            $this::_startCheck($projectId, $checkId);
+        } elseif ($operation == $this::OPERATION_STOP) {
+            $this::_stopCheck($projectId, $checkId);
+        }
+
+        $this->_startCheck($projectId, $checkId);
     }
 }

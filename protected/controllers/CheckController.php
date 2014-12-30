@@ -15,8 +15,7 @@ class CheckController extends Controller
 			'checkAuth',
             'checkAdmin',
             'ajaxOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput, controlscript',
-            'postOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput, controlscript',
-            "idleOrRunning",
+            'postOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput, controlscript'
 		);
 	}
 
@@ -447,6 +446,10 @@ class CheckController extends Controller
                     $redirect = true;
                 }
 
+                if ($model->categoryId != $control->check_category_id) {
+                    $oldCategory = $control->category();
+                }
+
                 $control->check_category_id = $model->categoryId;
                 $control->name = $model->name;
                 $control->save();
@@ -478,6 +481,26 @@ class CheckController extends Controller
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Control saved.'));
 
                 $control->refresh();
+
+                if (isset($oldCategory)) {
+                    $targetCheckCats = TargetCheckCategory::model()->findAllByAttributes(array(
+                        "check_category_id" => array($oldCategory->id, $control->check_category_id)
+                    ));
+
+                    foreach ($targetCheckCats as $category) {
+                        JobManager::enqueue(JobManager::JOB_STATS, array(
+                            "target_id" => $category->target_id,
+                            "category_id" => $category->check_category_id,
+                        ));
+                    }
+
+                    ProjectPlanner::updateAllStats();
+
+                    JobManager::enqueue(JobManager::JOB_TARGET_CHECK_REINDEX, array(
+                        "target_id" => $category->target_id,
+                        "category_id" => $category->check_category_id,
+                    ));
+                }
 
                 if ($redirect) {
                     $this->redirect(array('check/editcontrol', 'id' => $control->check_category_id, 'control' => $control->id));
@@ -1023,6 +1046,10 @@ class CheckController extends Controller
                     $redirect = true;
                 }
 
+                if ($model->controlId != $check->check_control_id) {
+                    $statControlIds = array($model->controlId, $check->check_control_id);
+                }
+
                 if ($newRecord && $this->_system->demo) {
                     $updated = System::model()->updateCounters(
                         array("demo_check_limit" => -1),
@@ -1044,6 +1071,11 @@ class CheckController extends Controller
                 $check->protocol = $model->protocol;
                 $check->port = $model->port;
                 $check->check_control_id = $model->controlId;
+
+                if ($model->referenceId != $check->reference_id) {
+                    $statReferenceIds = array($model->referenceId, $check->reference_id);
+                }
+
                 $check->reference_id = $model->referenceId;
                 $check->reference_code = $model->referenceCode;
                 $check->reference_url = $model->referenceUrl;
@@ -1093,6 +1125,59 @@ class CheckController extends Controller
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check saved.'));
                 $check->refresh();
+
+                if (isset($statControlIds)) {
+                    foreach ($statControlIds as $controlId) {
+                        $control = CheckControl::model()->findByPk($controlId);
+                        $targetCategories = TargetCheckCategory::model()->findAllByAttributes(array(
+                            "check_category_id" => $control->category->id
+                        ));
+
+                        foreach ($targetCategories as $targetCategory) {
+                            JobManager::enqueue(JobManager::JOB_STATS, array(
+                                "target_id" => $targetCategory->target_id,
+                                "category_id" => $targetCategory->check_category_id,
+                            ));
+
+                            JobManager::enqueue(JobManager::JOB_TARGET_CHECK_REINDEX, array(
+                                "target_id" => $targetCategory->target_id,
+                                "category_id" => $targetCategory->check_category_id,
+                            ));
+                        }
+                    }
+                }
+
+                if (isset($statReferenceIds)) {
+                    $references = Reference::model()->findAllByAttributes(array(
+                        "id" => $statReferenceIds
+                    ));
+
+                    foreach ($references as $reference) {
+                        $checks = Check::model()->findAllByAttributes(array(
+                            "reference_id" => $reference->id
+                        ));
+
+                        foreach ($checks as $check) {
+                            $targetCategories = TargetCheckCategory::model()->findAllByAttributes(array(
+                                "check_category_id" => $check->control->category->id
+                            ));
+
+                            foreach ($targetCategories as $targetCategory) {
+                                JobManager::enqueue(JobManager::JOB_STATS, array(
+                                    "target_id" => $targetCategory->target_id,
+                                    "category_id" => $targetCategory->check_category_id,
+                                ));
+
+                                JobManager::enqueue(JobManager::JOB_TARGET_CHECK_REINDEX, array(
+                                    "target_id" => $targetCategory->target_id,
+                                    "category_id" => $targetCategory->check_category_id,
+                                ));
+                            }
+                        }
+                    }
+                }
+
+                ProjectPlanner::updateAllStats();
 
                 if ($redirect) {
                     $this->redirect(array(

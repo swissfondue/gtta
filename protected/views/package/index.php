@@ -5,7 +5,7 @@
         <?php
             $disabled = false;
 
-            if (!in_array($system->status, array(System::STATUS_IDLE, System::STATUS_REGENERATE_SANDBOX))) {
+            if (!in_array($system->status, array(System::STATUS_IDLE))) {
                 $disabled = true;
             }
         ?>
@@ -60,7 +60,7 @@
                                     <span class="label <?php echo $labelClass; ?>"><?php echo $package->statusName; ?></span>
                                 </td>
                                 <td class="actions">
-                                    <?php if ($package->status != Package::STATUS_INSTALL && in_array($system->status, array(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER))): ?>
+                                    <?php if ($package->status != Package::STATUS_INSTALL && $system->status == System::STATUS_IDLE): ?>
                                         <a href="#del" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="system.control.del(<?php echo $package->id; ?>);"><i class="icon icon-remove"></i></a>
                                     <?php endif; ?>
                                 </td>

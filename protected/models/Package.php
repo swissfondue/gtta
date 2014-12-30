@@ -20,7 +20,6 @@ class Package extends ActiveRecord {
     const STATUS_INSTALL = 0;
     const STATUS_INSTALLED = 1;
     const STATUS_SHARE = 2;
-    const STATUS_DELETE = 10;
     const STATUS_ERROR = 100;
 
 	/**
@@ -68,7 +67,6 @@ class Package extends ActiveRecord {
                 self::STATUS_INSTALL,
                 self::STATUS_INSTALLED,
                 self::STATUS_SHARE,
-                self::STATUS_DELETE,
                 self::STATUS_ERROR
             )),
             array("create_time", "safe"),
@@ -96,7 +94,6 @@ class Package extends ActiveRecord {
             self::STATUS_INSTALL => Yii::t("app", "Installing"),
             self::STATUS_INSTALLED => Yii::t("app", "Installed"),
             self::STATUS_SHARE => Yii::t("app", "Sharing"),
-            self::STATUS_DELETE => Yii::t("app", "Deleting"),
             self::STATUS_ERROR => Yii::t("app", "Error"),
         );
 

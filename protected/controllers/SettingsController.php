@@ -12,7 +12,7 @@ class SettingsController extends Controller {
             "https",
 			"checkAuth",
             "checkAdmin",
-            "idleOrRunning",
+            "idle",
             "ajaxOnly + controllogo, integrationkey",
             "postOnly + controllogo, integrationkey",
 		);

@@ -1,9 +1,19 @@
 <?php
 
 /**
- * Community install command
+ * Class CommunityInstallJob
  */
-class CommunityInstallCommand extends ConsoleCommand {
+class CommunityInstallJob extends BackgroundJob {
+    /**
+     * System flag
+     */
+    const SYSTEM = false;
+
+    /**
+     * Job id
+     */
+    const JOB_ID = null;
+
     /**
      * Get install candidates
      * @param $integrationKey
@@ -62,16 +72,11 @@ class CommunityInstallCommand extends ConsoleCommand {
         /** @var System $system */
         $system = System::model()->findByPk(1);
 
-        if ($system->status != System::STATUS_COMMUNITY_INSTALL) {
-            return;
-        }
-
         if ($system->pid !== null) {
             if (ProcessManager::isRunning($system->pid)) {
                 return;
             }
 
-            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_COMMUNITY_INSTALL);
             System::model()->updateByPk(1, array(
                 "pid" => null,
             ));
@@ -95,7 +100,6 @@ class CommunityInstallCommand extends ConsoleCommand {
         // "finally" block emulation
         try {
             $this->_finish($system->integration_key);
-            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_COMMUNITY_INSTALL);
             System::model()->updateByPk(1, array(
                 "pid" => null,
             ));
@@ -109,10 +113,9 @@ class CommunityInstallCommand extends ConsoleCommand {
     }
 
     /**
-     * Run
-     * @param array $args
+     * Perform
      */
-    protected function runLocked($args) {
+    public function perform() {
         $this->_install();
     }
 }

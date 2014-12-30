@@ -3,7 +3,7 @@
 /**
  * Resque command
  */
-class ResqueCommand extends ConsoleCommand {
+class ResqueCommand extends CConsoleCommand {
     /**
      * Runs the command
      * @param array $args list of command-line arguments.

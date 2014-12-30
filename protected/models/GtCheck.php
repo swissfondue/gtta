@@ -98,9 +98,6 @@ class GtCheck extends ActiveRecord
         return
             $this->check->automated &&
             $this->projectChecks &&
-            in_array($this->projectChecks[0]->status, array(
-                ProjectGtCheck::STATUS_IN_PROGRESS,
-                ProjectGtCheck::STATUS_STOP
-            ));
+            $this->projectChecks[0]->isRunning;
     }
 }

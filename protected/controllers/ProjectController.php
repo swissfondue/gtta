@@ -16,7 +16,7 @@ class ProjectController extends Controller {
             "checkAdmin + edit, users, edituser, controluser, controltime",
             "ajaxOnly + savecheck, savecustomcheck, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtcontrolattachment, copycheck, controlchecklist, check, controlcategory",
             "postOnly + savecheck, savecustomcheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, gtcontrolcheck, gtsavecheck, gtupdatechecks, gtuploadattachment, gtcontrolattachment, copycheck, controlchecklist, check, controlcategory",
-            "idleOrRunning",
+            "idle",
 		);
 	}
 
@@ -225,6 +225,7 @@ class ProjectController extends Controller {
                 Project::STATUS_FINISHED => Yii::t("app", "Finished"),
             )
         ));
+
 	}
 
     /**
@@ -1451,6 +1452,25 @@ class ProjectController extends Controller {
 
                 $target->refresh();
 
+                foreach ($target->_categories as $category) {
+                    JobManager::enqueue(JobManager::JOB_STATS, array(
+                        "target_id" => $category->target_id,
+                        "category_id" => $category->check_category_id,
+                    ));
+
+                    JobManager::enqueue(JobManager::JOB_TARGET_CHECK_REINDEX, array(
+                        "target_id" => $category->target_id,
+                        "category_id" => $category->check_category_id,
+                    ));
+                }
+
+                ProjectPlanner::updateAllStats();
+
+                JobManager::enqueue(JobManager::JOB_TARGET_CHECK_REINDEX, array(
+                    "target_id" => $category->target_id,
+                    "category_id" => $category->check_category_id,
+                ));
+
                 if ($newRecord) {
                     $this->redirect(array("project/edittarget", "id" => $project->id, "target" => $target->id));
                 }
@@ -2322,6 +2342,18 @@ class ProjectController extends Controller {
                 }
             }
 
+            JobManager::enqueue(JobManager::JOB_STATS, array(
+                "target_id" => $targetCheck->target->id,
+                "category_id" => $targetCheck->check->control->category->id,
+            ));
+
+            ProjectPlanner::updateAllStats();
+
+            JobManager::enqueue(JobManager::JOB_TARGET_CHECK_REINDEX, array(
+                "target_id" => $category->target_id,
+                "category_id" => $category->check_category_id,
+            ));
+
             $response->addData("targetCheck", array(
                 'id' => $targetCheck->id,
                 "check" => array(
@@ -2757,6 +2789,13 @@ class ProjectController extends Controller {
 
             $category->advanced = $model->advanced;
             $category->save();
+
+            JobManager::enqueue(JobManager::JOB_STATS, array(
+                "category_id" => $category->check_category_id,
+                "target_id" => $category->target_id,
+            ));
+
+            ProjectPlanner::updateAllStats();
         }
         catch (Exception $e)
         {
@@ -3534,9 +3573,9 @@ class ProjectController extends Controller {
                 ));
             }
 
-            switch ($model->operation)             {
+            switch ($model->operation) {
                 case "start":
-                    if (!in_array($targetCheck->status, array(TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED))) {
+                    if ($targetCheck->isRunning) {
                         throw new CHttpException(403, Yii::t("app", "Access denied."));
                     }
 
@@ -3545,35 +3584,24 @@ class ProjectController extends Controller {
                         "target_check_id" => $targetCheck->id,
                     ));
 
-                    try {
-                        SystemManager::updateStatus(
-                            System::STATUS_RUNNING,
-                            array(System::STATUS_IDLE, System::STATUS_RUNNING)
-                        );
-                    } catch (Exception $e) {
-                        throw new CHttpException(403, Yii::t("app", "Access denied."));
-                    }
-
-                    $targetCheck->status = TargetCheck::STATUS_IN_PROGRESS;
                     $targetCheck->rating = TargetCheck::RATING_NONE;
-                    $targetCheck->started = null;
-                    $targetCheck->pid = null;
                     $targetCheck->save();
+
+                    TargetCheckManager::startCheck($targetCheck->id);
 
                     break;
 
                 case "stop":
-                    if ($targetCheck->status != TargetCheck::STATUS_IN_PROGRESS) {
+                    if (!$targetCheck->isRunning) {
                         throw new CHttpException(403, Yii::t("app", "Access denied."));
                     }
 
-                    $targetCheck->status = TargetCheck::STATUS_STOP;
-                    $targetCheck->save();
+                    TargetCheckManager::stopCheck($targetCheck->id);
 
                     break;
 
                 case "reset":
-                    if (!in_array($targetCheck->status, array(TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED))) {
+                    if ($targetCheck->isRunning) {
                         throw new CHttpException(403, Yii::t("app", "Access denied."));
                     }
 
@@ -3598,8 +3626,6 @@ class ProjectController extends Controller {
 
                     $targetCheck->result = null;
                     $targetCheck->target_file = null;
-                    $targetCheck->pid = null;
-                    $targetCheck->started = null;
                     $targetCheck->status = TargetCheck::STATUS_OPEN;
                     $targetCheck->result_file = null;
                     $targetCheck->protocol = $check->protocol;
@@ -3871,7 +3897,7 @@ class ProjectController extends Controller {
 
             switch ($model->operation) {
                 case 'start':
-                    if (!in_array($projectCheck->status, array(ProjectGtCheck::STATUS_OPEN, ProjectGtCheck::STATUS_FINISHED))) {
+                    if ($projectCheck->isRunning) {
                         throw new CHttpException(403, Yii::t('app', 'Access denied.'));
                     }
 
@@ -3880,36 +3906,26 @@ class ProjectController extends Controller {
                         'project_id' => $project->id,
                         'gt_check_id' => $check->id
                     ));
-
-                    try {
-                        SystemManager::updateStatus(
-                            System::STATUS_RUNNING,
-                            array(System::STATUS_IDLE, System::STATUS_RUNNING)
-                        );
-                    } catch (Exception $e) {
-                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
-                    }
-
-                    $projectCheck->status = ProjectGtCheck::STATUS_IN_PROGRESS;
                     $projectCheck->rating = ProjectGtCheck::RATING_NONE;
-                    $projectCheck->started = null;
-                    $projectCheck->pid = null;
                     $projectCheck->save();
+
+                    ProjectGtCheckManager::startGtCheck($projectCheck->project_id, $projectCheck->gt_check_id);
 
                     break;
 
                 case 'stop':
-                    if ($projectCheck->status != ProjectGtCheck::STATUS_IN_PROGRESS) {
+                    if (!$projectCheck->isRunning) {
                         throw new CHttpException(403, Yii::t('app', 'Access denied.'));
                     }
 
-                    $projectCheck->status = ProjectGtCheck::STATUS_STOP;
                     $projectCheck->save();
+
+                    ProjectGtCheckManager::stopCheck($projectCheck->project_id, $projectCheck->gt_check_id);
 
                     break;
 
                 case 'reset':
-                    if (!in_array($projectCheck->status, array(ProjectGtCheck::STATUS_OPEN, ProjectGtCheck::STATUS_FINISHED))) {
+                    if ($projectCheck->isRunning) {
                         throw new CHttpException(403, Yii::t('app', 'Access denied.'));
                     }
 
@@ -4464,7 +4480,7 @@ class ProjectController extends Controller {
             $checkData = array();
 
             foreach ($checks as $targetCheck) {
-                $time = $targetCheck->started;
+                $time = TargetCheckManager::getStarted($targetCheck->id);
                 $startedText = null;
 
                 if ($time) {
@@ -4503,11 +4519,13 @@ class ProjectController extends Controller {
                     );
                 }
 
+                $finished = !$targetCheck->isRunning;
+
                 $checkData[] = array(
                     "id" => $targetCheck->id,
                     "result" => $targetCheck->result,
                     "tableResult" => $table ? $this->renderPartial("/project/target/check/tableresult", array("table" => $table), true) : "",
-                    "finished" => $targetCheck->status == TargetCheck::STATUS_FINISHED,
+                    "finished" => $finished,
                     "time" => $time,
                     "attachmentControlUrl" => $this->createUrl("project/controlattachment"),
                     "attachments" => $attachmentList,
@@ -4597,9 +4615,10 @@ class ProjectController extends Controller {
             ));
 
             $startedText = null;
+            $time = ProjectGtCheckManager::getStarted($projectCheck->project_id, $projectCheck->gt_check_id);
 
-            if ($projectCheck->started) {
-                $started = new DateTime($projectCheck->started);
+            if ($time) {
+                $started = new DateTime($time);
                 $now = new DateTime();
 
                 $time = $now->format("U") - $started->format("U");
@@ -4654,7 +4673,7 @@ class ProjectController extends Controller {
                 "id" => $check->id,
                 "result" => $projectCheck->result,
                 "tableResult" => $table ? $this->renderPartial("/project/gt/tableresult", array("table" => $table), true) : "",
-                "finished" => $projectCheck->status == ProjectGtCheck::STATUS_FINISHED,
+                "finished" => !$projectCheck->isRunning,
                 "time" => $time,
                 "attachmentControlUrl" => $this->createUrl("project/gtcontrolattachment"),
                 "attachments" => $attachmentList,

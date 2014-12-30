@@ -30,8 +30,10 @@ class ControlManager {
         }
 
         if (!$control->external_id) {
-            $control->status = CheckControl::STATUS_SHARE;
-            $control->save();
+            JobManager::enqueue(JobManager::JOB_COMMUNITY_SHARE, array(
+                'type' => CommunityShareJob::TYPE_CONTROL,
+                'obj_id' => $control->id,
+            ));
         }
 
         if ($recursive) {

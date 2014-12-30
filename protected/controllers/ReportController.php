@@ -27,7 +27,7 @@ class ReportController extends Controller {
             'https',
 			'checkAuth',
             'showReports',
-            "idleOrRunning",
+            "idle",
 		);
 	}
 

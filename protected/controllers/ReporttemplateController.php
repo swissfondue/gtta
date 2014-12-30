@@ -14,7 +14,7 @@ class ReporttemplateController extends Controller {
             "checkAdmin",
             "ajaxOnly + controlheaderimage, controlsummary, controlsection, controlfile",
             "postOnly + uploadheaderimage, uploadfile, controlheaderimage, controlfile, controlsummary, controlsection",
-            "idleOrRunning",
+            "idle",
 		);
 	}
 

@@ -1,24 +1,24 @@
 <?php
 
 /**
- * Automation class.
+ * Class AutomationJob
  */
-class AutomationCommand extends ConsoleCommand {
+class AutomationJob extends BackgroundJob {
     /**
-     * Process starting checks.
+     * System flag
      */
-    private function _processStartingChecks() {
-        $checks = TargetCheck::model()->findAllByAttributes(array(
-            'status' => TargetCheck::STATUS_IN_PROGRESS,
-            'pid' => null
-        ));
+    const SYSTEM = false;
 
-        foreach ($checks as $check) {
-            ProcessManager::backgroundExec(
-                Yii::app()->params['yiicPath'] . '/yiic automation ' . $check->id
-            );
-        }
-    }
+    /**
+     * Operation types
+     */
+    const OPERATION_START = "start";
+    const OPERATION_STOP = "stop";
+
+    /**
+     * Automation job id template
+     */
+    const JOB_ID = "@app@.check.@operation@.@obj_id@";
 
     /**
      * Translate pid into the sandbox PID
@@ -38,66 +38,43 @@ class AutomationCommand extends ConsoleCommand {
     }
 
     /**
-     * Process stopping checks.
+     * Stop check
+     * @param $id
      */
-    private function _processStoppingChecks() {
-        $criteria = new CDbCriteria();
-        $criteria->addCondition('status = :status');
-        $criteria->params = array('status' => TargetCheck::STATUS_STOP);
-        $checks = TargetCheck::model()->findAll($criteria);
+    private function _stopCheck($id) {
+        $check = TargetCheck::model()->findByPk($id);
 
-        foreach ($checks as $check) {
-            $fileOutput = null;
-            $vm = new VMManager();
-
-            if ($check->pid) {
-                $vm->killProcessGroup($this->_translatePid($check->pid));
-                sleep(5);
-
-                $outFileName = $vm->virtualizePath(
-                    Yii::app()->params['automation']['filesPath'] . '/' . $check->result_file
-                );
-
-                if (file_exists($outFileName)) {
-                    $fileOutput = file_get_contents($outFileName);
-                }
-            }
-
-            if (!$check->result) {
-                $check->result = '';
-            }
-
-            $check->result .= $fileOutput ? $fileOutput : 'No output.';
-            $check->status = TargetCheck::STATUS_FINISHED;
-            $check->pid = null;
-            $check->save();
+        if (!$check) {
+            return;
         }
+
+        $fileOutput = null;
+        $job = JobManager::buildId($this::JOB_ID, array(
+            "operation" => $this::OPERATION_START,
+            "obj_id" => $check->id,
+        ));
+        $pid = JobManager::getPid($job);
+        $vm = new VMManager();
+        $vm->killProcessGroup($this->_translatePid($pid));
+
+        sleep(5);
+
+        $outFileName = $vm->virtualizePath(
+            Yii::app()->params['automation']['filesPath'] . '/' . $check->result_file
+        );
+
+        if (file_exists($outFileName)) {
+            $fileOutput = file_get_contents($outFileName);
+        }
+
+        if (!$check->result) {
+            $check->result = '';
+        }
+
+        $check->result .= $fileOutput ? $fileOutput : 'No output.';
+        $check->save();
     }
 
-    /**
-     * Process running checks.
-     */
-    private function _processRunningChecks() {
-        $criteria = new CDbCriteria();
-        $criteria->addCondition('pid IS NOT NULL');
-        $criteria->addInCondition('status', array(TargetCheck::STATUS_IN_PROGRESS, TargetCheck::STATUS_STOP));
-        $checks = TargetCheck::model()->findAll($criteria);
-
-        foreach ($checks as $check) {
-            // if task died for some reason
-            if (!ProcessManager::isRunning($check->pid)) {
-                $check->pid = null;
-
-                if (!$check->result) {
-                    $check->result = 'No output.';
-                }
-
-                $check->status = TargetCheck::STATUS_FINISHED;
-            }
-
-            $check->save();
-        }
-    }
 
     /**
      * Generate a file name for automated checks.
@@ -163,6 +140,8 @@ class AutomationCommand extends ConsoleCommand {
             );
 
             $email->save();
+
+            JobManager::enqueue(JobManager::JOB_EMAIL);
         }
     }
 
@@ -324,11 +303,7 @@ class AutomationCommand extends ConsoleCommand {
      * Check starter.
      */
     private function _startCheck($checkId) {
-        $check = TargetCheck::model()->with("check", "language", "target")->findByAttributes(array(
-            "status" => TargetCheck::STATUS_IN_PROGRESS,
-            "pid" => null,
-            "id" => $checkId
-        ));
+        $check = TargetCheck::model()->with("check", "language", "target")->findByPk($checkId);
 
         if (!$check) {
             return;
@@ -372,8 +347,8 @@ class AutomationCommand extends ConsoleCommand {
             $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
 
             try {
-                $check->pid = posix_getpgid(getmypid());
-                $check->started = $now->format("Y-m-d H:i:s");
+                $pid = posix_getpgid(getmypid());
+
                 $check->target_file = $this->_generateFileName();
                 $check->result_file = $this->_generateFileName();
                 $check->save();
@@ -384,7 +359,7 @@ class AutomationCommand extends ConsoleCommand {
                     "python",
                     "/opt/gtta/run_script.py",
                     $package->name,
-                    "--pid=" . $check->pid,
+                    "--pid=" . $pid,
                 );
 
                 $command[] = $filesPath . '/' . $check->target_file;
@@ -402,7 +377,6 @@ class AutomationCommand extends ConsoleCommand {
                     $data = $fileOutput ? $fileOutput : $output;
 
                     $check->refresh();
-                    $check->pid = null;
                     $check->result .= $data;
 
                     if (!$data) {
@@ -417,66 +391,48 @@ class AutomationCommand extends ConsoleCommand {
 
                 $check->save();
 
-                $started = new DateTime($check->started);
-                $interval = time() - $started->getTimestamp();
+                $started = TargetCheckManager::getStarted($check->id);
 
-                if ($interval > Yii::app()->params['automation']['minNotificationInterval']) {
-                    $this->_sendNotification($check, $target);
+                if ($started) {
+                    $started = new DateTime($started);
+                    $interval = time() - $started->getTimestamp();
+
+                    if ($interval > Yii::app()->params['automation']['minNotificationInterval']) {
+                        $this->_sendNotification($check, $target);
+                    }
                 }
             } catch (VMNotFoundException $e) {
                 $check->refresh();
-                $check->pid = null;
                 $check->result .= $e->getMessage();
             } catch (Exception $e) {
                 $check->automationError($e->getMessage());
             }
         }
 
-        $check->status = TargetCheck::STATUS_FINISHED;
         $check->save();
     }
-    
-    /**
-     * Run unlocked
-     * @param array $args
-     */
-    protected function runUnlocked($args) {
-        // start checks
-        if (count($args) <= 0) {
-            return;
-        }
 
-        if (count($args) != 1) {
+    /**
+     * Perform job
+     * @param $args
+     */
+    public function perform() {
+        if (!isset($this->args["obj_id"]) || !isset($this->args["operation"])) {
             die("Invalid number of arguments.");
         }
 
-        $checkId = (int) $args[0];
+        $operation = $this->args["operation"];
+        $id = $this->args["obj_id"];
 
-        if ($checkId) {
-            $this->_startCheck($checkId);
-        } else {
-            die("Invalid arguments.");
-        }
-
-        exit();
-    }
-
-    /**
-     * Run locked
-     * @param array $args
-     */
-    protected function runLocked($args) {
-        for ($i = 0; $i < 10; $i++) {
-            $this->_system->refresh();
-
-            if ($this->_system->status == System::STATUS_RUNNING) {
-                $this->_processStartingChecks();
-                $this->_processStoppingChecks();
-                $this->_processRunningChecks();
-                $this->_checkSystemIsRunning();
-            }
-
-            sleep(5);
+        switch ($operation) {
+            case $this::OPERATION_START:
+                $this->_startCheck($id);
+                break;
+            case $this::OPERATION_STOP:
+                $this->_stopCheck($id);
+                break;
+            default:
+                throw new Exception("Invalid operation.");
         }
     }
 }

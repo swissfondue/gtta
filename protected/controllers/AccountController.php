@@ -116,6 +116,9 @@ class AccountController extends Controller
                 );
 
                 $email->save();
+
+                JobManager::enqueue(JobManager::JOB_EMAIL);
+
                 $success = true;
             } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));

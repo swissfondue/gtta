@@ -9,13 +9,13 @@ class RegenerateCommand extends ConsoleCommand {
      * @param array $args
      */
     protected function runLocked($args) {
-        $firstTime = false;
-
-        if (count($args) == 1) {
-            $firstTime = (bool) $args[0];
+        if (!isset($args[0])) {
+            return;
         }
 
-        if (!$firstTime && $this->_system->status != System::STATUS_REGENERATE_SANDBOX) {
+        $firstTime = (bool) $args[0];
+
+        if (!$firstTime) {
             return;
         }
 
@@ -24,10 +24,6 @@ class RegenerateCommand extends ConsoleCommand {
             $vm->regenerate($firstTime);
         } catch (Exception $e) {
             Yii::log($e->getMessage(), CLogger::LEVEL_ERROR);
-        }
-
-        if (!$firstTime) {
-            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_REGENERATE_SANDBOX);
         }
     }
 } 
