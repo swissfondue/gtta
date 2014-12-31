@@ -1047,7 +1047,11 @@ class CheckController extends Controller
                 }
 
                 if ($model->controlId != $check->check_control_id) {
-                    $statControlIds = array($model->controlId, $check->check_control_id);
+                    if ($newRecord) {
+                        $statControlIds = array($model->controlId);
+                    } else {
+                        $statControlIds = array($model->controlId, $check->check_control_id);
+                    }
                 }
 
                 if ($newRecord && $this->_system->demo) {
@@ -1073,7 +1077,11 @@ class CheckController extends Controller
                 $check->check_control_id = $model->controlId;
 
                 if ($model->referenceId != $check->reference_id) {
-                    $statReferenceIds = array($model->referenceId, $check->reference_id);
+                    if ($newRecord) {
+                        $statReferenceIds = array($model->referenceId);
+                    } else {
+                        $statReferenceIds = array($model->referenceId, $check->reference_id);
+                    }
                 }
 
                 $check->reference_id = $model->referenceId;
