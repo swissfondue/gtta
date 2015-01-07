@@ -144,17 +144,12 @@ class ProjectGtCheck extends ActiveRecord {
      * @return boolean is running.
      */
     public function getIsRunning() {
-        $startJob = JobManager::buildId(GtAutomationJob::JOB_ID, array(
+        $startJob = JobManager::buildId(GtAutomationJob::ID_TEMPLATE, array(
             "operation" => GtAutomationJob::OPERATION_START,
             "proj_id" => $this->project_id,
             "obj_id" => $this->gt_check_id,
         ));
-        $stopJob = JobManager::buildId(GtAutomationJob::JOB_ID, array(
-            "operation" => GtAutomationJob::OPERATION_STOP,
-            "proj_id" => $this->project_id,
-            "obj_id" => $this->gt_check_id,
-        ));
 
-        return JobManager::isRunning($startJob) || JobManager::isRunning($stopJob);
+        return JobManager::isRunning($startJob);
     }
 }

@@ -5,14 +5,9 @@
  */
 class PackageJob extends BackgroundJob {
     /**
-     * System flag
-     */
-    const SYSTEM = false;
-
-    /**
      * Job id
      */
-    const JOB_ID = "@app@.package.@operation@.@obj_id@";
+    const ID_TEMPLATE = "gtta.package.@operation@.@obj_id@";
 
     const OPERATION_INSTALL  = 'install';
     const OPERATION_DELETE   = 'delete';
@@ -71,14 +66,12 @@ class PackageJob extends BackgroundJob {
         $operation = $this->args["operation"];
         $id = $this->args["obj_id"];
 
-        $this->_system->refresh();
-
         try {
             switch ($operation) {
-                case $this::OPERATION_INSTALL:
+                case self::OPERATION_INSTALL:
                     $this->_installPackage($id);
                     break;
-                case $this::OPERATION_DELETE:
+                case self::OPERATION_DELETE:
                     $this->_deletePackage($id);
                     break;
                 default:

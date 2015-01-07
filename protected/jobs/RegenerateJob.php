@@ -5,21 +5,14 @@
  */
 class RegenerateJob extends BackgroundJob {
     /**
-     * System flag
-     */
-    const SYSTEM = false;
-
-    /**
      * Job id
      */
-    const JOB_ID = "@app@.sandbox.regenerate";
+    const ID_TEMPLATE = "gtta.sandbox.regenerate";
 
     /**
      * Perform
      */
     public function perform() {
-        sleep(20);
-
         try {
             $vm = new VMManager();
             $vm->regenerate(false);

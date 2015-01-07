@@ -483,9 +483,10 @@
                     foreach ($control->checks as $check) {
                         foreach ($check->targetChecks as $tc) {
                             if ($tc->isRunning) {
+                                $started = TargetCheckManager::getStartTime($tc->id);
                                 $runningChecks[] = json_encode(array(
                                     "id" => $tc->id,
-                                    "time" => $tc->started != NULL ? time() - strtotime($tc->started) : -1,
+                                    "time" => $started != NULL ? time() - strtotime($started) : -1,
                                 ));
                             }
                         }

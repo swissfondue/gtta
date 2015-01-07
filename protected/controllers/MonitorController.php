@@ -30,7 +30,7 @@ class MonitorController extends Controller {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->addInCondition("t.id", TargetCheckManager::runningCheckIds());
+        $criteria->addInCondition("t.id", TargetCheckManager::getRunning());
         $criteria->order = "COALESCE(l10n.name, \"check\".name) ASC";
         $criteria->together = true;
 
@@ -52,7 +52,7 @@ class MonitorController extends Controller {
 
         $gtChecks = array();
 
-        $runningGtChecks = ProjectGtCheckManager::runningCheckIds();
+        $runningGtChecks = ProjectGtCheckManager::getRunning();
 
         foreach ($runningGtChecks as $ids) {
             $criteria = new CDbCriteria();
@@ -172,9 +172,9 @@ class MonitorController extends Controller {
                     }
 
                     if ($ids[0] == 'gt') {
-                        ProjectGtCheckManager::stopCheck($check->project_id, $check->gt_check_id);
+                        ProjectGtCheckManager::stop($check->project_id, $check->gt_check_id);
                     } else {
-                        TargetCheckManager::stopCheck($check->id);
+                        TargetCheckManager::stop($check->id);
                     }
 
                     $check->save();

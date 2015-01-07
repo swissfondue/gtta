@@ -238,7 +238,7 @@ class CheckManager {
         }
 
         if (!$check->external_id) {
-            JobManager::enqueue(JobManager::JOB_COMMUNITY_SHARE, array(
+            CommunityShareJob::enqueue(array(
                 "type" => CommunityShareJob::TYPE_CHECK,
                 "obj_id" => $check->id,
             ));

@@ -5,11 +5,6 @@
  */
 class AutomationJob extends BackgroundJob {
     /**
-     * System flag
-     */
-    const SYSTEM = false;
-
-    /**
      * Operation types
      */
     const OPERATION_START = "start";
@@ -18,7 +13,7 @@ class AutomationJob extends BackgroundJob {
     /**
      * Automation job id template
      */
-    const JOB_ID = "@app@.check.@operation@.@obj_id@";
+    const ID_TEMPLATE = "gtta.check.@operation@.@obj_id@";
 
     /**
      * Translate pid into the sandbox PID
@@ -49,8 +44,8 @@ class AutomationJob extends BackgroundJob {
         }
 
         $fileOutput = null;
-        $job = JobManager::buildId($this::JOB_ID, array(
-            "operation" => $this::OPERATION_START,
+        $job = JobManager::buildId(self::ID_TEMPLATE, array(
+            "operation" => self::OPERATION_START,
             "obj_id" => $check->id,
         ));
         $pid = JobManager::getPid($job);
@@ -74,7 +69,6 @@ class AutomationJob extends BackgroundJob {
         $check->result .= $fileOutput ? $fileOutput : 'No output.';
         $check->save();
     }
-
 
     /**
      * Generate a file name for automated checks.
@@ -116,16 +110,12 @@ class AutomationJob extends BackgroundJob {
         $user = User::model()->findByPk($check->user_id);
 
         if ($user->send_notifications) {
-            $email = new Email();
-            $email->user_id = $user->id;
-
-            $email->subject = Yii::t('app', '{checkName} check has been finished', array(
+            $subject = Yii::t('app', '{checkName} check has been finished', array(
                 '{checkName}' => $check->check->localizedName
             ));
 
-            $email->content = $this->render(
+            $content = $this->render(
                 'application.views.email.check',
-
                 array(
                     'userName'   => $user->name ? CHtml::encode($user->name) : $user->email,
                     'projectId'  => $target->project_id,
@@ -135,13 +125,14 @@ class AutomationJob extends BackgroundJob {
                     'checkName'  => $check->check->localizedName,
                     'targetHost' => $target->host
                 ),
-
                 true
             );
 
-            $email->save();
-
-            JobManager::enqueue(JobManager::JOB_EMAIL);
+            EmailJob::enqueue(array(
+                "user_id" => $user->id,
+                "subject" => $subject,
+                "content" => $content,
+            ));
         }
     }
 
@@ -347,7 +338,7 @@ class AutomationJob extends BackgroundJob {
             $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
 
             try {
-                $pid = posix_getpgid(getmypid());
+                $pid = posix_getpid();
 
                 $check->target_file = $this->_generateFileName();
                 $check->result_file = $this->_generateFileName();
@@ -391,7 +382,7 @@ class AutomationJob extends BackgroundJob {
 
                 $check->save();
 
-                $started = TargetCheckManager::getStarted($check->id);
+                $started = TargetCheckManager::getStartTime($check->id);
 
                 if ($started) {
                     $started = new DateTime($started);
@@ -413,22 +404,45 @@ class AutomationJob extends BackgroundJob {
     }
 
     /**
+     * Job tear down
+     */
+    public function tearDown() {
+        $targetCheck = TargetCheck::model()->findByPk($this->args['obj_id']);
+
+        if (!$targetCheck) {
+            throw new Exception("Check not found.");
+        }
+
+        StatsJob::enqueue(array(
+            "target_id" => $targetCheck->target_id,
+            "category_id" => $targetCheck->check->control->check_category_id,
+        ));
+
+        parent::tearDown();
+    }
+
+    /**
      * Perform job
      * @param $args
      */
     public function perform() {
         if (!isset($this->args["obj_id"]) || !isset($this->args["operation"])) {
-            die("Invalid number of arguments.");
+            throw new Exception("Invalid job params.");
         }
 
         $operation = $this->args["operation"];
         $id = $this->args["obj_id"];
 
         switch ($operation) {
-            case $this::OPERATION_START:
+            case self::OPERATION_START:
+                if (!isset($this->args["started"])) {
+                    throw new Exception("Start Time is not defined.");
+                }
+
+                $this->setVar("started", $this->args["started"]);
                 $this->_startCheck($id);
                 break;
-            case $this::OPERATION_STOP:
+            case self::OPERATION_STOP:
                 $this->_stopCheck($id);
                 break;
             default:

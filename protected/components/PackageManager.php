@@ -644,7 +644,7 @@ class PackageManager {
             $pkg->status = Package::STATUS_INSTALL;
             $pkg->save();
 
-            JobManager::enqueue(JobManager::JOB_PACKAGE, array(
+            PackageJob::enqueue(array(
                 'operation' => PackageJob::OPERATION_INSTALL,
                 'obj_id' => $pkg->id,
             ));
@@ -1194,7 +1194,7 @@ class PackageManager {
         }
 
         if (!$package->external_id) {
-            JobManager::enqueue(JobManager::JOB_COMMUNITY_SHARE, array(
+            CommunityShareJob::enqueue(array(
                 "type" => CommunityShareJob::TYPE_PACKAGE,
                 "obj_id" => $package->id,
             ));

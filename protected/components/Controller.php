@@ -183,14 +183,4 @@ class Controller extends CController {
         $this->_checkSystemStatus(System::STATUS_IDLE);
         $filterChain->run();
     }
-
-    /**
-     * Check if system is IDLE or UPDATING
-     * @param $filterChain
-     * @throws CHttpException
-     */
-    public function filterIdleOrUpdating($filterChain) {
-        $this->_checkSystemStatus(array(System::STATUS_IDLE, System::STATUS_UPDATING));
-        $filterChain->run();
-    }
 }

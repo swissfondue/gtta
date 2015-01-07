@@ -790,8 +790,19 @@ function Admin()
 
                     data = data.data;
 
-                    if (operation == 'stop')
-                        $('div.process-monitor[data-id="' + id + '"]').addClass('disabled');
+                    if (operation == 'stop') {
+                        row.fadeOut('slow', undefined, function () {
+                            row.remove();
+                            system.showMessage('success', system.translate('Task stopped.'));
+
+                            if ($('div.process-monitor').length <= 1) {
+                                // Timeout for stoping task
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 2000);
+                            }
+                        });
+                    }
                 },
 
                 error : function(jqXHR, textStatus, e) {
@@ -815,7 +826,14 @@ function Admin()
                 id = 'gt-' + id;
             }
 
-            _process._control(id, 'stop');
+            var row = $('div.process-monitor[data-id="' + id + '"]');
+            row.addClass('delete-row');
+
+            if (confirm(system.translate('Are you sure that you want to stop this task?'))) {
+                _process._control(id, 'stop');
+            } else {
+                row.removeClass('delete-row');
+            }
         };
     };
 

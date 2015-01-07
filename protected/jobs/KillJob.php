@@ -10,11 +10,6 @@ class KillJob extends BackgroundJob {
     const SYSTEM = true;
 
     /**
-     * Job id
-     */
-    const JOB_ID = null;
-
-    /**
      * Perform job
      */
     public function perform() {

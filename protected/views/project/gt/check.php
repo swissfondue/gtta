@@ -15,7 +15,7 @@
         $limited = true;
     }
 
-    $started = ProjectGtCheckManager::getStarted($check->projectChecks[0]->project_id, $check->projectChecks[0]->gt_check_id);
+    $started = ProjectGtCheckManager::getStartTime($check->projectChecks[0]->project_id, $check->projectChecks[0]->gt_check_id);
 ?>
 
 <div class="container">

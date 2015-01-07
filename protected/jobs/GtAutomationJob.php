@@ -5,14 +5,9 @@
  */
 class GtAutomationJob extends BackgroundJob {
     /**
-     * System flag
-     */
-    const SYSTEM = false;
-
-    /**
      * Job id
      */
-    const JOB_ID = "@app@.gt_check.project.@proj_id@.check.@obj_id@.@operation@";
+    const ID_TEMPLATE = "gtta.gt_check.project.@proj_id@.check.@obj_id@.@operation@";
 
     /**
      * Operations
@@ -263,7 +258,7 @@ class GtAutomationJob extends BackgroundJob {
             $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
 
             try {
-                $pid = posix_getpgid(getmypid());
+                $pid = posix_getpid();
                 $check->target_file = $this->_generateFileName();
                 $check->result_file = $this->_generateFileName();
                 $check->save();
@@ -345,7 +340,7 @@ class GtAutomationJob extends BackgroundJob {
         }
 
         $fileOutput = null;
-        $job = JobManager::buildId(GtAutomationJob::JOB_ID, array(
+        $job = JobManager::buildId(GtAutomationJob::ID_TEMPLATE, array(
             "operation" => GtAutomationJob::OPERATION_START,
             "proj_id" => $projectId,
             "obj_id" => $checkId,
@@ -385,14 +380,20 @@ class GtAutomationJob extends BackgroundJob {
         $checkId = $this->args["obj_id"];
         $operation = $this->args["operation"];
 
-        if (!in_array($operation, array($this::OPERATION_START, $this::OPERATION_STOP))) {
-            throw new Exception("Invalid operation.");
-        }
+        switch ($operation) {
+            case self::OPERATION_START:
+                if (!isset($this->args["started"])) {
+                    throw new Exception("Start Time is not defined.");
+                }
 
-        if ($operation == $this::OPERATION_START) {
-            $this::_startCheck($projectId, $checkId);
-        } elseif ($operation == $this::OPERATION_STOP) {
-            $this::_stopCheck($projectId, $checkId);
+                $this->setVar("started", $this->args["started"]);
+                $this->_startCheck($projectId, $checkId);
+                break;
+            case self::OPERATION_STOP:
+                $this->_stopCheck($projectId, $checkId);
+                break;
+            default:
+                throw new Exception("Invalid operation.");
         }
 
         $this->_startCheck($projectId, $checkId);

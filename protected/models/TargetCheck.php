@@ -183,16 +183,12 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      * @return boolean is running.
      */
     public function getIsRunning() {
-        $startJob = JobManager::buildId(AutomationJob::JOB_ID, array(
+        $startJob = JobManager::buildId(AutomationJob::ID_TEMPLATE, array(
             "operation" => AutomationJob::OPERATION_START,
             "obj_id" => $this->id,
         ));
-        $stopJob = JobManager::buildId(AutomationJob::JOB_ID, array(
-            "operation" => AutomationJob::OPERATION_STOP,
-            "obj_id" => $this->id,
-        ));
 
-        return JobManager::isRunning($startJob) || JobManager::isRunning($stopJob);
+        return JobManager::isRunning($startJob);
     }
 
     /**

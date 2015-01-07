@@ -10,11 +10,6 @@ class CommunityInstallJob extends BackgroundJob {
     const SYSTEM = false;
 
     /**
-     * Job id
-     */
-    const JOB_ID = null;
-
-    /**
      * Get install candidates
      * @param $integrationKey
      * @return mixed
@@ -61,7 +56,11 @@ class CommunityInstallJob extends BackgroundJob {
         $cm = new CheckManager();
 
         foreach ($checks as $check) {
-            $cm->create($check);
+            $c = $cm->create($check);
+
+            TargetCheckReindexJob::enqueue(array(
+                "category_id" => $c->control->check_category_id
+            ));
         }
     }
 
@@ -71,22 +70,6 @@ class CommunityInstallJob extends BackgroundJob {
     private function _install() {
         /** @var System $system */
         $system = System::model()->findByPk(1);
-
-        if ($system->pid !== null) {
-            if (ProcessManager::isRunning($system->pid)) {
-                return;
-            }
-
-            System::model()->updateByPk(1, array(
-                "pid" => null,
-            ));
-
-            return;
-        }
-
-        System::model()->updateByPk(1, array(
-            "pid" => posix_getpgid(getmypid()),
-        ));
         $exception = null;
 
         try {
@@ -100,9 +83,6 @@ class CommunityInstallJob extends BackgroundJob {
         // "finally" block emulation
         try {
             $this->_finish($system->integration_key);
-            System::model()->updateByPk(1, array(
-                "pid" => null,
-            ));
         } catch (Exception $e) {
             // swallow exceptions
         }

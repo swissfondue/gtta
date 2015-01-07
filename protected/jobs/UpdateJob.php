@@ -4,14 +4,9 @@
  */
 class UpdateJob extends BackgroundJob {
     /**
-     * System flag
+     * Update job id template
      */
-    const SYSTEM = false;
-
-    /**
-     * Job id
-     */
-    const JOB_ID = null;
+    const ID_TEMPLATE = "gtta.updating";
 
     const GTTA_USER = "gtta";
     const GTTA_GROUP = "gtta";
@@ -262,31 +257,13 @@ class UpdateJob extends BackgroundJob {
     private function _update() {
         $system = System::model()->findByPk(1);
 
-        if ($system->status != System::STATUS_UPDATING) {
+        if ($system->isUpdating) {
             return;
         }
-
-        if ($system->pid != null) {
-            if (ProcessManager::isRunning($system->pid)) {
-                return;
-            }
-
-            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_UPDATING);
-            System::model()->updateByPk(1, array(
-                "pid" => null,
-            ));
-
-            return;
-        }
-
-        System::model()->updateByPk(1, array(
-            "pid" => posix_getpgid(getmypid()),
-        ));
 
         $targetVersion = $system->update_version;
 
         if (!$targetVersion) {
-            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_UPDATING);
             return;
         }
 
@@ -354,12 +331,7 @@ class UpdateJob extends BackgroundJob {
         // "finally" block emulation
         try {
             $this->_cleanup($targetVersion, $finished);
-            SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_UPDATING);
-            System::model()->updateByPk(1, array(
-                "pid" => null,
-            ));
-
-            JobManager::enqueue(JobManager::JOB_REGENERATE);
+            RegenerateJob::enqueue();
         } catch (Exception $e) {
             // swallow exceptions
         }

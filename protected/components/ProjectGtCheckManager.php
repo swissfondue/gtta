@@ -8,7 +8,7 @@ class ProjectGtCheckManager {
      * Start check
      * @param $id
      */
-    public static function startGtCheck($projectId, $checkId) {
+    public static function start($projectId, $checkId) {
         $projectId = (int) $projectId;
         $checkId = (int) $checkId;
         $projectCheck = ProjectGtCheck::model()->findByAttributes(array(
@@ -17,12 +17,12 @@ class ProjectGtCheckManager {
         ));
 
         if (!$projectCheck) {
-            return;
+            throw new Exception("Check not found.");
         }
 
         $now = new DateTime();
 
-        JobManager::enqueue(JobManager::JOB_GT_AUTOMATION, array(
+        GtAutomationJob::enqueue(array(
                 "operation" => GtAutomationJob::OPERATION_START,
                 "proj_id" => $projectCheck->project_id,
                 "obj_id" => $projectCheck->gt_check_id,
@@ -35,7 +35,7 @@ class ProjectGtCheckManager {
      * Stop check
      * @param $id
      */
-    public static function stopCheck($projectId, $checkId) {
+    public static function stop($projectId, $checkId) {
         $projectId = (int) $projectId;
         $checkId = (int) $checkId;
         $projectCheck = ProjectGtCheck::model()->findByAttributes(array(
@@ -43,10 +43,10 @@ class ProjectGtCheckManager {
             "gt_check_id" => $checkId,
         ));
         if (!$projectCheck) {
-            return;
+            throw new Exception("Check not found.");
         }
 
-        JobManager::enqueue(JobManager::JOB_GT_AUTOMATION, array(
+        GtAutomationJob::enqueue(array(
                 "operation" => GtAutomationJob::OPERATION_STOP,
                 "proj_id" => $projectCheck->project_id,
                 "obj_id" => $projectCheck->gt_check_id,
@@ -60,19 +60,19 @@ class ProjectGtCheckManager {
      * @return array
      * @throws Exception
      */
-    public static function runningCheckIds() {
-        $mask = JobManager::buildId(GtAutomationJob::JOB_ID, array(
+    public static function getRunning() {
+        $mask = JobManager::buildId(GtAutomationJob::ID_TEMPLATE, array(
             "operation" => "*",
             "proj_id" => "*",
             "obj_id" => "*",
         ));
         $mask .= ".pid";
-        $keys = JobManager::keys($mask);
+        $keys = explode(" ", Resque::redis()->keys($mask));
 
         $ids = array();
 
         foreach ($keys as $key) {
-            if (preg_match("/project.\d+.check.\d+.(start|stop)/", $key, $match)) {
+            if (preg_match("/project.\d+.check.\d+.start/", $key, $match)) {
                 preg_match("/project.\d+/", $match[0], $projectMatch);
                 preg_match("/\d+/", $projectMatch[0], $pId);
                 $projectId = $pId[0];
@@ -93,13 +93,13 @@ class ProjectGtCheckManager {
      * @param $id
      * @return mixed
      */
-    public static function getStarted($projectId, $gtCheckId) {
-        $job = JobManager::buildId(GtAutomationJob::JOB_ID, array(
+    public static function getStartTime($projectId, $gtCheckId) {
+        $job = JobManager::buildId(GtAutomationJob::ID_TEMPLATE, array(
             "operation" => GtAutomationJob::OPERATION_START,
             "proj_id" => $projectId,
             "obj_id" => $gtCheckId,
         ));
 
-        return JobManager::getJobVar($job, "started");
+        return JobManager::getVar($job, "started");
     }
 }

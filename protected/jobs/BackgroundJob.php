@@ -5,9 +5,20 @@
  */
 abstract class BackgroundJob {
     /**
+     * Queue
+     */
+    const QUEUE_SYSTEM              = "system";
+    const QUEUE_WORKER              = "worker";
+
+    /**
      * System job flag
      */
     const SYSTEM = false;
+
+    /**
+     * Template for job's id
+     */
+    const ID_TEMPLATE = null;
 
     /**
      * @var string|null job id
@@ -18,11 +29,6 @@ abstract class BackgroundJob {
      * @var array args
      */
     public $args = array();
-
-    /**
-     * @var App System object
-     */
-    protected $_system = null;
 
     /**
      * Set job shared variable
@@ -46,16 +52,7 @@ abstract class BackgroundJob {
      * Job set up
      */
     public function setUp() {
-        $system = System::model()->findByPk(1);
-
-        if (!$system->timezone) {
-            $system->timezone = "Europe/Zurich";
-        }
-
-        date_default_timezone_set($system->timezone);
-        $this->_system = $system;
-
-        if ($this::SYSTEM) {
+        if (self::SYSTEM) {
             $this->id = "gtta.system." . md5(uniqid() . time());
         }
 
@@ -65,7 +62,7 @@ abstract class BackgroundJob {
             $this->id = "gtta.worker." . md5(uniqid() . time());
         }
 
-        $this->setVar("pid", posix_getpgid(getmypid()));
+        $this->setVar("pid", posix_getpid());
     }
 
     /**
@@ -92,29 +89,28 @@ abstract class BackgroundJob {
                 '{template}' => $path
             )));
 
-        return $this->renderFile($path, $data, true);
+        if(is_array($data))
+            extract($data, EXTR_PREFIX_SAME, 'data');
+
+        ob_start();
+        ob_implicit_flush(false);
+        require($path);
+
+        return ob_get_clean();
     }
 
     /**
-     * Renders a view file.
-     * @param string $_viewFile_ view file path
-     * @param array $_data_ optional data to be extracted as local view variables
-     * @param boolean $_return_ whether to return the rendering result instead of displaying it
-     * @return mixed the rendering result if required. Null otherwise.
+     * Create a job
+     * @param $args
      */
-    public function renderFile($_viewFile_,$_data_=null,$_return_=false) {
-        if(is_array($_data_))
-            extract($_data_,EXTR_PREFIX_SAME,'data');
-        else
-            $data=$_data_;
-        if($_return_)
-        {
-            ob_start();
-            ob_implicit_flush(false);
-            require($_viewFile_);
-            return ob_get_clean();
-        }
-        else
-            require($_viewFile_);
+    public static function enqueue($args = array()) {
+        $job = get_called_class();
+        $queue = $job::SYSTEM ? self::QUEUE_SYSTEM : self::QUEUE_WORKER;
+        $id = JobManager::buildId($job::ID_TEMPLATE, $args);
+        $token = Resque::enqueue($queue, $job, array_merge($args, array(
+            "id" => $id
+        )), true);
+
+        Resque::redis()->set("$id.token", $token);
     }
 }

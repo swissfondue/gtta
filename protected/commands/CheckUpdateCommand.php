@@ -50,7 +50,7 @@ class CheckUpdateCommand extends ConsoleCommand {
 
         if ($result->communityInstall && !$this->_system->demo) {
             try {
-                JobManager::enqueue(JobManager::JOB_COMMUNITY_INSTALL);
+                CommunityInstallJob::enqueue();
             } catch (Exception $e) {
                 // pass
             }

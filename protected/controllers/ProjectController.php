@@ -1452,23 +1452,8 @@ class ProjectController extends Controller {
 
                 $target->refresh();
 
-                foreach ($target->_categories as $category) {
-                    JobManager::enqueue(JobManager::JOB_STATS, array(
-                        "target_id" => $category->target_id,
-                        "category_id" => $category->check_category_id,
-                    ));
-
-                    JobManager::enqueue(JobManager::JOB_TARGET_CHECK_REINDEX, array(
-                        "target_id" => $category->target_id,
-                        "category_id" => $category->check_category_id,
-                    ));
-                }
-
-                ProjectPlanner::updateAllStats();
-
-                JobManager::enqueue(JobManager::JOB_TARGET_CHECK_REINDEX, array(
-                    "target_id" => $category->target_id,
-                    "category_id" => $category->check_category_id,
+                TargetCheckReindexJob::enqueue(array(
+                    "target_id" => $target->id
                 ));
 
                 if ($newRecord) {
@@ -2342,16 +2327,9 @@ class ProjectController extends Controller {
                 }
             }
 
-            JobManager::enqueue(JobManager::JOB_STATS, array(
-                "target_id" => $targetCheck->target->id,
-                "category_id" => $targetCheck->check->control->category->id,
-            ));
-
-            ProjectPlanner::updateAllStats();
-
-            JobManager::enqueue(JobManager::JOB_TARGET_CHECK_REINDEX, array(
-                "target_id" => $category->target_id,
-                "category_id" => $category->check_category_id,
+            StatsJob::enqueue(array(
+                "category_id" => $targetCheck->check->control->check_category_id,
+                "target_id" => $targetCheck->target_id
             ));
 
             $response->addData("targetCheck", array(
@@ -2467,6 +2445,11 @@ class ProjectController extends Controller {
                 $project->status = Project::STATUS_IN_PROGRESS;
                 $project->save();
             }
+
+            StatsJob::enqueue(array(
+                "category_id" => $targetCheck->check->control->check_category_id,
+                "target_id" => $targetCheck->target_id,
+            ));
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
@@ -2688,6 +2671,11 @@ class ProjectController extends Controller {
                 }
 
                 $response->addData("createCheck", true);
+
+                StatsJob::enqueue(array(
+                    "category_id" => $targetCheck->check->control->check_category_id,
+                    "target_id" => $targetCheck->target_id,
+                ));
             } else {
                 $customCheck->user_id = Yii::app()->user->id;
                 $customCheck->name = $form->name;
@@ -2721,6 +2709,11 @@ class ProjectController extends Controller {
                 $customCheck->save();
 
                 $response->addData("rating", $customCheck->rating);
+
+                StatsJob::enqueue(array(
+                    "category_id" => $customCheck->control->check_category_id,
+                    "target_id" => $customCheck->target_id,
+                ));
             }
 
             if ($project->status == Project::STATUS_OPEN) {
@@ -2790,12 +2783,10 @@ class ProjectController extends Controller {
             $category->advanced = $model->advanced;
             $category->save();
 
-            JobManager::enqueue(JobManager::JOB_STATS, array(
-                "category_id" => $category->check_category_id,
-                "target_id" => $category->target_id,
+            StatsJob::enqueue(array(
+                "category_id" => $category->target_id,
+                "target_id" => $category->check_category_id,
             ));
-
-            ProjectPlanner::updateAllStats();
         }
         catch (Exception $e)
         {
@@ -3587,7 +3578,7 @@ class ProjectController extends Controller {
                     $targetCheck->rating = TargetCheck::RATING_NONE;
                     $targetCheck->save();
 
-                    TargetCheckManager::startCheck($targetCheck->id);
+                    TargetCheckManager::start($targetCheck->id);
 
                     break;
 
@@ -3596,7 +3587,7 @@ class ProjectController extends Controller {
                         throw new CHttpException(403, Yii::t("app", "Access denied."));
                     }
 
-                    TargetCheckManager::stopCheck($targetCheck->id);
+                    TargetCheckManager::stop($targetCheck->id);
 
                     break;
 
@@ -3669,6 +3660,11 @@ class ProjectController extends Controller {
 
                     $response->addData("inputs", $inputValues);
 
+                    StatsJob::enqueue(array(
+                        "category_id" => $targetCheck->check->control->check_category_id,
+                        "target_id" => $targetCheck->target_id,
+                    ));
+
                     break;
 
                 case "copy":
@@ -3682,6 +3678,11 @@ class ProjectController extends Controller {
                     $copy->save();
 
                     $response->addData("id", $copy->id);
+
+                    StatsJob::enqueue(array(
+                        "category_id" => $targetCheck->check->control->check_category_id,
+                        "target_id" => $targetCheck->target_id,
+                    ));
 
                     break;
 
@@ -3708,6 +3709,11 @@ class ProjectController extends Controller {
                     ));
 
                     $targetCheck->delete();
+
+                    StatsJob::enqueue(array(
+                        "category_id" => $targetCheck->check->control->check_category_id,
+                        "target_id" => $targetCheck->target_id,
+                    ));
 
                     break;
 
@@ -3804,6 +3810,11 @@ class ProjectController extends Controller {
                     throw new CHttpException(403, Yii::t("app", "Unknown operation."));
                     break;
             }
+
+            StatsJob::enqueue(array(
+                "category_id" => $customCheck->control->check_category_id,
+                "target_id" => $customCheck->target_id,
+            ));
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
@@ -3909,7 +3920,7 @@ class ProjectController extends Controller {
                     $projectCheck->rating = ProjectGtCheck::RATING_NONE;
                     $projectCheck->save();
 
-                    ProjectGtCheckManager::startGtCheck($projectCheck->project_id, $projectCheck->gt_check_id);
+                    ProjectGtCheckManager::start($projectCheck->project_id, $projectCheck->gt_check_id);
 
                     break;
 
@@ -3920,7 +3931,7 @@ class ProjectController extends Controller {
 
                     $projectCheck->save();
 
-                    ProjectGtCheckManager::stopCheck($projectCheck->project_id, $projectCheck->gt_check_id);
+                    ProjectGtCheckManager::stop($projectCheck->project_id, $projectCheck->gt_check_id);
 
                     break;
 
@@ -4480,12 +4491,12 @@ class ProjectController extends Controller {
             $checkData = array();
 
             foreach ($checks as $targetCheck) {
-                $time = TargetCheckManager::getStarted($targetCheck->id);
+                $time = TargetCheckManager::getStartTime($targetCheck->id);
                 $startedText = null;
 
                 if ($time) {
                     $started = new DateTime($time);
-                    $time = mktime() - strtotime($time);
+                    $time = time() - strtotime($time);
                     $user = $targetCheck->user;
 
                     if ($targetCheck->status != TargetCheck::STATUS_FINISHED) {
@@ -4615,7 +4626,7 @@ class ProjectController extends Controller {
             ));
 
             $startedText = null;
-            $time = ProjectGtCheckManager::getStarted($projectCheck->project_id, $projectCheck->gt_check_id);
+            $time = ProjectGtCheckManager::getStartTime($projectCheck->project_id, $projectCheck->gt_check_id);
 
             if ($time) {
                 $started = new DateTime($time);

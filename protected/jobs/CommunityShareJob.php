@@ -4,18 +4,13 @@
  * Class CommunityShareJob
  */
 class CommunityShareJob extends BackgroundJob {
-    /**
-     * System flag
-     */
-    const SYSTEM = false;
-
     const TYPE_REFERENCE  = "reference";
     const TYPE_CATEGORY   = "category";
     const TYPE_CONTROL    = "control";
     const TYPE_PACKAGE    = "package";
     const TYPE_CHECK      = "check";
 
-    const JOB_ID   = '@app@.@type@.@obj_id@.share';
+    const ID_TEMPLATE  = 'gtta.@type@.@obj_id@.share';
 
     /**
      * Share reference
@@ -95,62 +90,28 @@ class CommunityShareJob extends BackgroundJob {
      * Share check preparations
      */
     private function _share($type, $id) {
-        /** @var System $system */
-        $system = System::model()->findByPk(1);
-
-        if ($system->pid !== null) {
-            if (ProcessManager::isRunning($system->pid)) {
-                return;
-            }
-
-            System::model()->updateByPk(1, array(
-                "pid" => null,
-            ));
-
-            return;
-        }
-
-        $exception = null;
-
         try {
             switch ($type) {
-                case $this::TYPE_REFERENCE:
+                case self::TYPE_REFERENCE:
                     $this->_shareReference($id);
                     break;
-                case $this::TYPE_CATEGORY:
+                case self::TYPE_CATEGORY:
                     $this->_shareCategory($id);
                     break;
-                case $this::TYPE_CONTROL:
+                case self::TYPE_CONTROL:
                     $this->_shareControl($id);
                     break;
-                case $this::TYPE_PACKAGE:
+                case self::TYPE_PACKAGE:
                     $this->_sharePackage($id);
                     break;
-                case $this::TYPE_CHECK:
+                case self::TYPE_CHECK:
                     $this->_shareCheck($id);
                     break;
                 default:
                     return;
             }
         } catch (Exception $e) {
-            $exception = $e;
-        }
-
-        System::model()->updateByPk(1, array(
-            "pid" => posix_getpgid(getmypid()),
-        ));
-
-        // "finally" block emulation
-        try {
-            System::model()->updateByPk(1, array(
-                "pid" => null,
-            ));
-        } catch (Exception $e) {
-            // swallow exceptions
-        }
-
-        if ($exception) {
-            throw $exception;
+            throw $e;
         }
     }
 
@@ -164,11 +125,11 @@ class CommunityShareJob extends BackgroundJob {
 
         $type = $this->args['type'];
         $allowedTypes = array(
-            $this::TYPE_REFERENCE,
-            $this::TYPE_CATEGORY,
-            $this::TYPE_CONTROL,
-            $this::TYPE_PACKAGE,
-            $this::TYPE_CHECK,
+            self::TYPE_REFERENCE,
+            self::TYPE_CATEGORY,
+            self::TYPE_CONTROL,
+            self::TYPE_PACKAGE,
+            self::TYPE_CHECK,
         );
 
         if (!in_array($type, $allowedTypes)) {

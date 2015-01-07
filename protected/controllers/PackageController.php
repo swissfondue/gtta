@@ -123,7 +123,7 @@ class PackageController extends Controller {
                     }
 
                     // schedule package for deletion
-                    JobManager::enqueue(JobManager::JOB_PACKAGE, array(
+                    PackageJob::enqueue(array(
                         "operation" => PackageJob::OPERATION_DELETE,
                         "obj_id" => $package->id,
                     ));
@@ -237,7 +237,7 @@ class PackageController extends Controller {
                             $selected = $form->path;
                             $package->save();
 
-                            JobManager::enqueue(JobManager::JOB_MODIFIED_PACKAGES, array(
+                            ModifiedPackagesJob::enqueue(array(
                                 "obj_id" => $package->id
                             ));
 
@@ -250,7 +250,7 @@ class PackageController extends Controller {
                             $form = new PackageEditForm();
                             $package->save();
 
-                            JobManager::enqueue(JobManager::JOB_MODIFIED_PACKAGES, array(
+                            ModifiedPackagesJob::enqueue(array(
                                 "obj_id" => $package->id
                             ));
 
@@ -371,7 +371,7 @@ class PackageController extends Controller {
      */
 	public function actionRegenerate() {
         if (!$this->_system->isRegenerating) {
-            JobManager::enqueue(JobManager::JOB_REGENERATE);
+            RegenerateJob::enqueue();
         }
 
         $this->_system->refresh();

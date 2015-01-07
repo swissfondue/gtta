@@ -19,7 +19,7 @@
                 </div>
 
                 <?php foreach ($checks as $check): ?>
-                    <div class="process-monitor<?php if ($check->isRunning) echo ' disabled'; ?>" data-control-url="<?php echo $this->createUrl('monitor/controlprocess'); ?>" data-id="<?php echo $check->target_id; ?>-<?php echo $check->check_id; ?>">
+                    <div class="process-monitor" data-control-url="<?php echo $this->createUrl('monitor/controlprocess'); ?>" data-id="<?php echo $check->target_id; ?>-<?php echo $check->check_id; ?>">
                         <table class="process-monitor">
                             <tbody>
                                 <tr>

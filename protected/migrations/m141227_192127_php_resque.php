@@ -19,6 +19,13 @@ class m141227_192127_php_resque extends CDbMigration {
 
         // Packages
         $this->dropColumn("packages", "modified");
+
+        // System
+        $this->dropColumn("system", "pid");
+
+        // Emails
+        $this->dropTable("emails");
+
         return true;
 	}
 
@@ -53,6 +60,33 @@ class m141227_192127_php_resque extends CDbMigration {
 
         // Packages
         $this->addColumn("packages", "modified", "boolean NOT NULL DEFAULT FALSE");
+
+        // System
+        $this->addColumn(
+            "system",
+            "pid",
+            "bigint"
+        );
+
+        // Emails
+        $this->createTable("emails", array(
+            "id" => "bigserial NOT NULL",
+            "user_id" => "bigint NOT NULL",
+            "subject" => "varchar (1000) NOT NULL",
+            "content" => "varchar NOT NULL",
+            "attempts" => "integer NOT NULL DEFAULT 0",
+            "sent" => "boolean NOT NULL DEFAULT FALSE",
+        ));
+        $this->addForeignKey(
+            "emails_user_id_fkey",
+            "emails",
+            "user_id",
+            "users",
+            "id",
+            "CASCADE",
+            "CASCADE"
+        );
+
 		return true;
 	}
 }

@@ -7,17 +7,17 @@ class TargetCheckManager {
      * Start check
      * @param $id
      */
-    public static function startCheck($id) {
+    public static function start($id) {
         $id = (int) $id;
         $targetCheck = TargetCheck::model()->findByPk($id);
 
         if (!$targetCheck) {
-            return;
+            throw new Exception("Check not found.");
         }
 
         $now = new DateTime();
 
-        JobManager::enqueue(JobManager::JOB_AUTOMATION, array(
+        AutomationJob::enqueue(array(
                 "operation" => AutomationJob::OPERATION_START,
                 "obj_id" => $targetCheck->id,
                 "started" => $now->format("Y-m-d H:i:s"),
@@ -29,15 +29,15 @@ class TargetCheckManager {
      * Stop check
      * @param $id
      */
-    public static function stopCheck($id) {
+    public static function stop($id) {
         $id = (int) $id;
         $targetCheck = TargetCheck::model()->findByPk($id);
 
         if (!$targetCheck) {
-            return;
+            throw new Exception("Check not found.");
         }
 
-        JobManager::enqueue(JobManager::JOB_AUTOMATION, array(
+        AutomationJob::enqueue(array(
                 "operation" => AutomationJob::OPERATION_STOP,
                 "obj_id" => $targetCheck->id,
             )
@@ -50,18 +50,18 @@ class TargetCheckManager {
      * @return array
      * @throws Exception
      */
-    public static function runningCheckIds() {
-        $mask = JobManager::buildId(AutomationJob::JOB_ID, array(
+    public static function getRunning() {
+        $mask = JobManager::buildId(AutomationJob::ID_TEMPLATE, array(
             "operation" => "*",
             "obj_id" => "*",
         ));
         $mask .= ".pid";
-        $keys = JobManager::keys($mask);
+        $keys = explode(" ", Resque::redis()->keys($mask));
 
         $ids = array();
 
         foreach ($keys as $key) {
-            if (preg_match("/check.(start|stop).[\d]+/", $key, $match)) {
+            if (preg_match("/check.start.\d+/", $key, $match)) {
                 preg_match("/\d+/", $match[0], $id);
                 $ids[] = $id[0];
             }
@@ -75,12 +75,12 @@ class TargetCheckManager {
      * @param $id
      * @return mixed
      */
-    public static function getStarted($id) {
-        $job = JobManager::buildId(AutomationJob::JOB_ID, array(
+    public static function getStartTime($id) {
+        $job = JobManager::buildId(AutomationJob::ID_TEMPLATE, array(
             "operation" => AutomationJob::OPERATION_START,
             "obj_id" => $id,
         ));
 
-        return JobManager::getJobVar($job, "started");
+        return JobManager::getVar($job, "started");
     }
 }

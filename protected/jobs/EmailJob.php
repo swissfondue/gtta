@@ -4,53 +4,28 @@
  */
 class EmailJob extends BackgroundJob {
     /**
-     * System flag
-     */
-    const SYSTEM = false;
-
-    /**
-     * Job id
-     */
-    const JOB_ID = null;
-
-    /**
      * Sends emails from the database queue.
      */
-    private function _sendEmails()
+    private function _sendEmail($userId, $subject, $content)
     {
-        $emails = Email::model()->with('user')->findAll(
-            array(
-                'condition' => 'NOT sent AND attempts < :max_attempts',
-                'params'    => array( 'max_attempts' => Yii::app()->params['email']['maxAttempts'] ),
-                'order'     => 't.id ASC'
-            )
-        );
+        $user = User::model()->findByPk($userId);
 
-        foreach ($emails as $email)
+        if (!$user) {
+            throw new Exception("User not found.");
+        }
+
+        try {
+            $message          = new YiiMailMessage();
+            $message->from    = array( Yii::app()->params['email']['systemEmail'] => Yii::app()->name);
+            $message->to      = $user->email;
+            $message->subject = $subject;
+            $message->setBody($content, 'text/html', 'utf-8');
+
+            Yii::app()->mail->send($message);
+        }
+        catch (Exception $e)
         {
-            $email->attempts += 1;
-
-            try
-            {
-                $message          = new YiiMailMessage();
-                $message->from    = array( Yii::app()->params['email']['systemEmail'] => Yii::app()->name );
-                $message->to      = $email->user->email;
-                $message->subject = $email->subject;
-                $message->setBody($email->content, 'text/html', 'utf-8');
-
-                Yii::app()->mail->send($message);
-
-                $email->sent = true;
-            }
-            catch (Exception $e)
-            {
-                // ignore
-            }
-
-            $email->save();
-
-            if ($email->sent)
-                $email->delete();
+            // ignore
         }
     }
 
@@ -59,6 +34,10 @@ class EmailJob extends BackgroundJob {
      * @param array $args
      */
     public function perform() {
-        $this->_sendEmails();
+        if (!isset($this->args['user_id']) || !isset($this->args['subject']) || !isset($this->args['content'])) {
+            throw new Exception("Invalid job params.");
+        }
+
+        $this->_sendEmail($this->args['user_id'], $this->args['subject'], $this->args['content']);
     }
 }

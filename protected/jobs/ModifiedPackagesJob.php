@@ -5,14 +5,9 @@
  */
 class ModifiedPackagesJob extends BackgroundJob {
     /**
-     * System flag
-     */
-    const SYSTEM = false;
-
-    /**
      * Job id
      */
-    const JOB_ID = "@app@.package.modified.@obj_id@";
+    const ID_TEMPLATE = "gtta.package.modified.@obj_id@";
 
     /**
      * Update virtualized package's files
@@ -42,6 +37,6 @@ class ModifiedPackagesJob extends BackgroundJob {
         $id = $this->args['obj_id'];
 
         $package = Package::model()->findByPk($id);
-        $this::_updatePackage($package);
+        $this->_updatePackage($package);
     }
 }

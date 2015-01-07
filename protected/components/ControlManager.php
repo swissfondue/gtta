@@ -30,7 +30,7 @@ class ControlManager {
         }
 
         if (!$control->external_id) {
-            JobManager::enqueue(JobManager::JOB_COMMUNITY_SHARE, array(
+            CommunityShareJob::enqueue(array(
                 'type' => CommunityShareJob::TYPE_CONTROL,
                 'obj_id' => $control->id,
             ));
