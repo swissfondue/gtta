@@ -5,11 +5,6 @@
  */
 class CommunityInstallJob extends BackgroundJob {
     /**
-     * System flag
-     */
-    const SYSTEM = false;
-
-    /**
      * Get install candidates
      * @param $integrationKey
      * @return mixed
