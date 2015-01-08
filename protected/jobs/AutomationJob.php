@@ -404,24 +404,6 @@ class AutomationJob extends BackgroundJob {
     }
 
     /**
-     * Job tear down
-     */
-    public function tearDown() {
-        $targetCheck = TargetCheck::model()->findByPk($this->args['obj_id']);
-
-        if (!$targetCheck) {
-            throw new Exception("Check not found.");
-        }
-
-        StatsJob::enqueue(array(
-            "target_id" => $targetCheck->target_id,
-            "category_id" => $targetCheck->check->control->check_category_id,
-        ));
-
-        parent::tearDown();
-    }
-
-    /**
      * Perform job
      * @param $args
      */
