@@ -577,8 +577,9 @@ class CheckController extends Controller
             if ($control === null)
                 throw new CHttpException(404, Yii::t('app', 'Control not found.'));
 
-            switch ($model->operation)
-            {
+            $categoryId = $control->check_category_id;
+
+            switch ($model->operation) {
                 case 'delete':
                     foreach ($control->checks as $check) {
                         if ($check->automated) {
@@ -593,6 +594,7 @@ class CheckController extends Controller
                     }
 
                     $control->delete();
+
                     break;
 
                 case 'up':
@@ -661,6 +663,10 @@ class CheckController extends Controller
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;
             }
+
+            StatsJob::enqueue(array(
+                "category_id" => $categoryId,
+            ));
         }
         catch (Exception $e)
         {
@@ -1450,6 +1456,8 @@ class CheckController extends Controller
             if ($check === null)
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
 
+            $categoryId = $check->control->check_category_id;
+
             switch ($model->operation)
             {
                 case 'delete':
@@ -1463,12 +1471,7 @@ class CheckController extends Controller
                         }
                     }
 
-                    $categoryId = $check->control->check_category_id;
                     $check->delete();
-
-                    StatsJob::enqueue(array(
-                        "category_id" => $categoryId,
-                    ));
 
                     break;
 
@@ -1538,6 +1541,10 @@ class CheckController extends Controller
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;
             }
+
+            StatsJob::enqueue(array(
+                "category_id" => $categoryId,
+            ));
         }
         catch (Exception $e)
         {

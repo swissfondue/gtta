@@ -3802,8 +3802,8 @@ class ProjectController extends Controller {
             }
 
             StatsJob::enqueue(array(
-                "category_id" => $customCheck->control->check_category_id,
-                "target_id" => $customCheck->target_id,
+                "category_id" => $category,
+                "target_id" => $target->id,
             ));
         } catch (Exception $e) {
             $response->setError($e->getMessage());
