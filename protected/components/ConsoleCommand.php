@@ -75,35 +75,6 @@ class ConsoleCommand extends CConsoleCommand {
     }
 
     /**
-     * Check system status
-     */
-    protected function _checkSystemIsRunning() {
-        $this->_system->refresh();
-
-        if ($this->_system->status != System::STATUS_RUNNING) {
-            return;
-        }
-
-        $criteria = new CDbCriteria();
-        $criteria->addInCondition("status", array(TargetCheck::STATUS_IN_PROGRESS, TargetCheck::STATUS_STOP));
-        $checks = TargetCheck::model()->findAll($criteria);
-
-        if (count($checks) > 0) {
-            return;
-        }
-
-        $criteria = new CDbCriteria();
-        $criteria->addInCondition("status", array(ProjectGtCheck::STATUS_IN_PROGRESS, ProjectGtCheck::STATUS_STOP));
-        $checks = ProjectGtCheck::model()->findAll($criteria);
-
-        if (count($checks) > 0) {
-            return;
-        }
-
-        SystemManager::updateStatus(System::STATUS_IDLE, System::STATUS_RUNNING);
-    }
-
-    /**
      * Run unlocked
      */
     protected function runUnlocked($args) {}

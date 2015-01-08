@@ -14,9 +14,7 @@ class PackageController extends Controller {
             "checkAdmin",
             "ajaxOnly + control",
             "postOnly + control, upload",
-            "idleOrPackageManager - index, regenerate, libraries, view, regeneratestatus",
-            "idleOrRegenerate + regenerate, regeneratestatus",
-            "idleOrRegenerateOrPackageManager + index, libraries, view",
+            "idle - index, regenerate, libraries, view, regeneratestatus",
 		);
 	}
 
@@ -67,15 +65,6 @@ class PackageController extends Controller {
 			$model->attributes = $_POST["PackageAddForm"];
 
 			if ($model->validate()) {
-                try {
-                    SystemManager::updateStatus(
-                        System::STATUS_PACKAGE_MANAGER,
-                        array(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER)
-                    );
-                } catch (Exception $e) {
-                    throw new CHttpException(403, Yii::t("app", "Access denied."));
-                }
-
                 $pm = new PackageManager();
                 $pm->scheduleForInstallation($model->id);
 
@@ -133,19 +122,11 @@ class PackageController extends Controller {
                         throw new CHttpException(403, Yii::t("app", "This package is required by other objects and cannot be deleted."));
                     }
 
-                    try {
-                        SystemManager::updateStatus(
-                            System::STATUS_PACKAGE_MANAGER,
-                            array(System::STATUS_IDLE, System::STATUS_PACKAGE_MANAGER)
-                        );
-                    } catch (Exception $e) {
-                        throw new CHttpException(403, Yii::t("app", "Access denied."));
-                    }
-
                     // schedule package for deletion
-                    $package->status = Package::STATUS_DELETE;
-                    $package->save();
-
+                    PackageJob::enqueue(array(
+                        "operation" => PackageJob::OPERATION_DELETE,
+                        "obj_id" => $package->id,
+                    ));
                     break;
 
                 default:
@@ -254,8 +235,12 @@ class PackageController extends Controller {
                         case PackageEditForm::OPERATION_SAVE:
                             FileManager::updateFile($path, $content);
                             $selected = $form->path;
-                            $package->modified = true;
                             $package->save();
+
+                            ModifiedPackagesJob::enqueue(array(
+                                "obj_id" => $package->id
+                            ));
+
                             Yii::app()->user->setFlash("success", Yii::t("app", "File successfully saved."));
 
                             break;
@@ -263,8 +248,12 @@ class PackageController extends Controller {
                         case PackageEditForm::OPERATION_DELETE:
                             FileManager::unlink($path);
                             $form = new PackageEditForm();
-                            $package->modified = true;
                             $package->save();
+
+                            ModifiedPackagesJob::enqueue(array(
+                                "obj_id" => $package->id
+                            ));
+
                             Yii::app()->user->setFlash("success", Yii::t("app", "File successfully deleted."));
 
                             break;
@@ -381,14 +370,11 @@ class PackageController extends Controller {
      * Regenerate.
      */
 	public function actionRegenerate() {
-        if (isset($_POST["RegenerateForm"])) {
-            try {
-                SystemManager::updateStatus(System::STATUS_REGENERATE_SANDBOX, System::STATUS_IDLE);
-                $this->_system->refresh();
-            } catch (Exception $e) {
-                throw new CHttpException(403, Yii::t("app", "Access denied."));
-            }
+        if (!$this->_system->isRegenerating) {
+            RegenerateJob::enqueue();
         }
+
+        $this->_system->refresh();
 
         $this->breadcrumbs[] = array(Yii::t("app", "Scripts"), $this->createUrl("package/index"));
         $this->breadcrumbs[] = array(Yii::t("app", "Regenerate Sandbox"), "");
@@ -408,7 +394,6 @@ class PackageController extends Controller {
 
         try {
             $system = System::model()->findByPk(1);
-            $response->addData("regenerating", $system->status == System::STATUS_REGENERATE_SANDBOX);
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }

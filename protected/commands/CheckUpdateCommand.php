@@ -50,7 +50,7 @@ class CheckUpdateCommand extends ConsoleCommand {
 
         if ($result->communityInstall && !$this->_system->demo) {
             try {
-                SystemManager::updateStatus(System::STATUS_COMMUNITY_INSTALL, System::STATUS_IDLE);
+                CommunityInstallJob::enqueue();
             } catch (Exception $e) {
                 // pass
             }

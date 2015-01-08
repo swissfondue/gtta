@@ -238,8 +238,10 @@ class CheckManager {
         }
 
         if (!$check->external_id) {
-            $check->status = Check::STATUS_SHARE;
-            $check->save();
+            CommunityShareJob::enqueue(array(
+                "type" => CommunityShareJob::TYPE_CHECK,
+                "obj_id" => $check->id,
+            ));
         }
     }
 

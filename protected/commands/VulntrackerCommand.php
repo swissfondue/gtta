@@ -80,14 +80,8 @@ class VulntrackerCommand extends ConsoleCommand {
 
             if ($overdued > 0) {
                 foreach ($admins as $user) {
-                    $email = new Email();
-                    $email->user_id = $user->id;
-
-                    $email->subject = Yii::t('app', '{projectName} project has overdued vulnerabilities', array(
-                        '{projectName}' => $project->name,
-                    ));
-
-                    $email->content = $this->render(
+                    $subject = Yii::t('app', '{projectName} project has overdued vulnerabilities', array('{projectName}' => $project->name));
+                    $content = $this->render(
                         'application.views.email.vuln_overdue',
 
                         array(
@@ -99,7 +93,11 @@ class VulntrackerCommand extends ConsoleCommand {
                         true
                     );
 
-                    $email->save();
+                    EmailJob::enqueue(array(
+                        "user_id" => $user->id,
+                        "subject" => $subject,
+                        "content" => $content,
+                    ));
                 }
 
                 $now = new DateTime();

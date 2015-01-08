@@ -262,7 +262,7 @@
                 <?php
                     $showAuto = false;
 
-                    if ($check->check->automated && $check->started && $check->status == TargetCheck::STATUS_IN_PROGRESS) {
+                    if ($check->check->automated && $check->isRunning) {
                         $showAuto = true;
                     }
                 ?>
@@ -279,7 +279,7 @@
                 <div class="automated-info-block <?php if (!$showAuto) echo "hide"; ?>">
                     <?php
                         if ($showAuto) {
-                            $started = new DateTime($check->started);
+                            $started = new DateTime(TargetCheckManager::getStartTime($check->id));
                             $user = $check->user;
 
                             echo Yii::t("app", "Started by {user} on {date} at {time}", array(

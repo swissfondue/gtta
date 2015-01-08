@@ -12,8 +12,6 @@
  * @property string $status
  * @property string $target_file
  * @property string $result_file
- * @property string $started
- * @property integer $pid
  * @property integer $language_id
  * @property string $protocol
  * @property integer $port
@@ -44,8 +42,6 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      * Check statuses.
      */
     const STATUS_OPEN = 0;
-    const STATUS_IN_PROGRESS = 10;
-    const STATUS_STOP = 50;
     const STATUS_FINISHED = 100;
 
     /**
@@ -134,11 +130,11 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
 	public function rules() {
 		return array(
             array("target_id, check_id", "required"),
-            array("target_id, check_id, pid, port, language_id, user_id", "numerical", "integerOnly" => true),
+            array("target_id, check_id, port, language_id, user_id", "numerical", "integerOnly" => true),
             array("target_file, result_file, protocol, override_target", "length", "max" => 1000),
-            array("status", "in", "range" => array(self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_STOP, self::STATUS_FINISHED)),
+            array("status", "in", "range" => array(self::STATUS_OPEN, self::STATUS_FINISHED)),
             array("rating", "in", "range" => self::getValidRatings()),
-            array("result, started, table_result, solution, solution_title, poc, links", "safe"),
+            array("result, table_result, solution, solution_title, poc, links", "safe"),
 		);
 	}
 
@@ -187,7 +183,12 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      * @return boolean is running.
      */
     public function getIsRunning() {
-        return in_array($this->status, array(self::STATUS_IN_PROGRESS, self::STATUS_STOP));
+        $startJob = JobManager::buildId(AutomationJob::ID_TEMPLATE, array(
+            "operation" => AutomationJob::OPERATION_START,
+            "obj_id" => $this->id,
+        ));
+
+        return JobManager::isRunning($startJob);
     }
 
     /**

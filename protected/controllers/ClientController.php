@@ -17,7 +17,6 @@ class ClientController extends Controller
             'checkAdmin + edit, control',
             'ajaxOnly + controllogo',
             'postOnly + uploadlogo, controllogo',
-            "idleOrRunning",
 		);
 	}
 

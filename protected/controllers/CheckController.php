@@ -15,8 +15,7 @@ class CheckController extends Controller
 			'checkAuth',
             'checkAdmin',
             'ajaxOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput, controlscript',
-            'postOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput, controlscript',
-            "idleOrRunning",
+            'postOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput, controlscript'
 		);
 	}
 
@@ -479,6 +478,10 @@ class CheckController extends Controller
 
                 $control->refresh();
 
+                StatsJob::enqueue(array(
+                    "category_id" => $control->check_category_id,
+                ));
+
                 if ($redirect) {
                     $this->redirect(array('check/editcontrol', 'id' => $control->check_category_id, 'control' => $control->id));
                 }
@@ -574,8 +577,9 @@ class CheckController extends Controller
             if ($control === null)
                 throw new CHttpException(404, Yii::t('app', 'Control not found.'));
 
-            switch ($model->operation)
-            {
+            $categoryId = $control->check_category_id;
+
+            switch ($model->operation) {
                 case 'delete':
                     foreach ($control->checks as $check) {
                         if ($check->automated) {
@@ -590,6 +594,7 @@ class CheckController extends Controller
                     }
 
                     $control->delete();
+
                     break;
 
                 case 'up':
@@ -658,6 +663,10 @@ class CheckController extends Controller
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;
             }
+
+            StatsJob::enqueue(array(
+                "category_id" => $categoryId,
+            ));
         }
         catch (Exception $e)
         {
@@ -1094,6 +1103,10 @@ class CheckController extends Controller
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check saved.'));
                 $check->refresh();
 
+                TargetCheckReindexJob::enqueue(array(
+                    "category_id" => $check->control->check_category_id
+                ));
+
                 if ($redirect) {
                     $this->redirect(array(
                         'check/editcheck',
@@ -1351,6 +1364,10 @@ class CheckController extends Controller
                     }
                 }
 
+                TargetCheckReindexJob::enqueue(array(
+                    "category_id" => $dst->control->check_category_id
+                ));
+
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check copied.'));
                 $this->redirect(array('check/editcheck', 'id' => $dst->control->check_category_id, 'control' => $dst->check_control_id, 'check' => $dst->id));
             } else {
@@ -1439,6 +1456,8 @@ class CheckController extends Controller
             if ($check === null)
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
 
+            $categoryId = $check->control->check_category_id;
+
             switch ($model->operation)
             {
                 case 'delete':
@@ -1522,6 +1541,10 @@ class CheckController extends Controller
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;
             }
+
+            StatsJob::enqueue(array(
+                "category_id" => $categoryId,
+            ));
         }
         catch (Exception $e)
         {

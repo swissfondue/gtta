@@ -243,16 +243,4 @@ class TargetCheckCategory extends ActiveRecord {
             $targetCheck->save();
         }
     }
-
-    /**
-     * Update all stats.
-     */
-    static public function updateAllStats() {
-        $targetCategories = TargetCheckCategory::model()->findAll();
-
-        foreach ($targetCategories as $targetCategory) {
-            $targetCategory->updateStats();
-            sleep(1);
-        }
-    }
 }

@@ -23,8 +23,10 @@ class CategoryManager {
      */
     public function prepareSharing(CheckCategory $category, $recursive=false) {
         if (!$category->external_id) {
-            $category->status = CheckCategory::STATUS_SHARE;
-            $category->save();
+            CommunityShareJob::enqueue(array(
+                'type' => CommunityShareJob::TYPE_CATEGORY,
+                'obj_id' => $category->id,
+            ));
         }
 
         if ($recursive) {

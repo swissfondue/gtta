@@ -16,11 +16,6 @@ class m141222_081949_mail_settings extends CDbMigration {
         );
         $this->addColumn(
             'system',
-            'mail_max_attempts',
-            'integer'
-        );
-        $this->addColumn(
-            'system',
             'mail_host',
             'varchar (1000)'
         );
@@ -53,7 +48,6 @@ class m141222_081949_mail_settings extends CDbMigration {
      */
     public function safeDown() {
         $this->dropColumn('system', 'email');
-        $this->dropColumn('system', 'mail_max_attempts');
         $this->dropColumn('system', 'mail_host');
         $this->dropColumn('system', 'mail_port');
         $this->dropColumn('system', 'mail_username');

@@ -1,0 +1,12 @@
+{
+    "name": "gtta/gtta",
+    "require": {
+        "chrisboulton/php-resque": "dev-master"
+    },
+    "authors": [
+        {
+            "name": "Anton Belousov",
+            "email": "anton@belousov.co"
+        }
+    ]
+}

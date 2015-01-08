@@ -30,10 +30,7 @@ class MonitorController extends Controller {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->addInCondition("t.status", array(
-            TargetCheck::STATUS_IN_PROGRESS,
-            TargetCheck::STATUS_STOP
-        ));
+        $criteria->addInCondition("t.id", TargetCheckManager::getRunning());
         $criteria->order = "COALESCE(l10n.name, \"check\".name) ASC";
         $criteria->together = true;
 
@@ -53,30 +50,38 @@ class MonitorController extends Controller {
             "user",
         ))->findAll($criteria);
 
-        $criteria = new CDbCriteria();
-        $criteria->addInCondition("t.status", array(
-            ProjectGtCheck::STATUS_IN_PROGRESS,
-            ProjectGtCheck::STATUS_STOP
-        ));
-        $criteria->order = "COALESCE(l10n.name, \"innerCheck\".name) ASC";
-        $criteria->together = true;
+        $gtChecks = array();
 
-        $gtChecks = ProjectGtCheck::model()->with(array(
-            "check" => array(
-                "with" => array(
-                    "check" => array(
-                        "alias" => "innerCheck",
-                        "with" => array(
-                            "l10n" => array(
-                                "joinType" => "LEFT JOIN",
-                                "on" => "l10n.language_id = :language_id",
-                                "params" => array("language_id" => $language)
-                            ),
+        $runningGtChecks = ProjectGtCheckManager::getRunning();
+
+        foreach ($runningGtChecks as $ids) {
+            $criteria = new CDbCriteria();
+            $criteria->addColumnCondition(array(
+                    "t.project_id" => $ids['proj_id'],
+                    "t.gt_check_id" => $ids['obj_id'],
+                )
+            );
+
+            $criteria->order = "COALESCE(l10n.name, \"innerCheck\".name) ASC";
+            $criteria->together = true;
+
+            $gtChecks[] = ProjectGtCheck::model()->with(array(
+                "check" => array(
+                    "with" => array(
+                        "check" => array(
+                            "alias" => "innerCheck",
+                            "with" => array(
+                                "l10n" => array(
+                                    "joinType" => "LEFT JOIN",
+                                    "on" => "l10n.language_id = :language_id",
+                                    "params" => array("language_id" => $language)
+                                ),
+                            )
                         )
                     )
                 )
-            )    
-        ))->findAll($criteria);
+            ))->find($criteria);
+        }
 
         $this->breadcrumbs[] = array(Yii::t("app", "Running Processes"), "");
 
@@ -162,13 +167,16 @@ class MonitorController extends Controller {
 
             switch ($model->operation) {
                 case "stop":
-                    $class = new ReflectionClass(get_class($check));
-
-                    if ($check->status != $class->getConstant("STATUS_IN_PROGRESS")) {
+                    if (!$check->isRunning) {
                         throw new CHttpException(403, Yii::t("app", "Access denied."));
                     }
 
-                    $check->status = $class->getConstant("STATUS_STOP");
+                    if ($ids[0] == 'gt') {
+                        ProjectGtCheckManager::stop($check->project_id, $check->gt_check_id);
+                    } else {
+                        TargetCheckManager::stop($check->id);
+                    }
+
                     $check->save();
 
                     break;

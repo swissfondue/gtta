@@ -75,12 +75,10 @@
                 <?php if (User::checkRole(User::ROLE_USER)): ?>
                     <td class="actions">
                         <?php if ($check->automated && !$limited): ?>
-                            <?php if (in_array($tc->status, array(TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED))): ?>
+                            <?php if (!$tc->isRunning): ?>
                                 <a href="#start" title="<?php echo Yii::t("app", "Start"); ?>" onclick="user.check.start(<?php echo $tc->id; ?>);"><i class="icon icon-play"></i></a>
-                            <?php elseif ($tc->status == TargetCheck::STATUS_IN_PROGRESS): ?>
-                                <a href="#stop" title="<?php echo Yii::t("app", "Stop"); ?>" onclick="user.check.stop(<?php echo $tc->id; ?>);"><i class="icon icon-stop"></i></a>
                             <?php else: ?>
-                                <span class="disabled"><i class="icon icon-stop" title="<?php echo Yii::t("app", "Stop"); ?>"></i></span>
+                                <a href="#stop" title="<?php echo Yii::t("app", "Stop"); ?>" onclick="user.check.stop(<?php echo $tc->id; ?>);"><i class="icon icon-stop"></i></a>
                             <?php endif; ?>
                             &nbsp;
                         <?php endif; ?>

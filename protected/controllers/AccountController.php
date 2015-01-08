@@ -100,22 +100,22 @@ class AccountController extends Controller
                 $user->password_reset_time = $now->format("Y-m-d H:i:s");
                 $user->save();
 
-                $email = new Email();
-                $email->user_id = $user->id;
-                $email->subject = Yii::t('app', 'Restore Account');
-
-                $email->content = $this->renderPartial(
+                $subject = Yii::t('app', 'Restore Account');
+                $content = $this->renderPartial(
                     'application.views.email.account_restore',
-
                     array(
                         'userName' => $user->name ? CHtml::encode($user->name) : $user->email,
                         'url' => $this->createUrl("account/changepassword", array("code" => $user->password_reset_code))
                     ),
-
                     true
                 );
 
-                $email->save();
+                EmailJob::enqueue(array(
+                    "user_id" => $user->id,
+                    "subject" => $subject,
+                    "content" => $content,
+                ));
+
                 $success = true;
             } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));

@@ -2,7 +2,7 @@
 
 <hr>
 
-<?php if ($system->status == System::STATUS_REGENERATE_SANDBOX): ?>
+<?php if ($system->isRegenerating): ?>
     <div class="form-description">
         <?php
             echo Yii::t(

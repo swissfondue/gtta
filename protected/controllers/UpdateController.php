@@ -14,7 +14,7 @@ class UpdateController extends Controller {
             "checkAdmin",
             "postOnly + status",
             "ajaxOnly + status",
-            "idleOrUpdating",
+            "idle",
 		);
 	}
 
@@ -27,7 +27,7 @@ class UpdateController extends Controller {
         $forbidMessage = null;
         $updating = false;
 
-        if ($system->status == System::STATUS_UPDATING) {
+        if ($system->isUpdating) {
             $updating = true;
         } else {
             $backupTime = null;
@@ -60,13 +60,9 @@ class UpdateController extends Controller {
                 throw new CHttpException(403, Yii::t("app", "Access denied."));
             }
 
-            try {
-                SystemManager::updateStatus(System::STATUS_UPDATING, System::STATUS_IDLE);
-            } catch (Exception $e) {
-                throw new CHttpException(403, Yii::t("app", "Access denied."));
-            }
-
             $updating = true;
+
+            UpdateJob::enqueue();
         }
 
         $req = Yii::app()->request;
@@ -99,7 +95,7 @@ class UpdateController extends Controller {
 
         try {
             $system = System::model()->findByPk(1);
-            $response->addData("updating", $system->status == System::STATUS_UPDATING);
+            $response->addData("updating", $system->isUpdating);
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }

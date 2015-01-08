@@ -27,6 +27,7 @@ return array(
         "application.components.reports.docx.*",
         "application.extensions.PHPRtfLite.*",
         "application.extensions.PHPRtfLite.PHPRtfLite.*",
+        "application.jobs.*",
 	),
 
 	// application components

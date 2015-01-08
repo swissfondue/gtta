@@ -14,6 +14,8 @@
     if ($this->_system->demo && !$check->check->demo) {
         $limited = true;
     }
+
+    $started = ProjectGtCheckManager::getStartTime($check->projectChecks[0]->project_id, $check->projectChecks[0]->gt_check_id);
 ?>
 
 <div class="container">
@@ -87,10 +89,8 @@
                                         ?>
                                     <?php elseif ($check->isRunning): ?>
                                         <?php
-                                            $seconds = $check->projectChecks[0]->started;
-
-                                            if ($seconds) {
-                                                $seconds = time() - strtotime($seconds);
+                                            if ($started) {
+                                                $seconds = time() - strtotime($started);
                                                 $minutes = 0;
 
                                                 if ($seconds > 59) {
@@ -112,7 +112,7 @@
                                         <?php if (!$limited && $check->check->automated): ?>
                                             <?php if (!$check->projectChecks || $check->projectChecks && in_array($check->projectChecks[0]->status, array(ProjectGtCheck::STATUS_OPEN, ProjectGtCheck::STATUS_FINISHED))): ?>
                                                 <a href="#start" title="<?php echo Yii::t('app', 'Start'); ?>" onclick="user.gtCheck.start();"><i class="icon icon-play"></i></a>
-                                            <?php elseif ($check->projectChecks && $check->projectChecks[0]->status == ProjectGtCheck::STATUS_IN_PROGRESS): ?>
+                                            <?php elseif ($check->projectChecks && $check->projectChecks[0]->isRunning): ?>
                                                 <a href="#stop" title="<?php echo Yii::t('app', 'Stop'); ?>" onclick="user.gtCheck.stop();"><i class="icon icon-stop"></i></a>
                                             <?php else: ?>
                                                 <span class="disabled"><i class="icon icon-stop" title="<?php echo Yii::t('app', 'Stop'); ?>"></i></span>
@@ -409,7 +409,7 @@
                                     <?php
                                         $showAuto = false;
 
-                                        if ($check->check->automated && $check->projectChecks && $check->projectChecks[0]->started && $check->projectChecks[0]->status == ProjectGtCheck::STATUS_IN_PROGRESS) {
+                                        if ($check->check->automated && $check->projectChecks && $started && $check->projectChecks[0]->isRunning) {
                                             $showAuto = true;
                                         }
                                     ?>
@@ -417,13 +417,13 @@
                                     <div class="automated-info-block <?php if (!$showAuto) echo "hide"; ?>">
                                         <?php
                                             if ($showAuto) {
-                                                $started = new DateTime($check->projectChecks[0]->started);
+                                                $dt = new DateTime($started);
                                                 $user = $check->projectChecks[0]->user;
 
                                                 echo Yii::t("app", "Started by {user} on {date} at {time}", array(
                                                     "{user}" => $user->name ? $user->name : $user->email,
-                                                    "{date}" => $started->format("d.m.Y"),
-                                                    "{time}" => $started->format("H:i:s"),
+                                                    "{date}" => $dt->format("d.m.Y"),
+                                                    "{time}" => $dt->format("H:i:s"),
                                                 ));
                                             }
                                         ?>
@@ -733,8 +733,8 @@
                 if ($check->isRunning):
                     $time = -1;
 
-                    if ($check->projectChecks[0]->started) {
-                        $time = new DateTime($check->projectChecks[0]->started);
+                    if ($started) {
+                        $time = new DateTime($started);
                         $now = new DateTime();
 
                         $time = $now->format("U") - $time->format("U");

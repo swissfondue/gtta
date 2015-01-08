@@ -14,7 +14,7 @@ class ReferenceController extends Controller
             'https',
 			'checkAuth',
             'checkAdmin',
-            "idleOrRunning",
+            "idle",
 		);
 	}
 

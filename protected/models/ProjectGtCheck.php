@@ -15,8 +15,6 @@
  * @property string $result_file
  * @property string $result
  * @property string $table_result
- * @property string $started
- * @property integer $pid
  * @property string $rating
  * @property string $status
  * @property string $solution
@@ -28,8 +26,6 @@ class ProjectGtCheck extends ActiveRecord {
      * Check statuses.
      */
     const STATUS_OPEN = "open";
-    const STATUS_IN_PROGRESS = "in_progress";
-    const STATUS_STOP = "stop";
     const STATUS_FINISHED = "finished";
 
     /**
@@ -96,9 +92,9 @@ class ProjectGtCheck extends ActiveRecord {
 	public function rules() {
 		return array(
             array('project_id, gt_check_id, user_id, language_id', 'required'),
-            array('project_id, gt_check_id, pid, port, language_id, user_id', 'numerical', 'integerOnly' => true),
+            array('project_id, gt_check_id, port, language_id, user_id', 'numerical', 'integerOnly' => true),
             array('target_file, result_file, protocol, target', 'length', 'max' => 1000),
-            array('status', 'in', 'range' => array(self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_STOP, self::STATUS_FINISHED)),
+            array('status', 'in', 'range' => array(self::STATUS_OPEN, self::STATUS_FINISHED)),
             array('rating', 'in', 'range' => self::getValidRatings()),
             array('result, started, table_result, solution, solution_title', 'safe'),
 		);
@@ -141,5 +137,19 @@ class ProjectGtCheck extends ActiveRecord {
         $this->result .= $message;
         $this->status = self::STATUS_FINISHED;
         $this->save();
+    }
+
+    /**
+     * Check if project gt check is running
+     * @return boolean is running.
+     */
+    public function getIsRunning() {
+        $startJob = JobManager::buildId(GtAutomationJob::ID_TEMPLATE, array(
+            "operation" => GtAutomationJob::OPERATION_START,
+            "proj_id" => $this->project_id,
+            "obj_id" => $this->gt_check_id,
+        ));
+
+        return JobManager::isRunning($startJob);
     }
 }
