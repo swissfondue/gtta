@@ -97,11 +97,6 @@ return array(
     "filesPath" => BASE_DIR . "/current/web/files",
     "systemStatusLock" => "/tmp/gtta-status.lock",
 
-    "email" => array(
-        "systemEmail" => "gtta.test@yandex.ru",
-        "maxAttempts" => 3,
-    ),
-
     "update" => array(
         "keyFile" => BASE_DIR . "/security/keys/update-server.pub",
         "directory" => "/tmp/gtta-update",

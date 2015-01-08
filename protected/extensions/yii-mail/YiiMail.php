@@ -200,20 +200,18 @@ class YiiMail extends CApplicationComponent
 	* @return mixed {@link Swift_MailTransport} or {@link Swift_SmtpTransport}
 	*/
 	public function getTransport() {
-		if ($this->transport===null) {
-			switch ($this->transportType) {
-				case 'php':
-					$this->transport = Swift_MailTransport::newInstance();
-					if ($this->transportOptions !== null)
-						$this->transport->setExtraParams($this->transportOptions);
-					break;
-				case 'smtp':
-					$this->transport = Swift_SmtpTransport::newInstance();
-					foreach ($this->transportOptions as $option => $value)
-						$this->transport->{'set'.ucfirst($option)}($value); // sets option with the setter method
-					break;
-			}
-		}
+        switch ($this->transportType) {
+            case 'php':
+                $this->transport = Swift_MailTransport::newInstance();
+                if ($this->transportOptions !== null)
+                    $this->transport->setExtraParams($this->transportOptions);
+                break;
+            case 'smtp':
+                $this->transport = Swift_SmtpTransport::newInstance();
+                foreach ($this->transportOptions as $option => $value)
+                    $this->transport->{'set'.ucfirst($option)}($value); // sets option with the setter method
+                break;
+        }
 		
 		return $this->transport;
 	}
