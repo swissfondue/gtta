@@ -8,6 +8,29 @@ class EmailJob extends BackgroundJob {
      */
     private function _sendEmail($userId, $subject, $content)
     {
+        $system = System::model()->findByPk(1);
+
+        // Yii-mail transport options
+        $transportOptions = array(
+            "host"          => $system->mail_host,
+            "port"          => $system->mail_port,
+            "username"      => $system->mail_username,
+            "password"      => $system->mail_password,
+        );
+
+        if ( $system->email ||
+            !$transportOptions['host'] ||
+            !$transportOptions['port'] ||
+            !$transportOptions['username'] ||
+            !$transportOptions['password'])
+        {
+            throw new Exception('Invalid mail settings.');
+        }
+
+        $systemMail = $system->email;
+        $transportOptions['encryption'] = $system->mail_encryption ? 'ssl' : null;
+        Yii::app()->mail->transportOptions = $transportOptions;
+
         $user = User::model()->findByPk($userId);
 
         if (!$user) {
@@ -16,7 +39,7 @@ class EmailJob extends BackgroundJob {
 
         try {
             $message          = new YiiMailMessage();
-            $message->from    = array( Yii::app()->params['email']['systemEmail'] => Yii::app()->name);
+            $message->from    = array($systemMail => Yii::app()->name);
             $message->to      = $user->email;
             $message->subject = $subject;
             $message->setBody($content, 'text/html', 'utf-8');

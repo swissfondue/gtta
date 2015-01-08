@@ -33,7 +33,6 @@
  * @property boolean $checklist_poc
  * @property boolean $checklist_links
  * @property email $email
- * @property integer $mail_max_attempts
  * @property integer $mail_host
  * @property integer $mail_port
  * @property integer $mail_username
