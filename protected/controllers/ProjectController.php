@@ -3660,11 +3660,6 @@ class ProjectController extends Controller {
 
                     $response->addData("inputs", $inputValues);
 
-                    StatsJob::enqueue(array(
-                        "category_id" => $targetCheck->check->control->check_category_id,
-                        "target_id" => $targetCheck->target_id,
-                    ));
-
                     break;
 
                 case "copy":
@@ -3678,11 +3673,6 @@ class ProjectController extends Controller {
                     $copy->save();
 
                     $response->addData("id", $copy->id);
-
-                    StatsJob::enqueue(array(
-                        "category_id" => $targetCheck->check->control->check_category_id,
-                        "target_id" => $targetCheck->target_id,
-                    ));
 
                     break;
 
@@ -3710,17 +3700,17 @@ class ProjectController extends Controller {
 
                     $targetCheck->delete();
 
-                    StatsJob::enqueue(array(
-                        "category_id" => $targetCheck->check->control->check_category_id,
-                        "target_id" => $targetCheck->target_id,
-                    ));
-
                     break;
 
                 default:
                     throw new CHttpException(403, Yii::t("app", "Unknown operation."));
                     break;
             }
+
+            StatsJob::enqueue(array(
+                "category_id" => $category->check_category_id,
+                "target_id" => $target->id,
+            ));
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
