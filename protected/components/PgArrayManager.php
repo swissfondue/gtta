@@ -35,33 +35,19 @@ class PgArrayManager {
             return array();
         }
 
-        if (!is_string($text) || $text == "{}") {
-            return array();
+        preg_match_all('/(?<=^\{|,)(([^,"{]*)|\s*"((?:[^"\\\\]|\\\\(?:.|[\d+|x[0-9a-f]+))*)"\s*)(,|(?<!^\{)(?=\}$))/i', $text, $matches, PREG_SET_ORDER);
+        $values = array();
+
+        foreach ($matches as $match) {
+            if ($match[3] != '') {
+                $values[] = stripcslashes($match[3]);
+            } elseif (strtolower($match[2]) == 'null') {
+                $values[] = null;
+            } else {
+                $values[] = $match[2];
+            }
         }
 
-        $text = substr($text, 1, -1);// Removes starting "{" and ending "}"
-
-        if (substr($text, 0, 1) == '"') {
-            $text = substr($text, 1);
-        }
-
-        if (substr($text, -1, 1) == '"') {
-            $text = substr($text, 0, -1);
-        }
-
-        if (strstr($text, '"')) { // Assuming string array.
-            $values = explode('","', $text);
-        } else { // Assuming Integer array.
-            $values = explode(',', $text);
-        }
-
-        $fixed_values = array();
-
-        foreach ($values as $value) {
-            $value = str_replace('\\"', '"', $value);
-            $fixed_values[] = $value;
-        }
-
-        return $fixed_values;
+        return $values;
     }
 }
