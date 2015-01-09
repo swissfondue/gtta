@@ -4911,6 +4911,7 @@ class ProjectController extends Controller {
                 $user->save();
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "User saved."));
+                $this->redirect(array("project/edituser", "id" => $project->id, "user" => $user->user_id));
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
