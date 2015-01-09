@@ -1654,8 +1654,6 @@ class ProjectController extends Controller {
                 }
             }
 
-            $stats[$control->id]["checks"]++;
-
             foreach ($control->checks as $check) {
                 foreach ($check->targetChecks as $tc) {
                     $stats[$control->id]["checks"]++;
