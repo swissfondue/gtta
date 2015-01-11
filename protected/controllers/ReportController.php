@@ -1547,12 +1547,6 @@ class ReportController extends Controller {
                         't.check_control_id' => $control->id
                     ));
 
-                    if ($this->_system->demo) {
-                        $criteria->addColumnCondition(array(
-                            "t.demo" => true
-                        ));
-                    }
-
                     $criteria->together = true;
 
                     if (!$category->advanced) {
@@ -1950,11 +1944,6 @@ class ReportController extends Controller {
 
             foreach ($checks as $check) {
                 $innerCheck = $check->check->check;
-
-                if ($this->_system->demo && !$innerCheck->demo) {
-                    continue;
-                }
-
                 $categoryId = $innerCheck->control->check_category_id;
                 $controlId = $innerCheck->check_control_id;
 
@@ -2009,10 +1998,6 @@ class ReportController extends Controller {
 
                     foreach ($control["checks"] as $check) {
                         $innerCheck = $check->check->check;
-
-                        if ($this->_system->demo && !$innerCheck->demo) {
-                            continue;
-                        }
 
                         $checkData = array(
                             "id" => $check->gt_check_id,
@@ -3430,12 +3415,6 @@ class ReportController extends Controller {
                     $criteria->addInCondition("reference_id", $referenceIds);
                     $criteria->addInCondition("check_control_id", $controlIds);
 
-                    if ($this->_system->demo) {
-                        $criteria->addColumnCondition(array(
-                            "t.demo" => true
-                        ));
-                    }
-
                     if (!$category->advanced) {
                         $criteria->addCondition("advanced = FALSE");
                     }
@@ -3579,10 +3558,6 @@ class ReportController extends Controller {
 
                 foreach ($checks as $check) {
                     $innerCheck = $check->check->check;
-
-                    if ($this->_system->demo && !$innerCheck->demo) {
-                        continue;
-                    }
 
                     $checksData[] = array(
                         "rating" => $check->rating
@@ -3900,12 +3875,6 @@ class ReportController extends Controller {
                         't.check_control_id' => $control->id
                     ));
 
-                    if ($this->_system->demo) {
-                        $criteria->addColumnCondition(array(
-                            "t.demo" => true
-                        ));
-                    }
-
                     if (!$category->advanced) {
                         $criteria->addCondition('t.advanced = FALSE');
                     }
@@ -4033,10 +4002,6 @@ class ReportController extends Controller {
 
             foreach ($checks as $check) {
                 $innerCheck = $check->check->check;
-
-                if ($this->_system->demo && !$innerCheck->demo) {
-                    continue;
-                }
 
                 if (!array_key_exists($innerCheck->check_control_id, $controls)) {
                     $controls[$innerCheck->check_control_id] = array(
@@ -5043,12 +5008,6 @@ class ReportController extends Controller {
                         't.check_control_id' => $control->id
                     ));
 
-                    if ($this->_system->demo) {
-                        $criteria->addColumnCondition(array(
-                            "t.demo" => true
-                        ));
-                    }
-
                     $criteria->together = true;
 
                     if (!$category->advanced) {
@@ -5328,10 +5287,6 @@ class ReportController extends Controller {
 
             $row = array();
             $innerCheck = $check->check->check;
-
-            if ($this->_system->demo && !$innerCheck->demo) {
-                continue;
-            }
 
             if (in_array(TargetCheck::COLUMN_TARGET, $model->columns)) {
                 $row[TargetCheck::COLUMN_TARGET] = $check->target;

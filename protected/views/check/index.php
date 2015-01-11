@@ -49,20 +49,13 @@
                         <?php endif; ?>
                         <?php foreach ($categories as $category): ?>
                             <?php
-                                $limited = false;
                                 $checkCount = 0;
-                                $limitedCheckCount = 0;
 
                                 foreach ($category->controls as $control) {
                                     $checkCount += $control->checkCount;
-                                    $limitedCheckCount += $control->limitedCheckCount;
-                                }
-
-                                if ($this->_system->demo && $limitedCheckCount > 0 && $checkCount == $limitedCheckCount) {
-                                    $limited = true;
                                 }
                             ?>
-                            <tr data-id="<?php echo $category->id; ?>" data-control-url="<?php echo $this->createUrl('check/control'); ?>" <?php if ($limited) echo 'class="limited"'; ?>>
+                            <tr data-id="<?php echo $category->id; ?>" data-control-url="<?php echo $this->createUrl('check/control'); ?>">
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('check/view', array( 'id' => $category->id )); ?>"><?php echo CHtml::encode($category->localizedName); ?></a>
                                 </td>

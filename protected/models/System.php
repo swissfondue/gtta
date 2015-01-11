@@ -23,10 +23,8 @@
  * @property float $report_med_damping_low
  * @property float $report_high_damping_low
  * @property float $report_high_damping_med
- * @property boolean $demo
  * @property string $copyright
  * @property string $logo_type
- * @property integer $demo_check_limit
  * @property float $community_min_rating
  * @property boolean $community_allow_unverified
  * @property string $integration_key
@@ -85,9 +83,9 @@ class System extends ActiveRecord {
 		return array(
             array("workstation_id, workstation_key, version, update_version, update_description, version_description, copyright, logo_type, integration_key", "length", "max" => 1000),
             array("status", "in", "range" => self::validStatuses()),
-            array("report_low_pedestal, report_med_pedestal, report_high_pedestal, report_max_rating, report_med_damping_low, report_high_damping_low, report_high_damping_med, demo_check_limit", "numerical", "min" => 0),
+            array("report_low_pedestal, report_med_pedestal, report_high_pedestal, report_max_rating, report_med_damping_low, report_high_damping_low, report_high_damping_med", "numerical", "min" => 0),
             array("community_min_rating", "numerical", "min" => 0, "max" => 5),
-            array("demo, community_allow_unverified, checklist_poc, checklist_links", "boolean"),
+            array("community_allow_unverified, checklist_poc, checklist_links", "boolean"),
             array("backup, timezone, update_check_time, update_time", "safe"),
 		);
 	}

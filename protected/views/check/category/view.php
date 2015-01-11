@@ -30,14 +30,7 @@
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($controls as $control): ?>
-                            <?php
-                                $limited = false;
-
-                                if ($this->_system->demo && $control->limitedCheckCount > 0 && $control->checkCount == $control->limitedCheckCount) {
-                                    $limited = true;
-                                }
-                            ?>
-                            <tr data-id="<?php echo $control->id; ?>" data-control-url="<?php echo $this->createUrl('check/control/control'); ?>"  <?php if ($limited) echo 'class="limited"'; ?>>
+                            <tr data-id="<?php echo $control->id; ?>" data-control-url="<?php echo $this->createUrl('check/control/control'); ?>">
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('check/viewcontrol', array( 'id' => $category->id, 'control' => $control->id )); ?>"><?php echo CHtml::encode($control->localizedName); ?></a>
                                 </td>

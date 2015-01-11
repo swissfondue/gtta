@@ -1231,7 +1231,6 @@ class ProjectController extends Controller {
                     "controls" => array(
                         "with" => array(
                             "checkCount",
-                            "limitedCheckCount",
                         ),
                     ),
                 ),
@@ -1482,35 +1481,16 @@ class ProjectController extends Controller {
             $language = $language->id;
         }
 
-        if ($this->_system->demo) {
-            $categories = CheckCategory::model()->with(array(
-                "l10n" => array(
-                    "joinType" => "LEFT JOIN",
-                    "on" => "language_id = :language_id",
-                    "params" => array( "language_id" => $language )
-                ),
-                "controls" => array(
-                    "with" => array(
-                        "checkCount",
-                        "limitedCheckCount"
-                    )
-                )
-            ))->findAllByAttributes(
-                array(),
-                array("order" => "COALESCE(l10n.name, t.name) ASC")
-            );
-        } else {
-            $categories = CheckCategory::model()->with(array(
-                "l10n" => array(
-                    "joinType" => "LEFT JOIN",
-                    "on" => "language_id = :language_id",
-                    "params" => array( "language_id" => $language )
-                ),
-            ))->findAllByAttributes(
-                array(),
-                array("order" => "COALESCE(l10n.name, t.name) ASC")
-            );
-        }
+        $categories = CheckCategory::model()->with(array(
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array( "language_id" => $language )
+            ),
+        ))->findAllByAttributes(
+            array(),
+            array("order" => "COALESCE(l10n.name, t.name) ASC")
+        );
 
         $references = Reference::model()->findAllByAttributes(
             array(),
@@ -1835,7 +1815,6 @@ class ProjectController extends Controller {
                         "category" => $category,
                         "check" => $check,
                         "tc" => $tc,
-                        "limited" => ($this->_system->demo && !$check->demo),
                         "number" => $number,
                         "ratings" => TargetCheck::getRatingNames(),
                     ), true);
@@ -1959,7 +1938,6 @@ class ProjectController extends Controller {
                 "target" => $target,
                 "category" => $category,
                 "check" => $check,
-                "limited" => ($this->_system->demo && !$check->check->demo),
                 "ratings" => TargetCheck::getRatingNames(),
             ), true);
 
@@ -2594,19 +2572,7 @@ class ProjectController extends Controller {
                     ));
                 }
 
-                if ($this->_system->demo) {
-                    $updated = System::model()->updateCounters(
-                        array("demo_check_limit" => -1),
-                        array("condition" => "id = 1 AND demo_check_limit > 0")
-                    );
-
-                    if (!$updated) {
-                        throw new CHttpException(403, Yii::t("app", "You've exceeded a limit of the new checks for the demo version."));
-                    }
-                }
-
                 $check = new Check();
-                $check->demo = true;
                 $check->name = $form->name;
                 $check->background_info = $form->backgroundInfo;
                 $check->question = $form->question;
@@ -3534,10 +3500,6 @@ class ProjectController extends Controller {
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
             }
 
-            if ($this->_system->demo && !$check->demo) {
-                throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
-            }
-
             $model = new EntryControlForm();
             $model->attributes = $_POST['EntryControlForm'];
 
@@ -3847,10 +3809,6 @@ class ProjectController extends Controller {
 
             if (!$check) {
                 throw new CHttpException(404, Yii::t('app', 'Check not found.'));
-            }
-
-            if ($this->_system->demo && !$check->check->demo) {
-                throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
             }
 
             $language = Language::model()->findByAttributes(array(

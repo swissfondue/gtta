@@ -20,7 +20,6 @@
  * @property string $reference_url
  * @property integer $effort
  * @property integer $sort_order
- * @property boolean $demo
  * @property integer $status
  * @property integer $external_id
  * @property string $create_time
@@ -63,7 +62,7 @@ class Check extends ActiveRecord {
                 "numerical",
                 "integerOnly" => true
             ),
-            array("advanced, automated, multiple_solutions, demo", "boolean"),
+            array("advanced, automated, multiple_solutions", "boolean"),
             array("status", "in", "range" => array(
                 self::STATUS_INSTALLED,
                 self::STATUS_SHARE,

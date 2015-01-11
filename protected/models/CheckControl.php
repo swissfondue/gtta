@@ -58,7 +58,6 @@ class CheckControl extends ActiveRecord implements IVariableScopeObject {
             "checks" => array(self::HAS_MANY, "Check", "check_control_id"),
             "category" => array(self::BELONGS_TO, "CheckCategory", "check_category_id"),
             "checkCount" => array(self::STAT, "Check", "check_control_id"),
-            "limitedCheckCount" => array(self::STAT, "Check", "check_control_id", "condition" => "NOT t.demo"),
             "customChecks" => array(self::HAS_MANY, "TargetCustomCheck", "check_control_id"),
 		);
 	}
