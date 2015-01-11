@@ -90,11 +90,6 @@ class SettingsEditForm extends CFormModel {
     public $email;
 
     /**
-     * @var integer mail max attempts
-     */
-    public $mailMaxAttempts;
-
-    /**
      * @var string mail host
      */
     public $mailHost;
@@ -136,7 +131,6 @@ class SettingsEditForm extends CFormModel {
             array("reportHighPedestal", "compare", "compareAttribute" => "reportMaxRating", "operator" => "<="),
             array("languageId", "checkLanguage"),
             array("email", "email"),
-            array("mailMaxAttempts", "numerical", "integerOnly" => true, "min" => 0),
             array("mailPort", "numerical", "integerOnly" => true, "min" => 1, "max" => 65535),
             array("mailHost, mailUsername, mailPassword", "safe"),
 		);
@@ -164,7 +158,6 @@ class SettingsEditForm extends CFormModel {
             "checklistPoc" => Yii::t("app", "Checklist POC"),
             "checklistLinks" => Yii::t("app", "Checklist Links"),
             "email" => Yii::t("app", "Email"),
-            "mailMaxAttempts" => Yii::t("app", "Mail Max Attempts"),
             "mailHost" => Yii::t("app", "Host"),
             "mailPort" => Yii::t("app", "Port"),
             "mailUsername" => Yii::t("app", "Username"),
