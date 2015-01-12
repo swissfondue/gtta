@@ -51,7 +51,6 @@
                     <b>1.11 (current version)</b>:
 
                     <ul>
-                        <li>Demo checks & categories are easily distinguishable in the list.</li>
                         <li>Project reports now support Microsoft Office 2013.</li>
                         <li>Network tools in GTTA configuration utility (ifconfig, route, ip, ping, traceroute and iptables).</li>
                         <li>Automated connectivity test after network configuration change.</li>

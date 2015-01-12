@@ -1,5 +1,5 @@
-<div id="check-<?php echo $tc->id; ?>" class="check-header <?php if ($tc->isRunning) echo "in-progress"; ?>" data-type="check" data-id="<?php echo $tc->id; ?>" data-control-url="<?php echo $this->createUrl("project/controlcheck", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $tc->id)); ?>" data-automated="<?php echo $check->automated ? 1 : 0; ?>" data-script-count="<?php echo count($check->scripts); ?>" data-limited="<?php echo $limited ? 1 : 0; ?>" data-check-url="<?php echo $this->createUrl("project/check", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $tc->id)); ?>">
-    <table class="check-header <?php if ($limited) echo "limited"; ?>">
+<div id="check-<?php echo $tc->id; ?>" class="check-header <?php if ($tc->isRunning) echo "in-progress"; ?>" data-type="check" data-id="<?php echo $tc->id; ?>" data-control-url="<?php echo $this->createUrl("project/controlcheck", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $tc->id)); ?>" data-automated="<?php echo $check->automated ? 1 : 0; ?>" data-script-count="<?php echo count($check->scripts); ?>" data-check-url="<?php echo $this->createUrl("project/check", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $tc->id)); ?>">
+    <table class="check-header">
         <tbody>
             <tr>
                 <td class="name">
@@ -13,7 +13,7 @@
                         <i class="icon-cog" title="<?php echo Yii::t("app", "Automated"); ?>"></i>
                     <?php endif; ?>
 
-                    <?php if (User::checkRole(User::ROLE_ADMIN) && !$limited): ?>
+                    <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                         <a href="<?php echo $this->createUrl("check/editcheck", array("id" => $category->check_category_id, "control" => $check->check_control_id, "check" => $check->id)); ?>"><i class="icon-edit" title="<?php echo Yii::t("app", "Edit"); ?>"></i></a>
                     <?php endif; ?>
 
@@ -26,7 +26,7 @@
                     <?php endif; ?>
                 </td>
                 <td class="status">
-                    <?php if (!$limited && $tc->status == TargetCheck::STATUS_FINISHED): ?>
+                    <?php if ($tc->status == TargetCheck::STATUS_FINISHED): ?>
                         <?php
                             switch ($tc->rating) {
                                 case TargetCheck::RATING_INFO:
@@ -74,7 +74,7 @@
                 </td>
                 <?php if (User::checkRole(User::ROLE_USER)): ?>
                     <td class="actions">
-                        <?php if ($check->automated && !$limited): ?>
+                        <?php if ($check->automated): ?>
                             <?php if (!$tc->isRunning): ?>
                                 <a href="#start" title="<?php echo Yii::t("app", "Start"); ?>" onclick="user.check.start(<?php echo $tc->id; ?>);"><i class="icon icon-play"></i></a>
                             <?php else: ?>
@@ -83,7 +83,7 @@
                             &nbsp;
                         <?php endif; ?>
 
-                        <?php if (!$limited && in_array($tc->status, array(TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED))): ?>
+                        <?php if (in_array($tc->status, array(TargetCheck::STATUS_OPEN, TargetCheck::STATUS_FINISHED))): ?>
                             <a href="#reset" title="<?php echo Yii::t("app", "Reset"); ?>" onclick="user.check.reset(<?php echo $tc->id; ?>);"><i class="icon icon-refresh"></i></a>
                         <?php else: ?>
                             <span class="disabled"><i class="icon icon-refresh" title="<?php echo Yii::t("app", "Reset"); ?>"></i></span>
@@ -95,8 +95,4 @@
     </table>
 </div>
 
-<div class="check-form hide" data-type="check" data-id="<?php echo $tc->id; ?>" data-save-url="<?php echo $this->createUrl("project/savecheck", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $tc->id)); ?>" data-autosave-url="<?php echo $this->createUrl("project/autosavecheck", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $tc->id)); ?>" data-limited="<?php echo $limited ? 1 : 0; ?>">
-    <?php if ($limited): ?>
-        <?php echo Yii::t("app", "This check is not available in the demo version."); ?>
-    <?php endif; ?>
-</div>
+<div class="check-form hide" data-type="check" data-id="<?php echo $tc->id; ?>" data-save-url="<?php echo $this->createUrl("project/savecheck", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $tc->id)); ?>" data-autosave-url="<?php echo $this->createUrl("project/autosavecheck", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $tc->id)); ?>"></div>

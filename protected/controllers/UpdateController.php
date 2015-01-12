@@ -38,7 +38,7 @@ class UpdateController extends Controller {
                 $backupTime = new DateTime($system->backup);
             }
 
-            if (!$system->demo && (!$backupTime || $backupTime < $backupLimit)) {
+            if (!$backupTime || $backupTime < $backupLimit) {
                 $forbidMessage = Yii::t(
                     "app",
                     "The system has been backed up more than 24 hours ago. Please download a backup before updating the system."

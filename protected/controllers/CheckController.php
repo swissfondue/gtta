@@ -70,7 +70,6 @@ class CheckController extends Controller
             "controls" => array(
                 "with" => array(
                     "checkCount",
-                    "limitedCheckCount",
                 ),
             ),
         ))->findAll($newCriteria);
@@ -141,7 +140,6 @@ class CheckController extends Controller
                 "params" => array( "language_id" => $language )
             ),
             "checkCount",
-            "limitedCheckCount",
         ))->findAll($criteria);
 
         $controlCount = CheckControl::model()->count($criteria);
@@ -957,7 +955,6 @@ class CheckController extends Controller
             }
         } else {
             $check = new Check();
-            $check->demo = true;
             $newRecord = true;
         }
 
@@ -1002,10 +999,6 @@ class CheckController extends Controller
 
 		// collect user input data
 		if (isset($_POST['CheckEditForm'])) {
-            if ($this->_system->demo && !$check->demo) {
-                throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
-            }
-
 			$model->attributes = $_POST['CheckEditForm'];
 
             $model->name = $model->defaultL10n($languages, 'name');
@@ -1030,17 +1023,6 @@ class CheckController extends Controller
 
                 if ($model->controlId != $check->check_control_id || $newRecord) {
                     $redirect = true;
-                }
-
-                if ($newRecord && $this->_system->demo) {
-                    $updated = System::model()->updateCounters(
-                        array("demo_check_limit" => -1),
-                        array("condition" => "id = 1 AND demo_check_limit > 0")
-                    );
-
-                    if (!$updated) {
-                        throw new CHttpException(403, Yii::t("app", "You've exceeded a limit of the new checks for the demo version."));
-                    }
                 }
 
                 $check->name = $model->name;
@@ -1240,12 +1222,7 @@ class CheckController extends Controller
 			if ($model->validate()) {
                 $src = Check::model()->findByPk($model->id);
 
-                if ($this->_system->demo && !$src->demo) {
-                    throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
-                }
-
                 $dst = new Check();
-
                 $dst->check_control_id = $control->id;
                 $dst->name = $src->name . ' (' . Yii::t('app', 'Copy') . ')';
                 $dst->background_info = $src->background_info;
@@ -1261,7 +1238,6 @@ class CheckController extends Controller
                 $dst->reference_url = $src->reference_url;
                 $dst->effort = $src->effort;
                 $dst->sort_order = 0;
-                $dst->demo = $src->demo;
                 $dst->save();
 
                 $dst->sort_order = $dst->id;
@@ -1610,10 +1586,6 @@ class CheckController extends Controller
         if (!$check)
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
 
-        if ($this->_system->demo && !$check->demo) {
-            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
-        }
-
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
@@ -1708,14 +1680,6 @@ class CheckController extends Controller
 
         if (!$check)
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
-
-        if ($this->_system->demo && !$check->demo) {
-            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
-        }
-
-        if ($this->_system->demo && !$check->demo) {
-            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
-        }
 
         if ($result)
         {
@@ -1892,10 +1856,6 @@ class CheckController extends Controller
             if ($result === null)
                 throw new CHttpException(404, Yii::t('app', 'Result not found.'));
 
-            if ($this->_system->demo && !$result->check->demo) {
-                throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
-            }
-
             switch ($model->operation)
             {
                 case 'delete':
@@ -1970,10 +1930,6 @@ class CheckController extends Controller
 
         if (!$check)
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
-
-        if ($this->_system->demo && !$check->demo) {
-            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
-        }
 
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
@@ -2243,10 +2199,6 @@ class CheckController extends Controller
             if ($solution === null)
                 throw new CHttpException(404, Yii::t('app', 'Solution not found.'));
 
-            if ($this->_system->demo && !$solution->check->demo) {
-                throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
-            }
-
             switch ($model->operation)
             {
                 case 'delete':
@@ -2321,10 +2273,6 @@ class CheckController extends Controller
 
         if (!$check)
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
-
-        if ($this->_system->demo && !$check->demo) {
-            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
-        }
 
         if ($page < 1)
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
@@ -2414,10 +2362,6 @@ class CheckController extends Controller
 
         if (!$check) {
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
-        }
-
-        if ($this->_system->demo && !$check->demo) {
-            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
         }
 
         if ($script) {
@@ -2520,10 +2464,6 @@ class CheckController extends Controller
             if ($script === null)
                 throw new CHttpException(404, Yii::t('app', 'Script not found.'));
 
-            if ($this->_system->demo && !$script->check->demo) {
-                throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
-            }
-
             switch ($model->operation)
             {
                 case 'delete':
@@ -2605,10 +2545,6 @@ class CheckController extends Controller
 
         if (!$check)
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
-
-        if ($this->_system->demo && !$check->demo) {
-            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
-        }
 
         $script = CheckScript::model()->findByAttributes(array(
             'id' => $script,
@@ -2725,10 +2661,6 @@ class CheckController extends Controller
 
         if (!$check)
             throw new CHttpException(404, Yii::t('app', 'Check not found.'));
-
-        if ($this->_system->demo && !$check->demo) {
-            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
-        }
 
         $script = CheckScript::model()->findByAttributes(array(
             'id' => $script,
@@ -2942,10 +2874,6 @@ class CheckController extends Controller
 
             if ($input === null)
                 throw new CHttpException(404, Yii::t('app', 'Input not found.'));
-
-            if ($this->_system->demo && !$input->script->check->demo) {
-                throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
-            }
 
             switch ($model->operation)
             {
@@ -3233,10 +3161,6 @@ class CheckController extends Controller
 
         if (!$check) {
             throw new CHttpException(404, Yii::t("app", "Check not found."));
-        }
-
-        if ($this->_system->demo && !$check->demo) {
-            throw new CHttpException(403, Yii::t("app", "This check is not available in the demo version."));
         }
 
         $form = new ShareForm();

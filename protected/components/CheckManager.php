@@ -79,7 +79,6 @@ class CheckManager {
 
         $c = new Check();
         $c->external_id = $check->id;
-        $c->demo = false;
         $c->name = $check->name;
         $c->background_info = $check->background_info;
         $c->hints = $check->hints;

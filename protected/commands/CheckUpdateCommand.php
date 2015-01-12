@@ -7,7 +7,7 @@ class CheckUpdateCommand extends ConsoleCommand {
     const SETUP_COMPLETED_FLAG = "/opt/gtta/.setup-completed";
 
     /**
-     * Register the demo version
+     * Get workstation id & key
      */
     private function _register() {
         $api = new ServerApiClient($this->_system->workstation_id, $this->_system->workstation_key);
@@ -18,7 +18,6 @@ class CheckUpdateCommand extends ConsoleCommand {
             $this->_system->workstation_key = $result->key;
         }
 
-        $this->_system->demo = true;
         $this->_system->save();
         $this->_system->refresh();
     }
@@ -38,7 +37,6 @@ class CheckUpdateCommand extends ConsoleCommand {
 
         $api = new ServerApiClient($this->_system->workstation_id, $this->_system->workstation_key);
         $result = $api->setStatus($this->_system->version, $this->_system->integration_key);
-        $this->_system->demo = $result->demo;
 
         if ($result->update !== null) {
             $this->_system->update_version = $result->update->version;
@@ -48,7 +46,7 @@ class CheckUpdateCommand extends ConsoleCommand {
 
         $this->_system->save();
 
-        if ($result->communityInstall && !$this->_system->demo) {
+        if ($result->communityInstall) {
             try {
                 CommunityInstallJob::enqueue();
             } catch (Exception $e) {

@@ -30,22 +30,15 @@
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($checks as $check): ?>
-                            <?php
-                                $limited = false;
-
-                                if ($this->_system->demo && !$check->demo) {
-                                    $limited = true;
-                                }
-                            ?>
                             <tr data-id="<?php echo $check->id; ?>" data-control-url="<?php echo $this->createUrl('check/control/check/control'); ?>">
-                                <td class="name <?php if ($limited) echo "limited"; ?>">
+                                <td class="name">
                                     <a href="<?php echo $this->createUrl('check/editcheck', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )); ?>"><?php echo CHtml::encode($check->localizedName); ?></a>
 
                                     <?php if ($check->automated): ?>
                                         <i class="icon-cog" title="<?php echo Yii::t('app', 'Automated'); ?>"></i>
                                     <?php endif; ?>
                                 </td>
-                                <td class="actions <?php if ($limited) echo "limited"; ?>">
+                                <td class="actions">
                                     <a href="#up" title="<?php echo Yii::t('app', 'Move Up'); ?>" onclick="system.control.up(<?php echo $check->id; ?>);"><i class="icon icon-arrow-up"></i></a>
                                     <a href="#down" title="<?php echo Yii::t('app', 'Move Down'); ?>" onclick="system.control.down(<?php echo $check->id; ?>);"><i class="icon icon-arrow-down"></i></a>
                                     <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $check->id; ?>);"><i class="icon icon-remove"></i></a>
