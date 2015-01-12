@@ -285,16 +285,6 @@
             </div>
         </div>
 
-        <div class="control-group <?php if ($form->getError('mailMaxAttempts')) echo 'error'; ?>">
-            <label class="control-label" for="SettingsEditForm_mailMaxAttempts"><?php echo Yii::t('app', 'Max Attempts'); ?></label>
-            <div class="controls">
-                <input type="text" class="input-xlarge" id="SettingsEditForm_mailMaxAttempts" name="SettingsEditForm[mailMaxAttempts]" value="<?php echo CHtml::encode($form->mailMaxAttempts); ?>">
-                <?php if ($form->getError('mailMaxAttempts')): ?>
-                    <p class="help-block"><?php echo $form->getError('mailMaxAttempts'); ?></p>
-                <?php endif; ?>
-            </div>
-        </div>
-
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>
         </div>

@@ -44,7 +44,6 @@ class SettingsController extends Controller {
         $form->checklistPoc = $system->checklist_poc;
         $form->checklistLinks = $system->checklist_links;
         $form->email = $system->email;
-        $form->mailMaxAttempts = $system->mail_max_attempts;
         $form->mailHost = $system->mail_host;
         $form->mailPort = $system->mail_port;
         $form->mailUsername = $system->mail_username;
@@ -85,7 +84,6 @@ class SettingsController extends Controller {
                 $system->checklist_links = $form->checklistLinks;
                 $system->community_min_rating = $form->communityMinRating;
                 $system->email = $form->email;
-                $system->mail_max_attempts = $form->mailMaxAttempts;
                 $system->mail_host = $form->mailHost;
                 $system->mail_port = $form->mailPort;
                 $system->mail_username = $form->mailUsername;
