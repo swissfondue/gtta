@@ -1322,4 +1322,40 @@ class PackageManager {
             throw $exception;
         }
     }
+
+    /**
+     * Get messages of scheduled packages
+     * @return array
+     */
+    public function installationMessages() {
+        // Redis doesn't support regexps, use glob
+        $mask = JobManager::buildId(PackageJob::ID_TEMPLATE, array(
+            "operation" => "*",
+            "obj_id" => "[0-9]*"
+        ));
+        $mask .= '.message';
+        $keys = explode(" ", Resque::redis()->keys($mask));
+        $pattern = JobManager::buildId(PackageJob::ID_TEMPLATE, array(
+            "operation" => sprintf("(%s|%s)", PackageJob::OPERATION_INSTALL, PackageJob::OPERATION_DELETE),
+            "obj_id" => "(\d+)"
+        ));
+        $pattern = '/' . $pattern . '.message/';
+        $messages = array();
+
+        foreach ($keys as $key) {
+            $key = str_replace("resque:", "", $key);
+            preg_match_all($pattern, $key, $matches, PREG_PATTERN_ORDER);
+
+            if (!empty($matches[0])) {
+                $messages[] = array(
+                    "id" => $matches[2],
+                    "message" => Resque::redis()->get($key)
+                );
+            }
+
+            JobManager::delKey($key);
+        }
+
+        return $messages;
+    }
 }

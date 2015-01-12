@@ -388,6 +388,8 @@ return array (
   'Package scheduled for installation.' => '',
   'Package scheduled for sharing.' => '',
   'Package with the same name already exists.' => '',
+  'Package {package} was not installed. {error}' => '',
+  'Package {package} was installed successfully.' => '',
   'Page Margin' => '',
   'Page not found.' => '',
   'Password' => '',

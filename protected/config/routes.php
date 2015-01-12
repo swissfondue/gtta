@@ -133,6 +133,7 @@ return array(
     "package/<id:\d+>/edit"     => "package/edit",
     "packages/<page:\d+>"       => "package/index",
     "packages"                  => "package/index",
+    "packages/messages"         => "package/messages",
     "package/<id:\d+>"          => "package/view",
     "package/<id:\d+>/share"    => "package/share",
     "package/<id:\d+>/file"     => "package/file",

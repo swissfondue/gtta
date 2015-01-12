@@ -1160,6 +1160,44 @@ function Admin()
 
             $('#PackageEdit').submit();
         };
+
+        /**
+         * Get messages of scheduled packages
+         * @param url
+         */
+        this.messages = function (url) {
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+                data: {
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+                'success' : function (response) {
+                    var messages = response.data.messages;
+                    var type, text;
+
+                    $.each(messages, function (key, message) {
+                        type = message['status'] == system.constants.Package.STATUS_INSTALLED ? "success" : "error";
+                        text = message['value'];
+
+                        system.addAlert(type, text);
+                    });
+
+                    $(".loader-image").hide();
+                },
+
+                'error' : function (data) {
+                    $(".loader-image").hide();
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                },
+
+                'beforeSend' : function () {
+                    $(".loader-image").show();
+                }
+            });
+        };
     };
 
     /**

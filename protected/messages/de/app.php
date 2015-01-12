@@ -119,6 +119,8 @@ return array (
   'Package scheduled for installation.' => 'Das Paket wurde für die Installation geplant',
   'Package scheduled for sharing.' => 'Das Paket wurde für die Freigabe geplant',
   'Package with the same name already exists.' => 'Ein Paket mit dem gleichen Namen existiert bereits',
+  'Package {package} was not installed. {error}' => 'Paket {package} wurde nicht installiert. {error}',
+  'Package {package} was installed successfully.' => 'Package {package} wurde erfolgreich installiert.',
   'Perl' => 'Perl',
   'Plan not found.' => 'Plan wurde nicht gefunden',
   'Planning' => 'Planung',

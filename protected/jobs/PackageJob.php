@@ -11,6 +11,7 @@ class PackageJob extends BackgroundJob {
 
     const OPERATION_INSTALL  = 'install';
     const OPERATION_DELETE   = 'delete';
+
     /**
      * Install package
      */
@@ -25,9 +26,13 @@ class PackageJob extends BackgroundJob {
 
         try {
             $pm->install($package);
+
+            $this->setVar("message", "");
         } catch (Exception $e) {
             $package->status = Package::STATUS_ERROR;
             $package->save();
+
+            $this->setVar("message", $e->getMessage());
 
             throw $e;
         }
@@ -53,6 +58,15 @@ class PackageJob extends BackgroundJob {
 
             throw $e;
         }
+    }
+
+    /**
+     * Job tear down
+     */
+    public function tearDown() {
+        JobManager::delKey($this->id . '.pid');
+        JobManager::delKey($this->id . '.token');
+        JobManager::delKey($this->id);
     }
 
     /**

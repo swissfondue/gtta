@@ -76,3 +76,9 @@
         </div>
     </div>
 </div>
+
+<script>
+    setInterval(function () {
+        admin.pkg.messages('<?php echo $this->createUrl('packages/messages'); ?>');
+    }, 5000);
+</script>

@@ -16,24 +16,56 @@ function System() {
      * Shows a message.
      */
     this.showMessage = function (eventType, message) {
-        $('.message-container').html('');
-
-        $('<div>', {
+        var message = $('<div>', {
             'class' : 'alert alert-' + eventType + ' hide',
             html    : '<a class="close" data-dismiss="alert">×</a>' + message
         }).appendTo('.message-container');
+        $('.message-container').append(message);
 
         $('html, body').animate({ scrollTop : 0 }, 'fast', function () {
-            $('.message-container > div').fadeIn('slow');
+            message.fadeIn('slow');
 
             if (_system._messageTimeout)
                 clearTimeout(_system._messageTimeout);
 
             _system._messageTimeout = setTimeout(function () {
-                $('.message-container > div').fadeOut('slow');
+                message.fadeOut('slow', function () {
+                    message.remove();
+                });
                 _system._messageTimeout = null;
             }, _system.messageTimeout);
         });
+    };
+
+    /**
+     * Add alert in alerts queue
+     * @param eventType
+     * @param message
+     */
+    this.addAlert = function (eventType, message) {
+        var $container = $('.message-container');
+        var options = {
+            timeout: this.messageTimeout
+        };
+
+        $('html, body').animate({ scrollTop : 0 }, 'fast');
+
+        switch (eventType) {
+            case "success":
+                $container.addSuccessAlert(message, options);
+                break;
+            case "error":
+                $container.addDangerAlert(message, options);
+                break;
+            case "warning":
+                $container.addWarningAlert(message, options);
+                break;
+            case "info":
+                $container.addInfoAlert(message, options);
+                break;
+            default:
+                break;
+        }
     };
 
     /**
