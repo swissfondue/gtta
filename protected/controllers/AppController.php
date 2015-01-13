@@ -170,6 +170,7 @@ class AppController extends Controller {
         header("Content-Type: text/javascript");
 
         $classes = array(
+            "Package",
             "TargetCheck",
             "ProjectGtCheck",
             "TargetCheckEditForm",

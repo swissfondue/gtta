@@ -12,7 +12,7 @@ class PackageController extends Controller {
             "https",
 			"checkAuth",
             "checkAdmin",
-            "ajaxOnly + control",
+            "ajaxOnly + control, messages",
             "postOnly + control, upload",
             "idle - index, regenerate, libraries, view, regeneratestatus",
 		);
@@ -54,6 +54,46 @@ class PackageController extends Controller {
             "system" => $this->_system,
         ));
 	}
+
+    /**
+     * Display messages of scheduled packages
+     */
+    public function actionMessages() {
+        $response = new AjaxResponse();
+
+        $pm = new PackageManager();
+        $iMes = $pm->installationMessages();
+        $messages = array();
+
+        foreach ($iMes as $message) {
+            $package = Package::model()->findByPk($message['id']);
+
+            if (!$package) {
+                return;
+            }
+
+            switch ($package->status) {
+                case Package::STATUS_INSTALLED:
+                    $messages[] = array(
+                        "status" => Package::STATUS_INSTALLED,
+                        "value" => Yii::t("app", "Package {package} was installed successfully.", array("{package}" => $package->name))
+                    );
+                    break;
+                case Package::STATUS_ERROR:
+                    $messages[] = array(
+                        "status" => Package::STATUS_ERROR,
+                        "value" => Yii::t("app", "Package {package} was not installed. {error}", array("{package}" => $package->name, "{error}" => $message['message']))
+                    );
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        $response->addData("messages", $messages);
+
+        echo $response->serialize();
+    }
 
     /**
      * New package

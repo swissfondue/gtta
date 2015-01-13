@@ -65,4 +65,13 @@ class JobManager {
     public static function getVar($job, $var) {
         return Resque::redis()->get("$job.$var");
     }
+
+    /**
+     * Delete Redis key
+     * @param $key
+     */
+    public static function delKey($key) {
+        $key = str_replace('resque:', '', $key);
+        Resque::redis()->del($key);
+    }
 }

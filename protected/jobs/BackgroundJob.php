@@ -66,16 +66,22 @@ abstract class BackgroundJob {
     }
 
     /**
-     * Job tear down
+     * Delete job's keys
      */
-    public function tearDown() {
+    public function delKeys() {
         $keys = Resque::redis()->keys($this->id . ".*");
         $keys = explode(' ', $keys);
 
         foreach ($keys as $key) {
-            $key = str_replace('resque:', '', $key);
-            Resque::redis()->del($key);
+            JobManager::delKey($key);
         }
+    }
+
+    /**
+     * Job tear down
+     */
+    public function tearDown() {
+        $this->delKeys();
     }
 
     /**
