@@ -2802,47 +2802,30 @@ class ReportController extends Controller {
                     }
 
                     $problem = $check["result"];
-                    $details = null;
-
-                    $startPos = mb_strpos($problem, "Problem:", 0, "UTF-8");
-
-                    if ($startPos !== false) {
-                        $cutPos = mb_strpos($problem, "@cut", 0, "UTF-8");
-
-                        if ($cutPos === false) {
-                            $cutPos = mb_strlen($problem, "UTF-8");
-                        }
-
-                        $problem = mb_substr($problem, $startPos, $cutPos - $startPos, "UTF-8");
-                        $problem = str_replace("Problem: ", "", $problem);
-
-                        $startPos = mb_strpos($problem, "Technical Details:", 0, "UTF-8");
-
-                        if ($startPos !== false) {
-                            $details = mb_substr($problem, $startPos, mb_strlen($problem, "UTF-8") - $startPos, "UTF-8");
-                            $problem = mb_substr($problem, 0, $startPos);
-                        }
-                    } else {
-                        $problem = Yii::t("app", "N/A");
-                    }
+                    $details = $check["poc"];
 
                     $cell = $table->getCell($row, 3);
 
-                    if (Utils::isHtml($problem)) {
-                        $this->_renderText($cell, $problem, false);
-                    } else {
-                        $cell->writeText($problem);
+                    if ($problem) {
+                        if (Utils::isHtml($problem)) {
+                            $this->_renderText($cell, $problem, false);
+                        } else {
+                            $cell->writeText($problem);
+                        }
+
+                        $cell->writeText("<br><br>");
                     }
 
                     if ($details) {
-                        $cell->writeText("<br>");
+                        $cell->writeText("Technical Details:<br>");
 
-                        if (Utils::isHtml($problem)) {
+                        if (Utils::isHtml($details)) {
                             $this->_renderText($cell, $details, false);
                         } else {
                             $cell->writeText($details);
                         }
                     }
+
 
                     $cell = $table->getCell($row, 4);
                     $this->_renderText($cell, $check["solution"], false);
