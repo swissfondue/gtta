@@ -1597,6 +1597,129 @@ function Admin()
             }
         };
     };
+
+    /**
+     * Backups
+     */
+    this.backup = new function () {
+        var _backup = this;
+
+        this.checkTimeout = 2000;
+
+        /**
+         * Backup request
+         */
+        this.create = function (url, callback) {
+            $.ajax({
+                dataType : 'json',
+                url      : url,
+                timeout  : system.ajaxTimeout,
+                type     : 'POST',
+
+                data : {
+                    'YII_CSRF_TOKEN' : system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $('.loader-image').hide();
+
+                    if (data.status == 'error')
+                    {
+                        system.showMessage('error', data.errorText);
+
+                        if (callback) {
+                            callback();
+                        }
+
+                        return;
+                    }
+
+                    if (callback) {
+                        callback(data.data);
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $('.loader-image').hide();
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+
+                    if (callback) {
+                        callback();
+                    }
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $('.loader-image').show();
+                    $('#backup').button("loading");
+                }
+            });
+        };
+
+        /**
+         * Check system backuping || restoring
+         */
+        this.check = function (url, type) {
+            $.ajax({
+                dataType : 'json',
+                url      : url,
+                timeout  : system.ajaxTimeout,
+                type     : 'POST',
+
+                data : {
+                    'YII_CSRF_TOKEN' : system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    var status;
+
+                    $('.loader-image').hide();
+
+                    if (data.status == 'error')
+                    {
+                        system.showMessage('error', data.errorText);
+                        return;
+                    }
+
+                    if (type == "backup") {
+                        status = data.data.backuping;
+
+                        if (!status) {
+                            system.addAlert("success", "Backup created.");
+                            $('#backup').button("reset").removeClass("active");
+
+                            setTimeout(function () {
+                                location.reload();
+                            }, 2000);
+
+                            return;
+                        }
+                    } else if (type == "restore") {
+                        status = data.data.restoring;
+
+                        if (!status) {
+                            system.addAlert("success", "System restored.");
+                            $('#restore').button("reset").removeClass("active");
+
+                            return;
+                        }
+                    }
+
+                    setTimeout(function () {
+                        _backup.check(url, type);
+                    }, _backup.checkTimeout);
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $('.loader-image').hide();
+                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $('.loader-image').show();
+                }
+            });
+        };
+    };
 }
 
 var admin = new Admin();
