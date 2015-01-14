@@ -73,6 +73,13 @@ class BackupController extends Controller {
                     break;
                 case "restore":
                     $response->addData("restoring", $system->isRestoring);
+                    $job = JobManager::buildId(RestoreJob::ID_TEMPLATE);
+
+                    if ($message = JobManager::getVar($job, "message")) {
+                        $response->addData("message", $message);
+                        JobManager::delKey("$job.message");
+                    }
+
                     break;
                 default:
                     break;

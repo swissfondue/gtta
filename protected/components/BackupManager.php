@@ -1,4 +1,8 @@
 <?php
+/**
+ * Class MatchVersionException
+ */
+class MatchVersionException extends Exception {};
 
 /**
  * Class BackupManager
@@ -293,6 +297,39 @@ class BackupManager {
     }
 
     /**
+     * Set version to backup
+     * @param $zip
+     * @param $dbPath
+     */
+    private function _setVersion($verPath, $zip) {
+        $system = System::model()->findByPk(1);
+
+        $dumpPath = Yii::app()->params['backups']['tmpFilesPath'] . '/' . hash('sha256', rand() . time());
+        $dump     = fopen($dumpPath, 'w');
+
+        fwrite($dump, "<version>" . $system->version . "</version>");
+        fclose($dump);
+
+        FileManager::zipFile($zip, $dumpPath, $verPath . '/version.xml');
+    }
+
+    /**
+     * Check backup version matching
+     * @param $zip
+     * @param $verFile
+     * @return bool
+     */
+    private function _checkVersion($zip, $verFile) {
+        $system = System::model()->findByPk(1);
+        $version = $zip->getFromIndex($verFile);
+        $version = trim($version);
+        $version = str_replace("<version>", "", $version);
+        $version = str_replace("</version>", "", $version);
+
+        return $version == $system->version;
+    }
+
+    /**
      * Backup the system.
      * @param $system System
      */
@@ -320,6 +357,7 @@ class BackupManager {
             $this->_backupAttachments($backupName . '/attachments', $zip);
             $this->_backupPackages($backupName . '/packages', $zip);
             $this->_backupDatabase($backupName, $zip);
+            $this->_setVersion($backupName, $zip);
 
             $zip->close();
 
@@ -357,9 +395,10 @@ class BackupManager {
             }
 
             $dbDump = null;
+            $verFile = null;
             $attachments = array();
 
-            // check if archive contains database dump
+            // check if archive contains database dump & version file
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $stat = $zip->statIndex($i);
 
@@ -368,6 +407,11 @@ class BackupManager {
 
                 if ($name == 'database.xml') {
                     $dbDump = $i;
+                    continue;
+                }
+
+                if ($name == 'version.xml') {
+                    $verFile = $i;
                     continue;
                 }
 
@@ -381,8 +425,12 @@ class BackupManager {
                 }
             }
 
-            if ($dbDump === null) {
+            if ($dbDump === null || $verFile === null) {
                 throw new Exception("Invalid backup file");
+            }
+
+            if (!$this->_checkVersion($zip, $verFile)) {
+                throw new MatchVersionException();
             }
 
             $this->_restoreAttachments($zip, $attachments);

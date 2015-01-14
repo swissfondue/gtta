@@ -1670,7 +1670,7 @@ function Admin()
                 },
 
                 success : function (data, textStatus) {
-                    var status;
+                    var status, message;
 
                     $('.loader-image').hide();
 
@@ -1695,9 +1695,15 @@ function Admin()
                         }
                     } else if (type == "restore") {
                         status = data.data.restoring;
+                        message = data.data.message;
 
                         if (!status) {
-                            system.addAlert("success", "System restored.");
+                            if (message) {
+                                system.addAlert("error", message);
+                            } else {
+                                system.addAlert("success", "System restored.");
+                            }
+
                             $('#restore').button("reset").removeClass("active");
 
                             return;

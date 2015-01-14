@@ -7,6 +7,15 @@ class RestoreJob extends BackgroundJob {
     const ID_TEMPLATE = "gtta.system.restore";
 
     /**
+     * Job tear down
+     */
+    public function tearDown() {
+        JobManager::delKey($this->id . '.pid');
+        JobManager::delKey($this->id . '.token');
+        JobManager::delKey($this->id);
+    }
+
+    /**
      * Perform
      */
     public function perform() {
@@ -19,7 +28,11 @@ class RestoreJob extends BackgroundJob {
         try {
             $bm = new BackupManager();
             $bm->restore($path);
-        } catch (Exception $e) {
+        }
+        catch (MatchVersionException $e) {
+            $this->setVar("message", Yii::t("app", "Backup version doesn't match with the system version."));
+        }
+        catch (Exception $e) {
             throw new CHttpException(500, Yii::t("app", "Error restoring backup."));
         }
     }
