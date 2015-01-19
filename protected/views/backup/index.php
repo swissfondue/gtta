@@ -49,9 +49,9 @@
         </div>
     </div>
 </div>
-<?php if ($backuping): ?>
+<?php if ($backingup): ?>
     <script>
-        $('#backup').button('loading');
+        $('#backup').prop("disabled", true);
         checkBackup();
     </script>
 <?php endif; ?>

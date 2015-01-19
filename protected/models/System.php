@@ -125,9 +125,9 @@ class System extends ActiveRecord {
     }
 
     /**
-     * Check if system is backuping
+     * Check if system is backing up
      */
-    public function getIsBackuping() {
+    public function getIsBackingUp() {
         $job = JobManager::buildId(BackupJob::ID_TEMPLATE);
 
         return JobManager::isRunning($job);

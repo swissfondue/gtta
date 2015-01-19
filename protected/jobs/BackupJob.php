@@ -10,11 +10,7 @@ class BackupJob extends BackgroundJob {
      * Perform
      */
     public function perform() {
-        try {
-            $bm = new BackupManager();
-            $bm->backup();
-        } catch (Exception $e) {
-            throw new CHttpException(500, Yii::t("app", "Error creating backup."));
-        }
+        $bm = new BackupManager();
+        $bm->backup();
     }
 }

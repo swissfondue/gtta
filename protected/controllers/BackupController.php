@@ -8,11 +8,19 @@ class BackupController extends Controller {
 	 * @return array action filters
 	 */
 	public function filters() {
+        $ajax = implode(",", array(
+            "create",
+            "check",
+            "controlBackup",
+        ));
+
 		return array(
             'https',
 			'checkAuth',
             'checkAdmin',
             "idle",
+            "ajaxOnly + " . $ajax,
+            "postOnly + " . $ajax,
 		);
 	}
 
@@ -29,7 +37,7 @@ class BackupController extends Controller {
         $this->pageTitle = Yii::t("app", "Backup");
 		$this->render("index", array(
             "backups" => $backups,
-            "backuping" =>$system->isBackuping
+            "backingup" => $system->isBackingUp
         ));
     }
 
@@ -39,18 +47,15 @@ class BackupController extends Controller {
     public function actionCreate() {
         $response = new AjaxResponse();
 
-        try
-        {
+        try {
             $system = System::model()->findByPk(1);
 
-            if ($system->isBackuping) {
-                throw new CHttpException(403, "Access Denied. System is backuping now.");
+            if ($system->isBackingUp) {
+                throw new CHttpException(403, "Access Denied. The system is backing up.");
             }
 
             BackupJob::enqueue();
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -58,18 +63,17 @@ class BackupController extends Controller {
     }
 
     /**
-     * Check if system is backuping || restoring
+     * Check if system is backing up || restoring
      */
     public function actionCheck($action) {
         $response = new AjaxResponse();
 
-        try
-        {
+        try {
             $system = System::model()->findByPk(1);
 
             switch ($action) {
                 case "backup":
-                    $response->addData("backuping", $system->isBackuping);
+                    $response->addData("backingup", $system->isBackingUp);
                     break;
                 case "restore":
                     $response->addData("restoring", $system->isRestoring);
@@ -84,9 +88,7 @@ class BackupController extends Controller {
                 default:
                     break;
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -183,7 +185,7 @@ class BackupController extends Controller {
 
             if ($form->validate()) {
                 if ($restoring) {
-                    throw new Exception("Access denied. System is restoring now.");
+                    throw new CHttpException(403, Yii::t("app", "Access denied. The system is restoring."));
                 }
 
                 $path = Yii::app()->params['tmpPath'] . DIRECTORY_SEPARATOR . hash('sha256', $form->backup->tempName . rand() . time());

@@ -28,12 +28,11 @@ class RestoreJob extends BackgroundJob {
         try {
             $bm = new BackupManager();
             $bm->restore($path);
-        }
-        catch (MatchVersionException $e) {
+        } catch (MatchVersionException $e) {
             $this->setVar("message", Yii::t("app", "Backup version doesn't match with the system version."));
-        }
-        catch (Exception $e) {
-            throw new CHttpException(500, Yii::t("app", "Error restoring backup."));
+        } catch (Exception $e) {
+            $this->setVar("message", Yii::t("app", "Error restoring backup."));
+            throw $e;
         }
     }
 }

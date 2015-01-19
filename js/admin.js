@@ -1650,13 +1650,13 @@ function Admin()
 
                 beforeSend : function (jqXHR, settings) {
                     $('.loader-image').show();
-                    $('#backup').button("loading");
+                    $('#backup').prop("disabled", true);
                 }
             });
         };
 
         /**
-         * Check system backuping || restoring
+         * Check system is backing up || restoring
          */
         this.check = function (url, type) {
             $.ajax({
@@ -1681,11 +1681,11 @@ function Admin()
                     }
 
                     if (type == "backup") {
-                        status = data.data.backuping;
+                        status = data.data.backingup;
 
                         if (!status) {
                             system.addAlert("success", "Backup created.");
-                            $('#backup').button("reset").removeClass("active");
+                            $('#backup').prop("disabled", false);
 
                             setTimeout(function () {
                                 location.reload();
