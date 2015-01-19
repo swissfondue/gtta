@@ -18,7 +18,17 @@
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn"><?php echo Yii::t('app', 'Restore'); ?></button>
+            <button id="restore" type="submit" class="btn"><?php echo Yii::t('app', 'Restore'); ?></button>
         </div>
     </fieldset>
 </form>
+
+<?php if ($restoring): ?>
+    <script>
+        $('#restore').prop("disabled", true);
+
+        setTimeout(function () {
+            admin.backup.check('<?php echo $this->createUrl("backup/check", array("action" => "restore")); ?>', "restore");
+        }, admin.backup.checkTimeout);
+    </script>
+<?php endif; ?>

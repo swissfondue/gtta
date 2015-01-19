@@ -128,7 +128,7 @@ function System() {
                     $('.loader-image').hide();
 
                     if (data.status == 'error') {
-                        _system.showMessage('error', data.errorText);
+                        _system.addAlert('error', data.errorText);
 
                         if (operation == "delete") {
                             $("tr[data-id=" + id + "]").removeClass("delete-row");
@@ -140,7 +140,7 @@ function System() {
                     if (operation == 'delete') {
                         $('tr[data-id=' + id + ']').fadeOut('slow', undefined, function () {
                             $('tr[data-id=' + id + ']').remove();
-                            _system.showMessage('success', _system.translate('Object deleted.'));
+                            _system.addAlert('success', _system.translate('Object deleted.'));
 
                             if ($('table.table > tbody > tr').length == 1)
                                 location.reload();
@@ -152,7 +152,7 @@ function System() {
 
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
-                    _system.showMessage('error', _system.translate('Request failed, please try again.'));
+                    _system.addAlert('error', _system.translate('Request failed, please try again.'));
 
                     if (operation == "delete") {
                         $("tr[data-id=" + id + "]").removeClass("delete-row");
@@ -235,7 +235,7 @@ function System() {
 
                     if (data.status == 'error')
                     {
-                        _system.showMessage('error', data.errorText);
+                        _system.addAlert('error', data.errorText);
                         callback();
 
                         return;
@@ -247,7 +247,7 @@ function System() {
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
                     _system_control._setLoaded();
-                    _system.showMessage('error', _system.translate('Request failed, please try again.'));
+                    _system.addAlert('error', _system.translate('Request failed, please try again.'));
                     callback();
                 },
 

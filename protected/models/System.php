@@ -43,8 +43,6 @@ class System extends ActiveRecord {
      * Statuses
      */
     const STATUS_IDLE = 0;
-    const STATUS_BACKING_UP = 200;
-    const STATUS_RESTORING = 205;
     const STATUS_LICENSE_EXPIRED = 500;
 
     /**
@@ -70,8 +68,6 @@ class System extends ActiveRecord {
     public static function validStatuses() {
         return array(
             self::STATUS_IDLE,
-            self::STATUS_BACKING_UP,
-            self::STATUS_RESTORING,
             self::STATUS_LICENSE_EXPIRED,
         );
     }
@@ -96,8 +92,6 @@ class System extends ActiveRecord {
     public function getStringStatus() {
         $statuses = array(
             self::STATUS_IDLE => Yii::t("app", "The system is idle."),
-            self::STATUS_BACKING_UP => Yii::t("app", "The system is backing up."),
-            self::STATUS_RESTORING => Yii::t("app", "The system is restoring."),
         );
 
         return $statuses[$this->status];
@@ -126,6 +120,24 @@ class System extends ActiveRecord {
      */
     public function getIsUpdating() {
         $job = JobManager::buildId(UpdateJob::ID_TEMPLATE);
+
+        return JobManager::isRunning($job);
+    }
+
+    /**
+     * Check if system is backing up
+     */
+    public function getIsBackingUp() {
+        $job = JobManager::buildId(BackupJob::ID_TEMPLATE);
+
+        return JobManager::isRunning($job);
+    }
+
+    /**
+     * Check if sustem is restoring
+     */
+    public function getIsRestoring() {
+        $job = JobManager::buildId(RestoreJob::ID_TEMPLATE);
 
         return JobManager::isRunning($job);
     }

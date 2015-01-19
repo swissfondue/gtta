@@ -156,7 +156,8 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 }
 
 .check-list .actions,
-.suggested-target-list .actions {
+.suggested-target-list .actions,
+.backups-list .actions {
     width:60px;
     text-align:right;
 }
@@ -1129,4 +1130,12 @@ table.project-header td.hours, table.project-header th.hours, table.user td.hour
 [contenteditable="true"].single-line * {
     display: inline;
     white-space: nowrap;
+}
+
+/* CUSTOM ICONS */
+.icon-backup {
+    background-image: url("/images/icon-backup.png");
+    background-position: 0px 0px;
+    width: 16px;
+    height: 13px;
 }

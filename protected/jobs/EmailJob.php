@@ -6,24 +6,23 @@ class EmailJob extends BackgroundJob {
     /**
      * Sends emails from the database queue.
      */
-    private function _sendEmail($userId, $subject, $content)
-    {
+    private function _sendEmail($userId, $subject, $content) {
         $system = System::model()->findByPk(1);
 
         // Yii-mail transport options
         $transportOptions = array(
-            "host"          => $system->mail_host,
-            "port"          => $system->mail_port,
-            "username"      => $system->mail_username,
-            "password"      => $system->mail_password,
+            "host" => $system->mail_host,
+            "port" => $system->mail_port,
+            "username" => $system->mail_username,
+            "password" => $system->mail_password,
         );
 
-        if ( $system->email ||
+        if ($system->email ||
             !$transportOptions['host'] ||
             !$transportOptions['port'] ||
             !$transportOptions['username'] ||
-            !$transportOptions['password'])
-        {
+            !$transportOptions['password']
+        ) {
             throw new Exception('Invalid mail settings.');
         }
 

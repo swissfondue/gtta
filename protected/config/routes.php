@@ -305,8 +305,12 @@ return array(
     "user/<id:\d+>/object-list"         => "user/objectlist",
 
     // backup
-    "backup"  => "backup/backup",
-    "restore" => "backup/restore",
+    "backups"                                   => "backup/index",
+    "backup/create"                             => "backup/create",
+    "<action:(backup|restore)>/check/"          => "backup/check",
+    "backup/<filename:[a-z\d\.]+>/download"     => "backup/download",
+    "backup/control"                            => "backup/controlbackup",
+    "restore"                                   => "backup/restore",
 
     // system monitor
     "processes"       => "monitor/processes",
