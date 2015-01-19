@@ -18,7 +18,7 @@ class PgArrayManager {
             } else {
                 $entry = str_replace('"', '\\"', $entry);
                 $entry = pg_escape_string($entry);
-                $entry = str_replace('\'\'', '\'', $entry);
+                $entry = str_replace("''", "'", $entry);
                 $result[] = '"' . $entry . '"';
             }
         }
