@@ -24,7 +24,7 @@
                 <table class="table backups-list">
                     <tbody>
                         <tr>
-                            <th class="created-at"><?php echo Yii::t("app", "Created At"); ?></th>
+                            <th class="created-at"><?php echo Yii::t("app", "Backups"); ?></th>
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($backups as $backup): ?>
@@ -33,10 +33,11 @@
                             ?>
                             <tr data-id="<?php echo $filename; ?>" data-control-url="<?php echo $this->createUrl("backup/controlbackup"); ?>">
                                 <td class="created-at">
-                                    <?php echo $backup['created_at']; ?>
+                                    <a href="<?php echo $this->createUrl("backup/download", array("filename" => $filename)); ?>" title="<?php echo Yii::t("app", "Download"); ?>">
+                                        <?php echo $backup['created_at']; ?>
+                                    </a>
                                 </td>
                                 <td class="actions">
-                                    <a href="<?php echo $this->createUrl("backup/download", array( "filename" => $filename )); ?>" title="<?php echo Yii::t("app", "Download"); ?>"><i class="icon icon-download"></i></a>
                                     <a href="#delete" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="system.control.del('<?php echo $filename; ?>');"><i class="icon icon-remove"></i></a>
                                 </td>
                             </tr>

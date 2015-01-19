@@ -25,10 +25,10 @@
 
 <?php if ($restoring): ?>
     <script>
-        $('#restore').button('loading');
+        $('#restore').prop("disabled", true);
 
         setTimeout(function () {
-            admin.backup.check('<?php echo $this->createUrl("backup/check", array( "action" => "restore" )); ?>', "restore");
+            admin.backup.check('<?php echo $this->createUrl("backup/check", array("action" => "restore")); ?>', "restore");
         }, admin.backup.checkTimeout);
     </script>
 <?php endif; ?>

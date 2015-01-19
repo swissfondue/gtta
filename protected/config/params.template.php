@@ -17,7 +17,7 @@ return array(
     ),
 
     "backups" => array(
-        "maxSize" => 100 * 1024 * 1024, // 100 megabytes
+        "maxSize" => 1024 * 1024 * 1024, // 1G
         'path' => BASE_DIR . "/files/backups",
         'tmpFilesPath' => '/tmp/backups',
     ),

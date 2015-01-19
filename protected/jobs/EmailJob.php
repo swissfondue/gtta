@@ -6,8 +6,7 @@ class EmailJob extends BackgroundJob {
     /**
      * Sends emails from the database queue.
      */
-    private function _sendEmail($userId, $subject, $content)
-    {
+    private function _sendEmail($userId, $subject, $content) {
         $system = System::model()->findByPk(1);
 
         // Yii-mail transport options
