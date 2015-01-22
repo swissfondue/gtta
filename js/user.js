@@ -78,7 +78,7 @@ function User()
                         $('.loader-image').hide();
 
                         if (data.status == 'error') {
-                            system.showMessage('error', data.errorText);
+                            system.addAlert('error', data.errorText);
                             return;
                         }
 
@@ -187,7 +187,7 @@ function User()
 
                     error : function(jqXHR, textStatus, e) {
                         $('.loader-image').hide();
-                        system.showMessage('error', system.translate('Request failed, please try again.'));
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
                     },
 
                     beforeSend : function (jqXHR, settings) {
@@ -335,7 +335,7 @@ function User()
                     $("a[data-type=check-link][data-id=" + id + "]").removeClass("disabled");
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -354,7 +354,7 @@ function User()
                 error : function(jqXHR, textStatus, e) {
                     $(".loader-image").hide();
                     $("a[data-type=check-link][data-id=" + id + "]").removeClass("disabled");
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -422,7 +422,7 @@ function User()
                     $("a[data-type=control-link][data-id=" + id + "]").removeClass("disabled");
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -439,7 +439,7 @@ function User()
                 error : function(jqXHR, textStatus, e) {
                     $(".loader-image").hide();
                     $("a[data-type=control-link][data-id=" + id + "]").removeClass("disabled");
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -760,7 +760,7 @@ function User()
 
                     if (data.status == 'error')
                     {
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
                         return;
                     }
 
@@ -904,7 +904,7 @@ function User()
 
                 error : function(jqXHR, textStatus, e) {
                     _check.setLoaded(id);
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -1027,7 +1027,7 @@ function User()
                     _check.setLoaded(id, true);
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -1050,7 +1050,7 @@ function User()
 
                 error: function(jqXHR, textStatus, e) {
                     _check.setLoaded(id, true);
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend: function (jqXHR, settings) {
@@ -1161,7 +1161,7 @@ function User()
                     _check.setLoaded(id, true);
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -1170,7 +1170,7 @@ function User()
 
                 error: function(jqXHR, textStatus, e) {
                     _check.setLoaded(id, true);
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend: function (jqXHR, settings) {
@@ -1204,14 +1204,14 @@ function User()
                     _check.setLoaded(id);
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
                 },
 
                 error : function(jqXHR, textStatus, e) {
                     _check.setLoaded(id);
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -1256,7 +1256,7 @@ function User()
 
                     if (data.status == 'error')
                     {
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
                         return;
                     }
 
@@ -1265,7 +1265,7 @@ function User()
 
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -1301,7 +1301,7 @@ function User()
                         var json = data.result;
 
                         if (json.status == "error") {
-                            system.showMessage("error", json.errorText);
+                            system.addAlert("error", json.errorText);
                             return;
                         }
 
@@ -1364,7 +1364,7 @@ function User()
                         $(".loader-image").hide();
                         $("#upload-message-" + id).hide();
                         $("#upload-link-" + id).show();
-                        system.showMessage("error", system.translate("Request failed, please try again."));
+                        system.addAlert("error", system.translate("Request failed, please try again."));
                     },
 
                     start: function (e) {
@@ -1398,7 +1398,7 @@ function User()
                     $(".loader-image").hide();
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -1416,7 +1416,7 @@ function User()
 
                 error : function(jqXHR, textStatus, e) {
                     $(".loader-image").hide();
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -1461,7 +1461,7 @@ function User()
                         var json = data.result;
 
                         if (json.status == "error") {
-                            system.showMessage("error", json.errorText);
+                            system.addAlert("error", json.errorText);
                             return;
                         }
 
@@ -1524,7 +1524,7 @@ function User()
                         $(".loader-image").hide();
                         $("#upload-custom-message-" + id).hide();
                         $("#upload-custom-link-" + id).show();
-                        system.showMessage("error", system.translate("Request failed, please try again."));
+                        system.addAlert("error", system.translate("Request failed, please try again."));
                     },
 
                     start: function (e) {
@@ -1558,7 +1558,7 @@ function User()
                     $(".loader-image").hide();
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -1577,7 +1577,7 @@ function User()
 
                 error : function(jqXHR, textStatus, e) {
                     $(".loader-image").hide();
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -1630,7 +1630,7 @@ function User()
                     _check.setLoaded(id, custom);
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -1742,7 +1742,7 @@ function User()
 
                 error: function(jqXHR, textStatus, e) {
                     _check.setLoaded(id, custom);
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend: function (jqXHR, settings) {
@@ -1763,7 +1763,7 @@ function User()
             scriptCount = parseInt(headerRow.data('script-count'));
 
             if (scriptCount <= 0) {
-                system.showMessage('error', system.translate('Check has no scripts attached.'));
+                system.addAlert('error', system.translate('Check has no scripts attached.'));
                 return;
             }
 
@@ -1782,7 +1782,7 @@ function User()
                 success : function (data, textStatus) {
                     if (data.status == 'error') {
                         _check.setLoaded(id);
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
 
                         return;
                     }
@@ -1792,7 +1792,7 @@ function User()
 
                 error : function(jqXHR, textStatus, e) {
                     _check.setLoaded(id);
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 }
             });
         };
@@ -2068,7 +2068,7 @@ function User()
 
                     if (data.status == 'error')
                     {
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
                         return;
                     }
 
@@ -2077,7 +2077,7 @@ function User()
 
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -2175,7 +2175,7 @@ function User()
                         $('.loader-image').hide();
 
                         if (data.status == 'error') {
-                            system.showMessage('error', data.errorText);
+                            system.addAlert('error', data.errorText);
                             return;
                         }
 
@@ -2319,7 +2319,7 @@ function User()
 
                     error : function(jqXHR, textStatus, e) {
                         $('.loader-image').hide();
-                        system.showMessage('error', system.translate('Request failed, please try again.'));
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
                     },
 
                     beforeSend : function (jqXHR, settings) {
@@ -2575,7 +2575,7 @@ function User()
                     _gtCheck.setLoaded();
 
                     if (data.status == 'error') {
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
                         return;
                     }
 
@@ -2652,7 +2652,7 @@ function User()
 
                 error : function(jqXHR, textStatus, e) {
                     _gtCheck.setLoaded();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -2686,14 +2686,14 @@ function User()
                     _gtCheck.setLoaded();
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
                 },
 
                 error : function(jqXHR, textStatus, e) {
                     _gtCheck.setLoaded();
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -2742,7 +2742,7 @@ function User()
                         var json = data.result;
 
                         if (json.status == 'error') {
-                            system.showMessage('error', json.errorText);
+                            system.addAlert('error', json.errorText);
                             return;
                         }
 
@@ -2803,7 +2803,7 @@ function User()
                         $('.loader-image').hide();
                         $('#upload-message').hide();
                         $('#upload-link').show();
-                        system.showMessage('error', system.translate('Request failed, please try again.'));
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
                     },
 
                     start : function (e) {
@@ -2837,7 +2837,7 @@ function User()
                     $('.loader-image').hide();
 
                     if (data.status == 'error') {
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
                         return;
                     }
 
@@ -2855,7 +2855,7 @@ function User()
 
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -2886,7 +2886,7 @@ function User()
                     $('.loader-image').hide();
 
                     if (data.status == 'error') {
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
                         return;
                     }
 
@@ -2907,7 +2907,7 @@ function User()
 
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -2967,7 +2967,7 @@ function User()
                     _gtCheck.setLoaded();
 
                     if (data.status == 'error') {
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
                         return;
                     }
 
@@ -3059,7 +3059,7 @@ function User()
 
                 error : function(jqXHR, textStatus, e) {
                     _gtCheck.setLoaded();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -3098,7 +3098,7 @@ function User()
                 success : function (data, textStatus) {
                     if (data.status == 'error') {
                         _gtCheck.setLoaded();
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
 
                         return;
                     }
@@ -3108,7 +3108,7 @@ function User()
 
                 error : function(jqXHR, textStatus, e) {
                     _gtCheck.setLoaded();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 }
             });
         };

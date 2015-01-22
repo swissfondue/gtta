@@ -313,9 +313,12 @@ return array(
     "restore"                                   => "backup/restore",
 
     // system monitor
-    "processes"       => "monitor/processes",
-    "process/control" => "monitor/controlprocess",
-    "sessions"        => "monitor/sessions",
+    "processes"                 => "monitor/processes",
+    "process/control"           => "monitor/controlprocess",
+    "sessions"                  => "monitor/sessions",
+    "errors"                    => "monitor/errors",
+    "errors/log"                => "monitor/log",
+    "errors/log/clear"          => "monitor/controllog",
 
     // history
     "history/logins/<page:\d+>" => "history/logins",

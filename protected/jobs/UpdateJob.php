@@ -345,6 +345,12 @@ class UpdateJob extends BackgroundJob {
      * Perform
      */
     public function perform() {
-        $this->_update();
+        try {
+            $this->_update();
+        } catch (Exception $e) {
+            $this->log($e->getMessage(), $e->getTraceAsString());
+
+            throw $e;
+        }
     }
 }

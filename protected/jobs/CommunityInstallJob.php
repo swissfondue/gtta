@@ -91,6 +91,12 @@ class CommunityInstallJob extends BackgroundJob {
      * Perform
      */
     public function perform() {
-        $this->_install();
+        try {
+            $this->_install();
+        } catch (Exception $e) {
+            $this->log($e->getMessage(), $e->getTraceAsString());
+
+            throw $e;
+        }
     }
 }

@@ -30,13 +30,23 @@ class ModifiedPackagesJob extends BackgroundJob {
      * Perform
      */
     public function perform() {
-        if (!isset($this->args['obj_id'])) {
-            throw new Exception("Invalid job params.");
+        try {
+            if (!isset($this->args['obj_id'])) {
+                throw new Exception("Invalid job params.");
+            }
+
+            $id = $this->args['obj_id'];
+            $package = Package::model()->findByPk($id);
+
+            if (!$package) {
+                throw new Exception("Package not found.");
+            }
+
+            $this->_updatePackage($package);
+        } catch (Exception $e) {
+            $this->log($e->getMessage(), $e->getTraceAsString());
+
+            throw $e;
         }
-
-        $id = $this->args['obj_id'];
-
-        $package = Package::model()->findByPk($id);
-        $this->_updatePackage($package);
     }
 }

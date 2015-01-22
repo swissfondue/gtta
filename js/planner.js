@@ -41,7 +41,7 @@
                     $(".loader-image").hide();
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -51,7 +51,7 @@
 
                 error: function(jqXHR, textStatus, e) {
                     $(".loader-image").hide();
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend: function (jqXHR, settings) {

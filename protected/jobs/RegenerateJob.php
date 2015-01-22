@@ -17,7 +17,7 @@ class RegenerateJob extends BackgroundJob {
             $vm = new VMManager();
             $vm->regenerate(false);
         } catch (Exception $e) {
-            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR);
+            $this->log($e->getMessage(), $e->getTraceAsString());
         }
     }
 }

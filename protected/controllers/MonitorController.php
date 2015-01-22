@@ -12,8 +12,8 @@ class MonitorController extends Controller {
             "https",
 			"checkAuth",
             "checkAdmin",
-            "postOnly + controlprocess",
-            "ajaxOnly + controlprocess",
+            "postOnly + controlprocess, log, controllog",
+            "ajaxOnly + controlprocess, log, controllog",
 		);
 	}
 
@@ -217,5 +217,94 @@ class MonitorController extends Controller {
                 User::ROLE_CLIENT => Yii::t('app', 'Client'),
             ),
         ));
+    }
+
+    /**
+     * Display background errors
+     */
+    public function actionErrors() {
+        $this->breadcrumbs[] = array(Yii::t('app', 'Background Process Errors'), '');
+        $this->pageTitle = Yii::t('app', 'Background Process Errors');
+        $this->render('errors', array(
+            'jobs' => JobManager::$jobs,
+        ));
+    }
+
+    /**
+     * Returns response with job's log
+     */
+    public function actionLog() {
+        $response = new AjaxResponse();
+
+        try {
+            $form = new BgLogForm();
+            $form->attributes = $_POST["BgLogForm"];
+
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $job = $form->job;
+            $log = $job::getLog();
+
+            $response->addData("log", $log);
+
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Control log
+     */
+    public function actionControlLog() {
+        $response = new AjaxResponse();
+
+        try {
+            $form = new EntryControlForm();
+            $form->attributes = $_POST["EntryControlForm"];
+
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            switch ($form->operation) {
+                case "clear":
+                    $job = $form->id;
+
+                    if (!in_array($job, JobManager::$jobs)) {
+                        throw new CHttpException(403, "Unknown job.");
+                    }
+
+                    ClearLogJob::enqueue(array(
+                        "job" => $job
+                    ));
+
+
+                    break;
+                default:
+                    throw new CHttpException(403, "Unknown operation.");
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
     }
 }

@@ -97,6 +97,7 @@
                                         <li class="divider"></li>
                                         <li <?php if (Yii::app()->controller->id == 'monitor' && Yii::app()->controller->action->id == 'processes') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('monitor/processes'); ?>"><?php echo Yii::t('app', 'Running Processes'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'monitor' && Yii::app()->controller->action->id == 'sessions') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('monitor/sessions'); ?>"><?php echo Yii::t('app', 'Active Sessions'); ?></a></li>
+                                        <li <?php if (Yii::app()->controller->id == 'monitor' && Yii::app()->controller->action->id == 'sessions') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('monitor/errors'); ?>"><?php echo Yii::t('app', 'Background Errors'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'history' && Yii::app()->controller->action->id == 'logins') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('history/logins'); ?>"><?php echo Yii::t('app', 'Login History'); ?></a></li>
                                         <li class="divider"></li>
                                         <li <?php if (Yii::app()->controller->id == 'backup' && Yii::app()->controller->action->id == 'backup') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('backup/index'); ?>"><?php echo Yii::t('app', 'Backup'); ?></a></li>

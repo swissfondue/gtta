@@ -73,28 +73,34 @@ class PackageJob extends BackgroundJob {
      * Perform
      */
     public function perform() {
-        if (!isset($this->args["operation"]) || !isset($this->args["obj_id"])) {
-            throw new Exception("Invalid job params.");
-        }
-
-        $operation = $this->args["operation"];
-        $id = $this->args["obj_id"];
-
         try {
-            switch ($operation) {
-                case self::OPERATION_INSTALL:
-                    $this->_installPackage($id);
-                    break;
-                case self::OPERATION_DELETE:
-                    $this->_deletePackage($id);
-                    break;
-                default:
-                    throw new Exception("Invalid operation.");
+            if (!isset($this->args["operation"]) || !isset($this->args["obj_id"])) {
+                throw new Exception("Invalid job params.");
             }
-        } catch (Exception $e) {
-            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR);
-        }
 
-        sleep(5);
+            $operation = $this->args["operation"];
+            $id = $this->args["obj_id"];
+
+            try {
+                switch ($operation) {
+                    case self::OPERATION_INSTALL:
+                        $this->_installPackage($id);
+                        break;
+                    case self::OPERATION_DELETE:
+                        $this->_deletePackage($id);
+                        break;
+                    default:
+                        throw new Exception("Invalid operation.");
+                }
+            } catch (Exception $e) {
+                Yii::log($e->getMessage(), CLogger::LEVEL_ERROR);
+            }
+
+            sleep(5);
+        } catch (Exception $e) {
+            $this->log($e->getMessage(), $e->getTraceAsString());
+
+            throw $e;
+        }
     }
 }

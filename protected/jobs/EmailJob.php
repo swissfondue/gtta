@@ -56,10 +56,16 @@ class EmailJob extends BackgroundJob {
      * @param array $args
      */
     public function perform() {
-        if (!isset($this->args['user_id']) || !isset($this->args['subject']) || !isset($this->args['content'])) {
-            throw new Exception("Invalid job params.");
-        }
+        try {
+            if (!isset($this->args['user_id']) || !isset($this->args['subject']) || !isset($this->args['content'])) {
+                throw new Exception("Invalid job params.");
+            }
 
-        $this->_sendEmail($this->args['user_id'], $this->args['subject'], $this->args['content']);
+            $this->_sendEmail($this->args['user_id'], $this->args['subject'], $this->args['content']);
+        } catch (Exception $e) {
+            $this->log($e->getMessage(), $e->getTraceAsString());
+
+            throw $e;
+        }
     }
 }

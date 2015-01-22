@@ -85,6 +85,47 @@ abstract class BackgroundJob {
     }
 
     /**
+     * Get log filename
+     * @return string
+     */
+    public static function getLogFilename() {
+        $class = get_called_class();
+        $class = strtolower($class);
+        $class = str_replace("job", "", $class);
+        $filename = $class . '.log';
+
+        return $filename;
+    }
+
+    /**
+     * Log message
+     * @param $message
+     */
+    public function log($message, $stackTrace, $level=CLogger::LEVEL_ERROR) {
+        $category = "bg." . get_called_class();
+        $m = sprintf("%s\nStack Trace:\n%s\n---\n", $message, $stackTrace);
+
+        Yii::log($m, $level, $category);
+        Yii::getLogger()->flush(true);
+    }
+
+    /**
+     * Get job logs
+     */
+    public static function getLog() {
+        $path = Yii::app()->params['bgLogsPath'] . DIRECTORY_SEPARATOR . self::getLogFilename();
+        return FileManager::getFileContent($path);
+    }
+
+    /**
+     * Clears job's log
+     */
+    public static function clearLog() {
+        $path = Yii::app()->params['bgLogsPath'] . DIRECTORY_SEPARATOR . self::getLogFilename();
+        FileManager::unlink($path);
+    }
+
+    /**
      * Renders a template.
      */
     protected function render($template, $data = array()) {

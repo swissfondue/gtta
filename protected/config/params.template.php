@@ -121,4 +121,6 @@ return array(
     "community" => array(
         "url" => "http://community.gtta.net",
     ),
+
+    "bgLogsPath" => BASE_DIR . "/runtime/bg"
 );
