@@ -60,6 +60,7 @@ return array(
     "project/<id:\d+>/target/<target:\d+>" => "project/target",
     "project/<id:\d+>/target/<target:\d+>/edit" => "project/edittarget",
     "project/<id:\d+>/target/new" => "project/edittarget",
+    "project/<id:\d+>/target/import" => "project/importtarget",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>" => "project/checks",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/save" => "project/savecategory",
     "project/<id:\d+>/target/<target:\d+>/category/control" => "project/controlcategory",
