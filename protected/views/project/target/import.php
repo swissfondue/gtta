@@ -7,6 +7,20 @@
     <input type="hidden" value="1" name="TargetImportForm[proceed]">
 
     <fieldset>
+        <div class="control-group <?php if ($model->getError('type')) echo 'error'; ?>">
+            <label class="control-label" for="TargetImportForm_type"><?php echo Yii::t('app', 'Type'); ?></label>
+            <div class="controls">
+                <select id="TargetImportForm_type" name="TargetImportForm[type]">
+                    <option value=""><?php print Yii::t("app", "Please select..."); ?></option>
+                    <?php foreach ($types as $type => $title): ?>
+                        <option value="<?php print $type; ?>"><?php print $title; ?></option>
+                    <?php endforeach;?>
+                </select>
+                <?php if ($model->getError('type')): ?>
+                    <p class="help-block"><?php echo $model->getError('type'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
         <div class="control-group <?php if ($model->getError('file')) echo 'error'; ?>">
             <label class="control-label" for="TargetImportForm_file"><?php echo Yii::t('app', 'File'); ?></label>
             <div class="controls">

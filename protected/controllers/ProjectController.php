@@ -1526,8 +1526,7 @@ class ProjectController extends Controller {
 
             if ($form->validate()) {
                 try {
-                    $fileType = end(explode(".", $form->file->name));
-                    ImportManager::importTargets($form->file->tempName, $fileType, $project);
+                    ImportManager::importTargets($form->file->tempName, $form->type, $project);
                 } catch (Exception $e) {
                     throw $e;
                 }
@@ -1546,6 +1545,7 @@ class ProjectController extends Controller {
         $this->pageTitle = Yii::t("app", "Import From File");
         $this->render("target/import", array(
             "model" => $form,
+            "types" => ImportManager::$types,
         ));
     }
 

@@ -11,18 +11,24 @@ class TargetImportForm extends CFormModel
     public $file;
 
     /**
+     * @var string type
+     */
+    public $type;
+
+    /**
      * @return array validation rules for model attributes.
      */
     public function rules()
     {
         return array(
-            array( 'file', 'required' ),
+            array( 'file, type', 'required' ),
             array(
                 'file',
                 'file',
                 'maxFiles' => 1,
-                'types'    => array( 'csv', 'nessus' ),
+                'types'    => array_keys(ImportManager::$types),
             ),
+            array("type", "in", "range" => array_keys(ImportManager::$types))
         );
     }
 
@@ -31,6 +37,7 @@ class TargetImportForm extends CFormModel
      */
     public function attributeLabels()
     {
-        return array( 'file' => 'Import File' );
+        return array( 'file' => 'File' );
+        return array( 'type' => 'Type' );
     }
 }

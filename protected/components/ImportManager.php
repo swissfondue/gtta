@@ -4,14 +4,23 @@
  * Class ImportManager
  */
 class ImportManager {
-    const TYPE_CSV = "csv";
-    const TYPE_NESSUS = "nessus";
+    const TYPE_NESSUS     = "nessus";
+    const TYPE_NESSUS_CSV = "csv";
 
     /**
-     * Serialize csv file's content
+     * Availible types
+     * @var array
+     */
+    public static $types = array(
+        self::TYPE_NESSUS     => "Nessus",
+        self::TYPE_NESSUS_CSV => "Nessus CSV",
+    );
+
+    /**
+     * Parse CSV file
      * @param $file
      */
-    public function csvSerialize($file) {
+    public static function parseCSV($file) {
         $result = array();
 
         if (($handle = fopen($file, "r")) !== FALSE) {
@@ -43,7 +52,7 @@ class ImportManager {
      * @return array
      * @throws Exception
      */
-    public static function importTargets($path, $type=self::TYPE_CSV, $project) {
+    public static function importTargets($path, $type=self::TYPE_NESSUS_CSV, $project) {
         if (!file_exists($path)) {
             throw new Exception("File not found.");
         }
@@ -51,8 +60,8 @@ class ImportManager {
         $targets = array();
 
         switch ($type) {
-            case self::TYPE_CSV:
-                $targets = self::csvSerialize($path);
+            case self::TYPE_NESSUS_CSV:
+                $targets = self::parseCSV($path);
 
                 foreach ($targets as $target) {
                     $t = new Target();
