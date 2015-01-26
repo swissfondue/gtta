@@ -35,9 +35,11 @@ class BackupController extends Controller {
 
         // display the page
         $this->pageTitle = Yii::t("app", "Backup");
+
 		$this->render("index", array(
             "backups" => $backups,
-            "backingup" => $system->isBackingUp
+            "backingup" => $system->isBackingUp,
+            "restoring" => $system->isRestoring
         ));
     }
 
@@ -126,6 +128,22 @@ class BackupController extends Controller {
             switch ($form->operation) {
                 case "delete":
                     FileManager::unlink($path);
+                    break;
+
+                case "restore":
+                    $system = System::model()->findByPk(1);
+
+                    if ($system->isRestoring) {
+                        throw new CHttpException(403, Yii::t("app", "Access denied. The system is restoring."));
+                    }
+
+                    $tmpPath = Yii::app()->params['tmpPath'] . DIRECTORY_SEPARATOR . hash('sha256', $path . rand() . time());
+                    FileManager::copy($path, $tmpPath);
+
+                    RestoreJob::enqueue(array(
+                        "path" => $tmpPath
+                    ));
+
                     break;
 
                 default:

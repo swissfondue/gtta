@@ -1824,7 +1824,7 @@ function Admin()
                                 system.addAlert("success", "System restored.");
                             }
 
-                            $('#restore').button("reset").removeClass("active");
+                            $('#backup, #restore').prop('disabled', false);
 
                             return;
                         }
