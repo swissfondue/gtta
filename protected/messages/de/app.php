@@ -68,6 +68,7 @@ return array (
   'If you press the button below, all your checks will be shared with the community and will be available for everyone with a valid GTTA license.' => 'Wenn Sie den Knopf drücken, werden alle Checks freigegeben und sind dann somit für jedermann mit einer gültigen GTTA Lizenz sichtbar',
   'If you press the button below, the check will be shared with the community and will be available for everyone with a valid GTTA license.' => 'Wenn Sie den Knopf drücken, wird der Check freigegeben und ist dann somit für jedermann mit einer gültigen GTTA Lizenz sichtbar',
   'If you press the button below, the package will be shared with the community and will be available for everyone with a valid GTTA license.' => 'Wenn Sie den Knopf drücken, wird das Paket freigegeben und ist dann somit für jedermann mit einer gültigen GTTA Lizenz sichtbar',
+  'Import Completed' => 'Import abgeschlossen',
   'Info Description' => 'Info Beschreibung',
   'Information' => 'Information',
   'Install' => 'Installieren',

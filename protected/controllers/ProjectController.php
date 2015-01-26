@@ -1509,6 +1509,47 @@ class ProjectController extends Controller {
 	}
 
     /**
+     * Import targets from file
+     * @throws Exception
+     */
+    public function actionImportTarget($id) {
+        $form = new TargetImportForm();
+        $project = Project::model()->findByPk($id);
+
+        if (!$project) {
+            throw new Exception("Project not found.");
+        }
+
+        if (isset($_POST["TargetImportForm"])) {
+            $form->attributes = $_POST["TargetImportForm"];
+            $form->file = CUploadedFile::getInstanceByName("TargetImportForm[file]");
+
+            if ($form->validate()) {
+                try {
+                    ImportManager::importTargets($form->file->tempName, $form->type, $project);
+                } catch (Exception $e) {
+                    throw $e;
+                }
+
+                Yii::app()->user->setFlash("success", Yii::t("app", "Import Completed."));
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+        }
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
+        $this->breadcrumbs[] = array(Yii::t("app", "Import Target"), "");
+
+        // display the page
+        $this->pageTitle = Yii::t("app", "Import From File");
+        $this->render("target/import", array(
+            "model" => $form,
+            "types" => ImportManager::$types,
+        ));
+    }
+
+    /**
      * Display a list of checks.
      */
 	public function actionChecks($id, $target, $category) {

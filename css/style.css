@@ -116,7 +116,10 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 .active-header {
     margin:0;
     padding:0;
-    overflow:hidden;
+}
+
+.active-header .btn-group {
+    display: inline-block;
 }
 
 .active-header .nav-pills {

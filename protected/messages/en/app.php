@@ -208,6 +208,7 @@ return array (
   'If you press the button below, the check will be shared with the community and will be available for everyone with a valid GTTA license.' => '',
   'If you press the button below, the package will be shared with the community and will be available for everyone with a valid GTTA license.' => '',
   'If you won\'t receive the message within a few minutes, please check your spam folder.' => '',
+  'Import Completed' => '',
   'In Progress' => '',
   'In order to recover your password please follow this link - {link}.' => '',
   'Incoming Checks' => '',
