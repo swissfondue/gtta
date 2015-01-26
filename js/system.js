@@ -10,32 +10,6 @@ function System() {
     this.messageTimeout = 5000;
     this.l10nMessages = {};
     this.constants = {};
-    this._messageTimeout = null;
-
-    /**
-     * Shows a message.
-     */
-    this.showMessage = function (eventType, message) {
-        var message = $('<div>', {
-            'class' : 'alert alert-' + eventType + ' hide',
-            html    : '<a class="close" data-dismiss="alert">×</a>' + message
-        }).appendTo('.message-container');
-        $('.message-container').append(message);
-
-        $('html, body').animate({ scrollTop : 0 }, 'fast', function () {
-            message.fadeIn('slow');
-
-            if (_system._messageTimeout)
-                clearTimeout(_system._messageTimeout);
-
-            _system._messageTimeout = setTimeout(function () {
-                message.fadeOut('slow', function () {
-                    message.remove();
-                });
-                _system._messageTimeout = null;
-            }, _system.messageTimeout);
-        });
-    };
 
     /**
      * Add alert in alerts queue
@@ -315,8 +289,6 @@ function System() {
             for (i = 0; i < statuses.length; i++) {
                 data.push(statuses[i]);
             }
-
-            console.log(data);
 
             data = data.join(",");
             sortBy = parseInt($('select[name="ProjectFilterForm[sortBy]"]').val());

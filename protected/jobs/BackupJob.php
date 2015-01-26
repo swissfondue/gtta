@@ -10,7 +10,11 @@ class BackupJob extends BackgroundJob {
      * Perform
      */
     public function perform() {
-        $bm = new BackupManager();
-        $bm->backup();
+        try {
+            $bm = new BackupManager();
+            $bm->backup();
+        } catch (Exception $e) {
+            $this->log($e->getMessage(), $e->getTraceAsString());
+        }
     }
 }

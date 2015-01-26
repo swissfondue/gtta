@@ -46,7 +46,7 @@ function Client() {
                     $("a[data-type=check-link][data-id=" + id + "]").removeClass("disabled");
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -61,7 +61,7 @@ function Client() {
                 error : function(jqXHR, textStatus, e) {
                     $(".loader-image").hide();
                     $("a[data-type=check-link][data-id=" + id + "]").removeClass("disabled");
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -145,7 +145,7 @@ function Client() {
                     $("a[data-type=control-link][data-id=" + id + "]").removeClass("disabled");
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -162,7 +162,7 @@ function Client() {
                 error : function(jqXHR, textStatus, e) {
                     $(".loader-image").hide();
                     $("a[data-type=control-link][data-id=" + id + "]").removeClass("disabled");
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend : function (jqXHR, settings) {

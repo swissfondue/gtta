@@ -106,7 +106,7 @@ function Admin()
 
                     if (data.status == 'error')
                     {
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
                         callback();
 
                         return;
@@ -118,7 +118,7 @@ function Admin()
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
                     _user._setLoaded();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                     callback();
                 },
 
@@ -292,7 +292,7 @@ function Admin()
 
                         if (json.status == 'error')
                         {
-                            system.showMessage('error', json.errorText);
+                            system.addAlert('error', json.errorText);
                             return;
                         }
 
@@ -313,7 +313,7 @@ function Admin()
                         $('.loader-image').hide();
                         imageWrapper.find('.upload-message').hide();
                         imageWrapper.find('.file-input').show();
-                        system.showMessage('error', system.translate('Request failed, please try again.'));
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
                     },
 
                     start : function (e) {
@@ -348,7 +348,7 @@ function Admin()
 
                     if (data.status == 'error')
                     {
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
                         return;
                     }
 
@@ -361,7 +361,7 @@ function Admin()
 
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -408,7 +408,7 @@ function Admin()
 
                         if (json.status == 'error')
                         {
-                            system.showMessage('error', json.errorText);
+                            system.addAlert('error', json.errorText);
                             return;
                         }
 
@@ -431,7 +431,7 @@ function Admin()
                         $('.loader-image').hide();
                         imageWrapper.find('.upload-message').hide();
                         imageWrapper.find('.file-input').show();
-                        system.showMessage('error', system.translate('Request failed, please try again.'));
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
                     },
 
                     start : function (e) {
@@ -468,7 +468,7 @@ function Admin()
 
                     if (data.status == 'error')
                     {
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
                         return;
                     }
 
@@ -481,7 +481,7 @@ function Admin()
 
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -542,7 +542,7 @@ function Admin()
                         var json = data.result;
 
                         if (json.status == "error") {
-                            system.showMessage("error", json.errorText);
+                            system.addAlert("error", json.errorText);
                             return;
                         }
 
@@ -555,7 +555,7 @@ function Admin()
                         $(".loader-image").hide();
                         $(".upload-message").hide();
                         $(".file-input").show();
-                        system.showMessage("error", system.translate("Request failed, please try again."));
+                        system.addAlert("error", system.translate("Request failed, please try again."));
                     },
 
                     start: function (e) {
@@ -589,7 +589,7 @@ function Admin()
                     $(".loader-image").hide();
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -601,7 +601,7 @@ function Admin()
 
                 error: function(jqXHR, textStatus, e) {
                     $(".loader-image").hide();
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend: function (jqXHR, settings) {
@@ -653,7 +653,7 @@ function Admin()
                         var json = data.result;
 
                         if (json.status == 'error') {
-                            system.showMessage('error', json.errorText);
+                            system.addAlert('error', json.errorText);
                             return;
                         }
 
@@ -679,7 +679,7 @@ function Admin()
                         $('.loader-image').hide();
                         $('.upload-message').hide();
                         $('.file-input').show();
-                        system.showMessage('error', system.translate('Request failed, please try again.'));
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
                     },
 
                     start : function (e) {
@@ -714,7 +714,7 @@ function Admin()
 
                     if (data.status == 'error')
                     {
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
                         return;
                     }
 
@@ -727,7 +727,7 @@ function Admin()
 
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -784,7 +784,7 @@ function Admin()
 
                     if (data.status == 'error')
                     {
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
                         return;
                     }
 
@@ -793,7 +793,7 @@ function Admin()
                     if (operation == 'stop') {
                         row.fadeOut('slow', undefined, function () {
                             row.remove();
-                            system.showMessage('success', system.translate('Task stopped.'));
+                            system.addAlert('success', system.translate('Task stopped.'));
 
                             if ($('div.process-monitor').length <= 1) {
                                 // Timeout for stoping task
@@ -807,7 +807,7 @@ function Admin()
 
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -833,6 +833,126 @@ function Admin()
                 _process._control(id, 'stop');
             } else {
                 row.removeClass('delete-row');
+            }
+        };
+    };
+
+    /**
+     * Background job object
+     */
+    this.job = new function () {
+        /**
+         * Get job's log
+         * @param job
+         * @private
+         */
+        this.getLog = function (job) {
+            var url, log;
+
+            if (job != '0') {
+                url = $("#BgLogForm_job").data('url');
+
+                $.ajax({
+                    dataType : 'json',
+                    url      : url,
+                    timeout  : system.ajaxTimeout,
+                    type     : 'POST',
+
+                    data : {
+                        'BgLogForm[job]'     : job,
+                        'YII_CSRF_TOKEN'    : system.csrf
+                    },
+
+                    success : function (data, textStatus) {
+                        $('.loader-image').hide();
+                        $("#BgLogForm select, #BgLogForm textarea").removeAttr("disabled");
+
+                        if (data.status == 'error')
+                        {
+                            system.addAlert('error', data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        log = data.log;
+
+                        if (!log) {
+                            log = system.translate("Log is empty.");
+                        } else {
+                            $("#clear").removeAttr("disabled");
+                        }
+
+                        $("#BgLogForm_log").html(log);
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $('.loader-image').hide();
+                        $("#BgLogForm select, #BgLogForm textarea").removeAttr("disabled");
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    },
+
+                    beforeSend : function (jqXHR, settings) {
+                        $("#BgLogForm select, #BgLogForm textarea, #clear").prop('disabled', true);
+                        $('.loader-image').show();
+                    }
+                });
+            } else {
+                $("#BgLogForm_log").html("");
+                $("#clear").prop("disabled", true);
+            }
+        };
+
+        /**
+         * Clear job's log
+         * @param url
+         */
+        this.clearLog = function (url) {
+            var job = $("#BgLogForm_job").val();
+
+            if (job != '0') {
+                $.ajax({
+                    dataType : 'json',
+                    url      : url,
+                    timeout  : system.ajaxTimeout,
+                    type     : 'POST',
+
+                    data : {
+                        'EntryControlForm[id]'          : job,
+                        'EntryControlForm[operation]'   : 'clear',
+                        'YII_CSRF_TOKEN'                : system.csrf
+                    },
+
+                    success : function (data, textStatus) {
+                        $('.loader-image').hide();
+                        $("#clear").removeClass("active");
+                        $("#BgLogForm select, #BgLogForm textarea").removeAttr("disabled");
+
+                        if (data.status == 'error')
+                        {
+                            system.addAlert('error', data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        $("#BgLogForm_log").html(system.translate("Log is empty."));
+
+                        system.addAlert("success", system.translate("Log cleared."));
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $('.loader-image').hide();
+                        $("#BgLogForm select, #BgLogForm textarea, #clear").removeAttr("disabled");
+                        $("#clear").removeClass("active");
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    },
+
+                    beforeSend : function (jqXHR, settings) {
+                        $("#BgLogForm select, #BgLogForm textarea, #clear").prop('disabled', true);
+                        $('.loader-image').show();
+                    }
+                });
             }
         };
     };
@@ -904,7 +1024,7 @@ function Admin()
                     $('.loader-image').hide();
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -927,7 +1047,7 @@ function Admin()
                             _update.update(url);
                         }, 5000);
                     } else {
-                        system.showMessage("error", system.translate("Request failed, please try again."));
+                        system.addAlert("error", system.translate("Request failed, please try again."));
                     }
                 },
 
@@ -971,7 +1091,7 @@ function Admin()
                         var json = data.result;
 
                         if (json.status == "error") {
-                            system.showMessage("error", json.errorText);
+                            system.addAlert("error", json.errorText);
                             return;
                         }
 
@@ -1004,7 +1124,7 @@ function Admin()
                         $(".upload-message").hide();
                         $(".file-input").show();
 
-                        system.showMessage("error", system.translate("Request failed, please try again."));
+                        system.addAlert("error", system.translate("Request failed, please try again."));
                     },
 
                     start: function (e) {
@@ -1042,7 +1162,7 @@ function Admin()
                     $('.loader-image').hide();
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -1065,7 +1185,7 @@ function Admin()
                             _package.regenerate(url);
                         }, 5000);
                     } else {
-                        system.showMessage("error", system.translate("Request failed, please try again."));
+                        system.addAlert("error", system.translate("Request failed, please try again."));
                     }
                 },
 
@@ -1128,7 +1248,7 @@ function Admin()
                 'error' : function (data) {
                     $('[id^=PackageEditForm]').removeAttr('disabled');
                     $(".loader-image").hide();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 'beforeSend' : function () {
@@ -1155,7 +1275,7 @@ function Admin()
                     $('#PackageEditForm_operation').val('delete');
                     break;
                 default:
-                    system.showMessage('error', 'Unknown operation type.');
+                    system.addAlert('error', 'Unknown operation type.');
             }
 
             $('#PackageEdit').submit();
@@ -1190,7 +1310,7 @@ function Admin()
 
                 'error' : function (data) {
                     $(".loader-image").hide();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 'beforeSend' : function () {
@@ -1232,7 +1352,7 @@ function Admin()
                         var json = data.result;
 
                         if (json.status == "error") {
-                            system.showMessage("error", json.errorText);
+                            system.addAlert("error", json.errorText);
                             return;
                         }
 
@@ -1248,7 +1368,7 @@ function Admin()
                         $(".loader-image").hide();
                         $(".upload-message").hide();
                         $(".file-input").show();
-                        system.showMessage("error", system.translate("Request failed, please try again."));
+                        system.addAlert("error", system.translate("Request failed, please try again."));
                     },
 
                     start : function (e) {
@@ -1282,7 +1402,7 @@ function Admin()
                     $(".loader-image").hide();
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -1297,7 +1417,7 @@ function Admin()
 
                 error : function(jqXHR, textStatus, e) {
                     $(".loader-image").hide();
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -1337,7 +1457,7 @@ function Admin()
                     $(".loader-image").hide();
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -1347,7 +1467,7 @@ function Admin()
 
                 error : function(jqXHR, textStatus, e) {
                     $(".loader-image").hide();
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -1532,7 +1652,7 @@ function Admin()
                     $(".loader-image").hide();
 
                     if (data.status == "error") {
-                        system.showMessage("error", data.errorText);
+                        system.addAlert("error", data.errorText);
                         return;
                     }
 
@@ -1547,7 +1667,7 @@ function Admin()
 
                 error : function(jqXHR, textStatus, e) {
                     $(".loader-image").hide();
-                    system.showMessage("error", system.translate("Request failed, please try again."));
+                    system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
                 beforeSend : function (jqXHR, settings) {
@@ -1625,7 +1745,7 @@ function Admin()
 
                     if (data.status == 'error')
                     {
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
 
                         if (callback) {
                             callback();
@@ -1641,7 +1761,7 @@ function Admin()
 
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
 
                     if (callback) {
                         callback();
@@ -1676,7 +1796,7 @@ function Admin()
 
                     if (data.status == 'error')
                     {
-                        system.showMessage('error', data.errorText);
+                        system.addAlert('error', data.errorText);
                         return;
                     }
 
@@ -1717,7 +1837,7 @@ function Admin()
 
                 error : function(jqXHR, textStatus, e) {
                     $('.loader-image').hide();
-                    system.showMessage('error', system.translate('Request failed, please try again.'));
+                    system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 
                 beforeSend : function (jqXHR, settings) {

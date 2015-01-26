@@ -119,25 +119,29 @@ class CommunityShareJob extends BackgroundJob {
      * Perform
      */
     public function perform() {
-        if (!isset($this->args['type']) || !isset($this->args['obj_id'])) {
-            throw new Exception('Invalid job params.');
+        try {
+            if (!isset($this->args['type']) || !isset($this->args['obj_id'])) {
+                throw new Exception('Invalid job params.');
+            }
+
+            $type = $this->args['type'];
+            $allowedTypes = array(
+                self::TYPE_REFERENCE,
+                self::TYPE_CATEGORY,
+                self::TYPE_CONTROL,
+                self::TYPE_PACKAGE,
+                self::TYPE_CHECK,
+            );
+
+            if (!in_array($type, $allowedTypes)) {
+                throw new Exception("Invalid type.");
+            }
+
+            $id = $this->args['obj_id'];
+
+            $this->_share($type, $id);
+        } catch (Exception $e) {
+            $this->log($e->getMessage(), $e->getTraceAsString());
         }
-
-        $type = $this->args['type'];
-        $allowedTypes = array(
-            self::TYPE_REFERENCE,
-            self::TYPE_CATEGORY,
-            self::TYPE_CONTROL,
-            self::TYPE_PACKAGE,
-            self::TYPE_CHECK,
-        );
-
-        if (!in_array($type, $allowedTypes)) {
-            throw new Exception("Invalid type.");
-        }
-
-        $id = $this->args['obj_id'];
-
-        $this->_share($type, $id);
     }
 }

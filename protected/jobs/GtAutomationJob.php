@@ -372,30 +372,34 @@ class GtAutomationJob extends BackgroundJob {
      * Perform
      */
     public function perform() {
-        if (!isset($this->args['proj_id']) || !isset($this->args['obj_id']) || !isset($this->args['operation'])) {
-            throw new Exception("Invalid job params.");
+        try {
+            if (!isset($this->args['proj_id']) || !isset($this->args['obj_id']) || !isset($this->args['operation'])) {
+                throw new Exception("Invalid job params.");
+            }
+
+            $projectId = $this->args["proj_id"];
+            $checkId = $this->args["obj_id"];
+            $operation = $this->args["operation"];
+
+            switch ($operation) {
+                case self::OPERATION_START:
+                    if (!isset($this->args["started"])) {
+                        throw new Exception("Start Time is not defined.");
+                    }
+
+                    $this->setVar("started", $this->args["started"]);
+                    $this->_startCheck($projectId, $checkId);
+                    break;
+                case self::OPERATION_STOP:
+                    $this->_stopCheck($projectId, $checkId);
+                    break;
+                default:
+                    throw new Exception("Invalid operation.");
+            }
+
+            $this->_startCheck($projectId, $checkId);
+        } catch (Exception $e) {
+            $this->log($e->getMessage(), $e->getTraceAsString());
         }
-
-        $projectId = $this->args["proj_id"];
-        $checkId = $this->args["obj_id"];
-        $operation = $this->args["operation"];
-
-        switch ($operation) {
-            case self::OPERATION_START:
-                if (!isset($this->args["started"])) {
-                    throw new Exception("Start Time is not defined.");
-                }
-
-                $this->setVar("started", $this->args["started"]);
-                $this->_startCheck($projectId, $checkId);
-                break;
-            case self::OPERATION_STOP:
-                $this->_stopCheck($projectId, $checkId);
-                break;
-            default:
-                throw new Exception("Invalid operation.");
-        }
-
-        $this->_startCheck($projectId, $checkId);
     }
 }

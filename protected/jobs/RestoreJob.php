@@ -19,20 +19,24 @@ class RestoreJob extends BackgroundJob {
      * Perform
      */
     public function perform() {
-        if (!isset($this->args['path'])) {
-            throw new Exception("Invalid job params.");
-        }
-
-        $path = $this->args['path'];
-
         try {
-            $bm = new BackupManager();
-            $bm->restore($path);
-        } catch (MatchVersionException $e) {
-            $this->setVar("message", Yii::t("app", "Backup version doesn't match with the system version."));
+            if (!isset($this->args['path'])) {
+                throw new Exception("Invalid job params.");
+            }
+
+            $path = $this->args['path'];
+
+            try {
+                $bm = new BackupManager();
+                $bm->restore($path);
+            } catch (MatchVersionException $e) {
+                $this->setVar("message", Yii::t("app", "Backup version doesn't match the system version."));
+            } catch (Exception $e) {
+                $this->setVar("message", Yii::t("app", "Error restoring backup."));
+                throw $e;
+            }
         } catch (Exception $e) {
-            $this->setVar("message", Yii::t("app", "Error restoring backup."));
-            throw $e;
+            $this->log($e->getMessage(), $e->getTraceAsString());
         }
     }
 }

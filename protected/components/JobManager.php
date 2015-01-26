@@ -4,6 +4,26 @@
  */
 class JobManager {
     /**
+     * Jobs list
+     * @var array
+     */
+    public static $jobs = array(
+        "AutomationJob",
+        "BackupJob",
+        "ClearLogJob",
+        "CommunityInstallJob",
+        "CommunityShareJob",
+        "EmailJob",
+        "GtAutomationJob",
+        "ModifiedPackagesJob",
+        "PackageJob",
+        "RegenerateJob",
+        "RestoreJob",
+        "StatsJob",
+        "TargetCheckReindexJob",
+        "UpdateJob",
+    );
+    /**
      * Checks if job is running
      * @param $job
      * @return bool

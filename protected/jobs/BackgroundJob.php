@@ -7,8 +7,8 @@ abstract class BackgroundJob {
     /**
      * Queue
      */
-    const QUEUE_SYSTEM              = "system";
-    const QUEUE_WORKER              = "worker";
+    const QUEUE_SYSTEM = "system";
+    const QUEUE_WORKER = "worker";
 
     /**
      * System job flag
@@ -82,6 +82,49 @@ abstract class BackgroundJob {
      */
     public function tearDown() {
         $this->delKeys();
+    }
+
+    /**
+     * Get log filename
+     * @return string
+     */
+    public static function getLogFilename() {
+        $class = get_called_class();
+        $class = strtolower($class);
+        $class = str_replace("job", "", $class);
+        $filename = $class . '.log';
+
+        return $filename;
+    }
+
+    /**
+     * Log message
+     * @param $message
+     * @param $stackTrace
+     * @param $level
+     */
+    public function log($message, $stackTrace, $level=CLogger::LEVEL_ERROR) {
+        $category = "bg." . get_called_class();
+        $m = sprintf("%s\n%s\n\n", $message, $stackTrace);
+
+        Yii::log($m, $level, $category);
+        Yii::getLogger()->flush(true);
+    }
+
+    /**
+     * Get job logs
+     */
+    public static function getLog() {
+        $path = Yii::app()->params['bgLogsPath'] . DIRECTORY_SEPARATOR . self::getLogFilename();
+        return FileManager::getFileContent($path);
+    }
+
+    /**
+     * Clears job's log
+     */
+    public static function clearLog() {
+        $path = Yii::app()->params['bgLogsPath'] . DIRECTORY_SEPARATOR . self::getLogFilename();
+        FileManager::unlink($path);
     }
 
     /**

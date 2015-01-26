@@ -405,30 +405,33 @@ class AutomationJob extends BackgroundJob {
 
     /**
      * Perform job
-     * @param $args
      */
     public function perform() {
-        if (!isset($this->args["obj_id"]) || !isset($this->args["operation"])) {
-            throw new Exception("Invalid job params.");
-        }
+        try {
+            if (!isset($this->args["obj_id"]) || !isset($this->args["operation"])) {
+                throw new Exception("Invalid job params.");
+            }
 
-        $operation = $this->args["operation"];
-        $id = $this->args["obj_id"];
+            $operation = $this->args["operation"];
+            $id = $this->args["obj_id"];
 
-        switch ($operation) {
-            case self::OPERATION_START:
-                if (!isset($this->args["started"])) {
-                    throw new Exception("Start Time is not defined.");
-                }
+            switch ($operation) {
+                case self::OPERATION_START:
+                    if (!isset($this->args["started"])) {
+                        throw new Exception("Start Time is not defined.");
+                    }
 
-                $this->setVar("started", $this->args["started"]);
-                $this->_startCheck($id);
-                break;
-            case self::OPERATION_STOP:
-                $this->_stopCheck($id);
-                break;
-            default:
-                throw new Exception("Invalid operation.");
+                    $this->setVar("started", $this->args["started"]);
+                    $this->_startCheck($id);
+                    break;
+                case self::OPERATION_STOP:
+                    $this->_stopCheck($id);
+                    break;
+                default:
+                    throw new Exception("Invalid operation.");
+            }
+        } catch (Exception $e) {
+            $this->log($e->getMessage(), $e->getTraceAsString());
         }
     }
 }

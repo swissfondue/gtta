@@ -331,121 +331,97 @@ class BackupManager {
 
     /**
      * Backup the system.
-     * @param $system System
      */
     public function backup() {
-        $exception = null;
+        $backupName = Yii::app()->name . ' ' . Yii::t('app', 'Backup') . ' ' . date('Ymd-Hi');
+        $fileName = md5($backupName . rand() . time());
+        FileManager::createDir(Yii::app()->params['backups']['tmpFilesPath'], 0777);
+        $tmpBackupPath = Yii::app()->params['backups']['tmpFilesPath'] . '/' . $fileName . '.zip';
+        $backupPath = Yii::app()->params['backups']['path'] . '/' . $fileName . '.zip';
 
-        try {
-            $backupName = Yii::app()->name . ' ' . Yii::t('app', 'Backup') . ' ' . date('Ymd-Hi');
-            $fileName = md5($backupName . rand() . time());
-            FileManager::createDir(Yii::app()->params['backups']['tmpFilesPath'], 0777);
-            $tmpBackupPath = Yii::app()->params['backups']['tmpFilesPath'] . '/' . $fileName . '.zip';
-            $backupPath = Yii::app()->params['backups']['path'] . '/' . $fileName . '.zip';
+        $zip = new ZipArchive();
 
-            $zip = new ZipArchive();
-
-            if ($zip->open($tmpBackupPath, ZipArchive::CREATE) !== true) {
-                throw new Exception("Unable to create backup archive: $fileName");
-            }
-
-            $zip->addEmptyDir($backupName);
-            $zip->addEmptyDir($backupName . '/attachments');
-            $zip->addEmptyDir($backupName . '/packages');
-            $zip->addEmptyDir($backupName . '/packages/lib');
-
-            $this->_backupAttachments($backupName . '/attachments', $zip);
-            $this->_backupPackages($backupName . '/packages', $zip);
-            $this->_backupDatabase($backupName, $zip);
-            $this->_setVersion($backupName, $zip);
-
-            $zip->close();
-
-            $now = new DateTime();
-            $system = System::model()->findByPk(1);
-            $system->backup = $now->format("Y-m-d H:i:s");
-            $system->save();
-
-            FileManager::copy($tmpBackupPath, $backupPath);
-            FileManager::unlink($tmpBackupPath);
-        } catch (Exception $e) {
-            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "application");
-            $exception = $e;
+        if ($zip->open($tmpBackupPath, ZipArchive::CREATE) !== true) {
+            throw new Exception("Unable to create backup archive: $fileName");
         }
 
-        if ($exception !== null) {
-            throw $exception;
-        }
+        $zip->addEmptyDir($backupName);
+        $zip->addEmptyDir($backupName . '/attachments');
+        $zip->addEmptyDir($backupName . '/packages');
+        $zip->addEmptyDir($backupName . '/packages/lib');
+
+        $this->_backupAttachments($backupName . '/attachments', $zip);
+        $this->_backupPackages($backupName . '/packages', $zip);
+        $this->_backupDatabase($backupName, $zip);
+        $this->_setVersion($backupName, $zip);
+
+        $zip->close();
+
+        $now = new DateTime();
+        $system = System::model()->findByPk(1);
+        $system->backup = $now->format("Y-m-d H:i:s");
+        $system->save();
+
+        FileManager::copy($tmpBackupPath, $backupPath);
+        FileManager::unlink($tmpBackupPath);
     }
 
     /**
      * Restore the system.
-     * @param $path
+     * @param $zipPath
      * @throws Exception
      * @throws null
      */
     public function restore($zipPath) {
-        $exception = null;
+        $zip = new ZipArchive();
 
-        try {
-            $zip = new ZipArchive();
-
-            if ($zip->open($zipPath) !== true) {
-                throw new Exception("Unable to open archive");
-            }
-
-            $dbDump = null;
-            $verFile = null;
-            $attachments = array();
-
-            // check if archive contains database dump & version file
-            for ($i = 0; $i < $zip->numFiles; $i++) {
-                $stat = $zip->statIndex($i);
-
-                $path = explode('/', $stat['name']);
-                $name = $path[count($path) - 1];
-
-                if ($name == 'database.xml') {
-                    $dbDump = $i;
-                    continue;
-                }
-
-                if ($name == 'version.xml') {
-                    $verFile = $i;
-                    continue;
-                }
-
-                if ($path[1] == 'attachments' && count($path) == 3 && $path[2]) {
-                    $attachments[] = array(
-                        'index' => $i,
-                        'name' => $name
-                    );
-
-                    continue;
-                }
-            }
-
-            if ($dbDump === null || $verFile === null) {
-                throw new Exception("Invalid backup file");
-            }
-
-            if (!$this->_checkVersion($zip, $verFile)) {
-                throw new MatchVersionException();
-            }
-
-            $this->_restoreAttachments($zip, $attachments);
-            $this->_restoreDatabase($zip, $dbDump);
-
-            $zip->close();
-
-            FileManager::unlink($zipPath);
-        } catch (Exception $e) {
-            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "application");
-            $exception = $e;
+        if ($zip->open($zipPath) !== true) {
+            throw new Exception("Unable to open archive");
         }
 
-        if ($exception) {
-            throw $exception;
+        $dbDump = null;
+        $verFile = null;
+        $attachments = array();
+
+        // check if archive contains database dump & version file
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $stat = $zip->statIndex($i);
+
+            $path = explode('/', $stat['name']);
+            $name = $path[count($path) - 1];
+
+            if ($name == 'database.xml') {
+                $dbDump = $i;
+                continue;
+            }
+
+            if ($name == 'version.xml') {
+                $verFile = $i;
+                continue;
+            }
+
+            if ($path[1] == 'attachments' && count($path) == 3 && $path[2]) {
+                $attachments[] = array(
+                    'index' => $i,
+                    'name' => $name
+                );
+
+                continue;
+            }
         }
+
+        if ($dbDump === null || $verFile === null) {
+            throw new Exception("Invalid backup file");
+        }
+
+        if (!$this->_checkVersion($zip, $verFile)) {
+            throw new MatchVersionException();
+        }
+
+        $this->_restoreAttachments($zip, $attachments);
+        $this->_restoreDatabase($zip, $dbDump);
+        $zip->close();
+
+        FileManager::unlink($zipPath);
     }
 }
