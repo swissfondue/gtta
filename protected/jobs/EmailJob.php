@@ -64,8 +64,6 @@ class EmailJob extends BackgroundJob {
             $this->_sendEmail($this->args['user_id'], $this->args['subject'], $this->args['content']);
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
-
-            throw $e;
         }
     }
 }

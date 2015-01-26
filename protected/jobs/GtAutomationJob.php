@@ -400,8 +400,6 @@ class GtAutomationJob extends BackgroundJob {
             $this->_startCheck($projectId, $checkId);
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
-
-            throw $e;
         }
     }
 }

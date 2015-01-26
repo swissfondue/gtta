@@ -19,8 +19,6 @@ class ClearLogJob extends BackgroundJob {
             $job::clearLog();
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
-
-            throw $e;
         }
     }
 }

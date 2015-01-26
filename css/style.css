@@ -1139,3 +1139,7 @@ table.project-header td.hours, table.project-header th.hours, table.user td.hour
     width: 16px;
     height: 13px;
 }
+
+textarea.log {
+    width:100%;
+}

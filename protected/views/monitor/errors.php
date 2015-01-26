@@ -18,19 +18,24 @@
             <label class="control-label" for="BgLogForm_job"><?php echo Yii::t('app', 'Process'); ?></label>
             <div class="controls">
                 <select class="input-xlarge" id="BgLogForm_job" data-url="<?php print $this->createUrl('monitor/log'); ?>" data-control-url="<?php print $this->createUrl("monitor/controllog"); ?>" onchange="admin.job.getLog($(this).val());">
-                    <option value="0" selected="selected"><?php echo Yii::t("app", "Select Job"); ?></option>
                     <?php foreach ($jobs as $job): ?>
-                        <option value="<?php echo $job; ?>"><?php echo $job; ?></option>
+                        <option value="<?php echo $job; ?>"><?php echo str_replace("Job", "", $job); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
         </div>
 
         <div class="control-group">
-            <label class="control-label" for="BgLogForm_log"><?php echo Yii::t('app', 'Log Content'); ?></label>
+            <label class="control-label" for="BgLogForm_log"><?php echo Yii::t('app', 'Log'); ?></label>
             <div class="controls">
-                <textarea class="input-xxlarge monospace" rows="20" id="BgLogForm_log" wrap="off" readonly="readonly"></textarea>
+                <textarea class="monospace log" rows="20" id="BgLogForm_log" wrap="off" readonly="readonly"></textarea>
             </div>
         </div>
     </fieldset>
 </form>
+
+<script>
+    $(function () {
+        admin.job.getLog($("#BgLogForm_job").val());
+    });
+</script>

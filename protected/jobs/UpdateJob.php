@@ -349,8 +349,6 @@ class UpdateJob extends BackgroundJob {
             $this->_update();
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
-
-            throw $e;
         }
     }
 }

@@ -27,6 +27,8 @@ var _messages = {
     "The package is ready to be installed."             : "<?php echo Yii::t("app", "The package is ready to be installed."); ?>",
     "The package could not be installed."               : "<?php echo Yii::t("app", "The package could not be installed."); ?>",
     "Check has no scripts attached."                    : "<?php echo Yii::t("app", "Check has no scripts attached."); ?>",
+    "Log is empty."                                     : "<?php echo Yii::t("app", "Log is empty."); ?>",
+    "Log Cleared."                                      : "<?php echo Yii::t("app", "Log cleared."); ?>",
 };
 
 system.l10nMessages = _messages;

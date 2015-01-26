@@ -876,11 +876,14 @@ function Admin()
                         data = data.data;
 
                         log = data.log;
-                        $("#BgLogForm_log").html(log);
 
-                        if (log) {
+                        if (!log) {
+                            log = system.translate("Log is empty.");
+                        } else {
                             $("#clear").removeAttr("disabled");
                         }
+
+                        $("#BgLogForm_log").html(log);
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -933,9 +936,9 @@ function Admin()
 
                         data = data.data;
 
-                        $("#BgLogForm_log").html("");
+                        $("#BgLogForm_log").html(system.translate("Log is empty."));
 
-                        system.addAlert("success", "Log Cleared.");
+                        system.addAlert("success", system.translate("Log cleared."));
                     },
 
                     error : function(jqXHR, textStatus, e) {

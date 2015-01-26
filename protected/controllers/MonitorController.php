@@ -223,8 +223,8 @@ class MonitorController extends Controller {
      * Display background errors
      */
     public function actionErrors() {
-        $this->breadcrumbs[] = array(Yii::t('app', 'Background Process Errors'), '');
-        $this->pageTitle = Yii::t('app', 'Background Process Errors');
+        $this->breadcrumbs[] = array(Yii::t('app', 'Background Errors'), '');
+        $this->pageTitle = Yii::t('app', 'Background Errors');
         $this->render('errors', array(
             'jobs' => JobManager::$jobs,
         ));

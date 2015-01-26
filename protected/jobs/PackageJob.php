@@ -99,8 +99,6 @@ class PackageJob extends BackgroundJob {
             sleep(5);
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
-
-            throw $e;
         }
     }
 }

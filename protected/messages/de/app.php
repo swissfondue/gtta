@@ -219,7 +219,7 @@ return array (
   'Background Info' => 'Hintergrund-Infos',
   'Backup' => 'Backup',
   'Backup File' => 'Backup Datei',
-  'Backup version doesn\'t match with the system version.' => 'Backup-Version entspricht nicht der Version des Systems übereinstimmen',
+  'Backup version doesn\'t match the system version.' => 'Backup-Version entspricht nicht der Version des Systems übereinstimmen',
   'Basic' => 'Basic',
   'Bold' => 'Fett',
   'Cancel' => 'Abbrechen',

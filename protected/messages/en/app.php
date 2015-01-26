@@ -49,7 +49,7 @@ return array (
   'Background Info' => '',
   'Backup' => '',
   'Backup File' => '',
-  'Backup version doesn\'t match with the system version.' => '',
+  'Backup version doesn\'t match the system version.' => '',
   'Basic' => '',
   'Bold' => '',
   'COMMUNITY' => '',

@@ -45,8 +45,6 @@ class ModifiedPackagesJob extends BackgroundJob {
             $this->_updatePackage($package);
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
-
-            throw $e;
         }
     }
 }

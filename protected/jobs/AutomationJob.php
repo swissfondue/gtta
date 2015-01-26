@@ -405,7 +405,6 @@ class AutomationJob extends BackgroundJob {
 
     /**
      * Perform job
-     * @param $args
      */
     public function perform() {
         try {
@@ -433,8 +432,6 @@ class AutomationJob extends BackgroundJob {
             }
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
-
-            throw $e;
         }
     }
 }

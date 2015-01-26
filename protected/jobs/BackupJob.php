@@ -15,8 +15,6 @@ class BackupJob extends BackgroundJob {
             $bm->backup();
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
-
-            throw $e;
         }
     }
 }

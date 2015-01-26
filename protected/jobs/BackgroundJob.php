@@ -7,8 +7,8 @@ abstract class BackgroundJob {
     /**
      * Queue
      */
-    const QUEUE_SYSTEM              = "system";
-    const QUEUE_WORKER              = "worker";
+    const QUEUE_SYSTEM = "system";
+    const QUEUE_WORKER = "worker";
 
     /**
      * System job flag
@@ -100,10 +100,12 @@ abstract class BackgroundJob {
     /**
      * Log message
      * @param $message
+     * @param $stackTrace
+     * @param $level
      */
     public function log($message, $stackTrace, $level=CLogger::LEVEL_ERROR) {
         $category = "bg." . get_called_class();
-        $m = sprintf("%s\nStack Trace:\n%s\n---\n", $message, $stackTrace);
+        $m = sprintf("%s\n%s\n\n", $message, $stackTrace);
 
         Yii::log($m, $level, $category);
         Yii::getLogger()->flush(true);
