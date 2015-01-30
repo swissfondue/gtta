@@ -151,6 +151,8 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "inputs" => array(self::HAS_MANY, "TargetCheckInput", "target_check_id"),
             "solutions" => array(self::HAS_MANY, "TargetCheckSolution", "target_check_id"),
             "attachments" => array(self::HAS_MANY, "TargetCheckAttachment", "target_check_id"),
+            "scripts" => array(self::HAS_MANY, "TargetCheckScript", "target_check_id"),
+            "startScripts" => array(self::HAS_MANY, 'CheckScript', array('check_script_id' => 'id'), 'through' => 'scripts', 'condition' => "scripts.start = 't'"),
 		);
 	}
 
@@ -281,35 +283,6 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         }
 
         return $data;
-    }
-
-    /**
-     * Returns scripts_to_start as a list of CheckScript objects
-     * @return array|null
-     */
-    public function getScriptsToStart() {
-        $scriptIds = PgArrayManager::pgArrayDecode($this->scripts_to_start);
-
-        if (empty($scriptIds)) {
-            return null;
-        }
-
-        $scripts = CheckScript::model()->with(
-            array(
-                'check' => array(
-                    'with' => array(
-                        'targetChecks' => array(
-                            'alias' => 'ttc',
-                            'joinType' => 'LEFT JOIN',
-                            'on' => 'ttc.id = :target_check_id',
-                            'params' => array('target_check_id' => $this->id)
-                        )
-                    )
-                ),
-            )
-        )->findAllByAttributes(array('id' => $scriptIds));
-
-        return $scripts;
     }
 
     /**

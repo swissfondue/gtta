@@ -2393,6 +2393,19 @@ class CheckController extends Controller
                 $script->package_id = $model->packageId;
                 $script->save();
 
+                $targetChecks = TargetCheck::model()->findAllByAttributes(array(
+                    "check_id" => $script->check_id
+                ));
+
+                // Add new target_check_scripts row
+                // to target checks related with current check
+                foreach ($targetChecks as $tc) {
+                    $targetCheckScript = new TargetCheckScript();
+                    $targetCheckScript->target_check_id = $tc->id;
+                    $targetCheckScript->check_script_id = $script->id;
+                    $targetCheckScript->save();
+                }
+
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Script saved.'));
 
                 $script->refresh();

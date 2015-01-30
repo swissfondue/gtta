@@ -3,7 +3,7 @@
 /**
  * This is the model class for package edit form.
  */
-class PackageEditForm extends CFormModel {
+class PackageEditFilesForm extends CFormModel {
     /**
      * Constants
      */

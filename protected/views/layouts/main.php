@@ -162,7 +162,7 @@
                 ?>
                     <script>
                         <?php foreach ($flashes as $key => $message): ?>
-                            system.showMessage('<?php echo $key; ?>', '<?php echo str_replace("'", "\\'", $message); ?>');
+                            system.addAlert('<?php echo $key; ?>', '<?php echo str_replace("'", "\\'", $message); ?>');
                         <?php endforeach; ?>
                     </script>
                 <?php elseif (User::checkRole(User::ROLE_ADMIN) && $this->_system->update_version && (!isset(Yii::app()->request->cookies["update_version"]) || Yii::app()->request->cookies["update_version"]->value != $this->_system->update_version) && Yii::app()->controller->id != 'update'): ?>
