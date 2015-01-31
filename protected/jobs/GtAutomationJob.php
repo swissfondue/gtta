@@ -396,8 +396,6 @@ class GtAutomationJob extends BackgroundJob {
                 default:
                     throw new Exception("Invalid operation.");
             }
-
-            $this->_startCheck($projectId, $checkId);
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
         }
