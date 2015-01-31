@@ -741,14 +741,24 @@ class PackageManager {
      */
     private function _installDebDependency($package, $packagePath) {
         $vm = new VMManager();
+        $debPath = "$packagePath/$package";
+        $virtualDebPath = $vm->virtualizePath("/tmp/$package");
+        $exception = null;
 
         try {
-            $vm->runCommand("dpkg --install $packagePath/$package");
+            FileManager::copy($debPath, $virtualDebPath);
+            $vm->runCommand("dpkg --install $virtualDebPath");
             $this->_checkDebDependency($package, $packagePath);
         } catch (Exception $e) {
-            throw new Exception(
+            $exception = new Exception(
                 Yii::t("app", "Unable to install deb dependency: {dependency}.", array("{dependency}" => $package))
             );
+        }
+
+        FileManager::unlink($virtualDebPath);
+
+        if ($exception) {
+            throw $exception;
         }
     }
 
