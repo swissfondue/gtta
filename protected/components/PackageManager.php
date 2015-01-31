@@ -747,7 +747,7 @@ class PackageManager {
 
         try {
             FileManager::copy($debPath, $virtualDebPath);
-            $vm->runCommand("dpkg --install $virtualDebPath");
+            $vm->runCommand("dpkg --install /tmp/$package");
             $this->_checkDebDependency($package, $packagePath);
         } catch (Exception $e) {
             $exception = new Exception(
