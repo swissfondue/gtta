@@ -1095,7 +1095,7 @@ class PackageManager {
         ));
 
         if (!$core) {
-            throw new Exception();
+            return;
         }
 
         $this->_installDependencies($core);
