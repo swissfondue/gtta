@@ -128,7 +128,7 @@ class BackupManager {
 
             return array(
                 "filename" => basename($file),
-                "created_at" => $created->format("d.m.Y"),
+                "created_at" => $created->format("d.m.Y H:i:s"),
             );
         }, $files);
 
