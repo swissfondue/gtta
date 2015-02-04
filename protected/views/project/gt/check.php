@@ -8,9 +8,7 @@
 
 <hr>
 
-<?php
-    $started = ProjectGtCheckManager::getStartTime($check->projectChecks[0]->project_id, $check->projectChecks[0]->gt_check_id);
-?>
+<?php $started = $check->projectChecks ? ProjectGtCheckManager::getStartTime($check->projectChecks[0]->project_id, $check->projectChecks[0]->gt_check_id) : 0; ?>
 
 <div class="container">
     <div class="row">
