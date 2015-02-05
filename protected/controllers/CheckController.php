@@ -2400,10 +2400,17 @@ class CheckController extends Controller
                 // Add new target_check_scripts row
                 // to target checks related with current check
                 foreach ($targetChecks as $tc) {
-                    $targetCheckScript = new TargetCheckScript();
-                    $targetCheckScript->target_check_id = $tc->id;
-                    $targetCheckScript->check_script_id = $script->id;
-                    $targetCheckScript->save();
+                    $targetCheckScript = TargetCheckScript::model()->findByAttributes(array(
+                        "target_check_id" => $tc->id,
+                        "check_script_id" => $script->id
+                    ));
+
+                    if (!$targetCheckScript) {
+                        $targetCheckScript = new TargetCheckScript();
+                        $targetCheckScript->target_check_id = $tc->id;
+                        $targetCheckScript->check_script_id = $script->id;
+                        $targetCheckScript->save();
+                    }
                 }
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Script saved.'));

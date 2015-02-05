@@ -166,7 +166,16 @@ class AutomationJob extends BackgroundJob {
             $port = $check->port;
         }
 
-        $timeout = $check->timeout;
+        $targetCheckScript = TargetCheckScript::model()->findByAttributes(array(
+            "target_check_id" => $check->id,
+            "check_script_id" => $script->id
+        ));
+
+        if (!$targetCheckScript) {
+            throw new Exception("No such script attached to target.");
+        }
+
+        $timeout = $targetCheckScript->timeout;
 
         if (!$timeout) {
             $timeout = $script->package->timeout;

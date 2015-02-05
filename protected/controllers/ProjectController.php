@@ -1947,15 +1947,15 @@ class ProjectController extends Controller {
 
             $check->check = Check::model()->with($lang)->findByPk($check->check_id);
 
-            foreach ($check->check->scripts as $script) {
+            foreach ($check->scripts as $script) {
                 $criteria = new CDbCriteria();
                 $criteria->addColumnCondition(array(
                     "visible" => true,
-                    "check_script_id" => $script->id,
+                    "check_script_id" => $script->script->id,
                 ));
                 $criteria->order = 'sort_order ASC';
 
-                $script->inputs = CheckInput::model()->with(array_merge(array(
+                $script->script->inputs = CheckInput::model()->with(array_merge(array(
                         "targetInputs" => array(
                             "alias" => "ti",
                             "on" => "ti.target_check_id = :tc_id",
