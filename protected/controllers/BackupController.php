@@ -137,11 +137,8 @@ class BackupController extends Controller {
                         throw new CHttpException(403, Yii::t("app", "Access denied. The system is restoring."));
                     }
 
-                    $tmpPath = Yii::app()->params['tmpPath'] . DIRECTORY_SEPARATOR . hash('sha256', $path . rand() . time());
-                    FileManager::copy($path, $tmpPath);
-
                     RestoreJob::enqueue(array(
-                        "path" => $tmpPath
+                        "path" => $path
                     ));
 
                     break;

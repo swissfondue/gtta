@@ -44,7 +44,7 @@
                                     </a>
                                 </td>
                                 <td class="actions">
-                                    <a href="#restore" class="btn-restore" title="<?php echo Yii::t("app", "Restore"); ?>" onclick="system.control.restore('<?php echo $filename; ?>');"><i class="icon icon-restore"></i></a>&nbsp;
+                                    <a href="#restore" class="btn-restore" title="<?php echo Yii::t("app", "Restore"); ?>" onclick="admin.backup.restore('<?php echo $filename; ?>');"><i class="icon icon-restore"></i></a>&nbsp;
                                     <a href="#delete" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="system.control.del('<?php echo $filename; ?>');"><i class="icon icon-remove"></i></a>
                                 </td>
                             </tr>

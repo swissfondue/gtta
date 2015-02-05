@@ -248,17 +248,6 @@ function System() {
                 }
             });
         };
-
-        /**
-         * Restore from selected backup in list
-         * @param id
-         */
-        this.restore = function (id) {
-            if (confirm(_system.translate('Are you sure that you want to restore system from this backup?'))) {
-                $('#backup').prop("disabled", true);
-                _system_control._control(id, 'restore');
-            }
-        };
     };
 
     /**
