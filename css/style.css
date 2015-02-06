@@ -1143,6 +1143,11 @@ table.project-header td.hours, table.project-header th.hours, table.user td.hour
     height: 13px;
 }
 
+.icon-restore {
+    background-image: url("/images/icon-restore.png");
+    background-position: 0px 0px;
+}
+
 textarea.log {
     width:100%;
 }

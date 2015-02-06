@@ -111,16 +111,33 @@ function System() {
                         return;
                     }
 
-                    if (operation == 'delete') {
-                        $('tr[data-id=' + id + ']').fadeOut('slow', undefined, function () {
-                            $('tr[data-id=' + id + ']').remove();
-                            _system.addAlert('success', _system.translate('Object deleted.'));
+                    switch (operation) {
+                        case 'delete':
+                            $('tr[data-id=' + id + ']').fadeOut('slow', undefined, function () {
+                                $('tr[data-id=' + id + ']').remove();
+                                _system.addAlert('success', _system.translate('Object deleted.'));
 
-                            if ($('table.table > tbody > tr').length == 1)
-                                location.reload();
-                        });
-                    } else if (operation == 'up' || operation == 'down') {
-                        location.reload();
+                                if ($('table.table > tbody > tr').length == 1)
+                                    location.reload();
+                            });
+
+                            break;
+
+                        case 'up':
+                        case 'down':
+                            location.reload();
+
+                            break;
+
+                        case 'restore':
+                            setTimeout(function () {
+                                admin.backup.check($('.backups-list').data('check-restore-url'), "restore");
+                            }, admin.backup.checkTimeout);
+
+                            break;
+
+                        default:
+                            break;
                     }
                 },
 

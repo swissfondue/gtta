@@ -1,7 +1,13 @@
 <script>
     var checkBackup = function () {
         setTimeout(function () {
-            admin.backup.check('<?php echo $this->createUrl("backup/check", array( "action" => "backup" )); ?>', "backup");
+            admin.backup.check($('.backups-list').data('check-backup-url'), "backup");
+        }, admin.backup.checkTimeout);
+    };
+
+    var checkRestore = function() {
+        setTimeout(function () {
+            admin.backup.check($('.backups-list').data('check-restore-url'), "restore");
         }, admin.backup.checkTimeout);
     };
 </script>
@@ -21,7 +27,7 @@
     <div class="row">
         <div class="span8">
             <?php if (!empty($backups)): ?>
-                <table class="table backups-list">
+                <table class="table backups-list" data-check-restore-url="<?php echo $this->createUrl("backup/check", array( "action" => "restore" )); ?>" data-check-backup-url="<?php echo $this->createUrl("backup/check", array( "action" => "backup" )); ?>">
                     <tbody>
                         <tr>
                             <th class="created-at"><?php echo Yii::t("app", "Backups"); ?></th>
@@ -38,6 +44,7 @@
                                     </a>
                                 </td>
                                 <td class="actions">
+                                    <a href="#restore" class="btn-restore" title="<?php echo Yii::t("app", "Restore"); ?>" onclick="admin.backup.restore('<?php echo $filename; ?>');"><i class="icon icon-restore"></i></a>&nbsp;
                                     <a href="#delete" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="system.control.del('<?php echo $filename; ?>');"><i class="icon icon-remove"></i></a>
                                 </td>
                             </tr>
@@ -50,9 +57,15 @@
         </div>
     </div>
 </div>
+
 <?php if ($backingup): ?>
     <script>
         $('#backup').prop("disabled", true);
         checkBackup();
+    </script>
+<?php elseif ($restoring): ?>
+    <script>
+        $("#backup").prop("disabled", true);
+        checkRestore();
     </script>
 <?php endif; ?>

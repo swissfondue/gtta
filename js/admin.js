@@ -1824,7 +1824,7 @@ function Admin()
                                 system.addAlert("success", "System restored.");
                             }
 
-                            $('#restore').button("reset").removeClass("active");
+                            $('#backup, #restore').prop('disabled', false);
 
                             return;
                         }
@@ -1844,6 +1844,17 @@ function Admin()
                     $('.loader-image').show();
                 }
             });
+        };
+
+        /**
+         * Restore from selected backup in list
+         * @param id
+         */
+        this.restore = function (id) {
+            if (confirm(system.translate('Are you sure that you want to restore system from this backup?'))) {
+                $('#backup').prop("disabled", true);
+                system.control._control(id, 'restore');
+            }
         };
     };
 }

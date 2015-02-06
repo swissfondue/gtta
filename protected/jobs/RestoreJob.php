@@ -25,10 +25,13 @@ class RestoreJob extends BackgroundJob {
             }
 
             $path = $this->args['path'];
+            $tmpPath = Yii::app()->params['tmpPath'] . DIRECTORY_SEPARATOR . hash('sha256', $path . rand() . time());
 
             try {
+                FileManager::copy($path, $tmpPath);
+
                 $bm = new BackupManager();
-                $bm->restore($path);
+                $bm->restore($tmpPath);
             } catch (MatchVersionException $e) {
                 $this->setVar("message", Yii::t("app", "Backup version doesn't match the system version."));
             } catch (Exception $e) {
