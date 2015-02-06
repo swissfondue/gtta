@@ -166,11 +166,27 @@ class AutomationJob extends BackgroundJob {
             $port = $check->port;
         }
 
+        $targetCheckScript = TargetCheckScript::model()->findByAttributes(array(
+            "target_check_id" => $check->id,
+            "check_script_id" => $script->id
+        ));
+
+        if (!$targetCheckScript) {
+            throw new Exception("No such script attached to target.");
+        }
+
+        $timeout = $targetCheckScript->timeout;
+
+        if (!$timeout) {
+            $timeout = $script->package->timeout;
+        }
+
         // base data
         fwrite($targetFile, $targetHost . "\n");
         fwrite($targetFile, $check->protocol . "\n");
         fwrite($targetFile, $port . "\n");
         fwrite($targetFile, $check->language->code . "\n");
+        fwrite($targetFile, $timeout . "\n");
         fclose($targetFile);
 
         // create empty result file
@@ -312,7 +328,7 @@ class AutomationJob extends BackgroundJob {
         Yii::app()->language = $language->code;
 
         $filesPath = Yii::app()->params['automation']['filesPath'];
-        $scripts = $check->scriptsToStart;
+        $scripts = $check->startScripts;
 
         if (!count($scripts)) {
             $scripts = $check->check->scripts;

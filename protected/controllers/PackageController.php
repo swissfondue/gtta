@@ -246,11 +246,11 @@ class PackageController extends Controller {
     }
 
     /**
-     * Edit package
+     * Edit package files
      * @param $id
      * @throws CHttpException
      */
-    public function actionEdit($id) {
+    public function actionEditFiles($id) {
         $id = (int) $id;
         $package = Package::model()->findByPk($id);
 
@@ -261,18 +261,18 @@ class PackageController extends Controller {
         $selected = null;
         $files = array();
         $pm = new PackageManager();
-        $form = new PackageEditForm();
+        $form = new PackageEditFilesForm();
 
         try {
-            if (isset($_POST['PackageEditForm'])) {
-                $form->attributes = $_POST['PackageEditForm'];
+            if (isset($_POST['PackageEditFilesForm'])) {
+                $form->attributes = $_POST['PackageEditFilesForm'];
 
                 if ($form->validate()) {
                     $path = $pm->getPath($package) . DIRECTORY_SEPARATOR . $form->path;
                     $content = $form->content;
 
                     switch ($form->operation) {
-                        case PackageEditForm::OPERATION_SAVE:
+                        case PackageEditFilesForm::OPERATION_SAVE:
                             FileManager::updateFile($path, $content);
                             $selected = $form->path;
                             $package->save();
@@ -285,9 +285,9 @@ class PackageController extends Controller {
 
                             break;
 
-                        case PackageEditForm::OPERATION_DELETE:
+                        case PackageEditFilesForm::OPERATION_DELETE:
                             FileManager::unlink($path);
-                            $form = new PackageEditForm();
+                            $form = new PackageEditFilesForm();
                             $package->save();
 
                             ModifiedPackagesJob::enqueue(array(
@@ -316,11 +316,52 @@ class PackageController extends Controller {
         $this->breadcrumbs[] = array(Yii::t("app", "Edit"), "");
         $this->pageTitle = $package->name;
 
-        $this->render("edit", array(
+        $this->render("edit-files", array(
             "files" => $files,
             "selected" => $selected,
             "package" => $package,
             "form" => $form
+        ));
+    }
+
+    /**
+     * Edit package properties
+     * @param $id
+     * @throws Exception
+     */
+    public function actionEditProperties($id) {
+        $id = (int) $id;
+
+        $package = Package::model()->findByPk($id);
+
+        if (!$package) {
+            throw new Exception("Package not found.");
+        }
+
+        $form = new PackageEditPropertiesForm();
+
+        if (isset($_POST["PackageEditPropertiesForm"])) {
+            $form->attributes = $_POST["PackageEditPropertiesForm"];
+
+            if ($form->validate()) {
+                $package->timeout = $form->timeout;
+                $package->save();
+
+                Yii::app()->user->setFlash("success", Yii::t("app", "Package saved."));
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+        }
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Packages"), $this->createUrl("package/index"));
+        $this->breadcrumbs[] = array($package->name, $this->createUrl("package/view", array("id" => $package->id)));
+        $this->breadcrumbs[] = array(Yii::t("app", "Edit"), "");
+        $this->pageTitle = $package->name;
+
+        // display the page
+        $this->render("edit-properties", array(
+            "form" => $form,
+            "package" => $package,
         ));
     }
 

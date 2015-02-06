@@ -1947,15 +1947,15 @@ class ProjectController extends Controller {
 
             $check->check = Check::model()->with($lang)->findByPk($check->check_id);
 
-            foreach ($check->check->scripts as $script) {
+            foreach ($check->scripts as $script) {
                 $criteria = new CDbCriteria();
                 $criteria->addColumnCondition(array(
                     "visible" => true,
-                    "check_script_id" => $script->id,
+                    "check_script_id" => $script->script->id,
                 ));
                 $criteria->order = 'sort_order ASC';
 
-                $script->inputs = CheckInput::model()->with(array_merge(array(
+                $script->script->inputs = CheckInput::model()->with(array_merge(array(
                         "targetInputs" => array(
                             "alias" => "ti",
                             "on" => "ti.target_check_id = :tc_id",
@@ -2114,27 +2114,60 @@ class ProjectController extends Controller {
                 $model->tableResult = null;
             }
 
-            $scripts = array();
+            if ($model->scripts) {
+                foreach ($model->scripts as $scriptData) {
+                    $dataEncoded = json_decode($scriptData);
+                    $script = CheckScript::model()->findByPk($dataEncoded->id);
 
-            if (!empty($model->scriptsToStart)) {
-                foreach ($model->scriptsToStart as $scriptId) {
-                    $criteria = new CDbCriteria();
-                    $criteria->addCondition('id = :id');
-                    $criteria->addCondition('check_id = :check_id');
-                    $criteria->params = array(
-                        'id' => $scriptId,
-                        'check_id' => $targetCheck->check->id
-                    );
-
-                    $script = CheckScript::model()->find($criteria);
-
-                    if ($script) {
-                        $scripts[] = $script->id;
+                    if (!$script) {
+                        throw new CHttpException(404, "Script not found.");
                     }
+
+                    $tcs = TargetCheckScript::model()->findByAttributes(array(
+                        "target_check_id" => $targetCheck->id,
+                        "check_script_id" => $script->id
+                    ));
+
+                    if (!$tcs) {
+                        throw new CHttpException(404, "Target check has no such script.");
+                    }
+
+                    $tcs->start = (bool) $dataEncoded->start;
+                    $tcs->save();
                 }
+            } else {
+                // Set all scripts to start if no script data received
+                TargetCheckScript::model()->updateAll(
+                    array("start" => true),
+                    "target_check_id = :target_check_id",
+                    array(
+                        "target_check_id" => $targetCheck->id
+                    )
+                );
             }
 
-            $model->scriptsToStart = PgArrayManager::pgArrayEncode($scripts);
+            if ($model->timeouts) {
+                foreach ($model->timeouts as $timeoutData) {
+                    $dataEncoded = json_decode($timeoutData);
+                    $script = CheckScript::model()->findByPk($dataEncoded->script_id);
+
+                    if (!$script) {
+                        throw new CHttpException(404, "Script not found.");
+                    }
+
+                    $tcs = TargetCheckScript::model()->findByAttributes(array(
+                        "target_check_id" => $targetCheck->id,
+                        "check_script_id" => $script->id
+                    ));
+
+                    if (!$tcs) {
+                        throw new CHttpException(404, "Target check has no such script.");
+                    }
+
+                    $tcs->timeout = $dataEncoded->timeout ? $dataEncoded->timeout : null;
+                    $tcs->save();
+                }
+            }
 
             $targetCheck->user_id = Yii::app()->user->id;
             $targetCheck->language_id = $language->id;
@@ -2192,7 +2225,6 @@ class ProjectController extends Controller {
             }
 
             $targetCheck->table_result = $model->tableResult;
-            $targetCheck->scripts_to_start = $model->scriptsToStart;
             $targetCheck->save();
 
             // delete old solutions
@@ -3632,9 +3664,38 @@ class ProjectController extends Controller {
                     $response->addData("protocol",  $check->protocol);
                     $response->addData("port", $check->port);
                     $inputValues = array();
+                    $timeoutValues = array();
+                    $startScripts = array();
 
                     // get default input values
                     if ($check->automated) {
+                        $criteria = new CDbCriteria();
+                        $criteria->addCondition("target_check_id = :target_check_id");
+                        $criteria->params = array(
+                            "target_check_id" => $targetCheck->id
+                        );
+                        TargetCheckScript::model()->updateAll(
+                            array(
+                                "start"   => true,
+                                "timeout" => null,
+                            ),
+                            $criteria
+                        );
+
+                        $scripts = TargetCheckScript::model()->findAll($criteria);
+
+                        foreach ($scripts as $script) {
+                            $timeout = $script->timeout ? $script->timeout : $script->script->package->timeout;
+                            $timeoutValues[] = array(
+                                "id"      => "TargetCheckEditForm_" . $targetCheck->id . "_timeouts_" . $script->script->id,
+                                "timeout" => $timeout,
+                            );
+                            $startScripts[] = array(
+                                "id"    => "TargetCheckEditForm_" . $targetCheck->id . "_scripts_" . $script->script->id,
+                                "start" => (bool) $script->start,
+                            );
+                        }
+
                         $scripts = CheckScript::model()->findAllByAttributes(array(
                             "check_id" => $check->id
                         ));
@@ -3660,6 +3721,8 @@ class ProjectController extends Controller {
                     }
 
                     $response->addData("inputs", $inputValues);
+                    $response->addData("timeouts", $timeoutValues);
+                    $response->addData("scripts", $startScripts);
 
                     break;
 

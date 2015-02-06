@@ -131,7 +131,8 @@ return array(
 
     // software packages
     "package/new"               => "package/new",
-    "package/<id:\d+>/edit"     => "package/edit",
+    "package/<id:\d+>/edit"     => "package/editfiles",
+    "package/<id:\d+>/edit"     => "package/editproperties",
     "packages/<page:\d+>"       => "package/index",
     "packages"                  => "package/index",
     "packages/messages"         => "package/messages",

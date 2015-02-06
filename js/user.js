@@ -567,7 +567,7 @@ function User()
          */
         this.getData = function (id) {
             var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, solutions, resultTitle, saveResult,
-                attachments, rating, data, solution, solutionTitle, saveSolution, poc, links, scripts;
+                attachments, rating, data, solution, solutionTitle, saveSolution, poc, links, scripts, timeouts;
 
             row = $('div.check-form[data-type=check][data-id="' + id + '"]');
 
@@ -615,14 +615,29 @@ function User()
                 _check.ckeditors["TargetCheckEditForm_" + id + "_result"].getData() :
                 $('textarea[name="TargetCheckEditForm_' + id + '[result]"]').val();
 
-            scripts = $('input[name^="TargetCheckEditForm_' + id + '[scriptsToStart]"]:checked', row).map(
+            scripts = $('input[name^="TargetCheckEditForm_' + id + '[scripts]"]', row).map(
                 function () {
                     return {
                         name: $(this).attr('name'),
-                        value: $(this).val()
+                        value: JSON.stringify({
+                            id : $(this).data("id"),
+                            start : $(this).is(":checked")
+                        })
                     }
                 }
             ).get();
+
+            timeouts = $('input[name^="TargetCheckEditForm_' + id + '[timeouts]"]', row).map(
+                function () {
+                    return {
+                        name : $(this).attr('name'),
+                        value : JSON.stringify({
+                            script_id : $(this).data("script-id"),
+                            timeout : $(this).val()
+                        })
+                    }
+                }
+            );
                 
             saveResult = $('input[name="TargetCheckEditForm_' + id + '[saveResult]"]', row).is(":checked");
 
@@ -730,6 +745,10 @@ function User()
 
             for (i = 0; i < scripts.length; i++) {
                 data.push(scripts[i]);
+            }
+
+            for (i = 0; i < timeouts.length; i++) {
+                data.push(timeouts[i]);
             }
 
             return data;
@@ -1700,6 +1719,14 @@ function User()
 
                             input_obj.val(input.value);
                         }
+
+                        $.each(data.timeouts, function(key, timeout) {
+                            $("#" + timeout.id).val(timeout.timeout);
+                        });
+
+                        $.each(data.scripts, function(key, script) {
+                            $("#" + script.id).prop("checked", script.start);
+                        });
 
                         $('input[name="TargetCheckEditForm_' + id + '[rating]"][value=0]').prop("checked", true);
                     } else if (operation == 'stop') {

@@ -86,16 +86,12 @@
             <?php endif; ?>
         <?php endif; ?>
         <?php if ($check->check->scripts && $check->check->automated && User::checkRole(User::ROLE_USER)): ?>
-            <?php
-                $scriptsToStart = PgArrayManager::pgArrayDecode($check->scripts_to_start);
-                $checkAll = empty($scriptsToStart);
-            ?>
-            <?php foreach ($check->check->scripts as $script): ?>
-                <?php if (count($check->check->scripts) > 1): ?>
+            <?php foreach ($check->scripts as $script): ?>
+                <?php if (count($check->scripts) > 1): ?>
                     <tr class="script-inputs">
                         <th>
-                            <input name="TargetCheckEditForm_<?php echo $check->id ?>[scriptsToStart][]" type="checkbox" value="<?php echo $script->id; ?>" <?php echo ($checkAll || in_array($script->id, $scriptsToStart) ? 'checked="checked"' : ''); ?> <?php if ($check->isRunning) echo "disabled"; ?> />
-                            <?php echo CHtml::encode($script->package->name); ?>
+                            <input name="TargetCheckEditForm_<?php echo $check->id ?>[scripts][]" id="TargetCheckEditForm_<?php print $check->id; ?>_scripts_<?php print $script->script->id; ?>" type="checkbox" data-id="<?php print $script->script->id; ?>" value="<?php echo $script->script->id; ?>" <?php if ($script->start) echo 'checked="checked"'; ?> <?php if ($check->isRunning) echo "disabled"; ?> />
+                            <?php echo CHtml::encode($script->script->package->name); ?>
                         </th>
                         <td>&nbsp;</td>
                     </tr>
@@ -103,9 +99,10 @@
                 <?php
                     $groups = array();
                     $group = array();
+                    $inputs = $script->script->inputs;
 
-                    if (count($script->inputs) > Yii::app()->params["maxCheckboxes"]) {
-                        foreach ($script->inputs as $input) {
+                    if (count($inputs) > Yii::app()->params["maxCheckboxes"]) {
+                        foreach ($inputs as $input) {
                             if (!in_array($input->type, array(CheckInput::TYPE_CHECKBOX, CheckInput::TYPE_FILE))) {
                                 if (count($group) > Yii::app()->params["maxCheckboxes"]) {
                                     $groups[] = $group;
@@ -123,7 +120,15 @@
                         $groups[] = $group;
                     }
                 ?>
-                <?php foreach ($script->inputs as $input): ?>
+                <tr>
+                    <th>
+                        <?php echo Yii::t("app", "Timeout"); ?>
+                    </th>
+                    <td>
+                        <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[timeouts][]" class="input-xlarge" id="TargetCheckEditForm_<?php echo $check->id; ?>_timeouts_<?php echo $script->script->id; ?>" data-script-id="<?php echo $script->script->id; ?>" <?php if ($check->isRunning) echo "readonly"; ?> value="<?php echo $script->timeout ? $script->timeout : $script->script->package->timeout; ?>">
+                    </td>
+                </tr>
+                <?php foreach ($inputs as $input): ?>
                     <?php
                         $currentGroup = false;
                         $position = false;
@@ -149,7 +154,6 @@
                             </th>
                             <td>
                     <?php endif; ?>
-
                     <?php if ($input->type == CheckInput::TYPE_TEXT): ?>
                         <?php
                             $value = "";
