@@ -159,6 +159,26 @@ return array(
     "checks/incoming/<page:\d+>" => "check/incoming",
     "checks/incoming/check/<id:\d+>/edit" => "check/editincoming",
 
+    // checklist template categories
+    "checklisttemplates"                                                        => "checklisttemplate/index",
+    "checklisttemplates/category/<id:\d+>"                                      => "checklisttemplate/viewcategory",
+    "checklisttemplates/category/<id:\d+>/<page:\d+>"                           => "checklisttemplate/viewcategory",
+    "checklisttemplates/category/<id:\d+>/edit"                                 => "checklisttemplate/editcategory",
+    "checklisttemplates/category/new"                                           => "checklisttemplate/editcategory",
+    "checklisttemplates/category/control"                                       => "checklisttemplate/controlcategory",
+
+    // checklist templates
+    "checklisttemplates/category/<id:\d+>/template/<template:\d+>/"             => "checklisttemplate/viewtemplate",
+    "checklisttemplates/category/<id:\d+>/template/<template:\d+>/<page:\d+>"   => "checklisttemplate/viewtemplate",
+    "checklisttemplates/category/<id:\d+>/template/<template:\d+>/edit"         => "checklisttemplate/edittemplate",
+    "checklisttemplates/category/<id:\d+>/template/new"                         => "checklisttemplate/edittemplate",
+    "checklisttemplates/category/template/control"                              => "checklisttemplate/controltemplate",
+
+    //checklist template checks
+    "checklisttemplates/category/<id:\d+>/template/<template:\d+>/category/<category:\d+>/edit"  => "checklisttemplate/editcheckcategory",
+    "checklisttemplates/category/<id:\d+>/template/<template:\d+>/category/new"                  => "checklisttemplate/editcheckcategory",
+    "checklisttemplates/category/template/<template:\d+>/category/control"                       => "checklisttemplate/controlcheckcategory",
+
     // check controls
     "check/<id:\d+>/control/<control:\d+>/<page:\d+>" => "check/viewcontrol",
     "check/<id:\d+>/control/<control:\d+>"            => "check/viewcontrol",

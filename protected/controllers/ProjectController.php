@@ -1318,11 +1318,13 @@ class ProjectController extends Controller {
 		$model = new TargetEditForm();
         $model->categoryIds = array();
         $model->referenceIds = array();
+        $model->templateIds = array();
 
         if (!$newRecord) {
             $model->host = $target->host;
             $model->port = $target->port;
             $model->description = $target->description;
+            $model->checklistTemplates = $target->checklist_templates;
 
             $categories = TargetCheckCategory::model()->findAllByAttributes(array(
                 "target_id" => $target->id
@@ -1330,6 +1332,15 @@ class ProjectController extends Controller {
 
             foreach ($categories as $category) {
                 $model->categoryIds[] = $category->check_category_id;
+            }
+
+            $templates = TargetCheckChecklistTemplate::model()->findAllByAttributes(array(
+                    "target_id" => $target->id,
+                )
+            );
+
+            foreach ($templates as $template) {
+                $model->templateIds[] = $template->checklist_template_id;
             }
 
             $references = TargetReference::model()->findAllByAttributes(array(
@@ -1345,6 +1356,7 @@ class ProjectController extends Controller {
 		if (isset($_POST["TargetEditForm"])) {
             $model->categoryIds = array();
             $model->referenceIds = array();
+            $model->templateIds = array();
 			$model->attributes = $_POST["TargetEditForm"];
 
 			if ($model->validate()) {
@@ -1352,36 +1364,63 @@ class ProjectController extends Controller {
                 $target->host = $model->host;
                 $target->port = $model->port;
                 $target->description = $model->description;
+                $target->checklist_templates = $model->checklistTemplates;
                 $target->save();
 
                 $addCategories = array();
                 $delCategories = array();
+                $addTemplates  = array();
+                $delTemplates  = array();
                 $addReferences = array();
                 $delReferences = array();
 
                 if (!$newRecord) {
                     $oldCategories = array();
                     $oldReferences = array();
+                    $oldTemplates = array();
 
-                    // fill in addCategories & delCategories arrays
-                    $categories = TargetCheckCategory::model()->findAllByAttributes(array(
-                        "target_id" => $target->id
-                    ));
+                    if (!$model->checklistTemplates) {
+                        // fill in addCategories & delCategories arrays
+                        $categories = TargetCheckCategory::model()->findAllByAttributes(array(
+                            "target_id"          => $target->id,
+                            "checklist_template" => false
+                        ));
 
-                    foreach ($categories as $category) {
-                        $oldCategories[] = $category->check_category_id;
-                    }
-
-                    foreach ($oldCategories as $category) {
-                        if (!in_array($category, $model->categoryIds)) {
-                            $delCategories[] = $category;
+                        foreach ($categories as $category) {
+                            $oldCategories[] = $category->check_category_id;
                         }
-                    }
 
-                    foreach ($model->categoryIds as $category) {
-                        if (!in_array($category, $oldCategories)) {
-                            $addCategories[] = $category;
+                        $delCategories= array_diff($oldCategories, $model->categoryIds);
+                        $addCategories = array_diff($model->categoryIds, $oldCategories);
+
+                        TargetCheckCategory::model()->deleteAllByAttributes(array(
+                            "target_id"          => $target->id,
+                            "checklist_template" => true
+                        ));
+                        TargetCheckChecklistTemplate::model()->deleteAllByAttributes(array(
+                            "target_id" => $target->id
+                        ));
+
+                        $model->templateIds = array();
+                    } else {
+                        // fill in addTemplates & delTemplates arrays
+                        $templates = TargetCheckChecklistTemplate::model()->findAllByAttributes(array(
+                            "target_id"           => $target->id,
+                        ));
+
+                        foreach ($templates as $template) {
+                            $oldTemplates[] = $template->checklist_template_id;
                         }
+
+                        $delTemplates = array_diff($oldTemplates, $model->templateIds);
+                        $addTemplates = array_diff($model->templateIds, $oldTemplates);
+
+                        TargetCheckCategory::model()->deleteAllByAttributes(array(
+                            "target_id"           => $target->id,
+                            "checklist_template"  => false,
+                        ));
+
+                        $model->categoryIds = array();
                     }
 
                     // fill in addReferences & delReferences arrays
@@ -1393,20 +1432,12 @@ class ProjectController extends Controller {
                         $oldReferences[] = $reference->reference_id;
                     }
 
-                    foreach ($oldReferences as $reference) {
-                        if (!in_array($reference, $model->referenceIds)) {
-                            $delReferences[] = $reference;
-                        }
-                    }
-
-                    foreach ($model->referenceIds as $reference) {
-                        if (!in_array($reference, $oldReferences)) {
-                            $addReferences[] = $reference;
-                        }
-                    }
+                    $delReferences = array_diff($oldReferences, $model->referenceIds);
+                    $addReferences = array_diff($model->referenceIds, $oldReferences);
                 } else {
                     $addCategories = $model->categoryIds;
                     $addReferences = $model->referenceIds;
+                    $addTemplates  = $model->templateIds;
                 }
 
                 // delete categories
@@ -1430,6 +1461,77 @@ class ProjectController extends Controller {
                     $targetCategory->save();
                 }
 
+                // delete templates
+                if ($delTemplates) {
+                    $criteria = new CDbCriteria();
+                    $criteria->addColumnCondition(array(
+                        "target_id" => $target->id
+                    ));
+                    $criteria->addInCondition("checklist_template_id", $delTemplates);
+                    $checklistTemplates = TargetCheckChecklistTemplate::model()->findAll($criteria);
+
+                    foreach ($checklistTemplates as $clTemplate) {
+                        $categories = $clTemplate->checklistTemplate->checkCategories;
+                        $delTemplateCategories = array();
+
+                        foreach ($categories as $category) {
+                            $delTemplateCategories[] = $category->id;
+                        }
+
+                        TargetCheckCategory::model()->deleteAllByAttributes(array(
+                            "target_id"          => $target->id,
+                            "check_category_id"  => $delTemplateCategories,
+                            "checklist_template" => true,
+                            "template_count"     => 1
+                        ));
+
+                        $updateCriteria = new CDbCriteria();
+                        $updateCriteria->addColumnCondition(array(
+                            "target_id"          => $target->id,
+                            "checklist_template" => true,
+                        ));
+                        $updateCriteria->addInCondition("check_category_id", $delTemplateCategories);
+                        $updateCriteria->addCondition("template_count > 1");
+
+                        TargetCheckCategory::model()->updateCounters(array(
+                            "template_count" => -1
+                        ), $updateCriteria);
+                    }
+
+                    TargetCheckChecklistTemplate::model()->deleteAll($criteria);
+                }
+
+                // add templates
+                foreach ($addTemplates as $template) {
+                    $checklistTemplate = new TargetCheckChecklistTemplate();
+                    $checklistTemplate->target_id = $target->id;
+                    $checklistTemplate->checklist_template_id = $template;
+                    $checklistTemplate->save();
+
+                    $categories = $checklistTemplate->checklistTemplate->checkCategories;
+
+                    foreach ($categories as $category) {
+                        $cat = TargetCheckCategory::model()->findByAttributes(array(
+                            "target_id"          => $target->id,
+                            "check_category_id"  => $category->id,
+                            "checklist_template" => true,
+                        ));
+
+                        if ($cat) {
+                            $cat->template_count += 1;
+                            $cat->save();
+                            continue;
+                        }
+
+                        $cat = new TargetCheckCategory();
+                        $cat->target_id              = $target->id;
+                        $cat->check_category_id      = $category->id;
+                        $cat->checklist_template     = true;
+                        $cat->advanced               = true;
+                        $cat->save();
+                    }
+                }
+
                 // delete references
                 if ($delReferences) {
                     $criteria = new CDbCriteria();
@@ -1446,10 +1548,9 @@ class ProjectController extends Controller {
                     $targetReference->save();
                 }
 
-                $target->syncChecks();
+                $target->refresh();
                 Yii::app()->user->setFlash("success", Yii::t("app", "Target saved."));
 
-                $target->refresh();
 
                 TargetCheckReindexJob::enqueue(array(
                     "target_id" => $target->id
@@ -1492,6 +1593,19 @@ class ProjectController extends Controller {
             array("order" => "COALESCE(l10n.name, t.name) ASC")
         );
 
+        $templates = ChecklistTemplate::model()->with(array(
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array(
+                    "language_id" => $language
+                )
+            )
+        ))->findAllByAttributes(
+            array(),
+            array("order" => "COALESCE(l10n.name, t.name)")
+        );
+
         $references = Reference::model()->findAllByAttributes(
             array(),
             array("order" => "t.name ASC")
@@ -1504,6 +1618,7 @@ class ProjectController extends Controller {
             "project" => $project,
             "target" => $target,
             "categories" => $categories,
+            "templates" => $templates,
             "references" => $references
         ));
 	}
@@ -1946,6 +2061,17 @@ class ProjectController extends Controller {
             );
 
             $check->check = Check::model()->with($lang)->findByPk($check->check_id);
+
+            if (!count($check->scripts)) {
+                foreach ($check->check->scripts as $script) {
+                    $targetCheckScript = new TargetCheckScript();
+                    $targetCheckScript->check_script_id = $script->id;
+                    $targetCheckScript->target_check_id = $check->id;
+                    $targetCheckScript->save();
+                }
+            }
+
+            $check->refresh();
 
             foreach ($check->scripts as $script) {
                 $criteria = new CDbCriteria();

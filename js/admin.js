@@ -1857,6 +1857,61 @@ function Admin()
             }
         };
     };
+
+    /**
+     * Checklist Template object
+     */
+    this.checklisttemplate = new function () {
+        var _checklisttemplate = this;
+        /**
+         * Load category checks list
+         * @param url
+         * @param id
+         */
+        this.loadChecks = function (id) {
+            $('.check-list').empty();
+            $('.check-list-wrapper').addClass('hide');
+            _checklisttemplate.toggleChecklistButton();
+
+            if (id != '0') {
+                system.control.loadObjects(id, "category-check-list", function (data) {
+                    if (data && data.objects.length) {
+                        $.each(data.objects, function (key, value) {
+                            $('.check-list').
+                                append(
+                                    $('<label>')
+                                        .addClass('checkbox')
+                                        .text(value.name)
+                                        .append(
+                                            $('<input>')
+                                                .attr('type', 'checkbox')
+                                                .attr('id', 'ChecklistTemplateCheckCategoryEditForm_checkIds_' + value.id)
+                                                .attr('name', 'ChecklistTemplateCheckCategoryEditForm[checkIds][]')
+                                                .change(_checklisttemplate.toggleChecklistButton)
+                                                .val(value.id)
+                                        )
+                                );
+                        });
+
+                        $('.check-list-wrapper').removeClass('hide');
+                    } else {
+                        system.addAlert("error", "Category has no checks.");
+                    }
+                });
+            }
+        };
+
+        /**
+         * Disable save button if no checkbox marked
+         */
+        this.toggleChecklistButton = function () {
+            if ($('.check-list input[type=checkbox]:checked').length) {
+                $('.btn-submit').prop('disabled', false);
+            } else {
+                $('.btn-submit').prop('disabled', true);
+            }
+        };
+    };
 }
 
 var admin = new Admin();

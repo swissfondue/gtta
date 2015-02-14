@@ -28,16 +28,16 @@ class TargetCheckReindexJob extends BackgroundJob {
                     throw new Exception("Category not found.");
                 }
 
-                $category->reindexChecks();
-                $category->updateStats();
+                TargetManager::reindexTargetCategoryChecks($category);
+                TargetManager::updateTargetCategoryStats($category);
                 ProjectPlanner::updateAllStats();
             } elseif (isset($this->args['target_id'])) {
                 $target = Target::model()->findByPk($this->args['target_id']);
                 $categories = $target->_categories;
 
                 foreach ($categories as $category) {
-                    $category->reindexChecks();
-                    $category->updateStats();
+                    TargetManager::reindexTargetCategoryChecks($category);
+                    TargetManager::updateTargetCategoryStats($category);
                     ProjectPlanner::updateAllStats();
                 }
             } else {
@@ -62,8 +62,8 @@ class TargetCheckReindexJob extends BackgroundJob {
                 $categories = TargetCheckCategory::model()->findAll($criteria);
 
                 foreach ($categories as $category) {
-                    $category->reindexChecks();
-                    $category->updateStats();
+                    TargetManager::reindexTargetCategoryChecks($category);
+                    TargetManager::updateTargetCategoryStats($category);
                     ProjectPlanner::updateAllStats();
                 }
             }

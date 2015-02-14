@@ -2112,6 +2112,15 @@ function User()
                 }
             });
         };
+
+        /**
+         * Toggle check source lists on target edit
+         * @param val
+         */
+        this.toggleChecksSource = function (val) {
+            $('.checks-source-list').addClass("hide");
+            $("." + val + "-list").removeClass("hide");
+        };
     };
 
     /**
