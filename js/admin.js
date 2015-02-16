@@ -1173,7 +1173,11 @@ function Admin()
                             _package.regenerate(url);
                         }, 5000);
                     } else {
-                        location.reload();
+                        system.addAlert("success", "Regeneration completed.");
+
+                        setTimeout(function() {
+                            window.location.href = $('.regenerate-description').data("back-url");
+                        }, 5000);
                     }
                 },
 
