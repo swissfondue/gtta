@@ -11,6 +11,7 @@
  * @property string description
  * @property timestamp create_time
  * @property timestamp start_time
+ * @property timestamp last_action
  */
 class ProjectTime extends ActiveRecord
 {
@@ -114,5 +115,15 @@ class ProjectTime extends ActiveRecord
             "hours" => $diff->format("%H"),
             "mins"  => $diff->format("%I"),
         );
+    }
+
+    /**
+     * Update session last action
+     * @return bool|void
+     */
+    public function updateLastAction() {
+        $now = new DateTime();
+        $this->last_action = $now->format("Y-m-d G:i:s");
+        $this->save();
     }
 }

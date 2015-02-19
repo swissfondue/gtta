@@ -294,6 +294,23 @@ class AccountController extends Controller
 
                     break;
 
+                case "refresh":
+                    $project = Project::model()->findByPk($model->id);
+
+                    $record = ProjectTime::model()->findByAttributes(array(
+                        "user_id" => $user->id,
+                        "project_id" => $project->id,
+                        "time" => null,
+                    ));
+
+                    if (!$record) {
+                        throw new Exception("Session not found.");
+                    }
+
+                    $record->updateLastAction();
+
+                    break;
+
                 default:
                     throw new CHttpException(403, Yii::t("app", "Unknown operation."));
                     break;

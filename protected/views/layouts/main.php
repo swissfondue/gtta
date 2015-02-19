@@ -33,7 +33,7 @@
         <?php endif; ?>
     </head>
 
-    <body onunload="user.timesession.stop('<?php print $this->createUrl("account/controltimerecord"); ?>');">
+    <body onunload="user.timesession.stop('<?php print $this->createUrl("account/controltimerecord"); ?>');" onbeforeunload="user.timesession.stop('<?php print $this->createUrl("account/controltimerecord"); ?>');">
         <div class="navbar">
             <div class="navbar-inner">
                 <div class="container">
@@ -281,7 +281,7 @@
         </div>
         <?php if ($this->timeSession): ?>
             <script>
-                user.timesession.runCounter();
+                user.timesession.refresh('<?php print $this->createUrl("account/controltimerecord"); ?>');
             </script>
         <?php endif; ?>
         <script>
