@@ -32,7 +32,8 @@
             <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/client.js"></script>
         <?php endif; ?>
     </head>
-    <body>
+
+    <body onunload="user.timesession.stop('<?php print $this->createUrl("account/controltimerecord"); ?>');">
         <div class="navbar">
             <div class="navbar-inner">
                 <div class="container">
@@ -61,14 +62,14 @@
                             <?php endif; ?>
 
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
-                                <li class="dropdown <?php if (in_array(Yii::app()->controller->id, array("planner", "timetracker"))) echo "active"; ?>">
+                                <li class="dropdown <?php if (Yii::app()->controller->id == "planner" || Yii::app()->controller->id == "timetracker" && Yii::app()->controller->action->id == "index") echo "active"; ?>">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                         <?php echo Yii::t("app", "Planning"); ?>
                                         <b class="caret"></b>
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li <?php if (Yii::app()->controller->id == "planner") echo 'class="active"'; ?>><a href="<?php echo $this->createUrl("planner/index"); ?>"><?php echo Yii::t('app', "Project Planner"); ?></a></li>
-                                        <li <?php if (Yii::app()->controller->id == "timetracker") echo 'class="active"'; ?>><a href="<?php echo $this->createUrl("timetracker/index"); ?>"><?php echo Yii::t('app', "Time Tracker"); ?></a></li>
+                                        <li <?php if (Yii::app()->controller->id == "timetracker" && Yii::app()->controller->action->id == "index") echo 'class="active"'; ?>><a href="<?php echo $this->createUrl("timetracker/index"); ?>"><?php echo Yii::t('app', "Time Tracker"); ?></a></li>
                                     </ul>
                                 </li>
                             <?php endif; ?>
@@ -109,7 +110,17 @@
                                 </li>
                             <?php endif; ?>
 
-                            <li <?php if (Yii::app()->controller->id == "account") echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('account/edit'); ?>"><?php echo Yii::t('app', 'Account'); ?></a></li>
+                            <li class="dropdown <?php if (Yii::app()->controller->id == "account") echo 'active'; ?>">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <?php echo Yii::t("app", "Account"); ?>
+                                    <b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li <?php if (Yii::app()->controller->action->id == "edit") echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('account/edit'); ?>"><?php echo Yii::t('app', 'Settings'); ?></a></li>
+                                    <li <?php if (Yii::app()->controller->action->id == "time" ) echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('account/time'); ?>"><?php echo Yii::t('app', 'Time Tracker'); ?></a></li>
+                                </ul>
+                            </li>
+
                             <li><a href="<?php echo $this->createUrl('app/logout'); ?>"><?php echo Yii::t('app', 'Logout'); ?></a></li>
                         </ul>
                     <?php endif; ?>
@@ -142,7 +153,7 @@
         </div>
         <div class="container">
             <?php if (!Yii::app()->user->isGuest): ?>
-                <ul class="breadcrumb">
+                <ul class="breadcrumb inline span10">
                     <?php foreach ($this->breadcrumbs as $link): ?>
                         <li<?php if (!$link[1]) echo ' class="active"'; ?>>
                             <?php if (!$link[1]): ?>
@@ -153,6 +164,83 @@
                         </li>
                     <?php endforeach; ?>
                 </ul>
+                <div class="time-session-counter panel-wrapped inline">
+                    <div class="counter inline">
+                        <span class="counter-part hours"><?php $this->timeSession ? print $this->timeSession->duration['hours'] : print "00"; ?></span> : <span class="counter-part minutes"><?php $this->timeSession ? print $this->timeSession->duration['mins'] : print "00"; ?></span>
+                    </div>
+                    <div class="session-controls inline dropdown">
+                        <div class="start-control <?php if ($this->timeSession) print "hide"; ?>">
+                            <a href="#start" onclick="user.timesession.start('<?php print $this->createUrl("account/controltimerecord"); ?>');">
+                                <i class="icon icon-play"></i>
+                            </a>
+                            <ul class="dropdown-menu time-session-project-list" onblur="$(this).hide();">
+                                <?php
+                                    $projectId = null;
+                                    $sessionProjectId = null;
+
+                                    if (Yii::app()->controller->id == 'project') {
+                                        $projectId = Yii::app()->getRequest()->getQuery('id');
+                                    }
+
+                                    if ($this->timeSession) {
+                                        $sessionProjectId = $this->timeSession->project_id;
+                                    }
+                                ?>
+                                <?php foreach ($this->projects as $project): ?>
+                                    <li>
+                                        <a href="#" data-id="<?php print $project->id; ?>" class="<?php if ($projectId == $project->id) print 'current-project';?> <?php if ($sessionProjectId == $project->id) print 'current-session'; ?>" onclick=" $(this).addClass('current-project'); user.timesession.start('<?php print $this->createUrl("account/controltimerecord"); ?>');">
+                                            <?php print $project->name; ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                        <div class="stop-control <?php if (!$this->timeSession) print "hide"; ?>">
+                            <a href="#stop" onclick="user.timesession.stop('<?php print $this->createUrl("account/controltimerecord"); ?>');">
+                                <i class="icon icon-stop"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="btn-group btn-time-records inline">
+                    <a class="btn btn-time-records btn-med dropdown-toggle" data-toggle="dropdown" href="#">
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu time-records-list">
+                        <?php if ($this->timeRecords): ?>
+                            <?php foreach ($this->timeRecords as $record): ?>
+                                <li class="time-record-row">
+                                    <table>
+                                        <tr>
+                                            <td class="create-time">
+                                                <?php print $record['create_time'] ?>
+                                            </td>
+                                            <td class="project">
+                                                <strong><?php print $record['project']; ?></strong>
+                                            </td>
+                                            <td class="interval">
+                                                <strong>Start </strong><?php print $record['start_time']; ?> - <strong>Stop </strong><?php print $record['stop_time']; ?>
+                                            </td>
+                                            <td class="total">
+                                                <strong>Total </strong><?php print $record['total']; ?> h
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </li>
+                            <?php endforeach; ?>
+                            <li class="time-record-row">
+                                <table>
+                                    <tr>
+                                        <td class="btn-view-all">
+                                            <a href="<?php print $this->createUrl("account/time"); ?>">View All</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+
             <?php endif; ?>
 
             <div class="message-container">
@@ -191,6 +279,11 @@
                 <?php echo Yii::t('app', 'All Rights Reserved'); ?><br>
             </footer>
         </div>
+        <?php if ($this->timeSession): ?>
+            <script>
+                user.timesession.runCounter();
+            </script>
+        <?php endif; ?>
         <script>
             try {
                 console.log('Page generated in', <?php echo $this->_requestTime; ?>, 'seconds');

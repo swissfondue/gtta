@@ -26,7 +26,6 @@ class TimetrackerController extends Controller {
             "projectUsers" => array(
                 "with" => "user"
             ),
-            "userHoursSpent",
             "client",
         ))->findAll($criteria);
 

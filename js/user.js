@@ -3245,6 +3245,139 @@ function User()
             return user.check.buildTableResult(checkForm);
         };
     };
+
+    /**
+     * Time session
+     */
+    this.timesession = new function () {
+        var _timesession = this;
+
+        /**
+         * Show project list
+         */
+        this.showProjectList = function () {
+            $('.time-session-project-list').show();
+        };
+
+        /**
+         * Checks if project selected
+         * @returns {Number|length|*|jQuery}
+         */
+        this.projectSelected = function () {
+            return $('.time-session-project-list').find('.current-project').length;
+        };
+
+        /**
+         * Start time session
+         * @param url
+         */
+        this.start = function (url, callback) {
+            if (_timesession.projectSelected()) {
+                var projectId = $('.time-session-project-list').find('.current-project').data('id');
+                $('.time-session-project-list').hide();
+
+                $.ajax({
+                    dataType : 'json',
+                    url      : url,
+                    timeout  : system.ajaxTimeout,
+                    type     : 'POST',
+                    data     : {
+                        "EntryControlForm[id]"        : projectId,
+                        "EntryControlForm[operation]" : 'start',
+                        "YII_CSRF_TOKEN"               : system.csrf
+                    },
+
+                    success : function (data, textStatus) {
+                        $('.loader-image').hide();
+
+                        if (data.status == 'error') {
+                            system.addAlert('error', data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        $(".start-control").addClass('hide');
+                        $(".stop-control").removeClass('hide');
+
+                        if (callback) {
+                            callback(data);
+                        } else {
+                            location.reload();
+                        }
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $('.loader-image').hide();
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    },
+
+                    beforeSend : function (jqXHR, settings) {
+                        $('.loader-image').show();
+                    }
+                });
+            } else {
+                _timesession.showProjectList();
+            }
+        };
+
+        /**
+         * Stop time session
+         * @param url
+         * @param callback
+         */
+        this.stop = function (url, callback) {
+            var sessionEl = $('.time-session-project-list').find('.current-session');
+            var projectId = null;
+
+            if (sessionEl.length) {
+                projectId = sessionEl.data('id');
+            }
+
+            if (projectId) {
+                $.ajax({
+                    dataType : 'json',
+                    url      : url,
+                    timeout  : system.ajaxTimeout,
+                    type     : 'POST',
+                    data     : {
+                        "EntryControlForm[id]"        : projectId,
+                        "EntryControlForm[operation]" : "stop",
+                        "YII_CSRF_TOKEN"              : system.csrf
+                    },
+
+                    success : function (data, textStatus) {
+                        $('.loader-image').hide();
+
+                        if (data.status == 'error') {
+                            system.addAlert('error', data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        $(".stop-control").addClass('hide');
+                        $(".start-control").removeClass('hide');
+
+                        if (callback) {
+                            callback(data);
+                        } else {
+                            location.reload();
+                        }
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $('.loader-image').hide();
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    },
+
+                    beforeSend : function (jqXHR, settings) {
+                        $('.loader-image').show();
+                    }
+                });
+            }
+        };
+    };
 }
 
 var user = new User();

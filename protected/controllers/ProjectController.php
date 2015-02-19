@@ -550,7 +550,6 @@ class ProjectController extends Controller {
                 "order" => "subject ASC"
             ),
             "userHoursAllocated",
-            "userHoursSpent",
         ))->findByPk($id);
 
         if (!$project) {
@@ -926,7 +925,6 @@ class ProjectController extends Controller {
         $id = (int) $id;
         $project = Project::model()->with(array(
             "userHoursAllocated",
-            "userHoursSpent",
         ))->findByPk($id);
 
         if (!$project) {
@@ -1155,7 +1153,6 @@ class ProjectController extends Controller {
 
         $project = Project::model()->with(array(
             "userHoursAllocated",
-            "userHoursSpent",
         ))->findByPk($id);
 
         if (!$project) {
@@ -1559,7 +1556,6 @@ class ProjectController extends Controller {
 
         $project = Project::model()->with(array(
             "userHoursAllocated",
-            "userHoursSpent",
         ))->findByPk($id);
 
         if (!$project) {
@@ -5309,7 +5305,13 @@ class ProjectController extends Controller {
                 $record = new ProjectTime();
                 $record->user_id = $user->user->id;
                 $record->project_id = $project->id;
-                $record->hours = $form->hoursSpent;
+                $record->time = $form->hoursSpent * 3600;
+
+                // Set start_time by user hours
+                $time = new DateTime();
+                $time->sub(new DateInterval(sprintf("PT%sH", $form->hoursSpent)));
+                $record->start_time = $time->format("Y-m-d G:i:s");
+
                 $record->description = $form->description;
                 $record->save();
 

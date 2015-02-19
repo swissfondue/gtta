@@ -12,7 +12,9 @@ class AccountController extends Controller
 	{
 		return array(
             'https',
-			'checkAuth + edit, certificate',
+			'checkAuth  + edit, certificate, time, controltimerecord',
+            'ajaxOnly   + controltimerecord',
+            'postOnly   + controltimerecord'
 		);
 	}
 
@@ -180,5 +182,126 @@ class AccountController extends Controller
      */
     public function actionCertificate() {
         OpenSSL::generateUserCertificate(Yii::app()->user->id);
+    }
+
+    /**
+     * Display user's time records list
+     */
+    public function actionTime($limited=false, $page=1) {
+        $page = (int) $page;
+
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(array(
+            "user_id" => Yii::app()->user->id
+        ));
+        $criteria->addCondition("time IS NOT NULL");
+        $criteria->limit  = Yii::app()->params["entriesPerPage"];
+        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->order = "create_time DESC";
+        $criteria->together = true;
+
+        $unformatted = ProjectTime::model()->findAll($criteria);
+        $records = array();
+
+        foreach ($unformatted as $r) {
+            $records[] = $r->formatted;
+        }
+
+        $recordCount = ProjectTime::model()->count($criteria);
+
+        $this->breadcrumbs[] = array(Yii::t("app", "User Time Tracker"), '');
+        $this->pageTitle = Yii::t("app", "User Time Tracker");
+
+        $paginator = new Paginator($recordCount, $page);
+
+        $this->render("time", array(
+            "records" => $records,
+            "p" => $paginator,
+        ));
+    }
+
+    /**
+     * Control time record
+     */
+    public function actionControlTimeRecord() {
+        $response = new AjaxResponse();
+
+        try {
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate()) {
+                $errorText = "";
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $user = User::model()->findByPk(Yii::app()->user->id);
+
+            switch ($model->operation) {
+                case "start":
+                    $project = Project::model()->findByPk($model->id);
+
+                    if (!$project) {
+                        throw new CHttpException(404, Yii::t("app", "Project not found."));
+                    }
+
+                    if ($user->timeSession) {
+                        $user->timeSession->stop();
+                    }
+
+                    $record = new ProjectTime();
+                    $record->project_id = $project->id;
+                    $record->user_id = $user->id;
+                    $record->save();
+
+                    break;
+
+                case "stop":
+                    $project = Project::model()->findByPk($model->id);
+
+                    if (!$project) {
+                        throw new CHttpException(404, Yii::t("app", "Project not found."));
+                    }
+
+                    $record = ProjectTime::model()->findByAttributes(array(
+                        "user_id" => $user->id,
+                        "project_id" => $project->id,
+                        "time" => null,
+                    ));
+
+                    if (!$record) {
+                        throw new Exception("Time session not started.");
+                    }
+
+                    $record->stop();
+
+                    break;
+
+                case "delete":
+                    $record = ProjectTime::model()->findByPk($model->id);
+
+                    if (!$record){
+                        throw new Exception("Time record not found.");
+                    }
+
+                    $record->delete();
+
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t("app", "Unknown operation."));
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
     }
 }

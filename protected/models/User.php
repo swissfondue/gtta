@@ -65,6 +65,7 @@ class User extends ActiveRecord {
 			"client" => array(self::BELONGS_TO, "Client",  "client_id"),
             "projects" => array(self::MANY_MANY,  "Project", "project_users(user_id, project_id)"),
             "planner" => array(self::HAS_MANY, "ProjectPlanner",  "user_id"),
+            "timeSession" => array(self::HAS_ONE, "ProjectTime",  "user_id", "condition" => "time IS NULL"),
 		);
 	}
 
