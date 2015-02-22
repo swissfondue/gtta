@@ -10,7 +10,7 @@
  * @property string $description
  * @property integer $port
  * @property boolean checklist_temlates
- * @property TargetCheckChecklistTemplate $checklistTemplates
+ * @property TargetChecklistTemplate $checklistTemplates
  * @property TargetCheck[] $targetChecks
  */
 class Target extends ActiveRecord implements IVariableScopeObject {
@@ -61,7 +61,7 @@ class Target extends ActiveRecord implements IVariableScopeObject {
             "highRiskCount" => array(self::STAT, "TargetCheckCategory", "target_id", "select" => "SUM(high_risk_count)"),
             "targetChecks" => array(self::HAS_MANY, "TargetCheck", "target_id"),
             "targetCustomChecks" => array(self::HAS_MANY, "TargetCustomCheck", "target_id"),
-            "checklistTemplates" => array(self::HAS_MANY, "TargetCheckChecklistTemplate", "target_id"),
+            "checklistTemplates" => array(self::HAS_MANY, "TargetChecklistTemplate", "target_id"),
         );
 	}
 

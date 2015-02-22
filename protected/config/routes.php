@@ -160,24 +160,24 @@ return array(
     "checks/incoming/check/<id:\d+>/edit" => "check/editincoming",
 
     // checklist template categories
-    "checklisttemplates"                                                        => "checklisttemplate/index",
-    "checklisttemplates/category/<id:\d+>"                                      => "checklisttemplate/viewcategory",
-    "checklisttemplates/category/<id:\d+>/<page:\d+>"                           => "checklisttemplate/viewcategory",
-    "checklisttemplates/category/<id:\d+>/edit"                                 => "checklisttemplate/editcategory",
-    "checklisttemplates/category/new"                                           => "checklisttemplate/editcategory",
-    "checklisttemplates/category/control"                                       => "checklisttemplate/controlcategory",
+    "checklist-templates"                                              => "checklisttemplate/index",
+    "checklist-template/<id:\d+>"                                      => "checklisttemplate/viewcategory",
+    "checklist-template/<id:\d+>/<page:\d+>"                           => "checklisttemplate/viewcategory",
+    "checklist-template/<id:\d+>/edit"                                 => "checklisttemplate/editcategory",
+    "checklist-template/new"                                           => "checklisttemplate/editcategory",
+    "checklist-template/control"                                       => "checklisttemplate/controlcategory",
 
     // checklist templates
-    "checklisttemplates/category/<id:\d+>/template/<template:\d+>/"             => "checklisttemplate/viewtemplate",
-    "checklisttemplates/category/<id:\d+>/template/<template:\d+>/<page:\d+>"   => "checklisttemplate/viewtemplate",
-    "checklisttemplates/category/<id:\d+>/template/<template:\d+>/edit"         => "checklisttemplate/edittemplate",
-    "checklisttemplates/category/<id:\d+>/template/new"                         => "checklisttemplate/edittemplate",
-    "checklisttemplates/category/template/control"                              => "checklisttemplate/controltemplate",
+    "checklist-template/<id:\d+>/template/<template:\d+>/"             => "checklisttemplate/viewtemplate",
+    "checklist-template/<id:\d+>/template/<template:\d+>/<page:\d+>"   => "checklisttemplate/viewtemplate",
+    "checklist-template/<id:\d+>/template/<template:\d+>/edit"         => "checklisttemplate/edittemplate",
+    "checklist-template/<id:\d+>/template/new"                         => "checklisttemplate/edittemplate",
+    "checklist-template/template/control"                              => "checklisttemplate/controltemplate",
 
-    //checklist template checks
-    "checklisttemplates/category/<id:\d+>/template/<template:\d+>/category/<category:\d+>/edit"  => "checklisttemplate/editcheckcategory",
-    "checklisttemplates/category/<id:\d+>/template/<template:\d+>/category/new"                  => "checklisttemplate/editcheckcategory",
-    "checklisttemplates/category/template/<template:\d+>/category/control"                       => "checklisttemplate/controlcheckcategory",
+    // checklist template checks
+    "checklist-template/<id:\d+>/template/<template:\d+>/category/<category:\d+>/edit"  => "checklisttemplate/editcheckcategory",
+    "checklist-template/<id:\d+>/template/<template:\d+>/category/new"                  => "checklisttemplate/editcheckcategory",
+    "checklist-template/template/<template:\d+>/category/control"                       => "checklisttemplate/controlcheckcategory",
 
     // check controls
     "check/<id:\d+>/control/<control:\d+>/<page:\d+>" => "check/viewcontrol",

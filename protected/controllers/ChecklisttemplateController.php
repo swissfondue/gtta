@@ -476,7 +476,7 @@ class ChecklisttemplateController extends Controller {
 
                 $template->refresh();
 
-                $targetTemplates = TargetCheckChecklistTemplate::model()->findAllByAttributes(array(
+                $targetTemplates = TargetChecklistTemplate::model()->findAllByAttributes(array(
                     "checklist_template_id" => $template->id
                 ));
 
@@ -812,7 +812,7 @@ class ChecklisttemplateController extends Controller {
                 throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
             }
 
-            $targetTemplates = TargetCheckChecklistTemplate::model()->findAllByAttributes(array(
+            $targetTemplates = TargetChecklistTemplate::model()->findAllByAttributes(array(
                 "checklist_template_id" => $template->id
             ));
 

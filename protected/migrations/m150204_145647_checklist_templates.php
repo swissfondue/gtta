@@ -16,7 +16,7 @@ class m150204_145647_checklist_templates extends CDbMigration {
             "checklist_template_categories",
             array(
                 "id" => "bigserial NOT NULL",
-                "name" => "varchar (100) NOT NULL",
+                "name" => "varchar (1000) NOT NULL",
                 "PRIMARY KEY (id)"
             )
         );
@@ -43,7 +43,7 @@ class m150204_145647_checklist_templates extends CDbMigration {
                 "id" => "bigserial NOT NULL",
                 "checklist_template_category_id" => "bigint NOT NULL",
                 "name" => "varchar (1000) NOT NULL",
-                "description" => "varchar (1000)",
+                "description" => "varchar",
                 "PRIMARY KEY (id)"
             )
         );
@@ -57,16 +57,16 @@ class m150204_145647_checklist_templates extends CDbMigration {
                 "checklist_template_id" => "bigint NOT NULL",
                 "language_id" => "bigint NOT NULL",
                 "name" => "varchar (1000)",
-                "description" => "varchar (1000)",
+                "description" => "varchar",
                 "PRIMARY KEY (checklist_template_id, language_id)"
             )
         );
 
         /**
-         * target_check_checklist_templates table
+         * target_checklist_templates table
          */
         $this->createTable(
-            "target_check_checklist_templates",
+            "target_checklist_templates",
             array(
                 "target_id" => "bigint NOT NULL",
                 "checklist_template_id" => "bigint NOT NULL",
@@ -191,7 +191,7 @@ class m150204_145647_checklist_templates extends CDbMigration {
         $this->dropColumn("target_check_categories", "checklist_template");
         $this->dropColumn("targets", "checklist_templates");
         $this->dropColumn("target_check_categories", "template_count");
-        $this->dropTable("target_check_checklist_templates");
+        $this->dropTable("target_checklist_templates");
         $this->dropTable("checklist_template_checks");
         $this->dropTable("checklist_templates_l10n");
         $this->dropTable("checklist_templates");

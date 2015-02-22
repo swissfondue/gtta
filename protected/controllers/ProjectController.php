@@ -1334,7 +1334,7 @@ class ProjectController extends Controller {
                 $model->categoryIds[] = $category->check_category_id;
             }
 
-            $templates = TargetCheckChecklistTemplate::model()->findAllByAttributes(array(
+            $templates = TargetChecklistTemplate::model()->findAllByAttributes(array(
                     "target_id" => $target->id,
                 )
             );
@@ -1397,14 +1397,14 @@ class ProjectController extends Controller {
                             "target_id"          => $target->id,
                             "checklist_template" => true
                         ));
-                        TargetCheckChecklistTemplate::model()->deleteAllByAttributes(array(
+                        TargetChecklistTemplate::model()->deleteAllByAttributes(array(
                             "target_id" => $target->id
                         ));
 
                         $model->templateIds = array();
                     } else {
                         // fill in addTemplates & delTemplates arrays
-                        $templates = TargetCheckChecklistTemplate::model()->findAllByAttributes(array(
+                        $templates = TargetChecklistTemplate::model()->findAllByAttributes(array(
                             "target_id"           => $target->id,
                         ));
 
@@ -1468,7 +1468,7 @@ class ProjectController extends Controller {
                         "target_id" => $target->id
                     ));
                     $criteria->addInCondition("checklist_template_id", $delTemplates);
-                    $checklistTemplates = TargetCheckChecklistTemplate::model()->findAll($criteria);
+                    $checklistTemplates = TargetChecklistTemplate::model()->findAll($criteria);
 
                     foreach ($checklistTemplates as $clTemplate) {
                         $categories = $clTemplate->checklistTemplate->checkCategories;
@@ -1498,12 +1498,12 @@ class ProjectController extends Controller {
                         ), $updateCriteria);
                     }
 
-                    TargetCheckChecklistTemplate::model()->deleteAll($criteria);
+                    TargetChecklistTemplate::model()->deleteAll($criteria);
                 }
 
                 // add templates
                 foreach ($addTemplates as $template) {
-                    $checklistTemplate = new TargetCheckChecklistTemplate();
+                    $checklistTemplate = new TargetChecklistTemplate();
                     $checklistTemplate->target_id = $target->id;
                     $checklistTemplate->checklist_template_id = $template;
                     $checklistTemplate->save();
