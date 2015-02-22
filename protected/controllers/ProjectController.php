@@ -1947,6 +1947,17 @@ class ProjectController extends Controller {
 
             $check->check = Check::model()->with($lang)->findByPk($check->check_id);
 
+            if (!count($check->scripts)) {
+                foreach ($check->check->scripts as $script) {
+                    $targetCheckScript = new TargetCheckScript();
+                    $targetCheckScript->check_script_id = $script->id;
+                    $targetCheckScript->target_check_id = $check->id;
+                    $targetCheckScript->save();
+                }
+            }
+
+            $check->refresh();
+
             foreach ($check->scripts as $script) {
                 $criteria = new CDbCriteria();
                 $criteria->addColumnCondition(array(
