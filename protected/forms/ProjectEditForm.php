@@ -74,7 +74,6 @@ class ProjectEditForm extends CFormModel {
             array("deadline, startDate", "date", "allowEmpty" => false, "format" => "yyyy-MM-dd"),
             array("clientId", "checkClient"),
             array("status", "in", "range" => Project::getValidStatuses()),
-            array("hoursAllocated", "default", "value" => 0),
             array("hoursAllocated", "numerical", "min" => 0),
             array("hoursAllocated", "checkHours"),
 		);
