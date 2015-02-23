@@ -42,7 +42,7 @@ class m150217_115958_time_tracker_improvement extends CDbMigration {
         $this->execute("UPDATE project_time SET hours = round( time / 3600, 1 )");
         $this->dropColumn("project_time", "time");
         $this->dropColumn("project_time", "start_time");
-        //$this->dropColumn("project_time", "last_action");
+        $this->dropColumn("project_time", "last_action");
 
 		return true;
 	}
