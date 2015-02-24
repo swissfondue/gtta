@@ -94,7 +94,7 @@ class WebUser extends CWebUser
         date_default_timezone_set($system->timezone);
 
         $now = new DateTime();
-        $this->_model->last_action_time = $now->format("Y-m-d H:i:s");
+        $this->_model->last_action_time = $now->format(ISO_DATE_TIME);
         $this->_model->save();
     }
 

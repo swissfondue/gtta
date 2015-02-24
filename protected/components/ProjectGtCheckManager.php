@@ -26,7 +26,7 @@ class ProjectGtCheckManager {
                 "operation" => GtAutomationJob::OPERATION_START,
                 "proj_id" => $projectCheck->project_id,
                 "obj_id" => $projectCheck->gt_check_id,
-                "started" => $now->format("Y-m-d H:i:s"),
+                "started" => $now->format(ISO_DATE_TIME),
             )
         );
     }

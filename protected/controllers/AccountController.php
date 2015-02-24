@@ -99,7 +99,7 @@ class AccountController extends Controller
                 $user = User::model()->findByAttributes(array('email' => $model->email));
                 $user->password_reset_code = hash('sha256', $user->email . time() . rand());
                 $now = new DateTime();
-                $user->password_reset_time = $now->format("Y-m-d H:i:s");
+                $user->password_reset_time = DateTimeFormat::toISO($now->getTimestamp());
                 $user->save();
 
                 $subject = Yii::t('app', 'Restore Account');
@@ -146,7 +146,7 @@ class AccountController extends Controller
 
         $user = User::model()->find(array(
             "condition" => "password_reset_code = :code AND password_reset_time + INTERVAL '10 MINUTES' >= :time",
-            "params" => array("code" => $code, "time" => $now->format("Y-m-d H:i:s"))
+            "params" => array("code" => $code, "time" => $now->format(ISO_DATE_TIME))
         ));
 
         if (!$user) {
@@ -255,7 +255,9 @@ class AccountController extends Controller
                         $user->timeSession->stop();
                     }
 
+                    $now = new DateTime();
                     $record = new ProjectTime();
+                    $record->start_time = $now->format(ISO_DATE_TIME);
                     $record->project_id = $project->id;
                     $record->user_id = $user->id;
                     $record->save();

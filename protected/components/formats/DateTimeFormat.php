@@ -9,6 +9,6 @@ class DateTimeFormat {
      */
     public static function toISO($time) {
         $target = new DateTime($time);
-        return $target->format("Y-m-d H:i:s");
+        return $target->format(ISO_DATE_TIME);
     }
 }

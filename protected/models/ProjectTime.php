@@ -11,7 +11,7 @@
  * @property string description
  * @property timestamp create_time
  * @property timestamp start_time
- * @property timestamp last_action
+ * @property timestamp last_action_time
  */
 class ProjectTime extends ActiveRecord
 {
@@ -123,7 +123,7 @@ class ProjectTime extends ActiveRecord
      */
     public function updateLastAction() {
         $now = new DateTime();
-        $this->last_action = $now->format("Y-m-d G:i:s");
+        $this->last_action_time = $now->format(ISO_DATE_TIME);
         $this->save();
     }
 }

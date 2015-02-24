@@ -33,7 +33,7 @@
         <?php endif; ?>
     </head>
 
-    <body onunload="user.timesession.stop('<?php print $this->createUrl("account/controltimerecord"); ?>');" onbeforeunload="user.timesession.stop('<?php print $this->createUrl("account/controltimerecord"); ?>');">
+    <body>
         <div class="navbar">
             <div class="navbar-inner">
                 <div class="container">
@@ -153,94 +153,110 @@
         </div>
         <div class="container">
             <?php if (!Yii::app()->user->isGuest): ?>
-                <ul class="breadcrumb inline span10">
-                    <?php foreach ($this->breadcrumbs as $link): ?>
-                        <li<?php if (!$link[1]) echo ' class="active"'; ?>>
-                            <?php if (!$link[1]): ?>
-                                <?php echo CHtml::encode($link[0]); ?>
-                            <?php else: ?>
-                                <a href="<?php echo $link[1]; ?>"><?php echo CHtml::encode($link[0]); ?></a> <span class="divider">/</span>
-                            <?php endif; ?>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-                <div class="time-session-counter panel-wrapped inline">
-                    <div class="counter inline">
-                        <span class="counter-part hours"><?php $this->timeSession ? print $this->timeSession->duration['hours'] : print "00"; ?></span> : <span class="counter-part minutes"><?php $this->timeSession ? print $this->timeSession->duration['mins'] : print "00"; ?></span>
-                    </div>
-                    <div class="session-controls inline dropdown">
-                        <div class="start-control <?php if ($this->timeSession) print "hide"; ?>">
-                            <a href="#start" onclick="user.timesession.start('<?php print $this->createUrl("account/controltimerecord"); ?>');">
-                                <i class="icon icon-play"></i>
-                            </a>
-                            <ul class="dropdown-menu time-session-project-list" onblur="$(this).hide();">
-                                <?php
-                                    $projectId = null;
-                                    $sessionProjectId = null;
-
-                                    if (Yii::app()->controller->id == 'project') {
-                                        $projectId = Yii::app()->getRequest()->getQuery('id');
-                                    }
-
-                                    if ($this->timeSession) {
-                                        $sessionProjectId = $this->timeSession->project_id;
-                                    }
-                                ?>
-                                <?php foreach ($this->projects as $project): ?>
-                                    <li>
-                                        <a href="#" data-id="<?php print $project->id; ?>" class="<?php if ($projectId == $project->id) print 'current-project';?> <?php if ($sessionProjectId == $project->id) print 'current-session'; ?>" onclick=" $(this).addClass('current-project'); user.timesession.start('<?php print $this->createUrl("account/controltimerecord"); ?>');">
-                                            <?php print $project->name; ?>
-                                        </a>
+                <div class="navigation panel-wrapped">
+                    <ul class="breadcrumb inline">
+                        <?php foreach ($this->breadcrumbs as $link): ?>
+                            <li<?php if (!$link[1]) echo ' class="active"'; ?>>
+                                <?php if (!$link[1]): ?>
+                                    <?php echo CHtml::encode($link[0]); ?>
+                                <?php else: ?>
+                                    <a href="<?php echo $link[1]; ?>"><?php echo CHtml::encode($link[0]); ?></a> <span class="divider">/</span>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <div class="btn-group btn-time-records inline">
+                        <a class="btn btn-time-records dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="icon icon-time"></i>
+                        </a>
+                        <ul class="dropdown-menu time-records-list">
+                            <?php if ($this->timeRecords): ?>
+                                <?php foreach ($this->timeRecords as $record): ?>
+                                    <li class="time-record-row">
+                                        <table>
+                                            <tr>
+                                                <td class="create-time">
+                                                    <?php print $record['create_time'] ?>
+                                                </td>
+                                                <td class="project">
+                                                    <strong><?php print $record['project']; ?></strong>
+                                                </td>
+                                                <td class="interval">
+                                                    <strong>Start </strong><?php print $record['start_time']; ?> - <strong>Stop </strong><?php print $record['stop_time']; ?>
+                                                </td>
+                                                <td class="total">
+                                                    <strong>Total </strong><?php print $record['total']; ?> h
+                                                </td>
+                                            </tr>
+                                        </table>
                                     </li>
                                 <?php endforeach; ?>
-                            </ul>
-                        </div>
-                        <div class="stop-control <?php if (!$this->timeSession) print "hide"; ?>">
-                            <a href="#stop" onclick="user.timesession.stop('<?php print $this->createUrl("account/controltimerecord"); ?>');">
-                                <i class="icon icon-stop"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="btn-group btn-time-records inline">
-                    <a class="btn btn-time-records btn-med dropdown-toggle" data-toggle="dropdown" href="#">
-                        <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu time-records-list">
-                        <?php if ($this->timeRecords): ?>
-                            <?php foreach ($this->timeRecords as $record): ?>
                                 <li class="time-record-row">
                                     <table>
                                         <tr>
-                                            <td class="create-time">
-                                                <?php print $record['create_time'] ?>
-                                            </td>
-                                            <td class="project">
-                                                <strong><?php print $record['project']; ?></strong>
-                                            </td>
-                                            <td class="interval">
-                                                <strong>Start </strong><?php print $record['start_time']; ?> - <strong>Stop </strong><?php print $record['stop_time']; ?>
-                                            </td>
-                                            <td class="total">
-                                                <strong>Total </strong><?php print $record['total']; ?> h
+                                            <td class="btn-view-all">
+                                                <a href="<?php print $this->createUrl("account/time"); ?>">View All</a>
                                             </td>
                                         </tr>
                                     </table>
                                 </li>
-                            <?php endforeach; ?>
-                            <li class="time-record-row">
-                                <table>
-                                    <tr>
-                                        <td class="btn-view-all">
-                                            <a href="<?php print $this->createUrl("account/time"); ?>">View All</a>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </li>
-                        <?php endif; ?>
-                    </ul>
-                </div>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                    <div class="time-session-counter inline">
+                        <div class="counter inline">
+                            <span class="counter-part hours"><?php $this->timeSession ? print $this->timeSession->duration['hours'] : print "00"; ?></span> : <span class="counter-part minutes"><?php $this->timeSession ? print $this->timeSession->duration['mins'] : print "00"; ?></span>
+                        </div>
+                        <div class="session-controls inline">
+                            <div class="start-control <?php if ($this->timeSession) print "hide"; ?>">
+                                <a href="#start" onclick="user.timesession.start('<?php print $this->createUrl("account/controltimerecord"); ?>');">
+                                    <i class="icon icon-play"></i>
+                                </a>
+                                <div class="modal fade" id="time-session-project-select" tabindex="-1" role="dialog" aria-labelledby="smallModal" aria-hidden="true">
+                                    <?php
+                                        $projectIdToSelect = null;
 
+                                        if (Yii::app()->controller->id == 'project') {
+                                            $projectIdToSelect = Yii::app()->getRequest()->getQuery('id');
+                                        }
+
+                                        if ($this->timeSession) {
+                                            $projectIdToSelect = $this->timeSession->project_id;
+                                        }
+                                    ?>
+                                    <div class="modal-dialog modal-sm">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal">×</button>
+                                                <h3>Select Project</h3>
+                                            </div>
+                                            <div class="modal-body">
+                                                <select class="time-session-project">
+                                                    <option value="0">Please select...</option>
+
+                                                    <?php foreach ($this->projects as $project): ?>
+                                                        <option value="<?php print $project->id; ?>" <?php if ($projectIdToSelect == $project->id) print 'selected="selected"'; ?>>
+                                                            <?php print $project->name; ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="#" class="btn btn-primary" onclick="user.timesession.start('<?php print $this->createUrl("account/controltimerecord")?>')">Start</a>
+                                                <a href="#" class="btn" data-dismiss="modal" onclick="$('.time-session-project').find(':selected').removeAttr('selected');">Cancel</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="stop-control <?php if (!$this->timeSession) print "hide"; ?>">
+                                <a href="#stop" onclick="user.timesession.stop('<?php print $this->createUrl("account/controltimerecord"); ?>');">
+                                    <i class="icon icon-stop"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             <?php endif; ?>
 
             <div class="message-container">

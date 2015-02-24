@@ -16,8 +16,8 @@ class TimeSessionCleanerCommand extends ConsoleCommand {
 
         foreach ($records as $record) {
             $now = new DateTime();
-            $lastAction = new DateTime($record->last_action);
-            $diff = $now->getTimestamp() - $lastAction->getTimestamp();
+            $lastActionTime = new DateTime($record->last_action_time);
+            $diff = $now->getTimestamp() - $lastActionTime->getTimestamp();
 
             if ($diff > self::INACTIVE_LIFETIME) {
                 $record->stop();

@@ -1178,16 +1178,31 @@ textarea.log {
     box-shadow: inset 0 1px 0 #ffffff;
 }
 
-div.inline {
+.inline {
     display: inline-block;
 }
 
+ul.breadcrumb {
+    border: none;
+    background: none;
+    margin: 0;
+    padding: 0;
+}
+
 .time-session-counter {
+    margin-left: 5px;
+    float: right;
+}
+
+.time-session-counter .session-controls {
     margin-left: 5px;
 }
 
 .btn-time-records {
     vertical-align: top;
+    float: right;
+    margin-top: -3px;
+    padding: 2px 5px;
 }
 
 .time-records-list {
@@ -1230,4 +1245,9 @@ div.inline {
 
 .time-record-row .btn-view-all a {
     color: #0088cc;
+}
+
+#time-session-project-select .modal-footer ,
+#time-session-project-select .modal-body {
+    text-align: center;
 }

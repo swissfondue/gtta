@@ -3258,7 +3258,7 @@ function User()
          * Show project list
          */
         this.showProjectList = function () {
-            $('.time-session-project-list').show();
+            $('#time-session-project-select').modal("show");
         };
 
         /**
@@ -3266,7 +3266,7 @@ function User()
          * @returns {Number|length|*|jQuery}
          */
         this.projectSelected = function () {
-            return $('.time-session-project-list').find('.current-project').length;
+            return $('.time-session-project').val() != '0';
         };
 
         /**
@@ -3274,9 +3274,10 @@ function User()
          * @param url
          */
         this.start = function (url, callback) {
+            var modal = $('#time-session-project-select');
+
             if (_timesession.projectSelected()) {
-                var projectId = $('.time-session-project-list').find('.current-project').data('id');
-                $('.time-session-project-list').hide();
+                var projectId = $('.time-session-project').val();
 
                 $.ajax({
                     dataType : 'json',
@@ -3298,6 +3299,8 @@ function User()
                         }
 
                         data = data.data;
+
+                        modal.modal("hide");
 
                         $(".start-control").addClass('hide');
                         $(".stop-control").removeClass('hide');
@@ -3329,14 +3332,9 @@ function User()
          * @param callback
          */
         this.stop = function (url, callback) {
-            var sessionEl = $('.time-session-project-list').find('.current-session');
-            var projectId = null;
+            if (_timesession.projectSelected()) {
+                var projectId = $('.time-session-project').val();
 
-            if (sessionEl.length) {
-                projectId = sessionEl.data('id');
-            }
-
-            if (projectId) {
                 $.ajax({
                     dataType : 'json',
                     url      : url,

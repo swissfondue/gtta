@@ -201,7 +201,7 @@ class MonitorController extends Controller {
 
         $criteria = new CDbCriteria();
         $criteria->addCondition("t.last_action_time > :interval");
-        $criteria->params = array('interval' => $interval->format("Y-m-d H:i:s"));
+        $criteria->params = array('interval' => $interval->format(ISO_DATE_TIME));
         $criteria->order = 't.role ASC, t.name ASC, t.email ASC';
 
         $users = User::model()->findAll($criteria);

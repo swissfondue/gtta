@@ -20,7 +20,7 @@ class TargetCheckManager {
         AutomationJob::enqueue(array(
                 "operation" => AutomationJob::OPERATION_START,
                 "obj_id" => $targetCheck->id,
-                "started" => $now->format("Y-m-d H:i:s"),
+                "started" => $now->format(ISO_DATE_TIME),
             )
         );
     }
