@@ -166,7 +166,7 @@
                         <?php endforeach; ?>
                     </ul>
                     <div class="btn-group btn-time-records inline">
-                        <a class="btn btn-time-records dropdown-toggle" data-toggle="dropdown" href="#">
+                        <a class="btn btn-time-records dropdown-toggle <?php if (!$this->timeRecords) print "disabled"; ?>" data-toggle="dropdown" href="#">
                             <i class="icon icon-time"></i>
                         </a>
                         <ul class="dropdown-menu time-records-list">
