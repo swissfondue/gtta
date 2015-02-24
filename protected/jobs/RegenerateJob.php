@@ -13,9 +13,10 @@ class RegenerateJob extends BackgroundJob {
      * Perform
      */
     public function perform() {
+        sleep(30);
         try {
             $vm = new VMManager();
-            $vm->regenerate(false);
+            //$vm->regenerate(false);
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
         }

@@ -2,17 +2,35 @@
 
 <hr>
 
-<div class="regenerate-description" data-back-url="<?php print $this->createUrl("package/index"); ?>">
-    <?php
+<?php if ($system->isRegenerating): ?>
+    <div class="form-description" data-redirect-url="<?php print $this->createUrl("package/index"); ?>">
+        <?php
         echo Yii::t(
             "app",
             "Regenerating scripts sandbox. This may take up to several minutes or hours, please be patient."
         );
-    ?>
-</div>
+        ?>
+    </div>
 
-<script>
-    $(function () {
-        admin.pkg.regenerate("<?php echo $this->createUrl("package/regeneratestatus"); ?>");
-    });
-</script>
+    <script>
+        $(function () {
+            admin.pkg.checkRegenerate("<?php echo $this->createUrl("package/regeneratestatus"); ?>");
+        });
+    </script>
+<?php else: ?>
+    <p>
+        <?php echo Yii::t("app", "Please note that sandbox regeneration may take up to several minutes or hours to complete."); ?>
+        <?php echo Yii::t("app", "The regeneration process cannot be cancelled, so use this feature only if you have to."); ?>
+    </p>
+
+    <form id="RegenerateForm" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
+        <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
+        <input type="hidden" value="1" name="RegenerateForm[proceed]">
+
+        <fieldset>
+            <div class="form-actions">
+                <button type="submit" class="btn"><?php echo Yii::t("app", "Regenerate"); ?></button>
+            </div>
+        </fieldset>
+    </form>
+<?php endif; ?>

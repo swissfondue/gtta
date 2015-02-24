@@ -451,8 +451,10 @@ class PackageController extends Controller {
      * Regenerate.
      */
 	public function actionRegenerate() {
-        if (!$this->_system->isRegenerating) {
-            RegenerateJob::enqueue();
+        if (isset($_POST["RegenerateForm"])) {
+            if (!$this->_system->isRegenerating) {
+                RegenerateJob::enqueue();
+            }
         }
 
         $this->_system->refresh();
