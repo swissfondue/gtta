@@ -2119,7 +2119,8 @@ function User()
          */
         this.toggleChecksSource = function (val) {
             $('.checks-source-list').addClass("hide");
-            $("." + val + "-list").removeClass("hide");
+            $('.references-list').addClass("hide");
+            $("." + val + "-mode").removeClass("hide");
         };
     };
 

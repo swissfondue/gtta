@@ -30,7 +30,7 @@
                     <tbody>
                     <tr>
                         <th class="name"><?php echo Yii::t('app', 'Category'); ?></th>
-                        <th class="check-count"><?php echo Yii::t('app', 'Checks'); ?></th>
+                        <th class="check-count"><?php echo Yii::t('app', 'Templates'); ?></th>
                         <th class="actions">&nbsp;</th>
                     </tr>
                     <?php foreach ($categories as $category): ?>

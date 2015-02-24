@@ -40,17 +40,10 @@
                             <?php endif; ?>
                         </div>
                     </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-
-        <div class="tab-content">
-            <?php foreach ($languages as $language): ?>
-                <div class="tab-pane<?php if ($language->default) echo ' active'; ?>" id="<?php echo CHtml::encode($language->code); ?>">
                     <div class="control-group <?php if ($model->getError('description')) echo 'error'; ?>">
                         <label class="control-label" for="ChecklistTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_description"><?php echo Yii::t('app', 'Description'); ?></label>
                         <div class="controls">
-                            <textarea class="max-width" rows="10" id="ChecklistTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_description" name="ChecklistTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][description]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['description']) : ''; ?>"></textarea>
+                            <textarea class="max-width" rows="10" id="ChecklistTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_description" name="ChecklistTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][description]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['description']) : ''; ?></textarea>
                             <?php if ($model->getError('description')): ?>
                                 <p class="help-block"><?php echo $model->getError('description'); ?></p>
                             <?php endif; ?>

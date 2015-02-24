@@ -10,7 +10,6 @@ class TargetManager {
      */
     public static function updateTargetCategoryStats($category) {
         $controlIds = array();
-        $referenceIds = array();
         $checkCount = 0;
         $finishedCount = 0;
         $infoCount = 0;
@@ -58,17 +57,22 @@ class TargetManager {
             }
         }
 
-        $references = TargetReference::model()->findAllByAttributes(array(
-            "target_id" => $category->target_id
-        ));
-
-        foreach ($references as $reference) {
-            $referenceIds[] = $reference->reference_id;
-        }
-
         $criteria = new CDbCriteria();
         $criteria->addInCondition("tc.check_control_id", $controlIds);
-        $criteria->addInCondition("tc.reference_id", $referenceIds);
+
+        if (!$target->checklist_templates) {
+            $referenceIds = array();
+            $references = TargetReference::model()->findAllByAttributes(array(
+                "target_id" => $category->target_id
+            ));
+
+            foreach ($references as $reference) {
+                $referenceIds[] = $reference->reference_id;
+            }
+
+            $criteria->addInCondition("tc.reference_id", $referenceIds);
+        }
+
         $criteria->addColumnCondition(array(
             "t.target_id" => $target->id
         ));
@@ -86,7 +90,10 @@ class TargetManager {
 
         $criteria = new CDbCriteria();
         $criteria->addInCondition("check_control_id", $controlIds);
-        $criteria->addInCondition("reference_id", $referenceIds);
+
+        if (!$target->checklist_templates) {
+            $criteria->addInCondition("reference_id", $referenceIds);
+        }
 
         if (!$category->advanced) {
             $criteria->addCondition("t.advanced = FALSE");
@@ -144,20 +151,11 @@ class TargetManager {
      */
     public static function reindexTargetCategoryChecks($category) {
         $controlIds = array();
-        $referenceIds = array();
         $checks = array();
         $checkIds = array();
         $target = $category->target;
 
-        $references = TargetReference::model()->findAllByAttributes(array(
-            "target_id" => $category->target_id
-        ));
-
-        foreach ($references as $reference) {
-            $referenceIds[] = $reference->reference_id;
-        }
-
-        if ($category->target->checklist_templates) {
+        if ($target->checklist_templates) {
             $templates = $target->checklistTemplates;
 
             foreach ($templates as $template) {
@@ -165,7 +163,6 @@ class TargetManager {
                 $criteria->addColumnCondition(array(
                     "t.checklist_template_id" => $template->checklist_template_id,
                 ));
-                $criteria->addInCondition("tc.reference_id", $referenceIds);
 
                 $templateChecks = ChecklistTemplateCheck::model()->with(array(
                     "check" => array(
@@ -188,6 +185,15 @@ class TargetManager {
                 }
             }
         } else {
+            $referenceIds = array();
+            $references = TargetReference::model()->findAllByAttributes(array(
+                "target_id" => $category->target_id
+            ));
+
+            foreach ($references as $reference) {
+                $referenceIds[] = $reference->reference_id;
+            }
+
             $controls = CheckControl::model()->findAllByAttributes(array(
                 "check_category_id" => $category->check_category_id
             ));

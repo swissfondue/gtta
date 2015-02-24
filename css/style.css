@@ -1151,3 +1151,13 @@ table.project-header td.hours, table.project-header th.hours, table.user td.hour
 textarea.log {
     width:100%;
 }
+
+#TargetEditForm .template-category-list,
+#TargetEditForm .template-list {
+    list-style: none;
+}
+
+#TargetEditForm .template-category-list {
+    margin-left: 0;
+    padding-top: 3px;
+}

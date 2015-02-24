@@ -1593,18 +1593,24 @@ class ProjectController extends Controller {
             array("order" => "COALESCE(l10n.name, t.name) ASC")
         );
 
-        $templates = ChecklistTemplate::model()->with(array(
-            "l10n" => array(
-                "joinType" => "LEFT JOIN",
-                "on" => "language_id = :language_id",
-                "params" => array(
-                    "language_id" => $language
+        $templateCategories = ChecklistTemplateCategory::model()->with(array(
+            "templates" => array(
+                "alias" => "tpl",
+                "with" => array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array(
+                            "language_id" => $language
+                        )
+                    )
                 )
             )
         ))->findAllByAttributes(
             array(),
-            array("order" => "COALESCE(l10n.name, t.name)")
+            array("order" => "t.name")
         );
+        $templateCount = ChecklistTemplate::model()->count();
 
         $references = Reference::model()->findAllByAttributes(
             array(),
@@ -1618,7 +1624,8 @@ class ProjectController extends Controller {
             "project" => $project,
             "target" => $target,
             "categories" => $categories,
-            "templates" => $templates,
+            "templateCount" => $templateCount,
+            "templateCategories" => $templateCategories,
             "references" => $references
         ));
 	}
@@ -1927,18 +1934,21 @@ class ProjectController extends Controller {
                 throw new CHttpException(404, Yii::t("app", "Control not found."));
             }
 
-            $referenceIds = array();
-            $references = TargetReference::model()->findAllByAttributes(array(
-                "target_id" => $target->id
-            ));
-
-            foreach ($references as $reference) {
-                $referenceIds[] = $reference->reference_id;
-            }
-
             $criteria = new CDbCriteria();
             $criteria->addColumnCondition(array("t.check_control_id" => $control->id));
-            $criteria->addInCondition("t.reference_id", $referenceIds);
+
+            if (!$target->checklist_templates) {
+                $referenceIds = array();
+                $references = TargetReference::model()->findAllByAttributes(array(
+                    "target_id" => $target->id
+                ));
+
+                foreach ($references as $reference) {
+                    $referenceIds[] = $reference->reference_id;
+                }
+                $criteria->addInCondition("t.reference_id", $referenceIds);
+            }
+
             $criteria->order = "t.sort_order ASC, tc.id ASC";
 
             if (!$category->advanced) {

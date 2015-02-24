@@ -369,8 +369,9 @@ class ChecklisttemplateController extends Controller {
             'code' => Yii::app()->language
         ));
 
-        if ($language)
+        if ($language) {
             $language = $language->id;
+        }
 
         $category = ChecklistTemplateCategory::model()->with(array(
             'l10n' => array(
@@ -380,11 +381,11 @@ class ChecklisttemplateController extends Controller {
             )
         ))->findByPk($id);
 
-        if (!$category)
+        if (!$category) {
             throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+        }
 
-        if ($template)
-        {
+        if ($template) {
             $template = ChecklistTemplate::model()->with(array(
                 'l10n' => array(
                     'joinType' => 'LEFT JOIN',
@@ -399,9 +400,7 @@ class ChecklisttemplateController extends Controller {
             if (!$template) {
                 throw new CHttpException(404, Yii::t('app', 'Template not found.'));
             }
-        }
-        else
-        {
+        } else {
             $template   = new ChecklistTemplate();
             $template->checklist_template_category_id = $category->id;
             $newRecord = true;
@@ -412,8 +411,7 @@ class ChecklisttemplateController extends Controller {
         $model = new ChecklistTemplateEditForm();
         $model->localizedItems = array();
 
-        if (!$newRecord)
-        {
+        if (!$newRecord) {
             $model->name        = $template->name;
             $model->description = $template->description;
 
@@ -421,18 +419,16 @@ class ChecklisttemplateController extends Controller {
                 'checklist_template_id' => $template->id
             ));
 
-            foreach ($templateL10n as $tl)
-            {
+            foreach ($templateL10n as $tl) {
                 $i = array();
 
                 $i['name'] = $tl->name;
-                $i['description'] = $tl->name;
+                $i['description'] = $tl->description;
                 $model->localizedItems[$tl->language_id] = $i;
             }
         }
 
-        if (isset($_POST['ChecklistTemplateEditForm']))
-        {
+        if (isset($_POST['ChecklistTemplateEditForm'])) {
             $model->attributes  = $_POST['ChecklistTemplateEditForm'];
             $model->name        = $model->defaultL10n($languages, 'name');
             $model->description = $model->defaultL10n($languages, 'description');
@@ -512,10 +508,9 @@ class ChecklisttemplateController extends Controller {
         $this->breadcrumbs[] = array(Yii::t('app', 'Checklist Templates'), $this->createUrl('checklisttemplate/index'));
         $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('checklisttemplate/viewcategory', array( 'id' => $category->id )));
 
-        if ($newRecord)
+        if ($newRecord) {
             $this->breadcrumbs[] = array(Yii::t('app', 'New Template'), '');
-        else
-        {
+        } else {
             $this->breadcrumbs[] = array($template->localizedName, $this->createUrl('checklisttemplate/viewtemplate', array(
                 'id'          => $category->id,
                 'template'    => $template->id
