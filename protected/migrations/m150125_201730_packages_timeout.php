@@ -9,7 +9,7 @@ class m150125_201730_packages_timeout extends CDbMigration {
      * @return bool
      */
     public function safeUp() {
-        $this->addColumn("packages", "timeout", "BIGINT DEFAULT 60");
+        $this->addColumn("packages", "timeout", "BIGINT DEFAULT 86400");
         $this->createTable("target_check_scripts", array(
             "target_check_id" => "bigint NOT NULL",
             "check_script_id" => "bigint NOT NULL",
