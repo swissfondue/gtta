@@ -3,18 +3,18 @@
 <hr>
 
 <?php if ($system->isRegenerating): ?>
-    <div class="form-description">
+    <div class="form-description" data-redirect-url="<?php print $this->createUrl("package/index"); ?>">
         <?php
-            echo Yii::t(
-                "app",
-                "Regenerating scripts sandbox. This may take up to several minutes or hours, please be patient."
-            );
+        echo Yii::t(
+            "app",
+            "Regenerating scripts sandbox. This may take up to several minutes or hours, please be patient."
+        );
         ?>
     </div>
 
     <script>
         $(function () {
-            admin.pkg.regenerate("<?php echo $this->createUrl("package/regeneratestatus"); ?>");
+            admin.pkg.checkRegenerate("<?php echo $this->createUrl("package/regeneratestatus"); ?>");
         });
     </script>
 <?php else: ?>

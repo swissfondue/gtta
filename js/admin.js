@@ -1147,7 +1147,7 @@ function Admin()
         /**
          * Regenerate status
          */
-        this.regenerate = function (url) {
+        this.checkRegenerate = function (url) {
             $.ajax({
                 dataType: "json",
                 url: url,
@@ -1170,10 +1170,14 @@ function Admin()
 
                     if (data.regenerating) {
                         setTimeout(function () {
-                            _package.regenerate(url);
+                            _package.checkRegenerate(url);
                         }, 5000);
                     } else {
-                        location.reload();
+                        system.addAlert("success", "Regeneration completed.");
+
+                        setTimeout(function() {
+                            window.location.href = $('.form-description').data("redirect-url");
+                        }, 5000);
                     }
                 },
 
@@ -1182,7 +1186,7 @@ function Admin()
 
                     if (textStatus == "timeout") {
                         setTimeout(function () {
-                            _package.regenerate(url);
+                            _package.checkRegenerate(url);
                         }, 5000);
                     } else {
                         system.addAlert("error", system.translate("Request failed, please try again."));
