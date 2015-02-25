@@ -338,7 +338,6 @@ return array (
   'If you won\'t receive the message within a few minutes, please check your spam folder.' => 'Falls Sie die Nachricht nicht binnen der nächsten Minuten erhalten, bitten wir Sie den SPAM Eingang zu kontrollieren',
   'In Progress' => 'Im Gange',
   'In order to recover your password please follow this link - {link}.' => 'Um ihr Passwort wieder herzustellen bitten wir Sie, den nachfolgenden Link zu verwenden: {link}',
-  'Incoming Checks' => 'Eingehende Checks',
   'Incorrect username or password.' => 'Falscher Benutzername oder Passwort.',
   'Indent' => 'Auftrag',
   'Info' => 'Information',

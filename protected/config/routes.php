@@ -154,11 +154,6 @@ return array(
     "check/control"             => "check/control",
     "check/search"              => "check/search",
 
-    // incoming checks
-    "checks/incoming" => "check/incoming",
-    "checks/incoming/<page:\d+>" => "check/incoming",
-    "checks/incoming/check/<id:\d+>/edit" => "check/editincoming",
-
     // check controls
     "check/<id:\d+>/control/<control:\d+>/<page:\d+>" => "check/viewcontrol",
     "check/<id:\d+>/control/<control:\d+>"            => "check/viewcontrol",

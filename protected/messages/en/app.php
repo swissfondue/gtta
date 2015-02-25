@@ -211,7 +211,6 @@ return array (
   'Import Completed' => '',
   'In Progress' => '',
   'In order to recover your password please follow this link - {link}.' => '',
-  'Incoming Checks' => '',
   'Incorrect username or password.' => '',
   'Indent' => '',
   'Info' => '',
