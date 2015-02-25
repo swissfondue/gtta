@@ -49,7 +49,7 @@
                     </tbody>
                 </table>
 
-                <?php echo $this->renderPartial('/layouts/partial/pagination', array('p' => $p, 'url' => 'check/index', 'params' => array())); ?>
+                <?php echo $this->renderPartial('/layouts/partial/pagination', array('p' => $p, 'url' => 'checklisttemplate/index', 'params' => array())); ?>
             <?php else: ?>
                 <?php echo Yii::t('app', 'No categories yet.'); ?>
             <?php endif; ?>

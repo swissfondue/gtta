@@ -160,6 +160,7 @@ return array(
     "checks/incoming/check/<id:\d+>/edit" => "check/editincoming",
 
     // checklist template categories
+    "checklist-templates/<page:\d+>"                                   => "checklisttemplate/index",
     "checklist-templates"                                              => "checklisttemplate/index",
     "checklist-template/<id:\d+>"                                      => "checklisttemplate/viewcategory",
     "checklist-template/<id:\d+>/<page:\d+>"                           => "checklisttemplate/viewcategory",
