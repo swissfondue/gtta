@@ -58,6 +58,7 @@ class ProjectEditForm extends CFormModel {
     public function __construct($scenario="", $projectId=null) {
         parent::__construct($scenario);
         $this->_projectId = $projectId;
+        $this->hoursAllocated = 0;
     }
 
     /**

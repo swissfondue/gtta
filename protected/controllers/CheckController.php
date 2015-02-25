@@ -81,7 +81,6 @@ class CheckController extends Controller
 
         $criteria = new CDbCriteria();
         $criteria->addCondition("check_control_id IS NULL");
-        $incomingCount = Check::model()->count($criteria);
 
         $this->breadcrumbs[] = array(Yii::t("app", "Checks"), "");
 
@@ -91,7 +90,6 @@ class CheckController extends Controller
             "categories" => $categories,
             "p" => $paginator,
             "count" => $count,
-            "incomingCount" => $incomingCount,
         ));
 	}
 
@@ -747,146 +745,6 @@ class CheckController extends Controller
             'p'        => $paginator,
             'category' => $category,
             'control'  => $control,
-        ));
-	}
-
-    /**
-     * Display a list of incoming checks
-     */
-	public function actionIncoming($page=1) {
-        $page = (int) $page;
-
-        $language = Language::model()->findByAttributes(array(
-            "code" => Yii::app()->language
-        ));
-
-        if ($language) {
-            $language = $language->id;
-        }
-
-        if ($page < 1) {
-            throw new CHttpException(404, Yii::t("app", "Page not found."));
-        }
-
-        $criteria = new CDbCriteria();
-        $criteria->limit = Yii::app()->params["entriesPerPage"];
-        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
-        $criteria->order = "t.sort_order ASC";
-        $criteria->addCondition("check_control_id IS NULL");
-        $criteria->together = true;
-
-        $checks = Check::model()->with(array(
-            "l10n" => array(
-                "joinType" => "LEFT JOIN",
-                "on" => "language_id = :language_id",
-                "params" => array("language_id" => $language)
-            )
-        ))->findAll($criteria);
-
-        $checkCount = Check::model()->count($criteria);
-        $paginator = new Paginator($checkCount, $page);
-
-        $this->breadcrumbs[] = array(Yii::t("app", "Checks"), $this->createUrl("check/index"));
-        $this->breadcrumbs[] = array(Yii::t("app", "Incoming Checks"), "");
-
-        // display the page
-        $this->pageTitle = Yii::t("app", "Incoming Checks");
-		$this->render("incoming/index", array(
-            "checks" => $checks,
-            "p" => $paginator,
-        ));
-	}
-
-    /**
-     * Incoming check edit page.
-     */
-	public function actionEditIncoming($id) {
-        $id = (int) $id;
-
-        $language = Language::model()->findByAttributes(array(
-            "code" => Yii::app()->language
-        ));
-
-        if ($language) {
-            $language = $language->id;
-        }
-
-        $criteria = new CDbCriteria();
-        $criteria->together = true;
-        $criteria->addCondition("check_control_id IS NULL");
-        $criteria->addColumnCondition(array("id" => $id));
-
-        $check = Check::model()->with(array(
-            "l10n" => array(
-                "joinType" => "LEFT JOIN",
-                "on" => "language_id = :language_id",
-                "params" => array("language_id" => $language)
-            )
-        ))->find($criteria);
-
-        if (!$check) {
-            throw new CHttpException(404, Yii::t("app", "Check not found."));
-        }
-
-		$model = new IncomingCheckEditForm();
-
-		// collect user input data
-		if (isset($_POST["IncomingCheckEditForm"])) {
-			$model->attributes = $_POST["IncomingCheckEditForm"];
-
-			if ($model->validate()) {
-                $check->check_control_id = $model->controlId;
-                $check->save();
-
-                $control = CheckControl::model()->findByPk($model->controlId);
-
-                Yii::app()->user->setFlash("success", Yii::t("app", "Check saved."));
-                $check->refresh();
-
-                $this->redirect(array(
-                    "check/editcheck",
-                    "id" => $check->control->check_category_id,
-                    "control" => $check->check_control_id,
-                    "check" => $check->id
-                ));
-            } else {
-                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
-            }
-		}
-
-        $this->breadcrumbs[] = array(Yii::t("app", "Checks"), $this->createUrl("check/index"));
-        $this->breadcrumbs[] = array(Yii::t("app", "Incoming Checks"), $this->createUrl("check/incoming"));
-        $this->breadcrumbs[] = array($check->localizedName, "");
-
-        $categories = CheckCategory::model()->with(array(
-            "l10n" => array(
-                "joinType" => "LEFT JOIN",
-                "on" => "language_id = :language_id",
-                "params" => array("language_id" => $language)
-            ),
-
-            "controls" => array(
-                "joinType" => "LEFT JOIN",
-                "with"     => array(
-                    "l10n" => array(
-                        "alias" => "l10n_c",
-                        "joinType" => "LEFT JOIN",
-                        "on" => "l10n_c.language_id = :language_id",
-                        "params" => array("language_id" => $language)
-                    )
-                )
-            )
-        ))->findAllByAttributes(
-            array(),
-            array("order" => "COALESCE(l10n.name, t.name) ASC")
-        );
-
-		// display the page
-        $this->pageTitle = $check->localizedName;
-		$this->render("incoming/edit", array(
-            "model" => $model,
-            "check" => $check,
-            "categories" => $categories,
         ));
 	}
 
