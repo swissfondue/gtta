@@ -12,7 +12,7 @@ class ChecklistTemplateL10n extends ActiveRecord {
     /**
      * Returns the static model of the specified AR class.
      * @param string $className active record class name.
-     * @return Check the static model class
+     * @return ChecklistTemplateL10n the static model class
      */
     public static function model($className=__CLASS__) {
         return parent::model($className);

@@ -40,7 +40,7 @@
                     </tbody>
                 </table>
 
-                <?php echo $this->renderPartial('/layouts/partial/pagination', array('p' => $p, 'url' => 'check/view', 'params' => array('id' => $category->id))); ?>
+                <?php echo $this->renderPartial("/layouts/partial/pagination", array("p" => $p, "url" => "checklisttemplate/viewtemplate", "params" => array("id" => $category->id, "template" => $template->id))); ?>
             <?php else: ?>
                 <?php echo Yii::t('app', 'No categories yet.'); ?>
             <?php endif; ?>

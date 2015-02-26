@@ -28,10 +28,10 @@ class ChecklistTemplateEditForm extends LocalizedFormModel {
     /**
      * @return array customized attribute labels (name=>label)
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return array(
             'name' => Yii::t('app', 'Name'),
+            'description' => Yii::t('app', 'Description'),
         );
     }
 }

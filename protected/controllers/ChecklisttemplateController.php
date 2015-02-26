@@ -7,8 +7,7 @@ class ChecklisttemplateController extends Controller {
     /**
      * @return array action filters
      */
-    public function filters()
-    {
+    public function filters() {
         return array(
             'https',
             'checkAuth',
@@ -130,14 +129,14 @@ class ChecklisttemplateController extends Controller {
         $id        = (int) $id;
         $newRecord = false;
 
-        if ($id)
-        {
+        if ($id) {
             $language = Language::model()->findByAttributes(array(
                 'code' => Yii::app()->language
             ));
 
-            if ($language)
+            if ($language) {
                 $language = $language->id;
+            }
 
             $category = ChecklistTemplateCategory::model()->with(array(
                 'l10n' => array(
@@ -146,9 +145,7 @@ class ChecklisttemplateController extends Controller {
                     'params'   => array( 'language_id' => $language )
                 )
             ))->findByPk($id);
-        }
-        else
-        {
+        } else {
             $category  = new ChecklistTemplateCategory();
             $newRecord = true;
         }
@@ -158,16 +155,16 @@ class ChecklisttemplateController extends Controller {
         $model = new ChecklistTemplateCategoryEditForm();
         $model->localizedItems = array();
 
-        if (!$newRecord)
-        {
+        if (!$newRecord) {
             $model->name = $category->name;
 
             $categoryL10n = ChecklistTemplateCategoryL10n::model()->findAllByAttributes(array(
                 'checklist_template_category_id' => $category->id
             ));
 
-            foreach ($categoryL10n as $cl)
+            foreach ($categoryL10n as $cl) {
                 $model->localizedItems[$cl->language_id]['name'] = $cl->name;
+            }
         }
 
         // collect user input data
@@ -222,10 +219,9 @@ class ChecklisttemplateController extends Controller {
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Checklist Templates'), $this->createUrl('checklisttemplate/index'));
 
-        if ($newRecord)
+        if ($newRecord) {
             $this->breadcrumbs[] = array(Yii::t('app', 'New Category'), '');
-        else
-        {
+        } else {
             $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('checklisttemplate/viewcategory', array( 'id' => $category->id )));
             $this->breadcrumbs[] = array(Yii::t('app', 'Edit'), '');
         }
@@ -245,17 +241,14 @@ class ChecklisttemplateController extends Controller {
     public function actionControlCategory() {
         $response = new AjaxResponse();
 
-        try
-        {
+        try {
             $model = new EntryControlForm();
             $model->attributes = $_POST['EntryControlForm'];
 
-            if (!$model->validate())
-            {
+            if (!$model->validate()) {
                 $errorText = '';
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -269,8 +262,7 @@ class ChecklisttemplateController extends Controller {
             if ($category === null)
                 throw new CHttpException(404, Yii::t('app', 'Category not found.'));
 
-            switch ($model->operation)
-            {
+            switch ($model->operation) {
                 case 'delete':
                     $category->delete();
                     break;
@@ -279,9 +271,7 @@ class ChecklisttemplateController extends Controller {
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -534,17 +524,14 @@ class ChecklisttemplateController extends Controller {
     public function actionControlTemplate() {
         $response = new AjaxResponse();
 
-        try
-        {
+        try {
             $model = new EntryControlForm();
             $model->attributes = $_POST['EntryControlForm'];
 
-            if (!$model->validate())
-            {
+            if (!$model->validate()) {
                 $errorText = '';
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -552,20 +539,19 @@ class ChecklisttemplateController extends Controller {
                 throw new Exception($errorText);
             }
 
-            $id      = $model->id;
+            $id = $model->id;
             $template = ChecklistTemplate::model()->findByPk($id);
 
-            if ($template === null)
+            if ($template === null) {
                 throw new CHttpException(404, Yii::t('app', 'Template not found.'));
+            }
 
             if ($model->operation == 'delete') {
                 $template->delete();
             } else {
                 throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -576,7 +562,7 @@ class ChecklisttemplateController extends Controller {
      * Edit template's check category
      * @param $id
      * @param $template
-     * @param int $checkcategory
+     * @param int $category
      * @throws CHttpException
      */
     public function actionEditCheckCategory($id, $template, $category=0) {
@@ -711,7 +697,12 @@ class ChecklisttemplateController extends Controller {
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Category saved.'));
 
-                $this->redirect(array( 'checklisttemplate/editcheckcategory', 'id' => $category->id, 'template' => $template->id, 'category' => $checkCategory->id ));
+                $this->redirect(array(
+                    'checklisttemplate/editcheckcategory',
+                    'id' => $category->id,
+                    'template' => $template->id,
+                    'category' => $checkCategory->id
+                ));
             } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
             }
@@ -747,12 +738,10 @@ class ChecklisttemplateController extends Controller {
             $model = new EntryControlForm();
             $model->attributes = $_POST['EntryControlForm'];
 
-            if (!$model->validate())
-            {
+            if (!$model->validate()) {
                 $errorText = '';
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -760,7 +749,7 @@ class ChecklisttemplateController extends Controller {
                 throw new Exception($errorText);
             }
 
-            $id      = $model->id;
+            $id = $model->id;
             $templateId = (int) $template;
 
             $category = CheckCategory::model()->findByPk($id);
@@ -819,9 +808,7 @@ class ChecklisttemplateController extends Controller {
                     "target_id" => $tt->target->id,
                 ));
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 

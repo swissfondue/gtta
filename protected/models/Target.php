@@ -10,7 +10,7 @@
  * @property string $description
  * @property integer $port
  * @property boolean checklist_temlates
- * @property TargetChecklistTemplate $checklistTemplates
+ * @property TargetChecklistTemplate[] $checklistTemplates
  * @property TargetCheck[] $targetChecks
  */
 class Target extends ActiveRecord implements IVariableScopeObject {
@@ -230,22 +230,16 @@ class Target extends ActiveRecord implements IVariableScopeObject {
     }
 
     /**
-     * Check if target check can be dublicated (for targets with checklist templates)
+     * Check if target check can be duplicated (for targets with checklist templates)
      * @param $checkId
      * @return bool
      * @throws Exception
      */
-    public function checkAddAbility($checkId) {
-        $check = Check::model()->findByPk($checkId);
-
-        if (!$check) {
-            throw new Exception("Check not found.");
-        }
-
+    public function canAddCheck($checkId) {
         $availableCount = null;
         $currentCount = TargetCheck::model()->countByAttributes(array(
             "target_id" => $this->id,
-            "check_id"  => $check->id
+            "check_id"  => $checkId,
         ));
 
         if ($this->checklist_templates) {
@@ -258,7 +252,7 @@ class Target extends ActiveRecord implements IVariableScopeObject {
 
             $availableCount = ChecklistTemplateCheck::model()->countByAttributes(array(
                 "checklist_template_id" => $templateIds,
-                "check_id" => $check->id,
+                "check_id" => $checkId,
             ));
         } else {
             $availableCount = 1;

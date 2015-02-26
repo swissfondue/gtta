@@ -16,6 +16,7 @@
  * @property boolean $checklist_template
  * @property integer $template_count
  * @property CheckCategory $category
+ * @property Target $target
  */
 class TargetCheckCategory extends ActiveRecord {
 	/**

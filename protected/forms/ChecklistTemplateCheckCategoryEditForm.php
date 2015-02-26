@@ -16,8 +16,7 @@ class ChecklistTemplateCheckCategoryEditForm extends CFormModel {
     /**
      * @return array validation rules for model attributes.
      */
-    public function rules()
-    {
+    public function rules() {
         return array(
             array( 'categoryId', 'required' ),
             array( 'categoryId', 'numerical', 'integerOnly' => true ),

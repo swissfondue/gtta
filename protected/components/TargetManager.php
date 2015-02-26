@@ -6,9 +6,9 @@
 class TargetManager {
     /**
      * Update stats
-     * @param $category
+     * @param TargetCheckCategory $category
      */
-    public static function updateTargetCategoryStats($category) {
+    public static function updateTargetCategoryStats(TargetCheckCategory $category) {
         $controlIds = array();
         $checkCount = 0;
         $finishedCount = 0;
@@ -147,9 +147,9 @@ class TargetManager {
 
     /**
      * Actualize checks within target category
-     * @param $category
+     * @param TargetCheckCategory $category
      */
-    public static function reindexTargetCategoryChecks($category) {
+    public static function reindexTargetCategoryChecks(TargetCheckCategory $category) {
         $controlIds = array();
         $checks = array();
         $checkIds = array();
@@ -248,10 +248,8 @@ class TargetManager {
         $language = Language::model()->findByAttributes(array("default" => true));
 
         foreach ($checks as $check) {
-            if (in_array($check->id, $checkIds)) {
-                if (!$target->checkAddAbility($check->id)) {
-                    continue;
-                }
+            if (in_array($check->id, $checkIds) && !$target->canAddCheck($check->id)) {
+                continue;
             }
 
             $targetCheck = new TargetCheck();

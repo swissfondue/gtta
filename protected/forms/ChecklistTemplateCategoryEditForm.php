@@ -12,8 +12,7 @@ class ChecklistTemplateCategoryEditForm extends LocalizedFormModel {
     /**
      * @return array validation rules for model attributes.
      */
-    public function rules()
-    {
+    public function rules() {
         return array(
             array( 'name', 'required' ),
             array( 'name', 'length', 'max' => 1000 ),
@@ -24,8 +23,7 @@ class ChecklistTemplateCategoryEditForm extends LocalizedFormModel {
     /**
      * @return array customized attribute labels (name=>label)
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return array(
             'name' => Yii::t('app', 'Name'),
         );
