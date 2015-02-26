@@ -93,7 +93,7 @@ class Project extends ActiveRecord implements IVariableScopeObject {
             "modules" => array(self::HAS_MANY, "ProjectGtModule", "project_id"),
             "gtChecks" => array(self::HAS_MANY, "ProjectGtCheck", "project_id"),
             "userHoursAllocated" => array(self::STAT, "ProjectUser", "project_id", "select" => "SUM(hours_allocated)"),
-            "trackedTime" => array(self::STAT, "ProjectTime", "project_id", "select" => "SUM(time)"),
+            "trackedTime" => array(self::STAT, "ProjectTime", "project_id", "select" => "trunc(SUM(time) / 3600)"), // Convert seconds to hours
             "timeRecords" => array(self::HAS_MANY, "ProjectTime", "project_id"),
 		);
 	}
