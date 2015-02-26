@@ -18,7 +18,7 @@
 
 <hr>
 
-<form class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
+<form id="TargetEditForm" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
     <fieldset>
@@ -60,8 +60,26 @@
             </div>
         </div>
 
+        <div class="control-group <?php if ($model->getError('checklistTemplates')) echo 'error'; ?>">
+            <label class="control-label" for="TargetEditForm_checklistTemplates"><?php echo Yii::t('app', 'Check Source'); ?></label>
+            <div class="controls">
+                <select class="input-xlarge" id="TargetEditForm_checklistTemplates" name="TargetEditForm[checklistTemplates]" onchange="user.project.toggleChecksSource($(this).find('option:selected').data('source-type'));">
+                    <?php if ($categories): ?>
+                        <option data-source-type="categories" <?php if (!$model->checklistTemplates) print 'selected="selected"'; ?> value="0"><?php echo Yii::t('app', 'Check Categories'); ?></option>
+                    <?php endif; ?>
+
+                    <?php if ($templateCategories): ?>
+                        <option data-source-type="templates" <?php if ($model->checklistTemplates) print 'selected="selected"'; ?> value="1"><?php echo Yii::t('app', 'Checklist Templates'); ?></option>
+                    <?php endif;?>
+                </select>
+                <?php if ($model->getError('checklistTemplates')): ?>
+                    <p class="help-block"><?php echo $model->getError('checklistTemplates'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <?php if (count($categories)): ?>
-            <div class="control-group">
+            <div class="control-group checks-source-list categories-mode <?php if ($model->checklistTemplates) print "hide"; ?>" data-source-type="categories">
                 <label class="control-label"><?php echo Yii::t('app', 'Check Categories'); ?></label>
                 <div class="controls">
                     <?php foreach ($categories as $category): ?>
@@ -74,8 +92,34 @@
             </div>
         <?php endif; ?>
 
+        <?php if (count($templateCategories)): ?>
+            <div class="control-group checks-source-list templates-mode <?php if (!$model->checklistTemplates) echo "hide"; ?>" data-source-type="templates">
+                <label class="control-label"><?php echo Yii::t('app', 'Checklist Templates'); ?></label>
+                <div class="controls">
+                    <ul class="template-category-list">
+                        <?php foreach ($templateCategories as $templateCategory): ?>
+                            <?php if (!$templateCategory->templates) continue; ?>
+                            <li>
+                                <strong><?php print CHtml::encode($templateCategory->localizedName); ?></strong>
+                                <ul class="template-list">
+                                    <?php foreach ($templateCategory->templates as $template): ?>
+                                        <li>
+                                            <label class="checkbox">
+                                                <input type="checkbox" id="TargetEditForm_templateIds_<?php echo $template->id; ?>" name="TargetEditForm[templateIds][]" value="<?php echo $template->id; ?>" <?php if (in_array($template->id, $model->templateIds)) echo 'checked'; ?>>
+                                                <?php echo CHtml::encode($template->localizedName); ?>
+                                            </label>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <?php if (count($references)): ?>
-            <div class="control-group">
+            <div class="control-group references-list categories-mode <?php if ($target->checklist_templates) print 'hide'; ?>">
                 <label class="control-label"><?php echo Yii::t('app', 'References'); ?></label>
                 <div class="controls">
                     <?php foreach ($references as $reference): ?>

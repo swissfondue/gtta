@@ -17,30 +17,37 @@ class TargetCheckReindexJob extends BackgroundJob {
                 throw new Exception("Invalid job params.");
             }
 
-            if (isset($this->args['category_id']) && isset($this->args['target_id'])) {
-                $category = TargetCheckCategory::model()->findByAttributes(array(
-                        "target_id" => $this->args["target_id"],
-                        "check_category_id" => $this->args['category_id'],
-                    )
-                );
+            if (isset($this->args['target_id'])) {
+                $target = Target::model()->findByPk($this->args['target_id']);
+
+                if (!$target) {
+                    throw new Exception("Target not found.");
+                }
+
+                if ($target->checklist_templates) {
+                    $templates = $target->checklistTemplates;
+
+                    foreach ($templates as $template) {
+                        TargetManager::reindexTargetTemplateChecks($template);
+                    }
+                }
+
+                $categories = $target->_categories;
+
+                foreach ($categories as $category) {
+                    if (!$target->checklist_templates) {
+                        TargetManager::reindexTargetCategoryChecks($category);
+                    }
+
+                    TargetManager::updateTargetCategoryStats($category);
+                }
+            } else {
+                $category = CheckCategory::model()->findByPk($this->args['category_id']);
 
                 if (!$category) {
                     throw new Exception("Category not found.");
                 }
 
-                $category->reindexChecks();
-                $category->updateStats();
-                ProjectPlanner::updateAllStats();
-            } elseif (isset($this->args['target_id'])) {
-                $target = Target::model()->findByPk($this->args['target_id']);
-                $categories = $target->_categories;
-
-                foreach ($categories as $category) {
-                    $category->reindexChecks();
-                    $category->updateStats();
-                    ProjectPlanner::updateAllStats();
-                }
-            } else {
                 $criteria = new CDbCriteria();
                 $criteria->addCondition("project.status != :status");
                 $criteria->params = array(
@@ -56,17 +63,18 @@ class TargetCheckReindexJob extends BackgroundJob {
 
                 $criteria = new CDbCriteria();
                 $criteria->addColumnCondition(array(
-                    "check_category_id" => $this->args['category_id']
+                    "check_category_id" => $category->id
                 ));
                 $criteria->addInCondition("target_id", $targetIds);
                 $categories = TargetCheckCategory::model()->findAll($criteria);
 
                 foreach ($categories as $category) {
-                    $category->reindexChecks();
-                    $category->updateStats();
-                    ProjectPlanner::updateAllStats();
+                    TargetManager::reindexTargetCategoryChecks($category);
+                    TargetManager::updateTargetCategoryStats($category);
                 }
             }
+
+            ProjectPlanner::updateAllStats();
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
         }

@@ -21,9 +21,19 @@ class TargetEditForm extends CFormModel
     public $description;
 
     /**
+     * @var boolean checklistTemplates
+     */
+    public $checklistTemplates;
+
+    /**
      * @var array category ids.
      */
     public $categoryIds;
+
+    /**
+     * @var array template ids
+     */
+    public $templateIds;
 
     /**
      * @var array reference ids.
@@ -38,8 +48,9 @@ class TargetEditForm extends CFormModel
 		return array(
 			array( 'host', 'required' ),
             array( 'host, description', 'length', 'max' => 1000 ),
-            array("port", "numerical", "integerOnly" => true, "min" => 1, "max" => 65535),
-            array( 'categoryIds, referenceIds', 'safe' ),
+            array( "port", "numerical", "integerOnly" => true, "min" => 1, "max" => 65535),
+            array( 'checklistTemplates', 'boolean' ),
+            array( 'categoryIds, templateIds, referenceIds', 'safe' ),
 		);
 	}
     
