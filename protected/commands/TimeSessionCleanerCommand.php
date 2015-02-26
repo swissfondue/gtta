@@ -4,7 +4,7 @@
  * Class TimeSessionCleanerCommand
  */
 class TimeSessionCleanerCommand extends ConsoleCommand {
-    const INACTIVE_LIFETIME = 600; // 10 minut
+    const INACTIVE_LIFETIME = 600; // 10 minutes
 
     /**
      * Clear inactive sessions

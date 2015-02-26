@@ -166,36 +166,40 @@
                         <?php endforeach; ?>
                     </ul>
                     <div class="btn-group btn-time-records inline">
-                        <a class="btn btn-time-records dropdown-toggle <?php if (!$this->timeRecords) print "disabled"; ?>" data-toggle="dropdown" href="#">
+                        <a class="<?php if (!$this->timeRecords) print "disabled"; ?>" data-toggle="dropdown" href="#" title="<?= Yii::t("app", "Previous Time Records"); ?>">
                             <i class="icon icon-time"></i>
                         </a>
                         <ul class="dropdown-menu time-records-list">
                             <?php if ($this->timeRecords): ?>
-                                <?php foreach ($this->timeRecords as $record): ?>
-                                    <li class="time-record-row">
-                                        <table>
+                                <li class="time-record-row">
+                                    <table class="table">
+                                        <tr>
+                                            <th colspan="3">
+                                                <?= Yii::t("app", "Previous Time Records"); ?>
+                                            </th>
+                                        </tr>
+
+                                        <?php foreach ($this->timeRecords as $record): ?>
                                             <tr>
-                                                <td class="create-time">
+                                                <td class="interval">
                                                     <?php print $record['create_time'] ?>
+                                                    <?php print $record['start_time']; ?> - <?php print $record['stop_time']; ?>
                                                 </td>
                                                 <td class="project">
-                                                    <strong><?php print $record['project']; ?></strong>
-                                                </td>
-                                                <td class="interval">
-                                                    <strong>Start </strong><?php print $record['start_time']; ?> - <strong>Stop </strong><?php print $record['stop_time']; ?>
+                                                    <a href="<?= $this->createUrl("project/view", array("id" => $record["project_id"])); ?>" target="_blank"><?php print $record['project']; ?></a>
                                                 </td>
                                                 <td class="total">
-                                                    <strong>Total </strong><?php print $record['total']; ?> h
+                                                    <?php print $record['total']; ?>
                                                 </td>
                                             </tr>
-                                        </table>
-                                    </li>
-                                <?php endforeach; ?>
+                                        <?php endforeach; ?>
+                                    </table>
+                                </li>
                                 <li class="time-record-row">
                                     <table>
                                         <tr>
                                             <td class="btn-view-all">
-                                                <a href="<?php print $this->createUrl("account/time"); ?>">View All</a>
+                                                <a href="<?php print $this->createUrl("account/time"); ?>" target="_blank">View All &raquo;</a>
                                             </td>
                                         </tr>
                                     </table>
@@ -205,7 +209,7 @@
                     </div>
                     <div class="time-session-counter inline">
                         <div class="counter inline">
-                            <span class="counter-part hours"><?php $this->timeSession ? print $this->timeSession->duration['hours'] : print "00"; ?></span> : <span class="counter-part minutes"><?php $this->timeSession ? print $this->timeSession->duration['mins'] : print "00"; ?></span> : <span class="counter-part seconds"><?php $this->timeSession ? print $this->timeSession->duration['seconds'] : print "00"; ?></span>
+                            <span class="counter-part hours"><?php $this->timeSession ? print $this->timeSession->duration['hours'] : print "00"; ?></span>:<span class="counter-part minutes"><?php $this->timeSession ? print $this->timeSession->duration['mins'] : print "00"; ?></span>:<span class="counter-part seconds"><?php $this->timeSession ? print $this->timeSession->duration['seconds'] : print "00"; ?></span>
                         </div>
                         <div class="session-controls inline">
                             <div class="start-control <?php if ($this->timeSession) print "hide"; ?>">

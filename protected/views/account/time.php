@@ -11,28 +11,24 @@
                 <table class="table time-records-list">
                     <tbody>
                     <tr>
-                        <th class="date-added"><?php echo Yii::t('app', 'Date Added'); ?></th>
+                        <th class="interval"><?php echo Yii::t('app', 'Time'); ?></th>
                         <th class="project"><?php echo Yii::t('app', 'Project'); ?></th>
-                        <th class="start-time"><?php echo Yii::t('app', 'Start Time'); ?></th>
-                        <th class="stop-time"><?php echo Yii::t('app', 'Stop Time'); ?></th>
                         <th class="total"><?php echo Yii::t('app', 'Total'); ?></th>
+                        <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
+                            <th class="actions">&nbsp;</th>
+                        <?php endif; ?>
                     </tr>
                     <?php foreach ($records as $record): ?>
                         <tr data-id="<?php echo $record['id']; ?>" data-control-url="<?php echo $this->createUrl('account/controltimerecord'); ?>">
-                            <td class="date-added">
+                            <td class="interval">
                                 <?php print $record['create_time'] ?>
+                                <?php print $record['start_time']; ?> - <?php print $record['stop_time']; ?>
                             </td>
                             <td class="project">
-                                <?php print $record['project']; ?>
-                            </td>
-                            <td class="start-time">
-                                <?php print $record['start_time']; ?>
-                            </td>
-                            <td class="stop-time">
-                                <?php print $record['stop_time']; ?>
+                                <a href="<?= $this->createUrl("project/view", array("id" => $record["project_id"])); ?>" target="_blank"><?php print $record['project']; ?></a>
                             </td>
                             <td class="total">
-                                <?php print $record['total']; ?> h
+                                <?php print $record['total']; ?>
                             </td>
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                 <td class="actions">

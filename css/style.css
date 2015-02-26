@@ -153,7 +153,8 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 .report-template-list .actions,
 .risk-template-list .actions,
 .summary-list .actions,
-.section-list .actions {
+.section-list .actions,
+.time-records-list .actions {
     width:30px;
     text-align:right;
 }
@@ -1201,7 +1202,7 @@ ul.breadcrumb {
 .btn-time-records {
     vertical-align: top;
     float: right;
-    margin-top: -3px;
+    margin-top: -2px;
     padding: 2px 5px;
 }
 
@@ -1210,7 +1211,7 @@ ul.breadcrumb {
     right: 0;
 }
 
-.time-record-row td {
+.time-record-row table td {
     text-align: left;
 }
 
@@ -1223,24 +1224,22 @@ ul.breadcrumb {
     width: 100%;
 }
 
-.time-record-row .create-time {
-    width: 17%;
+.time-record-row .project a {
+    padding:0;
+    color:#0088cc;
 }
 
-.time-record-row .project {
-    width: 40%;
+.time-record-row .interval, .time-records-list .interval {
+    width: 30%;
 }
 
-.time-record-row .interval{
-    width: 25%;
-}
-
-.time-record-row .total {
-    width: 15%;
+.time-record-row .total, .time-records-list .total {
+    width: 10%;
+    text-align:right;
 }
 
 .time-record-row .btn-view-all {
-    text-align: center;
+    text-align: right;
 }
 
 .time-record-row .btn-view-all a {

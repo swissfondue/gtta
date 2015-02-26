@@ -7,8 +7,8 @@ return array(
     "account/certificate"             => "account/certificate",
     "account/restore"                 => "account/restore",
     "account/restore/<code:[a-z\d]+>" => "account/changepassword",
-    "account/time"                    => "account/time",
     "account/time/<page:\d+>"         => "account/time",
+    "account/time"                    => "account/time",
     "account/time/control"            => "account/controltimerecord",
 
     // misc

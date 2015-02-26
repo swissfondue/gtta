@@ -82,6 +82,7 @@ class ProjectTime extends ActiveRecord
         $formatted = array(
             "id"          => $this->id,
             "create_time" => $createTime->format("d.m.Y"),
+            "project_id"  => $project->id,
             "project"     => $project->name,
             "start_time"  => $startTime->format("H:i"),
             "stop_time"   => $stopTime->format("H:i"),

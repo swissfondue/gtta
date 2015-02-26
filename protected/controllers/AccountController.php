@@ -209,8 +209,8 @@ class AccountController extends Controller
 
         $recordCount = ProjectTime::model()->count($criteria);
 
-        $this->breadcrumbs[] = array(Yii::t("app", "User Time Tracker"), '');
-        $this->pageTitle = Yii::t("app", "User Time Tracker");
+        $this->breadcrumbs[] = array(Yii::t("app", "Time Tracker"), '');
+        $this->pageTitle = Yii::t("app", "Time Tracker");
 
         $paginator = new Paginator($recordCount, $page);
 
