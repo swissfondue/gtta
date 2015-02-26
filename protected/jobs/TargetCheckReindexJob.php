@@ -41,8 +41,6 @@ class TargetCheckReindexJob extends BackgroundJob {
 
                     TargetManager::updateTargetCategoryStats($category);
                 }
-
-                ProjectPlanner::updateAllStats();
             } else {
                 $category = CheckCategory::model()->findByPk($this->args['category_id']);
 
@@ -73,9 +71,10 @@ class TargetCheckReindexJob extends BackgroundJob {
                 foreach ($categories as $category) {
                     TargetManager::reindexTargetCategoryChecks($category);
                     TargetManager::updateTargetCategoryStats($category);
-                    ProjectPlanner::updateAllStats();
                 }
             }
+
+            ProjectPlanner::updateAllStats();
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
         }
