@@ -7,9 +7,11 @@
  * @property integer id (pk)
  * @property integer user_id
  * @property integer project_id
- * @property numeric(11,1) hours
+ * @property integer time
  * @property string description
  * @property timestamp create_time
+ * @property timestamp start_time
+ * @property timestamp last_action_time
  */
 class ProjectTime extends ActiveRecord
 {
@@ -37,7 +39,7 @@ class ProjectTime extends ActiveRecord
     public function rules()
     {
         return array(
-            array( 'user_id, project_id, hours', 'required' ),
+            array( 'user_id, project_id', 'required' ),
             array( 'create_time','default', 'value'=>new CDbExpression('NOW()'), 'setOnEmpty'=>false,'on'=>'insert' )
         );
     }
@@ -51,5 +53,79 @@ class ProjectTime extends ActiveRecord
             'user'    => array( self::BELONGS_TO, 'User',    'user_id' ),
             'project' => array( self::BELONGS_TO, 'Project', 'project_id' ),
         );
+    }
+
+    /**
+     * Convert seconds to hours
+     * @return float
+     */
+    public function getHours() {
+        return round($this->time / 3600, 1);
+    }
+
+    /**
+     * Return formatted record data
+     * @throws Exception
+     */
+    public function getFormatted() {
+        $createTime = new DateTime($this->create_time);
+        $startTime  = new DateTime($this->start_time);
+        $stopTime   = clone $startTime;
+        $stopTime->add(new DateInterval(sprintf("PT%sS", $this->time)));
+        $project    = Project::model()->findByPk($this->project_id);
+        $total      = $startTime->diff($stopTime);
+
+        if (!$project) {
+            throw new Exception("Project not found.");
+        }
+
+        $formatted = array(
+            "id"          => $this->id,
+            "create_time" => $createTime->format("d.m.Y"),
+            "project_id"  => $project->id,
+            "project"     => $project->name,
+            "start_time"  => $startTime->format("H:i"),
+            "stop_time"   => $stopTime->format("H:i"),
+            "total"       => $total->format("%H:%I"),
+        );
+
+        return $formatted;
+    }
+
+    /**
+     * Stop time session
+     */
+    public function stop() {
+        $now = new DateTime();
+        $started = new DateTime($this->start_time);
+        $this->time = $now->getTimestamp() - $started->getTimestamp();
+
+        $this->save();
+    }
+
+    /**
+     * Get time session duration
+     * @return array
+     */
+    public function getDuration() {
+        $now = new DateTime();
+        $startTime = new DateTime($this->start_time);
+        $diff = $now->diff($startTime);
+
+        return array(
+            "hours" => $diff->format("%H"),
+            "mins"  => $diff->format("%I"),
+            "seconds"  => $diff->format("%S"),
+        );
+    }
+
+    /**
+     * Update session last action
+     * @return bool|void
+     */
+    public function updateLastAction() {
+        $now = new DateTime();
+        $this->last_action_time = $now->format(ISO_DATE_TIME);
+        $this->save();
     }
 }

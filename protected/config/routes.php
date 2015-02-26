@@ -2,11 +2,14 @@
 
 return array(
     // account
-    "<action:(login|logout|verify)>" => "app/<action>",
-    "account" => "account/edit",
-    "account/certificate" => "account/certificate",
-    "account/restore" => "account/restore",
+    "<action:(login|logout|verify)>"  => "app/<action>",
+    "account"                         => "account/edit",
+    "account/certificate"             => "account/certificate",
+    "account/restore"                 => "account/restore",
     "account/restore/<code:[a-z\d]+>" => "account/changepassword",
+    "account/time/<page:\d+>"         => "account/time",
+    "account/time"                    => "account/time",
+    "account/time/control"            => "account/controltimerecord",
 
     // misc
     "app/l10n.js" => "app/l10n",

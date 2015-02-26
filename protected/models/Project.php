@@ -93,8 +93,7 @@ class Project extends ActiveRecord implements IVariableScopeObject {
             "modules" => array(self::HAS_MANY, "ProjectGtModule", "project_id"),
             "gtChecks" => array(self::HAS_MANY, "ProjectGtCheck", "project_id"),
             "userHoursAllocated" => array(self::STAT, "ProjectUser", "project_id", "select" => "SUM(hours_allocated)"),
-            "userHoursSpent" => array(self::STAT, "ProjectTime", "project_id", "select" => "SUM(hours)"),
-            "trackedTime" => array(self::STAT, "ProjectTime", "project_id", "select" => "SUM(hours)"),
+            "trackedTime" => array(self::STAT, "ProjectTime", "project_id", "select" => "trunc(SUM(time) / 3600)"), // Convert seconds to hours
             "timeRecords" => array(self::HAS_MANY, "ProjectTime", "project_id"),
 		);
 	}
@@ -326,5 +325,22 @@ class Project extends ActiveRecord implements IVariableScopeObject {
         }
 
         return $data;
+    }
+
+    /**
+     * Get user hours of project
+     * @return int
+     */
+    public function getUserHoursSpent() {
+        $records = ProjectTime::model()->findAllByAttributes(array(
+            "project_id" => $this->id
+        ));
+        $hours = 0;
+
+        foreach ($records as $record) {
+            $hours += $record->hours;
+        }
+
+        return $hours;
     }
 }

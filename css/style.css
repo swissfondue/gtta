@@ -153,7 +153,8 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 .report-template-list .actions,
 .risk-template-list .actions,
 .summary-list .actions,
-.section-list .actions {
+.section-list .actions,
+.time-records-list .actions {
     width:30px;
     text-align:right;
 }
@@ -1149,9 +1150,106 @@ table.project-header td.hours, table.project-header th.hours, table.user td.hour
 }
 
 textarea.log {
-    width:100%;
+    width: 100%;
 }
 
+.btn-med {
+    padding: 7px 12px;
+}
+
+.panel-wrapped {
+    padding: 7px 14px;
+    margin: 0 0 18px;
+    list-style: none;
+    background-color: #fbfbfb;
+    background-image: -moz-linear-gradient(top, #ffffff, #f5f5f5);
+    background-image: -ms-linear-gradient(top, #ffffff, #f5f5f5);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#f5f5f5));
+    background-image: -webkit-linear-gradient(top, #ffffff, #f5f5f5);
+    background-image: -o-linear-gradient(top, #ffffff, #f5f5f5);
+    background-image: linear-gradient(top, #ffffff, #f5f5f5);
+    background-repeat: repeat-x;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr='#ffffff', endColorstr='#f5f5f5', GradientType=0);
+    -webkit-box-shadow: inset 0 1px 0 #ffffff;
+    -moz-box-shadow: inset 0 1px 0 #ffffff;
+    box-shadow: inset 0 1px 0 #ffffff;
+}
+
+.inline {
+    display: inline-block;
+}
+
+ul.breadcrumb {
+    border: none;
+    background: none;
+    margin: 0;
+    padding: 0;
+}
+
+.time-session-counter {
+    margin-left: 5px;
+    float: right;
+}
+
+.time-session-counter .session-controls {
+    margin-left: 5px;
+}
+
+.btn-time-records {
+    vertical-align: top;
+    float: right;
+    margin-top: -2px;
+    padding: 2px 5px;
+}
+
+.time-records-list {
+    left: auto;
+    right: 0;
+}
+
+.time-record-row table td {
+    text-align: left;
+}
+
+.time-record-row {
+    padding: 10px;
+    width: 600px;
+}
+
+.time-record-row table {
+    width: 100%;
+}
+
+.time-record-row .project a {
+    padding:0;
+    color:#0088cc;
+}
+
+.time-record-row .interval, .time-records-list .interval {
+    width: 30%;
+}
+
+.time-record-row .total, .time-records-list .total {
+    width: 10%;
+    text-align:right;
+}
+
+.time-record-row .btn-view-all {
+    text-align: right;
+}
+
+.time-record-row .btn-view-all a {
+    color: #0088cc;
+}
+
+#time-session-project-select .modal-footer ,
+#time-session-project-select .modal-body {
+    text-align: center;
+}
 #TargetEditForm .template-category-list,
 #TargetEditForm .template-list {
     list-style: none;

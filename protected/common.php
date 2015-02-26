@@ -1,6 +1,7 @@
 <?php
 
 defined("DS") or define("DS", DIRECTORY_SEPARATOR);
+defined("ISO_DATE_TIME") or define("ISO_DATE_TIME", "Y-m-d H:i:s");
 
 /**
  * Merge array

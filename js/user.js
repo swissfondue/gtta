@@ -3255,6 +3255,224 @@ function User()
             return user.check.buildTableResult(checkForm);
         };
     };
+
+    /**
+     * Time session
+     */
+    this.timesession = new function () {
+        var _timesession = this;
+
+        this.refreshTimeout  = 5000; // One minute
+        this.counterInterval = 1000; // Update counter values every second
+
+        /**
+         * Show project list
+         */
+        this.showProjectList = function () {
+            $('#time-session-project-select').modal("show");
+        };
+
+        /**
+         * Checks if project selected
+         * @returns {Number|length|*|jQuery}
+         */
+        this.projectSelected = function () {
+            return $('.time-session-project').val() != '0';
+        };
+
+        /**
+         * Start time session
+         * @param url
+         */
+        this.start = function (url, callback) {
+            var modal = $('#time-session-project-select');
+
+            if (_timesession.projectSelected()) {
+                var projectId = $('.time-session-project').val();
+
+                $.ajax({
+                    dataType : 'json',
+                    url      : url,
+                    timeout  : system.ajaxTimeout,
+                    type     : 'POST',
+                    data     : {
+                        "EntryControlForm[id]"        : projectId,
+                        "EntryControlForm[operation]" : 'start',
+                        "YII_CSRF_TOKEN"               : system.csrf
+                    },
+
+                    success : function (data, textStatus) {
+                        $('.loader-image').hide();
+
+                        if (data.status == 'error') {
+                            system.addAlert('error', data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        modal.modal("hide");
+
+                        $(".start-control").addClass('hide');
+                        $(".stop-control").removeClass('hide');
+
+                        if (callback) {
+                            callback(data);
+                        } else {
+                            location.reload();
+                        }
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $('.loader-image').hide();
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    },
+
+                    beforeSend : function (jqXHR, settings) {
+                        $('.loader-image').show();
+                    }
+                });
+            } else {
+                _timesession.showProjectList();
+            }
+        };
+
+        /**
+         * Stop time session
+         * @param url
+         * @param callback
+         */
+        this.stop = function (url, callback) {
+            if (_timesession.projectSelected()) {
+                var projectId = $('.time-session-project').val();
+
+                $.ajax({
+                    dataType : 'json',
+                    url      : url,
+                    timeout  : system.ajaxTimeout,
+                    type     : 'POST',
+                    data     : {
+                        "EntryControlForm[id]"        : projectId,
+                        "EntryControlForm[operation]" : "stop",
+                        "YII_CSRF_TOKEN"              : system.csrf
+                    },
+
+                    success : function (data, textStatus) {
+                        $('.loader-image').hide();
+
+                        if (data.status == 'error') {
+                            system.addAlert('error', data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        $(".stop-control").addClass('hide');
+                        $(".start-control").removeClass('hide');
+
+                        if (callback) {
+                            callback(data);
+                        } else {
+                            location.reload();
+                        }
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $('.loader-image').hide();
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    },
+
+                    beforeSend : function (jqXHR, settings) {
+                        $('.loader-image').show();
+                    }
+                });
+            }
+        };
+
+        /**
+         * Refresh user time session
+         * @param url
+         */
+        this.refresh = function (url) {
+            var sessionEl = $('.time-session-project-list').find('.current-session');
+            var projectId = null;
+
+            if (sessionEl.length) {
+                projectId = sessionEl.data('id');
+            }
+
+            if (projectId) {
+                setTimeout(function () {
+                    $.ajax({
+                        dataType : 'json',
+                        url      : url,
+                        timeout  : system.ajaxTimeout,
+                        type     : 'POST',
+                        data     : {
+                            "EntryControlForm[id]"        : projectId,
+                            "EntryControlForm[operation]" : "refresh",
+                            "YII_CSRF_TOKEN"              : system.csrf
+                        },
+
+                        success : function (data, textStatus) {
+                            $('.loader-image').hide();
+
+                            if (data.status == 'error') {
+                                return;
+                            }
+
+                            setTimeout(function () {
+                                _timesession.refresh(url);
+                            }, _timesession.refreshTimeout)
+                        },
+
+                        error : function(jqXHR, textStatus, e) {
+                            $('.loader-image').hide();
+                            system.addAlert('error', system.translate('Request failed, please try again.'));
+                        },
+
+                        beforeSend : function (jqXHR, settings) {
+                            $('.loader-image').show();
+                        }
+                    });
+                }, _timesession.refreshTimeout);
+            }
+        };
+
+        /**
+         * Start time session counter
+         */
+        this.startCounter = function () {
+            setInterval(function () {
+                var seconds = parseInt($('.counter').find('.seconds').text());
+                var minutes = parseInt($('.counter').find('.minutes').text());
+                var hours   = parseInt($('.counter').find('.hours').text());
+
+                seconds++;
+
+                if (seconds == 60) {
+                    seconds = 0;
+                    minutes++;
+                }
+
+                if (minutes == 60) {
+                    minutes = 0;
+                    hours++;
+                }
+
+                if (hours == 24) {
+                    seconds = 0;
+                    minutes = 0;
+                    hours   = 0;
+                }
+
+                $('.counter').find('.seconds').text(("0" + seconds).slice(-2));
+                $('.counter').find('.minutes').text(("0" + minutes).slice(-2));
+                $('.counter').find('.hours').text(("0" + hours).slice(-2));
+
+            }, _timesession.counterInterval);
+        };
+    };
 }
 
 var user = new User();

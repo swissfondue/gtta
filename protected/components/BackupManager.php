@@ -359,7 +359,7 @@ class BackupManager {
 
         $now = new DateTime();
         $system = System::model()->findByPk(1);
-        $system->backup = $now->format("Y-m-d H:i:s");
+        $system->backup = $now->format(ISO_DATE_TIME);
         $system->save();
 
         FileManager::copy($tmpBackupPath, $backupPath);

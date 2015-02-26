@@ -20,6 +20,21 @@ class Controller extends CController {
     protected $_system = null;
 
     /**
+     * @var ProjectTime array
+     */
+    public $timeRecords = array();
+
+    /**
+     * @var ProjectTime timeSession
+     */
+    public $timeSession = array();
+
+    /**
+     * @var Project projects
+     */
+    public $projects = null;
+
+    /**
      * Controller initialization.
      */
     function init() {
@@ -53,6 +68,29 @@ class Controller extends CController {
 
         date_default_timezone_set($system->timezone);
         $this->_system = $system;
+
+        if (!Yii::app()->user->isGuest) {
+            $criteria = new CDbCriteria();
+            $criteria->addColumnCondition(array(
+                "user_id" => Yii::app()->user->id
+            ));
+            $criteria->addCondition("time IS NOT NULL");
+            $criteria->limit = Yii::app()->params['limitedListEntriesCount'];
+            $criteria->order = "create_time DESC";
+
+            $records = ProjectTime::model()->findAll($criteria);
+
+            foreach ($records as $record) {
+                $this->timeRecords[] = $record->formatted;
+            }
+
+            $user = User::model()->findByPk(Yii::app()->user->id);
+            $this->timeSession = $user->timeSession;
+        }
+
+        $this->projects = Project::model()->findAllByAttributes(array(
+            "status" => Project::STATUS_IN_PROGRESS
+        ));
     }
 
     /**
