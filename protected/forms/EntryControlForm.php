@@ -15,11 +15,17 @@ class EntryControlForm extends CFormModel {
     public $operation;
 
     /**
+     * @var integer parentId
+     */
+    public $parentId;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
 		return array(
 			array("id, operation", "required"),
+			array("parentId", "safe"),
 		);
 	}
 }

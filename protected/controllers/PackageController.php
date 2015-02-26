@@ -451,8 +451,10 @@ class PackageController extends Controller {
      * Regenerate.
      */
 	public function actionRegenerate() {
-        if (!$this->_system->isRegenerating) {
-            RegenerateJob::enqueue();
+        if (isset($_POST["RegenerateForm"])) {
+            if (!$this->_system->isRegenerating) {
+                RegenerateJob::enqueue();
+            }
         }
 
         $this->_system->refresh();
@@ -475,6 +477,7 @@ class PackageController extends Controller {
 
         try {
             $system = System::model()->findByPk(1);
+            $response->addData("regenerating", $system->isRegenerating);
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }

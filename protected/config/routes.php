@@ -133,19 +133,19 @@ return array(
     "update/status" => "update/status",
 
     // software packages
-    "package/new"               => "package/new",
-    "package/<id:\d+>/edit"     => "package/editfiles",
-    "package/<id:\d+>/edit"     => "package/editproperties",
-    "packages/<page:\d+>"       => "package/index",
-    "packages"                  => "package/index",
-    "packages/messages"         => "package/messages",
-    "package/<id:\d+>"          => "package/view",
-    "package/<id:\d+>/share"    => "package/share",
-    "package/<id:\d+>/file"     => "package/file",
-    "package/control"           => "package/control",
-    "package/upload"            => "package/upload",
-    "packages/regenerate"        => "package/regenerate",
-    "packages/regenerate-status" => "package/regeneratestatus",
+    "package/new"                          => "package/new",
+    "package/<id:\d+>/edit"                => "package/editfiles",
+    "package/<id:\d+>/edit"                => "package/editproperties",
+    "packages/<page:\d+>"                  => "package/index",
+    "packages"                             => "package/index",
+    "packages/messages"                    => "package/messages",
+    "package/<id:\d+>"                     => "package/view",
+    "package/<id:\d+>/share"               => "package/share",
+    "package/<id:\d+>/file"                => "package/file",
+    "package/control"                      => "package/control",
+    "package/upload"                       => "package/upload",
+    "packages/regenerate"                  => "package/regenerate",
+    "packages/regenerate-status"           => "package/regeneratestatus",
 
     // checks
     "checks/<page:\d+>"         => "check/index",
@@ -157,10 +157,26 @@ return array(
     "check/control"             => "check/control",
     "check/search"              => "check/search",
 
-    // incoming checks
-    "checks/incoming" => "check/incoming",
-    "checks/incoming/<page:\d+>" => "check/incoming",
-    "checks/incoming/check/<id:\d+>/edit" => "check/editincoming",
+    // checklist template categories
+    "checklist-templates/<page:\d+>"                                   => "checklisttemplate/index",
+    "checklist-templates"                                              => "checklisttemplate/index",
+    "checklist-template/<id:\d+>/<page:\d+>"                           => "checklisttemplate/viewcategory",
+    "checklist-template/<id:\d+>"                                      => "checklisttemplate/viewcategory",
+    "checklist-template/<id:\d+>/edit"                                 => "checklisttemplate/editcategory",
+    "checklist-template/new"                                           => "checklisttemplate/editcategory",
+    "checklist-template/control"                                       => "checklisttemplate/controlcategory",
+
+    // checklist templates
+    "checklist-template/<id:\d+>/template/<template:\d+>/<page:\d+>"   => "checklisttemplate/viewtemplate",
+    "checklist-template/<id:\d+>/template/<template:\d+>/"             => "checklisttemplate/viewtemplate",
+    "checklist-template/<id:\d+>/template/<template:\d+>/edit"         => "checklisttemplate/edittemplate",
+    "checklist-template/<id:\d+>/template/new"                         => "checklisttemplate/edittemplate",
+    "checklist-template/template/control"                              => "checklisttemplate/controltemplate",
+
+    // checklist template checks
+    "checklist-template/<id:\d+>/template/<template:\d+>/category/<category:\d+>/edit"  => "checklisttemplate/editcheckcategory",
+    "checklist-template/<id:\d+>/template/<template:\d+>/category/new"                  => "checklisttemplate/editcheckcategory",
+    "checklist-template/template/<template:\d+>/category/control"                       => "checklisttemplate/controlcheckcategory",
 
     // check controls
     "check/<id:\d+>/control/<control:\d+>/<page:\d+>" => "check/viewcontrol",

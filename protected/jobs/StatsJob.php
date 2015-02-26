@@ -36,7 +36,7 @@ class StatsJob extends BackgroundJob {
                     throw new Exception("Category not found.");
                 }
 
-                $category->updateStats();
+                TargetManager::updateTargetCategoryStats($category);
             } elseif (isset($this->args['target_id'])) {
                 $target = Target::model()->findByPk($this->args['target_id']);
 
@@ -45,7 +45,7 @@ class StatsJob extends BackgroundJob {
                 ));
 
                 foreach ($categories as $category) {
-                    $category->updateStats();
+                    TargetManager::updateTargetCategoryStats($category);
                 }
             } else {
                 $criteria = new CDbCriteria();
@@ -69,7 +69,7 @@ class StatsJob extends BackgroundJob {
                 $categories = TargetCheckCategory::model()->findAll($criteria);
 
                 foreach ($categories as $category) {
-                    $category->updateStats();
+                    TargetManager::updateTargetCategoryStats($category);
                 }
             }
         } catch (Exception $e) {

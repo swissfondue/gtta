@@ -643,6 +643,31 @@ class AppController extends Controller {
 
                     break;
 
+                case "category-check-list":
+                    $checks = Check::model()->with(array(
+                        "control" => array(
+                            "with" => array(
+                                "category" => array(
+                                    "alias" => "tcat",
+                                    "joinType",
+                                    "condition" => "tcat.id = :category_id",
+                                    "params" => array(
+                                        "category_id" => $model->id
+                                    )
+                                )
+                            )
+                        )
+                    ))->findAll();
+
+                    foreach ($checks as $check) {
+                        $objects[] = array(
+                            "id" => $check->id,
+                            "name" => $check->localizedName,
+                        );
+                    }
+
+                    break;
+
                 default:
                     throw new CHttpException(403, Yii::t("app", "Unknown operation."));
                     break;

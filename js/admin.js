@@ -1147,7 +1147,7 @@ function Admin()
         /**
          * Regenerate status
          */
-        this.regenerate = function (url) {
+        this.checkRegenerate = function (url) {
             $.ajax({
                 dataType: "json",
                 url: url,
@@ -1170,10 +1170,14 @@ function Admin()
 
                     if (data.regenerating) {
                         setTimeout(function () {
-                            _package.regenerate(url);
+                            _package.checkRegenerate(url);
                         }, 5000);
                     } else {
-                        location.reload();
+                        system.addAlert("success", "Regeneration completed.");
+
+                        setTimeout(function() {
+                            window.location.href = $('.form-description').data("redirect-url");
+                        }, 5000);
                     }
                 },
 
@@ -1182,7 +1186,7 @@ function Admin()
 
                     if (textStatus == "timeout") {
                         setTimeout(function () {
-                            _package.regenerate(url);
+                            _package.checkRegenerate(url);
                         }, 5000);
                     } else {
                         system.addAlert("error", system.translate("Request failed, please try again."));
@@ -1854,6 +1858,61 @@ function Admin()
             if (confirm(system.translate('Are you sure that you want to restore system from this backup?'))) {
                 $('#backup').prop("disabled", true);
                 system.control._control(id, 'restore');
+            }
+        };
+    };
+
+    /**
+     * Checklist Template object
+     */
+    this.checklisttemplate = new function () {
+        var _checklisttemplate = this;
+        /**
+         * Load category checks list
+         * @param url
+         * @param id
+         */
+        this.loadChecks = function (id) {
+            $('.check-list').empty();
+            $('.check-list-wrapper').addClass('hide');
+            _checklisttemplate.toggleChecklistButton();
+
+            if (id != '0') {
+                system.control.loadObjects(id, "category-check-list", function (data) {
+                    if (data && data.objects.length) {
+                        $.each(data.objects, function (key, value) {
+                            $('.check-list').
+                                append(
+                                    $('<label>')
+                                        .addClass('checkbox')
+                                        .text(value.name)
+                                        .append(
+                                            $('<input>')
+                                                .attr('type', 'checkbox')
+                                                .attr('id', 'ChecklistTemplateCheckCategoryEditForm_checkIds_' + value.id)
+                                                .attr('name', 'ChecklistTemplateCheckCategoryEditForm[checkIds][]')
+                                                .change(_checklisttemplate.toggleChecklistButton)
+                                                .val(value.id)
+                                        )
+                                );
+                        });
+
+                        $('.check-list-wrapper').removeClass('hide');
+                    } else {
+                        system.addAlert("error", "Category has no checks.");
+                    }
+                });
+            }
+        };
+
+        /**
+         * Disable save button if no checkbox marked
+         */
+        this.toggleChecklistButton = function () {
+            if ($('.check-list input[type=checkbox]:checked').length) {
+                $('.btn-submit').prop('disabled', false);
+            } else {
+                $('.btn-submit').prop('disabled', true);
             }
         };
     };

@@ -9,6 +9,8 @@
  * @property string $host
  * @property string $description
  * @property integer $port
+ * @property boolean checklist_temlates
+ * @property TargetChecklistTemplate[] $checklistTemplates
  * @property TargetCheck[] $targetChecks
  */
 class Target extends ActiveRecord implements IVariableScopeObject {
@@ -35,6 +37,7 @@ class Target extends ActiveRecord implements IVariableScopeObject {
 		return array(
             array("host, project_id", "required"),
             array("host, description", "length", "max" => 1000),
+            array("checklist_templates", "boolean"),
             array("project_id", "numerical", "integerOnly" => true),
             array("port", "safe"),
 		);
@@ -58,91 +61,9 @@ class Target extends ActiveRecord implements IVariableScopeObject {
             "highRiskCount" => array(self::STAT, "TargetCheckCategory", "target_id", "select" => "SUM(high_risk_count)"),
             "targetChecks" => array(self::HAS_MANY, "TargetCheck", "target_id"),
             "targetCustomChecks" => array(self::HAS_MANY, "TargetCustomCheck", "target_id"),
+            "checklistTemplates" => array(self::HAS_MANY, "TargetChecklistTemplate", "target_id"),
         );
 	}
-
-    /**
-     * Synchronize target checks (delete old ones and create new).
-     */
-    public function syncChecks() {
-        $checkIds = array();
-        $referenceIds = array();
-
-        $references = TargetReference::model()->findAllByAttributes(array(
-            "target_id" => $this->id
-        ));
-
-        foreach ($references as $reference) {
-            $referenceIds[] = $reference->reference_id;
-        }
-
-        $categories = TargetCheckCategory::model()->with("category")->findAllByAttributes(array(
-            "target_id" => $this->id
-        ));
-
-        foreach ($categories as $category) {
-            $controlIds = array();
-
-            $controls = CheckControl::model()->findAllByAttributes(array(
-                "check_category_id" => $category->check_category_id
-            ));
-
-            foreach ($controls as $control) {
-                $controlIds[] = $control->id;
-            }
-
-            $criteria = new CDbCriteria();
-
-            if (!$category->advanced) {
-                $criteria->addCondition("t.advanced = FALSE");
-            }
-
-            $criteria->addInCondition("t.check_control_id", $controlIds);
-            $criteria->addInCondition("t.reference_id", $referenceIds);
-            $checks = Check::model()->findAll($criteria);
-
-            foreach ($checks as $check) {
-                $checkIds[] = $check->id;
-            }
-        }
-
-        // clean target checks
-        $criteria = new CDbCriteria();
-        $criteria->addNotInCondition("check_id", $checkIds);
-        $criteria->addColumnCondition(array(
-            "target_id" => $this->id
-        ));
-
-        TargetCheck::model()->deleteAll($criteria);
-        $cache = array();
-
-        foreach (TargetCheck::model()->findAllByAttributes(array("target_id" => $this->id)) as $tc) {
-            $cache[] = $tc->check_id;
-        }
-
-        $language = Language::model()->findByAttributes(array(
-            "code" => Yii::app()->language
-        ));
-
-        if ($language) {
-            $language = $language->id;
-        }
-
-        foreach ($checkIds as $checkId) {
-            if (in_array($checkId, $cache)) {
-                continue;
-            }
-
-            $check = new TargetCheck();
-            $check->target_id = $this->id;
-            $check->check_id = $checkId;
-            $check->status = TargetCheck::STATUS_OPEN;
-            $check->rating = TargetCheck::RATING_NONE;
-            $check->user_id = Yii::app()->user->id;
-            $check->language_id = $language;
-            $check->save();
-        }
-    }
 
     /**
      * Get variable value
@@ -306,6 +227,38 @@ class Target extends ActiveRecord implements IVariableScopeObject {
         }
 
         return $data;
+    }
+
+    /**
+     * Check if target check can be duplicated (for targets with checklist templates)
+     * @param $checkId
+     * @return bool
+     * @throws Exception
+     */
+    public function canAddCheck($checkId) {
+        $availableCount = null;
+        $currentCount = TargetCheck::model()->countByAttributes(array(
+            "target_id" => $this->id,
+            "check_id"  => $checkId,
+        ));
+
+        if ($this->checklist_templates) {
+            $templates = $this->checklistTemplates;
+            $templateIds = array();
+
+            foreach ($templates as $template) {
+                $templateIds[] = $template->checklist_template_id;
+            }
+
+            $availableCount = ChecklistTemplateCheck::model()->countByAttributes(array(
+                "checklist_template_id" => $templateIds,
+                "check_id" => $checkId,
+            ));
+        } else {
+            $availableCount = 1;
+        }
+
+        return $availableCount > $currentCount;
     }
 
     /**
