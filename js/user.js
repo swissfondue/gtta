@@ -3252,7 +3252,8 @@ function User()
     this.timesession = new function () {
         var _timesession = this;
 
-        this.refreshTimeout = 5000; // One minute
+        this.refreshTimeout  = 5000; // One minute
+        this.counterInterval = 1000; // Update counter values every second
 
         /**
          * Show project list
@@ -3426,6 +3427,40 @@ function User()
                     });
                 }, _timesession.refreshTimeout);
             }
+        };
+
+        /**
+         * Start time session counter
+         */
+        this.startCounter = function () {
+            setInterval(function () {
+                var seconds = parseInt($('.counter').find('.seconds').text());
+                var minutes = parseInt($('.counter').find('.minutes').text());
+                var hours   = parseInt($('.counter').find('.hours').text());
+
+                seconds++;
+
+                if (seconds == 60) {
+                    seconds = 0;
+                    minutes++;
+                }
+
+                if (minutes == 60) {
+                    minutes = 0;
+                    hours++;
+                }
+
+                if (hours == 24) {
+                    seconds = 0;
+                    minutes = 0;
+                    hours   = 0;
+                }
+
+                $('.counter').find('.seconds').text(("0" + seconds).slice(-2));
+                $('.counter').find('.minutes').text(("0" + minutes).slice(-2));
+                $('.counter').find('.hours').text(("0" + hours).slice(-2));
+
+            }, _timesession.counterInterval);
         };
     };
 }

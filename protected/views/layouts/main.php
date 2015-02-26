@@ -205,7 +205,7 @@
                     </div>
                     <div class="time-session-counter inline">
                         <div class="counter inline">
-                            <span class="counter-part hours"><?php $this->timeSession ? print $this->timeSession->duration['hours'] : print "00"; ?></span> : <span class="counter-part minutes"><?php $this->timeSession ? print $this->timeSession->duration['mins'] : print "00"; ?></span>
+                            <span class="counter-part hours"><?php $this->timeSession ? print $this->timeSession->duration['hours'] : print "00"; ?></span> : <span class="counter-part minutes"><?php $this->timeSession ? print $this->timeSession->duration['mins'] : print "00"; ?></span> : <span class="counter-part seconds"><?php $this->timeSession ? print $this->timeSession->duration['seconds'] : print "00"; ?></span>
                         </div>
                         <div class="session-controls inline">
                             <div class="start-control <?php if ($this->timeSession) print "hide"; ?>">
@@ -298,6 +298,7 @@
         <?php if ($this->timeSession): ?>
             <script>
                 user.timesession.refresh('<?php print $this->createUrl("account/controltimerecord"); ?>');
+                user.timesession.startCounter();
             </script>
         <?php endif; ?>
         <script>

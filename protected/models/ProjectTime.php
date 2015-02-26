@@ -114,6 +114,7 @@ class ProjectTime extends ActiveRecord
         return array(
             "hours" => $diff->format("%H"),
             "mins"  => $diff->format("%I"),
+            "seconds"  => $diff->format("%S"),
         );
     }
 
