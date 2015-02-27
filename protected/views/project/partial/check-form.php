@@ -87,15 +87,23 @@
         <?php endif; ?>
         <?php if ($check->check->scripts && $check->check->automated && User::checkRole(User::ROLE_USER)): ?>
             <?php foreach ($check->scripts as $script): ?>
-                <?php if (count($check->scripts) > 1): ?>
-                    <tr class="script-inputs">
-                        <th>
+                <tr class="script-inputs">
+                    <th>
+                        <label class="checkbox">
                             <input name="TargetCheckEditForm_<?php echo $check->id ?>[scripts][]" id="TargetCheckEditForm_<?php print $check->id; ?>_scripts_<?php print $script->script->id; ?>" type="checkbox" data-id="<?php print $script->script->id; ?>" value="<?php echo $script->script->id; ?>" <?php if ($script->start) echo 'checked="checked"'; ?> <?php if ($check->isRunning) echo "disabled"; ?> />
                             <?php echo CHtml::encode($script->script->package->name); ?>
-                        </th>
-                        <td>&nbsp;</td>
-                    </tr>
-                <?php endif; ?>
+                        </label>
+                    </th>
+                    <td>
+                        <div class="pull-left">
+                            <input style="width:70px;" type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[timeouts][]" id="TargetCheckEditForm_<?php echo $check->id; ?>_timeouts_<?php echo $script->script->id; ?>" data-script-id="<?php echo $script->script->id; ?>" <?php if ($check->isRunning) echo "readonly"; ?> value="<?php echo $script->timeout ? $script->timeout : $script->script->package->timeout; ?>">
+                        </div>
+                        <div class="pull-left" style="padding-top:5px;padding-left:5px;">
+                            <?= Yii::t("app", "seconds timeout"); ?>
+                        </div>
+                    </td>
+                </tr>
+
                 <?php
                     $groups = array();
                     $group = array();
@@ -120,14 +128,6 @@
                         $groups[] = $group;
                     }
                 ?>
-                <tr>
-                    <th>
-                        <?php echo Yii::t("app", "Timeout"); ?>
-                    </th>
-                    <td>
-                        <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[timeouts][]" class="input-xlarge" id="TargetCheckEditForm_<?php echo $check->id; ?>_timeouts_<?php echo $script->script->id; ?>" data-script-id="<?php echo $script->script->id; ?>" <?php if ($check->isRunning) echo "readonly"; ?> value="<?php echo $script->timeout ? $script->timeout : $script->script->package->timeout; ?>">
-                    </td>
-                </tr>
                 <?php foreach ($inputs as $input): ?>
                     <?php
                         $currentGroup = false;

@@ -845,12 +845,15 @@ table.table-result .new-entry input {
 }
 
 .script-inputs {
-    border-bottom:1px solid #999 !important;
+    background-color:#ddd !important;
 }
 
 .script-inputs th {
     text-align:left !important;
-    background-color:#ddd !important;
+}
+
+.script-inputs th label.checkbox {
+    font-weight:bold;
 }
 
 .gt-check .module-header, .suggested-targets .suggested-targets-header {
