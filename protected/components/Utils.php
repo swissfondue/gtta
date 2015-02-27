@@ -17,6 +17,7 @@ class Utils {
             "<ul>",
             "<ol>",
             "<br />",
+            "<br>",
         );
 
         $isHtml = false;

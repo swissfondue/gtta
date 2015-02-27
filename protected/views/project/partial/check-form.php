@@ -354,7 +354,7 @@
                                     </span>
                                 </div>
 
-                                <div class="result-content hide" data-id="<?php echo $result->id; ?>"><?php echo str_replace("\n", "<br>", CHtml::encode($result->localizedResult)); ?></div>
+                                <div class="result-content hide" data-id="<?php echo $result->id; ?>"><?php echo (Utils::isHtml($result->localizedResult) ? $result->localizedResult : str_replace("\n", "<br>", $result->localizedResult)); ?></div>
                             </li>
                         <?php endforeach; ?>
                     </ul>
