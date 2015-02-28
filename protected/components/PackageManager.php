@@ -385,22 +385,6 @@ class PackageManager {
             }
         }
 
-        // scan top-level sections
-        $allowedTopLevel = array(
-            self::SECTION_NAME,
-            self::SECTION_TYPE,
-            self::SECTION_VERSION,
-            self::SECTION_DESCRIPTION,
-            self::SECTION_DEPENDENCIES,
-            self::SECTION_INPUTS,
-        );
-
-        foreach ($package as $key => $value) {
-            if (!in_array($key, $allowedTopLevel)) {
-                throw new Exception(Yii::t("app", "Invalid section: {section}", array("{section}" => $key)));
-            }
-        }
-
         return array(
             self::SECTION_TYPE => $type,
             self::SECTION_NAME => $name,
@@ -869,7 +853,13 @@ class PackageManager {
             $destinationPath = $this->getPath($package);
             FileManager::rmDir($destinationPath);
             FileManager::createDir($destinationPath, 0755);
-            FileManager::chown($destinationPath, "gtta", "gtta");
+
+            try {
+                FileManager::chown($destinationPath, "gtta", "gtta");
+            } catch (Exception $e) {
+                // pass
+            }
+
             FileManager::copyRecursive($this->_getRootPath($packagePath), $destinationPath);
 
             // change "files" directory permission
