@@ -819,13 +819,8 @@ function Admin()
         /**
          * Stop process.
          */
-        this.stop = function (targetId, checkId, guidedTest) {
+        this.stop = function (targetId, checkId) {
             var id = targetId.toString() + '-' + checkId.toString();
-
-            if (guidedTest) {
-                id = 'gt-' + id;
-            }
-
             var row = $('div.process-monitor[data-id="' + id + '"]');
             row.addClass('delete-row');
 
@@ -954,49 +949,6 @@ function Admin()
                     }
                 });
             }
-        };
-    };
-
-    /**
-     * GT check object.
-     */
-    this.gtCheck = new function () {
-        var _gtCheck = this;
-
-        /**
-         * Load types
-         */
-        this.loadTypes = function (obj, target) {
-            var category = obj.val();
-
-            target.find("option:gt(0)").remove();
-
-            system.control.loadObjects(category, 'gt-type-list', function (data) {
-                if (data && data.objects.length) {
-                    for (var i = 0; i < data.objects.length; i++) {
-                        var item = data.objects[i];
-                        target.append($("<option>").attr("value", item.id).html(item.name));
-                    }
-                }
-            });
-        };
-
-        /**
-         * Load modules
-         */
-        this.loadModules = function (obj, target) {
-            var type = obj.val();
-
-            target.find("option:gt(0)").remove();
-
-            system.control.loadObjects(type, 'gt-module-list', function (data) {
-                if (data && data.objects.length) {
-                    for (var i = 0; i < data.objects.length; i++) {
-                        var item = data.objects[i];
-                        target.append($("<option>").attr("value", item.id).html(item.name));
-                    }
-                }
-            });
         };
     };
 
@@ -1535,7 +1487,6 @@ function Admin()
                                 options.push($("<option></option>")
                                     .val(option.id)
                                     .html(option.name)
-                                    .attr("data-guided", option.guided)
                                 );
                             }
 
@@ -1554,49 +1505,25 @@ function Admin()
                     targetId.parent().parent().hide();
                     moduleId.parent().parent().hide();
                 } else {
-                    var guided = $(elem).find("option:selected").data("guided");
+                    system.control.loadObjects($(elem).val(), "target-list", function (data) {
+                        if (data && data.objects) {
+                            targetId.parent().parent().show();
+                            moduleId.parent().parent().hide();
 
-                    if (!guided) {
-                        system.control.loadObjects($(elem).val(), "target-list", function (data) {
-                            if (data && data.objects) {
-                                targetId.parent().parent().show();
-                                moduleId.parent().parent().hide();
+                            var options = [];
 
-                                var options = [];
+                            for (var i = 0; i < data.objects.length; i++) {
+                                var option = data.objects[i];
 
-                                for (var i = 0; i < data.objects.length; i++) {
-                                    var option = data.objects[i];
-
-                                    options.push($("<option></option>")
-                                        .val(option.id)
-                                        .html(option.host)
-                                    );
-                                }
-
-                                targetId.append(options);
+                                options.push($("<option></option>")
+                                    .val(option.id)
+                                    .html(option.host)
+                                );
                             }
-                        });
-                    } else {
-                        system.control.loadObjects($(elem).val(), "gt-project-module-list", function (data) {
-                            if (data && data.objects) {
-                                moduleId.parent().parent().show();
-                                targetId.parent().parent().hide();
 
-                                var options = [];
-
-                                for (var i = 0; i < data.objects.length; i++) {
-                                    var option = data.objects[i];
-
-                                    options.push($("<option></option>")
-                                        .val(option.id)
-                                        .html(option.name)
-                                    );
-                                }
-
-                                moduleId.append(options);
-                            }
-                        });
-                    }
+                            targetId.append(options);
+                        }
+                    });
                 }
             } else if (id == "ProjectPlannerEditForm_targetId") {
                 categoryId.find("option:not(:first)").remove();

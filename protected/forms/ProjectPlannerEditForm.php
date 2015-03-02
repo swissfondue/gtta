@@ -15,11 +15,6 @@ class ProjectPlannerEditForm extends CFormModel {
     public $projectId;
 
     /**
-     * @var int module id
-     */
-    public $moduleId;
-
-    /**
      * @var int target id
      */
     public $targetId;
@@ -46,7 +41,7 @@ class ProjectPlannerEditForm extends CFormModel {
 		return array(
 			array("userId, projectId", "required"),
             array("startDate, endDate", "date", "allowEmpty" => false, "format" => "yyyy-MM-dd"),
-            array("userId, projectId, moduleId, targetId, categoryId", "numerical", "integerOnly" => true),
+            array("userId, projectId, targetId, categoryId", "numerical", "integerOnly" => true),
 		);
 	}
     
@@ -57,7 +52,6 @@ class ProjectPlannerEditForm extends CFormModel {
 		return array(
 			"userId" => Yii::t("app", "User"),
             "projectId" => Yii::t("app", "Project"),
-            "moduleId" => Yii::t("app", "Module"),
             "targetId" => Yii::t("app", "Target"),
             "categoryId" => Yii::t("app", "Category"),
             "startDate" => Yii::t("app", "Start Date"),
