@@ -34,10 +34,6 @@
                                 </td>
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl('project/view', array( 'id' => $project->id )); ?>"><?php echo CHtml::encode($project->name); ?></a>
-
-                                    <?php if ($project->guided_test): ?>
-                                        <i class="icon icon-hand-right"></i>
-                                    <?php endif; ?>
                                 </td>
                                 <td class="status">
                                     <?php

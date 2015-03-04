@@ -81,7 +81,7 @@
                             <?php endif; ?>
 
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
-                                <li class="dropdown <?php if (in_array(Yii::app()->controller->id, array('backup', 'check', 'reference', 'risk', 'user', 'package', 'reporttemplate', 'gt', 'monitor', 'history', 'update', 'settings'))) echo 'active'; ?>">
+                                <li class="dropdown <?php if (in_array(Yii::app()->controller->id, array('backup', 'check', 'reference', 'risk', 'user', 'package', 'reporttemplate', 'monitor', 'history', 'update', 'settings'))) echo 'active'; ?>">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                         <?php echo Yii::t('app', 'System'); ?>
                                         <b class="caret"></b>
@@ -93,7 +93,6 @@
                                         <li <?php if (Yii::app()->controller->id == 'user') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('user/index'); ?>"><?php echo Yii::t('app', 'Users'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'package') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('package/index'); ?>"><?php echo Yii::t('app', 'Packages'); ?></a></li>
                                         <li class="divider"></li>
-                                        <li <?php if (Yii::app()->controller->id == 'gt') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('gt/index'); ?>"><?php echo Yii::t('app', 'Guided Test Templates'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'reporttemplate') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('reporttemplate/index'); ?>"><?php echo Yii::t('app', 'Report Templates'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'risk') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('risk/index'); ?>"><?php echo Yii::t('app', 'Risk Matrix Templates'); ?></a></li>
                                         <li class="divider"></li>

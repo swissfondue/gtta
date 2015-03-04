@@ -221,7 +221,6 @@ class ReportController extends Controller {
         }
 
         $textBlocks = explode($table, $text);
-        $guided = $this->project['project']->guided_test;
 
         for ($i = 0; $i < count($textBlocks); $i++) {
             $this->_renderText($container, $textBlocks[$i], $substitute);
@@ -235,7 +234,7 @@ class ReportController extends Controller {
                     $list = new PHPRtfLite_List_Enumeration($this->rtf, PHPRtfLite_List_Enumeration::TYPE_CIRCLE);
 
                     foreach ($this->project['targets'] as $target) {
-                        $list->addItem($guided ? $target["host"] : $target->hostPort, $this->textFont, $this->noPar);
+                        $list->addItem($target->hostPort, $this->textFont, $this->noPar);
                     }
 
                     $container->writeRtfCode('\par ');
@@ -273,42 +272,42 @@ class ReportController extends Controller {
                     $row++;
 
                     foreach ($this->project['targets'] as $target) {
-                        $table->getCell($row, 1)->writeText($guided ? $target["host"] : $target->hostPort, $this->textFont, $this->noPar);
+                        $table->getCell($row, 1)->writeText($target->hostPort, $this->textFont, $this->noPar);
 
-                        if (!$guided && $target->description) {
+                        if ($target->description) {
                             $table->getCell($row, 1)->writeText(' / ', $this->textFont);
                             $table->getCell($row, 1)->writeText($target->description, new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
                         }
 
                         $table->getCell($row, 2)->writeText(
-                            $guided ? $target["highRiskCount"] : $target->highRiskCount,
+                            $target->highRiskCount,
                             new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#d63515')
                         );
 
                         $table->getCell($row, 2)->writeText(' / ', $this->textFont);
                         $table->getCell($row, 2)->writeText(
-                            $guided ? $target["medRiskCount"] : $target->medRiskCount,
+                            $target->medRiskCount,
                             new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#dace2f')
                         );
 
                         $table->getCell($row, 2)->writeText(' / ', $this->textFont);
                         $table->getCell($row, 2)->writeText(
-                            $guided ? $target["lowRiskCount"] : $target->lowRiskCount,
+                            $target->lowRiskCount,
                             new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#53a254')
                         );
 
                         $table->getCell($row, 2)->writeText(' / ', $this->textFont);
-                        $table->getCell($row, 2)->writeText($guided ? $target["infoCount"] : $target->infoCount, $this->textFont);
+                        $table->getCell($row, 2)->writeText($target->infoCount, $this->textFont);
 
-                        $count = $guided ? $target["checkCount"] : $target->checkCount;
-                        $finished = $guided ? $target["finishedCount"] : $target->finishedCount;
+                        $count = $target->checkCount;
+                        $finished = $target->finishedCount;
 
                         $table->getCell($row, 3)->writeText(
                             ($count ? sprintf('%.2f%%', $finished / $count * 100) : '0.00%') . ' / ' . $finished,
                             $this->textFont
                         );
 
-                        $table->getCell($row, 4)->writeText($guided ? $target["checkCount"] : $target->checkCount, $this->textFont);
+                        $table->getCell($row, 4)->writeText($target->checkCount, $this->textFont);
 
                         $row++;
                     }
@@ -343,14 +342,14 @@ class ReportController extends Controller {
                     $row++;
 
                     foreach ($this->project['targets'] as $target) {
-                        $table->getCell($row, 1)->writeText($guided ? $target["host"] : $target->hostPort, $this->textFont, $this->noPar);
+                        $table->getCell($row, 1)->writeText($target->hostPort, $this->textFont, $this->noPar);
 
-                        if (!$guided && $target->description) {
+                        if ($target->description) {
                             $table->getCell($row, 1)->writeText(' / ', $this->textFont);
                             $table->getCell($row, 1)->writeText($target->description, new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
                         }
 
-                        $control = $this->project['weakestControls'][$guided ? $target["id"] : $target->id];
+                        $control = $this->project['weakestControls'][$target->id];
 
                         $table->getCell($row, 2)->writeText($control ? $control['name'] : Yii::t('app', 'N/A'));
                         $table->getCell($row, 3)->writeText($control ? $control['degree'] . '%' : Yii::t('app', 'N/A'));
@@ -1778,404 +1777,6 @@ class ReportController extends Controller {
     }
 
     /**
-     * GT project report
-     * @param $templateCategoryIds
-     * @param $project
-     * @param $language
-     * @return array
-     */
-    private function _gtProjectReport($templateCategoryIds, $project, $language) {
-        $targets = array();
-        $projectTargets = array();
-
-        $criteria = new CDbCriteria();
-        $criteria->addColumnCondition(array('project_id' => $project->id));
-        $criteria->order = 'target ASC';
-
-        $checks = ProjectGtCheck::model()->findAll($criteria);
-        $targetId = 1;
-
-        foreach ($checks as $check) {
-            if (!$check->target) {
-                continue;
-            }
-
-            if (!in_array($check->target, $targets)) {
-                $targets[] = $check->target;
-                $projectTargets[$check->target] = array(
-                    "id" => $targetId,
-                    "host" => $check->target,
-                    "checkCount" => 0,
-                    "finishedCount" => 0,
-                    "infoCount" => 0,
-                    "lowRiskCount" => 0,
-                    "medRiskCount" => 0,
-                    "highRiskCount" => 0
-                );
-            }
-
-            $projectTargets[$check->target]["checkCount"]++;
-
-            if ($check->status = ProjectGtCheck::STATUS_FINISHED) {
-                $projectTargets[$check->target]["finishedCount"]++;
-
-                switch ($check->rating) {
-                    case ProjectGtCheck::RATING_INFO:
-                        $projectTargets[$check->target]["infoCount"]++;
-                        break;
-
-                    case ProjectGtCheck::RATING_LOW_RISK:
-                        $projectTargets[$check->target]["lowRiskCount"]++;
-                        break;
-
-                    case ProjectGtCheck::RATING_MED_RISK:
-                        $projectTargets[$check->target]["medRiskCount"]++;
-                        break;
-
-                    case ProjectGtCheck::RATING_HIGH_RISK:
-                        $projectTargets[$check->target]["highRiskCount"]++;
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-        }
-
-        $this->project['targets'] = $projectTargets;
-        $this->_generateFulfillmentDegreeReport(null, true);
-
-        $data = array();
-        $hasInfo = true;
-        $hasSeparate = false;
-
-        $totalRating = 0.0;
-        $totalCheckCount = 0;
-        $checksHigh = 0;
-        $checksMed = 0;
-        $checksLow = 0;
-        $checksInfo = 0;
-        $reportAttachments = array();
-
-        $reducedChecks = array();
-        $ratings = ProjectGtCheck::getRatingNames();
-        $targetId = 1;
-
-        foreach ($targets as $target) {
-            $targetData = array(
-                'id' => $targetId,
-                'host' => $target,
-                'description' => "",
-                'rating' => 0.0,
-                'checkCount' => 0,
-                'categories' => array(),
-                'info' => 0,
-                'separate' => array(),
-                'separateCount' => 0,
-            );
-
-            // prepare all checks
-            $criteria = new CDBCriteria();
-            $criteria->addCondition('t.project_id = :project AND t.target = :target AND t.status = :status AND rating != :hidden');
-
-            $criteria->params = array(
-                "hidden" => ProjectGtCheck::RATING_HIDDEN,
-                "project" => $project->id,
-                "target" => $target,
-                "status" => ProjectGtCheck::STATUS_FINISHED,
-            );
-
-            $criteria->together = true;
-
-            $checks = ProjectGtCheck::model()->with(array(
-                'check' => array(
-                    'with' => array(
-                        'check' => array(
-                            'alias' => 'innerCheck',
-                            'with' => array(
-                                'l10n' => array(
-                                    'joinType' => 'LEFT JOIN',
-                                    'on' => 'l10n.language_id = :language_id',
-                                    'params' => array('language_id' => $language)
-                                ),
-                                'control' => array(
-                                    'with' => array(
-                                        'l10n' => array(
-                                            'alias' => 'c_l10n',
-                                            'joinType' => 'LEFT JOIN',
-                                            'on' => 'c_l10n.language_id = :language_id',
-                                            'params' => array('language_id' => $language)
-                                        ),
-                                        'category' => array(
-                                            'with' => array(
-                                                'l10n' => array(
-                                                    'alias' => 'ca_l10n',
-                                                    'joinType' => 'LEFT JOIN',
-                                                    'on' => 'ca_l10n.language_id = :language_id',
-                                                    'params' => array('language_id' => $language)
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                                '_reference',
-                            ),
-                        ),
-                    ),
-                ),
-                'solutions' => array(
-                    'with' => array(
-                        'solution' => array(
-                            'with' => array(
-                                'l10n' => array(
-                                    'alias' => 'l10n_s',
-                                    'joinType' => 'LEFT JOIN',
-                                    'on' => 'l10n_s.language_id = :language_id',
-                                    'params' => array('language_id' => $language)
-                                ),
-                            ),
-                        ),
-                    ),
-                ),
-                'attachments',
-            ))->findAll($criteria);
-
-            $categories = array();
-
-            foreach ($checks as $check) {
-                $innerCheck = $check->check->check;
-                $categoryId = $innerCheck->control->check_category_id;
-                $controlId = $innerCheck->check_control_id;
-
-                if (!array_key_exists($categoryId, $categories)) {
-                    $categories[$categoryId] = array(
-                        'id' => $categoryId,
-                        'name' => $innerCheck->control->category->localizedName,
-                        'controls' => array(),
-                    );
-                }
-
-                if (!array_key_exists($innerCheck->check_control_id, $categories[$categoryId]["controls"])) {
-                    $categories[$categoryId]["controls"][$controlId] = array(
-                        'id' => $controlId,
-                        'name' => $innerCheck->control->localizedName,
-                        'checks' => array(),
-                    );
-                }
-
-                $categories[$categoryId]["controls"][$controlId]["checks"][] = $check;
-            }
-
-            foreach ($categories as $category) {
-                $categoryData = array(
-                    'id'  => $category["id"],
-                    'name' => $category["name"],
-                    'rating' => 0.0,
-                    'checkCount' => 0,
-                    'controls' => array(),
-                    'info' => 0,
-                    'separate' => 0,
-                );
-
-                if (!$category["controls"]) {
-                    continue;
-                }
-
-                foreach ($category["controls"] as $control) {
-                    $controlData = array(
-                        'id' => $control["id"],
-                        'name' => $control["name"],
-                        'rating' => 0.0,
-                        'checkCount' => 0,
-                        'checks' => array(),
-                        'info' => 0,
-                        'separate' => 0,
-                    );
-
-                    if (!$control["checks"]) {
-                        continue;
-                    }
-
-                    foreach ($control["checks"] as $check) {
-                        $innerCheck = $check->check->check;
-
-                        $checkData = array(
-                            "id" => $check->gt_check_id,
-                            "name" => $innerCheck->localizedName,
-                            "background" => $this->_prepareProjectReportText($innerCheck->localizedBackgroundInfo),
-                            "question" => $this->_prepareProjectReportText($innerCheck->localizedQuestion),
-                            "result" => $check->result,
-                            "tableResult" => $check->table_result,
-                            "rating" => 0,
-                            "ratingName" => $ratings[$check->rating],
-                            "ratingColor" => "#999999",
-                            "solutions" => array(),
-                            "images" => array(),
-                            "reference" => $innerCheck->_reference->name,
-                            "referenceUrl" => $innerCheck->_reference->url,
-                            "referenceCode" => $innerCheck->reference_code,
-                            "referenceCodeUrl" => $innerCheck->reference_url,
-                            "info" => $check->rating == ProjectGtCheck::RATING_INFO,
-                            "separate" => in_array($category["id"], $templateCategoryIds),
-                        );
-
-                        if ($check->solution) {
-                            $checkData["solutions"][] = $this->_prepareProjectReportText($check->solution);
-                        }
-
-                        if ($checkData['info']) {
-                            $controlData['info']++;
-                            $categoryData['info']++;
-                            $targetData['info']++;
-                            $hasInfo = true;
-                        }
-
-                        if ($checkData['separate']) {
-                            $controlData['separate']++;
-                            $categoryData['separate']++;
-
-                            if (!in_array($category["id"], $targetData['separate'])) {
-                                $targetData['separate'][] = $category["id"];
-                            }
-
-                            $targetData['separateCount']++;
-
-                            $hasSeparate = true;
-                        }
-
-                        $checkData["rating"] = $check->rating;
-
-                        switch ($check->rating) {
-                            case TargetCheck::RATING_INFO:
-                                $checkData['ratingColor'] = '#3A87AD';
-                                $checkData["ratingValue"] = 0;
-                                $checksInfo++;
-                                break;
-
-                            case TargetCheck::RATING_LOW_RISK:
-                                $checkData['ratingColor'] = '#53A254';
-                                $checkData["ratingValue"] = 1;
-                                $checksLow++;
-                                break;
-
-                            case TargetCheck::RATING_MED_RISK:
-                                $checkData['ratingColor'] = '#DACE2F';
-                                $checkData["ratingValue"] = 2;
-                                $checksMed++;
-                                break;
-
-                            case TargetCheck::RATING_HIGH_RISK:
-                                $checkData['ratingColor'] = '#D63515';
-                                $checkData["ratingValue"] = 3;
-                                $checksHigh++;
-                                break;
-                        }
-
-                        if ($check->solutions) {
-                            foreach ($check->solutions as $solution) {
-                                $checkData['solutions'][] = $this->_prepareProjectReportText($solution->solution->localizedSolution);
-                            }
-                        }
-
-                        if ($check->attachments) {
-                            foreach ($check->attachments as $attachment) {
-                                if (in_array($attachment->type, array('image/jpeg', 'image/png', 'image/gif', 'image/pjpeg'))) {
-                                    $checkData['images'][] = array(
-                                        'title' => $attachment->title,
-                                        'image' => Yii::app()->params['attachments']['path'] . '/' . $attachment->path
-                                    );
-                                } else {
-                                    $reportAttachments[] = array(
-                                        "host" => $target->hostPort,
-                                        "title" => $attachment->title,
-                                        "check" => $check->name,
-                                        "filename" => $attachment->name,
-                                        "path" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path,
-                                    );
-                                }
-                            }
-                        }
-
-                        if (in_array($check->rating, array(TargetCheck::RATING_HIGH_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_LOW_RISK))) {
-                            $reducedChecks[] = array(
-                                'target' => array(
-                                    'id' => $targetId,
-                                    'host' => $target,
-                                    'description' => ""
-                                ),
-                                'id' => $checkData['id'],
-                                'name' => $checkData['name'],
-                                'question' => $checkData['question'],
-                                'solution' => $checkData['solutions'] ? implode("\n", $checkData['solutions']) : Yii::t('app', 'N/A'),
-                                'rating' => $check->rating,
-                                "result" => $checkData["result"],
-                                "ratingValue" => $checkData["ratingValue"],
-                            );
-                        }
-
-                        // put checks with RATING_INFO rating to a separate category
-                        $controlData['checks'][] = $checkData;
-                    }
-
-                    $controlData['rating'] = $this->_getChecksRating($controlData["checks"]);
-
-                    $controlData['checkCount'] = count($checks);
-                    $categoryData['checkCount'] += $controlData['checkCount'];
-                    $targetData['checkCount'] += $controlData['checkCount'];
-                    $totalCheckCount += $controlData['checkCount'];
-
-                    if ($controlData['checks']) {
-                        $categoryData['controls'][] = $controlData;
-                    }
-                }
-
-                if ($categoryData['checkCount']) {
-                    $categoryData['rating'] = $this->_getCategoryRating($categoryData);
-
-                    if ($categoryData['controls']) {
-                        $targetData['categories'][] = $categoryData;
-                    }
-                }
-            }
-
-            if ($targetData['checkCount']) {
-                $targetData['rating'] = $this->_getTargetRating($targetData);
-            }
-
-            $data[] = $targetData;
-            $targetId++;
-        }
-
-        if ($totalCheckCount) {
-            $totalRating = $this->_getTotalRating($data);
-        }
-
-        $this->project['rating'] = $totalRating;
-        $this->project['checks'] = $totalCheckCount;
-        $this->project['checksInfo'] = $checksInfo;
-        $this->project['checksLow'] = $checksLow;
-        $this->project['checksMed'] = $checksMed;
-        $this->project['checksHigh'] = $checksHigh;
-        $this->project['reducedChecks'] = $reducedChecks;
-        $this->project['hasInfo'] = $hasInfo;
-        $this->project['hasSeparate'] = $hasSeparate;
-
-        $data = array(
-            "data" => $data,
-            "targets" => $projectTargets,
-            "project" => $project,
-            "rating" => $totalRating,
-            "checks" => $totalCheckCount,
-            "checksInfo" => $checksInfo,
-            "checksMed" => $checksMed,
-            "checksHigh" => $checksHigh,
-            "attachments" => $reportAttachments
-        );
-
-        return $data;
-    }
-
-    /**
      * Generate project function.
      */
     private function _generateProjectReport($model) {
@@ -2214,7 +1815,7 @@ class ReportController extends Controller {
             'project' => $project
         );
 
-        if (!$project->guided_test && (!$targetIds || !count($targetIds))) {
+        if (!$targetIds || !count($targetIds)) {
             Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
             return;
         }
@@ -2267,11 +1868,7 @@ class ReportController extends Controller {
 
         FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
 
-        if ($project->guided_test) {
-            $data = $this->_gtProjectReport($templateCategoryIds, $project, $language);
-        } else {
-            $data = $this->_projectReport($targetIds, $templateCategoryIds, $project, $language);
-        }
+        $data = $this->_projectReport($targetIds, $templateCategoryIds, $project, $language);
 
         if ($template->type == ReportTemplate::TYPE_DOCX) {
             $plugin = ReportPlugin::getPlugin($template, $data);
@@ -3438,125 +3035,6 @@ class ReportController extends Controller {
     }
 
     /**
-     * Get GT project targets
-     * @param $projectId
-     * @return array
-     */
-    private function _getGtTargets($projectId) {
-        $targets = array();
-
-        $criteria = new CDbCriteria();
-        $criteria->addColumnCondition(array('project_id' => $projectId));
-        $criteria->order = 'target ASC';
-
-        $checks = ProjectGtCheck::model()->findAll($criteria);
-
-        foreach ($checks as $check) {
-            if (!$check->target) {
-                continue;
-            }
-
-            if (!in_array($check->target, $targets)) {
-                $targets[] = $check->target;
-            }
-        }
-
-        return $targets;
-    }
-
-    /**
-     * Comparison report for GT projects
-     * @param $project1
-     * @param $project2
-     * @return array
-     * @throws CHttpException
-     */
-    private function _gtComparisonReport($project1, $project2) {
-        $targets1 = $this->_getGtTargets($project1->id);
-        $targets2 = $this->_getGtTargets($project2->id);
-
-        // find corresponding targets
-        $data = array();
-
-        foreach ($targets1 as $target1) {
-            foreach ($targets2 as $target2) {
-                if ($target2 == $target1) {
-                    $data[] = array(
-                        array(
-                            "target" => $target1,
-                            "project" => $project1
-                        ),
-                        array(
-                            "target" => $target2,
-                            "project" => $project2
-                        ),
-                    );
-
-                    break;
-                }
-            }
-        }
-
-        if (!$data) {
-            throw new CHttpException(404, Yii::t('app', 'No targets to compare.'));
-        }
-
-        $targetsData = array();
-
-        foreach ($data as $targets) {
-            $targetData = array(
-                'host' => $targets[0]["target"],
-                'ratings' => array()
-            );
-
-            foreach ($targets as $target) {
-                $rating = 0;
-                $checkCount = 0;
-
-                // get all checks
-                $criteria = new CDBCriteria();
-                $criteria->addCondition("project_id = :project AND target = :target AND status = :status AND rating != :hidden");
-                $criteria->params = array(
-                    "project" => $target["project"]->id,
-                    "target" => $target["target"],
-                    "status" => ProjectGtCheck::STATUS_FINISHED,
-                    "hidden" => ProjectGtCheck::RATING_HIDDEN,
-                );
-
-                $checks = ProjectGtCheck::model()->with(array(
-                    "check" => array(
-                        "with" => array(
-                            "check" => array(
-                                "alias" => "innerCheck",
-                            )
-                        )
-                    )
-                ))->findAll($criteria);
-
-                if (!$checks) {
-                    continue;
-                }
-
-                $checksData = array();
-
-                foreach ($checks as $check) {
-                    $innerCheck = $check->check->check;
-
-                    $checksData[] = array(
-                        "rating" => $check->rating
-                    );
-                }
-
-                $targetData['ratings'][] = $this->_getChecksRating($checksData);
-            }
-
-            $targetsData[] = $targetData;
-        }
-
-        return $targetsData;
-    }
-
-    /**
      * Generate comparison report.
      */
     private function _generateComparisonReport($model) {
@@ -3594,16 +3072,7 @@ class ReportController extends Controller {
             return;
         }
 
-        if ($project1->guided_test != $project2->guided_test) {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Guided Test projects can be compared only to Guided Test projects.'));
-            return;
-        }
-
-        if ($project1->guided_test) {
-            $targetsData = $this->_gtComparisonReport($project1, $project2);
-        } else {
-            $targetsData = $this->_comparisonReport($project1, $project2);
-        }
+        $targetsData = $this->_comparisonReport($project1, $project2);
 
         $this->_rtfSetup($model);
         $section = $this->rtf->addSection();
@@ -3914,122 +3383,6 @@ class ReportController extends Controller {
     }
 
     /**
-     * Fulfillment report for GT
-     * @param $fullReport
-     * @param $findWeakest
-     * @param $model
-     * @param $language
-     * @return array
-     */
-    private function _gtFulfillmentReport($fullReport, $findWeakest, $model, $language) {
-        $data = array();
-
-        $projectId = ($fullReport || $findWeakest) ? $this->project['project']->id : $model->projectId;
-        $targets = $this->_getGtTargets($projectId);
-        $targetId = 1;
-
-        foreach ($targets as $target) {
-            $targetData = array(
-                'id' => $targetId,
-                'host' => $target,
-                'description' => "",
-                'controls' => array(),
-            );
-
-            // get all checks
-            $criteria = new CDBCriteria();
-            $criteria->addColumnCondition(array(
-                "project_id" => $projectId,
-                "target" => $target,
-                "t.status" => ProjectGtCheck::STATUS_FINISHED,
-            ));
-
-            $checks = ProjectGtCheck::model()->with(array(
-                'check' => array(
-                    'with' => array(
-                        'check' => array(
-                            'alias' => 'innerCheck',
-                            'with' => array(
-                                'l10n' => array(
-                                    'joinType' => 'LEFT JOIN',
-                                    'on' => 'l10n.language_id = :language_id',
-                                    'params' => array('language_id' => $language)
-                                ),
-                                'control' => array(
-                                    'with' => array(
-                                        'l10n' => array(
-                                            'alias' => 'c_l10n',
-                                            'joinType' => 'LEFT JOIN',
-                                            'on' => 'c_l10n.language_id = :language_id',
-                                            'params' => array('language_id' => $language)
-                                        ),
-                                        'category' => array(
-                                            'with' => array(
-                                                'l10n' => array(
-                                                    'alias' => 'ca_l10n',
-                                                    'joinType' => 'LEFT JOIN',
-                                                    'on' => 'ca_l10n.language_id = :language_id',
-                                                    'params' => array('language_id' => $language)
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                ),
-            ))->findAll($criteria);
-
-            $controls = array();
-
-            foreach ($checks as $check) {
-                $innerCheck = $check->check->check;
-
-                if (!array_key_exists($innerCheck->check_control_id, $controls)) {
-                    $controls[$innerCheck->check_control_id] = array(
-                        "name" => $innerCheck->control->category->localizedName . ' / ' . $innerCheck->control->localizedName,
-                        "degree" => 0.0,
-                        "count" => 0,
-                    );
-                }
-
-                switch ($check->rating) {
-                    case ProjectGtCheck::RATING_HIDDEN:
-                    case ProjectGtCheck::RATING_INFO:
-                        $controls[$innerCheck->check_control_id]['degree'] += 0;
-                        break;
-
-                    case ProjectGtCheck::RATING_LOW_RISK:
-                        $controls[$innerCheck->check_control_id]['degree'] += 1;
-                        break;
-
-                    case ProjectGtCheck::RATING_MED_RISK:
-                        $controls[$innerCheck->check_control_id]['degree'] += 2;
-                        break;
-
-                    case ProjectGtCheck::RATING_HIGH_RISK:
-                        $controls[$innerCheck->check_control_id]['degree'] += 3;
-                        break;
-                }
-
-                $controls[$innerCheck->check_control_id]["count"]++;
-            }
-
-            foreach ($controls as $control) {
-                $maxDegree = $control["count"] * 3;
-                $control["degree"] = round(100 - $control['degree'] / $maxDegree * 100);
-                $targetData["controls"][] = $control;
-            }
-
-            $data[] = $targetData;
-            $targetId++;
-        }
-
-        return $data;
-    }
-
-    /**
      * Generate a Degree of Fulfillment report
      */
     private function _generateFulfillmentDegreeReport($model = null, $findWeakest = false, &$section = null, $sectionNumber = null) {
@@ -4063,7 +3416,7 @@ class ReportController extends Controller {
                 return;
             }
 
-            if (!$project->guided_test && (!$model->targetIds || !count($model->targetIds))) {
+            if (!$model->targetIds || !count($model->targetIds)) {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
                 return;
             }
@@ -4092,11 +3445,7 @@ class ReportController extends Controller {
             $section->writeText("\n\n");
         }
 
-        if ($project->guided_test) {
-            $data = $this->_gtFulfillmentReport($fullReport, $findWeakest, $model, $language);
-        } else {
-            $data = $this->_fulfillmentReport($fullReport, $findWeakest, $model, $language);
-        }
+        $data = $this->_fulfillmentReport($fullReport, $findWeakest, $model, $language);
 
         $targetNumber = 1;
 
@@ -4414,82 +3763,6 @@ class ReportController extends Controller {
     }
 
     /**
-     * Risk matrix report for GT projects
-     * @param $fullReport
-     * @param $model
-     * @param $risks
-     * @return array
-     */
-    private function _gtRiskMatrixReport($fullReport, $model, $risks) {
-        $data = array();
-
-        $projectId = $fullReport ? $this->project['project']->id : $model->projectId;
-        $targets = $this->_getGtTargets($projectId);
-        $targetId = 1;
-
-        foreach ($targets as $target) {
-            $mtrx = array();
-
-            $criteria = new CDbCriteria();
-            $criteria->addColumnCondition(array(
-                "project_id" => $projectId,
-                "target" => $target,
-                "status" => ProjectGtCheck::STATUS_FINISHED,
-            ));
-
-            $criteria->addInCondition("rating", array(
-                ProjectGtCheck::RATING_HIGH_RISK,
-                ProjectGtCheck::RATING_MED_RISK,
-            ));
-
-            $checks = ProjectGtCheck::model()->findAll($criteria);
-
-            foreach ($checks as $check) {
-                if (!isset($model->matrix[$targetId][$check->gt_check_id])) {
-                    continue;
-                }
-
-                $ctr = 0;
-
-                foreach ($risks as $riskId => $risk) {
-                    $ctr++;
-
-                    if (!isset($model->matrix[$targetId][$check->gt_check_id][$risk->id])) {
-                        continue;
-                    }
-
-                    $riskName = 'R' . $ctr;
-
-                    $damage = $model->matrix[$targetId][$check->gt_check_id][$risk->id]['damage'] - 1;
-                    $likelihood = $model->matrix[$targetId][$check->gt_check_id][$risk->id]['likelihood'] - 1;
-
-                    if (!isset($mtrx[$damage])) {
-                        $mtrx[$damage] = array();
-                    }
-
-                    if (!isset($mtrx[$damage][$likelihood])) {
-                        $mtrx[$damage][$likelihood] = array();
-                    }
-
-                    if (!in_array($riskName, $mtrx[$damage][$likelihood])) {
-                        $mtrx[$damage][$likelihood][] = $riskName;
-                    }
-                }
-            }
-
-            $data[] = array(
-                'host' => $target,
-                'description' => "",
-                'matrix' => $mtrx
-            );
-
-            $targetId++;
-        }
-
-        return $data;
-    }
-
-    /**
      * Generate risk matrix report.
      */
     private function _generateRiskMatrixReport($model, &$section = null, $sectionNumber = null) {
@@ -4532,7 +3805,7 @@ class ReportController extends Controller {
                 return;
             }
 
-            if (!$project->guided_test && (!$model->targetIds || !count($model->targetIds))) {
+            if (!$model->targetIds || !count($model->targetIds)) {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
                 return;
             }
@@ -4560,11 +3833,7 @@ class ReportController extends Controller {
             array('order' => 'COALESCE(l10n.name, t.name) ASC')
         );
 
-        if ($project->guided_test) {
-            $data = $this->_gtRiskMatrixReport($fullReport, $model, $risks);
-        } else {
-            $data = $this->_riskMatrixReport($fullReport, $model, $risks, $language);
-        }
+        $data = $this->_riskMatrixReport($fullReport, $model, $risks, $language);
 
         if (!$fullReport) {
             $this->_rtfSetup($model);
@@ -5202,135 +4471,6 @@ class ReportController extends Controller {
     }
 
     /**
-     * Vulnerability export for GT projects
-     * @param $project
-     * @param $language
-     * @param $model
-     */
-    private function _gtProjectVulnExport($project, $language, $model) {
-        $criteria = new CDbCriteria();
-        $criteria->addColumnCondition(array(
-            't.project_id' => $project->id
-        ));
-        $criteria->order = 'target ASC';
-
-        $gtChecks = ProjectGtCheck::model()->with(array(
-            'check' => array(
-                'with' => array(
-                    'check' => array(
-                        'alias' => 'innerCheck',
-                        'with' => array(
-                            'l10n' => array(
-                                'joinType' => 'LEFT JOIN',
-                                'on' => 'l10n.language_id = :language_id',
-                                'params' => array('language_id' => $language)
-                            ),
-                            '_reference',
-                        ),
-                    ),
-                ),
-            ),
-            'solutions' => array(
-                'joinType' => 'LEFT JOIN',
-                'with' => array(
-                    'solution' => array(
-                        'joinType' => 'LEFT JOIN',
-                        'with' => array(
-                            'l10n' => array(
-                                'alias' => 's_l10n',
-                                'on' => 's_l10n.language_id = :language_id',
-                                'params' => array('language_id' => $language)
-                            )
-                        )
-                    )
-                )
-            ),
-            'vuln' => array(
-                'with' => 'user'
-            )
-        ))->findAll($criteria);
-
-        if (!$gtChecks) {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Checks not found.'));
-            return array();
-        }
-
-        $data = array();
-        $ratings = ProjectGtCheck::getRatingNames();
-
-        $statuses = array(
-            TargetCheck::STATUS_VULN_OPEN => Yii::t('app', 'Open'),
-            TargetCheck::STATUS_VULN_RESOLVED => Yii::t('app', 'Resolved'),
-        );
-
-        foreach ($gtChecks as $check) {
-            if (!in_array($check->rating, $model->ratings)) {
-                continue;
-            }
-
-            $row = array();
-            $innerCheck = $check->check->check;
-
-            if (in_array(TargetCheck::COLUMN_TARGET, $model->columns)) {
-                $row[TargetCheck::COLUMN_TARGET] = $check->target;
-            }
-
-            if (in_array(TargetCheck::COLUMN_NAME, $model->columns)) {
-                $row[TargetCheck::COLUMN_NAME] = $innerCheck->localizedName;
-            }
-
-            if (in_array(TargetCheck::COLUMN_REFERENCE, $model->columns)) {
-                $row[TargetCheck::COLUMN_REFERENCE] = $innerCheck->_reference->name .
-                    ($innerCheck->reference_code ? '-' . $innerCheck->reference_code : '');
-            }
-
-            if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
-                $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($innerCheck->localizedBackgroundInfo);
-            }
-
-            if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns)) {
-                $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareVulnExportText($innerCheck->localizedQuestion);
-            }
-
-            if (in_array(TargetCheck::COLUMN_RESULT, $model->columns)) {
-                $row[TargetCheck::COLUMN_RESULT] = $check->result;
-            }
-
-            if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns)) {
-                $solutions = array();
-
-                foreach ($check->solutions as $solution) {
-                    $solutions[] = $this->_prepareVulnExportText($solution->solution->localizedSolution);
-                }
-
-                $row[TargetCheck::COLUMN_SOLUTION] = implode("\n", $solutions);
-            }
-
-            if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $model->columns)) {
-                $user = $check->vulnUser ? $check->vulnUser : null;
-
-                if ($user) {
-                    $row[TargetCheck::COLUMN_ASSIGNED_USER] = $user->name ? $user->name : $user->email;
-                } else {
-                    $row[TargetCheck::COLUMN_ASSIGNED_USER] = '';
-                }
-            }
-
-            if (in_array(TargetCheck::COLUMN_RATING, $model->columns)) {
-                $row[TargetCheck::COLUMN_RATING] = $ratings[$check->rating];
-            }
-
-            if (in_array(TargetCheck::COLUMN_STATUS, $model->columns)) {
-                $row[TargetCheck::COLUMN_STATUS] = $statuses[$check->vuln_status ? $check->vuln_status : TargetCheck::STATUS_VULN_OPEN];
-            }
-
-            $data[] = $row;
-        }
-
-        return $data;
-    }
-
-    /**
      * Generate vulnerabilities report.
      */
     private function _generateVulnExportReport($model) {
@@ -5354,11 +4494,7 @@ class ReportController extends Controller {
             $language = $language->id;
         }
 
-        if ($project->guided_test) {
-            $data = $this->_gtProjectVulnExport($project, $language, $model);
-        } else {
-            $data = $this->_projectVulnExport($project, $language, $model);
-        }
+        $data = $this->_projectVulnExport($project, $language, $model);
 
         if (!$data) {
             return;

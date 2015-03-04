@@ -98,14 +98,6 @@ return array(
                 array(
                     "class"   => "CFileLogRoute",
                     "levels"  => "error",
-                    "categories" => "bg.GtAutomationJob",
-                    "logPath" => $mainConfig["params"]["bgLogsPath"],
-                    "logFile" => "gtautomation.log",
-                    'maxLogFiles' => 1,
-                ),
-                array(
-                    "class"   => "CFileLogRoute",
-                    "levels"  => "error",
                     "categories" => "bg.ModifiedPackagesJob",
                     "logPath" => $mainConfig["params"]["bgLogsPath"],
                     "logFile" => "modifiedpackages.log",

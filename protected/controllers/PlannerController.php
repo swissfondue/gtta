@@ -29,7 +29,6 @@ class PlannerController extends Controller {
                 $targetId = $form->targetId;
                 $categoryId = $form->categoryId;
                 $projectId = $form->projectId;
-                $moduleId = $form->moduleId;
                 $error = false;
 
                 if ($targetId && $categoryId) {
@@ -42,19 +41,6 @@ class PlannerController extends Controller {
 
                     if ($plan) {
                         Yii::app()->user->setFlash("error", Yii::t("app", "This category is already planned."));
-                        $error = true;
-                    }
-                } else if ($projectId && $moduleId) {
-                    $targetId = null;
-                    $categoryId = null;
-
-                    $plan = ProjectPlanner::model()->findByAttributes(array(
-                        "project_id" => $projectId,
-                        "gt_module_id" => $moduleId
-                    ));
-
-                    if ($plan) {
-                        Yii::app()->user->setFlash("error", Yii::t("app", "This module is already planned."));
                         $error = true;
                     }
                 } else {
@@ -70,7 +56,6 @@ class PlannerController extends Controller {
                     $plan->target_id = $targetId;
                     $plan->check_category_id = $categoryId;
                     $plan->project_id = $projectId;
-                    $plan->gt_module_id = $moduleId;
                     $plan->save();
                 }
             } else {
@@ -161,26 +146,7 @@ class PlannerController extends Controller {
                                     )
                                 )
                             )
-                        ),
-                        "projectGtModule" => array(
-                            "with" => array(
-                                "project" => array(
-                                    "alias" => "gt_project"
-                                ),
-                                "module" => array(
-                                    "with" => array(
-                                        "l10n" => array(
-                                            "alias" => "l10n_module",
-                                            "joinType" => "LEFT JOIN",
-                                            "on" => "l10n_module.language_id = :language_id",
-                                            "params" => array(
-                                                "language_id" => $language,
-                                            ),
-                                        ),
-                                    )
-                                )
-                            )
-                        ),
+                        )
                     )
                 )
             ))->findAll($criteria);
@@ -193,26 +159,17 @@ class PlannerController extends Controller {
                     $name = null;
                     $link = null;
 
-                    if ($plan->targetCheckCategory) {
-                        $name = implode(", ", array(
-                            $plan->targetCheckCategory->category->localizedName,
-                            $plan->targetCheckCategory->target->host,
-                            $plan->targetCheckCategory->target->project->name,
-                        ));
+                    $name = implode(", ", array(
+                        $plan->targetCheckCategory->category->localizedName,
+                        $plan->targetCheckCategory->target->host,
+                        $plan->targetCheckCategory->target->project->name,
+                    ));
 
-                        $link = $this->createUrl("project/checks", array(
-                            "id" => $plan->targetCheckCategory->target->project_id,
-                            "target" => $plan->targetCheckCategory->target_id,
-                            "category" => $plan->targetCheckCategory->check_category_id,
-                        ));
-                    } else {
-                        $name = implode(", ", array(
-                            $plan->projectGtModule->module->localizedName,
-                            $plan->projectGtModule->project->name,
-                        ));
-
-                        $link = $this->createUrl("project/gt", array("id" => $plan->project_id));
-                    }
+                    $link = $this->createUrl("project/checks", array(
+                        "id" => $plan->targetCheckCategory->target->project_id,
+                        "target" => $plan->targetCheckCategory->target_id,
+                        "category" => $plan->targetCheckCategory->check_category_id,
+                    ));
 
                     $plans[] = array(
                         "id" => $plan->id,

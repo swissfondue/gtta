@@ -11,7 +11,6 @@
  * @property string $deadline
  * @property integer $status
  * @property string $vuln_overdue
- * @property boolean $guided_test
  * @property string $start_date
  * @property float $hours_allocated
  * @property float $userHoursAllocated
@@ -74,7 +73,6 @@ class Project extends ActiveRecord implements IVariableScopeObject {
             array("name, year", "required"),
             array("name", "length", "max" => 1000),
             array("year", "length", "max" => 4),
-            array("guided_test", "boolean"),
             array("status", "in", "range" => self::getValidStatuses()),
             array("hours_allocated", "numerical", "min" => 0),
 		);
@@ -90,8 +88,6 @@ class Project extends ActiveRecord implements IVariableScopeObject {
             "users" => array(self::MANY_MANY, "User", "project_users(project_id, user_id)"),
             "projectUsers" => array(self::HAS_MANY, "ProjectUser", "project_id"),
             "targets" => array(self::HAS_MANY, "Target", "project_id"),
-            "modules" => array(self::HAS_MANY, "ProjectGtModule", "project_id"),
-            "gtChecks" => array(self::HAS_MANY, "ProjectGtCheck", "project_id"),
             "userHoursAllocated" => array(self::STAT, "ProjectUser", "project_id", "select" => "SUM(hours_allocated)"),
             "trackedTime" => array(self::STAT, "ProjectTime", "project_id", "select" => "trunc(SUM(time) / 3600)"), // Convert seconds to hours
             "timeRecords" => array(self::HAS_MANY, "ProjectTime", "project_id"),
