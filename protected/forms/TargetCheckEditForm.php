@@ -103,9 +103,36 @@ class TargetCheckEditForm extends CFormModel {
 		return array(
             array("rating", "in", "range" => TargetCheck::getValidRatings()),
             array("port", "numerical", "integerOnly" => true, "min" => 0, "max" => 65536),
-            array("protocol, overrideTarget, solutionTitle, resultTitle", "length", "max" => 1000),
+            array("protocol, solutionTitle, resultTitle", "length", "max" => 1000),
+            array("overrideTarget", "checkOverrideTarget"),
             array("saveSolution, saveResult", "boolean"),
             array("inputs, result, solutions, solution, poc, links, attachmentTitles, tableResult, scripts, timeouts", "safe"),
 		);
 	}
+
+    /**
+     * Validate override target
+     * @param $target
+     * @return bool
+     */
+    public function checkOverrideTarget($attribute,$params) {
+        $target  = trim($this->overrideTarget);
+        $targets = explode("\n", $target);
+
+        if (empty($targets)) {
+            $this->addError('overrideTarget', Yii::t('app', 'Override target is not valid.'));
+            return true;
+        }
+
+        foreach ($targets as $t) {
+            if (!Utils::isIP($t) && !Utils::isIPRange($t) && !Utils::isDomain($t) && !Utils::isIPNetwork($t)) {
+                $this->addError('overrideTarget', Yii::t('app', 'Override target is not valid.'));
+                return false;
+            }
+        }
+
+        $this->overrideTarget = $target;
+
+        return true;
+    }
 }

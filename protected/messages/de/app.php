@@ -458,6 +458,7 @@ return array (
   'Originator' => 'Ersteller',
   'Outdent' => 'Einzug',
   'Override Target' => 'Ziel überschreiben',
+  'Override target is not valid.' => 'Override target is not valid.',
   'Overview' => 'Übersicht',
   'Owner' => 'Besitzer',
   'P.C.' => 'P.C.',

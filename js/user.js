@@ -607,7 +607,7 @@ function User()
                 }
             ).get();
 
-            override = $('input[name="TargetCheckEditForm_' + id + '[overrideTarget]"]', row).val();
+            override = $('textarea[name="TargetCheckEditForm_' + id + '[overrideTarget]"]', row).val();
             protocol = $('input[name="TargetCheckEditForm_' + id + '[protocol]"]', row).val();
             port     = $('input[name="TargetCheckEditForm_' + id + '[port]"]', row).val();
             resultTitle = $('input[name="TargetCheckEditForm_' + id + '[resultTitle]"]', row).val();

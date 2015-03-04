@@ -377,6 +377,7 @@ return array (
   'Originator' => '',
   'Outdent' => '',
   'Override Target' => '',
+  'Override target is not valid.' => '',
   'Overview' => '',
   'Owner' => '',
   'P.C.' => '',
