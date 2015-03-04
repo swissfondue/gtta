@@ -81,7 +81,6 @@ class MonitorController extends Controller {
             }
 
             $ids = explode("-", $model->id);
-            $isGuided = false;
             $check = null;
 
 
