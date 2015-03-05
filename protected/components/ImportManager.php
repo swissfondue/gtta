@@ -5,7 +5,9 @@
  */
 class ImportManager {
     const TYPE_NESSUS     = "nessus";
-    const TYPE_NESSUS_CSV = "csv";
+    const TYPE_NESSUS_CSV = "nessus_csv";
+    const TYPE_CSV        = "csv";
+    const TYPE_TXT        = "txt";
 
     /**
      * Availible types
@@ -14,24 +16,32 @@ class ImportManager {
     public static $types = array(
         self::TYPE_NESSUS     => "Nessus",
         self::TYPE_NESSUS_CSV => "Nessus CSV",
+        self::TYPE_CSV        => "CSV",
+        self::TYPE_TXT        => "TXT",
     );
 
     /**
      * Parse CSV file
      * @param $file
      */
-    public static function parseCSV($file) {
+    public static function parseCSV($file, $nessus=false) {
         $result = array();
 
         if (($handle = fopen($file, "r")) !== FALSE) {
-            $titles = fgetcsv($handle, 1000, ",");
+            if ($nessus) {
+                $titles = fgetcsv($handle, 1000, ",");
+            }
 
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                 $num = count($data);
                 $rowData = array();
 
                 for ($col = 0; $col < $num; $col++) {
-                    $rowData[$titles[$col]] = $data[$col];
+                    if ($nessus) {
+                        $rowData[$titles[$col]] = $data[$col];
+                    } else {
+                        $rowData[] = $data[$col];
+                    }
                 }
 
                 $result[] = $rowData;
@@ -43,6 +53,25 @@ class ImportManager {
         return $result;
     }
 
+    /**
+     * Parse TXT file
+     * @param $file
+     * @return array
+     */
+    public static function parseTXT($file) {
+        $result = array();
+
+        if (($handle = fopen($file, "r")) !== FALSE) {
+            while (($data = fgets($handle, 1000)) !== FALSE) {
+                $rowData = explode(" ", $data);
+                $result[] = $rowData;
+            }
+
+            fclose($handle);
+        }
+
+        return $result;
+    }
 
 
     /**
@@ -61,7 +90,7 @@ class ImportManager {
 
         switch ($type) {
             case self::TYPE_NESSUS_CSV:
-                $targets = self::parseCSV($path);
+                $targets = self::parseCSV($path, true);
 
                 foreach ($targets as $target) {
                     $t = new Target();
@@ -94,6 +123,30 @@ class ImportManager {
 
                         break;
                     }
+                }
+
+                break;
+
+            case self::TYPE_CSV:
+                $targets = self::parseCSV($path);
+
+                foreach ($targets as $target) {
+                    $t = new Target();
+                    $t->project_id = $project->id;
+                    $t->host       = $target[0];
+                    $t->save();
+                }
+
+                break;
+
+            case self::TYPE_TXT:
+                $targets = self::parseTXT($path);
+
+                foreach ($targets as $target) {
+                    $t = new Target();
+                    $t->project_id = $project->id;
+                    $t->host       = $target[0];
+                    $t->save();
                 }
 
                 break;

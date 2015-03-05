@@ -1167,6 +1167,55 @@ class ProjectController extends Controller {
 	}
 
     /**
+     * Add list of targets page
+     * @param $id
+     * @throws Exception
+     */
+    public function actionAddTargetList($id) {
+        $form = new TargetListAddForm();
+        $project = Project::model()->findByPk($id);
+
+        if (!$project) {
+            throw new Exception("Project not found.");
+        }
+
+        if (isset($_POST["TargetListAddForm"])) {
+            $form->attributes = $_POST["TargetListAddForm"];
+
+            if ($form->validate()) {
+                try {
+                    $targets = trim($form->targetList);
+                    $targets = explode("\n", $targets);
+
+                    foreach ($targets as $target) {
+                        $t = new Target();
+                        $t->project_id = $project->id;
+                        $t->host = $target;
+                        $t->save();
+                    }
+                } catch (Exception $e) {
+                    throw $e;
+                }
+
+                Yii::app()->user->setFlash("success", Yii::t("app", "Targets added."));
+                $this->redirect(array("project/view", "id" => $project->id));
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+        }
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
+        $this->breadcrumbs[] = array(Yii::t("app", "New Targets"), "");
+
+        // display the page
+        $this->pageTitle = Yii::t("app", "New Targets");
+        $this->render("target/new-list", array(
+            "model" => $form,
+        ));
+    }
+
+    /**
      * Import targets from file
      * @throws Exception
      */
