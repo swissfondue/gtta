@@ -117,16 +117,16 @@ class TargetCheckEditForm extends CFormModel {
      */
     public function checkOverrideTarget($attribute,$params) {
         $target  = trim($this->overrideTarget);
-        $targets = explode("\n", $target);
 
-        if (empty($targets)) {
-            $this->addError('overrideTarget', Yii::t('app', 'Override target is not valid.'));
+        if (!$target) {
             return true;
         }
 
+        $targets = explode("\n", $target);
+
         foreach ($targets as $t) {
             if (!Utils::isIP($t) && !Utils::isIPRange($t) && !Utils::isDomain($t) && !Utils::isIPNetwork($t)) {
-                $this->addError('overrideTarget', Yii::t('app', 'Override target is not valid.'));
+                $this->addError('overrideTarget', Yii::t('app', sprintf("Target '%s' is not valid.", $t)));
                 return false;
             }
         }

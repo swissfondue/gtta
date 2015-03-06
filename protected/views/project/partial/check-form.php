@@ -61,9 +61,7 @@
                     <?php echo Yii::t("app", "Override Target"); ?>
                 </th>
                 <td>
-                    <textarea class="max-width" rows="10" name="TargetCheckEditForm_<?php echo $check->id; ?>[overrideTarget]" id="TargetCheckEditForm_<?php echo $check->id; ?>_overrideTarget" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>>
-                        <?php echo CHtml::encode($check->override_target); ?>
-                    </textarea>
+                    <textarea class="max-width" rows="10" name="TargetCheckEditForm_<?php echo $check->id; ?>[overrideTarget]" id="TargetCheckEditForm_<?php echo $check->id; ?>_overrideTarget" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->override_target); ?></textarea>
                 </td>
             </tr>
             <?php if ($check->check->protocol): ?>
