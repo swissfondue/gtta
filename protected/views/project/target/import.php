@@ -12,8 +12,8 @@
             <div class="controls">
                 <select id="TargetImportForm_type" name="TargetImportForm[type]">
                     <option value=""><?php print Yii::t("app", "Please select..."); ?></option>
-                    <?php foreach ($types as $type => $title): ?>
-                        <option value="<?php print $type; ?>"><?php print $title; ?></option>
+                    <?php foreach ($types as $type => $typeData): ?>
+                        <option value="<?php print $type; ?>"><?php print $typeData['name']; ?></option>
                     <?php endforeach;?>
                 </select>
                 <?php if ($model->getError('type')): ?>

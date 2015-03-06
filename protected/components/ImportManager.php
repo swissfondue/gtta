@@ -14,10 +14,22 @@ class ImportManager {
      * @var array
      */
     public static $types = array(
-        self::TYPE_NESSUS     => "Nessus",
-        self::TYPE_NESSUS_CSV => "Nessus CSV",
-        self::TYPE_CSV        => "CSV",
-        self::TYPE_TXT        => "TXT",
+        self::TYPE_NESSUS     => array(
+            "name"  => "Nessus",
+            "ext"   => "nessus"
+        ),
+        self::TYPE_NESSUS_CSV => array(
+            "name"  => "Nessus CSV",
+            "ext"   => "csv"
+        ),
+        self::TYPE_CSV        => array(
+            "name"  => "CSV",
+            "ext"   => "csv"
+        ),
+        self::TYPE_TXT        => array(
+            "name"  => "TXT",
+            "ext"   => "txt"
+        )
     );
 
     /**
@@ -62,9 +74,15 @@ class ImportManager {
         $result = array();
 
         if (($handle = fopen($file, "r")) !== FALSE) {
-            while (($data = fgets($handle, 1000)) !== FALSE) {
-                $rowData = explode(" ", $data);
-                $result[] = $rowData;
+            $data = fgets($handle, 1000);
+
+            while ($data !== FALSE) {
+                if (trim($data)) {
+                    $rowData = explode(" ", $data);
+                    $result[] = $rowData;
+                }
+
+                $data = fgets($handle, 1000);
             }
 
             fclose($handle);
@@ -85,8 +103,6 @@ class ImportManager {
         if (!file_exists($path)) {
             throw new Exception("File not found.");
         }
-
-        $targets = array();
 
         switch ($type) {
             case self::TYPE_NESSUS_CSV:
@@ -131,9 +147,16 @@ class ImportManager {
                 $targets = self::parseCSV($path);
 
                 foreach ($targets as $target) {
+                    $targetData = explode(":", $target[0]);
+
                     $t = new Target();
                     $t->project_id = $project->id;
-                    $t->host       = $target[0];
+                    $t->host       = $targetData[0];
+
+                    if (count($targetData) > 1) {
+                        $t->port = (int) $targetData[1];
+                    }
+
                     $t->save();
                 }
 
@@ -143,9 +166,16 @@ class ImportManager {
                 $targets = self::parseTXT($path);
 
                 foreach ($targets as $target) {
+                    $targetData = explode(":", $target[0]);
+
                     $t = new Target();
                     $t->project_id = $project->id;
-                    $t->host       = $target[0];
+                    $t->host       = $targetData[0];
+
+                    if (count($targetData) > 1) {
+                        $t->port = (int) $targetData[1];
+                    }
+
                     $t->save();
                 }
 
