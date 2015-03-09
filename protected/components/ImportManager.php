@@ -14,7 +14,7 @@ class ImportManager {
      * @var array
      */
     public static $types = array(
-        self::TYPE_NESSUS     => array(
+        self::TYPE_NESSUS => array(
             "name"  => "Nessus",
             "ext"   => "nessus"
         ),
@@ -22,12 +22,12 @@ class ImportManager {
             "name"  => "Nessus CSV",
             "ext"   => "csv"
         ),
-        self::TYPE_CSV        => array(
-            "name"  => "CSV",
+        self::TYPE_CSV => array(
+            "name"  => "CSV File",
             "ext"   => "csv"
         ),
-        self::TYPE_TXT        => array(
-            "name"  => "TXT",
+        self::TYPE_TXT => array(
+            "name"  => "Text File",
             "ext"   => "txt"
         )
     );

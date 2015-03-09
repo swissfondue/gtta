@@ -13,7 +13,7 @@
                 <select id="TargetImportForm_type" name="TargetImportForm[type]">
                     <option value=""><?php print Yii::t("app", "Please select..."); ?></option>
                     <?php foreach ($types as $type => $typeData): ?>
-                        <option value="<?php print $type; ?>"><?php print $typeData['name']; ?></option>
+                        <option value="<?php print $type; ?>" <?php if ($type == $model->type) echo "selected"; ?>><?php print $typeData['name']; ?></option>
                     <?php endforeach;?>
                 </select>
                 <?php if ($model->getError('type')): ?>

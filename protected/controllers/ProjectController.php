@@ -1233,12 +1233,6 @@ class ProjectController extends Controller {
 
             if ($form->validate()) {
                 try {
-                    $extension = end(explode(".", $form->file->name));
-
-                    if ($extension != ImportManager::$types[$form->type]["ext"]) {
-                        throw new CHttpException(400, "Invalid file extension.");
-                    }
-
                     ImportManager::importTargets($form->file->tempName, $form->type, $project);
                 } catch (Exception $e) {
                     throw $e;
