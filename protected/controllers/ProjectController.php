@@ -1230,14 +1230,23 @@ class ProjectController extends Controller {
         if (isset($_POST["TargetImportForm"])) {
             $form->attributes = $_POST["TargetImportForm"];
             $form->file = CUploadedFile::getInstanceByName("TargetImportForm[file]");
+            $success = true;
 
             if ($form->validate()) {
                 try {
                     ImportManager::importTargets($form->file->tempName, $form->type, $project);
-                } catch (Exception $e) {
-                    throw $e;
+                } catch (ImportFileParseException $e) {
+                    $form->addError("file", Yii::t("app", "File parse error."));
+                    $success = false;
+                } catch (NoValidTargetException $e) {
+                    $form->addError("file", Yii::t("app", "File doesn't contains any valid target."));
+                    $success = false;
                 }
+            } else {
+                $success = false;
+            }
 
+            if ($success) {
                 Yii::app()->user->setFlash("success", Yii::t("app", "Import Completed."));
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));

@@ -167,6 +167,8 @@ return array (
   'File' => '',
   'File Name' => '',
   'File not found.' => '',
+  'File parse error.' => '',
+  'File doesn\'t contains any valid target.' => '',
   'Filter' => '',
   'Filter parameters missing.' => '',
   'Finished' => '',

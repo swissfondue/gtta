@@ -45,6 +45,10 @@ class TargetImportForm extends CFormModel {
 	 * Checks if type and extension are valid.
 	 */
 	public function checkType($attribute, $params) {
+        if (!$this->file) {
+            return false;
+        }
+
         $extension = end(explode(".", $this->file->name));
 
         if ($extension != ImportManager::$types[$this->type]["ext"]) {

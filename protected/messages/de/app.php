@@ -54,6 +54,8 @@ return array (
   'Entry point not found.' => 'Anfangspunkt wurde nicht lokalisiert',
   'Error extracting package files.' => 'Es ist ein Fehler beim Extrahieren des Paketes aufgetreten',
   'File not found.' => 'Die Datei wurde nicht gefunden',
+  'File parse error.' => 'Datei Parser-Fehler.',
+  'File doesn\'t contains any valid target.' => 'Datei enthält keine gültigen Ziel enthält.',
   'Filter parameters missing.' => 'Die Filter Parameter fehlen',
   'HELP' => 'HILFE',
   'Help' => 'Hilfe',

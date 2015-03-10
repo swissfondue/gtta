@@ -1,6 +1,12 @@
 <?php
 
 /**
+ * Class ImportFileParseException
+ */
+class ImportFileParseException extends Exception {}
+class NoValidTargetException extends Exception {}
+
+/**
  * Class ImportManager
  */
 class ImportManager {
@@ -45,10 +51,15 @@ class ImportManager {
             }
 
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                $empty = true;
                 $num = count($data);
                 $rowData = array();
 
                 for ($col = 0; $col < $num; $col++) {
+                    if ($data[$col]) {
+                        $empty = false;
+                    }
+
                     if ($nessus) {
                         $rowData[$titles[$col]] = $data[$col];
                     } else {
@@ -56,7 +67,9 @@ class ImportManager {
                     }
                 }
 
-                $result[] = $rowData;
+                if (!$empty) {
+                    $result[] = $rowData;
+                }
             }
 
             fclose($handle);
@@ -106,7 +119,15 @@ class ImportManager {
 
         switch ($type) {
             case self::TYPE_NESSUS_CSV:
-                $targets = self::parseCSV($path, true);
+                try {
+                    $targets = self::parseCSV($path, true);
+                } catch (Exception $e) {
+                    throw new ImportFileParseException();
+                }
+
+                if (!count($targets)) {
+                    throw new NoValidTargetException();
+                }
 
                 foreach ($targets as $target) {
                     $t = new Target();
@@ -116,12 +137,23 @@ class ImportManager {
                     $t->description = $target["Description"];
                     $t->save();
                 }
-                
+
                 break;
 
             case self::TYPE_NESSUS:
                 $content = FileManager::getFileContent($path);
-                $report = new SimpleXMLElement($content);
+
+                try {
+                    $report = new SimpleXMLElement($content, LIBXML_NOERROR);
+                } catch (Exception $e) {
+                    throw new ImportFileParseException();
+                }
+
+                $reportNodes = $report->xpath("//ReportHost");
+
+                if (!count($reportNodes)) {
+                    throw new NoValidTargetException();
+                }
 
                 foreach ($report->xpath("//ReportHost") as $reportNode) {
                     $t = new Target();
@@ -144,7 +176,15 @@ class ImportManager {
                 break;
 
             case self::TYPE_CSV:
-                $targets = self::parseCSV($path);
+                try {
+                    $targets = self::parseCSV($path);
+                } catch (Exception $e) {
+                    throw new ImportFileParseException();
+                }
+
+                if (!count($targets)) {
+                    throw new NoValidTargetException();
+                }
 
                 foreach ($targets as $target) {
                     $targetData = explode(":", $target[0]);
@@ -163,7 +203,15 @@ class ImportManager {
                 break;
 
             case self::TYPE_TXT:
-                $targets = self::parseTXT($path);
+                try {
+                    $targets = self::parseTXT($path);
+                } catch (Exception $e) {
+                    throw new ImportFileParseException();
+                }
+
+                if (!count($targets)) {
+                    throw new NoValidTargetException();
+                }
 
                 foreach ($targets as $target) {
                     $targetData = explode(":", $target[0]);
