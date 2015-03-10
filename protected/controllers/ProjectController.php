@@ -1167,6 +1167,55 @@ class ProjectController extends Controller {
 	}
 
     /**
+     * Add list of targets page
+     * @param $id
+     * @throws Exception
+     */
+    public function actionAddTargetList($id) {
+        $form = new TargetListAddForm();
+        $project = Project::model()->findByPk($id);
+
+        if (!$project) {
+            throw new Exception("Project not found.");
+        }
+
+        if (isset($_POST["TargetListAddForm"])) {
+            $form->attributes = $_POST["TargetListAddForm"];
+
+            if ($form->validate()) {
+                try {
+                    $targets = trim($form->targetList);
+                    $targets = explode("\n", $targets);
+
+                    foreach ($targets as $target) {
+                        $t = new Target();
+                        $t->project_id = $project->id;
+                        $t->host = $target;
+                        $t->save();
+                    }
+                } catch (Exception $e) {
+                    throw $e;
+                }
+
+                Yii::app()->user->setFlash("success", Yii::t("app", "Targets added."));
+                $this->redirect(array("project/view", "id" => $project->id));
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+        }
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
+        $this->breadcrumbs[] = array(Yii::t("app", "New Targets"), "");
+
+        // display the page
+        $this->pageTitle = Yii::t("app", "New Targets");
+        $this->render("target/new-list", array(
+            "model" => $form,
+        ));
+    }
+
+    /**
      * Import targets from file
      * @throws Exception
      */
@@ -1181,15 +1230,24 @@ class ProjectController extends Controller {
         if (isset($_POST["TargetImportForm"])) {
             $form->attributes = $_POST["TargetImportForm"];
             $form->file = CUploadedFile::getInstanceByName("TargetImportForm[file]");
+            $success = true;
 
             if ($form->validate()) {
                 try {
                     ImportManager::importTargets($form->file->tempName, $form->type, $project);
-                } catch (Exception $e) {
-                    throw $e;
+                } catch (ImportFileParsingException $e) {
+                    $form->addError("file", Yii::t("app", "File parsing error."));
+                    $success = false;
+                } catch (NoValidTargetException $e) {
+                    $form->addError("file", Yii::t("app", "File doesn't contain any valid targets."));
+                    $success = false;
                 }
+            } else {
+                $success = false;
+            }
 
-                Yii::app()->user->setFlash("success", Yii::t("app", "Import Completed."));
+            if ($success) {
+                Yii::app()->user->setFlash("success", Yii::t("app", "Import completed."));
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
