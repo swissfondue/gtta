@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class ImportFileParseException
+ * Exception classes
  */
-class ImportFileParseException extends Exception {}
+class ImportFileParsingException extends Exception {}
 class NoValidTargetException extends Exception {}
 
 /**
@@ -122,7 +122,7 @@ class ImportManager {
                 try {
                     $targets = self::parseCSV($path, true);
                 } catch (Exception $e) {
-                    throw new ImportFileParseException();
+                    throw new ImportFileParsingException();
                 }
 
                 if (!count($targets)) {
@@ -130,6 +130,10 @@ class ImportManager {
                 }
 
                 foreach ($targets as $target) {
+                    if (!isset($target["Host"]) || !isset($target["Port"]) || !isset($target["Description"])) {
+                        throw new ImportFileParsingException();
+                    }
+
                     $t = new Target();
                     $t->project_id = $project->id;
                     $t->host = $target["Host"];
@@ -146,7 +150,7 @@ class ImportManager {
                 try {
                     $report = new SimpleXMLElement($content, LIBXML_NOERROR);
                 } catch (Exception $e) {
-                    throw new ImportFileParseException();
+                    throw new ImportFileParsingException();
                 }
 
                 $reportNodes = $report->xpath("//ReportHost");
@@ -179,7 +183,7 @@ class ImportManager {
                 try {
                     $targets = self::parseCSV($path);
                 } catch (Exception $e) {
-                    throw new ImportFileParseException();
+                    throw new ImportFileParsingException();
                 }
 
                 if (!count($targets)) {
@@ -206,7 +210,7 @@ class ImportManager {
                 try {
                     $targets = self::parseTXT($path);
                 } catch (Exception $e) {
-                    throw new ImportFileParseException();
+                    throw new ImportFileParsingException();
                 }
 
                 if (!count($targets)) {

@@ -1235,11 +1235,11 @@ class ProjectController extends Controller {
             if ($form->validate()) {
                 try {
                     ImportManager::importTargets($form->file->tempName, $form->type, $project);
-                } catch (ImportFileParseException $e) {
-                    $form->addError("file", Yii::t("app", "File parse error."));
+                } catch (ImportFileParsingException $e) {
+                    $form->addError("file", Yii::t("app", "File parsing error."));
                     $success = false;
                 } catch (NoValidTargetException $e) {
-                    $form->addError("file", Yii::t("app", "File doesn't contains any valid target."));
+                    $form->addError("file", Yii::t("app", "File doesn't contain any valid targets."));
                     $success = false;
                 }
             } else {
@@ -1247,7 +1247,7 @@ class ProjectController extends Controller {
             }
 
             if ($success) {
-                Yii::app()->user->setFlash("success", Yii::t("app", "Import Completed."));
+                Yii::app()->user->setFlash("success", Yii::t("app", "Import completed."));
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
