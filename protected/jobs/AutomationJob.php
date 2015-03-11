@@ -155,15 +155,22 @@ class AutomationJob extends BackgroundJob {
             throw new VMNotFoundException("Sandbox is not running, please regenerate it.");
         }
 
-        $targetHost = $check->override_target ? $check->override_target : $target->host;
+        $targetHosts = "";
         $port = "";
 
-        if ($target->port) {
-            $port = $target->port;
-        }
+        if (!$check->override_target) {
+            $targetHosts = $target->host;
 
-        if ($check->port) {
-            $port = $check->port;
+            if ($target->port) {
+                $port = $target->port;
+            }
+
+            if ($check->port) {
+                $port = $check->port;
+            }
+        } else {
+            $targets = explode("\n", $check->override_target);
+            $targetHosts = implode(",", $targets);
         }
 
         $targetCheckScript = TargetCheckScript::model()->findByAttributes(array(
@@ -182,7 +189,7 @@ class AutomationJob extends BackgroundJob {
         }
 
         // base data
-        fwrite($targetFile, $targetHost . "\n");
+        fwrite($targetFile, $targetHosts . "\n");
         fwrite($targetFile, $check->protocol . "\n");
         fwrite($targetFile, $port . "\n");
         fwrite($targetFile, $check->language->code . "\n");
