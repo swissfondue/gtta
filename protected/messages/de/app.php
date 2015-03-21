@@ -146,6 +146,7 @@ return array (
   'Regenerate' => 'Wiederherstellen',
   'Regenerate Sandbox' => 'Sandbox wiederherstellen',
   'Regenerating scripts sandbox. This may take up to several minutes or hours, please be patient.' => 'Die Sandbox wird wieder hergestellt. This kann bis zu mehreren Stunden je nach Scripts/Abhängkeiten dauern. Bitte gedulden Sie sich daher.',
+  'Relation Templates' => 'Bezug Vorlagen',
   'Remain' => 'Verbleiben',
   'Report not generated yet.' => 'Der Bericht wurde noch nicht erstellt',
   'Sandbox is not running, please regenerate it.' => 'Die Sandbox läuft momentan nicht. Bitte regenerieren Sie diese',

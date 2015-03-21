@@ -467,6 +467,7 @@ return array (
   'Regenerate' => '',
   'Regenerate Sandbox' => '',
   'Regenerating scripts sandbox. This may take up to several minutes or hours, please be patient.' => '',
+  'Relation Templates' => '',
   'Remain' => '',
   'Report Settings' => '',
   'Report Templates' => '',

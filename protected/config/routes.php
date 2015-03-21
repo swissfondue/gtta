@@ -157,6 +157,12 @@ return array(
     "checklist-template/new"                                           => "checklisttemplate/editcategory",
     "checklist-template/control"                                       => "checklisttemplate/controlcategory",
 
+    // relation templates
+    "relationtemplates/<page:\d+>"   => "relationtemplate/index",
+    "relationtemplates"              => "relationtemplate/index",
+    "relationtemplate/<id:\d+>"      => "relationtemplate/view",
+    "relationtemplate/control"       => "relationtemplate/control",
+
     // checklist templates
     "checklist-template/<id:\d+>/template/<template:\d+>/<page:\d+>"   => "checklisttemplate/viewtemplate",
     "checklist-template/<id:\d+>/template/<template:\d+>/"             => "checklisttemplate/viewtemplate",
