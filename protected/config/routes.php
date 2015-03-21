@@ -160,7 +160,7 @@ return array(
     // relation templates
     "relationtemplates/<page:\d+>"   => "relationtemplate/index",
     "relationtemplates"              => "relationtemplate/index",
-    "relationtemplate/<id:\d+>"      => "relationtemplate/view",
+    "relationtemplate/<id:\d+>/edit" => "relationtemplate/edit",
     "relationtemplate/control"       => "relationtemplate/control",
 
     // checklist templates
