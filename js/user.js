@@ -2085,6 +2085,126 @@ function User()
     };
 
     /**
+     * Target object
+     */
+    this.target = new function () {
+        var _target = this;
+
+        this.chain = new function () {
+            /**
+             * Start target check chain
+             */
+            this.start = function (targetId, url) {
+                $('.loader-image').show();
+
+                $.ajax({
+                    dataType: 'json',
+                    url: url,
+                    timeout: system.ajaxTimeout,
+                    type: 'POST',
+                    data: {
+                        "EntryControlForm[id]"        : targetId,
+                        "EntryControlForm[operation]" : 'start',
+                        "YII_CSRF_TOKEN"               : system.csrf
+                    },
+
+                    success : function (data, textStatus) {
+                        $('.loader-image').hide();
+
+                        if (data.status == 'error') {
+                            system.addAlert('error', data.errorText);
+
+                            return;
+                        }
+
+                        $('.chain-start-button').hide();
+                        $('.chain-stop-button').show();
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $('.loader-image').hide();
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    }
+                });
+            };
+
+            /**
+             * Stop target check chain
+             * @param targetId
+             * @param url
+             */
+            this.stop = function (targetId, url) {
+                $('.loader-image').show();
+
+                $.ajax({
+                    dataType: 'json',
+                    url: url,
+                    timeout: system.ajaxTimeout,
+                    type: 'POST',
+                    data: {
+                        "EntryControlForm[id]"        : targetId,
+                        "EntryControlForm[operation]" : 'stop',
+                        "YII_CSRF_TOKEN"               : system.csrf
+                    },
+
+                    success : function (data, textStatus) {
+                        $('.loader-image').hide();
+
+                        if (data.status == 'error') {
+                            system.addAlert('error', data.errorText);
+
+                            return;
+                        }
+
+                        $('.chain-stop-button').hide();
+                        $('.chain-start-button').show();
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $('.loader-image').hide();
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    }
+                });
+            };
+
+            /**
+             * Show chain messages
+             */
+            this.messages = function (url) {
+                $('.loader-image').show();
+
+                $.ajax({
+                    dataType: "json",
+                    url: url,
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+                    data: {
+                        "YII_CSRF_TOKEN": system.csrf
+                    },
+                    'success' : function (response) {
+                        var messages = response.data.messages;
+
+                        $.each(messages, function (key, value) {
+                            system.addAlert("success", value);
+                        });
+
+                        $(".loader-image").hide();
+                    },
+
+                    'error' : function (data) {
+                        $(".loader-image").hide();
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    },
+
+                    'beforeSend' : function () {
+                        $(".loader-image").show();
+                    }
+                });
+            };
+        };
+    };
+
+    /**
      * Time session
      */
     this.timesession = new function () {

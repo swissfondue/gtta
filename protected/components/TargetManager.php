@@ -1,4 +1,9 @@
 <?php
+/**
+ * Invalid target list exceptions
+ */
+class EmptyTargetListException extends Exception {};
+class InvalidTargetException extends Exception {};
 
 /**
  * Class TargetManager
@@ -60,7 +65,7 @@ class TargetManager {
         $criteria = new CDbCriteria();
         $criteria->addInCondition("tc.check_control_id", $controlIds);
 
-        if (!$target->checklist_templates) {
+        if ($target->check_source_type == Target::SOURCE_TYPE_CHECK_CATEGORIES) {
             $referenceIds = array();
             $references = TargetReference::model()->findAllByAttributes(array(
                 "target_id" => $category->target_id
@@ -91,7 +96,7 @@ class TargetManager {
         $criteria = new CDbCriteria();
         $criteria->addInCondition("check_control_id", $controlIds);
 
-        if (!$target->checklist_templates) {
+        if ($target->check_source_type == Target::SOURCE_TYPE_CHECK_CATEGORIES) {
             $criteria->addInCondition("reference_id", $referenceIds);
         }
 
@@ -305,5 +310,142 @@ class TargetManager {
             $targetCheck->rating = TargetCheck::RATING_NONE;
             $targetCheck->save();
         }
+    }
+
+    /**
+     * Check relation's checks and target's checks matching
+     * @param Target $target
+     * @param $relations
+     * @return bool
+     * @throws Exception
+     */
+    public static function validateRelations(Target $target, $data) {
+        try {
+            $relations = new SimpleXMLElement($data, LIBXML_NOERROR);
+        } catch (Exception $e) {
+            throw new Exception("Relations is not valid.");
+        }
+
+        $checkNodes = $relations->xpath('//*[@type="check"]');
+        $startCheck = false;
+
+        foreach ($checkNodes as $node) {
+            $attributes = $node->attributes();
+
+            $checkIds[] = (int) $attributes->check_id;
+
+            if ((int) $attributes->start_check == 1) {
+                $startCheck = true;
+            }
+        }
+
+        if (!$startCheck) {
+            throw new Exception("Start check is not defined.");
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->addInCondition("check_id", $checkIds);
+        $criteria->addColumnCondition(array(
+            "target_id" => $target->id
+        ));
+
+        $targetCheckCount = TargetCheck::model()->count($criteria);
+
+        if ($targetCheckCount < count($checkIds)) {
+            throw new Exception("Not all relation checks attached to target.");
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns target chain status
+     * @param $id
+     * @return mixed|null
+     * @throws Exception
+     */
+    public static function getChainStatus($id) {
+        $target = Target::model()->findByPk($id);
+
+        if (!$target) {
+            throw new Exception("Target not found.");
+        }
+
+        $key = JobManager::buildId(
+            CheckChainAutomationJob::CHAIN_STATUS_TEMPLATE,
+            array(
+                "target_id" => $target->id
+            )
+        );
+        $status = JobManager::getKeyValue($key);
+
+        if (!in_array($status, array(Target::CHAIN_STATUS_STOPPED, Target::CHAIN_STATUS_IDLE, Target::CHAIN_STATUS_ACTIVE, Target::CHAIN_STATUS_BREAKED))) {
+            return null;
+        }
+
+        return $status;
+    }
+
+    /**
+     * Returns last activated cell in target check chain
+     * (when you resuming stopped chain)
+     * @param $id
+     * @return mixed|null
+     * @throws Exception
+     */
+    public static function getChainLastCellId($id) {
+        $target = Target::model()->findByPk($id);
+
+        if (!$target) {
+            throw new Exception("Target not found.");
+        }
+
+        $key = JobManager::buildId(
+            CheckChainAutomationJob::CHAIN_CELL_ID_TEMPLATE,
+            array(
+                "target_id" => $target->id
+            )
+        );
+        $activeCellId = JobManager::getKeyValue($key);
+
+        if (!$activeCellId) {
+            return null;
+        }
+
+        return $activeCellId;
+    }
+
+    /**
+     * Returns chain's messages
+     * @param $id
+     * @return array
+     * @throws Exception
+     */
+    public static function getChainMessages() {
+        $mask = JobManager::buildId(CheckChainAutomationJob::ID_TEMPLATE, array(
+            "operation" => "*",
+            "target_id" => "[0-9]*"
+        ));
+        $mask .= '.message';
+        $keys = explode(" ", Resque::redis()->keys($mask));
+        $pattern = JobManager::buildId(CheckChainAutomationJob::ID_TEMPLATE, array(
+            "operation" => sprintf("(%s|%s)", CheckChainAutomationJob::OPERATION_START, CheckChainAutomationJob::OPERATION_STOP),
+            "target_id" => "(\d+)"
+        ));
+        $pattern = '/' . $pattern . '.message/';
+        $messages = array();
+
+        foreach ($keys as $key) {
+            $key = str_replace("resque:", "", $key);
+            preg_match_all($pattern, $key, $matches, PREG_PATTERN_ORDER);
+
+            if (!empty($matches[0])) {
+                $messages[] = Resque::redis()->get($key);
+            }
+
+            JobManager::delKey($key);
+        }
+
+        return $messages;
     }
 }

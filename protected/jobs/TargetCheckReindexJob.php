@@ -24,22 +24,32 @@ class TargetCheckReindexJob extends BackgroundJob {
                     throw new Exception("Target not found.");
                 }
 
-                if ($target->checklist_templates) {
-                    $templates = $target->checklistTemplates;
-
-                    foreach ($templates as $template) {
-                        TargetManager::reindexTargetTemplateChecks($template);
-                    }
-                }
-
                 $categories = $target->_categories;
 
-                foreach ($categories as $category) {
-                    if (!$target->checklist_templates) {
-                        TargetManager::reindexTargetCategoryChecks($category);
-                    }
+                switch ($target->check_source_type) {
+                    case Target::SOURCE_TYPE_CHECK_CATEGORIES:
+                        foreach ($categories as $category) {
+                            TargetManager::reindexTargetCategoryChecks($category);
+                            TargetManager::updateTargetCategoryStats($category);
+                        }
 
-                    TargetManager::updateTargetCategoryStats($category);
+                        break;
+
+                    case Target::SOURCE_TYPE_CHECKLIST_TEMPLATES:
+                        $templates = $target->checklistTemplates;
+
+                        foreach ($templates as $template) {
+                            TargetManager::reindexTargetTemplateChecks($template);
+                        }
+
+                        foreach ($categories as $category) {
+                            TargetManager::updateTargetCategoryStats($category);
+                        }
+
+                        break;
+
+                    default:
+                        throw new Exception("Invalid target check source type.");
                 }
             } else {
                 $category = CheckCategory::model()->findByPk($this->args['category_id']);

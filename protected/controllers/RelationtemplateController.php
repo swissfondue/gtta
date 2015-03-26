@@ -161,7 +161,7 @@ class RelationtemplateController extends Controller {
         }
 
         $categories = CheckCategory::model()->findAll();
-        $filters = RelationTemplateFilterManager::$filters;
+        $filters = RelationTemplateManager::$filters;
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Relation Templates'), $this->createUrl('relationtemplate/index'));
 
