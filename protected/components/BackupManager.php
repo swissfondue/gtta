@@ -49,6 +49,8 @@ class BackupManager {
         'risk_categories',
         'risk_categories_l10n',
         'risk_category_checks',
+        'relation_templates',
+        'relation_templates_l10n',
         'report_templates',
         'report_templates_l10n',
         'report_template_summary',
