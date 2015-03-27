@@ -20,7 +20,7 @@
 	</ui>
 	<Array as="templates">
 		<add as="check">
-			<Rect label="New Check" type="check" stopped="0" check_id="">
+			<Rect label="New Check" type="check" start_check="0" stopped="0" check_id="">
 				<mxCell vertex="1">	
 					<mxGeometry as="geometry" width="150" height="60"/>
 				</mxCell>
@@ -35,7 +35,7 @@
 		</add>
         <add as="connector">
             <Connector label="" href="">
-                <mxCell type="edge" edge="1">
+                <mxCell type="connection" edge="1">
                     <mxGeometry as="geometry" relative="1"/>
                 </mxCell>
             </Connector>

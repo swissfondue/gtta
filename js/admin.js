@@ -1862,7 +1862,7 @@ function Admin()
             var enc = new mxCodec();
             var node = enc.encode(editor.graph.getModel());
 
-            $('#RelationTemplateEditForm_relations').val(new XMLSerializer().serializeToString(node));
+            $('.relations-form-input').val(new XMLSerializer().serializeToString(node));
         };
     };
 

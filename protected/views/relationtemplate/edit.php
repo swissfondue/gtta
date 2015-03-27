@@ -53,8 +53,7 @@
                 <?php endif; ?>
             </div>
         </div>
-
-        <input type="hidden" id="RelationTemplateEditForm_relations" name="RelationTemplateEditForm[relations]" />
+        <input type="hidden" class="relations-form-input" id="RelationTemplateEditForm_relations" name="RelationTemplateEditForm[relations]" />
 
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>
@@ -83,7 +82,7 @@
     $('#languages-tab a').click(function (e) {
         e.preventDefault();
         $(this).tab('show');
-    })
+    });
 
     <?php if (!$template->isNewRecord): ?>
         admin.mxgraph.buildByXML('<?php print $template->relations; ?>');

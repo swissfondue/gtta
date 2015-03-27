@@ -66,6 +66,14 @@ return array(
                 array(
                     "class"   => "CFileLogRoute",
                     "levels"  => "error",
+                    "categories" => "bg.CheckChainAutomationJob",
+                    "logPath" => $mainConfig["params"]["bgLogsPath"],
+                    "logFile" => "checkchainautomation.log",
+                    'maxLogFiles' => 1,
+                ),
+                array(
+                    "class"   => "CFileLogRoute",
+                    "levels"  => "error",
                     "categories" => "bg.ClearLogJob",
                     "logPath" => $mainConfig["params"]["bgLogsPath"],
                     "logFile" => "clearlog.log",

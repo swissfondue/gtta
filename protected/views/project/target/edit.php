@@ -60,26 +60,26 @@
             </div>
         </div>
 
-        <div class="control-group <?php if ($model->getError('checklistTemplates')) echo 'error'; ?>">
-            <label class="control-label" for="TargetEditForm_checklistTemplates"><?php echo Yii::t('app', 'Check Source'); ?></label>
+        <div class="control-group <?php if ($model->getError('sourceType')) echo 'error'; ?>">
+            <label class="control-label" for="TargetEditForm_sourceType"><?php echo Yii::t('app', 'Check Source'); ?></label>
             <div class="controls">
-                <select class="input-xlarge" id="TargetEditForm_checklistTemplates" name="TargetEditForm[checklistTemplates]" onchange="user.project.toggleChecksSource($(this).find('option:selected').data('source-type'));">
+                <select class="input-xlarge" id="TargetEditForm_sourceType" name="TargetEditForm[sourceType]" onchange="user.project.toggleChecksSource($(this).find('option:selected').data('source-type'));">
                     <?php if ($categories): ?>
-                        <option data-source-type="categories" <?php if (!$model->checklistTemplates) print 'selected="selected"'; ?> value="0"><?php echo Yii::t('app', 'Check Categories'); ?></option>
+                        <option data-source-type="categories" <?php if ($model->sourceType == Target::SOURCE_TYPE_CHECK_CATEGORIES) print 'selected="selected"'; ?> value="<?php print Target::SOURCE_TYPE_CHECK_CATEGORIES; ?>"><?php echo Yii::t('app', 'Check Categories'); ?></option>
                     <?php endif; ?>
 
                     <?php if ($templateCategories): ?>
-                        <option data-source-type="templates" <?php if ($model->checklistTemplates) print 'selected="selected"'; ?> value="1"><?php echo Yii::t('app', 'Checklist Templates'); ?></option>
+                        <option data-source-type="templates" <?php if ($model->sourceType == Target::SOURCE_TYPE_CHECKLIST_TEMPLATES) print 'selected="selected"'; ?> value="<?php print Target::SOURCE_TYPE_CHECKLIST_TEMPLATES; ?>"><?php echo Yii::t('app', 'Checklist Templates'); ?></option>
                     <?php endif;?>
                 </select>
-                <?php if ($model->getError('checklistTemplates')): ?>
-                    <p class="help-block"><?php echo $model->getError('checklistTemplates'); ?></p>
+                <?php if ($model->getError('sourceType')): ?>
+                    <p class="help-block"><?php echo $model->getError('sourceType'); ?></p>
                 <?php endif; ?>
             </div>
         </div>
 
         <?php if (count($categories)): ?>
-            <div class="control-group checks-source-list categories-mode <?php if ($model->checklistTemplates) print "hide"; ?>" data-source-type="categories">
+            <div class="control-group checks-source-list categories-mode <?php if ($model->sourceType != Target::SOURCE_TYPE_CHECK_CATEGORIES) print "hide"; ?>" data-source-type="categories">
                 <label class="control-label"><?php echo Yii::t('app', 'Check Categories'); ?></label>
                 <div class="controls">
                     <?php foreach ($categories as $category): ?>
@@ -93,7 +93,7 @@
         <?php endif; ?>
 
         <?php if (count($templateCategories)): ?>
-            <div class="control-group checks-source-list templates-mode <?php if (!$model->checklistTemplates) echo "hide"; ?>" data-source-type="templates">
+            <div class="control-group checks-source-list templates-mode <?php if ($model->sourceType != Target::SOURCE_TYPE_CHECKLIST_TEMPLATES) echo "hide"; ?>" data-source-type="templates">
                 <label class="control-label"><?php echo Yii::t('app', 'Checklist Templates'); ?></label>
                 <div class="controls">
                     <ul class="template-category-list">
@@ -119,7 +119,7 @@
         <?php endif; ?>
 
         <?php if (count($references)): ?>
-            <div class="control-group references-list categories-mode <?php if ($target->checklist_templates) print 'hide'; ?>">
+            <div class="control-group references-list categories-mode <?php if ($target->check_source_type != Target::SOURCE_TYPE_CHECK_CATEGORIES) print 'hide'; ?>">
                 <label class="control-label"><?php echo Yii::t('app', 'References'); ?></label>
                 <div class="controls">
                     <?php foreach ($references as $reference): ?>
@@ -128,6 +128,20 @@
                             <?php echo CHtml::encode($reference->name); ?>
                         </label>
                     <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <?php if (count($relationTemplates)): ?>
+            <div class="control-group">
+                <label class="control-label"><?php echo Yii::t('app', 'Relation Template'); ?></label>
+                <div class="controls">
+                    <select id="TargetEditForm_relationTemplateId" name="TargetEditForm[relationTemplateId]">
+                        <option value="0"><?php print Yii::t("app", "Please select..."); ?></option>
+                        <?php foreach ($relationTemplates as $template): ?>
+                            <option value="<?php echo $template->id; ?>" <?php if ($template->id == $model->relationTemplateId) echo 'selected="selected"'; ?>><?php echo CHtml::encode($template->localizedName); ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
             </div>
         <?php endif; ?>

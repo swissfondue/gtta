@@ -860,7 +860,8 @@ class ProjectController extends Controller {
             $model->host = $target->host;
             $model->port = $target->port;
             $model->description = $target->description;
-            $model->checklistTemplates = $target->checklist_templates;
+            $model->sourceType = $target->check_source_type;
+            $model->relationTemplateId = $target->relation_template_id;
 
             $categories = TargetCheckCategory::model()->findAllByAttributes(array(
                 "target_id" => $target->id
@@ -900,7 +901,24 @@ class ProjectController extends Controller {
                 $target->host = $model->host;
                 $target->port = $model->port;
                 $target->description = $model->description;
-                $target->checklist_templates = $model->checklistTemplates;
+                $target->check_source_type = $model->sourceType;
+
+                if (!$model->relationTemplateId) {
+                    $target->relation_template_id = null;
+                    $target->relations = null;
+                } else {
+                    if ($target->relation_template_id != $model->relationTemplateId) {
+                        $target->relation_template_id = $model->relationTemplateId;
+                        $template = RelationTemplate::model()->findByPk($model->relationTemplateId);
+
+                        if (!$template) {
+                            throw new CHttpException(404, "Template not found.");
+                        }
+
+                        $target->relations = $template->relations;
+                    }
+                }
+
                 $target->save();
 
                 $addCategories = array();
@@ -915,48 +933,54 @@ class ProjectController extends Controller {
                     $oldReferences = array();
                     $oldTemplates = array();
 
-                    if (!$model->checklistTemplates) {
-                        // fill in addCategories & delCategories arrays
-                        $categories = TargetCheckCategory::model()->findAllByAttributes(array(
-                            "target_id"          => $target->id,
-                            "checklist_template" => false
-                        ));
+                    switch ($model->sourceType) {
+                        case Target::SOURCE_TYPE_CHECK_CATEGORIES:
+                            // fill in addCategories & delCategories arrays
+                            $categories = TargetCheckCategory::model()->findAllByAttributes(array(
+                                "target_id"          => $target->id,
+                                "checklist_template" => false
+                            ));
 
-                        foreach ($categories as $category) {
-                            $oldCategories[] = $category->check_category_id;
-                        }
+                            foreach ($categories as $category) {
+                                $oldCategories[] = $category->check_category_id;
+                            }
 
-                        $delCategories= array_diff($oldCategories, $model->categoryIds);
-                        $addCategories = array_diff($model->categoryIds, $oldCategories);
+                            $delCategories= array_diff($oldCategories, $model->categoryIds);
+                            $addCategories = array_diff($model->categoryIds, $oldCategories);
 
-                        TargetCheckCategory::model()->deleteAllByAttributes(array(
-                            "target_id"          => $target->id,
-                            "checklist_template" => true
-                        ));
-                        TargetChecklistTemplate::model()->deleteAllByAttributes(array(
-                            "target_id" => $target->id
-                        ));
+                            TargetCheckCategory::model()->deleteAllByAttributes(array(
+                                "target_id"          => $target->id,
+                                "checklist_template" => true
+                            ));
+                            TargetChecklistTemplate::model()->deleteAllByAttributes(array(
+                                "target_id" => $target->id
+                            ));
 
-                        $model->templateIds = array();
-                    } else {
-                        // fill in addTemplates & delTemplates arrays
-                        $templates = TargetChecklistTemplate::model()->findAllByAttributes(array(
-                            "target_id"           => $target->id,
-                        ));
+                            $model->templateIds = array();
 
-                        foreach ($templates as $template) {
-                            $oldTemplates[] = $template->checklist_template_id;
-                        }
+                            break;
 
-                        $delTemplates = array_diff($oldTemplates, $model->templateIds);
-                        $addTemplates = array_diff($model->templateIds, $oldTemplates);
+                        case Target::SOURCE_TYPE_CHECKLIST_TEMPLATES:
+                            // fill in addTemplates & delTemplates arrays
+                            $templates = TargetChecklistTemplate::model()->findAllByAttributes(array(
+                                "target_id"           => $target->id,
+                            ));
 
-                        TargetCheckCategory::model()->deleteAllByAttributes(array(
-                            "target_id"           => $target->id,
-                            "checklist_template"  => false,
-                        ));
+                            foreach ($templates as $template) {
+                                $oldTemplates[] = $template->checklist_template_id;
+                            }
 
-                        $model->categoryIds = array();
+                            $delTemplates = array_diff($oldTemplates, $model->templateIds);
+                            $addTemplates = array_diff($model->templateIds, $oldTemplates);
+
+                            TargetCheckCategory::model()->deleteAllByAttributes(array(
+                                "target_id"           => $target->id,
+                                "checklist_template"  => false,
+                            ));
+
+                            $model->categoryIds = array();
+
+                            break;
                     }
 
                     // fill in addReferences & delReferences arrays
@@ -1148,6 +1172,19 @@ class ProjectController extends Controller {
         );
         $templateCount = ChecklistTemplate::model()->count();
 
+        $relationTemplates = RelationTemplate::model()->with(array(
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => array(
+                    "language_id" => $language
+                )
+            )
+        ))->findAllByAttributes(
+                array(),
+                array("order" => "t.name")
+            );
+
         $references = Reference::model()->findAllByAttributes(
             array(),
             array("order" => "t.name ASC")
@@ -1162,6 +1199,7 @@ class ProjectController extends Controller {
             "categories" => $categories,
             "templateCount" => $templateCount,
             "templateCategories" => $templateCategories,
+            "relationTemplates" => $relationTemplates,
             "references" => $references
         ));
 	}
@@ -1263,6 +1301,183 @@ class ProjectController extends Controller {
             "model" => $form,
             "types" => ImportManager::$types,
         ));
+    }
+
+    public function actionEditChain($id, $target) {
+        $id = (int) $id;
+        $target = (int) $target;
+
+        $project = Project::model()->findByPk($id);
+
+        if (!$project) {
+            throw new CHttpException(404, Yii::t("app", "Project not found."));
+        }
+
+        if (!$project->checkPermission()) {
+            throw new CHttpException(403, Yii::t("app", "Access denied."));
+        }
+
+        $target = Target::model()->findByPk($target);
+
+        if (!$target) {
+            throw new CHttpException(404, Yii::t("app", "Target not found."));
+        }
+
+        $model = new TargetChainEditForm();
+        $model->relations = $target->relations;
+
+        // collect user input data
+        if (isset($_POST["TargetChainEditForm"])) {
+            $model->attributes = $_POST["TargetChainEditForm"];
+            $success = true;
+
+            if ($model->validate()) {
+                try {
+                    TargetManager::validateRelations($target, $model->relations);
+                } catch (Exception $e) {
+                    $model->addError("relations", $e->getMessage());
+                    $success = false;
+                }
+            }
+
+            if ($success) {
+                $target->relations = $model->relations;
+                $target->save();
+
+                Yii::app()->user->setFlash("success", Yii::t("app", "Target saved."));
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+        }
+
+        $categories = CheckCategory::model()->findAll();
+        $filters = RelationTemplateManager::$filters;
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
+        $this->breadcrumbs[] = array($target->hostPort, $this->createUrl("project/target", array("id" => $project->id, "target" => $target->id)));
+        $this->breadcrumbs[] = array(Yii::t("app", "Edit Check Chain"), "");
+
+        // display the page
+        $this->pageTitle = $target->hostPort;
+        $this->render("target/chain/edit", array(
+            "model" => $model,
+            "project" => $project,
+            "categories" => $categories,
+            "filters" => $filters,
+            "target" => $target,
+        ));
+    }
+
+    /**
+     * Control target's check chain
+     * @param $id
+     * @param $target
+     */
+    public function actionControlChain($id, $target) {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $target = (int) $target;
+
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+            }
+
+            if (!$project->checkPermission()) {
+                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+            }
+
+            $target = Target::model()->findByAttributes(array(
+                'id' => $target,
+                'project_id' => $project->id
+            ));
+
+            if (!$target) {
+                throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+            }
+
+            $model = new EntryControlForm();
+            $model->attributes = $_POST['EntryControlForm'];
+
+            if (!$model->validate()) {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            try {
+                TargetManager::validateRelations($target, $target->relations);
+            } catch (Exception $e) {
+                throw $e;
+            }
+
+            switch ($model->operation) {
+                case "start":
+                    if ($target->isChainRunning) {
+                        throw new CHttpException(403, Yii::t("app", "Access denied."));
+                    }
+
+                    $targetChecks = TargetCheck::model()->findAllByAttributes(array(
+                        "target_id" => $target->id
+                    ));
+
+                    foreach ($targetChecks as $tc) {
+                        $tc->rating = TargetCheck::RATING_NONE;
+                        $tc->save();
+                    }
+
+                    CheckChainAutomationJob::enqueue(array(
+                        "target_id" => $target->id,
+                        "operation" => CheckChainAutomationJob::OPERATION_START,
+                    ));
+
+                    break;
+
+                case "stop":
+                    if (!$target->isChainRunning) {
+                        throw new CHttpException(403, Yii::t("app", "Access denied."));
+                    }
+
+                    CheckChainAutomationJob::enqueue(array(
+                        "target_id" => $target->id,
+                        "operation" => CheckChainAutomationJob::OPERATION_STOP,
+                    ));
+
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t("app", "Unknown operation."));
+                    break;
+            }
+
+            StatsJob::enqueue(array(
+                "target_id" => $target->id,
+            ));
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Display messages of scheduled packages
+     */
+    public function actionChainMessages() {
+        $response = new AjaxResponse();
+
+        $response->addData("messages", TargetManager::getChainMessages());
+
+        echo $response->serialize();
     }
 
     /**
@@ -1530,7 +1745,7 @@ class ProjectController extends Controller {
             $criteria = new CDbCriteria();
             $criteria->addColumnCondition(array("t.check_control_id" => $control->id));
 
-            if (!$target->checklist_templates) {
+            if ($target->check_source_type == Target::SOURCE_TYPE_CHECK_CATEGORIES) {
                 $referenceIds = array();
                 $references = TargetReference::model()->findAllByAttributes(array(
                     "target_id" => $target->id
