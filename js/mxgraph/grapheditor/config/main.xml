@@ -54,16 +54,6 @@
 				return mxUtils.isNode(this.model.getValue(cell), 'container');
 			}
 		]]></add>
-		<add as="getTooltipForCell"><![CDATA[
-			function(cell)
-			{
-				return '<b>'+cell.getAttribute('label')+
-						'</b> ('+cell.getId()+')'+
-						'<br>Style: '+cell.getStyle()+
-						'<br>Connections: '+cell.getEdgeCount()+
-						'<br>Children: '+cell.getChildCount();
-			}
-		]]></add>
 		<add as="convertValueToString"><![CDATA[
 			function(cell)
 			{

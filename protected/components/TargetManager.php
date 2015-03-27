@@ -4,7 +4,6 @@
  */
 class EmptyTargetListException extends Exception {};
 class InvalidTargetException extends Exception {};
-
 /**
  * Class TargetManager
  */
@@ -327,7 +326,7 @@ class TargetManager {
         }
 
         $checkNodes = $relations->xpath('//*[@type="check"]');
-        $startCheck = false;
+        $startCheckId = false;
 
         foreach ($checkNodes as $node) {
             $attributes = $node->attributes();
@@ -335,11 +334,11 @@ class TargetManager {
             $checkIds[] = (int) $attributes->check_id;
 
             if ((int) $attributes->start_check == 1) {
-                $startCheck = true;
+                $startCheckId = $attributes->id;
             }
         }
 
-        if (!$startCheck) {
+        if (!$startCheckId) {
             throw new Exception("Start check is not defined.");
         }
 
@@ -353,6 +352,14 @@ class TargetManager {
 
         if ($targetCheckCount < count($checkIds)) {
             throw new Exception("Not all relation checks attached to target.");
+        }
+
+        // Check if graph has more than one connection group
+        $cellCount = count($relations->xpath('//*[@type="check" or @type="filter"]'));
+        $startCheckChilds = RelationTemplateManager::getCellChildrenCount($relations, $startCheckId);
+
+        if ($cellCount > $startCheckChilds + 1) {
+            throw new Exception("Template has more than one connection group.");
         }
 
         return true;

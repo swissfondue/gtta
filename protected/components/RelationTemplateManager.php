@@ -70,6 +70,36 @@ class RelationTemplateManager {
     }
 
     /**
+     * Returns cell's children count
+     * @param $node
+     * @param $id
+     * @param null $count
+     * @return int|null
+     */
+    public static function getCellChildrenCount($node, $id, $count=null) {
+        $startCell = false;
+
+        if ($count === null) {
+            $startCell = true;
+            $count = 0;
+        }
+
+        $n = $count;
+        $edges = RelationTemplateManager::getCellConnections($node, $id);
+
+        foreach ($edges as $edge) {
+            $targetId = (int) $edge->attributes()->target;
+            $n += self::getCellChildrenCount($node, $targetId, $count);
+        }
+
+        if (!$startCell) {
+            $n++;
+        }
+
+        return $n;
+    }
+
+    /**
      * Apply relation template filter to result
      * @param $filter
      * @param $values
