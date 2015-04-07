@@ -150,60 +150,17 @@ class TargetManager {
     }
 
     /**
-     * Reindex checks by target check category
-     * @param TargetCheckCategory $category
+     * Reindex target's checks
+     * @param Target $target
+     * @throws Exception
      */
-    public static function reindexTargetCategoryChecks(TargetCheckCategory $category) {
-        $controlIds = array();
-        $checkIds = array();
-        $target = $category->target;
-
-        $referenceIds = array();
-        $references = TargetReference::model()->findAllByAttributes(array(
-            "target_id" => $category->target_id
-        ));
-
-        foreach ($references as $reference) {
-            $referenceIds[] = $reference->reference_id;
-        }
-
-        $controls = CheckControl::model()->findAllByAttributes(array(
-            "check_category_id" => $category->check_category_id
-        ));
-
-        foreach ($controls as $control) {
-            $controlIds[] = $control->id;
-        }
-
-        $criteria = new CDbCriteria();
-        $criteria->addInCondition("check_control_id", $controlIds);
-        $criteria->addInCondition("reference_id", $referenceIds);
-
-        if (!$category->advanced) {
-            $criteria->addCondition("t.advanced = FALSE");
-        }
-
-        $checks = Check::model()->findAll($criteria);
-
-        $targetChecks = TargetCheck::model()->findAllByAttributes(array("target_id" => $category->target_id));
-
-        foreach ($targetChecks as $check) {
-            $checkIds[] = $check->check_id;
-        }
-
-        // clean target checks
-        $criteria = new CDbCriteria();
-        $criteria->addNotInCondition("check_id", $checkIds);
-        $criteria->addColumnCondition(array(
-            "target_id" => $target->id
-        ));
-        TargetCheck::model()->deleteAll($criteria);
-
+    public static function reindexTargetChecks(Target $target) {
         $admin = null;
 
-        foreach ($category->target->project->projectUsers as $user) {
+        foreach ($target->project->projectUsers as $user) {
             if ($user->admin) {
                 $admin = $user->user_id;
+
                 break;
             }
         }
@@ -218,96 +175,139 @@ class TargetManager {
 
         $language = Language::model()->findByAttributes(array("default" => true));
 
-        foreach ($checks as $check) {
-            if (in_array($check->id, $checkIds)) {
-                continue;
-            }
+        switch ($target->check_source_type) {
+            case Target::SOURCE_TYPE_CHECK_CATEGORIES:
+                $controlIds = array();
+                $checkIds = array();
+                $categoryIds = array();
+                $targetCheckIds = array();
 
-            $targetCheck = new TargetCheck();
-            $targetCheck->target_id = $category->target_id;
-            $targetCheck->check_id = $check->id;
-            $targetCheck->user_id = $admin;
-            $targetCheck->language_id = $language->id;
-            $targetCheck->status = TargetCheck::STATUS_OPEN;
-            $targetCheck->rating = TargetCheck::RATING_NONE;
-            $targetCheck->save();
-        }
-    }
+                $referenceIds = array();
+                $references = TargetReference::model()->findAllByAttributes(array(
+                    "target_id" => $target->id
+                ));
 
-    /**
-     * Reindex checks by target checklist template
-     * @param TargetChecklistTemplate $template
-     */
-    public static function reindexTargetTemplateChecks(TargetChecklistTemplate $template) {
-        $checks = array();
-        $checkIds = array();
-        $target = $template->target;
+                foreach ($references as $reference) {
+                    $referenceIds[] = $reference->reference_id;
+                }
 
-        $criteria = new CDbCriteria();
-        $criteria->addColumnCondition(array(
-            "t.checklist_template_id" => $template->checklist_template_id,
-        ));
+                $targetCategories = TargetCheckCategory::model()->findAllByAttributes(array(
+                    "target_id" => $target->id
+                ));
 
-        $templateChecks = ChecklistTemplateCheck::model()->with(array(
-            "check" => array(
-                "alias" => "tc",
-                "joinType" => "LEFT JOIN",
-            )
-        ))->findAll($criteria);
+                foreach ($targetCategories as $tc) {
+                    $categoryIds[] = $tc->check_category_id;
+                }
 
-        foreach ($templateChecks as $tc) {
-            $checks[] = $tc->check;
+                $controls = CheckControl::model()->findAllByAttributes(array(
+                    "check_category_id" => $categoryIds
+                ));
 
-            $targetCheck = TargetCheck::model()->findByAttributes(array(
-                "target_id" => $target->id,
-                "check_id"  => $tc->check_id,
-            ));
+                foreach ($controls as $control) {
+                    $controlIds[] = $control->id;
+                }
 
-            if ($targetCheck) {
-                $checkIds[] = $targetCheck->check_id;
-            }
-        }
+                $criteria = new CDbCriteria();
+                $criteria->addInCondition("check_control_id", $controlIds);
+                $criteria->addInCondition("reference_id", $referenceIds);
 
-        // clean target checks
-        $criteria = new CDbCriteria();
-        $criteria->addNotInCondition("check_id", $checkIds);
-        $criteria->addColumnCondition(array(
-            "target_id" => $target->id
-        ));
-        TargetCheck::model()->deleteAll($criteria);
+                $checks = Check::model()->findAll($criteria);
 
-        $admin = null;
+                foreach ($checks as $c) {
+                    $checkIds[] = $c->id;
+                }
 
-        foreach ($template->target->project->projectUsers as $user) {
-            if ($user->admin) {
-                $admin = $user->user_id;
+                $targetChecks = TargetCheck::model()->findAllByAttributes(array(
+                    "target_id" => $target->id
+                ));
+
+                foreach ($targetChecks as $tc) {
+                    $targetCheckIds[] = $tc->check_id;
+                }
+
+                // clean target checks
+                $criteria = new CDbCriteria();
+                $criteria->addNotInCondition("check_id", $checkIds);
+                $criteria->addColumnCondition(array(
+                    "target_id" => $target->id
+                ));
+                TargetCheck::model()->deleteAll($criteria);
+
+                $checksToAdd = Check::model()->findAllByAttributes(array(
+                    "id" => array_diff($checkIds, $targetCheckIds)
+                ));
+
+                foreach ($checksToAdd as $check) {
+                    $targetCheck = new TargetCheck();
+                    $targetCheck->target_id = $target->id;
+                    $targetCheck->check_id = $check->id;
+                    $targetCheck->user_id = $admin;
+                    $targetCheck->language_id = $language->id;
+                    $targetCheck->status = TargetCheck::STATUS_OPEN;
+                    $targetCheck->rating = TargetCheck::RATING_NONE;
+                    $targetCheck->save();
+                }
+
                 break;
-            }
-        }
 
-        if ($admin == null) {
-            $admin = User::model()->findByAttributes(array("role" => User::ROLE_ADMIN));
+            case Target::SOURCE_TYPE_CHECKLIST_TEMPLATES:
+                $checkIds = array();
+                $targetCheckIds = array();
+                $templateIds = array();
 
-            if ($admin) {
-                $admin = $admin->id;
-            }
-        }
+                foreach ($target->checklistTemplates as $template) {
+                    $templateIds[] = $template->checklist_template_id;
+                }
 
-        $language = Language::model()->findByAttributes(array("default" => true));
+                $criteria = new CDbCriteria();
+                $criteria->addInCondition("t.checklist_template_id", $templateIds);
 
-        foreach ($checks as $check) {
-            if (in_array($check->id, $checkIds) && !$target->canAddCheck($check->id)) {
-                continue;
-            }
+                $templateChecks = ChecklistTemplateCheck::model()->with(array(
+                    "check" => array(
+                        "alias" => "tc",
+                        "joinType" => "LEFT JOIN",
+                    )
+                ))->findAll($criteria);
 
-            $targetCheck = new TargetCheck();
-            $targetCheck->target_id = $target->id;
-            $targetCheck->check_id = $check->id;
-            $targetCheck->user_id = $admin;
-            $targetCheck->language_id = $language->id;
-            $targetCheck->status = TargetCheck::STATUS_OPEN;
-            $targetCheck->rating = TargetCheck::RATING_NONE;
-            $targetCheck->save();
+                foreach ($templateChecks as $tc) {
+                    $checkIds[] = $tc->check->id;
+                }
+
+                // clean target checks
+                $criteria = new CDbCriteria();
+                $criteria->addNotInCondition("check_id", $checkIds);
+                $criteria->addColumnCondition(array(
+                    "target_id" => $target->id
+                ));
+                TargetCheck::model()->deleteAll($criteria);
+
+                $targetChecks = TargetCheck::model()->findAllByAttributes(array(
+                    "target_id" => $target->id
+                ));
+
+                foreach ($targetChecks as $tc) {
+                    $targetCheckIds[] = $tc->check_id;
+                }
+
+                foreach ($templateChecks as $check) {
+                    if (in_array($check->check->id, $targetCheckIds) && !$target->canAddCheck($check->check->id)) {
+                        continue;
+                    }
+
+                    $targetCheck = new TargetCheck();
+                    $targetCheck->target_id = $target->id;
+                    $targetCheck->check_id = $check->check->id;
+                    $targetCheck->user_id = $admin;
+                    $targetCheck->language_id = $language->id;
+                    $targetCheck->status = TargetCheck::STATUS_OPEN;
+                    $targetCheck->rating = TargetCheck::RATING_NONE;
+                    $targetCheck->save();
+                }
+
+                break;
+
+            default:
+                throw new Exception("Unknown check source type.");
         }
     }
 
