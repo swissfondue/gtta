@@ -2219,10 +2219,10 @@ function Admin()
 
                 $.each(_mxgraph.filters, function (key, value) {
                     var option = $('<option>')
-                        .attr('value', value)
-                        .text(value);
+                        .attr('value', value.name)
+                        .text(value.title);
 
-                    if (value == current) {
+                    if (value.name == current) {
                         option.attr('selected', 'selected');
                     }
 
@@ -2237,11 +2237,12 @@ function Admin()
 
                 var okFunction = function (cell) {
                     var name = $('.mxWindow .filter_name' ).val();
+                    var title = $('.mxWindow .filter_name option:selected' ).text();
                     var values = $('.mxWindow .filter_values').val();
 
                     if (name != '0' && values) {
                         cell.setAttribute('filter_name', name);
-                        cell.setAttribute('label', name);
+                        cell.setAttribute('label', title);
                         cell.setAttribute("filter_values", values);
 
                         graph.refresh();

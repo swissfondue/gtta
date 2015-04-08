@@ -113,8 +113,18 @@ class RelationtemplateController extends Controller {
         if (isset($_POST['RelationTemplateEditForm'])) {
             $model->attributes = $_POST['RelationTemplateEditForm'];
             $model->name = $model->defaultL10n($languages, 'name');
+            $success = false;
 
             if ($model->validate()) {
+                try {
+                    TargetManager::validateRelations($model->relations);
+                    $success = true;
+                } catch (Exception $e) {
+                    $model->addError("relations", $e->getMessage());
+                }
+            }
+
+            if ($success) {
                 $template->name = $model->name;
                 $template->relations = $model->relations;
                 $template->save();
@@ -156,7 +166,7 @@ class RelationtemplateController extends Controller {
                     )
                 ))->findByPk($id);
             } else {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
         }
 

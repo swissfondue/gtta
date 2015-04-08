@@ -7,7 +7,10 @@ class RelationTemplateManager {
     const PORT_FILTER = "port-filter";
 
     public static $filters = array(
-        self::PORT_FILTER
+        array(
+            "name" => self::PORT_FILTER,
+            "title" => "Port Filter"
+        )
     );
 
     /**

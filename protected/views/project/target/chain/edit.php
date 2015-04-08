@@ -80,7 +80,7 @@
     <?php endforeach; ?>
 
     <?php foreach ($filters as $filter): ?>
-        admin.mxgraph.filters.push("<?php print $filter; ?>");
+        admin.mxgraph.filters.push({ name: "<?php print $filter['name']; ?>", title: "<?php print $filter['title']; ?>" });
     <?php endforeach; ?>
 
     $('#languages-tab a').click(function (e) {

@@ -318,7 +318,7 @@ class TargetManager {
      * @return bool
      * @throws Exception
      */
-    public static function validateRelations(Target $target, $data) {
+    public static function validateRelations($data, Target $target=null) {
         try {
             $relations = new SimpleXMLElement($data, LIBXML_NOERROR);
         } catch (Exception $e) {
@@ -328,10 +328,17 @@ class TargetManager {
         $checkNodes = $relations->xpath('//*[@type="check"]');
         $startCheckId = false;
 
+        $checkIds = array();
+
         foreach ($checkNodes as $node) {
             $attributes = $node->attributes();
+            $checkId = (int) $attributes->check_id;
 
-            $checkIds[] = (int) $attributes->check_id;
+            if (!$checkId) {
+                throw new Exception("There are blocks with no check tied.");
+            }
+
+            $checkIds[] = $checkId;
 
             if ((int) $attributes->start_check == 1) {
                 $startCheckId = $attributes->id;
@@ -342,16 +349,18 @@ class TargetManager {
             throw new Exception("Start check is not defined.");
         }
 
-        $criteria = new CDbCriteria();
-        $criteria->addInCondition("check_id", $checkIds);
-        $criteria->addColumnCondition(array(
-            "target_id" => $target->id
-        ));
+        if ($target) {
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition("check_id", $checkIds);
+            $criteria->addColumnCondition(array(
+                "target_id" => $target->id
+            ));
 
-        $targetCheckCount = TargetCheck::model()->count($criteria);
+            $targetCheckCount = TargetCheck::model()->count($criteria);
 
-        if ($targetCheckCount < count($checkIds)) {
-            throw new Exception("Not all relation checks attached to target.");
+            if ($targetCheckCount < count($checkIds)) {
+                throw new Exception("Not all relation checks attached to target.");
+            }
         }
 
         // Check if graph has more than one connection group

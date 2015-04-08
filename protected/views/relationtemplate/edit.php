@@ -35,7 +35,7 @@
             <?php endforeach; ?>
         </div>
 
-        <div class="control-group relations-graph <?php if ($model->getError('relation')) echo 'error'; ?>">
+        <div class="control-group relations-graph <?php if ($model->getError('relations')) echo 'error'; ?>">
             <label class="control-label"><?php echo Yii::t('app', 'Relations'); ?></label>
             <div class="controls">
                 <table border="0" width="730px">
@@ -76,7 +76,7 @@
     <?php endforeach; ?>
 
     <?php foreach ($filters as $filter): ?>
-        admin.mxgraph.filters.push("<?php print $filter; ?>");
+    admin.mxgraph.filters.push({ name: "<?php print $filter['name']; ?>", title: "<?php print $filter['title']; ?>" });
     <?php endforeach; ?>
 
     $('#languages-tab a').click(function (e) {
@@ -84,7 +84,9 @@
         $(this).tab('show');
     });
 
-    <?php if (!$template->isNewRecord): ?>
+    <?php if ($model->relations): ?>
+        admin.mxgraph.buildByXML('<?php print $model->relations; ?>');
+    <?php elseif (!$template->isNewRecord): ?>
         admin.mxgraph.buildByXML('<?php print $template->relations; ?>');
     <?php endif; ?>
 </script>

@@ -1333,7 +1333,7 @@ class ProjectController extends Controller {
 
             if ($model->validate()) {
                 try {
-                    TargetManager::validateRelations($target, $model->relations);
+                    TargetManager::validateRelations($model->relations, $target);
                 } catch (Exception $e) {
                     $model->addError("relations", $e->getMessage());
                     $success = false;
@@ -1415,7 +1415,7 @@ class ProjectController extends Controller {
             }
 
             try {
-                TargetManager::validateRelations($target, $target->relations);
+                TargetManager::validateRelations($target->relations, $target);
             } catch (Exception $e) {
                 throw $e;
             }
