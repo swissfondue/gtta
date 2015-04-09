@@ -1,15 +1,20 @@
 <?php
 
 class RelationTemplateManager {
+    /**
+     * Chart's cell types
+     */
     const MX_GRAPH_CELL_TYPE_CHECK  = 'check';
     const MX_GRAPH_CELL_TYPE_FILTER = 'filter';
 
-    const PORT_FILTER = "port-filter";
-
+    /**
+     * Filters list
+     * @var array
+     */
     public static $filters = array(
         array(
-            "name" => self::PORT_FILTER,
-            "title" => "Port Filter"
+            "name" => PortFilterFilter::ID,
+            "title" => PortFilterFilter::TITLE
         )
     );
 
@@ -114,7 +119,7 @@ class RelationTemplateManager {
         $result = null;
 
         switch ($filter) {
-            case self::PORT_FILTER:
+            case PortFilterFilter::ID:
                 $ports = explode(",", $values);
 
                 foreach ($ports as $key => $value) {
@@ -128,7 +133,7 @@ class RelationTemplateManager {
                 }
 
                 $targets = explode("\n", $input);
-                $result = Utils::filterTargetsByPorts($ports, $targets);
+                $result = PortFilterFilter::apply($ports, $targets);
                 $result = implode("\n", $result);
 
                 break;

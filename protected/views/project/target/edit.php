@@ -137,7 +137,7 @@
                 <label class="control-label"><?php echo Yii::t('app', 'Relation Template'); ?></label>
                 <div class="controls">
                     <select id="TargetEditForm_relationTemplateId" name="TargetEditForm[relationTemplateId]">
-                        <option value="0"><?php print Yii::t("app", "Please select..."); ?></option>
+                        <option value="0"><?php print Yii::t("app", "N/A"); ?></option>
                         <?php foreach ($relationTemplates as $template): ?>
                             <option value="<?php echo $template->id; ?>" <?php if ($template->id == $model->relationTemplateId) echo 'selected="selected"'; ?>><?php echo CHtml::encode($template->localizedName); ?></option>
                         <?php endforeach; ?>

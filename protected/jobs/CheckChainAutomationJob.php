@@ -241,6 +241,7 @@ class CheckChainAutomationJob extends BackgroundJob {
 
         switch ($status) {
             case Target::CHAIN_STATUS_IDLE:
+            case Target::CHAIN_STATUS_BREAKED:
                 $this->setVar("message", sprintf("Check chain of target '%s' was started.", $target->host));
 
                 $statusKey = JobManager::buildId(
@@ -271,6 +272,7 @@ class CheckChainAutomationJob extends BackgroundJob {
                 $this->_startChain($target, $cellId);
 
                 break;
+
             case Target::CHAIN_STATUS_ACTIVE:
                 throw new Exception("Permission denied.");
 

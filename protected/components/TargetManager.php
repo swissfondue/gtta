@@ -438,6 +438,7 @@ class TargetManager {
      * @throws Exception
      */
     public static function getChainMessages() {
+        // Redis doesn't support regexps, use glob
         $mask = JobManager::buildId(CheckChainAutomationJob::ID_TEMPLATE, array(
             "operation" => "*",
             "target_id" => "[0-9]*"
@@ -456,7 +457,13 @@ class TargetManager {
             preg_match_all($pattern, $key, $matches, PREG_PATTERN_ORDER);
 
             if (!empty($matches[0])) {
-                $messages[] = Resque::redis()->get($key);
+                $targetId = $matches[1][0];
+
+                $messages[] = array(
+                    "id" => $matches[1][0],
+                    "status" => self::getChainStatus($targetId),
+                    "message" => Resque::redis()->get($key)
+                );
             }
 
             JobManager::delKey($key);

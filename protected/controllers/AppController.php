@@ -171,6 +171,7 @@ class AppController extends Controller {
 
         $classes = array(
             "Package",
+            "Target",
             "TargetCheck",
             "TargetCheckEditForm",
         );

@@ -1919,15 +1919,17 @@ function Admin()
             var checkTied = parseInt(cell.getAttribute('check_id'));
             var stopper = parseInt(cell.getAttribute('stopped'));
 
+            cell.delStyle();
+
             if (!checkTied) {
                 cell.setStyle("noCheckSelectedStyle");
-                _mxgraph.editor.graph.refresh();
             }
 
             if (stopper) {
                 cell.setStyle("stoppedCellStyle");
-                _mxgraph.editor.graph.refresh();
             }
+
+            _mxgraph.editor.graph.refresh();
         };
 
         /**
@@ -1961,6 +1963,15 @@ function Admin()
          */
         this.mxCheckHandlerInit = function () {
             var md = (mxClient.IS_TOUCH) ? 'touchstart' : 'mousedown';
+
+            // Started check icon
+            if (this.state.cell.isStartCheck()) {
+                img = mxUtils.createImage('/js/mxgraph/grapheditor/images/play.png');
+                img.style.width = '16px';
+                img.style.height = '16px';
+
+                this.domNode.appendChild(img);
+            }
 
             // Settings
             var img = mxUtils.createImage('/js/mxgraph/grapheditor/images/settings.png');
@@ -2161,8 +2172,7 @@ function Admin()
             {
                 _mxgraph.editor.graph.removeCells([this.state.cell]);
                 mxEvent.consume(evt);
-            })
-            );
+            }));
 
             this.domNode.appendChild(img);
             _mxgraph.editor.graph.container.appendChild(this.domNode);

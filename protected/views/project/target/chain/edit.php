@@ -6,24 +6,11 @@
                 <li><a href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
             </ul>
         </div>
-
         <div class="pull-right buttons">
-            <div class="btn-group">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon icon-plus"></i>
-                    <?php echo Yii::t('app', 'Check Chain'); ?>
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li class="chain-start-button <?php if ($target->isChainRunning) print 'hide'; ?>">
-                        <a href="#startchain" data-target-id="<?php print $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>" onclick="user.target.chain.start($(this).data('target-id'), $(this).data('control-url'))" >Start</a>
-                    </li>
-                    <li class="chain-stop-button <?php if (!$target->isChainRunning) print 'hide'; ?>">
-                        <a href="#stopchain" data-target-id="<?php print $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>" onclick="user.target.chain.stop($(this).data('target-id'), $(this).data('control-url'))" >Stop</a>
-                    </li>
-                    <li class="active"><a href="<?php echo $this->createUrl('project/editchain', array( 'id' => $project->id, 'target' => $target->id )); ?>">Edit</a></li>
-                </ul>
-            </div>
+            <?php if (User::checkRole(User::ROLE_USER)): ?>
+                <a href="#startchain" class="btn chain-start-button <?php if ($target->isChainRunning) print 'hide'; ?>" data-target-id="<?php print $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>" onclick="user.target.chain.start($(this).data('target-id'), $(this).data('control-url'))"><i class="icon icon-play"></i><?php echo Yii::t("app", "Start"); ?></a>&nbsp;
+                <a href="#stopchain" class="btn chain-stop-button <?php if (!$target->isChainRunning) print 'hide'; ?>" data-target-id="<?php print $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>" onclick="user.target.chain.stop($(this).data('target-id'), $(this).data('control-url'))"><i class="icon icon-stop"></i><?php echo Yii::t("app", "Stop"); ?></a>
+            <?php endif; ?>
         </div>
 
         <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
@@ -88,6 +75,7 @@
         $(this).tab('show');
     });
 
+    user.target.targetId = parseInt("<?php print $target->id; ?>");
     admin.mxgraph.buildByXML('<?php print $model->relations; ?>');
 
     setInterval(function () {
