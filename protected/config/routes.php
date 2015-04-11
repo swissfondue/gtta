@@ -56,7 +56,6 @@ return array(
     "project/<id:\d+>/target/addlist" => "project/addtargetlist",
     "project/<id:\d+>/target/import" => "project/importtarget",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>" => "project/checks",
-    "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/save" => "project/savecategory",
     "project/<id:\d+>/target/<target:\d+>/category/control" => "project/controlcategory",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/control/<control:\d+>" => "project/controlchecklist",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/check/<check:\d+>" => "project/check",

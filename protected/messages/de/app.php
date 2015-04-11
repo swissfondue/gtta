@@ -208,7 +208,6 @@ return array (
   'Additional Data' => 'Zusätzliche Daten',
   'Address' => 'Adresse',
   'Admin' => 'Administrator',
-  'Advanced' => 'Advanced',
   'All Rights Reserved' => 'Alle Rechte vorbehalten',
   'Appendix' => 'Anhang',
   'Appendix Section' => 'Anhangs Abschnitt',

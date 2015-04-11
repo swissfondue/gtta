@@ -77,10 +77,6 @@ class TargetManager {
             "t.target_id" => $target->id
         ));
 
-        if (!$category->advanced) {
-            $criteria->addCondition("tc.advanced = FALSE");
-        }
-
         $checkCount += TargetCheck::model()->with(array(
             "check" => array(
                 "alias" => "tc",
@@ -93,10 +89,6 @@ class TargetManager {
 
         if (!$target->checklist_templates) {
             $criteria->addInCondition("reference_id", $referenceIds);
-        }
-
-        if (!$category->advanced) {
-            $criteria->addCondition("t.advanced = FALSE");
         }
 
         $checks = Check::model()->findAll($criteria);
