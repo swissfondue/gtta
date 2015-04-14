@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class PortFilterFilter
+ * Class PortFilter
  */
-class PortFilterFilter {
+class PortFilter {
     const ID = "port-filter";
     const TITLE = "Port Filter";
 

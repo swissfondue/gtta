@@ -13,8 +13,8 @@ class RelationTemplateManager {
      */
     public static $filters = array(
         array(
-            "name" => PortFilterFilter::ID,
-            "title" => PortFilterFilter::TITLE
+            "name" => PortFilter::ID,
+            "title" => PortFilter::TITLE
         )
     );
 
@@ -119,7 +119,7 @@ class RelationTemplateManager {
         $result = null;
 
         switch ($filter) {
-            case PortFilterFilter::ID:
+            case PortFilter::ID:
                 $ports = explode(",", $values);
 
                 foreach ($ports as $key => $value) {
@@ -133,7 +133,7 @@ class RelationTemplateManager {
                 }
 
                 $targets = explode("\n", $input);
-                $result = PortFilterFilter::apply($ports, $targets);
+                $result = PortFilter::apply($ports, $targets);
                 $result = implode("\n", $result);
 
                 break;
