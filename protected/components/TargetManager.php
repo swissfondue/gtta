@@ -166,11 +166,6 @@ class TargetManager {
         $criteria = new CDbCriteria();
         $criteria->addInCondition("check_control_id", $controlIds);
         $criteria->addInCondition("reference_id", $referenceIds);
-
-        if (!$category->advanced) {
-            $criteria->addCondition("t.advanced = FALSE");
-        }
-
         $checks = Check::model()->findAll($criteria);
 
         $targetChecks = TargetCheck::model()->findAllByAttributes(array("target_id" => $category->target_id));
