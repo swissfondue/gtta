@@ -493,6 +493,26 @@ class AppController extends Controller {
 
                     break;
 
+                case "category-control-list":
+                    $category = CheckCategory::model()->findByPk($model->id);
+
+                    if (!$category) {
+                        throw new CHttpException(404, "Category not found.");
+                    }
+
+                    $controls = CheckControl::model()->findAllByAttributes(array(
+                        "check_category_id" => $category->id
+                    ));
+
+                    foreach ($controls as $control) {
+                        $objects[] = array(
+                            "id" => $control->id,
+                            "name" => $control->localizedName,
+                        );
+                    }
+
+                    break;
+
                 default:
                     throw new CHttpException(403, Yii::t("app", "Unknown operation."));
                     break;

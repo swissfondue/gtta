@@ -9,11 +9,22 @@
  * @property string $host
  * @property string $description
  * @property integer $port
- * @property boolean checklist_temlates
+ * @property integer $check_source_type
+ * @property boolean $relation_template_id
+ * @property boolean $relations
+ * @property RelationTemplate $relationTemplate
  * @property TargetChecklistTemplate[] $checklistTemplates
  * @property TargetCheck[] $targetChecks
  */
 class Target extends ActiveRecord implements IVariableScopeObject {
+    const CHAIN_STATUS_IDLE = 0;
+    const CHAIN_STATUS_ACTIVE = 1;
+    const CHAIN_STATUS_STOPPED = 2;
+    const CHAIN_STATUS_BREAKED = 3;
+
+    const SOURCE_TYPE_CHECK_CATEGORIES = 0;
+    const SOURCE_TYPE_CHECKLIST_TEMPLATES = 1;
+
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -37,9 +48,8 @@ class Target extends ActiveRecord implements IVariableScopeObject {
 		return array(
             array("host, project_id", "required"),
             array("host, description", "length", "max" => 1000),
-            array("checklist_templates", "boolean"),
-            array("project_id", "numerical", "integerOnly" => true),
-            array("port", "safe"),
+            array("project_id, check_source_type", "numerical", "integerOnly" => true),
+            array("port, relations", "safe"),
 		);
 	}
 
@@ -62,6 +72,7 @@ class Target extends ActiveRecord implements IVariableScopeObject {
             "targetChecks" => array(self::HAS_MANY, "TargetCheck", "target_id"),
             "targetCustomChecks" => array(self::HAS_MANY, "TargetCustomCheck", "target_id"),
             "checklistTemplates" => array(self::HAS_MANY, "TargetChecklistTemplate", "target_id"),
+            "relationTemplate" => array(self::BELONGS_TO, "RelationTemplate", "relation_template_id"),
         );
 	}
 
@@ -242,7 +253,7 @@ class Target extends ActiveRecord implements IVariableScopeObject {
             "check_id"  => $checkId,
         ));
 
-        if ($this->checklist_templates) {
+        if ($this->check_source_type == Target::SOURCE_TYPE_CHECKLIST_TEMPLATES) {
             $templates = $this->checklistTemplates;
             $templateIds = array();
 
@@ -266,5 +277,18 @@ class Target extends ActiveRecord implements IVariableScopeObject {
      */
     public function getHostPort() {
         return $this->host . ($this->port ? ":" . $this->port : "");
+    }
+
+    /**
+     * Check if check chain is running
+     * @return bool
+     */
+    public function getIsChainRunning() {
+        $job = JobManager::buildId(CheckChainAutomationJob::ID_TEMPLATE, array(
+            "target_id" => $this->id,
+            "operation" => CheckChainAutomationJob::OPERATION_START,
+        ));
+
+        return JobManager::isRunning($job);
     }
 }

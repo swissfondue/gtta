@@ -1,0 +1,90 @@
+<mxEditor>
+	<ui>
+		<resource basename="/js/mxgraph/grapheditor/resources/mxApplication"/>
+	</ui>
+	<mxDefaultPopupMenu as="popupHandler">
+        <add as="stopHere" action="setStopped" if="isUnstoppedCheck"></add>
+        <add as="unstopHere" action="setUnStopped" if="isStoppedCheck"></add>
+        <add as="setStartCheck" action="setStartCheck" if="isCheck"></add>
+        <condition name="isCheck"><![CDATA[
+            function (editor, cell, evt)
+            {
+                if (!cell) {
+                    return false;
+                }
+
+                return cell.getAttribute("type") == "check";
+            }
+        ]]></condition>
+        <condition name="isFilter"><![CDATA[
+            function (editor, cell, evt)
+            {
+                if (!cell) {
+                    return false;
+                }
+
+                return cell.getAttribute("type") == "filter";
+            }
+        ]]></condition>
+        <condition name="isStoppedCheck"><![CDATA[
+            function (editor, cell, evt)
+            {
+                if (!cell) {
+                    return false;
+                }
+
+                if (cell.getAttribute("type") != "check") {
+                    return false;
+                }
+
+                return cell.getAttribute("stopped") == "1" ? true : false;
+            }
+        ]]></condition>
+        <condition name="isUnstoppedCheck"><![CDATA[
+            function (editor, cell, evt)
+            {
+                if (!cell) {
+                    return false;
+                }
+
+                if (cell.getAttribute("type") != "check") {
+                    return false;
+                }
+
+                return cell.getAttribute("stopped") == "1" ? false : true;
+            }
+        ]]></condition>
+	</mxDefaultPopupMenu>
+	<include name="/js/mxgraph/grapheditor/config/keyhandler-commons.xml"/>
+	<Array as="actions">
+        <add as="setStartCheck"><![CDATA[
+			function (editor, cell)
+			{
+			    var cells = editor.graph.getChildVertices(editor.graph.getDefaultParent());
+
+			    $.each(cells, function (key, cell) {
+			        if (cell.isCheck) {
+			            cell.setAttribute('start_check', '0');
+			        }
+			    });
+
+				cell.setAttribute("start_check", "1");
+				admin.relationTemplate.updateRelations();
+			}
+		]]></add>
+        <add as="setStopped"><![CDATA[
+			function (editor, cell)
+			{
+				cell.setAttribute("stopped", "1");
+				admin.relationTemplate.updateRelations();
+			}
+		]]></add>
+        <add as="setUnStopped"><![CDATA[
+			function (editor, cell)
+			{
+				cell.setAttribute("stopped", "0");
+				admin.relationTemplate.updateRelations();
+			}
+		]]></add>
+	</Array>
+</mxEditor>

@@ -1843,6 +1843,603 @@ function Admin()
             }
         };
     };
+
+    /**
+     * Relation Template object
+     */
+    this.relationTemplate = new function () {
+        /**
+         * Set XML node of mxGraph to form input field
+         * @returns {boolean}
+         */
+        this.updateRelations = function () {
+            var editor = admin.mxgraph.editor;
+
+            if (!editor) {
+                return false;
+            }
+
+            var enc = new mxCodec();
+            var node = enc.encode(editor.graph.getModel());
+
+            $('.relations-form-input').val(new XMLSerializer().serializeToString(node));
+        };
+    };
+
+    /**
+     * MxGraph object
+     */
+    this.mxgraph = new function () {
+        var _mxgraph = this;
+
+        /**
+         * Cell types
+         * @type {string}
+         */
+        this.CELL_TYPE_CHECK = 'check';
+        this.CELL_TYPE_FILTER = 'filter';
+
+        /**
+         * Check & filter lists
+         * @type {null}
+         */
+        this.checkCategories = [];
+        this.filters         = [];
+
+        /**
+         * MxGraph objects handlers
+         * @type {null}
+         */
+        this.editor     = null;
+        this.properties = null;
+
+        /**
+         * Returns all graph cells
+         * @returns {*}
+         */
+        this.getAllCells = function () {
+            return _mxgraph.editor.graph.getChildVertices(_mxgraph.editor.graph.getDefaultParent())
+        };
+
+        /**
+         * Check graph object handler
+         * @param state
+         */
+        this.mxCheckHandler = function (state) {
+            mxVertexHandler.apply(this, arguments);
+
+            _mxgraph.updateCheckStyles(state.cell);
+        };
+
+        /**
+         * Refresh check cell styles
+         * @param cell
+         */
+        this.updateCheckStyles = function (cell) {
+            var checkTied = parseInt(cell.getAttribute('check_id'));
+            var stopper = parseInt(cell.getAttribute('stopped'));
+
+            if (!checkTied) {
+                cell.setStyle("noCheckSelectedStyle");
+                _mxgraph.editor.graph.refresh();
+            }
+
+            if (stopper) {
+                cell.setStyle("stoppedCellStyle");
+                _mxgraph.editor.graph.refresh();
+            }
+        };
+
+        /**
+         * Filter graph object handler
+         * @param state
+         */
+        this.mxFilterHandler = function (state) {
+            mxVertexHandler.apply(this, arguments);
+        };
+
+        /**
+         * Common cell handler init
+         */
+        this.mxCellHandlerInit = function () {
+            mxVertexHandler.prototype.init.apply(this, arguments);
+
+            this.domNode = document.createElement('div');
+            this.domNode.style.position = 'absolute';
+            this.domNode.style.whiteSpace = 'nowrap';
+            var cell = _mxgraph.editor.graph.getSelectionCell();
+
+            if (cell.getAttribute("type") == _mxgraph.CELL_TYPE_CHECK) {
+                _mxgraph.mxCheckHandlerInit.call(this);
+            } else if (cell.getAttribute("type") == _mxgraph.CELL_TYPE_FILTER) {
+                _mxgraph.mxFilterHandlerInit.call(this);
+            }
+        };
+
+        /**
+         * Init mxCheckHandler
+         */
+        this.mxCheckHandlerInit = function () {
+            var md = (mxClient.IS_TOUCH) ? 'touchstart' : 'mousedown';
+
+            // Settings
+            var img = mxUtils.createImage('/js/mxgraph/grapheditor/images/settings.png');
+            img.style.cursor = 'pointer';
+            img.style.width = '16px';
+            img.style.height = '16px';
+            mxEvent.addListener(img, md, mxUtils.bind(this, function(evt) {
+                // Disables dragging the image
+                mxEvent.consume(evt);
+            }));
+
+            mxEvent.addListener(img, 'click', mxUtils.bind(this, function(evt) {
+                var graph = _mxgraph.editor.graph;
+                var cell = graph.getSelectionCell();
+                var bounds = this.graph.getCellBounds(cell);
+                var model = graph.getModel();
+
+                if (_mxgraph.properties) {
+                    _mxgraph.properties.destroy();
+                }
+
+                var graphOffset = mxUtils.getOffset(_mxgraph.editor.graph.container);
+                var x = graphOffset.x + 10;
+                var y = graphOffset.y;
+
+                if (bounds != null)
+                {
+                    x += bounds.x + Math.min(100, bounds.width);
+                    y += bounds.y;
+                }
+
+                var form = $('<div>');
+
+                var checkId = cell.getAttribute("check_id");
+                var $categories = $('<select>')
+                    .addClass('category-list')
+                    .addClass('max-width')
+                    .append(
+                        $('<option>')
+                            .attr('value', '0')
+                            .text('Select category...')
+                    )
+                    .change(function() {
+                        var category = $(this).val();
+                        var $properties = $(_mxgraph.properties.getElement());
+                        var $categoryList = $(this);
+                        var $controlList = $properties.find('.control-list');
+                        var $checkList = $properties.find('.check-list');
+
+                        $categoryList.addClass('disabled');
+                        $controlList
+                            .addClass('disabled')
+                            .find('option[value=0]')
+                            .siblings()
+                            .remove();
+
+                        $checkList
+                            .addClass('disabled')
+                            .find('option[value=0]')
+                            .siblings()
+                            .remove();
+
+                        if (category != '0') {
+                            system.control.loadObjects(category, "category-control-list", function (data) {
+                                var controls = data.objects;
+
+                                $.each(controls, function (key, value) {
+                                    $controlList.append(
+                                        $('<option>')
+                                            .attr("value", value.id)
+                                            .text(value.name)
+                                    );
+                                });
+
+                                $categoryList.removeClass('disabled');
+                                $controlList.removeClass('disabled');
+                            });
+                        } else {
+                            $categoryList.removeClass('disabled');
+                            $controlList.addClass('disabled');
+                        }
+                    });
+
+                var $controls = $('<select>')
+                    .addClass('control-list')
+                    .addClass('max-width')
+                    .addClass('disabled')
+                    .append(
+                        $('<option>')
+                            .attr('value', '0')
+                            .text('Select control...')
+                    )
+                    .change(function () {
+                        var controlId = $(this).val();
+                        var $properties = $(_mxgraph.properties.getElement());
+                        var $categoryList = $properties.find('.category-list');
+                        var $checkList = $properties.find('.check-list');
+                        var $controlList = $properties.find('.control-list');
+
+                        $categoryList.addClass('disabled');
+                        $controlList.addClass('disabled');
+                        $checkList
+                            .addClass('disabled')
+                            .find('option[value=0]')
+                            .siblings()
+                            .remove();
+
+                        if (controlId != '0') {
+                            system.control.loadObjects(controlId, 'control-check-list', function (data) {
+                                $.each(data.objects, function (key, value) {
+                                    $checkList.append(
+                                        $('<option>')
+                                            .attr('value', value.id)
+                                            .text(value.name)
+                                    );
+                                });
+
+                                $categoryList.removeClass('disabled');
+                                $controlList.removeClass('disabled');
+                                $checkList.removeClass('disabled');
+                            });
+                        } else {
+                            $categoryList.removeClass('disabled');
+                            $controlList.removeClass('disabled');
+                            $checkList.addClass('disabled');
+                        }
+                    });
+
+                var $checks = $('<select>')
+                    .addClass('check-list')
+                    .addClass('max-width')
+                    .addClass('disabled')
+                    .append(
+                        $('<option>')
+                            .attr('value', '0')
+                            .text('Select check...')
+                    );
+
+                $.each(_mxgraph.checkCategories, function (key, value) {
+                    $categories.append(
+                        $('<option>')
+                            .attr('value', value.id)
+                            .text(value.name)
+                    );
+                });
+
+                var $okButton = $('<button>')
+                    .text('OK')
+                    .click(function () {
+                        var $properties = $(_mxgraph.properties.getElement());
+
+                        var $checkList = $properties.find('.check-list');
+                        var categoryId = $properties.find('.category-list').val();
+                        var controlId = $properties.find('.control-list').val();
+                        var checkId = $properties.find('.check-list').val();
+                        var checkName = $checkList.find('option[value=' + checkId + ']').text();
+
+                        if (parseInt(categoryId) && parseInt(controlId) && parseInt(checkId)) {
+                            cell.setAttribute("check_id", checkId);
+                            cell.setAttribute("label", checkName);
+
+                            cell.delStyle();
+
+                            _mxgraph.editor.graph.refresh();
+                            _mxgraph.properties.destroy();
+                            admin.relationTemplate.updateRelations();
+                        }
+                    });
+
+                var $cancelButton = $('<button>')
+                    .text('Cancel')
+                    .click(function () {
+                        _mxgraph.properties.destroy();
+                    });
+
+                form.append($categories, $controls, $checks, $okButton, $cancelButton);
+
+                _mxgraph.properties = new mxWindow("Check Properties", form[0], x, y, 250, 170, false);
+                _mxgraph.properties.setVisible(true);
+            }));
+
+            this.domNode.appendChild(img);
+
+            // Delete button
+            img = mxUtils.createImage('/js/mxgraph/grapheditor/images/delete.gif');
+            img.style.cursor = 'pointer';
+            img.style.width = '16px';
+            img.style.height = '16px';
+            mxEvent.addListener(img, md,
+                mxUtils.bind(this, function(evt)
+                {
+                    // Disables dragging the image
+                    mxEvent.consume(evt);
+                })
+            );
+
+            mxEvent.addListener(img, 'click', mxUtils.bind(this, function(evt)
+            {
+                _mxgraph.editor.graph.removeCells([this.state.cell]);
+                mxEvent.consume(evt);
+            })
+            );
+
+            this.domNode.appendChild(img);
+            _mxgraph.editor.graph.container.appendChild(this.domNode);
+            this.redrawTools();
+        };
+
+        /**
+         * Init mxFilterHandler
+         */
+        this.mxFilterHandlerInit = function () {
+            var md = (mxClient.IS_TOUCH) ? 'touchstart' : 'mousedown';
+
+            // Settings
+            var img = mxUtils.createImage('/js/mxgraph/grapheditor/images/settings.png');
+            img.style.cursor = 'pointer';
+            img.style.width = '16px';
+            img.style.height = '16px';
+            mxEvent.addListener(img, md, mxUtils.bind(this, function(evt) {
+                // Disables dragging the image
+                mxEvent.consume(evt);
+            }));
+
+            mxEvent.addListener(img, 'click', mxUtils.bind(this, function(evt) {
+                var graph = _mxgraph.editor.graph;
+                var cell = graph.getSelectionCell();
+                var bounds = this.graph.getCellBounds(cell);
+                var model = graph.getModel();
+
+                if (_mxgraph.properties) {
+                    _mxgraph.properties.destroy();
+                }
+
+                var graphOffset = mxUtils.getOffset(_mxgraph.editor.graph.container);
+                var x = graphOffset.x + 10;
+                var y = graphOffset.y;
+
+                if (bounds != null)
+                {
+                    x += bounds.x + Math.min(100, bounds.width);
+                    y += bounds.y;
+                }
+
+                var form = $('<div>');
+                var current = cell.getAttribute("filter_name");
+
+                var filters = $('<select>')
+                    .addClass('filter_name')
+                    .addClass('max-width')
+                    .append(
+                        $('<option>')
+                            .attr('value', '0')
+                            .text('Select filter...')
+                    );
+
+                $.each(_mxgraph.filters, function (key, value) {
+                    var option = $('<option>')
+                        .attr('value', value.name)
+                        .text(value.title);
+
+                    if (value.name == current) {
+                        option.attr('selected', 'selected');
+                    }
+
+                    filters.append(option);
+                });
+
+                var values = $('<input>')
+                    .addClass('filter_values')
+                    .addClass('max-width')
+                    .attr("placeholder", "Enter filter values here...")
+                    .val(cell.getAttribute("filter_values"));
+
+                var okFunction = function (cell) {
+                    var name = $('.mxWindow .filter_name' ).val();
+                    var title = $('.mxWindow .filter_name option:selected' ).text();
+                    var values = $('.mxWindow .filter_values').val();
+
+                    if (name != '0' && values) {
+                        cell.setAttribute('filter_name', name);
+                        cell.setAttribute('label', title);
+                        cell.setAttribute("filter_values", values);
+
+                        graph.refresh();
+                        _mxgraph.properties.destroy();
+                        admin.relationTemplate.updateRelations();
+                    }
+                };
+
+                var cancelFunction = function () {
+                    _mxgraph.properties.destroy();
+                };
+
+                var buttons = $('<div>')
+                    .append(
+                        $('<button>')
+                            .text('OK')
+                            .click(function () {
+                                okFunction(cell);
+                            }),
+                        $('<button>')
+                            .text('Cancel')
+                            .click(cancelFunction)
+                    );
+
+                form.append(filters, values, buttons);
+
+                _mxgraph.properties = new mxWindow("Filter Properties", form[0], x, y, 230, 120, false);
+                _mxgraph.properties.setVisible(true);
+            }));
+
+            this.domNode.appendChild(img);
+
+            // Delete button
+            img = mxUtils.createImage('/js/mxgraph/grapheditor/images/delete.gif');
+            img.style.cursor = 'pointer';
+            img.style.width = '16px';
+            img.style.height = '16px';
+            mxEvent.addListener(img, md,
+                mxUtils.bind(this, function(evt)
+                {
+                    // Disables dragging the image
+                    mxEvent.consume(evt);
+                })
+            );
+
+            mxEvent.addListener(img, 'click', mxUtils.bind(this, function(evt)
+            {
+                _mxgraph.editor.graph.removeCells([this.state.cell]);
+                mxEvent.consume(evt);
+            })
+            );
+
+            this.domNode.appendChild(img);
+            _mxgraph.editor.graph.container.appendChild(this.domNode);
+            this.redrawTools();
+        };
+
+        /**
+         * Init
+         * @param editor
+         */
+        this.init = function (editor) {
+            _mxgraph.editor = editor;
+            _mxgraph.editor.graph.setConnectable(true);
+            _mxgraph.editor.graph.connectionHandler.createTarget = true;
+
+            // Check cell styles
+            _mxgraph.editor.graph.getStylesheet().putCellStyle('stoppedCellStyle', stoppedCellStyle);
+            _mxgraph.editor.graph.getStylesheet().putCellStyle('noCheckSelectedStyle', noCheckSelectedStyle);
+
+            _mxgraph.editor.graph.createHandler = function (state) {
+                if (state != null && this.model.isVertex(state.cell)) {
+                    if (state.cell.isCheck()) {
+                        return new _mxgraph.mxCheckHandler(state);
+                    } else if (state.cell.isFilter()) {
+                        return new _mxgraph.mxFilterHandler(state);
+                    }
+                }
+
+                return mxGraph.prototype.createHandler.apply(this, arguments);
+            };
+
+            _mxgraph.mxCheckHandler.prototype = new mxVertexHandler();
+            _mxgraph.mxCheckHandler.prototype.constructor = _mxgraph.mxCheckHandler;
+            _mxgraph.mxCheckHandler.prototype.domNode = null;
+            _mxgraph.mxCheckHandler.prototype.init = _mxgraph.mxCellHandlerInit;
+
+            _mxgraph.mxCheckHandler.prototype.redraw = function() {
+                mxVertexHandler.prototype.redraw.apply(this);
+                this.redrawTools();
+            };
+
+            _mxgraph.mxCheckHandler.prototype.redrawTools = function () {
+                if (this.state != null && this.domNode != null) {
+                    var dy = (mxClient.IS_VML && document.compatMode == 'CSS1Compat') ? 20 : 4;
+                    this.domNode.style.left = (this.state.x + this.state.width - 30) + 'px';
+                    this.domNode.style.top = (this.state.y - 20 - dy) + 'px';
+                }
+            };
+
+            _mxgraph.mxCheckHandler.prototype.destroy = function (sender, me) {
+                mxVertexHandler.prototype.destroy.apply(this, arguments);
+
+                if (this.domNode != null) {
+                    this.domNode.parentNode.removeChild(this.domNode);
+                    this.domNode = null;
+                }
+            };
+
+            _mxgraph.mxFilterHandler.prototype = new mxVertexHandler();
+            _mxgraph.mxFilterHandler.prototype.constructor = _mxgraph.mxFilterHandler;
+            _mxgraph.mxFilterHandler.prototype.domNode = null;
+            _mxgraph.mxFilterHandler.prototype.init = _mxgraph.mxCellHandlerInit;
+
+            _mxgraph.mxFilterHandler.prototype.redraw = function() {
+                mxVertexHandler.prototype.redraw.apply(this);
+                this.redrawTools();
+            };
+
+            _mxgraph.mxFilterHandler.prototype.redrawTools = function () {
+                if (this.state != null && this.domNode != null) {
+                    var dy = (mxClient.IS_VML && document.compatMode == 'CSS1Compat') ? 20 : 4;
+                    this.domNode.style.left = (this.state.x + this.state.width - 30) + 'px';
+                    this.domNode.style.top = (this.state.y - 20 - dy) + 'px';
+                }
+            };
+
+            _mxgraph.mxFilterHandler.prototype.destroy = function (sender, me) {
+                mxVertexHandler.prototype.destroy.apply(this, arguments);
+
+                if (this.domNode != null) {
+                    this.domNode.parentNode.removeChild(this.domNode);
+                    this.domNode = null;
+                }
+            };
+
+            // Crisp rendering in SVG except for connectors, actors, cylinder, ellipses
+            mxShape.prototype.crisp = true;
+            mxActor.prototype.crisp = false;
+            mxCylinder.prototype.crisp = false;
+            mxEllipse.prototype.crisp = false;
+            mxDoubleEllipse.prototype.crisp = false;
+            mxConnector.prototype.crisp = false;
+
+            // Enables guides
+            mxGraphHandler.prototype.guidesEnabled = true;
+
+            // Alt disables guides
+            mxGuide.prototype.isEnabledForEvent = function(evt)
+            {
+                return !mxEvent.isAltDown(evt);
+            };
+
+            // Enables snapping waypoints to terminals
+            mxEdgeHandler.prototype.snapToTerminals = true;
+
+            // Defines an icon for creating new connections in the connection handler.
+            // This will automatically disable the highlighting of the source vertex.
+            mxConnectionHandler.prototype.connectImage = new mxImage('/js/mxgraph/grapheditor/images/connector.gif', 16, 16);
+
+            // Enables connections in the graph and disables
+            // reset of zoom and translate on root change
+            // (ie. switch between XML and graphical mode).
+            _mxgraph.editor.graph.setConnectable(true);
+
+            _mxgraph.editor.graph.getModel().addListener(mxEvent.CHANGE, function () {
+                admin.relationTemplate.updateRelations();
+            });
+
+            // Create select actions in page
+            var node = document.getElementById('zoomActions');
+            mxUtils.write(node, 'Zoom: ');
+            mxUtils.linkAction(node, 'In', _mxgraph.editor, 'zoomIn');
+            mxUtils.write(node, ', ');
+            mxUtils.linkAction(node, 'Out', _mxgraph.editor, 'zoomOut');
+            mxUtils.write(node, ', ');
+            mxUtils.linkAction(node, 'Actual', _mxgraph.editor, 'actualSize');
+            mxUtils.write(node, ', ');
+            mxUtils.linkAction(node, 'Fit', _mxgraph.editor, 'fit');
+        };
+
+        /**
+         * Build graph by XML
+         * @param xml
+         */
+        this.buildByXML = function (xml) {
+            var doc = mxUtils.parseXml(xml);
+            var dec = new mxCodec(doc);
+            dec.decode(doc.documentElement, _mxgraph.editor.graph.getModel());
+
+            $.each(_mxgraph.getAllCells(), function (key, cell) {
+                if (cell.getAttribute('type') == _mxgraph.CELL_TYPE_CHECK) {
+                    _mxgraph.updateCheckStyles(cell);
+                }
+            });
+        };
+    };
 }
 
 var admin = new Admin();
