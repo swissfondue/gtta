@@ -161,10 +161,10 @@ return array(
     "checklist-template/control"                                       => "checklisttemplate/controlcategory",
 
     // relation templates
-    "relationtemplates/<page:\d+>"   => "relationtemplate/index",
-    "relationtemplates"              => "relationtemplate/index",
-    "relationtemplate/<id:\d+>/edit" => "relationtemplate/edit",
-    "relationtemplate/control"       => "relationtemplate/control",
+    "relation-templates/<page:\d+>"   => "relationtemplate/index",
+    "relation-templates"              => "relationtemplate/index",
+    "relation-template/<id:\d+>/edit" => "relationtemplate/edit",
+    "relation-template/control"       => "relationtemplate/control",
 
     // checklist templates
     "checklist-template/<id:\d+>/template/<template:\d+>/<page:\d+>"   => "checklisttemplate/viewtemplate",

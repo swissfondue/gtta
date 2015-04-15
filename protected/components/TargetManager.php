@@ -312,69 +312,6 @@ class TargetManager {
     }
 
     /**
-     * Check relation's checks and target's checks matching
-     * @param Target $target
-     * @param $relations
-     * @return bool
-     * @throws Exception
-     */
-    public static function validateRelations($data, Target $target=null) {
-        try {
-            $relations = new SimpleXMLElement($data, LIBXML_NOERROR);
-        } catch (Exception $e) {
-            throw new Exception("Relations is not valid.");
-        }
-
-        $checkNodes = $relations->xpath('//*[@type="check"]');
-        $startCheckId = false;
-
-        $checkIds = array();
-
-        foreach ($checkNodes as $node) {
-            $attributes = $node->attributes();
-            $checkId = (int) $attributes->check_id;
-
-            if (!$checkId) {
-                throw new Exception("There are blocks with no check tied.");
-            }
-
-            $checkIds[] = $checkId;
-
-            if ((int) $attributes->start_check == 1) {
-                $startCheckId = $attributes->id;
-            }
-        }
-
-        if (!$startCheckId) {
-            throw new Exception("Start check is not defined.");
-        }
-
-        if ($target) {
-            $criteria = new CDbCriteria();
-            $criteria->addInCondition("check_id", $checkIds);
-            $criteria->addColumnCondition(array(
-                "target_id" => $target->id
-            ));
-
-            $targetCheckCount = TargetCheck::model()->count($criteria);
-
-            if ($targetCheckCount < count($checkIds)) {
-                throw new Exception("Not all relation checks attached to target.");
-            }
-        }
-
-        // Check if graph has more than one connection group
-        $cellCount = count($relations->xpath('//*[@type="check" or @type="filter"]'));
-        $startCheckChilds = RelationTemplateManager::getCellChildrenCount($relations, $startCheckId);
-
-        if ($cellCount > $startCheckChilds + 1) {
-            throw new Exception("Template has more than one connection group.");
-        }
-
-        return true;
-    }
-
-    /**
      * Returns target chain status
      * @param $id
      * @return mixed|null

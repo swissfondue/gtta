@@ -1333,7 +1333,7 @@ class ProjectController extends Controller {
 
             if ($model->validate()) {
                 try {
-                    TargetManager::validateRelations($model->relations, $target);
+                    RelationTemplateManager::validateRelations($model->relations, $target);
                 } catch (Exception $e) {
                     $model->addError("relations", $e->getMessage());
                     $success = false;
@@ -1380,7 +1380,6 @@ class ProjectController extends Controller {
         try {
             $id = (int) $id;
             $target = (int) $target;
-
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
@@ -1414,11 +1413,7 @@ class ProjectController extends Controller {
                 throw new Exception($errorText);
             }
 
-            try {
-                TargetManager::validateRelations($target->relations, $target);
-            } catch (Exception $e) {
-                throw $e;
-            }
+            RelationTemplateManager::validateRelations($target->relations, $target);
 
             switch ($model->operation) {
                 case "start":

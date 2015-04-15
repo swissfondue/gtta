@@ -140,4 +140,64 @@ class RelationTemplateManager {
 
         return $result;
     }
+
+    /**
+     * Validate relations
+     * @param $data
+     * @param Target $target
+     * @throws Exception
+     */
+    public static function validateRelations($data, Target $target=null) {
+        try {
+            $relations = new SimpleXMLElement($data, LIBXML_NOERROR);
+        } catch (Exception $e) {
+            throw new Exception("Relations are not valid.");
+        }
+
+        $checkNodes = $relations->xpath('//*[@type="check"]');
+        $startCheckId = false;
+
+        $checkIds = array();
+
+        foreach ($checkNodes as $node) {
+            $attributes = $node->attributes();
+            $checkId = (int) $attributes->check_id;
+
+            if (!$checkId) {
+                throw new Exception("There are blocks with no checks tied.");
+            }
+
+            $checkIds[] = $checkId;
+
+            if ((int) $attributes->start_check == 1) {
+                $startCheckId = $attributes->id;
+            }
+        }
+
+        if (!$startCheckId) {
+            throw new Exception("Start check is not defined.");
+        }
+
+        if ($target) {
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition("check_id", $checkIds);
+            $criteria->addColumnCondition(array(
+                "target_id" => $target->id
+            ));
+
+            $targetCheckCount = TargetCheck::model()->count($criteria);
+
+            if ($targetCheckCount < count($checkIds)) {
+                throw new Exception("Not all relation checks are attached to target.");
+            }
+        }
+
+        // Check if graph has more than one connection group
+        $cellCount = count($relations->xpath('//*[@type="check" or @type="filter"]'));
+        $startCheckChildren = RelationTemplateManager::getCellChildrenCount($relations, $startCheckId);
+
+        if ($cellCount > $startCheckChildren + 1) {
+            throw new Exception("Template has more than one connection group.");
+        }
+    }
 }
