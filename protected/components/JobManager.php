@@ -11,6 +11,7 @@ class JobManager {
         "AutomationJob",
         "BackupJob",
         "ClearLogJob",
+        "CheckChainAutomationJob",
         "CommunityInstallJob",
         "CommunityShareJob",
         "EmailJob",
@@ -92,5 +93,23 @@ class JobManager {
     public static function delKey($key) {
         $key = str_replace('resque:', '', $key);
         Resque::redis()->del($key);
+    }
+
+    /**
+     * Set redis key value
+     * @param $key
+     * @param $value
+     */
+    public static function setKeyValue($key, $value) {
+        Resque::redis()->set($key, $value);
+    }
+
+    /**
+     * Returns redis key value
+     * @param $key
+     * @return mixed
+     */
+    public static function getKeyValue($key) {
+        return Resque::redis()->get($key);
     }
 }

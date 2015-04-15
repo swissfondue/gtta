@@ -351,14 +351,16 @@ class AutomationJob extends BackgroundJob {
             $now = new DateTime();
             $package = $script->package;
 
-            $data = Yii::t("app", "The {script} script was used within this check against {target} on {date} at {time}", array(
-                "{script}" => $package->name,
-                "{target}" => $check->override_target ? $check->override_target : $target->host,
-                "{date}" => $now->format("d.m.Y"),
-                "{time}" => $now->format("H:i:s"),
-            ));
+            if (!isset($this->args['chain'])) {
+                $data = Yii::t("app", "The {script} script was used within this check against {target} on {date} at {time}", array(
+                    "{script}" => $package->name,
+                    "{target}" => $check->override_target ? $check->override_target : $target->host,
+                    "{date}" => $now->format("d.m.Y"),
+                    "{time}" => $now->format("H:i:s"),
+                ));
 
-            $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
+                $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
+            }
 
             try {
                 $pid = posix_getpid();

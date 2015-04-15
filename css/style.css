@@ -154,7 +154,8 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 .risk-template-list .actions,
 .summary-list .actions,
 .section-list .actions,
-.time-records-list .actions {
+.time-records-list .actions,
+.relation-template-list .actions {
     width:30px;
     text-align:right;
 }
@@ -1258,4 +1259,22 @@ ul.breadcrumb {
 #TargetEditForm .template-category-list {
     margin-left: 0;
     padding-top: 3px;
+}
+
+/* MxGraph */
+.relations-graph #graph {
+    position: relative;
+    height: 480px;
+    width: 684px;
+    overflow: hidden;
+    cursor: default;
+    border: 1px solid #cccccc;
+}
+.relations-graph #toolbar {
+    width: 16px;
+    padding-left: 20px;
+}
+.relations-graph #zoomActions {
+    width: 100%;
+    padding-top: 4px;
 }

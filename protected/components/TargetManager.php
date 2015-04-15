@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * Invalid target list exceptions
+ */
+class EmptyTargetListException extends Exception {};
+class InvalidTargetException extends Exception {};
 /**
  * Class TargetManager
  */
@@ -60,7 +64,7 @@ class TargetManager {
         $criteria = new CDbCriteria();
         $criteria->addInCondition("tc.check_control_id", $controlIds);
 
-        if (!$target->checklist_templates) {
+        if ($target->check_source_type == Target::SOURCE_TYPE_CHECK_CATEGORIES) {
             $referenceIds = array();
             $references = TargetReference::model()->findAllByAttributes(array(
                 "target_id" => $category->target_id
@@ -87,7 +91,7 @@ class TargetManager {
         $criteria = new CDbCriteria();
         $criteria->addInCondition("check_control_id", $controlIds);
 
-        if (!$target->checklist_templates) {
+        if ($target->check_source_type == Target::SOURCE_TYPE_CHECK_CATEGORIES) {
             $criteria->addInCondition("reference_id", $referenceIds);
         }
 
@@ -138,53 +142,14 @@ class TargetManager {
     }
 
     /**
-     * Reindex checks by target check category
-     * @param TargetCheckCategory $category
+     * Reindex target's checks
+     * @param Target $target
+     * @throws Exception
      */
-    public static function reindexTargetCategoryChecks(TargetCheckCategory $category) {
-        $controlIds = array();
-        $checkIds = array();
-        $target = $category->target;
-
-        $referenceIds = array();
-        $references = TargetReference::model()->findAllByAttributes(array(
-            "target_id" => $category->target_id
-        ));
-
-        foreach ($references as $reference) {
-            $referenceIds[] = $reference->reference_id;
-        }
-
-        $controls = CheckControl::model()->findAllByAttributes(array(
-            "check_category_id" => $category->check_category_id
-        ));
-
-        foreach ($controls as $control) {
-            $controlIds[] = $control->id;
-        }
-
-        $criteria = new CDbCriteria();
-        $criteria->addInCondition("check_control_id", $controlIds);
-        $criteria->addInCondition("reference_id", $referenceIds);
-        $checks = Check::model()->findAll($criteria);
-
-        $targetChecks = TargetCheck::model()->findAllByAttributes(array("target_id" => $category->target_id));
-
-        foreach ($targetChecks as $check) {
-            $checkIds[] = $check->check_id;
-        }
-
-        // clean target checks
-        $criteria = new CDbCriteria();
-        $criteria->addNotInCondition("check_id", $checkIds);
-        $criteria->addColumnCondition(array(
-            "target_id" => $target->id
-        ));
-        TargetCheck::model()->deleteAll($criteria);
-
+    public static function reindexTargetChecks(Target $target) {
         $admin = null;
 
-        foreach ($category->target->project->projectUsers as $user) {
+        foreach ($target->project->projectUsers as $user) {
             if ($user->admin) {
                 $admin = $user->user_id;
                 break;
@@ -201,96 +166,229 @@ class TargetManager {
 
         $language = Language::model()->findByAttributes(array("default" => true));
 
-        foreach ($checks as $check) {
-            if (in_array($check->id, $checkIds)) {
-                continue;
-            }
+        switch ($target->check_source_type) {
+            case Target::SOURCE_TYPE_CHECK_CATEGORIES:
+                $controlIds = array();
+                $checkIds = array();
+                $categoryIds = array();
+                $targetCheckIds = array();
 
-            $targetCheck = new TargetCheck();
-            $targetCheck->target_id = $category->target_id;
-            $targetCheck->check_id = $check->id;
-            $targetCheck->user_id = $admin;
-            $targetCheck->language_id = $language->id;
-            $targetCheck->status = TargetCheck::STATUS_OPEN;
-            $targetCheck->rating = TargetCheck::RATING_NONE;
-            $targetCheck->save();
+                $referenceIds = array();
+                $references = TargetReference::model()->findAllByAttributes(array(
+                    "target_id" => $target->id
+                ));
+
+                foreach ($references as $reference) {
+                    $referenceIds[] = $reference->reference_id;
+                }
+
+                $targetCategories = TargetCheckCategory::model()->findAllByAttributes(array(
+                    "target_id" => $target->id
+                ));
+
+                foreach ($targetCategories as $tc) {
+                    $categoryIds[] = $tc->check_category_id;
+                }
+
+                $controls = CheckControl::model()->findAllByAttributes(array(
+                    "check_category_id" => $categoryIds
+                ));
+
+                foreach ($controls as $control) {
+                    $controlIds[] = $control->id;
+                }
+
+                $criteria = new CDbCriteria();
+                $criteria->addInCondition("check_control_id", $controlIds);
+                $criteria->addInCondition("reference_id", $referenceIds);
+
+                $checks = Check::model()->findAll($criteria);
+                foreach ($checks as $c) {
+                    $checkIds[] = $c->id;
+                }
+
+                $targetChecks = TargetCheck::model()->findAllByAttributes(array(
+                    "target_id" => $target->id
+                ));
+
+                foreach ($targetChecks as $tc) {
+                    $targetCheckIds[] = $tc->check_id;
+                }
+
+                // clean target checks
+                $criteria = new CDbCriteria();
+                $criteria->addNotInCondition("check_id", $checkIds);
+                $criteria->addColumnCondition(array(
+                    "target_id" => $target->id
+                ));
+                TargetCheck::model()->deleteAll($criteria);
+
+                $checksToAdd = Check::model()->findAllByAttributes(array(
+                    "id" => array_diff($checkIds, $targetCheckIds)
+                ));
+
+                foreach ($checksToAdd as $check) {
+                    $targetCheck = new TargetCheck();
+                    $targetCheck->target_id = $target->id;
+                    $targetCheck->check_id = $check->id;
+                    $targetCheck->user_id = $admin;
+                    $targetCheck->language_id = $language->id;
+                    $targetCheck->status = TargetCheck::STATUS_OPEN;
+                    $targetCheck->rating = TargetCheck::RATING_NONE;
+                    $targetCheck->save();
+                }
+
+                break;
+
+            case Target::SOURCE_TYPE_CHECKLIST_TEMPLATES:
+                $checkIds = array();
+                $targetCheckIds = array();
+                $templateIds = array();
+
+                foreach ($target->checklistTemplates as $template) {
+                    $templateIds[] = $template->checklist_template_id;
+                }
+
+                $criteria = new CDbCriteria();
+                $criteria->addInCondition("t.checklist_template_id", $templateIds);
+
+                $templateChecks = ChecklistTemplateCheck::model()->with(array(
+                    "check" => array(
+                        "alias" => "tc",
+                        "joinType" => "LEFT JOIN",
+                    )
+                ))->findAll($criteria);
+
+                foreach ($templateChecks as $tc) {
+                    $checkIds[] = $tc->check->id;
+                }
+
+                // clean target checks
+                $criteria = new CDbCriteria();
+                $criteria->addNotInCondition("check_id", $checkIds);
+                $criteria->addColumnCondition(array(
+                    "target_id" => $target->id
+                ));
+                TargetCheck::model()->deleteAll($criteria);
+
+                $targetChecks = TargetCheck::model()->findAllByAttributes(array(
+                    "target_id" => $target->id
+                ));
+
+                foreach ($targetChecks as $tc) {
+                    $targetCheckIds[] = $tc->check_id;
+                }
+
+                foreach ($templateChecks as $check) {
+                    if (in_array($check->check->id, $targetCheckIds) && !$target->canAddCheck($check->check->id)) {
+                        continue;
+                    }
+
+                    $targetCheck = new TargetCheck();
+                    $targetCheck->target_id = $target->id;
+                    $targetCheck->check_id = $check->check->id;
+                    $targetCheck->user_id = $admin;
+                    $targetCheck->language_id = $language->id;
+                    $targetCheck->status = TargetCheck::STATUS_OPEN;
+                    $targetCheck->rating = TargetCheck::RATING_NONE;
+                    $targetCheck->save();
+                }
+
+                break;
+
+            default:
+                throw new Exception("Unknown check source type.");
         }
     }
 
     /**
-     * Reindex checks by target checklist template
-     * @param TargetChecklistTemplate $template
+     * Returns target chain status
+     * @param $id
+     * @return mixed|null
+     * @throws Exception
      */
-    public static function reindexTargetTemplateChecks(TargetChecklistTemplate $template) {
-        $checks = array();
-        $checkIds = array();
-        $target = $template->target;
+    public static function getChainStatus($id) {
+        $target = Target::model()->findByPk($id);
 
-        $criteria = new CDbCriteria();
-        $criteria->addColumnCondition(array(
-            "t.checklist_template_id" => $template->checklist_template_id,
-        ));
+        if (!$target) {
+            throw new Exception("Target not found.");
+        }
 
-        $templateChecks = ChecklistTemplateCheck::model()->with(array(
-            "check" => array(
-                "alias" => "tc",
-                "joinType" => "LEFT JOIN",
+        $key = JobManager::buildId(
+            CheckChainAutomationJob::CHAIN_STATUS_TEMPLATE,
+            array(
+                "target_id" => $target->id
             )
-        ))->findAll($criteria);
+        );
+        $status = JobManager::getKeyValue($key);
 
-        foreach ($templateChecks as $tc) {
-            $checks[] = $tc->check;
-
-            $targetCheck = TargetCheck::model()->findByAttributes(array(
-                "target_id" => $target->id,
-                "check_id"  => $tc->check_id,
-            ));
-
-            if ($targetCheck) {
-                $checkIds[] = $targetCheck->check_id;
-            }
+        if (!in_array($status, array(Target::CHAIN_STATUS_STOPPED, Target::CHAIN_STATUS_IDLE, Target::CHAIN_STATUS_ACTIVE, Target::CHAIN_STATUS_BREAKED))) {
+            return null;
         }
 
-        // clean target checks
-        $criteria = new CDbCriteria();
-        $criteria->addNotInCondition("check_id", $checkIds);
-        $criteria->addColumnCondition(array(
-            "target_id" => $target->id
+        return $status;
+    }
+
+    /**
+     * Returns last activated cell in target check chain
+     * (when you resuming stopped chain)
+     * @param $id
+     * @return mixed|null
+     * @throws Exception
+     */
+    public static function getChainLastCellId($id) {
+        $target = Target::model()->findByPk($id);
+
+        if (!$target) {
+            throw new Exception("Target not found.");
+        }
+
+        $key = JobManager::buildId(
+            CheckChainAutomationJob::CHAIN_CELL_ID_TEMPLATE,
+            array(
+                "target_id" => $target->id
+            )
+        );
+        $activeCellId = JobManager::getKeyValue($key);
+
+        if (!$activeCellId) {
+            return null;
+        }
+
+        return $activeCellId;
+    }
+
+    /**
+     * Returns chain's messages
+     * @param $id
+     * @return array
+     * @throws Exception
+     */
+    public static function getChainMessages() {
+        $mask = JobManager::buildId(CheckChainAutomationJob::ID_TEMPLATE, array(
+            "operation" => "*",
+            "target_id" => "[0-9]*"
         ));
-        TargetCheck::model()->deleteAll($criteria);
+        $mask .= '.message';
+        $keys = explode(" ", Resque::redis()->keys($mask));
+        $pattern = JobManager::buildId(CheckChainAutomationJob::ID_TEMPLATE, array(
+            "operation" => sprintf("(%s|%s)", CheckChainAutomationJob::OPERATION_START, CheckChainAutomationJob::OPERATION_STOP),
+            "target_id" => "(\d+)"
+        ));
+        $pattern = '/' . $pattern . '.message/';
+        $messages = array();
 
-        $admin = null;
+        foreach ($keys as $key) {
+            $key = str_replace("resque:", "", $key);
+            preg_match_all($pattern, $key, $matches, PREG_PATTERN_ORDER);
 
-        foreach ($template->target->project->projectUsers as $user) {
-            if ($user->admin) {
-                $admin = $user->user_id;
-                break;
-            }
-        }
-
-        if ($admin == null) {
-            $admin = User::model()->findByAttributes(array("role" => User::ROLE_ADMIN));
-
-            if ($admin) {
-                $admin = $admin->id;
-            }
-        }
-
-        $language = Language::model()->findByAttributes(array("default" => true));
-
-        foreach ($checks as $check) {
-            if (in_array($check->id, $checkIds) && !$target->canAddCheck($check->id)) {
-                continue;
+            if (!empty($matches[0])) {
+                $messages[] = Resque::redis()->get($key);
             }
 
-            $targetCheck = new TargetCheck();
-            $targetCheck->target_id = $target->id;
-            $targetCheck->check_id = $check->id;
-            $targetCheck->user_id = $admin;
-            $targetCheck->language_id = $language->id;
-            $targetCheck->status = TargetCheck::STATUS_OPEN;
-            $targetCheck->rating = TargetCheck::RATING_NONE;
-            $targetCheck->save();
+            JobManager::delKey($key);
         }
+
+        return $messages;
     }
 }
