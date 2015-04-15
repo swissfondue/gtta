@@ -1255,45 +1255,6 @@ function User()
         };
 
         /**
-         * Set category as advanced.
-         */
-        this.setAdvanced = function (url, advanced) {
-            data = {};
-
-            data['YII_CSRF_TOKEN'] = system.csrf;
-            data['TargetCheckCategoryEditForm[advanced]'] = advanced;
-
-            $.ajax({
-                dataType : 'json',
-                url      : url,
-                timeout  : system.ajaxTimeout,
-                type     : 'POST',
-                data     : data,
-
-                success : function (data, textStatus) {
-                    $('.loader-image').hide();
-
-                    if (data.status == 'error')
-                    {
-                        system.addAlert('error', data.errorText);
-                        return;
-                    }
-
-                    location.reload();
-                },
-
-                error : function(jqXHR, textStatus, e) {
-                    $('.loader-image').hide();
-                    system.addAlert('error', system.translate('Request failed, please try again.'));
-                },
-
-                beforeSend : function (jqXHR, settings) {
-                    $('.loader-image').show();
-                }
-            });
-        };
-
-        /**
          * Initialize attachments form.
          */
         this.initTargetCheckAttachmentUploadForms = function (id) {

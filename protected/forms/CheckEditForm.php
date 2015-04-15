@@ -51,11 +51,6 @@ class CheckEditForm extends LocalizedFormModel
     public $port;
 
     /**
-     * @var boolean advanced.
-     */
-    public $advanced;
-
-    /**
      * @var boolean automated.
      */
     public $automated;
@@ -84,7 +79,7 @@ class CheckEditForm extends LocalizedFormModel
 			array( 'name, referenceId, controlId', 'required' ),
             array( 'name, protocol, referenceCode, referenceUrl', 'length', 'max' => 1000 ),
             array( 'port', 'numerical', 'integerOnly' => true, 'min' => 0, 'max' => 1000 ),
-            array( 'advanced, automated, multipleSolutions', 'boolean' ),
+            array( 'automated, multipleSolutions', 'boolean' ),
             array( 'localizedItems, backgroundInfo, hints, question', 'safe' ),
             array( 'referenceUrl', 'url', 'defaultScheme' => 'http' ),
             array( 'referenceId, effort', 'numerical', 'integerOnly' => true ),
@@ -104,7 +99,6 @@ class CheckEditForm extends LocalizedFormModel
             'backgroundInfo' => Yii::t('app', 'Background Info'),
             'hints     '     => Yii::t('app', 'Hints'),
             'question'       => Yii::t('app', 'Question'),
-            'advanced'       => Yii::t('app', 'Advanced'),
             'automated'      => Yii::t('app', 'Automated'),
             'protocol'       => Yii::t('app', 'Protocol'),
             'port'           => Yii::t('app', 'Port'),

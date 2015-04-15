@@ -30,7 +30,6 @@ return array (
   'Additional Data' => '',
   'Address' => '',
   'Admin' => '',
-  'Advanced' => '',
   'All Rights Reserved' => '',
   'All checks scheduled for sharing.' => '',
   'Allocated' => '',

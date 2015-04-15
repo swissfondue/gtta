@@ -1017,7 +1017,6 @@ class ProjectController extends Controller {
                     $targetCategory = new TargetCheckCategory();
                     $targetCategory->target_id = $target->id;
                     $targetCategory->check_category_id = $category;
-                    $targetCategory->advanced = true;
                     $targetCategory->save();
                 }
 
@@ -1087,7 +1086,6 @@ class ProjectController extends Controller {
                         $cat->target_id              = $target->id;
                         $cat->check_category_id      = $category->id;
                         $cat->checklist_template     = true;
-                        $cat->advanced               = true;
                         $cat->save();
                     }
                 }
@@ -1753,10 +1751,6 @@ class ProjectController extends Controller {
             }
 
             $criteria->order = "t.sort_order ASC, tc.id ASC";
-
-            if (!$category->advanced) {
-                $criteria->addCondition("t.advanced = FALSE");
-            }
 
             $checks = Check::model()->with(array(
                 "l10n" => array(
@@ -2592,7 +2586,6 @@ class ProjectController extends Controller {
                 $check->reference_id = $reference->id;
                 $check->reference_code = "CHECK-" . $customCheck->reference;
                 $check->reference_url = $reference->url;
-                $check->advanced = false;
                 $check->automated = false;
                 $check->multiple_solutions = false;
                 $check->status = Check::STATUS_INSTALLED;
@@ -2697,75 +2690,6 @@ class ProjectController extends Controller {
                 $project->save();
             }
         } catch (Exception $e) {
-            $response->setError($e->getMessage());
-        }
-
-        echo $response->serialize();
-    }
-
-    /**
-     * Save check category.
-     */
-    public function actionSaveCategory($id, $target, $category)
-    {
-        $response = new AjaxResponse();
-
-        try
-        {
-            $id       = (int) $id;
-            $target   = (int) $target;
-            $category = (int) $category;
-
-            $project = Project::model()->findByPk($id);
-
-            if (!$project)
-                throw new CHttpException(404, Yii::t('app', 'Project not found.'));
-
-            if (!$project->checkPermission())
-                throw new CHttpException(403, Yii::t('app', 'Access denied.'));
-
-            $target = Target::model()->findByAttributes(array(
-                'id'         => $target,
-                'project_id' => $project->id
-            ));
-
-            if (!$target)
-                throw new CHttpException(404, Yii::t('app', 'Target not found.'));
-
-            $category = TargetCheckCategory::model()->with('category')->findByAttributes(array(
-                'target_id'         => $target->id,
-                'check_category_id' => $category
-            ));
-
-            if (!$category)
-                throw new CHttpException(404, Yii::t('app', 'Category not found.'));
-
-            $model = new TargetCheckCategoryEditForm();
-            $model->attributes = $_POST['TargetCheckCategoryEditForm'];
-
-            if (!$model->validate())
-            {
-                $errorText = '';
-
-                foreach ($model->getErrors() as $error)
-                {
-                    $errorText = $error[0];
-                    break;
-                }
-
-                throw new Exception($errorText);
-            }
-
-            $category->advanced = $model->advanced;
-            $category->save();
-
-            StatsJob::enqueue(array(
-                "category_id" => $category->target_id,
-                "target_id" => $category->check_category_id,
-            ));
-        }
-        catch (Exception $e)
-        {
             $response->setError($e->getMessage());
         }
 

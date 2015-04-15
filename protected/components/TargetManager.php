@@ -81,10 +81,6 @@ class TargetManager {
             "t.target_id" => $target->id
         ));
 
-        if (!$category->advanced) {
-            $criteria->addCondition("tc.advanced = FALSE");
-        }
-
         $checkCount += TargetCheck::model()->with(array(
             "check" => array(
                 "alias" => "tc",
@@ -97,10 +93,6 @@ class TargetManager {
 
         if ($target->check_source_type == Target::SOURCE_TYPE_CHECK_CATEGORIES) {
             $criteria->addInCondition("reference_id", $referenceIds);
-        }
-
-        if (!$category->advanced) {
-            $criteria->addCondition("t.advanced = FALSE");
         }
 
         $checks = Check::model()->findAll($criteria);
@@ -160,7 +152,6 @@ class TargetManager {
         foreach ($target->project->projectUsers as $user) {
             if ($user->admin) {
                 $admin = $user->user_id;
-
                 break;
             }
         }
@@ -212,7 +203,6 @@ class TargetManager {
                 $criteria->addInCondition("reference_id", $referenceIds);
 
                 $checks = Check::model()->findAll($criteria);
-
                 foreach ($checks as $c) {
                     $checkIds[] = $c->id;
                 }

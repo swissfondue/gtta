@@ -1161,7 +1161,7 @@ function System() {
          * Calculate effort.
          */
         this._calculateEffort = function () {
-            var effort, checks, category, check, advanced, targets, references;
+            var effort, checks, category, check, targets, references;
 
             category   = $('#EffortEstimateForm_categoryId').val();
             targets    = $('#EffortEstimateForm_targets').val();
@@ -1170,8 +1170,6 @@ function System() {
                     return parseInt($(this).val());
                 }
             ).get();
-
-            advanced = $('#EffortEstimateForm_advanced').is(':checked');
 
             checks = 0;
             effort = 0;
@@ -1187,9 +1185,6 @@ function System() {
 
                         if ($.inArray(check.reference, references) != -1)
                         {
-                            if (!advanced && check.advanced)
-                                continue;
-
                             effort += check.effort;
                             checks++;
                         }
@@ -1308,7 +1303,6 @@ function System() {
 
             // refresh the form
             $('#EffortEstimateForm_categoryId').val(0);
-            $('#EffortEstimateForm_advanced').prop('checked', true);
             $('input[name="EffortEstimateForm[referenceIds][]"]').prop('checked', true);
             $('#EffortEstimateForm_targets').val(1);
 
