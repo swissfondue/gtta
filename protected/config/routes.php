@@ -59,7 +59,6 @@ return array(
     "project/<id:\d+>/target/<target:\d+>/chain/control" => "project/controlchain",
     "project/<id:\d+>/target/<target:\d+>/chain/messages" => "project/chainmessages",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>" => "project/checks",
-    "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/save" => "project/savecategory",
     "project/<id:\d+>/target/<target:\d+>/category/control" => "project/controlcategory",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/control/<control:\d+>" => "project/controlchecklist",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/check/<check:\d+>" => "project/check",
@@ -161,10 +160,10 @@ return array(
     "checklist-template/control"                                       => "checklisttemplate/controlcategory",
 
     // relation templates
-    "relationtemplates/<page:\d+>"   => "relationtemplate/index",
-    "relationtemplates"              => "relationtemplate/index",
-    "relationtemplate/<id:\d+>/edit" => "relationtemplate/edit",
-    "relationtemplate/control"       => "relationtemplate/control",
+    "relation-templates/<page:\d+>"   => "relationtemplate/index",
+    "relation-templates"              => "relationtemplate/index",
+    "relation-template/<id:\d+>/edit" => "relationtemplate/edit",
+    "relation-template/control"       => "relationtemplate/control",
 
     // checklist templates
     "checklist-template/<id:\d+>/template/<template:\d+>/<page:\d+>"   => "checklisttemplate/viewtemplate",

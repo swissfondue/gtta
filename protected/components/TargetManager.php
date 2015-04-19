@@ -81,10 +81,6 @@ class TargetManager {
             "t.target_id" => $target->id
         ));
 
-        if (!$category->advanced) {
-            $criteria->addCondition("tc.advanced = FALSE");
-        }
-
         $checkCount += TargetCheck::model()->with(array(
             "check" => array(
                 "alias" => "tc",
@@ -97,10 +93,6 @@ class TargetManager {
 
         if ($target->check_source_type == Target::SOURCE_TYPE_CHECK_CATEGORIES) {
             $criteria->addInCondition("reference_id", $referenceIds);
-        }
-
-        if (!$category->advanced) {
-            $criteria->addCondition("t.advanced = FALSE");
         }
 
         $checks = Check::model()->findAll($criteria);
@@ -160,7 +152,6 @@ class TargetManager {
         foreach ($target->project->projectUsers as $user) {
             if ($user->admin) {
                 $admin = $user->user_id;
-
                 break;
             }
         }
@@ -212,7 +203,6 @@ class TargetManager {
                 $criteria->addInCondition("reference_id", $referenceIds);
 
                 $checks = Check::model()->findAll($criteria);
-
                 foreach ($checks as $c) {
                     $checkIds[] = $c->id;
                 }
@@ -309,69 +299,6 @@ class TargetManager {
             default:
                 throw new Exception("Unknown check source type.");
         }
-    }
-
-    /**
-     * Check relation's checks and target's checks matching
-     * @param Target $target
-     * @param $relations
-     * @return bool
-     * @throws Exception
-     */
-    public static function validateRelations($data, Target $target=null) {
-        try {
-            $relations = new SimpleXMLElement($data, LIBXML_NOERROR);
-        } catch (Exception $e) {
-            throw new Exception("Relations is not valid.");
-        }
-
-        $checkNodes = $relations->xpath('//*[@type="check"]');
-        $startCheckId = false;
-
-        $checkIds = array();
-
-        foreach ($checkNodes as $node) {
-            $attributes = $node->attributes();
-            $checkId = (int) $attributes->check_id;
-
-            if (!$checkId) {
-                throw new Exception("There are blocks with no check tied.");
-            }
-
-            $checkIds[] = $checkId;
-
-            if ((int) $attributes->start_check == 1) {
-                $startCheckId = $attributes->id;
-            }
-        }
-
-        if (!$startCheckId) {
-            throw new Exception("Start check is not defined.");
-        }
-
-        if ($target) {
-            $criteria = new CDbCriteria();
-            $criteria->addInCondition("check_id", $checkIds);
-            $criteria->addColumnCondition(array(
-                "target_id" => $target->id
-            ));
-
-            $targetCheckCount = TargetCheck::model()->count($criteria);
-
-            if ($targetCheckCount < count($checkIds)) {
-                throw new Exception("Not all relation checks attached to target.");
-            }
-        }
-
-        // Check if graph has more than one connection group
-        $cellCount = count($relations->xpath('//*[@type="check" or @type="filter"]'));
-        $startCheckChilds = RelationManager::getCellChildrenCount($relations, $startCheckId);
-
-        if ($cellCount > $startCheckChilds + 1) {
-            throw new Exception("Template has more than one connection group.");
-        }
-
-        return true;
     }
 
     /**

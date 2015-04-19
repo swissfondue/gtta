@@ -432,9 +432,6 @@ class AppController extends Controller {
                             $criteria->addInCondition('t.check_control_id', $controlIds);
                             $criteria->together = true;
 
-                            if (!$category->advanced)
-                                $criteria->addCondition('t.advanced = FALSE');
-
                             $checks = Check::model()->with(array(
                                 'l10n' => array(
                                     'joinType' => 'LEFT JOIN',

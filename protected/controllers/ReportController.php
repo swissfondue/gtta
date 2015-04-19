@@ -1548,10 +1548,6 @@ class ReportController extends Controller {
 
                     $criteria->together = true;
 
-                    if (!$category->advanced) {
-                        $criteria->addCondition('t.advanced = FALSE');
-                    }
-
                     $checks = Check::model()->with(array(
                         "l10n" => array(
                             "joinType" => "LEFT JOIN",
@@ -2995,10 +2991,6 @@ class ReportController extends Controller {
                     $criteria->addInCondition("reference_id", $referenceIds);
                     $criteria->addInCondition("check_control_id", $controlIds);
 
-                    if (!$category->advanced) {
-                        $criteria->addCondition("advanced = FALSE");
-                    }
-
                     $checks = Check::model()->with(array(
                         "targetChecks" => array(
                             "alias" => "tcs",
@@ -3326,10 +3318,6 @@ class ReportController extends Controller {
                     $criteria->addColumnCondition(array(
                         't.check_control_id' => $control->id
                     ));
-
-                    if (!$category->advanced) {
-                        $criteria->addCondition('t.advanced = FALSE');
-                    }
 
                     $checks = Check::model()->with(array(
                         "targetChecks" => array(
@@ -3694,10 +3682,6 @@ class ReportController extends Controller {
                 $criteria->addInCondition('t.reference_id', $referenceIds);
                 $criteria->addInCondition('t.check_control_id', $controlIds);
                 $criteria->together = true;
-
-                if (!$category->advanced) {
-                    $criteria->addCondition('t.advanced = FALSE');
-                }
 
                 $checks = Check::model()->with(array(
                     'l10n' => array(
@@ -4157,7 +4141,6 @@ class ReportController extends Controller {
                 if ($check->control->check_category_id == $category->id)
                     $checkCategory['checks'][] = array(
                         'effort'    => $check->effort,
-                        'advanced'  => $check->advanced,
                         'reference' => $check->reference_id
                     );
 
@@ -4259,12 +4242,7 @@ class ReportController extends Controller {
                     $criteria->addColumnCondition(array(
                         't.check_control_id' => $control->id
                     ));
-
                     $criteria->together = true;
-
-                    if (!$category->advanced) {
-                        $criteria->addCondition('t.advanced = FALSE');
-                    }
 
                     $checks = Check::model()->with(array(
                         "l10n" => array(

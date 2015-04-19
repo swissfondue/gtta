@@ -152,13 +152,6 @@
         </div>
 
         <div class="control-group">
-            <label class="control-label" for="CheckEditForm_advanced"><?php echo Yii::t('app', 'Advanced'); ?></label>
-            <div class="controls">
-                <input type="checkbox" id="CheckEditForm_advanced" name="CheckEditForm[advanced]" value="1" <?php if ($model->advanced) echo 'checked="checked"'; ?>>
-            </div>
-        </div>
-
-        <div class="control-group">
             <label class="control-label" for="CheckEditForm_multipleSolutions"><?php echo Yii::t('app', 'Multiple Solutions'); ?></label>
             <div class="controls">
                 <input type="checkbox" id="CheckEditForm_multipleSolutions" name="CheckEditForm[multipleSolutions]" value="1" <?php if ($model->multipleSolutions) echo 'checked="checked"'; ?>>

@@ -7,13 +7,13 @@ class RelationtemplateController extends Controller {
     /**
      * @return array action filters
      */
-    public function filters()
-    {
+    public function filters() {
         return array(
-            'https',
-            'checkAuth  + edit, controltemplate',
-            'ajaxOnly   + controltemplate',
-            'postOnly   + controltemplate'
+            "https",
+            "checkAuth",
+            "checkAdmin",
+            "ajaxOnly + control",
+            "postOnly + control"
         );
     }
 
@@ -73,19 +73,20 @@ class RelationtemplateController extends Controller {
         $id        = (int) $id;
         $newRecord = false;
 
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
         if ($id) {
-            $language = Language::model()->findByAttributes(array(
-                'code' => Yii::app()->language
-            ));
-
-            if ($language)
-                $language = $language->id;
-
             $template = RelationTemplate::model()->with(array(
                 'l10n' => array(
                     'joinType' => 'LEFT JOIN',
                     'on'       => 'language_id = :language_id',
-                    'params'   => array( 'language_id' => $language )
+                    'params'   => array('language_id' => $language)
                 )
             ))->findByPk($id);
         } else {
@@ -105,8 +106,9 @@ class RelationtemplateController extends Controller {
                 'relation_template_id' => $template->id
             ));
 
-            foreach ($templateL10n as $cl)
+            foreach ($templateL10n as $cl) {
                 $model->localizedItems[$cl->language_id]['name'] = $cl->name;
+            }
         }
 
         // collect user input data
@@ -117,7 +119,7 @@ class RelationtemplateController extends Controller {
 
             if ($model->validate()) {
                 try {
-                    TargetManager::validateRelations($model->relations);
+                    RelationTemplateManager::validateRelations($model->relations);
                     $success = true;
                 } catch (Exception $e) {
                     $model->addError("relations", $e->getMessage());
@@ -154,10 +156,10 @@ class RelationtemplateController extends Controller {
                 $template->refresh();
 
                 if ($newRecord) {
-                    $this->redirect(array( 'relationtemplate/edit', 'id' => $template->id ));
+                    $this->redirect(array('relationtemplate/edit', 'id' => $template->id));
                 }
 
-                // refresh the category after saving
+                // refresh the template after saving
                 $template = RelationTemplate::model()->with(array(
                     "l10n" => array(
                         "joinType" => "LEFT JOIN",
@@ -198,17 +200,14 @@ class RelationtemplateController extends Controller {
     public function actionControl() {
         $response = new AjaxResponse();
 
-        try
-        {
+        try {
             $model = new EntryControlForm();
             $model->attributes = $_POST['EntryControlForm'];
 
-            if (!$model->validate())
-            {
+            if (!$model->validate()) {
                 $errorText = '';
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -219,11 +218,11 @@ class RelationtemplateController extends Controller {
             $id       = $model->id;
             $template = RelationTemplate::model()->findByPk($id);
 
-            if ($template === null)
-                throw new CHttpException(404, Yii::t('app', 'Category not found.'));
+            if ($template === null) {
+                throw new CHttpException(404, Yii::t('app', 'Template not found.'));
+            }
 
-            switch ($model->operation)
-            {
+            switch ($model->operation) {
                 case 'delete':
                     $template->delete();
                     break;

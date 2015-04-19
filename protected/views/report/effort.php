@@ -56,13 +56,6 @@
                     </div>
                 </div>
 
-                <div class="control-group">
-                    <label class="control-label" for="EffortEstimateForm_advanced"><?php echo Yii::t('app', 'Advanced'); ?></label>
-                    <div class="controls">
-                        <input type="checkbox" id="EffortEstimateForm_advanced" name="EffortEstimateForm[advanced]" value="1" checked onchange="system.report.effortFormChange(this);">
-                    </div>
-                </div>
-
                 <?php if (count($references)): ?>
                     <div class="control-group">
                         <label class="control-label"><?php echo Yii::t('app', 'References'); ?></label>
