@@ -1351,7 +1351,7 @@ class ProjectController extends Controller {
         }
 
         $categories = CheckCategory::model()->findAll();
-        $filters = RelationTemplateManager::$filters;
+        $filters = RelationManager::$filters;
 
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
         $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));

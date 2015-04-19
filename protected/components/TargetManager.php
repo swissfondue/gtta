@@ -365,7 +365,7 @@ class TargetManager {
 
         // Check if graph has more than one connection group
         $cellCount = count($relations->xpath('//*[@type="check" or @type="filter"]'));
-        $startCheckChilds = RelationTemplateManager::getCellChildrenCount($relations, $startCheckId);
+        $startCheckChilds = RelationManager::getCellChildrenCount($relations, $startCheckId);
 
         if ($cellCount > $startCheckChilds + 1) {
             throw new Exception("Template has more than one connection group.");

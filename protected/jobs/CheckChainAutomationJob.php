@@ -36,13 +36,13 @@ class CheckChainAutomationJob extends BackgroundJob {
                 $resuming = true;
             }
 
-            $cell = RelationTemplateManager::getCell($relations, $cellId);
+            $cell = RelationManager::getCell($relations, $cellId);
 
             if (!$cell) {
                 throw new Exception("No graph cell with id: $cellId.");
             }
         } else {
-            $cell = RelationTemplateManager::getStartCheck($relations);
+            $cell = RelationManager::getStartCheck($relations);
 
             if (!$cell) {
                 throw new Exception("Start check is not defined.");
@@ -56,7 +56,7 @@ class CheckChainAutomationJob extends BackgroundJob {
         $stopperCell = false;
 
         switch ($cellType) {
-            case RelationTemplateManager::MX_GRAPH_CELL_TYPE_CHECK:
+            case RelationManager::MX_GRAPH_CELL_TYPE_CHECK:
                 $checkId = (int) $attributes->check_id;
                 $stopperCell = (int) $attributes->stopped;
                 $check = TargetCheck::model()->findByAttributes(array(
@@ -97,10 +97,10 @@ class CheckChainAutomationJob extends BackgroundJob {
 
                 break;
 
-            case RelationTemplateManager::MX_GRAPH_CELL_TYPE_FILTER:
+            case RelationManager::MX_GRAPH_CELL_TYPE_FILTER:
                 $filterName = (string) $attributes->filter_name;
                 $filterValues = (string) $attributes->filter_values;
-                $cellOutput = RelationTemplateManager::applyFilter($filterName, $filterValues, $inputTargets);
+                $cellOutput = RelationManager::applyFilter($filterName, $filterValues, $inputTargets);
 
                 break;
 
@@ -119,7 +119,7 @@ class CheckChainAutomationJob extends BackgroundJob {
 
             JobManager::setKeyValue($statusKey, Target::CHAIN_STATUS_STOPPED);
         } else {
-            $edges = RelationTemplateManager::getCellConnections($relations, $cellId);
+            $edges = RelationManager::getCellConnections($relations, $cellId);
 
             foreach ($edges as $edge) {
                 $targetCellId = (int) $edge->attributes()->target;
@@ -157,7 +157,7 @@ class CheckChainAutomationJob extends BackgroundJob {
             throw new Exception("Invalid target relations.");
         }
 
-        $checkIds = RelationTemplateManager::getCheckIds($relations);
+        $checkIds = RelationManager::getCheckIds($relations);
 
         $targetChecks = TargetCheck::model()->findAllByAttributes(array(
             "check_id" => $checkIds,

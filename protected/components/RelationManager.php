@@ -1,6 +1,6 @@
 <?php
 
-class RelationTemplateManager {
+class RelationManager {
     /**
      * Chart's cell types
      */
@@ -93,7 +93,7 @@ class RelationTemplateManager {
         }
 
         $n = $count;
-        $edges = RelationTemplateManager::getCellConnections($node, $id);
+        $edges = RelationManager::getCellConnections($node, $id);
 
         foreach ($edges as $edge) {
             $targetId = (int) $edge->attributes()->target;

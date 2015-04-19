@@ -4,6 +4,7 @@
             <ul class="nav nav-pills">
                 <li><a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
                 <li class="active"><a href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+                <li><a href="<?php echo $this->createUrl('project/editchain', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'Check Chain'); ?></a></li>
             </ul>
         </div>
         <div class="pull-right buttons">
