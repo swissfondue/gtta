@@ -119,7 +119,7 @@ class RelationtemplateController extends Controller {
 
             if ($model->validate()) {
                 try {
-                    RelationTemplateManager::validateRelations($model->relations);
+                    RelationManager::validateRelations($model->relations);
                     $success = true;
                 } catch (Exception $e) {
                     $model->addError("relations", $e->getMessage());

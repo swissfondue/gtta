@@ -1331,7 +1331,7 @@ class ProjectController extends Controller {
 
             if ($model->validate()) {
                 try {
-                    RelationTemplateManager::validateRelations($model->relations, $target);
+                    RelationManager::validateRelations($model->relations, $target);
                 } catch (Exception $e) {
                     $model->addError("relations", $e->getMessage());
                     $success = false;
@@ -1411,7 +1411,7 @@ class ProjectController extends Controller {
                 throw new Exception($errorText);
             }
 
-            RelationTemplateManager::validateRelations($target->relations, $target);
+            RelationManager::validateRelations($target->relations, $target);
 
             switch ($model->operation) {
                 case "start":

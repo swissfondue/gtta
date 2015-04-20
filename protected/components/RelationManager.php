@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Relation manager class
+ */
 class RelationManager {
     /**
      * Chart's cell types
@@ -199,7 +202,7 @@ class RelationManager {
 
         // Check if graph has more than one connection group
         $cellCount = count($relations->xpath('//*[@type="check" or @type="filter"]'));
-        $startCheckChildren = RelationTemplateManager::getCellChildrenCount($relations, $startCheckId);
+        $startCheckChildren = RelationManager::getCellChildrenCount($relations, $startCheckId);
 
         if ($cellCount > $startCheckChildren + 1) {
             throw new Exception("Template has more than one connection group.");
