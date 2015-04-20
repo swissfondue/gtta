@@ -4,11 +4,6 @@
  */
 class TargetCheckReindexJob extends BackgroundJob {
     /**
-     * Job id
-     */
-    const ID_TEMPLATE = "gtta.reindex.category.@category_id@.target.@target_id@";
-
-    /**
      * Run
      */
     public function perform() {
