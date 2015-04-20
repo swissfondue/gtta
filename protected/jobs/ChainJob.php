@@ -1,13 +1,13 @@
 <?php
 /**
- * Class CheckChainAutomationJob
+ * Class ChainJob
  */
-class CheckChainAutomationJob extends BackgroundJob {
+class ChainJob extends BackgroundJob {
     const OPERATION_START = "start";
     const OPERATION_STOP  = "stop";
 
     /**
-     * CheckChainAutomationJob id template
+     * ChainJob id template
      */
     const ID_TEMPLATE = "gtta.target.@target_id@.chain.@operation@";
     const CHAIN_STATUS_TEMPLATE = "gtta.target.@target_id@.chain.status";
@@ -199,17 +199,17 @@ class CheckChainAutomationJob extends BackgroundJob {
                 JobManager::setKeyValue($statusKey, Target::CHAIN_STATUS_IDLE);
                 JobManager::delKey($activeCellKey);
 
-                $message = sprintf("Check chain of target '%s' was completed.", $target->host);
+                $message = sprintf("Check chain of target '%s' completed.", $target->host);
 
                 break;
 
             case Target::CHAIN_STATUS_STOPPED:
-                $message = sprintf("Check chain of target '%s' was paused.", $target->host);
+                $message = sprintf("Check chain of target '%s' paused.", $target->host);
 
                 break;
 
             case Target::CHAIN_STATUS_BREAKED:
-                $message = sprintf("Check chain of target '%s' was stopped by user.", $target->host);
+                $message = sprintf("Check chain of target '%s' stopped by user.", $target->host);
 
                 break;
             default:

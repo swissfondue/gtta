@@ -52,7 +52,7 @@
                         ?>
                     <?php elseif ($tc->isRunning): ?>
                         <?php
-                            $seconds = $tc->started;
+                            $seconds = TargetCheckManager::getStartTime($tc->id);
 
                             if ($seconds) {
                                 $seconds = time() - strtotime($seconds);

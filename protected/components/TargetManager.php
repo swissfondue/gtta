@@ -315,7 +315,7 @@ class TargetManager {
         }
 
         $key = JobManager::buildId(
-            CheckChainAutomationJob::CHAIN_STATUS_TEMPLATE,
+            ChainJob::CHAIN_STATUS_TEMPLATE,
             array(
                 "target_id" => $target->id
             )
@@ -344,7 +344,7 @@ class TargetManager {
         }
 
         $key = JobManager::buildId(
-            CheckChainAutomationJob::CHAIN_CELL_ID_TEMPLATE,
+            ChainJob::CHAIN_CELL_ID_TEMPLATE,
             array(
                 "target_id" => $target->id
             )
@@ -366,14 +366,14 @@ class TargetManager {
      */
     public static function getChainMessages() {
         // Redis doesn't support regexps, use glob
-        $mask = JobManager::buildId(CheckChainAutomationJob::ID_TEMPLATE, array(
+        $mask = JobManager::buildId(ChainJob::ID_TEMPLATE, array(
             "operation" => "*",
             "target_id" => "[0-9]*"
         ));
         $mask .= '.message';
         $keys = explode(" ", Resque::redis()->keys($mask));
-        $pattern = JobManager::buildId(CheckChainAutomationJob::ID_TEMPLATE, array(
-            "operation" => sprintf("(%s|%s)", CheckChainAutomationJob::OPERATION_START, CheckChainAutomationJob::OPERATION_STOP),
+        $pattern = JobManager::buildId(ChainJob::ID_TEMPLATE, array(
+            "operation" => sprintf("(%s|%s)", ChainJob::OPERATION_START, ChainJob::OPERATION_STOP),
             "target_id" => "(\d+)"
         ));
         $pattern = '/' . $pattern . '.message/';

@@ -1428,9 +1428,9 @@ class ProjectController extends Controller {
                         $tc->save();
                     }
 
-                    CheckChainAutomationJob::enqueue(array(
+                    ChainJob::enqueue(array(
                         "target_id" => $target->id,
-                        "operation" => CheckChainAutomationJob::OPERATION_START,
+                        "operation" => ChainJob::OPERATION_START,
                     ));
 
                     break;
@@ -1440,9 +1440,9 @@ class ProjectController extends Controller {
                         throw new CHttpException(403, Yii::t("app", "Access denied."));
                     }
 
-                    CheckChainAutomationJob::enqueue(array(
+                    ChainJob::enqueue(array(
                         "target_id" => $target->id,
-                        "operation" => CheckChainAutomationJob::OPERATION_STOP,
+                        "operation" => ChainJob::OPERATION_STOP,
                     ));
 
                     break;
