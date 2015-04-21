@@ -20,7 +20,7 @@ class Target extends ActiveRecord implements IVariableScopeObject {
     const CHAIN_STATUS_IDLE = 0;
     const CHAIN_STATUS_ACTIVE = 1;
     const CHAIN_STATUS_STOPPED = 2;
-    const CHAIN_STATUS_BREAKED = 3;
+    const CHAIN_STATUS_INTERRUPTED = 3;
 
     const SOURCE_TYPE_CHECK_CATEGORIES = 0;
     const SOURCE_TYPE_CHECKLIST_TEMPLATES = 1;

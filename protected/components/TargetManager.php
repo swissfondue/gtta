@@ -322,7 +322,7 @@ class TargetManager {
         );
         $status = JobManager::getKeyValue($key);
 
-        if (!in_array($status, array(Target::CHAIN_STATUS_STOPPED, Target::CHAIN_STATUS_IDLE, Target::CHAIN_STATUS_ACTIVE, Target::CHAIN_STATUS_BREAKED))) {
+        if (!in_array($status, array(Target::CHAIN_STATUS_STOPPED, Target::CHAIN_STATUS_IDLE, Target::CHAIN_STATUS_ACTIVE, Target::CHAIN_STATUS_INTERRUPTED))) {
             return null;
         }
 

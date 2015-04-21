@@ -149,7 +149,7 @@ class ChainJob extends BackgroundJob {
                 "target_id" => $this->args['target_id']
             )
         );
-        JobManager::setKeyValue($statusKey, Target::CHAIN_STATUS_BREAKED);
+        JobManager::setKeyValue($statusKey, Target::CHAIN_STATUS_INTERRUPTED);
 
         try {
             $relations = new SimpleXMLElement($target->relations, LIBXML_NOERROR);
@@ -208,8 +208,8 @@ class ChainJob extends BackgroundJob {
 
                 break;
 
-            case Target::CHAIN_STATUS_BREAKED:
-                $message = sprintf("Check chain of target '%s' stopped by user.", $target->host);
+            case Target::CHAIN_STATUS_INTERRUPTED:
+                $message = sprintf("Check chain of target '%s' interrupted by user.", $target->host);
 
                 break;
             default:
@@ -241,8 +241,8 @@ class ChainJob extends BackgroundJob {
 
         switch ($status) {
             case Target::CHAIN_STATUS_IDLE:
-            case Target::CHAIN_STATUS_BREAKED:
-                $this->setVar("message", sprintf("Check chain of target '%s' was started.", $target->host));
+            case Target::CHAIN_STATUS_INTERRUPTED:
+                $this->setVar("message", sprintf("Check chain of target '%s' started.", $target->host));
 
                 $statusKey = JobManager::buildId(
                     self::CHAIN_STATUS_TEMPLATE,
@@ -257,7 +257,7 @@ class ChainJob extends BackgroundJob {
                 break;
 
             case Target::CHAIN_STATUS_STOPPED:
-                $this->setVar("message", sprintf("Check chain of target '%s' was continued.", $target->host));
+                $this->setVar("message", sprintf("Check chain of target '%s' continued.", $target->host));
 
                 $statusKey = JobManager::buildId(
                     self::CHAIN_STATUS_TEMPLATE,
