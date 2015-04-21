@@ -76,6 +76,7 @@
 			function (editor, cell)
 			{
 				cell.setAttribute("stopped", "1");
+                admin.mxgraph.updateCheckStyles(cell);
 				admin.relationTemplate.updateRelations();
 			}
 		]]></add>
@@ -83,6 +84,7 @@
 			function (editor, cell)
 			{
 				cell.setAttribute("stopped", "0");
+                admin.mxgraph.updateCheckStyles(cell);
 				admin.relationTemplate.updateRelations();
 			}
 		]]></add>

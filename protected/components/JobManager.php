@@ -11,7 +11,7 @@ class JobManager {
         "AutomationJob",
         "BackupJob",
         "ClearLogJob",
-        "CheckChainAutomationJob",
+        "ChainJob",
         "CommunityInstallJob",
         "CommunityShareJob",
         "EmailJob",

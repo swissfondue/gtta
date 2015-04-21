@@ -20,7 +20,7 @@ class Target extends ActiveRecord implements IVariableScopeObject {
     const CHAIN_STATUS_IDLE = 0;
     const CHAIN_STATUS_ACTIVE = 1;
     const CHAIN_STATUS_STOPPED = 2;
-    const CHAIN_STATUS_BREAKED = 3;
+    const CHAIN_STATUS_INTERRUPTED = 3;
 
     const SOURCE_TYPE_CHECK_CATEGORIES = 0;
     const SOURCE_TYPE_CHECKLIST_TEMPLATES = 1;
@@ -284,9 +284,9 @@ class Target extends ActiveRecord implements IVariableScopeObject {
      * @return bool
      */
     public function getIsChainRunning() {
-        $job = JobManager::buildId(CheckChainAutomationJob::ID_TEMPLATE, array(
+        $job = JobManager::buildId(ChainJob::ID_TEMPLATE, array(
             "target_id" => $this->id,
-            "operation" => CheckChainAutomationJob::OPERATION_START,
+            "operation" => ChainJob::OPERATION_START,
         ));
 
         return JobManager::isRunning($job);

@@ -1,13 +1,13 @@
 <?php
 /**
- * Class CheckChainAutomationJob
+ * Class ChainJob
  */
-class CheckChainAutomationJob extends BackgroundJob {
+class ChainJob extends BackgroundJob {
     const OPERATION_START = "start";
     const OPERATION_STOP  = "stop";
 
     /**
-     * CheckChainAutomationJob id template
+     * ChainJob id template
      */
     const ID_TEMPLATE = "gtta.target.@target_id@.chain.@operation@";
     const CHAIN_STATUS_TEMPLATE = "gtta.target.@target_id@.chain.status";
@@ -36,13 +36,13 @@ class CheckChainAutomationJob extends BackgroundJob {
                 $resuming = true;
             }
 
-            $cell = RelationTemplateManager::getCell($relations, $cellId);
+            $cell = RelationManager::getCell($relations, $cellId);
 
             if (!$cell) {
                 throw new Exception("No graph cell with id: $cellId.");
             }
         } else {
-            $cell = RelationTemplateManager::getStartCheck($relations);
+            $cell = RelationManager::getStartCheck($relations);
 
             if (!$cell) {
                 throw new Exception("Start check is not defined.");
@@ -56,7 +56,7 @@ class CheckChainAutomationJob extends BackgroundJob {
         $stopperCell = false;
 
         switch ($cellType) {
-            case RelationTemplateManager::MX_GRAPH_CELL_TYPE_CHECK:
+            case RelationManager::MX_GRAPH_CELL_TYPE_CHECK:
                 $checkId = (int) $attributes->check_id;
                 $stopperCell = (int) $attributes->stopped;
                 $check = TargetCheck::model()->findByAttributes(array(
@@ -97,10 +97,10 @@ class CheckChainAutomationJob extends BackgroundJob {
 
                 break;
 
-            case RelationTemplateManager::MX_GRAPH_CELL_TYPE_FILTER:
+            case RelationManager::MX_GRAPH_CELL_TYPE_FILTER:
                 $filterName = (string) $attributes->filter_name;
                 $filterValues = (string) $attributes->filter_values;
-                $cellOutput = RelationTemplateManager::applyFilter($filterName, $filterValues, $inputTargets);
+                $cellOutput = RelationManager::applyFilter($filterName, $filterValues, $inputTargets);
 
                 break;
 
@@ -119,7 +119,7 @@ class CheckChainAutomationJob extends BackgroundJob {
 
             JobManager::setKeyValue($statusKey, Target::CHAIN_STATUS_STOPPED);
         } else {
-            $edges = RelationTemplateManager::getCellConnections($relations, $cellId);
+            $edges = RelationManager::getCellConnections($relations, $cellId);
 
             foreach ($edges as $edge) {
                 $targetCellId = (int) $edge->attributes()->target;
@@ -149,7 +149,7 @@ class CheckChainAutomationJob extends BackgroundJob {
                 "target_id" => $this->args['target_id']
             )
         );
-        JobManager::setKeyValue($statusKey, Target::CHAIN_STATUS_BREAKED);
+        JobManager::setKeyValue($statusKey, Target::CHAIN_STATUS_INTERRUPTED);
 
         try {
             $relations = new SimpleXMLElement($target->relations, LIBXML_NOERROR);
@@ -157,7 +157,7 @@ class CheckChainAutomationJob extends BackgroundJob {
             throw new Exception("Invalid target relations.");
         }
 
-        $checkIds = RelationTemplateManager::getCheckIds($relations);
+        $checkIds = RelationManager::getCheckIds($relations);
 
         $targetChecks = TargetCheck::model()->findAllByAttributes(array(
             "check_id" => $checkIds,
@@ -199,17 +199,17 @@ class CheckChainAutomationJob extends BackgroundJob {
                 JobManager::setKeyValue($statusKey, Target::CHAIN_STATUS_IDLE);
                 JobManager::delKey($activeCellKey);
 
-                $message = sprintf("Check chain of target '%s' was completed.", $target->host);
+                $message = sprintf("Check chain of target '%s' completed.", $target->host);
 
                 break;
 
             case Target::CHAIN_STATUS_STOPPED:
-                $message = sprintf("Check chain of target '%s' was paused.", $target->host);
+                $message = sprintf("Check chain of target '%s' paused.", $target->host);
 
                 break;
 
-            case Target::CHAIN_STATUS_BREAKED:
-                $message = sprintf("Check chain of target '%s' was stopped by user.", $target->host);
+            case Target::CHAIN_STATUS_INTERRUPTED:
+                $message = sprintf("Check chain of target '%s' interrupted by user.", $target->host);
 
                 break;
             default:
@@ -241,7 +241,8 @@ class CheckChainAutomationJob extends BackgroundJob {
 
         switch ($status) {
             case Target::CHAIN_STATUS_IDLE:
-                $this->setVar("message", sprintf("Check chain of target '%s' was started.", $target->host));
+            case Target::CHAIN_STATUS_INTERRUPTED:
+                $this->setVar("message", sprintf("Check chain of target '%s' started.", $target->host));
 
                 $statusKey = JobManager::buildId(
                     self::CHAIN_STATUS_TEMPLATE,
@@ -256,7 +257,7 @@ class CheckChainAutomationJob extends BackgroundJob {
                 break;
 
             case Target::CHAIN_STATUS_STOPPED:
-                $this->setVar("message", sprintf("Check chain of target '%s' was continued.", $target->host));
+                $this->setVar("message", sprintf("Check chain of target '%s' continued.", $target->host));
 
                 $statusKey = JobManager::buildId(
                     self::CHAIN_STATUS_TEMPLATE,
@@ -271,6 +272,7 @@ class CheckChainAutomationJob extends BackgroundJob {
                 $this->_startChain($target, $cellId);
 
                 break;
+
             case Target::CHAIN_STATUS_ACTIVE:
                 throw new Exception("Permission denied.");
 

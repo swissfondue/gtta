@@ -17,7 +17,7 @@ return array(
 		"application.models.*",
 		"application.components.*",
         "application.components.formats.*",
-        "application.components.processors.*",
+        "application.components.filters.*",
         "application.components.reports.*",
         "application.components.reports.docx.*",
         "application.jobs.*",
@@ -66,7 +66,7 @@ return array(
                 array(
                     "class"   => "CFileLogRoute",
                     "levels"  => "error",
-                    "categories" => "bg.CheckChainAutomationJob",
+                    "categories" => "bg.ChainJob",
                     "logPath" => $mainConfig["params"]["bgLogsPath"],
                     "logFile" => "checkchainautomation.log",
                     'maxLogFiles' => 1,

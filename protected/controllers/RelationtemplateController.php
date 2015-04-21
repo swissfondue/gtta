@@ -119,7 +119,7 @@ class RelationtemplateController extends Controller {
 
             if ($model->validate()) {
                 try {
-                    RelationTemplateManager::validateRelations($model->relations);
+                    RelationManager::validateRelations($model->relations);
                     $success = true;
                 } catch (Exception $e) {
                     $model->addError("relations", $e->getMessage());
@@ -173,7 +173,7 @@ class RelationtemplateController extends Controller {
         }
 
         $categories = CheckCategory::model()->findAll();
-        $filters = RelationTemplateManager::$filters;
+        $filters = RelationManager::$filters;
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Relation Templates'), $this->createUrl('relationtemplate/index'));
 

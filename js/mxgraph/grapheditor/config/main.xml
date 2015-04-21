@@ -20,7 +20,7 @@
 	</ui>
 	<Array as="templates">
 		<add as="check">
-			<Rect label="New Check" type="check" start_check="0" stopped="0" check_id="">
+			<Rect label="New Check" type="check" start_check="0" stopped="0" category_id="" control_id="" check_id="">
 				<mxCell vertex="1">	
 					<mxGeometry as="geometry" width="150" height="60"/>
 				</mxCell>

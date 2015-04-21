@@ -1,15 +1,23 @@
 <?php
 
-class RelationTemplateManager {
+/**
+ * Relation manager class
+ */
+class RelationManager {
+    /**
+     * Chart's cell types
+     */
     const MX_GRAPH_CELL_TYPE_CHECK  = 'check';
     const MX_GRAPH_CELL_TYPE_FILTER = 'filter';
 
-    const PORT_FILTER = "port-filter";
-
+    /**
+     * Filters list
+     * @var array
+     */
     public static $filters = array(
         array(
-            "name" => self::PORT_FILTER,
-            "title" => "Port Filter"
+            "name" => PortFilter::ID,
+            "title" => PortFilter::TITLE
         )
     );
 
@@ -88,7 +96,7 @@ class RelationTemplateManager {
         }
 
         $n = $count;
-        $edges = RelationTemplateManager::getCellConnections($node, $id);
+        $edges = RelationManager::getCellConnections($node, $id);
 
         foreach ($edges as $edge) {
             $targetId = (int) $edge->attributes()->target;
@@ -114,7 +122,7 @@ class RelationTemplateManager {
         $result = null;
 
         switch ($filter) {
-            case self::PORT_FILTER:
+            case PortFilter::ID:
                 $ports = explode(",", $values);
 
                 foreach ($ports as $key => $value) {
@@ -128,7 +136,7 @@ class RelationTemplateManager {
                 }
 
                 $targets = explode("\n", $input);
-                $result = Utils::filterTargetsByPorts($ports, $targets);
+                $result = PortFilter::apply($ports, $targets);
                 $result = implode("\n", $result);
 
                 break;
@@ -194,7 +202,7 @@ class RelationTemplateManager {
 
         // Check if graph has more than one connection group
         $cellCount = count($relations->xpath('//*[@type="check" or @type="filter"]'));
-        $startCheckChildren = RelationTemplateManager::getCellChildrenCount($relations, $startCheckId);
+        $startCheckChildren = RelationManager::getCellChildrenCount($relations, $startCheckId);
 
         if ($cellCount > $startCheckChildren + 1) {
             throw new Exception("Template has more than one connection group.");

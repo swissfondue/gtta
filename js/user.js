@@ -2051,6 +2051,15 @@ function User()
     this.target = new function () {
         var _target = this;
 
+        /**
+         * Current target id on target chain editing
+         * @type {null}
+         */
+        this.targetId = null;
+
+        /**
+         * Target check chain object
+         */
         this.chain = new function () {
             /**
              * Start target check chain
@@ -2078,8 +2087,8 @@ function User()
                             return;
                         }
 
-                        $('.chain-start-button').hide();
-                        $('.chain-stop-button').show();
+                        $('.chain-start-button').addClass('hide');
+                        $('.chain-stop-button').removeClass('hide');
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -2146,7 +2155,32 @@ function User()
                         var messages = response.data.messages;
 
                         $.each(messages, function (key, value) {
-                            system.addAlert("success", value);
+                            var status = parseInt(value.status);
+                            var id = parseInt(value.id);
+                            var message = value.message;
+
+                            system.addAlert("success", message);
+
+                            if (id) {
+                                switch (status) {
+                                    case system.constants.Target.CHAIN_STATUS_IDLE:
+                                    case system.constants.Target.CHAIN_STATUS_STOPPED:
+                                    case system.constants.Target.CHAIN_STATUS_BREAKED:
+                                        $('.chain-start-button').removeClass('hide');
+                                        $('.chain-stop-button').addClass('hide');
+
+                                        break;
+
+                                    case system.constants.Target.CHAIN_STATUS_ACTIVE:
+                                        $('.chain-start-button').addClass('hide');
+                                        $('.chain-stop-button').removeClass('hide');
+
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+                            }
                         });
 
                         $(".loader-image").hide();

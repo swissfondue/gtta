@@ -1919,15 +1919,17 @@ function Admin()
             var checkTied = parseInt(cell.getAttribute('check_id'));
             var stopper = parseInt(cell.getAttribute('stopped'));
 
+            cell.delStyle();
+
             if (!checkTied) {
                 cell.setStyle("noCheckSelectedStyle");
-                _mxgraph.editor.graph.refresh();
             }
 
             if (stopper) {
                 cell.setStyle("stoppedCellStyle");
-                _mxgraph.editor.graph.refresh();
             }
+
+            _mxgraph.editor.graph.refresh();
         };
 
         /**
@@ -1962,6 +1964,15 @@ function Admin()
         this.mxCheckHandlerInit = function () {
             var md = (mxClient.IS_TOUCH) ? 'touchstart' : 'mousedown';
 
+            // Started check icon
+            if (this.state.cell.isStartCheck()) {
+                img = mxUtils.createImage('/js/mxgraph/grapheditor/images/play.png');
+                img.style.width = '16px';
+                img.style.height = '16px';
+
+                this.domNode.appendChild(img);
+            }
+
             // Settings
             var img = mxUtils.createImage('/js/mxgraph/grapheditor/images/settings.png');
             img.style.cursor = 'pointer';
@@ -1976,7 +1987,6 @@ function Admin()
                 var graph = _mxgraph.editor.graph;
                 var cell = graph.getSelectionCell();
                 var bounds = this.graph.getCellBounds(cell);
-                var model = graph.getModel();
 
                 if (_mxgraph.properties) {
                     _mxgraph.properties.destroy();
@@ -1995,6 +2005,11 @@ function Admin()
                 var form = $('<div>');
 
                 var checkId = cell.getAttribute("check_id");
+                var controlId = cell.getAttribute("control_id");
+                var categoryId = cell.getAttribute("category_id");
+
+                var $properties, $categoryList, $controlList, $checkList;
+
                 var $categories = $('<select>')
                     .addClass('category-list')
                     .addClass('max-width')
@@ -2005,10 +2020,10 @@ function Admin()
                     )
                     .change(function() {
                         var category = $(this).val();
-                        var $properties = $(_mxgraph.properties.getElement());
-                        var $categoryList = $(this);
-                        var $controlList = $properties.find('.control-list');
-                        var $checkList = $properties.find('.check-list');
+                        $properties = $(_mxgraph.properties.getElement());
+                        $categoryList = $(this);
+                        $controlList = $properties.find('.control-list');
+                        $checkList = $properties.find('.check-list');
 
                         $categoryList.addClass('disabled');
                         $controlList
@@ -2023,7 +2038,7 @@ function Admin()
                             .siblings()
                             .remove();
 
-                        if (category != '0') {
+                        if (parseInt(category)) {
                             system.control.loadObjects(category, "category-control-list", function (data) {
                                 var controls = data.objects;
 
@@ -2054,11 +2069,11 @@ function Admin()
                             .text('Select control...')
                     )
                     .change(function () {
-                        var controlId = $(this).val();
-                        var $properties = $(_mxgraph.properties.getElement());
-                        var $categoryList = $properties.find('.category-list');
-                        var $checkList = $properties.find('.check-list');
-                        var $controlList = $properties.find('.control-list');
+                        var control = $(this).val();
+                        $properties = $(_mxgraph.properties.getElement());
+                        $categoryList = $properties.find('.category-list');
+                        $checkList = $properties.find('.check-list');
+                        $controlList = $properties.find('.control-list');
 
                         $categoryList.addClass('disabled');
                         $controlList.addClass('disabled');
@@ -2068,8 +2083,8 @@ function Admin()
                             .siblings()
                             .remove();
 
-                        if (controlId != '0') {
-                            system.control.loadObjects(controlId, 'control-check-list', function (data) {
+                        if (parseInt(control)) {
+                            system.control.loadObjects(control, 'control-check-list', function (data) {
                                 $.each(data.objects, function (key, value) {
                                     $checkList.append(
                                         $('<option>')
@@ -2099,27 +2114,25 @@ function Admin()
                             .text('Select check...')
                     );
 
-                $.each(_mxgraph.checkCategories, function (key, value) {
-                    $categories.append(
-                        $('<option>')
-                            .attr('value', value.id)
-                            .text(value.name)
-                    );
-                });
-
                 var $okButton = $('<button>')
                     .text('OK')
                     .click(function () {
-                        var $properties = $(_mxgraph.properties.getElement());
+                        $properties = $(_mxgraph.properties.getElement());
+                        $categoryList = $properties.find('.category-list');
+                        $controlList = $properties.find('.control-list');
+                        $checkList = $properties.find('.check-list');
 
-                        var $checkList = $properties.find('.check-list');
-                        var categoryId = $properties.find('.category-list').val();
-                        var controlId = $properties.find('.control-list').val();
-                        var checkId = $properties.find('.check-list').val();
-                        var checkName = $checkList.find('option[value=' + checkId + ']').text();
+                        var category = $categoryList.val();
+                        var control = $controlList.val();
+                        var check = $checkList.val();
+                        var checkName;
 
-                        if (parseInt(categoryId) && parseInt(controlId) && parseInt(checkId)) {
-                            cell.setAttribute("check_id", checkId);
+                        if (parseInt(category) && parseInt(control) && parseInt(check)) {
+                            checkName = $checkList.find('option[value=' + check + ']').text();
+
+                            cell.setAttribute("category_id", category);
+                            cell.setAttribute("control_id", control);
+                            cell.setAttribute("check_id", check);
                             cell.setAttribute("label", checkName);
 
                             cell.delStyle();
@@ -2140,6 +2153,57 @@ function Admin()
 
                 _mxgraph.properties = new mxWindow("Check Properties", form[0], x, y, 250, 170, false);
                 _mxgraph.properties.setVisible(true);
+
+                $properties = $(_mxgraph.properties.getElement());
+                $categoryList = $properties.find('.category-list');
+                $checkList = $properties.find('.check-list');
+                $controlList = $properties.find('.control-list');
+
+                $.each(_mxgraph.checkCategories, function (key, value) {
+                    var option = $('<option>')
+                        .attr('value', value.id)
+                        .text(value.name);
+
+                    if (parseInt(categoryId) && parseInt(controlId) && parseInt(checkId) && value.id == categoryId) {
+                        option.attr('selected', 'selected');
+
+                        system.control.loadObjects(categoryId, "category-control-list", function (data) {
+                            var controls = data.objects;
+
+                            $.each(controls, function (key, value) {
+                                var option = $('<option>')
+                                    .attr("value", value.id)
+                                    .text(value.name);
+
+                                if (value.id == controlId) {
+                                    option.attr('selected', 'selected');
+                                }
+
+                                $controlList.append(option);
+                            });
+
+                            system.control.loadObjects(controlId, 'control-check-list', function (data) {
+                                $.each(data.objects, function (key, value) {
+                                    var option = $('<option>')
+                                        .attr('value', value.id)
+                                        .text(value.name);
+
+                                    if (value.id == checkId) {
+                                        option.attr('selected', 'selected');
+                                    }
+
+                                    $checkList.append(option);
+                                });
+
+                                $categoryList.removeClass('disabled');
+                                $controlList.removeClass('disabled');
+                                $checkList.removeClass('disabled');
+                            });
+                        });
+                    }
+
+                    $categories.append(option);
+                });
             }));
 
             this.domNode.appendChild(img);
@@ -2161,8 +2225,7 @@ function Admin()
             {
                 _mxgraph.editor.graph.removeCells([this.state.cell]);
                 mxEvent.consume(evt);
-            })
-            );
+            }));
 
             this.domNode.appendChild(img);
             _mxgraph.editor.graph.container.appendChild(this.domNode);

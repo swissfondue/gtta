@@ -1331,7 +1331,7 @@ class ProjectController extends Controller {
 
             if ($model->validate()) {
                 try {
-                    RelationTemplateManager::validateRelations($model->relations, $target);
+                    RelationManager::validateRelations($model->relations, $target);
                 } catch (Exception $e) {
                     $model->addError("relations", $e->getMessage());
                     $success = false;
@@ -1349,7 +1349,7 @@ class ProjectController extends Controller {
         }
 
         $categories = CheckCategory::model()->findAll();
-        $filters = RelationTemplateManager::$filters;
+        $filters = RelationManager::$filters;
 
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
         $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
@@ -1411,7 +1411,7 @@ class ProjectController extends Controller {
                 throw new Exception($errorText);
             }
 
-            RelationTemplateManager::validateRelations($target->relations, $target);
+            RelationManager::validateRelations($target->relations, $target);
 
             switch ($model->operation) {
                 case "start":
@@ -1428,9 +1428,9 @@ class ProjectController extends Controller {
                         $tc->save();
                     }
 
-                    CheckChainAutomationJob::enqueue(array(
+                    ChainJob::enqueue(array(
                         "target_id" => $target->id,
-                        "operation" => CheckChainAutomationJob::OPERATION_START,
+                        "operation" => ChainJob::OPERATION_START,
                     ));
 
                     break;
@@ -1440,9 +1440,9 @@ class ProjectController extends Controller {
                         throw new CHttpException(403, Yii::t("app", "Access denied."));
                     }
 
-                    CheckChainAutomationJob::enqueue(array(
+                    ChainJob::enqueue(array(
                         "target_id" => $target->id,
-                        "operation" => CheckChainAutomationJob::OPERATION_STOP,
+                        "operation" => ChainJob::OPERATION_STOP,
                     ));
 
                     break;

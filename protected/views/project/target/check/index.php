@@ -4,7 +4,19 @@
 <script src="/ckeditor/ckeditor.js"></script>
 <script src="/ckeditor/adapters/jquery.js"></script>
 
-<h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+<?php if (User::checkRole(User::ROLE_USER)): ?>
+    <div class="active-header">
+        <div class="pull-right">
+            <ul class="nav nav-pills">
+                <li><a href="<?php echo $this->createUrl('project/editchain', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'Check Chain'); ?></a></li>
+            </ul>
+        </div>
+
+        <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+    </div>
+<?php else: ?>
+    <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+<?php endif; ?>
 
 <hr>
 

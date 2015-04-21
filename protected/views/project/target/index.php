@@ -4,26 +4,8 @@
             <ul class="nav nav-pills">
                 <li class="active"><a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
                 <li><a href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+                <li><a href="<?php echo $this->createUrl('project/editchain', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'Check Chain'); ?></a></li>
             </ul>
-        </div>
-
-        <div class="pull-right buttons">
-            <div class="btn-group">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon icon-plus"></i>
-                    <?php echo Yii::t('app', 'Check Chain'); ?>
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li class="chain-start-button <?php if ($target->isChainRunning) print 'hide'; ?>">
-                        <a href="#startchain" data-target-id="<?php print $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>" onclick="user.target.chain.start($(this).data('target-id'), $(this).data('control-url'))" >Start</a>
-                    </li>
-                    <li class="chain-stop-button <?php if (!$target->isChainRunning) print 'hide'; ?>">
-                        <a href="#stopchain" data-target-id="<?php print $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>" onclick="user.target.chain.stop($(this).data('target-id'), $(this).data('control-url'))" >Stop</a>
-                    </li>
-                    <li><a href="<?php echo $this->createUrl('project/editchain', array( 'id' => $project->id, 'target' => $target->id )); ?>">Edit</a></li>
-                </ul>
-            </div>
         </div>
 
         <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>

@@ -315,14 +315,14 @@ class TargetManager {
         }
 
         $key = JobManager::buildId(
-            CheckChainAutomationJob::CHAIN_STATUS_TEMPLATE,
+            ChainJob::CHAIN_STATUS_TEMPLATE,
             array(
                 "target_id" => $target->id
             )
         );
         $status = JobManager::getKeyValue($key);
 
-        if (!in_array($status, array(Target::CHAIN_STATUS_STOPPED, Target::CHAIN_STATUS_IDLE, Target::CHAIN_STATUS_ACTIVE, Target::CHAIN_STATUS_BREAKED))) {
+        if (!in_array($status, array(Target::CHAIN_STATUS_STOPPED, Target::CHAIN_STATUS_IDLE, Target::CHAIN_STATUS_ACTIVE, Target::CHAIN_STATUS_INTERRUPTED))) {
             return null;
         }
 
@@ -344,7 +344,7 @@ class TargetManager {
         }
 
         $key = JobManager::buildId(
-            CheckChainAutomationJob::CHAIN_CELL_ID_TEMPLATE,
+            ChainJob::CHAIN_CELL_ID_TEMPLATE,
             array(
                 "target_id" => $target->id
             )
@@ -365,14 +365,15 @@ class TargetManager {
      * @throws Exception
      */
     public static function getChainMessages() {
-        $mask = JobManager::buildId(CheckChainAutomationJob::ID_TEMPLATE, array(
+        // Redis doesn't support regexps, use glob
+        $mask = JobManager::buildId(ChainJob::ID_TEMPLATE, array(
             "operation" => "*",
             "target_id" => "[0-9]*"
         ));
         $mask .= '.message';
         $keys = explode(" ", Resque::redis()->keys($mask));
-        $pattern = JobManager::buildId(CheckChainAutomationJob::ID_TEMPLATE, array(
-            "operation" => sprintf("(%s|%s)", CheckChainAutomationJob::OPERATION_START, CheckChainAutomationJob::OPERATION_STOP),
+        $pattern = JobManager::buildId(ChainJob::ID_TEMPLATE, array(
+            "operation" => sprintf("(%s|%s)", ChainJob::OPERATION_START, ChainJob::OPERATION_STOP),
             "target_id" => "(\d+)"
         ));
         $pattern = '/' . $pattern . '.message/';
@@ -383,7 +384,13 @@ class TargetManager {
             preg_match_all($pattern, $key, $matches, PREG_PATTERN_ORDER);
 
             if (!empty($matches[0])) {
-                $messages[] = Resque::redis()->get($key);
+                $targetId = $matches[1][0];
+
+                $messages[] = array(
+                    "id" => $matches[1][0],
+                    "status" => self::getChainStatus($targetId),
+                    "message" => Resque::redis()->get($key)
+                );
             }
 
             JobManager::delKey($key);

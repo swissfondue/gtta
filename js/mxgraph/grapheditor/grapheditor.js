@@ -8,6 +8,16 @@ mxCell.prototype.isCheck = function () {
 };
 
 /**
+ * Returns true if cell is a start check
+ * @returns {boolean|Number}
+ */
+mxCell.prototype.isStartCheck = function () {
+    var starter = parseInt(this.getAttribute("start_check"));
+
+    return this.isCheck() && starter;
+};
+
+/**
  * Returns true if cell is "filter" type
  * @returns {boolean}
  */
