@@ -465,15 +465,15 @@ function User()
         /**
          * Toggle control.
          */
-        this.toggleControl = function (id) {
+        this.toggleControl = function (id, callback) {
             if ($("a[data-type=control-link][data-id=" + id + "]").hasClass("disabled")) {
                 return;
             }
 
             if ($("div.control-body[data-id=" + id + "]").is(":visible")) {
-                _check.collapseControl(id, null);
+                _check.collapseControl(id, callback);
             } else {
-                _check.expandControl(id, null);
+                _check.expandControl(id, callback);
             }
         };
 
@@ -2061,6 +2061,8 @@ function User()
          * Target check chain object
          */
         this.chain = new function () {
+            var _chain = this;
+
             /**
              * Start target check chain
              */
@@ -2089,6 +2091,10 @@ function User()
 
                         $('.chain-start-button').addClass('hide');
                         $('.chain-stop-button').removeClass('hide');
+
+                        setTimeout(function () {
+                            _chain.updateActiveCheck($('#activeChainCheck').data('url'));
+                        }, 5000);
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -2128,6 +2134,43 @@ function User()
 
                         $('.chain-stop-button').hide();
                         $('.chain-start-button').show();
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $('.loader-image').hide();
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    }
+                });
+            };
+
+            /**
+             * Stop target check chain
+             * @param targetId
+             * @param url
+             */
+            this.reset = function (targetId, url) {
+                $('.loader-image').show();
+                $('.chain-reset-button').show();
+
+                $.ajax({
+                    dataType: 'json',
+                    url: url,
+                    timeout: system.ajaxTimeout,
+                    type: 'POST',
+                    data: {
+                        "EntryControlForm[id]"        : targetId,
+                        "EntryControlForm[operation]" : 'reset',
+                        "YII_CSRF_TOKEN"               : system.csrf
+                    },
+
+                    success : function (data, textStatus) {
+                        $('.loader-image').hide();
+
+                        if (data.status == 'error') {
+                            system.addAlert('error', data.errorText);
+                        }
+
+                        $('#activeChainCheck').addClass('hide');
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -2182,6 +2225,53 @@ function User()
                                 }
                             }
                         });
+
+                        $(".loader-image").hide();
+                    },
+
+                    'error' : function (data) {
+                        $(".loader-image").hide();
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    },
+
+                    'beforeSend' : function () {
+                        $(".loader-image").show();
+                    }
+                });
+            };
+
+            /**
+             * Update active check of running chain
+             * @param url
+             */
+            this.updateActiveCheck = function (url) {
+                $('.loader-image').show();
+
+                $.ajax({
+                    dataType: "json",
+                    url: url,
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+                    data: {
+                        "YII_CSRF_TOKEN": system.csrf
+                    },
+                    'success' : function (response) {
+                        var status = parseInt(response.data.status);
+                        var check = response.data.check;
+
+                        if (status == system.constants.Target.CHAIN_STATUS_ACTIVE) {
+                            setTimeout(function () {
+                                _chain.updateActiveCheck(url);
+                            }, 5000);
+
+                            $('#activeChainCheck').removeClass('hide');
+                            $('#activeChainCheck .check-name').text(check);
+                        } else {
+                            $('#activeChainCheck').addClass('hide');
+
+                            $('.chain-start-button').removeClass('hide');
+                            $('.chain-stop-button').addClass('hide');
+                        }
 
                         $(".loader-image").hide();
                     },

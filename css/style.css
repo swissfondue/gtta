@@ -1275,6 +1275,11 @@ ul.breadcrumb {
     padding-left: 20px;
 }
 .relations-graph #zoomActions {
-    width: 100%;
+    float: left;
     padding-top: 4px;
+}
+.relations-graph #activeChainCheck {
+    float: right;
+    padding-top: 4px;
+    margin-right: 90px;
 }

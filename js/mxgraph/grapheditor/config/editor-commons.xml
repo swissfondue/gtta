@@ -6,6 +6,7 @@
         <add as="stopHere" action="setStopped" if="isUnstoppedCheck"></add>
         <add as="unstopHere" action="setUnStopped" if="isStoppedCheck"></add>
         <add as="setStartCheck" action="setStartCheck" if="isCheck"></add>
+        <add as="openCheck" action="openCheck" if="isCheck"></add>
         <condition name="isCheck"><![CDATA[
             function (editor, cell, evt)
             {
@@ -86,6 +87,16 @@
 				cell.setAttribute("stopped", "0");
                 admin.mxgraph.updateCheckStyles(cell);
 				admin.relationTemplate.updateRelations();
+			}
+		]]></add>
+        <add as="openCheck"><![CDATA[
+			function (editor, cell)
+			{
+			    var checkId = cell.getAttribute('check_id');
+
+                admin.mxgraph.getCheckLink($('.relations-graph').data('get-check-url'), admin.mxgraph.target, checkId, function (url) {
+                    window.location.replace(url);
+                });
 			}
 		]]></add>
 	</Array>

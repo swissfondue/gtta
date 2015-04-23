@@ -9,8 +9,9 @@
         </div>
         <div class="pull-right buttons">
             <?php if (User::checkRole(User::ROLE_USER)): ?>
-                <a href="#startchain" class="btn chain-start-button <?php if ($target->isChainRunning) print 'hide'; ?>" data-target-id="<?php print $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>" onclick="user.target.chain.start($(this).data('target-id'), $(this).data('control-url'))"><i class="icon icon-play"></i><?php echo Yii::t("app", "Start"); ?></a>&nbsp;
-                <a href="#stopchain" class="btn chain-stop-button <?php if (!$target->isChainRunning) print 'hide'; ?>" data-target-id="<?php print $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>" onclick="user.target.chain.stop($(this).data('target-id'), $(this).data('control-url'))"><i class="icon icon-stop"></i><?php echo Yii::t("app", "Stop"); ?></a>
+                <a href="#resetchain" title="Reset" class="btn chain-reset-button" data-target-id="<?php print $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>" onclick="user.target.chain.reset($(this).data('target-id'), $(this).data('control-url'))"><i class="icon icon-refresh"></i></a>&nbsp;
+                <a href="#startchain" title="Start" class="btn chain-start-button <?php if ($target->isChainRunning) print 'hide'; ?>" data-target-id="<?php print $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>" onclick="user.target.chain.start($(this).data('target-id'), $(this).data('control-url'))"><i class="icon icon-play"></i><?php echo Yii::t("app", "Start"); ?></a>&nbsp;
+                <a href="#stopchain" title="Stop" class="btn chain-stop-button <?php if (!$target->isChainRunning) print 'hide'; ?>" data-target-id="<?php print $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>" onclick="user.target.chain.stop($(this).data('target-id'), $(this).data('control-url'))"><i class="icon icon-stop"></i><?php echo Yii::t("app", "Stop"); ?></a>
             <?php endif; ?>
         </div>
 
@@ -26,7 +27,7 @@
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
     <fieldset>
-        <div class="control-group relations-graph <?php if ($model->getError('relations')) echo 'error'; ?>">
+        <div class="control-group relations-graph <?php if ($model->getError('relations')) echo 'error'; ?>" data-get-check-url="<?php print $this->createUrl('project/checklink'); ?>">
             <label class="control-label"><?php echo Yii::t('app', 'Relations'); ?></label>
             <div class="controls">
                 <table border="0" width="730px">
@@ -40,7 +41,9 @@
                 <?php if ($model->getError('relations')): ?>
                     <p class="help-block"><?php echo $model->getError('relations'); ?></p>
                 <?php endif; ?>
-                <div id="zoomActions">
+                <div id="zoomActions"></div>
+                <div id="activeChainCheck" data-url="<?php print $this->createUrl('project/chainactivecheck', array( 'id' => $project->id, 'target' => $target->id )); ?>" class="<?php if (!$activeCheck) print 'hide'; ?>">
+                    <?php print Yii::t("app", "Current Check") . ": ";?> <strong class="check-name"><?php print $activeCheck; ?></strong>
                 </div>
             </div>
         </div>
@@ -82,4 +85,12 @@
     setInterval(function () {
         user.target.chain.messages('<?php print $this->createUrl('project/chainmessages'); ?>');
     }, 5000);
+
+    <?php if ($target->isChainRunning): ?>
+        setTimeout(function () {
+            user.target.chain.updateActiveCheck('<?php print $this->createUrl('project/chainactivecheck'); ?>');
+        }, 5000);
+    <?php endif; ?>
+
+    admin.mxgraph.target = parseInt('<?php print $target->id; ?>')
 </script>

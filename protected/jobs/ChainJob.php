@@ -74,14 +74,7 @@ class ChainJob extends BackgroundJob {
                         $check->save();
                     }
 
-                    $checkKey = JobManager::buildId(
-                        self::CHAIN_CELL_ID_TEMPLATE,
-                        array(
-                            "target_id" => $this->args['target_id']
-                        )
-                    );
-                    JobManager::setKeyValue($checkKey, $cellId);
-
+                    TargetManager::setChainLastCellId($target->id, $cellId);
                     TargetCheckManager::start($check->id, true);
 
                     sleep(5);
@@ -110,14 +103,7 @@ class ChainJob extends BackgroundJob {
         }
 
         if ($stopperCell && !$resuming) {
-            $statusKey = JobManager::buildId(
-                self::CHAIN_STATUS_TEMPLATE,
-                array(
-                    "target_id" => $this->args['target_id']
-                )
-            );
-
-            JobManager::setKeyValue($statusKey, Target::CHAIN_STATUS_STOPPED);
+            TargetManager::setChainStatus($target->id, Target::CHAIN_STATUS_STOPPED);
         } else {
             $edges = RelationManager::getCellConnections($relations, $cellId);
 
@@ -143,14 +129,6 @@ class ChainJob extends BackgroundJob {
             throw new Exception("Target not found.");
         }
 
-        $statusKey = JobManager::buildId(
-            self::CHAIN_STATUS_TEMPLATE,
-            array(
-                "target_id" => $this->args['target_id']
-            )
-        );
-        JobManager::setKeyValue($statusKey, Target::CHAIN_STATUS_INTERRUPTED);
-
         try {
             $relations = new SimpleXMLElement($target->relations, LIBXML_NOERROR);
         } catch (Exception $e) {
@@ -167,6 +145,13 @@ class ChainJob extends BackgroundJob {
         foreach ($targetChecks as $tc) {
             TargetCheckManager::stop($tc->id);
         }
+
+        if (isset($this->args['reset'])) {
+            TargetManager::setChainStatus($target->id, Target::CHAIN_STATUS_IDLE);
+            TargetManager::delChainLastCellId($target->id);
+        } else {
+            TargetManager::setChainStatus($target->id, Target::CHAIN_STATUS_INTERRUPTED);
+        }
     }
 
     /**
@@ -179,27 +164,19 @@ class ChainJob extends BackgroundJob {
             throw new Exception("Target not found.");
         }
 
-        $statusKey = JobManager::buildId(
-            self::CHAIN_STATUS_TEMPLATE,
-            array(
-                "target_id" => $this->args['target_id']
-            )
-        );
-        $status = JobManager::getKeyValue($statusKey);
-        $activeCellKey = JobManager::buildId(
-            self::CHAIN_CELL_ID_TEMPLATE,
-            array(
-                "target_id" => $this->args['target_id']
-            )
-        );
+        $status = TargetManager::getChainStatus($target->id);
 
         switch ($status) {
             case Target::CHAIN_STATUS_ACTIVE:
             case Target::CHAIN_STATUS_IDLE:
-                JobManager::setKeyValue($statusKey, Target::CHAIN_STATUS_IDLE);
-                JobManager::delKey($activeCellKey);
+                TargetManager::setChainStatus($target->id, Target::CHAIN_STATUS_IDLE);
+                TargetManager::delChainLastCellId($target->id);
 
-                $message = sprintf("Check chain of target '%s' completed.", $target->host);
+                if (isset($this->args['reset'])) {
+                    $message = sprintf("Check chain of target '%s' reset.", $target->host);
+                } else {
+                    $message = sprintf("Check chain of target '%s' completed.", $target->host);
+                }
 
                 break;
 
@@ -244,14 +221,7 @@ class ChainJob extends BackgroundJob {
             case Target::CHAIN_STATUS_INTERRUPTED:
                 $this->setVar("message", sprintf("Check chain of target '%s' started.", $target->host));
 
-                $statusKey = JobManager::buildId(
-                    self::CHAIN_STATUS_TEMPLATE,
-                    array(
-                        "target_id" => $this->args['target_id']
-                    )
-                );
-                JobManager::setKeyValue($statusKey, Target::CHAIN_STATUS_ACTIVE);
-
+                TargetManager::setChainStatus($target->id, Target::CHAIN_STATUS_ACTIVE);
                 $this->_startChain($target);
 
                 break;
@@ -259,16 +229,8 @@ class ChainJob extends BackgroundJob {
             case Target::CHAIN_STATUS_STOPPED:
                 $this->setVar("message", sprintf("Check chain of target '%s' continued.", $target->host));
 
-                $statusKey = JobManager::buildId(
-                    self::CHAIN_STATUS_TEMPLATE,
-                    array(
-                        "target_id" => $this->args['target_id']
-                    )
-                );
-                JobManager::setKeyValue($statusKey, Target::CHAIN_STATUS_ACTIVE);
-
+                TargetManager::setChainStatus($target->id, Target::CHAIN_STATUS_ACTIVE);
                 $cellId = TargetManager::getChainLastCellId($target->id);
-
                 $this->_startChain($target, $cellId);
 
                 break;

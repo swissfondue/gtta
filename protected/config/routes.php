@@ -58,6 +58,8 @@ return array(
     "project/<id:\d+>/target/<target:\d+>/chain/edit" => "project/editchain",
     "project/<id:\d+>/target/<target:\d+>/chain/control" => "project/controlchain",
     "project/<id:\d+>/target/<target:\d+>/chain/messages" => "project/chainmessages",
+    "project/<id:\d+>/target/<target:\d+>/chain/activecheck" => "project/chainactivecheck",
+    "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/control/<controlToOpen:\d+>/check/<checkToOpen:\d+>" => "project/checks",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>" => "project/checks",
     "project/<id:\d+>/target/<target:\d+>/category/control" => "project/controlcategory",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/control/<control:\d+>" => "project/controlchecklist",
@@ -72,6 +74,7 @@ return array(
     "project/attachment/control" => "project/controlattachment",
     "project/target/control" => "project/controltarget",
     "project/search" => "project/search",
+    "project/target/<target:\d+>/check/<check:\d+>/link" => "project/checklink",
 
     // custom checks
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/custom-check/save" => "project/savecustomcheck",

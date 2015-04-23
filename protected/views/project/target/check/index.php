@@ -505,6 +505,14 @@
         }, 1000);
 
         $(".wysiwyg").ckeditor();
+
+        <?php if ($controlToOpen): ?>
+            user.check.toggleControl(<?php print $controlToOpen; ?>, function () {
+                <?php if ($checkToOpen): ?>
+                    user.check.toggle(<?php print $checkToOpen; ?>);
+                <?php endif; ?>
+            });
+        <?php endif; ?>
     });
 <?php endif; ?>
 </script>

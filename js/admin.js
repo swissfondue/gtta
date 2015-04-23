@@ -1894,6 +1894,12 @@ function Admin()
         this.properties = null;
 
         /**
+         * Current target
+         * @type {null}
+         */
+        this.target = null;
+
+        /**
          * Returns all graph cells
          * @returns {*}
          */
@@ -2499,6 +2505,54 @@ function Admin()
             $.each(_mxgraph.getAllCells(), function (key, cell) {
                 if (cell.getAttribute('type') == _mxgraph.CELL_TYPE_CHECK) {
                     _mxgraph.updateCheckStyles(cell);
+                }
+            });
+        };
+
+        /**
+         * Returns target check url
+         * @param url
+         * @param target
+         * @param check
+         */
+        this.getCheckLink = function (url, target, check, callback) {
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data: {
+                    YII_CSRF_TOKEN: system.csrf,
+                    'TargetCheckLinkForm[target]' : target,
+                    'TargetCheckLinkForm[check]'  : check
+                },
+
+                success: function (data, textStatus) {
+                    $('.loader-image').hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    url = data.data.url;
+
+                    window.location.replace(url);
+
+                    if (callback) {
+                        callback(url);
+                    }
+                },
+
+                error: function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend: function (jqXHR, settings) {
+                    $(".loader-image").show();
                 }
             });
         };
