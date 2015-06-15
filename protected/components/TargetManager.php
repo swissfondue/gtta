@@ -203,6 +203,7 @@ class TargetManager {
                 $criteria->addInCondition("reference_id", $referenceIds);
 
                 $checks = Check::model()->findAll($criteria);
+
                 foreach ($checks as $c) {
                     $checkIds[] = $c->id;
                 }
@@ -236,6 +237,13 @@ class TargetManager {
                     $targetCheck->status = TargetCheck::STATUS_OPEN;
                     $targetCheck->rating = TargetCheck::RATING_NONE;
                     $targetCheck->save();
+
+                    foreach ($check->scripts as $script) {
+                        $targetCheckScript = new TargetCheckScript();
+                        $targetCheckScript->check_script_id = $script->id;
+                        $targetCheckScript->target_check_id = $targetCheck->id;
+                        $targetCheckScript->save();
+                    }
                 }
 
                 break;
@@ -292,6 +300,13 @@ class TargetManager {
                     $targetCheck->status = TargetCheck::STATUS_OPEN;
                     $targetCheck->rating = TargetCheck::RATING_NONE;
                     $targetCheck->save();
+
+                    foreach ($check->scripts as $script) {
+                        $targetCheckScript = new TargetCheckScript();
+                        $targetCheckScript->check_script_id = $script->id;
+                        $targetCheckScript->target_check_id = $targetCheck->id;
+                        $targetCheckScript->save();
+                    }
                 }
 
                 break;
