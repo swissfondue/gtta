@@ -345,6 +345,32 @@ class TargetManager {
     }
 
     /**
+     * Set check chain status
+     * @param $id
+     * @param $status
+     */
+    public static function setChainStatus($id, $status) {
+        $target = Target::model()->findByPk($id);
+
+        if (!$target) {
+            throw new Exception("Target not found.");
+        }
+
+        if (!in_array($status, array(Target::CHAIN_STATUS_STOPPED, Target::CHAIN_STATUS_ACTIVE, Target::CHAIN_STATUS_IDLE, Target::CHAIN_STATUS_INTERRUPTED))) {
+            throw new Exception("Unknown chain status.");
+        }
+
+        $key = JobManager::buildId(
+            ChainJob::CHAIN_STATUS_TEMPLATE,
+            array(
+                "target_id" => $target->id
+            )
+        );
+
+        JobManager::setKeyValue($key, $status);
+    }
+
+    /**
      * Returns last activated cell in target check chain
      * (when you resuming stopped chain)
      * @param $id
@@ -371,6 +397,51 @@ class TargetManager {
         }
 
         return $activeCellId;
+    }
+
+    /**
+     * Set chain last cell id
+     * @param $targetId
+     * @param $cellId
+     * @throws Exception
+     */
+    public static function setChainLastCellId($targetId, $cellId) {
+        $target = Target::model()->findByPk($targetId);
+
+        if (!$target) {
+            throw new Exception("Target not found.");
+        }
+
+        $key = JobManager::buildId(
+            ChainJob::CHAIN_CELL_ID_TEMPLATE,
+            array(
+                "target_id" => $target->id
+            )
+        );
+
+        JobManager::setKeyValue($key, $cellId);
+    }
+
+    /**
+     * Delete key value of last check chain
+     * @param $targetId
+     * @throws Exception
+     */
+    public static function delChainLastCellId($targetId) {
+        $target = Target::model()->findByPk($targetId);
+
+        if (!$target) {
+            throw new Exception("Target not found.");
+        }
+
+        $key = JobManager::buildId(
+            ChainJob::CHAIN_CELL_ID_TEMPLATE,
+            array(
+                "target_id" => $target->id
+            )
+        );
+
+        JobManager::delKey($key);
     }
 
     /**

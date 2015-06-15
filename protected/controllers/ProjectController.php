@@ -1301,6 +1301,12 @@ class ProjectController extends Controller {
         ));
     }
 
+    /**
+     * Target check chain edit page
+     * @param $id
+     * @param $target
+     * @throws CHttpException
+     */
     public function actionEditChain($id, $target) {
         $id = (int) $id;
         $target = (int) $target;
@@ -1350,6 +1356,18 @@ class ProjectController extends Controller {
 
         $categories = CheckCategory::model()->findAll();
         $filters = RelationManager::$filters;
+        $activeCheck = null;
+
+        try {
+            RelationManager::validateRelations($target->relations, $target);
+            $relations = new SimpleXMLElement($target->relations, LIBXML_NOERROR);
+            $cellId = (int) TargetManager::getChainLastCellId($target->id);
+
+            if ($cellId) {
+                $cell = RelationManager::getCell($relations, $cellId);
+                $activeCheck = $cell->attributes()->label;
+            }
+        } catch (Exception $e) {}
 
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
         $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
@@ -1364,6 +1382,7 @@ class ProjectController extends Controller {
             "categories" => $categories,
             "filters" => $filters,
             "target" => $target,
+            "activeCheck" => $activeCheck,
         ));
     }
 
@@ -1447,6 +1466,15 @@ class ProjectController extends Controller {
 
                     break;
 
+                case "reset":
+                    ChainJob::enqueue(array(
+                        "target_id" => $target->id,
+                        "operation" => ChainJob::OPERATION_STOP,
+                        "reset"     => true
+                    ));
+
+                    break;
+
                 default:
                     throw new CHttpException(403, Yii::t("app", "Unknown operation."));
                     break;
@@ -1474,12 +1502,126 @@ class ProjectController extends Controller {
     }
 
     /**
+     * Returns chain status and active check
+     * @param $id
+     * @param $target
+     */
+    public function actionChainActiveCheck($id, $target) {
+        $response = new AjaxResponse();
+
+        $id = (int) $id;
+        $target = (int) $target;
+        $project = Project::model()->findByPk($id);
+
+        if (!$project) {
+            throw new CHttpException(404, Yii::t('app', 'Project not found.'));
+        }
+
+        if (!$project->checkPermission()) {
+            throw new CHttpException(403, Yii::t('app', 'Access denied.'));
+        }
+
+        $target = Target::model()->findByAttributes(array(
+            'id' => $target,
+            'project_id' => $project->id
+        ));
+
+        if (!$target) {
+            throw new CHttpException(404, Yii::t('app', 'Target not found.'));
+        }
+
+        $response->addData("status", TargetManager::getChainStatus($target->id));
+        $activeCheck = null;
+
+        try {
+            RelationManager::validateRelations($target->relations, $target);
+            $relations = new SimpleXMLElement($target->relations, LIBXML_NOERROR);
+            $cellId = (int) TargetManager::getChainLastCellId($target->id);
+
+            if ($cellId) {
+                $cell = RelationManager::getCell($relations, $cellId);
+                $activeCheck = (string) $cell->attributes()->label;
+            }
+        } catch (Exception $e) {}
+
+        $response->addData("check", $activeCheck);
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Returns link to check
+     * @param $target
+     * @param $check
+     * @throws CHttpException
+     */
+    public function actionCheckLink() {
+        $response = new AjaxResponse();
+
+        try {
+            $model = new TargetCheckLinkForm();
+            $model->attributes = $_POST["TargetCheckLinkForm"];
+
+            if (!$model->validate()) {
+                $errorText = "";
+
+                foreach ($model->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        $target = $model->target;
+        $target = Target::model()->findByPk($target);
+
+        if (!$target) {
+            throw new CHttpException(404, "Target not found.");
+        }
+
+        $check = $model->check;
+        $check = Check::model()->findByPk($check);
+
+
+        if (!$check) {
+            throw new CHttpException(404, "Check not found.");
+        }
+
+        $targetCheck = TargetCheck::model()->findByAttributes(array(
+            "target_id" => $target->id,
+            "check_id" => $check->id
+        ));
+
+        if (!$targetCheck) {
+            throw new CHttpException(404, "Target check not found.");
+        }
+
+        $url = $this->createUrl("project/checks", array(
+            "id" => $target->project->id,
+            "target" => $target->id,
+            "category" => $check->control->category->id,
+            "controlToOpen" => $check->control->id,
+            "checkToOpen" => $targetCheck->id
+        ));
+
+        $response->addData("url", $url);
+
+        echo $response->serialize();
+    }
+
+    /**
      * Display a list of checks.
      */
-	public function actionChecks($id, $target, $category) {
+	public function actionChecks($id, $target, $category, $controlToOpen=0, $checkToOpen=0) {
         $id = (int) $id;
         $target = (int) $target;
         $category = (int) $category;
+        $controlToOpen = (int) $controlToOpen;
+        $checkToOpen = (int) $checkToOpen;
 
         $project = Project::model()->with(array(
             "userHoursAllocated",
@@ -1672,6 +1814,8 @@ class ProjectController extends Controller {
             "ratings" => TargetCheck::getRatingNames(),
             "stats" => $stats,
             "quickTargets" => $quickTargets,
+            "controlToOpen" => $controlToOpen,
+            "checkToOpen" => $checkToOpen,
         ));
 	}
 
