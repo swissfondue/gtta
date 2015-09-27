@@ -49,4 +49,16 @@ class SystemManager {
             throw new Exception("Error changing system status.");
         }
     }
+
+    /**
+     * Check if git inited
+     * @return bool
+     */
+    public static function gitInited() {
+        if (is_dir(Yii::app()->params["packages"]["path"]["scripts"] . DS . ".git")) {
+            return true;
+        }
+
+        return false;
+    }
 } 

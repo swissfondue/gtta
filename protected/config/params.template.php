@@ -93,7 +93,20 @@ return array(
             "libraries" => BASE_DIR . "/scripts/lib",
         ),
         "tmpPath" => "/tmp/gtta-package",
-        "maxSize" => 100 * 1024 * 1024, // 100 megabytes
+        "maxSize" => 100 * 1024 * 1024, // 100 megabytes,
+        "git" => array(
+            "key" => "scripts_rsa",
+            "scripts" => array(
+                "path" => BASE_DIR . "/current/tools/git",
+                "init" => "init.sh",
+                "configure" => "configure.sh",
+                "sync" => "sync.sh",
+            )
+        )
+    ),
+
+    "system" => array(
+        "filesPath" => BASE_DIR . "/files/system",
     ),
 
     "filesPath" => BASE_DIR . "/current/web/files",

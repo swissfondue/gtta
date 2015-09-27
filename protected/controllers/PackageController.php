@@ -459,7 +459,7 @@ class PackageController extends Controller {
 
         $this->_system->refresh();
 
-        $this->breadcrumbs[] = array(Yii::t("app", "Scripts"), $this->createUrl("package/index"));
+        $this->breadcrumbs[] = array(Yii::t("app", "Packages"), $this->createUrl("package/index"));
         $this->breadcrumbs[] = array(Yii::t("app", "Regenerate Sandbox"), "");
 
         // display the page
@@ -470,7 +470,7 @@ class PackageController extends Controller {
 	}
 
     /**
-     * Regenerate status page
+     * Get regenerate status
      */
     public function actionRegenerateStatus() {
         $response = new AjaxResponse();
@@ -478,6 +478,64 @@ class PackageController extends Controller {
         try {
             $system = System::model()->findByPk(1);
             $response->addData("regenerating", $system->isRegenerating);
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Sync options page
+     */
+    public function actionSync() {
+        $sync = false;
+        $form = new SyncForm();
+
+        if (isset($_POST["SyncForm"])) {
+            $form->attributes = $_POST["SyncForm"];
+
+            if ($form->validate()) {
+                if (!$this->_system->gitBusy) {
+                    GitJob::enqueue(array(
+                        "strategy" => $form->strategy
+                    ));
+                    $sync = true;
+                }
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+        }
+
+        $this->_system->refresh();
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Packages"), $this->createUrl("package/index"));
+        $this->breadcrumbs[] = array(Yii::t("app", "Sync"), "");
+
+        // display the page
+        $this->pageTitle = Yii::t("app", "Sync Packages");
+        $this->render("sync", array(
+            "sync" => $sync,
+            "system" => $this->_system
+        ));
+    }
+
+    /**
+     * Get packages sync status
+     */
+    public function actionSyncStatus() {
+        $response = new AjaxResponse();
+
+        try {
+            $system = System::model()->findByPk(1);
+            $response->addData("sync", $system->gitBusy);
+
+            $failed = $system->git_status == System::GIT_STATUS_FAILED;
+            $response->addData("error", $failed);
+
+            if ($failed) {
+                $system->updateGitStatus(System::GIT_STATUS_IDLE);
+            }
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }

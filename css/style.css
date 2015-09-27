@@ -684,6 +684,11 @@ input[type="text"].search-query:focus {
     color:#333;
 }
 
+input[type="file"] {
+    line-height: 10px;
+    padding-top: 5px;
+}
+
 .report-target-header {
     border-top:1px solid #ddd;
     padding:8px;

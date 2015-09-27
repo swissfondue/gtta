@@ -3,7 +3,8 @@
 /**
  * This is the model class for settings edit form.
  */
-class SettingsEditForm extends CFormModel {
+class SettingsEditForm extends CFormModel
+{
     /**
      * @var string workstation id
      */
@@ -115,11 +116,37 @@ class SettingsEditForm extends CFormModel {
     public $mailEncryption;
 
     /**
-	 * @return array validation rules for model attributes.
-	 */
-	public function rules() {
-		return array(
-			array("timezone", "required"),
+     * @var string git repo url
+     */
+    public $gitUrl;
+
+    /**
+     * @var string git protocol
+     */
+    public $gitProto;
+
+    /**
+     * @var string git username to sync
+     */
+    public $gitUsername;
+
+    /**
+     * @var string git password to sync
+     */
+    public $gitPassword;
+
+    /**
+     * @var file git private key
+     */
+    public $gitKey;
+
+    /**
+     * @return array validation rules for model attributes.
+     */
+    public function rules()
+    {
+        return array(
+            array("timezone", "required"),
             array("timezone", "in", "range" => array_keys(TimeZones::$zones)),
             array("workstationId", "length", "is" => 36),
             array("workstationKey, copyright", "length", "max" => 1000),
@@ -132,18 +159,20 @@ class SettingsEditForm extends CFormModel {
             array("languageId", "checkLanguage"),
             array("email", "email"),
             array("mailPort", "numerical", "integerOnly" => true, "min" => 1, "max" => 65535),
-            array("mailHost, mailUsername, mailPassword", "safe"),
-		);
-	}
-    
+            array("mailHost, mailUsername, mailPassword, gitUrl, gitUsername, gitPassword, gitKey", "safe"),
+            array("gitProto", "checkProto"),
+        );
+    }
+
     /**
-	 * @return array customized attribute labels (name=>label)
-	 */
-	public function attributeLabels() {
-		return array(
+     * @return array customized attribute labels (name=>label)
+     */
+    public function attributeLabels()
+    {
+        return array(
             "workstationId" => Yii::t("app", "Workstation ID"),
             "workstationKey" => Yii::t("app", "Workstation Key"),
-			"timezone" => Yii::t("app", "Time Zone"),
+            "timezone" => Yii::t("app", "Time Zone"),
             "reportLowPedestal" => Yii::t("app", "Low Risk Pedestal"),
             "reportMedPedestal" => Yii::t("app", "Medium Risk Pedestal"),
             "reportHighPedestal" => Yii::t("app", "High Risk Pedestal"),
@@ -163,18 +192,51 @@ class SettingsEditForm extends CFormModel {
             "mailUsername" => Yii::t("app", "Username"),
             "mailPassword" => Yii::t("app", "Password"),
             "mailEncryption" => Yii::t("app", "Encryption"),
-		);
-	}
+        );
+    }
 
     /**
      * Checks if language exists.
      */
-    public function checkLanguage($attribute, $params) {
+    public function checkLanguage($attribute, $params)
+    {
         $language = Language::model()->findByPk($this->languageId);
 
         if (!$language) {
             $this->addError("languageId", Yii::t("app", "Language not found."));
             return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check git protocol
+     * @param $attribute
+     * @param $params
+     * @return bool
+     */
+    public function checkProto($attribute, $params) {
+        if (!in_array($this->gitProto, array(System::GIT_PROTO_HTTPS, System::GIT_PROTO_SSH))) {
+            $this->addError("gitProto", "Invalid Protocol.");
+            return false;
+        }
+
+        if ($this->gitProto == System::GIT_PROTO_HTTPS) {
+            if (!$this->gitUsername) {
+                $this->addError("gitUsername", "Username can't be blank.");
+                return false;
+            }
+
+            if (!$this->gitPassword) {
+                $this->addError("gitPassword", "Password can't be blank.");
+                return false;
+            }
+        } elseif ($this->gitProto == System::GIT_PROTO_SSH) {
+            if (!file_exists($_FILES["SettingsEditForm"]["tmp_name"]["gitKey"])) {
+                $this->addError("gitKey", "Key can't be blank.");
+                return false;
+            }
         }
 
         return true;

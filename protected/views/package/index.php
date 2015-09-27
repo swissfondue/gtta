@@ -1,5 +1,6 @@
 <div class="active-header">
     <div class="pull-right buttons">
+        <a class="btn" href="<?php echo $this->createUrl("package/sync") ?>"><i class="icon icon-repeat"></i> <?php echo Yii::t("app", "Sync"); ?></a>&nbsp;
         <a class="btn" href="<?php echo $this->createUrl("package/new") ?>"><i class="icon icon-plus"></i> <?php echo Yii::t("app", "New Package"); ?></a>&nbsp;
 
         <?php

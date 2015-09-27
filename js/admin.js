@@ -1200,6 +1200,65 @@ function Admin()
         };
 
         /**
+         * Regenerate status
+         */
+        this.checkSync = function (url) {
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data: {
+                    YII_CSRF_TOKEN: system.csrf
+                },
+
+                success: function (data, textStatus) {
+                    $('.loader-image').hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    data = data.data;
+
+                    if (data.sync) {
+                        setTimeout(function () {
+                            _package.checkSync(url);
+                        }, 5000);
+                    } else {
+                        if (data.error) {
+                            system.addAlert("error", "Synchronization failed.");
+                        } else {
+                            system.addAlert("success", "Synchronization is successful.");
+                        }
+
+                        setTimeout(function() {
+                            system.refreshPage();
+                        }, 5000);
+                    }
+                },
+
+                error: function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+
+                    if (textStatus == "timeout") {
+                        setTimeout(function () {
+                            _package.checkRegenerate(url);
+                        }, 5000);
+                    } else {
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    }
+                },
+
+                beforeSend: function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
          * File select changed
          * @param val
          */
