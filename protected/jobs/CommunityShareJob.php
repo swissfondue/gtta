@@ -83,6 +83,10 @@ class CommunityShareJob extends BackgroundJob {
             throw new Exception("Check not found");
         }
 
+        if ($check->private) {
+            throw new Exception("Check is private");
+        }
+
         $cm->share($check);
     }
 
