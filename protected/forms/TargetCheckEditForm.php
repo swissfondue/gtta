@@ -122,15 +122,6 @@ class TargetCheckEditForm extends CFormModel {
             return true;
         }
 
-        $targets = explode("\n", $target);
-
-        foreach ($targets as $t) {
-            if (!Utils::isIP($t) && !Utils::isIPRange($t) && !Utils::isDomain($t) && !Utils::isIPNetwork($t)) {
-                $this->addError('overrideTarget', Yii::t('app', sprintf("Target '%s' is not valid.", $t)));
-                return false;
-            }
-        }
-
         $this->overrideTarget = $target;
 
         return true;
