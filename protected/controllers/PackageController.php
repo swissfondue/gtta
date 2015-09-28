@@ -32,7 +32,7 @@ class PackageController extends Controller {
         $criteria->limit = Yii::app()->params["entriesPerPage"];
         $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
         $criteria->addInCondition("status", array(
-            Package::STATUS_INSTALL,
+            Package::STATUS_NOT_INSTALLED,
             Package::STATUS_INSTALLED,
             Package::STATUS_SHARE,
             Package::STATUS_ERROR
@@ -105,10 +105,13 @@ class PackageController extends Controller {
 			$model->attributes = $_POST["PackageAddForm"];
 
 			if ($model->validate()) {
-                $pm = new PackageManager();
-                $pm->scheduleForInstallation($model->id);
-
-                Yii::app()->user->setFlash("success", Yii::t("app", "Package scheduled for installation."));
+                try {
+                    $pm = new PackageManager();
+                    $pm->scheduleForInstallation($model->id);
+                    Yii::app()->user->setFlash("success", Yii::t("app", "Package scheduled for installation."));
+                } catch (Exception $e) {
+                    Yii::app()->user->setFlash("error", Yii::t("app", $e->getMessage()));
+                }
 
                 $this->redirect(array("package/index"));
             } else {

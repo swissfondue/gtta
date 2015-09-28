@@ -619,15 +619,20 @@ class PackageManager {
 
             if (!$pkg) {
                 $pkg = new Package();
+                $pkg->file_name = $id;
+                $pkg->name = $package[self::SECTION_NAME];
+                $pkg->type = $package[self::SECTION_TYPE];
+                $pkg->version = $package[self::SECTION_VERSION];
+                $pkg->save();
+            } else {
+                if (in_array($pkg->status, Package::getActiveStatuses())) {
+                    throw new Exception("Package already installed.");
+                } elseif($pkg->status == Package::STATUS_ERROR) {
+                    throw new Exception("Package was previously installed with errors. Delete existing.");
+                }
             }
 
-            $pkg->file_name = $id;
-            $pkg->name = $package[self::SECTION_NAME];
-            $pkg->type = $package[self::SECTION_TYPE];
-            $pkg->version = $package[self::SECTION_VERSION];
-            $pkg->status = Package::STATUS_INSTALL;
-            $pkg->save();
-
+            // Try to reinstall if error / not installed
             PackageJob::enqueue(array(
                 'operation' => PackageJob::OPERATION_INSTALL,
                 'obj_id' => $pkg->id,
