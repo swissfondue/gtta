@@ -72,7 +72,7 @@ class ControlManager {
             $api = new CommunityApiClient($system->integration_key);
             $control->external_id = $api->shareControl(array("control" => $data))->id;
         } catch (Exception $e) {
-            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
+            throw new Exception($e->getMessage());
         }
 
         $control->status = CheckControl::STATUS_INSTALLED;
@@ -84,12 +84,12 @@ class ControlManager {
      * @param $externalId
      * @return CheckCategory
      */
-    private function _getCategoryId($externalId) {
+    private function _getCategoryId($externalId, $initial) {
         $category = CheckCategory::model()->findByAttributes(array("external_id" => $externalId));
 
         if (!$category) {
             $cm = new CategoryManager();
-            $category = $cm->create($externalId);
+            $category = $cm->create($externalId, $initial);
         }
 
         return $category->id;
@@ -101,10 +101,10 @@ class ControlManager {
      * @return CheckControl
      * @throws Exception
      */
-    public function create($control) {
+    public function create($control, $initial) {
         /** @var System $system */
         $system = System::model()->findByPk(1);
-        $api = new CommunityApiClient($system->integration_key);
+        $api = new CommunityApiClient($initial ? null : $system->integration_key);
         $control = $api->getControl($control)->control;
 
         $id = $control->id;
@@ -114,7 +114,7 @@ class ControlManager {
             return $existingControl;
         }
 
-        $category = $this->_getCategoryId($control->category_id);
+        $category = $this->_getCategoryId($control->category_id, $initial);
 
         $c = new CheckControl();
         $c->check_category_id = $category;
