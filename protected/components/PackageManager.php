@@ -1204,7 +1204,6 @@ class PackageManager {
         $pkg = $this->scheduleForInstallation($tmpData["id"], $initial ? false : true);
         $pkg->external_id = $id;
         $pkg->save();
-        $this->install($pkg);
 
         return $pkg;
     }
