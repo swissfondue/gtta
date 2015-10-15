@@ -1380,7 +1380,12 @@ class PackageManager {
             "obj_id" => "[0-9]*"
         ));
         $mask .= '.message';
-        $keys = explode(" ", Resque::redis()->keys($mask));
+        $keys = Resque::redis()->keys($mask);
+
+        if (!is_array($keys)) {
+            $keys = explode(" ", $keys);
+        }
+
         $pattern = JobManager::buildId(PackageJob::ID_TEMPLATE, array(
             "operation" => sprintf("(%s|%s)", PackageJob::OPERATION_INSTALL, PackageJob::OPERATION_DELETE),
             "obj_id" => "(\d+)"

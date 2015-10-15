@@ -100,13 +100,9 @@ class CommunityInstallJob extends BackgroundJob {
     private function _installInitial() {
         $exception = null;
 
-        try {
-            $installCandidates = $this->_status();
-            $this->_installPackages($installCandidates->packages, true);
-            $this->_installChecks($installCandidates->checks, true);
-        } catch (Exception $e) {
-            throw $e;
-        }
+        $installCandidates = $this->_status();
+        $this->_installPackages($installCandidates->packages, true);
+        $this->_installChecks($installCandidates->checks, true);
     }
 
     /**
@@ -115,14 +111,10 @@ class CommunityInstallJob extends BackgroundJob {
     public function perform() {
         $initial = isset($this->args["initial"]);
 
-        try {
-            if ($initial) {
-                $this->_installInitial();
-            } else {
-                $this->_install();
-            }
-        } catch (Exception $e) {
-            $this->log($e->getMessage(), $e->getTraceAsString());
+        if ($initial) {
+            $this->_installInitial();
+        } else {
+            $this->_install();
         }
     }
 }
