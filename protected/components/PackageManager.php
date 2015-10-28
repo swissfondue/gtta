@@ -617,6 +617,10 @@ class PackageManager {
                 "name" => $package[self::SECTION_NAME]
             ));
 
+            if ($pkg && in_array($pkg->status, Package::getActiveStatuses())) {
+                throw new Exception("Package already installed.");
+            }
+
             if (!$pkg) {
                 $pkg = new Package();
             }
@@ -625,9 +629,10 @@ class PackageManager {
             $pkg->name = $package[self::SECTION_NAME];
             $pkg->type = $package[self::SECTION_TYPE];
             $pkg->version = $package[self::SECTION_VERSION];
-            $pkg->status = Package::STATUS_INSTALL;
+            $pkg->status = Package::STATUS_NOT_INSTALLED;
             $pkg->save();
 
+            // Try to reinstall if error / not installed
             PackageJob::enqueue(array(
                 'operation' => PackageJob::OPERATION_INSTALL,
                 'obj_id' => $pkg->id,
@@ -1257,7 +1262,7 @@ class PackageManager {
             $pkg->type = $package[self::SECTION_TYPE];
             $pkg->version = $package[self::SECTION_VERSION];
             $pkg->file_name = null;
-            $pkg->status = Package::STATUS_INSTALLED;
+            $pkg->status = Package::STATUS_NOT_INSTALLED;
             $pkg->save();
 
             // install dependencies
@@ -1308,6 +1313,9 @@ class PackageManager {
                 $packageDep->to_package_id = $script->id;
                 $packageDep->save();
             }
+
+            $pkg->status = Package::STATUS_INSTALLED;
+            $pkg->save();
         } catch (Exception $e) {
             $exception = $e;
 
