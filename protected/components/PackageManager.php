@@ -617,20 +617,20 @@ class PackageManager {
                 "name" => $package[self::SECTION_NAME]
             ));
 
+            if ($pkg && in_array($pkg->status, Package::getActiveStatuses())) {
+                throw new Exception("Package already installed.");
+            }
+
             if (!$pkg) {
                 $pkg = new Package();
-                $pkg->file_name = $id;
-                $pkg->name = $package[self::SECTION_NAME];
-                $pkg->type = $package[self::SECTION_TYPE];
-                $pkg->version = $package[self::SECTION_VERSION];
-                $pkg->save();
-            } else {
-                if (in_array($pkg->status, Package::getActiveStatuses())) {
-                    throw new Exception("Package already installed.");
-                } elseif($pkg->status == Package::STATUS_ERROR) {
-                    throw new Exception("Package was previously installed with errors. Delete existing.");
-                }
             }
+
+            $pkg->file_name = $id;
+            $pkg->name = $package[self::SECTION_NAME];
+            $pkg->type = $package[self::SECTION_TYPE];
+            $pkg->version = $package[self::SECTION_VERSION];
+            $pkg->status = Package::STATUS_NOT_INSTALLED;
+            $pkg->save();
 
             // Try to reinstall if error / not installed
             PackageJob::enqueue(array(
@@ -1262,7 +1262,7 @@ class PackageManager {
             $pkg->type = $package[self::SECTION_TYPE];
             $pkg->version = $package[self::SECTION_VERSION];
             $pkg->file_name = null;
-            $pkg->status = Package::STATUS_INSTALLED;
+            $pkg->status = Package::STATUS_NOT_INSTALLED;
             $pkg->save();
 
             // install dependencies
@@ -1313,6 +1313,9 @@ class PackageManager {
                 $packageDep->to_package_id = $script->id;
                 $packageDep->save();
             }
+
+            $pkg->status = Package::STATUS_INSTALLED;
+            $pkg->save();
         } catch (Exception $e) {
             $exception = $e;
 
