@@ -5,6 +5,11 @@
  */
 class CommunityInstallJob extends BackgroundJob {
     /**
+     * Template for job's id
+     */
+    const ID_TEMPLATE = "gtta.community.install";
+
+    /**
      * Get install candidates
      * @param $integrationKey
      * @return mixed
@@ -30,7 +35,7 @@ class CommunityInstallJob extends BackgroundJob {
      * Finish installation
      * @param $integrationKey
      */
-    private function _finish($integrationKey=null) {
+    private function _finish($integrationKey) {
         $this->_status($integrationKey);
 
         $api = new CommunityApiClient($integrationKey);
