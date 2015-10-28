@@ -63,7 +63,7 @@ class CategoryManager {
             $api = new CommunityApiClient($system->integration_key);
             $category->external_id = $api->shareCategory(array("category" => $data))->id;
         } catch (Exception $e) {
-            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
+            throw new Exception($e->getMessage());
         }
 
         $category->status = CheckCategory::STATUS_INSTALLED;
@@ -76,10 +76,10 @@ class CategoryManager {
      * @return CheckCategory
      * @throws Exception
      */
-    public function create($category) {
+    public function create($category, $initial=false) {
         /** @var System $system */
         $system = System::model()->findByPk(1);
-        $api = new CommunityApiClient($system->integration_key);
+        $api = new CommunityApiClient($initial ? null : $system->integration_key);
         $category = $api->getCategory($category)->category;
 
         $id = $category->id;
