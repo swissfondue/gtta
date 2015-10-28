@@ -111,10 +111,14 @@ class CommunityInstallJob extends BackgroundJob {
     public function perform() {
         $initial = isset($this->args["initial"]);
 
-        if ($initial) {
-            $this->_installInitial();
-        } else {
-            $this->_install();
+        try {
+            if ($initial) {
+                $this->_installInitial();
+            } else {
+                $this->_install();
+            }
+        } catch (Exception $e) {
+            $this->log($e->getMessage(), $e->getTraceAsString());
         }
     }
 }
