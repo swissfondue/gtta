@@ -9,12 +9,6 @@ class InitialDataCommand extends ConsoleCommand {
      * @param array $args
      */
     protected function runLocked($args) {
-        try {
-            CommunityInstallJob::enqueue(array(
-                "initial" => true
-            ));
-        } catch (Exception $e) {
-            // pass
-        }
+        CommunityInstallJob::enqueue(array("initial" => true));
     }
 }
