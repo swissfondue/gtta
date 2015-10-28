@@ -211,7 +211,7 @@ class CheckManager {
      * @throws Exception
      */
     public function prepareSharing(Check $check) {
-        if ($check->status != Check::STATUS_INSTALLED) {
+        if ($check->status != Check::STATUS_INSTALLED || $check->private) {
             return;
         }
 
