@@ -66,6 +66,11 @@ class CheckEditForm extends LocalizedFormModel
     public $multipleSolutions;
 
     /**
+     * @var boolean private.
+     */
+    public $private;
+
+    /**
      * @var integer effort.
      */
     public $effort;
@@ -84,7 +89,7 @@ class CheckEditForm extends LocalizedFormModel
 			array( 'name, referenceId, controlId', 'required' ),
             array( 'name, protocol, referenceCode, referenceUrl', 'length', 'max' => 1000 ),
             array( 'port', 'numerical', 'integerOnly' => true, 'min' => 0, 'max' => 1000 ),
-            array( 'advanced, automated, multipleSolutions', 'boolean' ),
+            array( 'advanced, automated, multipleSolutions, private', 'boolean' ),
             array( 'localizedItems, backgroundInfo, hints, question', 'safe' ),
             array( 'referenceUrl', 'url', 'defaultScheme' => 'http' ),
             array( 'referenceId, effort', 'numerical', 'integerOnly' => true ),
@@ -112,6 +117,7 @@ class CheckEditForm extends LocalizedFormModel
             'referenceCode'  => Yii::t('app', 'Reference Code'),
             'referenceUrl'   => Yii::t('app', 'Reference URL'),
             'effort'         => Yii::t('app', 'Effort'),
+            'private'        => Yii::t('app', 'Private'),
 		);
 	}
 
