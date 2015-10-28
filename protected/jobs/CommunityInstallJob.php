@@ -5,19 +5,30 @@
  */
 class CommunityInstallJob extends BackgroundJob {
     /**
+     * Template for job's id
+     */
+    const ID_TEMPLATE = "gtta.community.install";
+
+    /**
      * Get install candidates
      * @param $integrationKey
      * @return mixed
      */
-    private function _status($integrationKey) {
-        $cm = new CheckManager();
-        $pm = new PackageManager();
+    private function _status($integrationKey=null) {
+        $args = array();
+
+        if ($integrationKey) {
+            $cm = new CheckManager();
+            $pm = new PackageManager();
+            $args = array(
+                "checks" => $cm->getExternalIds(),
+                "packages" => $pm->getExternalIds(),
+            );
+        }
+
         $api = new CommunityApiClient($integrationKey);
 
-        return $api->status(array(
-            "checks" => $cm->getExternalIds(),
-            "packages" => $pm->getExternalIds(),
-        ));
+        return $api->status($args);
     }
 
     /**
@@ -35,11 +46,11 @@ class CommunityInstallJob extends BackgroundJob {
      * Install packages
      * @param $packages
      */
-    private function _installPackages($packages) {
+    private function _installPackages($packages, $initial=false) {
         $pm = new PackageManager();
 
         foreach ($packages as $package) {
-            $pm->create($package);
+            $pm->create($package, $initial);
         }
     }
 
@@ -47,11 +58,11 @@ class CommunityInstallJob extends BackgroundJob {
      * Install checks
      * @param $checks
      */
-    private function _installChecks($checks) {
+    private function _installChecks($checks, $initial=false) {
         $cm = new CheckManager();
 
         foreach ($checks as $check) {
-            $c = $cm->create($check);
+            $c = $cm->create($check, $initial);
 
             TargetCheckReindexJob::enqueue(array(
                 "category_id" => $c->control->check_category_id
@@ -88,11 +99,29 @@ class CommunityInstallJob extends BackgroundJob {
     }
 
     /**
+     * Install initial packages/checks
+     * @throws Exception
+     */
+    private function _installInitial() {
+        $exception = null;
+
+        $installCandidates = $this->_status();
+        $this->_installPackages($installCandidates->packages, true);
+        $this->_installChecks($installCandidates->checks, true);
+    }
+
+    /**
      * Perform
      */
     public function perform() {
+        $initial = isset($this->args["initial"]);
+
         try {
-            $this->_install();
+            if ($initial) {
+                $this->_installInitial();
+            } else {
+                $this->_install();
+            }
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
         }

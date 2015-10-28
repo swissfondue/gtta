@@ -94,6 +94,7 @@ return array(
         ),
         "tmpPath" => "/tmp/gtta-package",
         "maxSize" => 100 * 1024 * 1024, // 100 megabytes,
+        "installerLock" => "/tmp/installer.lock",
         "git" => array(
             "key" => "scripts_rsa",
             "scripts" => array(
@@ -129,7 +130,8 @@ return array(
     "yiicPath" => dirname(__FILE__) . "/../",
 
     "api" => array(
-        "url" => "http://gta-update.does-it.net:8080",
+        "url" => "http://gta-update.does-it.net:80",
+        "regKey" => "s8cowl2sv3l64menxb0jvqhci2yop7i0"
     ),
 
     "community" => array(

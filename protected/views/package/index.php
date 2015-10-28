@@ -45,7 +45,7 @@
                                         $labelClass = "";
 
                                         switch ($package->status) {
-                                            case Package::STATUS_INSTALL:
+                                            case Package::STATUS_NOT_INSTALLED:
                                                 $labelClass = "label-install";
                                                 break;
 
@@ -61,7 +61,7 @@
                                     <span class="label <?php echo $labelClass; ?>"><?php echo $package->statusName; ?></span>
                                 </td>
                                 <td class="actions">
-                                    <?php if ($package->status != Package::STATUS_INSTALL && $system->status == System::STATUS_IDLE): ?>
+                                    <?php if ($package->status != Package::STATUS_NOT_INSTALLED && $system->status == System::STATUS_IDLE): ?>
                                         <a href="#del" title="<?php echo Yii::t("app", "Delete"); ?>" onclick="system.control.del(<?php echo $package->id; ?>);"><i class="icon icon-remove"></i></a>
                                     <?php endif; ?>
                                 </td>

@@ -46,7 +46,7 @@ class CheckUpdateCommand extends ConsoleCommand {
 
         $this->_system->save();
 
-        if ($result->communityInstall) {
+        if ($result->community_install) {
             try {
                 CommunityInstallJob::enqueue();
             } catch (Exception $e) {

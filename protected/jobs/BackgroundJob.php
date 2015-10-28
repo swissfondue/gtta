@@ -70,7 +70,10 @@ abstract class BackgroundJob {
      */
     public function delKeys() {
         $keys = Resque::redis()->keys($this->id . ".*");
-        $keys = explode(' ', $keys);
+
+        if (!is_array($keys)) {
+            $keys = explode(' ', $keys);
+        }
 
         foreach ($keys as $key) {
             JobManager::delKey($key);
