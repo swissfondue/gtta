@@ -21,11 +21,6 @@ class VulntrackerCommand extends ConsoleCommand {
                     "targetChecks"
                 ),
             ),
-            "gtChecks" => array(
-                "with" => array(
-                    "vuln"
-                )
-            ),
             "projectUsers" => array(
                 "with" => "user"
             )
@@ -70,13 +65,6 @@ class VulntrackerCommand extends ConsoleCommand {
                     }
                 }
             }
-
-            foreach ($project->gtChecks as $check) {
-                if ($check->vuln->overdued) {
-                    $overdued++;
-                    break;
-                }
-            };
 
             if ($overdued > 0) {
                 foreach ($admins as $user) {

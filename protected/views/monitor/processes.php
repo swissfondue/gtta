@@ -5,7 +5,7 @@
 <div class="container">
     <div class="row">
         <div class="span8">
-            <?php if (count($checks) > 0 || count($gtChecks) > 0): ?>
+            <?php if (count($checks) > 0): ?>
                 <div>
                     <table class="table process-monitor">
                         <tbody>
@@ -36,29 +36,6 @@
                                     </td>
                                     <td class="actions">
                                         <a href="#stop" title="<?php echo Yii::t('app', 'Stop'); ?>" onclick="admin.process.stop(<?php echo $check->target_id; ?>, <?php echo $check->check_id; ?>);"><i class="icon icon-stop"></i></a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endforeach; ?>
-
-                <?php foreach ($gtChecks as $check): ?>
-                    <div class="process-monitor" data-control-url="<?php echo $this->createUrl('monitor/controlprocess'); ?>" data-id="gt-<?php echo $check->project_id; ?>-<?php echo $check->gt_check_id; ?>">
-                        <table class="process-monitor">
-                            <tbody>
-                                <tr>
-                                    <td class="name">
-                                        <a href="<?php echo $this->createUrl('project/gt', array('id' => $check->project_id)); ?>"><?php echo CHtml::encode($check->check->check->localizedName); ?></a><br>
-                                        <?php echo CHtml::encode($check->target); ?>
-                                    </td>
-                                    <td class="user">
-                                        <a href="<?php echo $this->createUrl('user/edit', array('id' => $check->user_id)); ?>"><?php echo CHtml::encode($check->user->name ? $check->user->name : $check->user->email); ?></a>
-                                    </td>
-                                    <td class="actions">
-                                        <?php if ($check->isRunning): ?>
-                                            <a href="#stop" title="<?php echo Yii::t('app', 'Stop'); ?>" onclick="admin.process.stop(<?php echo $check->project_id; ?>, <?php echo $check->gt_check_id; ?>, true);"><i class="icon icon-stop"></i></a>
-                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             </tbody>

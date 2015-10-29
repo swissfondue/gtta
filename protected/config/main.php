@@ -22,7 +22,7 @@ return array(
 		"application.models.*",
 		"application.components.*",
         "application.components.formats.*",
-        "application.components.processors.*",
+        "application.components.filters.*",
         "application.components.reports.*",
         "application.components.reports.docx.*",
         "application.extensions.PHPRtfLite.*",

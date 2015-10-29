@@ -6,7 +6,6 @@
  * The followings are the available columns in table "target_check_categories":
  * @property integer $target_id
  * @property integer $check_category_id
- * @property boolean $advanced
  * @property integer $check_count
  * @property integer $finished_count
  * @property integer $low_risk_count
@@ -43,7 +42,6 @@ class TargetCheckCategory extends ActiveRecord {
             array("target_id, check_category_id", "required"),
             array("target_id, check_category_id", "numerical", "integerOnly" => true),
             array("template_count", "numerical", "min" => 0, "integerOnly" => true),
-            array("advanced", "boolean"),
 		);
 	}
 

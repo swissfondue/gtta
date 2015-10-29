@@ -28,16 +28,6 @@ return array(
     "project/new" => "project/edit",
     "project/control" => "project/control",
 
-    // guided test
-    "project/<id:\d+>/gt" => "project/gt",
-    "project/<id:\d+>/gt/module/<module:\d+>/check/<check:\d+>/control" => "project/gtcontrolcheck",
-    "project/<id:\d+>/gt/module/<module:\d+>/check/<check:\d+>/save" => "project/gtsavecheck",
-    "project/<id:\d+>/gt/module/<module:\d+>/check/<check:\d+>/update" => "project/gtupdatechecks",
-    "project/<id:\d+>/gt/module/<module:\d+>/check/<check:\d+>/attachment/new" => "project/gtuploadattachment",
-    "project/gt-attachment/<path:[a-z\d]+>/download" => "project/gtattachment",
-    "project/gt-attachment/control" => "project/gtcontrolattachment",
-    "project/gt-target/control" => "project/gtcontroltarget",
-
     // project details
     "project/<id:\d+>/details/<page:\d+>"       => "project/details",
     "project/<id:\d+>/details"                  => "project/details",
@@ -63,9 +53,14 @@ return array(
     "project/<id:\d+>/target/<target:\d+>" => "project/target",
     "project/<id:\d+>/target/<target:\d+>/edit" => "project/edittarget",
     "project/<id:\d+>/target/new" => "project/edittarget",
+    "project/<id:\d+>/target/addlist" => "project/addtargetlist",
     "project/<id:\d+>/target/import" => "project/importtarget",
+    "project/<id:\d+>/target/<target:\d+>/chain/edit" => "project/editchain",
+    "project/<id:\d+>/target/<target:\d+>/chain/control" => "project/controlchain",
+    "project/<id:\d+>/target/<target:\d+>/chain/messages" => "project/chainmessages",
+    "project/<id:\d+>/target/<target:\d+>/chain/activecheck" => "project/chainactivecheck",
+    "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/control/<controlToOpen:\d+>/check/<checkToOpen:\d+>" => "project/checks",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>" => "project/checks",
-    "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/save" => "project/savecategory",
     "project/<id:\d+>/target/<target:\d+>/category/control" => "project/controlcategory",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/control/<control:\d+>" => "project/controlchecklist",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/check/<check:\d+>" => "project/check",
@@ -79,6 +74,7 @@ return array(
     "project/attachment/control" => "project/controlattachment",
     "project/target/control" => "project/controltarget",
     "project/search" => "project/search",
+    "project/target/<target:\d+>/check/<check:\d+>/link" => "project/checklink",
 
     // custom checks
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/custom-check/save" => "project/savecustomcheck",
@@ -166,6 +162,12 @@ return array(
     "checklist-template/new"                                           => "checklisttemplate/editcategory",
     "checklist-template/control"                                       => "checklisttemplate/controlcategory",
 
+    // relation templates
+    "relation-templates/<page:\d+>"   => "relationtemplate/index",
+    "relation-templates"              => "relationtemplate/index",
+    "relation-template/<id:\d+>/edit" => "relationtemplate/edit",
+    "relation-template/control"       => "relationtemplate/control",
+
     // checklist templates
     "checklist-template/<id:\d+>/template/<template:\d+>/<page:\d+>"   => "checklisttemplate/viewtemplate",
     "checklist-template/<id:\d+>/template/<template:\d+>/"             => "checklisttemplate/viewtemplate",
@@ -231,40 +233,6 @@ return array(
     "reference/<id:\d+>/edit" => "reference/edit",
     "reference/new"           => "reference/edit",
     "reference/control"       => "reference/control",
-
-    // guided test templates
-    "gt-templates/<page:\d+>" => "gt/index",
-    "gt-templates" => "gt/index",
-    "gt-template/<id:\d+>/<page:\d+>" => "gt/view",
-    "gt-template/<id:\d+>" => "gt/view",
-    "gt-template/<id:\d+>/edit" => "gt/edit",
-    "gt-template/new" => "gt/edit",
-    "gt-template/control" => "gt/control",
-
-    // guided test types
-    "gt-template/<id:\d+>/type/<type:\d+>/<page:\d+>" => "gt/viewtype",
-    "gt-template/<id:\d+>/type/<type:\d+>" => "gt/viewtype",
-    "gt-template/<id:\d+>/type/<type:\d+>/edit" => "gt/edittype",
-    "gt-template/<id:\d+>/type/new" => "gt/edittype",
-    "gt-template/type/control" => "gt/controltype",
-
-    // guided test modules
-    "gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/<page:\d+>" => "gt/viewmodule",
-    "gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>" => "gt/viewmodule",
-    "gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/edit" => "gt/editmodule",
-    "gt-template/<id:\d+>/type/<type:\d+>/module/new" => "gt/editmodule",
-    "gt-template/type/module/control" => "gt/controlmodule",
-
-    // guided test module checks
-    "gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>/edit" => "gt/editcheck",
-    "gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/new" => "gt/editcheck",
-    "gt-template/type/module/check/control" => "gt/controlcheck",
-
-    // guided test check dependencies
-    "gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>/dependencies/<page:\d+>" => "gt/dependencies",
-    "gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>/dependencies" => "gt/dependencies",
-    "gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>/dependency/<dependency:\d+>/edit" => "gt/editdependency",
-    "gt-template/<id:\d+>/type/<type:\d+>/module/<module:\d+>/check/<check:\d+>/dependency/new" => "gt/editdependency",
 
     // report templates
     "report-templates/<page:\d+>" => "reporttemplate/index",

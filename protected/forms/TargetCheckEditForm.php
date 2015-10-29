@@ -103,9 +103,27 @@ class TargetCheckEditForm extends CFormModel {
 		return array(
             array("rating", "in", "range" => TargetCheck::getValidRatings()),
             array("port", "numerical", "integerOnly" => true, "min" => 0, "max" => 65536),
-            array("protocol, overrideTarget, solutionTitle, resultTitle", "length", "max" => 1000),
+            array("protocol, solutionTitle, resultTitle", "length", "max" => 1000),
+            array("overrideTarget", "checkOverrideTarget"),
             array("saveSolution, saveResult", "boolean"),
             array("inputs, result, solutions, solution, poc, links, attachmentTitles, tableResult, scripts, timeouts", "safe"),
 		);
 	}
+
+    /**
+     * Validate override target
+     * @param $target
+     * @return bool
+     */
+    public function checkOverrideTarget($attribute,$params) {
+        $target  = trim($this->overrideTarget);
+
+        if (!$target) {
+            return true;
+        }
+
+        $this->overrideTarget = $target;
+
+        return true;
+    }
 }

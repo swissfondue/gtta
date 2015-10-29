@@ -22,6 +22,14 @@
                 system.csrf = '<?php echo Yii::app()->request->csrfToken; ?>';
             });
         </script>
+
+        <!-- MxGraph Library -->
+        <script type="text/javascript">
+            mxBasePath = "<?php echo Yii::app()->request->baseUrl; ?>/js/mxgraph/src";
+        </script>
+        <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl; ?>/js/mxgraph/src/js/mxClient.js"></script>
+        <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl; ?>/js/mxgraph/grapheditor/grapheditor.js"></script>
+
         <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
             <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/admin.js"></script>
         <?php endif; ?>
@@ -81,7 +89,7 @@
                             <?php endif; ?>
 
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
-                                <li class="dropdown <?php if (in_array(Yii::app()->controller->id, array('backup', 'check', 'reference', 'risk', 'user', 'package', 'reporttemplate', 'gt', 'monitor', 'history', 'update', 'settings'))) echo 'active'; ?>">
+                                <li class="dropdown <?php if (in_array(Yii::app()->controller->id, array('backup', 'check', 'reference', 'risk', 'user', 'package', 'reporttemplate', 'monitor', 'history', 'update', 'settings'))) echo 'active'; ?>">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                         <?php echo Yii::t('app', 'System'); ?>
                                         <b class="caret"></b>
@@ -89,11 +97,11 @@
                                     <ul class="dropdown-menu">
                                         <li <?php if (Yii::app()->controller->id == 'check') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('check/index'); ?>"><?php echo Yii::t('app', 'Checks'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'checklisttemplate') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('checklisttemplate/index'); ?>"><?php echo Yii::t('app', 'Checklist Templates'); ?></a></li>
+                                        <li <?php if (Yii::app()->controller->id == 'relationtemplate') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('relationtemplate/index'); ?>"><?php echo Yii::t('app', 'Relation Templates'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'reference') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('reference/index'); ?>"><?php echo Yii::t('app', 'References'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'user') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('user/index'); ?>"><?php echo Yii::t('app', 'Users'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'package') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('package/index'); ?>"><?php echo Yii::t('app', 'Packages'); ?></a></li>
                                         <li class="divider"></li>
-                                        <li <?php if (Yii::app()->controller->id == 'gt') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('gt/index'); ?>"><?php echo Yii::t('app', 'Guided Test Templates'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'reporttemplate') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('reporttemplate/index'); ?>"><?php echo Yii::t('app', 'Report Templates'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'risk') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('risk/index'); ?>"><?php echo Yii::t('app', 'Risk Matrix Templates'); ?></a></li>
                                         <li class="divider"></li>

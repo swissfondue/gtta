@@ -73,7 +73,6 @@ class CheckInput extends ActiveRecord {
             'l10n' => array(self::HAS_MANY, 'CheckInputL10n', 'check_input_id'),
             'script' => array(self::BELONGS_TO, 'CheckScript', 'check_script_id'),
             'targetInputs' => array(self::HAS_MANY, 'TargetCheckInput', 'check_input_id'),
-            'projectInputs' => array(self::HAS_MANY, 'ProjectGtCheckInput', 'check_input_id'),
 		);
 	}
 

@@ -10,7 +10,6 @@
  * @property string $background_info
  * @property string $hints
  * @property string $question
- * @property boolean $advanced
  * @property boolean $automated
  * @property boolean $multiple_solutions
  * @property string $protocol
@@ -63,7 +62,7 @@ class Check extends ActiveRecord {
                 "numerical",
                 "integerOnly" => true
             ),
-            array("advanced, automated, multiple_solutions, private", "boolean"),
+            array("automated, multiple_solutions, private", "boolean"),
             array("status", "in", "range" => array(
                 self::STATUS_INSTALLED,
                 self::STATUS_SHARE,

@@ -50,46 +50,12 @@ class MonitorController extends Controller {
             "user",
         ))->findAll($criteria);
 
-        $gtChecks = array();
-
-        $runningGtChecks = ProjectGtCheckManager::getRunning();
-
-        foreach ($runningGtChecks as $ids) {
-            $criteria = new CDbCriteria();
-            $criteria->addColumnCondition(array(
-                    "t.project_id" => $ids['proj_id'],
-                    "t.gt_check_id" => $ids['obj_id'],
-                )
-            );
-
-            $criteria->order = "COALESCE(l10n.name, \"innerCheck\".name) ASC";
-            $criteria->together = true;
-
-            $gtChecks[] = ProjectGtCheck::model()->with(array(
-                "check" => array(
-                    "with" => array(
-                        "check" => array(
-                            "alias" => "innerCheck",
-                            "with" => array(
-                                "l10n" => array(
-                                    "joinType" => "LEFT JOIN",
-                                    "on" => "l10n.language_id = :language_id",
-                                    "params" => array("language_id" => $language)
-                                ),
-                            )
-                        )
-                    )
-                )
-            ))->find($criteria);
-        }
-
         $this->breadcrumbs[] = array(Yii::t("app", "Running Processes"), "");
 
         // display the page
         $this->pageTitle = Yii::t("app", "Running Processes");
 		$this->render("processes", array(
             "checks" => $checks,
-            "gtChecks" => $gtChecks,
         ));
     }
 
@@ -115,51 +81,28 @@ class MonitorController extends Controller {
             }
 
             $ids = explode("-", $model->id);
-            $isGuided = false;
             $check = null;
 
-            if ($ids[0] == "gt") {
-                $isGuided = true;
-                $project = (int) $ids[1];
-                $check = (int) $ids[2];
 
-                $project = Project::model()->findByPk($project);
+            $target = (int) $ids[0];
+            $check = (int) $ids[1];
 
-                if (!$project) {
-                    throw new CHttpException(404, Yii::t("app", "Project not found."));
-                }
+            $target = Target::model()->findByPk($target);
 
-                $check = GtCheck::model()->findByPk($check);
-
-                if (!$check) {
-                    throw new CHttpException(404, Yii::t("app", "Check not found."));
-                }
-
-                $check = ProjectGtCheck::model()->findByAttributes(array(
-                    "project_id" => $project->id,
-                    "gt_check_id" => $check->id
-                ));
-            } else {
-                $target = (int) $ids[0];
-                $check = (int) $ids[1];
-
-                $target = Target::model()->findByPk($target);
-
-                if (!$target) {
-                    throw new CHttpException(404, Yii::t("app", "Target not found."));
-                }
-
-                $check = Check::model()->findByPk($check);
-
-                if (!$check) {
-                    throw new CHttpException(404, Yii::t("app", "Check not found."));
-                }
-
-                $check = TargetCheck::model()->findByAttributes(array(
-                    "target_id" => $target->id,
-                    "check_id" => $check->id
-                ));
+            if (!$target) {
+                throw new CHttpException(404, Yii::t("app", "Target not found."));
             }
+
+            $check = Check::model()->findByPk($check);
+
+            if (!$check) {
+                throw new CHttpException(404, Yii::t("app", "Check not found."));
+            }
+
+            $check = TargetCheck::model()->findByAttributes(array(
+                "target_id" => $target->id,
+                "check_id" => $check->id
+            ));
 
             if (!$check) {
                 throw new CHttpException(404, Yii::t("app", "Process not found."));
@@ -171,12 +114,7 @@ class MonitorController extends Controller {
                         throw new CHttpException(403, Yii::t("app", "Access denied."));
                     }
 
-                    if ($ids[0] == 'gt') {
-                        ProjectGtCheckManager::stop($check->project_id, $check->gt_check_id);
-                    } else {
-                        TargetCheckManager::stop($check->id);
-                    }
-
+                    TargetCheckManager::stop($check->id);
                     $check->save();
 
                     break;
