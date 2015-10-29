@@ -20,12 +20,12 @@ class CheckManager {
      * @param $externalId
      * @return CheckControl
      */
-    private function _getControlId($externalId) {
+    private function _getControlId($externalId, $initial=false) {
         $control = CheckControl::model()->findByAttributes(array("external_id" => $externalId));
 
         if (!$control) {
             $cm = new ControlManager();
-            $control = $cm->create($externalId);
+            $control = $cm->create($externalId, $initial);
         }
 
         return $control->id;
@@ -36,12 +36,12 @@ class CheckManager {
      * @param $externalId
      * @return Reference
      */
-    private function _getReferenceId($externalId) {
+    private function _getReferenceId($externalId, $initial=false) {
         $reference = Reference::model()->findByAttributes(array("external_id" => $externalId));
 
         if (!$reference) {
             $rm = new ReferenceManager();
-            $reference = $rm->create($externalId);
+            $reference = $rm->create($externalId, $initial);
         }
 
         return $reference->id;
@@ -53,10 +53,10 @@ class CheckManager {
      * @return Check
      * @throws Exception
      */
-    public function create($check) {
+    public function create($check, $initial=false) {
         /** @var System $system */
         $system = System::model()->findByPk(1);
-        $api = new CommunityApiClient($system->integration_key);
+        $api = new CommunityApiClient($initial ? null : $system->integration_key);
         $check = $api->getCheck($check)->check;
 
         if ($check->status == CommunityApiClient::STATUS_UNVERIFIED && !$system->community_allow_unverified) {
@@ -74,8 +74,8 @@ class CheckManager {
             return $existingCheck;
         }
 
-        $control = $this->_getControlId($check->control_id);
-        $reference = $this->_getReferenceId($check->reference_id);
+        $control = $this->_getControlId($check->control_id, $initial);
+        $reference = $this->_getReferenceId($check->reference_id, $initial);
 
         $c = new Check();
         $c->external_id = $check->id;
@@ -154,7 +154,7 @@ class CheckManager {
             $pkg = Package::model()->find($criteria);
 
             if (!$pkg) {
-                $pkg = $pm->create($script->package_id);
+                $pkg = $pm->create($script->package_id, $initial);
             }
 
             $s = new CheckScript();
@@ -210,7 +210,7 @@ class CheckManager {
      * @throws Exception
      */
     public function prepareSharing(Check $check) {
-        if ($check->status != Check::STATUS_INSTALLED) {
+        if ($check->status != Check::STATUS_INSTALLED || $check->private) {
             return;
         }
 
@@ -359,7 +359,7 @@ class CheckManager {
             $api = new CommunityApiClient($system->integration_key);
             $check->external_id = $api->shareCheck(array("check" => $data))->id;
         } catch (Exception $e) {
-            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
+            throw new Exception($e->getMessage());
         }
 
         $check->status = Check::STATUS_INSTALLED;

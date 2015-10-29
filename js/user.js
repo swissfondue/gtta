@@ -305,6 +305,8 @@ function User()
         this.expand = function (id, callback) {
             var header, form, url;
 
+            _check.destroyEditor("TargetCheckEditForm_" + id + "_result");
+
             header = $("div.check-header[data-type=check][data-id=" + id + "]");
             form = $("div.check-form[data-type=check][data-id=" + id + "]");
 
@@ -513,21 +515,34 @@ function User()
          * Insert predefined result.
          */
         this.insertResult = function (id, result) {
-            if (_check.isRunning(id))
+            if (_check.isRunning(id)) {
                 return;
-
-            var textarea = $('#TargetCheckEditForm_' + id + '_result');
-
-            result = result.replace(/\n<br>/g, '\n');
-            result = result.replace(/<br>/g, '\n');
-            result = result.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-
-            if (result.match(/Problem:/ig)) {
-                result = result + "\n\nTechnical Details:\n\n@cut\n";
             }
 
-            textarea.val(result + '\n' + textarea.val());
-            textarea.trigger('change');
+            var original = result;
+            result = result.replace(/\n<br>/g, '\n').replace(/<br>\n/g, '\n').replace(/\n<br \/>/g, '\n').replace(/<br \/>\n/g, '\n');
+            result = result.replace(/<br>/g, '\n').replace(/<br \/>/g, '\n');
+
+            var editor = _check.getEditor("TargetCheckEditForm_" + id + "_result");
+
+            if (editor) {
+                result = original + "<br><br>";
+
+                var range = editor.createRange();
+                range.moveToElementEditStart(range.root);
+                editor.getSelection().selectRanges([range]);
+                editor.insertHtml(result);
+            } else {
+                if (result.isHTML()) {
+                    result = original + "<br><br>";
+                } else {
+                    result = result + "\n\n";
+                }
+
+                var textarea = $('#TargetCheckEditForm_' + id + '_result');
+                textarea.val(result + textarea.val());
+                textarea.trigger('change');
+            }
         };
 
         /**
@@ -1856,8 +1871,15 @@ function User()
          * @param id
          */
         this.destroyEditor = function (id) {
-            _check.ckeditors[id].destroy();
-            delete _check.ckeditors[id];
+            if (_check.ckeditors[id]) {
+                try {
+                    _check.ckeditors[id].destroy();
+                } catch (e) {
+                    // pass
+                }
+
+                delete _check.ckeditors[id];
+            }
         };
 
         /**

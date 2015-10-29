@@ -438,17 +438,17 @@ table.check-form > tbody > tr > td {
     list-style:none;
 }
 
-.check-form .results li, .check-form .solutions > li {
+.check-form .results > li, .check-form .solutions > li {
     border-top:1px solid #ddd;
     padding-top:10px;
 }
 
-.check-form .results li:first-child, .check-form .solutions > li:first-child {
+.check-form .results > li:first-child, .check-form .solutions > li:first-child {
     border-top:none;
     padding-top:0;
 }
 
-.check-form .results li,
+.check-form .results > li,
 .check-form .solutions > li,
 .check-form .rating li,
 .check-form .radio-input li {
@@ -846,12 +846,15 @@ table.table-result .new-entry input {
 }
 
 .script-inputs {
-    border-bottom:1px solid #999 !important;
+    background-color:#ddd !important;
 }
 
 .script-inputs th {
     text-align:left !important;
-    background-color:#ddd !important;
+}
+
+.script-inputs th label.checkbox {
+    font-weight:bold;
 }
 
 .module-header, .suggested-targets .suggested-targets-header {

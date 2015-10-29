@@ -22,6 +22,7 @@
  * @property integer $status
  * @property integer $external_id
  * @property string $create_time
+ * @property boolean $private
  * @property TargetCheck[] $targetChecks
  * @property CheckL10n[] $l10n
  * @property CheckScript[] $scripts
@@ -61,7 +62,7 @@ class Check extends ActiveRecord {
                 "numerical",
                 "integerOnly" => true
             ),
-            array("automated, multiple_solutions", "boolean"),
+            array("automated, multiple_solutions, private", "boolean"),
             array("status", "in", "range" => array(
                 self::STATUS_INSTALLED,
                 self::STATUS_SHARE,

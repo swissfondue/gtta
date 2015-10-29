@@ -11,7 +11,9 @@
                 <?php endif; ?>
                 <li><a href="<?php echo $this->createUrl('check/results', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )); ?>"><?php echo Yii::t('app', 'Results'); ?></a></li>
                 <li><a href="<?php echo $this->createUrl('check/solutions', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id )); ?>"><?php echo Yii::t('app', 'Solutions'); ?></a></li>
-                <li><a href="<?php echo $this->createUrl("check/sharecheck", array("id" => $category->id, "control" => $control->id, "check" => $check->id)); ?>"><?php echo Yii::t('app', "Share"); ?></a></li>
+                <?php if (!$check->private): ?>
+                    <li><a href="<?php echo $this->createUrl("check/sharecheck", array("id" => $category->id, "control" => $control->id, "check" => $check->id)); ?>"><?php echo Yii::t('app', "Share"); ?></a></li>
+                <?php endif; ?>
             </ul>
         </div>
     <?php endif; ?>
@@ -155,6 +157,13 @@
             <label class="control-label" for="CheckEditForm_multipleSolutions"><?php echo Yii::t('app', 'Multiple Solutions'); ?></label>
             <div class="controls">
                 <input type="checkbox" id="CheckEditForm_multipleSolutions" name="CheckEditForm[multipleSolutions]" value="1" <?php if ($model->multipleSolutions) echo 'checked="checked"'; ?>>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="CheckEditForm_private"><?php echo Yii::t('app', 'Private'); ?></label>
+            <div class="controls">
+                <input type="checkbox" id="CheckEditForm_private" name="CheckEditForm[private]" value="1" <?php if ($model->private) echo 'checked="checked"'; ?>>
             </div>
         </div>
 

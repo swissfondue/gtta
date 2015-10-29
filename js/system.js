@@ -1387,7 +1387,8 @@ String.prototype.isHTML = function () {
         "<u>",
         "<ul>",
         "<ol>",
-        "<br />"
+        "<br />",
+        "<br>"
     ];
 
     for (var i = 0; i < htmlTest.length; i++) {

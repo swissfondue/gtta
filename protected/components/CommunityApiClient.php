@@ -7,16 +7,27 @@ class CommunityApiClient {
     const URL = "api";
     const TIMEOUT = 3600;
     const INTEGRATION_KEY_HEADER = "X_INTEGRATION_KEY";
+    const INITIAL_KEY_HEADER = "X_INITIAL";
     const STATUS_UNVERIFIED = 0;
 
     private $key;
 
     /**
+     * Flag for the first run
+     * @var bool
+     */
+    private $_initial = false;
+
+    /**
      * Constructor
      * @param $key
      */
-    public function __construct($key) {
+    public function __construct($key=null) {
         $this->key = $key;
+
+        if (!$key) {
+            $this->_initial = true;
+        }
     }
 
     /**
@@ -32,14 +43,16 @@ class CommunityApiClient {
         $curl = curl_init();
         $outFile = null;
 
+        $headers = array(
+            "Content-Type: " . $contentType
+        );
+
+        $headers[] = $this->_initial ? self::INITIAL_KEY_HEADER . ": " . true : self::INTEGRATION_KEY_HEADER . ": " . $this->key;
         $options = array(
             CURLOPT_URL => sprintf("%s/%s/%s", Yii::app()->params["community"]["url"], self::URL, $url),
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => self::TIMEOUT,
-            CURLOPT_HTTPHEADER => array(
-                "Content-Type: " . $contentType,
-                self::INTEGRATION_KEY_HEADER . ": " . $this->key,
-            ),
+            CURLOPT_HTTPHEADER => $headers,
         );
 
         if ($destFilePath !== null) {

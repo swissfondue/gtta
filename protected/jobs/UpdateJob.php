@@ -35,8 +35,8 @@ class UpdateJob extends BackgroundJob {
         $sigPath = $updateDir . "/" . self::SIGNATURE_FILE;
 
         $api = new ServerApiClient($workstationId, $workstationKey);
-        $api->getUpdateArchive($targetVersion, $zipPath);
-        $api->getUpdateSignature($targetVersion, $sigPath);
+        $api->getUpdateArchive($zipPath);
+        $api->getUpdateSignature($sigPath);
 
         if (!file_exists($zipPath) || !file_exists($sigPath)) {
             throw new Exception("Error downloading files");

@@ -830,6 +830,7 @@ class CheckController extends Controller
             $model->protocol = $check->protocol;
             $model->port = $check->port;
             $model->multipleSolutions = $check->multiple_solutions;
+            $model->private = $check->private;
             $model->referenceId = $check->reference_id;
             $model->referenceCode = $check->reference_code;
             $model->referenceUrl = $check->reference_url;
@@ -862,14 +863,9 @@ class CheckController extends Controller
             $model->backgroundInfo = $model->defaultL10n($languages, 'backgroundInfo');
             $model->hints = $model->defaultL10n($languages, 'hints');
             $model->question = $model->defaultL10n($languages, 'question');
-
-            if (!isset($_POST['CheckEditForm']['automated'])) {
-                $model->automated = false;
-            }
-
-            if (!isset($_POST['CheckEditForm']['multipleSolutions'])) {
-                $model->multipleSolutions = false;
-            }
+            $model->automated = isset($_POST["CheckEditForm"]["automated"]);
+            $model->multipleSolutions = isset($_POST["CheckEditForm"]["multipleSolutions"]);
+            $model->private = isset($_POST["CheckEditForm"]["private"]);
 
 			if ($model->validate()) {
                 $redirect = false;
@@ -884,6 +880,7 @@ class CheckController extends Controller
                 $check->question = $model->question;
                 $check->automated = $model->automated;
                 $check->multiple_solutions = $model->multipleSolutions;
+                $check->private = $model->private;
                 $check->protocol = $model->protocol;
                 $check->port = $model->port;
                 $check->check_control_id = $model->controlId;
@@ -3032,6 +3029,10 @@ class CheckController extends Controller
 
         if (!$check) {
             throw new CHttpException(404, Yii::t("app", "Check not found."));
+        }
+
+        if ($check->private) {
+            throw new CHttpException(403, Yii::t("app", "Permission denied."));
         }
 
         $form = new ShareForm();
