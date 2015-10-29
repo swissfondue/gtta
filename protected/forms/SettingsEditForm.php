@@ -119,7 +119,7 @@ class SettingsEditForm extends CFormModel {
 	 */
 	public function rules() {
 		return array(
-			array("timezone", "required"),
+			array("timezone, communityMinRating, reportLowPedestal, reportMedPedestal, reportHighPedestal, reportMaxRating, reportMedDampingLow, reportHighDampingLow, reportHighDampingMed", "required"),
             array("timezone", "in", "range" => array_keys(TimeZones::$zones)),
             array("workstationId", "length", "is" => 36),
             array("workstationKey, copyright", "length", "max" => 1000),
