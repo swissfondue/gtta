@@ -24,7 +24,9 @@ class AttachedImage
      * Parse
      */
     public function parse($content) {
-        $image = new SimpleXMLElement($content);
-        $this->src = $image[self::ATTR_SRC];
+        try {
+            $image = new SimpleXMLElement($content, LIBXML_NOERROR);
+            $this->src = $image[self::ATTR_SRC];
+        } catch (Exception $e) {}
     }
 }
