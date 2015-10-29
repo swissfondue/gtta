@@ -16,8 +16,15 @@ class GitJob extends BackgroundJob {
     const ACTION_CONFIGURE = 1;
     const ACTION_SYNC = 2;
 
+    /**
+     * @var System system
+     */
     private $_system;
 
+    /**
+     * Initialize git
+     * @throws Exception
+     */
     private function _init() {
         $this->_system->updateGitStatus(System::GIT_STATUS_INIT);
 
@@ -30,7 +37,7 @@ class GitJob extends BackgroundJob {
 
         ProcessManager::runCommand($cmd, true);
 
-        $this->_system->updateGitStatus(System::STATUS_IDLE);
+        $this->_system->updateGitStatus(System::GIT_STATUS_IDLE);
     }
 
     /**
@@ -160,8 +167,7 @@ class GitJob extends BackgroundJob {
         $this->_system = System::model()->findByPk(1);
 
         try {
-            $strategy = isset($this->args["strategy"]) ?
-                            $this->args["strategy"] : System::GIT_MERGE_STRATEGY_THEIRS;
+            $strategy = isset($this->args["strategy"]) ? $this->args["strategy"] : System::GIT_MERGE_STRATEGY_THEIRS;
             $this->_sync($strategy);
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());

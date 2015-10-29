@@ -160,6 +160,7 @@ class SettingsEditForm extends CFormModel
             array("email", "email"),
             array("mailPort", "numerical", "integerOnly" => true, "min" => 1, "max" => 65535),
             array("mailHost, mailUsername, mailPassword, gitUrl, gitUsername, gitPassword, gitKey", "safe"),
+            array("gitProto", "in", "range" => array(System::GIT_PROTO_HTTPS, System::GIT_PROTO_SSH)),
             array("gitProto", "checkProto"),
         );
     }
@@ -217,24 +218,23 @@ class SettingsEditForm extends CFormModel
      * @return bool
      */
     public function checkProto($attribute, $params) {
-        if (!in_array($this->gitProto, array(System::GIT_PROTO_HTTPS, System::GIT_PROTO_SSH))) {
-            $this->addError("gitProto", "Invalid Protocol.");
-            return false;
+        if (!$this->gitUrl) {
+            return true;
         }
 
         if ($this->gitProto == System::GIT_PROTO_HTTPS) {
             if (!$this->gitUsername) {
-                $this->addError("gitUsername", "Username can't be blank.");
+                $this->addError("gitUsername", Yii::t("app", "Username can't be blank."));
                 return false;
             }
 
             if (!$this->gitPassword) {
-                $this->addError("gitPassword", "Password can't be blank.");
+                $this->addError("gitPassword", Yii::t("app", "Password can't be blank."));
                 return false;
             }
         } elseif ($this->gitProto == System::GIT_PROTO_SSH) {
             if (!file_exists($_FILES["SettingsEditForm"]["tmp_name"]["gitKey"])) {
-                $this->addError("gitKey", "Key can't be blank.");
+                $this->addError("gitKey", Yii::t("app", "Key can't be blank."));
                 return false;
             }
         }

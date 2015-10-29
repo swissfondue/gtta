@@ -1,6 +1,5 @@
 <div class="active-header">
     <div class="pull-right buttons">
-        <a class="btn" href="<?php echo $this->createUrl("package/sync") ?>"><i class="icon icon-repeat"></i> <?php echo Yii::t("app", "Sync"); ?></a>&nbsp;
         <a class="btn" href="<?php echo $this->createUrl("package/new") ?>"><i class="icon icon-plus"></i> <?php echo Yii::t("app", "New Package"); ?></a>&nbsp;
 
         <?php
@@ -10,7 +9,17 @@
                 $disabled = true;
             }
         ?>
-        <a class="btn" href="<?php echo $disabled ? "#" : $this->createUrl("package/regenerate"); ?>" <?php if ($disabled) echo "disabled"; ?>><i class="icon icon-refresh"></i> <?php echo Yii::t("app", "Regenerate"); ?></a>
+        <a class="btn" href="<?php echo $disabled ? "#" : $this->createUrl("package/regenerate"); ?>" <?php if ($disabled) echo "disabled"; ?>><i class="icon icon-refresh"></i> <?php echo Yii::t("app", "Regenerate"); ?></a>&nbsp;
+
+        <?php
+            $disabled = false;
+
+            if (!$system->git_url) {
+                $disabled = true;
+            }
+        ?>
+
+        <a class="btn" href="<?php echo $this->createUrl("package/sync") ?>" <?php if ($disabled) echo "disabled"; ?>><i class="icon icon-repeat"></i> <?php echo Yii::t("app", "Sync"); ?></a>
     </div>
 
     <h1>

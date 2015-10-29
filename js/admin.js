@@ -1231,7 +1231,7 @@ function Admin()
                         if (data.error) {
                             system.addAlert("error", "Synchronization failed.");
                         } else {
-                            system.addAlert("success", "Synchronization is successful.");
+                            system.addAlert("success", "Synchronization succeeded.");
                         }
 
                         setTimeout(function() {

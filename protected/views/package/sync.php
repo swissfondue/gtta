@@ -7,7 +7,7 @@
         <?php
         echo Yii::t(
             "app",
-            "Git busy. This may take up to several minutes or hours, please be patient."
+            "Synchronizing packages. This may take up to several minutes, please be patient."
         );
         ?>
     </div>

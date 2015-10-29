@@ -290,7 +290,7 @@
         <h3><?php echo Yii::t("app", "Git Settings"); ?></h3>
 
         <div class="control-group <?php if ($form->getError('gitUrl')) echo 'error'; ?>">
-            <label class="control-label" for="SettingsEditForm_gitUrl"><?php echo Yii::t('app', 'Repo Url'); ?></label>
+            <label class="control-label" for="SettingsEditForm_gitUrl"><?php echo Yii::t('app', 'Repository URL'); ?></label>
             <div class="controls">
                 <input type="text" class="input-xlarge" id="SettingsEditForm_gitUrl" name="SettingsEditForm[gitUrl]" value="<?php echo CHtml::encode($form->gitUrl); ?>">
                 <?php if ($form->getError('gitUrl')): ?>
