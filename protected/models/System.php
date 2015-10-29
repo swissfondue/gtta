@@ -179,30 +179,6 @@ class System extends ActiveRecord {
     }
 
     /**
-     * Check if git configured
-     * @return bool
-     */
-    public function getGitConfigured() {
-        if (!$this->git_url) {
-            return false;
-        }
-
-        if ($this->git_proto == self::GIT_PROTO_HTTPS && (!$this->git_username || !$this->git_password)) {
-            return false;
-        }
-
-        if ($this->git_proto == self::GIT_PROTO_SSH) {
-            $keyPath = Yii::app()->params["system"]["filesPath"] . DS . Yii::app()->params["packages"]["git"]["key"];
-
-            if (!file_exists($keyPath)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
      * Update git status
      * @param $status
      * @throws Exception

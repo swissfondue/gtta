@@ -61,4 +61,30 @@ class SystemManager {
 
         return false;
     }
+
+    /**
+     * Check if git configured
+     * @return bool
+     */
+    public static function gitConfigured() {
+        $system = System::model()->findByPk(1);
+
+        if (!$system->git_url) {
+            return false;
+        }
+
+        if ($system->git_proto == System::GIT_PROTO_HTTPS && (!$system->git_username || !$system->git_password)) {
+            return false;
+        }
+
+        if ($system->git_proto == System::GIT_PROTO_SSH) {
+            $keyPath = Yii::app()->params["system"]["filesPath"] . DS . Yii::app()->params["packages"]["git"]["key"];
+
+            if (!file_exists($keyPath)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 } 

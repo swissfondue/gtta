@@ -53,6 +53,8 @@ class GitJob extends BackgroundJob {
         $args = array(
             "--dir",
             Yii::app()->params["packages"]["path"]["scripts"],
+            "--e-mail",
+            $this->args["email"]
         );
 
         if ($this->_system->git_proto == System::GIT_PROTO_HTTPS) {
@@ -112,7 +114,7 @@ class GitJob extends BackgroundJob {
             $this->_init();
         }
 
-        if ($system->gitConfigured) {
+        if (SystemManager::gitConfigured()) {
             $this->_configure();
         }
 
@@ -122,6 +124,8 @@ class GitJob extends BackgroundJob {
             Yii::app()->params["packages"]["path"]["scripts"],
             "--strategy",
             $strategy,
+            "--e-mail",
+            $this->args["email"]
         );
 
         if ($system->git_proto == System::GIT_PROTO_SSH) {
@@ -164,9 +168,13 @@ class GitJob extends BackgroundJob {
      * Perform
      */
     public function perform() {
-        $this->_system = System::model()->findByPk(1);
-
         try {
+            if (!isset($this->args["strategy"]) || !isset($this->args["email"])) {
+                throw new Exception("Invalid job arguments.");
+            }
+
+            $this->_system = System::model()->findByPk(1);
+
             $strategy = isset($this->args["strategy"]) ? $this->args["strategy"] : System::GIT_MERGE_STRATEGY_THEIRS;
             $this->_sync($strategy);
         } catch (Exception $e) {

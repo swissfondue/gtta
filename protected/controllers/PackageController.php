@@ -501,7 +501,8 @@ class PackageController extends Controller {
             if ($form->validate()) {
                 if (!$this->_system->gitBusy) {
                     GitJob::enqueue(array(
-                        "strategy" => $form->strategy
+                        "strategy" => $form->strategy,
+                        "email" => Yii::app()->user->email
                     ));
                     $sync = true;
                 }
