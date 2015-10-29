@@ -143,9 +143,12 @@ class CheckInput extends ActiveRecord {
             @mkdir($filesPath, 0777, true);
         }
 
-        $fp = fopen($filePath, 'w');
-        fwrite($fp, $data);
-        fclose($fp);
+        $fp = @fopen($filePath, 'w');
+
+        if ($fp) {
+            fwrite($fp, $data);
+            fclose($fp);
+        }
     }
 
     /**
