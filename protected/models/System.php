@@ -177,29 +177,4 @@ class System extends ActiveRecord {
     public function getGitBusy() {
         return $this->git_status != self::GIT_STATUS_IDLE && $this->git_status != self::GIT_STATUS_FAILED;
     }
-
-    /**
-     * Update git status
-     * @param $status
-     * @throws Exception
-     */
-    public function updateGitStatus($status) {
-        $notIdle = array(
-            self::GIT_STATUS_INIT,
-            self::GIT_STATUS_CONFIG,
-            self::GIT_STATUS_FAILED,
-            self::GIT_STATUS_SYNC
-        );
-
-        if ($status == $this->git_status) {
-            return;
-        }
-
-        if (in_array($status, $notIdle) && in_array($this->git_status, $notIdle)) {
-            throw new Exception("Permission denied.");
-        }
-
-        $this->git_status = $status;
-        $this->save();
-    }
 }

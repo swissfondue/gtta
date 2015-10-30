@@ -26,7 +26,7 @@ class GitJob extends BackgroundJob {
      * @throws Exception
      */
     private function _init() {
-        $this->_system->updateGitStatus(System::GIT_STATUS_INIT);
+        SystemManager::updateGitStatus(System::GIT_STATUS_INIT);
 
         $cmd = sprintf(
             "%s/%s %s",
@@ -37,7 +37,7 @@ class GitJob extends BackgroundJob {
 
         ProcessManager::runCommand($cmd, true);
 
-        $this->_system->updateGitStatus(System::GIT_STATUS_IDLE);
+        SystemManager::updateGitStatus(System::GIT_STATUS_IDLE);
     }
 
     /**
@@ -49,7 +49,7 @@ class GitJob extends BackgroundJob {
             $this->_init();
         }
 
-        $this->_system->updateGitStatus(System::GIT_STATUS_CONFIG);
+        SystemManager::updateGitStatus(System::GIT_STATUS_CONFIG);
         $args = array(
             "--dir",
             Yii::app()->params["packages"]["path"]["scripts"],
@@ -79,7 +79,7 @@ class GitJob extends BackgroundJob {
         );
 
         ProcessManager::runCommand($cmd, true);
-        $this->_system->updateGitStatus(System::GIT_STATUS_IDLE);
+        SystemManager::updateGitStatus(System::GIT_STATUS_IDLE);
     }
 
     /**
@@ -179,7 +179,7 @@ class GitJob extends BackgroundJob {
             $this->_sync($strategy);
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
-            $this->_system->updateGitStatus(System::GIT_STATUS_FAILED);
+            SystemManager::updateGitStatus(System::GIT_STATUS_FAILED);
         }
     }
 }

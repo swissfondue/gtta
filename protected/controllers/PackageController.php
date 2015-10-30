@@ -533,7 +533,6 @@ class PackageController extends Controller {
         try {
             $system = System::model()->findByPk(1);
             $response->addData("sync", $system->gitBusy);
-
             $failed = $system->git_status == System::GIT_STATUS_FAILED;
             $response->addData("error", $failed);
 
