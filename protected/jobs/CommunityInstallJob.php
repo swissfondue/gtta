@@ -15,20 +15,8 @@ class CommunityInstallJob extends BackgroundJob {
      * @return mixed
      */
     private function _status($integrationKey=null) {
-        $args = array();
-
-        if ($integrationKey) {
-            $cm = new CheckManager();
-            $pm = new PackageManager();
-            $args = array(
-                "checks" => $cm->getExternalIds(),
-                "packages" => $pm->getExternalIds(),
-            );
-        }
-
         $api = new CommunityApiClient($integrationKey);
-
-        return $api->status($args);
+        return $api->status();
     }
 
     /**
@@ -36,10 +24,16 @@ class CommunityInstallJob extends BackgroundJob {
      * @param $integrationKey
      */
     private function _finish($integrationKey) {
-        $this->_status($integrationKey);
-
         $api = new CommunityApiClient($integrationKey);
-        $api->finish();
+        $cm = new CheckManager();
+        $pm = new PackageManager();
+
+        $finished = array(
+            "checks" => $cm->getExternalIds(),
+            "packages" => $pm->getExternalIds(),
+        );
+
+        $api->finish($finished);
     }
 
     /**

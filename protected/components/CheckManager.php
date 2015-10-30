@@ -21,12 +21,8 @@ class CheckManager {
      * @return CheckControl
      */
     private function _getControlId($externalId, $initial=false) {
-        $control = CheckControl::model()->findByAttributes(array("external_id" => $externalId));
-
-        if (!$control) {
-            $cm = new ControlManager();
-            $control = $cm->create($externalId, $initial);
-        }
+        $cm = new ControlManager();
+        $control = $cm->create($externalId, $initial);
 
         return $control->id;
     }
@@ -37,12 +33,8 @@ class CheckManager {
      * @return Reference
      */
     private function _getReferenceId($externalId, $initial=false) {
-        $reference = Reference::model()->findByAttributes(array("external_id" => $externalId));
-
-        if (!$reference) {
-            $rm = new ReferenceManager();
-            $reference = $rm->create($externalId, $initial);
-        }
+        $rm = new ReferenceManager();
+        $reference = $rm->create($externalId, $initial);
 
         return $reference->id;
     }
@@ -56,8 +48,11 @@ class CheckManager {
     public function create($check, $initial=false) {
         /** @var System $system */
         $system = System::model()->findByPk(1);
+
         $api = new CommunityApiClient($initial ? null : $system->integration_key);
         $check = $api->getCheck($check)->check;
+        $control = $this->_getControlId($check->control_id, $initial);
+        $reference = $this->_getReferenceId($check->reference_id, $initial);
 
         if ($check->status == CommunityApiClient::STATUS_UNVERIFIED && !$system->community_allow_unverified) {
             throw new Exception(Yii::t("app", "Installing unverified checks is prohibited."));
@@ -67,17 +62,12 @@ class CheckManager {
             throw new Exception(Yii::t("app", "Check rating is below the system rating limit."));
         }
 
-        $id = $check->id;
-        $existingCheck = Check::model()->findByAttributes(array("external_id" => $id));
+        $c = Check::model()->findByAttributes(array("external_id" => $check->id));
 
-        if ($existingCheck) {
-            return $existingCheck;
+        if (!$c) {
+            $c = new Check();
         }
 
-        $control = $this->_getControlId($check->control_id, $initial);
-        $reference = $this->_getReferenceId($check->reference_id, $initial);
-
-        $c = new Check();
         $c->external_id = $check->id;
         $c->name = $check->name;
         $c->background_info = $check->background_info;
@@ -95,6 +85,9 @@ class CheckManager {
         $c->status = Check::STATUS_INSTALLED;
         $c->save();
 
+        // l10n
+        CheckL10n::model()->deleteAllByAttributes(array("check_id" => $c->id));
+
         foreach ($check->l10n as $l10n) {
             $l = new CheckL10n();
             $l->language_id = $this->_languages[$l10n->code];
@@ -105,6 +98,9 @@ class CheckManager {
             $l->question = $l10n->question;
             $l->save();
         }
+
+        // results
+        CheckResult::model()->deleteAllByAttributes(array("check_id" => $c->id));
 
         foreach ($check->results as $result) {
             $r = new CheckResult();
@@ -123,6 +119,9 @@ class CheckManager {
                 $l->save();
             }
         }
+
+        // solutions
+        CheckSolution::model()->deleteAllByAttributes(array("check_id" => $c->id));
 
         foreach ($check->solutions as $solution) {
             $s = new CheckSolution();
@@ -143,6 +142,9 @@ class CheckManager {
         }
 
         $pm = new PackageManager();
+
+        // scripts
+        CheckScript::model()->deleteAllByAttributes(array("check_id" => $c->id));
 
         foreach ($check->scripts as $script) {
             $criteria = new CDbCriteria();

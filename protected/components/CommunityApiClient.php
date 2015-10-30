@@ -108,11 +108,10 @@ class CommunityApiClient {
 
     /**
      * Status command
-     * @param $data
      * @return mixed response
      */
-    public function status($data) {
-        $response = $this->_sendRequest("status", json_encode($data));
+    public function status() {
+        $response = $this->_sendRequest("status");
         return $this->_parseResponse($response);
     }
 
@@ -235,8 +234,9 @@ class CommunityApiClient {
 
     /**
      * Finish command
+     * @param $data
      */
-    public function finish() {
-        $this->_sendRequest("finish");
+    public function finish($data) {
+        $this->_sendRequest("finish", json_encode($data));
     }
 }

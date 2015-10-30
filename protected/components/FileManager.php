@@ -261,6 +261,6 @@ class FileManager {
             self::createDir(dirname($path), 0770, true);
         }
 
-        file_put_contents($path, $content);
+        @file_put_contents($path, $content);
     }
 }

@@ -54,17 +54,15 @@ class ReferenceManager {
     public function create($reference, $initial) {
         /** @var System $system */
         $system = System::model()->findByPk(1);
+
         $api = new CommunityApiClient($initial ? null : $system->integration_key);
         $reference = $api->getReference($reference)->reference;
+        $r = Reference::model()->findByAttributes(array("external_id" => $reference->id));
 
-        $id = $reference->id;
-        $existingReference = Reference::model()->findByAttributes(array("external_id" => $id));
-
-        if ($existingReference) {
-            return $existingReference;
+        if (!$r) {
+            $r = new Reference();
         }
 
-        $r = new Reference();
         $r->external_id = $reference->id;
         $r->name = $reference->name;
         $r->url = $reference->url;

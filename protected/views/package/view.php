@@ -1,22 +1,20 @@
 <div class="active-header">
-    <?php if (!$package->external_id): ?>
-        <div class="pull-right">
-            <ul class="nav nav-pills">
-                <li class="active"><a href="<?php echo $this->createUrl("package/view", array("id" => $package->id)); ?>"><?php echo Yii::t("app", "View"); ?></a></li>
-                <li class="dropdown" aria-expanded="false">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                        <?php echo Yii::t("app", "Edit"); ?>
-                        <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="<?php echo $this->createUrl("package/editproperties", array("id" => $package->id)); ?>">Properties</a></li>
-                        <li><a href="<?php echo $this->createUrl("package/editfiles", array("id" => $package->id)); ?>">Files</a></li>
-                    </ul>
-                </li>
-                <li><a href="<?php echo $this->createUrl("package/share", array("id" => $package->id)); ?>"><?php echo Yii::t("app", "Share"); ?></a></li>
-            </ul>
-        </div>
-    <?php endif; ?>
+    <div class="pull-right">
+        <ul class="nav nav-pills">
+            <li class="active"><a href="<?php echo $this->createUrl("package/view", array("id" => $package->id)); ?>"><?php echo Yii::t("app", "View"); ?></a></li>
+            <li class="dropdown" aria-expanded="false">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                    <?php echo Yii::t("app", "Edit"); ?>
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="<?php echo $this->createUrl("package/editproperties", array("id" => $package->id)); ?>">Properties</a></li>
+                    <li><a href="<?php echo $this->createUrl("package/editfiles", array("id" => $package->id)); ?>">Files</a></li>
+                </ul>
+            </li>
+            <li><a href="<?php echo $this->createUrl("package/share", array("id" => $package->id)); ?>"><?php echo Yii::t("app", "Share"); ?></a></li>
+        </ul>
+    </div>
 
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 </div>

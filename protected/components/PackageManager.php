@@ -610,13 +610,15 @@ class PackageManager {
 
     /**
      * Schedule package for installation
-     * @param $id
+     * @param $fileId
+     * @param $externalId
+     * @param $async
      * @return Package
      * @throws Exception
      */
-    public function scheduleForInstallation($id, $async=true) {
-        $packagePath = Yii::app()->params["packages"]["tmpPath"] . "/" . $id;
-        $zipPath = Yii::app()->params["packages"]["tmpPath"] . "/" . $id . ".zip";
+    public function scheduleForInstallation($fileId, $externalId=0, $async=true) {
+        $packagePath = Yii::app()->params["packages"]["tmpPath"] . "/" . $fileId;
+        $zipPath = Yii::app()->params["packages"]["tmpPath"] . "/" . $fileId . ".zip";
         $package = null;
         $exception = null;
         $pkg = null;
@@ -626,30 +628,37 @@ class PackageManager {
             $package = $this->_parse($this->_getRootPath($packagePath));
             $this->_validate($package, false);
 
-            $pkg = Package::model()->findByAttributes(array(
-                "type" => $package[self::SECTION_TYPE],
-                "name" => $package[self::SECTION_NAME]
-            ));
+            if ($externalId) {
+                $pkg = Package::model()->findByAttributes(array("external_id" => $externalId));
+            }
 
-            if ($pkg && in_array($pkg->status, Package::getActiveStatuses())) {
-                throw new Exception("Package already installed.");
+            if (!$pkg) {
+                $pkg = Package::model()->findByAttributes(array(
+                    "type" => $package[self::SECTION_TYPE],
+                    "name" => $package[self::SECTION_NAME]
+                ));
             }
 
             if (!$pkg) {
                 $pkg = new Package();
             }
 
-            $pkg->file_name = $id;
+            $pkg->file_name = $fileId;
             $pkg->name = $package[self::SECTION_NAME];
             $pkg->type = $package[self::SECTION_TYPE];
             $pkg->version = $package[self::SECTION_VERSION];
             $pkg->status = Package::STATUS_NOT_INSTALLED;
+
+            if ($externalId) {
+                $pkg->external_id = $externalId;
+            }
+
             $pkg->save();
 
             if ($async) {
                 PackageJob::enqueue(array(
-                    'operation' => PackageJob::OPERATION_INSTALL,
-                    'obj_id' => $pkg->id,
+                    "operation" => PackageJob::OPERATION_INSTALL,
+                    "obj_id" => $pkg->id,
                 ));
             } else {
                 $this->install($pkg);
@@ -1176,16 +1185,10 @@ class PackageManager {
             throw new Exception("Package rating is below the system rating limit.");
         }
 
-        $id = $package->id;
-        $checkPackage = Package::model()->findByAttributes(array("external_id" => $id));
-
-        if ($checkPackage) {
-            return $checkPackage;
-        }
-
         foreach ($package->dependencies as $dep) {
             $checkDependency = Package::model()->findByAttributes(array(
                 "external_id" => $dep->id,
+                "status" => Package::STATUS_INSTALLED,
             ));
 
             if ($checkDependency) {
@@ -1199,17 +1202,13 @@ class PackageManager {
         $zipPath = $tmpData["zipPath"];
 
         $api = new CommunityApiClient($initial ? null : $system->integration_key);
-        $api->getPackageArchive($id, $zipPath);
+        $api->getPackageArchive($package->id, $zipPath);
 
         if (!file_exists($zipPath)) {
             throw new Exception("Error downloading package file: $zipPath");
         }
 
-        $pkg = $this->scheduleForInstallation($tmpData["id"], $initial ? false : true);
-        $pkg->external_id = $id;
-        $pkg->save();
-
-        return $pkg;
+        return $this->scheduleForInstallation($tmpData["id"], $package->id, false);
     }
 
     /**
@@ -1218,9 +1217,12 @@ class PackageManager {
      */
     public function getExternalIds() {
         $packageIds = array();
-        $packages = Package::model()->findAll("external_id IS NOT NULL AND status = :status", array(
-            "status" => Package::STATUS_INSTALLED
-        ));
+
+        $criteria = new CDbCriteria();
+        $criteria->addCondition("external_id IS NOT NULL");
+        $criteria->addInCondition("status", array(Package::STATUS_INSTALLED, Package::STATUS_ERROR));
+
+        $packages = Package::model()->findAll($criteria);
 
         foreach ($packages as $package) {
             $packageIds[] = $package->external_id;
