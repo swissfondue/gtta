@@ -57,7 +57,11 @@ class TargetCheckManager {
             "obj_id" => "*",
         ));
         $mask .= ".pid";
-        $keys = explode(" ", Resque::redis()->keys($mask));
+        $keys = Resque::redis()->keys($mask);
+
+        if (!is_array($keys)) {
+            $keys = explode(" ", $keys);
+        }
 
         $ids = array();
 

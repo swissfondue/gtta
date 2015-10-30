@@ -72,7 +72,7 @@ abstract class BackgroundJob {
         $keys = Resque::redis()->keys($this->id . ".*");
 
         if (!is_array($keys)) {
-            $keys = explode(' ', $keys);
+            $keys = explode(" ", $keys);
         }
 
         foreach ($keys as $key) {

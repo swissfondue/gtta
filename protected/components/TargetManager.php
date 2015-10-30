@@ -457,7 +457,12 @@ class TargetManager {
             "target_id" => "[0-9]*"
         ));
         $mask .= '.message';
-        $keys = explode(" ", Resque::redis()->keys($mask));
+        $keys = Resque::redis()->keys($mask);
+
+        if (!is_array($keys)) {
+            $keys = explode(" ", $keys);
+        }
+
         $pattern = JobManager::buildId(ChainJob::ID_TEMPLATE, array(
             "operation" => sprintf("(%s|%s)", ChainJob::OPERATION_START, ChainJob::OPERATION_STOP),
             "target_id" => "(\d+)"
