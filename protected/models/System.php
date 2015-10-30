@@ -36,6 +36,11 @@
  * @property integer $mail_username
  * @property integer $mail_password
  * @property integer $mail_encryption
+ * @property integer $git_url
+ * @property integer $git_proto
+ * @property integer $git_username
+ * @property integer $git_password
+ * @property integer $git_status
  * @property Language $language
  */
 class System extends ActiveRecord {
@@ -44,6 +49,27 @@ class System extends ActiveRecord {
      */
     const STATUS_IDLE = 0;
     const STATUS_LICENSE_EXPIRED = 500;
+
+    /**
+     * Git statuses
+     */
+    const GIT_STATUS_IDLE = 0;
+    const GIT_STATUS_INIT = 1;
+    const GIT_STATUS_CONFIG = 2;
+    const GIT_STATUS_SYNC = 3;
+    const GIT_STATUS_FAILED = 4;
+
+    /**
+     * Merge strategies
+     */
+    const GIT_MERGE_STRATEGY_OURS = "ours";
+    const GIT_MERGE_STRATEGY_THEIRS = "theirs";
+
+    /**
+     * Git repo protocols
+     */
+    const GIT_PROTO_HTTPS = 0;
+    const GIT_PROTO_SSH = 1;
 
     /**
 	 * Returns the static model of the specified AR class.
@@ -73,6 +99,7 @@ class System extends ActiveRecord {
     }
 
 	/**
+     * Validation rules
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
@@ -82,7 +109,8 @@ class System extends ActiveRecord {
             array("report_low_pedestal, report_med_pedestal, report_high_pedestal, report_max_rating, report_med_damping_low, report_high_damping_low, report_high_damping_med", "numerical", "min" => 0),
             array("community_min_rating", "numerical", "min" => 0, "max" => 5),
             array("community_allow_unverified, checklist_poc, checklist_links", "boolean"),
-            array("backup, timezone, update_check_time, update_time", "safe"),
+            array("backup, timezone, update_check_time, update_time, gitUrl, git_username, git_password", "safe"),
+            array("git_proto", "in", "range" => array(System::GIT_PROTO_HTTPS, System::GIT_PROTO_SSH)),
 		);
 	}
 
@@ -134,11 +162,19 @@ class System extends ActiveRecord {
     }
 
     /**
-     * Check if sustem is restoring
+     * Check if system is restoring
      */
     public function getIsRestoring() {
         $job = JobManager::buildId(RestoreJob::ID_TEMPLATE);
 
         return JobManager::isRunning($job);
+    }
+
+    /**
+     * Check if git is busy
+     * @return bool
+     */
+    public function getGitBusy() {
+        return $this->git_status != self::GIT_STATUS_IDLE && $this->git_status != self::GIT_STATUS_FAILED;
     }
 }

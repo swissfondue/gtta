@@ -4,12 +4,37 @@
 function System() {
     var _system = this;
 
-    // attributes
-    this.csrf = null;
-    this.ajaxTimeout = 60000;
-    this.messageTimeout = 5000;
-    this.l10nMessages = {};
-    this.constants = {};
+    /**
+     * Init
+     */
+    this.init = function () {
+        this.csrf = null;
+        this.ajaxTimeout = 60000;
+        this.messageTimeout = 5000;
+        this.l10nMessages = {};
+        this.constants = {};
+
+        $("select.show-hide-toggle").change(function () {
+            var option = $(this).find("option:selected");
+            $(option.data("hide")).hide();
+            $(option.data("show")).show();
+        });
+    };
+
+    /**
+     * Refresh page without request
+     */
+    this.refreshPage = function () {
+        this.redirect(window.location.href.split("#")[0]);
+    };
+
+    /**
+     * Redirect to url
+     * @param url
+     */
+    this.redirect = function (url) {
+        window.location = url;
+    };
 
     /**
      * Add alert in alerts queue
@@ -1362,6 +1387,10 @@ function System() {
 }
 
 var system = new System();
+
+$(function () {
+    system.init();
+});
 
 /**
  * Number zero padding.

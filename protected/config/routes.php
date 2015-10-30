@@ -130,7 +130,7 @@ return array(
 
     // software packages
     "package/new"                          => "package/new",
-    "package/<id:\d+>/edit"                => "package/editfiles",
+    "package/files/<id:\d+>/edit"          => "package/editfiles",
     "package/<id:\d+>/edit"                => "package/editproperties",
     "packages/<page:\d+>"                  => "package/index",
     "packages"                             => "package/index",
@@ -142,6 +142,8 @@ return array(
     "package/upload"                       => "package/upload",
     "packages/regenerate"                  => "package/regenerate",
     "packages/regenerate-status"           => "package/regeneratestatus",
+    "packages/sync"                        => "packages/sync",
+    "packages/sync-status"                 => "packages/syncStatus",
 
     // checks
     "checks/<page:\d+>"         => "check/index",

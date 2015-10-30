@@ -15,6 +15,7 @@ class JobManager {
         "CommunityInstallJob",
         "CommunityShareJob",
         "EmailJob",
+        "GitJob",
         "ModifiedPackagesJob",
         "PackageJob",
         "RegenerateJob",

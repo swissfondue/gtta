@@ -49,6 +49,9 @@ class SettingsController extends Controller {
         $form->mailUsername = $system->mail_username;
         $form->mailPassword = $system->mail_password;
         $form->mailEncryption = $system->mail_encryption;
+        $form->gitUrl = $system->git_url;
+        $form->gitProto = $system->git_proto;
+        $form->gitUsername = $system->git_username;
 
         // collect form input data
 		if (isset($_POST["SettingsEditForm"])) {
@@ -89,6 +92,17 @@ class SettingsController extends Controller {
                 $system->mail_username = $form->mailUsername;
                 $system->mail_password = $form->mailPassword;
                 $system->mail_encryption = $form->mailEncryption;
+                $system->git_url = $form->gitUrl;
+                $system->git_proto = $form->gitProto;
+
+                if ($form->gitProto == System::GIT_PROTO_HTTPS) {
+                    $system->git_username = $form->gitUsername;
+                    $system->git_password = $form->gitPassword ? $form->gitPassword : $system->git_password;
+                } elseif ($form->gitProto == System::GIT_PROTO_SSH) {
+                    $form->gitKey = CUploadedFile::getInstanceByName("SettingsEditForm[gitKey]");
+                    $form->gitKey->saveAs(Yii::app()->params["system"]["filesPath"] . DS . Yii::app()->params["packages"]["git"]["key"]);
+                }
+
                 $system->save();
 
                 $this->_system->refresh();
@@ -114,7 +128,7 @@ class SettingsController extends Controller {
     /**
      * Upload logo.
      */
-    function actionUploadLogo() {
+    public function actionUploadLogo() {
         $response = new AjaxResponse();
 
         try {
