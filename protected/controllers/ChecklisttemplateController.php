@@ -548,6 +548,19 @@ class ChecklisttemplateController extends Controller {
 
             if ($model->operation == 'delete') {
                 $template->delete();
+
+                $targetTemplates = TargetChecklistTemplate::model()->findAllByAttributes(array(
+                    "checklist_template_id" => $template->id
+                ));
+
+                foreach ($targetTemplates as $tt) {
+                    TargetCheckReindexJob::enqueue(array(
+                        "target_id" => $tt->target->id,
+                    ));
+                    StatsJob::enqueue(array(
+                        "target_id" => $tt->target->id,
+                    ));
+                }
             } else {
                 throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
             }
@@ -696,6 +709,19 @@ class ChecklisttemplateController extends Controller {
                 }
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Category saved.'));
+
+                $targetTemplates = TargetChecklistTemplate::model()->findAllByAttributes(array(
+                    "checklist_template_id" => $template->id
+                ));
+
+                foreach ($targetTemplates as $tt) {
+                    TargetCheckReindexJob::enqueue(array(
+                        "target_id" => $tt->target->id,
+                    ));
+                    StatsJob::enqueue(array(
+                        "target_id" => $tt->target->id,
+                    ));
+                }
 
                 $this->redirect(array(
                     'checklisttemplate/editcheckcategory',

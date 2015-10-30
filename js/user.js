@@ -467,15 +467,15 @@ function User()
         /**
          * Toggle control.
          */
-        this.toggleControl = function (id) {
+        this.toggleControl = function (id, callback) {
             if ($("a[data-type=control-link][data-id=" + id + "]").hasClass("disabled")) {
                 return;
             }
 
             if ($("div.control-body[data-id=" + id + "]").is(":visible")) {
-                _check.collapseControl(id, null);
+                _check.collapseControl(id, callback);
             } else {
-                _check.expandControl(id, null);
+                _check.expandControl(id, callback);
             }
         };
 
@@ -622,7 +622,7 @@ function User()
                 }
             ).get();
 
-            override = $('input[name="TargetCheckEditForm_' + id + '[overrideTarget]"]', row).val();
+            override = $('textarea[name="TargetCheckEditForm_' + id + '[overrideTarget]"]', row).val();
             protocol = $('input[name="TargetCheckEditForm_' + id + '[protocol]"]', row).val();
             port     = $('input[name="TargetCheckEditForm_' + id + '[port]"]', row).val();
             resultTitle = $('input[name="TargetCheckEditForm_' + id + '[resultTitle]"]', row).val();
@@ -1266,45 +1266,6 @@ function User()
                         _check.autosave(id);
                     }, 100);
                 });
-            });
-        };
-
-        /**
-         * Set category as advanced.
-         */
-        this.setAdvanced = function (url, advanced) {
-            data = {};
-
-            data['YII_CSRF_TOKEN'] = system.csrf;
-            data['TargetCheckCategoryEditForm[advanced]'] = advanced;
-
-            $.ajax({
-                dataType : 'json',
-                url      : url,
-                timeout  : system.ajaxTimeout,
-                type     : 'POST',
-                data     : data,
-
-                success : function (data, textStatus) {
-                    $('.loader-image').hide();
-
-                    if (data.status == 'error')
-                    {
-                        system.addAlert('error', data.errorText);
-                        return;
-                    }
-
-                    location.reload();
-                },
-
-                error : function(jqXHR, textStatus, e) {
-                    $('.loader-image').hide();
-                    system.addAlert('error', system.translate('Request failed, please try again.'));
-                },
-
-                beforeSend : function (jqXHR, settings) {
-                    $('.loader-image').show();
-                }
             });
         };
 
@@ -2096,46 +2057,6 @@ function User()
         var _project = this;
 
         /**
-         * Toggle project's "guided test" status.
-         */
-        this.toggleGuidedTest = function (url, id) {
-            data = {};
-
-            data['YII_CSRF_TOKEN'] = system.csrf;
-            data['EntryControlForm[id]'] = id;
-            data['EntryControlForm[operation]'] = 'gt';
-
-            $.ajax({
-                dataType : 'json',
-                url      : url,
-                timeout  : system.ajaxTimeout,
-                type     : 'POST',
-                data     : data,
-
-                success : function (data, textStatus) {
-                    $('.loader-image').hide();
-
-                    if (data.status == 'error')
-                    {
-                        system.addAlert('error', data.errorText);
-                        return;
-                    }
-
-                    location.reload();
-                },
-
-                error : function(jqXHR, textStatus, e) {
-                    $('.loader-image').hide();
-                    system.addAlert('error', system.translate('Request failed, please try again.'));
-                },
-
-                beforeSend : function (jqXHR, settings) {
-                    $('.loader-image').show();
-                }
-            });
-        };
-
-        /**
          * Toggle check source lists on target edit
          * @param val
          */
@@ -2147,1134 +2068,246 @@ function User()
     };
 
     /**
-     * GT selector object.
+     * Target object
      */
-    this.gtSelector = new function () {
-        var _gtSelector = this;
+    this.target = new function () {
+        var _target = this;
 
         /**
-         * Toggle GT category.
+         * Current target id on target chain editing
+         * @type {null}
          */
-        this.categoryToggle = function (id) {
-            if ($('div.gt-category-content[data-id=' + id + ']').is(':visible')) {
-                $('div.gt-category-content[data-id=' + id + ']').slideUp('slow');
-            } else {
-                $('div.gt-category-content[data-id=' + id + ']').slideDown('slow');
-            }
-        };
+        this.targetId = null;
 
         /**
-         * Toggle GT type.
+         * Target check chain object
          */
-        this.typeToggle = function (id) {
-            if ($('div.gt-category-type-content[data-id=' + id + ']').is(':visible')) {
-                $('div.gt-category-type-content[data-id=' + id + ']').slideUp('slow');
-            } else {
-                $('div.gt-category-type-content[data-id=' + id + ']').slideDown('slow');
-            }
-        };
-    };
+        this.chain = new function () {
+            var _chain = this;
 
-    /**
-     * GT check object.
-     */
-    this.gtCheck = new function () {
-        var _gtCheck = this;
-
-        this.runningCheck = undefined;
-        this.updateIteration = 0;
-
-        /**
-         * Update status of running checks.
-         */
-        this.update = function (url) {
-            var i, k, check, headingRow, minutes, seconds;
-
-            if (_gtCheck.runningCheck) {
-                _gtCheck.updateIteration++;
-
-                check = _gtCheck.runningCheck;
-                headingRow = $('div.check-header');
-
-                if (check.time > -1) {
-                    check.time++;
-                    minutes = 0;
-                    seconds = check.time;
-                } else {
-                    minutes = 0;
-                    seconds = 0;
-                }
-
-                if (seconds > 59) {
-                    minutes = Math.floor(seconds / 60);
-                    seconds = seconds - (minutes * 60);
-                }
-
-                $('td.status', headingRow).html(minutes.zeroPad(2) + ':' + seconds.zeroPad(2));
-            }
-
-            if (_gtCheck.updateIteration < 5) {
-                setTimeout(function () {
-                    _gtCheck.update(url);
-                }, 1000);
-            } else {
-                _gtCheck.updateIteration = 0;
-
-                data = [];
-                data.push({name: 'YII_CSRF_TOKEN', value: system.csrf});
+            /**
+             * Start target check chain
+             */
+            this.start = function (targetId, url) {
+                $('.loader-image').show();
 
                 $.ajax({
                     dataType: 'json',
                     url: url,
                     timeout: system.ajaxTimeout,
                     type: 'POST',
-                    data: data,
+                    data: {
+                        "EntryControlForm[id]"        : targetId,
+                        "EntryControlForm[operation]" : 'start',
+                        "YII_CSRF_TOKEN"               : system.csrf
+                    },
 
                     success : function (data, textStatus) {
                         $('.loader-image').hide();
 
                         if (data.status == 'error') {
                             system.addAlert('error', data.errorText);
+
                             return;
                         }
 
-                        data = data.data;
-
-                        if (data.check) {
-                            var check, table, tbody, tr, attachment, target;
-
-                            check = data.check;
-
-                            $('#ProjectGtCheckEditForm_result').val(check.result);
-                            $('div.check-form div.table-result').html(check.tableResult);
-
-                            if (check.startedText) {
-                                $('div.check-form .automated-info-block')
-                                    .html(check.startedText)
-                                    .show();
-                            } else {
-                                $('div.check-form .automated-info-block').hide();
-                            }
-
-                            // attachments
-                            if (check.attachments.length > 0) {
-                                table = $('div.check-form .attachment-list');
-                                tbody = table.find("tbody");
-                                tbody.find("tr").remove();
-
-                                for (k = 0; k < check.attachments.length; k++) {
-                                    attachment = check.attachments[k];
-                                    tr = $("<tr>");
-
-                                    tr.attr("data-path", attachment.path);
-                                    tr.attr("data-control-url", check.attachmentControlUrl);
-
-                                    tr.append(
-                                        $("<td>")
-                                            .addClass("name")
-                                            .append(
-                                                $("<a>")
-                                                    .attr("href", attachment.url)
-                                                    .html(attachment.name)
-                                            )
-                                    );
-
-                                    tr.append(
-                                        $("<td>")
-                                            .addClass("actions")
-                                            .append(
-                                                $("<a>")
-                                                    .attr("href", "#del")
-                                                    .attr("title", system.translate("Delete"))
-                                                    .html('<i class="icon icon-remove"></i>')
-                                                    .click(function () {
-                                                        user.gtCheck.delAttachment(attachment.path);
-                                                    })
-                                            )
-                                    );
-
-                                    tbody.append(tr);
-                                }
-
-                                table.show();
-                            }
-
-                            // targets
-                            if (check.targets.length > 0) {
-                                table = $('.suggested-target-list');
-                                tbody = table.find("tbody");
-                                tbody.find("tr").remove();
-
-                                for (k = 0; k < check.targets.length; k++) {
-                                    target = check.targets[k];
-                                    tr = $("<tr>");
-
-                                    tr.attr("data-id", target.id);
-                                    tr.attr("data-control-url", check.targetControlUrl);
-
-                                    tr.append(
-                                        $("<td>")
-                                            .addClass("target")
-                                            .append(target.host + " / ")
-                                            .append(
-                                                $("<a>")
-                                                    .attr("href", "#")
-                                                    .html(target.module.name)
-                                            )
-                                    );
-
-                                    tr.append(
-                                        $("<td>")
-                                            .addClass("actions")
-                                            .append(
-                                                $("<a>")
-                                                    .attr("id", "approve-link")
-                                                    .attr("href", "#approve")
-                                                    .attr("title", system.translate("Approve"))
-                                                    .attr("onclick", "user.gtCheck.approveTarget(" + target.id + ");")
-                                                    .html('<i class="icon icon-ok"></i>')
-                                            )
-                                            .append("&nbsp;")
-                                            .append(
-                                                $("<a>")
-                                                    .attr("href", "#del")
-                                                    .attr("title", system.translate("Delete"))
-                                                    .attr("onclick", "user.gtCheck.delTarget(" + target.id + ");")
-                                                    .html('<i class="icon icon-remove"></i>')
-                                            )
-                                    );
-
-                                    tbody.append(tr);
-                                }
-
-                                table.parent().parent().show();
-                            }
-
-                            if (_gtCheck.runningCheck) {
-                                _gtCheck.runningCheck.time = check.time;
-                            }
-
-                            if (check.finished) {
-                                _gtCheck.runningCheck = undefined;
-                                var headerRow = $('div.check-header');
-
-                                headerRow.removeClass('in-progress');
-                                $('td.status', headerRow).html('&nbsp;');
-
-                                _gtCheck.setLoaded();
-
-                                $('td.actions', headerRow).html('');
-                                $('td.actions', headerRow).append(
-                                    '<a href="#start" title="' + system.translate('Start') + '" onclick="user.gtCheck.start();"><i class="icon icon-play"></i></a> &nbsp; ' +
-                                    '<a href="#reset" title="' + system.translate('Reset') + '" onclick="user.gtCheck.reset();"><i class="icon icon-refresh"></i></a>'
-                                );
-                            }
-                        }
+                        $('.chain-start-button').addClass('hide');
+                        $('.chain-stop-button').removeClass('hide');
 
                         setTimeout(function () {
-                            _gtCheck.update(url);
-                        }, 1000);
+                            _chain.updateActiveCheck($('#activeChainCheck').data('url'));
+                        }, 5000);
                     },
 
                     error : function(jqXHR, textStatus, e) {
                         $('.loader-image').hide();
                         system.addAlert('error', system.translate('Request failed, please try again.'));
-                    },
-
-                    beforeSend : function (jqXHR, settings) {
-                        $('.loader-image').show();
                     }
                 });
-            }
-        };
-
-        /**
-         * Expand solution.
-         */
-        this.expandSolution = function (id) {
-            $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.gtCheck.collapseSolution(\'' + id + '\');"><i class="icon-chevron-up"></i></a>');
-            $('div.solution-content[data-id=' + id + ']').slideDown('slow');
-        };
-
-        /**
-         * Collapse solution.
-         */
-        this.collapseSolution = function (id) {
-            $('span.solution-control[data-id=' + id + ']').html('<a href="#solution" onclick="user.gtCheck.expandSolution(\'' + id + '\');"><i class="icon-chevron-down"></i></a>');
-            $('div.solution-content[data-id=' + id + ']').slideUp('slow');
-        };
-
-        /**
-         * Expand result.
-         */
-        this.expandResult = function (id) {
-            $('span.result-control[data-id=' + id + ']').html('<a href="#result" onclick="user.gtCheck.collapseResult(' + id + ');"><i class="icon-chevron-up"></i></a>');
-            $('div.result-content[data-id=' + id + ']').slideDown('slow');
-        };
-
-        /**
-         * Collapse result.
-         */
-        this.collapseResult = function (id) {
-            $('span.result-control[data-id=' + id + ']').html('<a href="#result" onclick="user.gtCheck.expandResult(' + id + ');"><i class="icon-chevron-down"></i></a>');
-            $('div.result-content[data-id=' + id + ']').slideUp('slow');
-        };
-
-        /**
-         * Insert predefined result.
-         */
-        this.insertResult = function (result) {
-            if (_gtCheck.runningCheck) {
-                return;
-            }
-
-            var textarea = $('#ProjectGtCheckEditForm_result');
-
-            result = result.replace(/\n<br>/g, '\n');
-            result = result.replace(/<br>/g, '\n');
-            result = result.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-
-            if (result.match(/Problem:/ig)) {
-                result = result + "\n\nTechnical Details:\n\n@cut\n";
-            }
-
-            textarea.val(result + '\n' + textarea.val());
-        };
-
-        /**
-         * Set loading.
-         */
-        this.setLoading = function () {
-            row = $('div.check-form');
-
-            $('.loader-image').show();
-            $('input[type="text"]', row).prop('readonly', true);
-            $('input[type="radio"]', row).prop('disabled', true);
-            $('input[type="checkbox"]', row).prop('disabled', true);
-            $('textarea', row).prop('readonly', true);
-            $('button', row).prop('disabled', true);
-        };
-
-        /**
-         * Set loaded.
-         */
-        this.setLoaded = function () {
-            row = $('div.check-form');
-
-            $('.loader-image').hide();
-            $('input[type="text"]', row).prop('readonly', false);
-            $('input[type="radio"]', row).prop('disabled', false);
-            $('input[type="checkbox"]', row).prop('disabled', false);
-            $('textarea', row).prop('readonly', false);
-            $('button', row).prop('disabled', false);
-        };
-
-        /**
-         * Get check data in array.
-         */
-        this.getData = function () {
-            var i, row, textareas, texts, checkboxes, radios, target, protocol, port, result, solutions, attachments,
-                rating, data, solution, solutionTitle, saveSolution;
-
-            row = $('div.check-form');
-
-            texts = $('input[type="text"][name^="ProjectGtCheckEditForm[inputs]"]', row).map(
-                function () {
-                    return {
-                        name  : $(this).attr('name'),
-                        value : $(this).val()
-                    }
-                }
-            ).get();
-
-            textareas = $('textarea[name^="ProjectGtCheckEditForm[inputs]"]', row).map(
-                function () {
-                    return {
-                        name  : $(this).attr('name'),
-                        value : $(this).val()
-                    }
-                }
-            ).get();
-
-            checkboxes = $('input[type="checkbox"][name^="ProjectGtCheckEditForm[inputs]"]', row).map(
-                function () {
-                    return {
-                        name  : $(this).attr('name'),
-                        value : $(this).is(':checked') ? $(this).val() : '0'
-                    }
-                }
-            ).get();
-
-            radios = $('input[type="radio"][name^="ProjectGtCheckEditForm[inputs]"]:checked', row).map(
-                function () {
-                    return {
-                        name  : $(this).attr('name'),
-                        value : $(this).val()
-                    }
-                }
-            ).get();
-
-            target = $('input[name="ProjectGtCheckEditForm[target]"]', row).val();
-            protocol = $('input[name="ProjectGtCheckEditForm[protocol]"]', row).val();
-            port = $('input[name="ProjectGtCheckEditForm[port]"]', row).val();
-            result = $('textarea[name="ProjectGtCheckEditForm[result]"]', row).val();
-
-            solutions = $('input[name^="ProjectGtCheckEditForm[solutions]"]:checked', row).map(
-                function () {
-                    return {
-                        name  : $(this).attr('name'),
-                        value : $(this).val()
-                    }
-                }
-            ).get();
-
-            for (i = 0; i < solutions.length; i++) {
-                if (solutions[i].value == system.constants.ProjectGtCheckEditForm.CUSTOM_SOLUTION_IDENTIFIER) {
-                    solution = $('textarea[name="ProjectGtCheckEditForm[solution]"]', row).val();
-                    solutionTitle = $('input[name="ProjectGtCheckEditForm[solutionTitle]"]', row).val();
-                    saveSolution = $('input[name="ProjectGtCheckEditForm[saveSolution]"]', row).is(":checked");
-                }
-            }
-
-            attachments = $('input[name^="ProjectGtCheckEditForm[attachmentTitles]"]', row).map(
-                function () {
-                    return {
-                        name : $(this).attr('name'),
-                        value: JSON.stringify({ path : $(this).data('path'), 'title' : $(this).val() })
-                    }
-                }
-            ).get();
-
-            rating = $('input[name="ProjectGtCheckEditForm[rating]"]:checked', row).val();
-
-            if (target == undefined) {
-                target = '';
-            }
-
-            if (protocol == undefined) {
-                protocol = '';
-            }
-
-            if (port == undefined) {
-                port = '';
-            }
-
-            if (result == undefined) {
-                result = '';
-            }
-
-            if (rating == undefined) {
-                rating = '';
-            }
-
-            data = [];
-
-            data.push({name: 'ProjectGtCheckEditForm[target]', value: target});
-            data.push({name: 'ProjectGtCheckEditForm[protocol]', value: protocol});
-            data.push({name: 'ProjectGtCheckEditForm[port]', value: port});
-            data.push({name: 'ProjectGtCheckEditForm[result]', value: result});
-            data.push({name: 'ProjectGtCheckEditForm[rating]', value: rating});
-
-            data.push({name: "ProjectGtCheckEditForm[solution]", value: solution ? solution : ""});
-            data.push({name: "ProjectGtCheckEditForm[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
-            data.push({name: "ProjectGtCheckEditForm[tableResult]", value: _gtCheck.buildTableResult(row)});
-
-            if (saveSolution) {
-                data.push({name: "ProjectGtCheckEditForm[saveSolution]", value: "1"});
-            }
-
-            for (i = 0; i < texts.length; i++) {
-                data.push(texts[i]);
-            }
-
-            for (i = 0; i < textareas.length; i++) {
-                data.push(textareas[i]);
-            }
-
-            for (i = 0; i < checkboxes.length; i++) {
-                data.push(checkboxes[i]);
-            }
-
-            for (i = 0; i < radios.length; i++) {
-                data.push(radios[i]);
-            }
-
-            for (i = 0; i < solutions.length; i++) {
-                data.push(solutions[i]);
-            }
-
-            for (i = 0; i < attachments.length; i++) {
-                data.push(attachments[i]);
-            }
-
-            return data;
-        };
-
-        /**
-         * Save the check.
-         */
-        this.save = function () {
-            var row, headerRow, data, url, nextRow, rating;
-
-            headerRow = $('div.check-header');
-            row = $('div.check-form');
-            url = row.data('save-url');
-
-            data = _gtCheck.getData();
-            data.push({name: 'YII_CSRF_TOKEN', value: system.csrf});
-
-            $.ajax({
-                dataType : 'json',
-                url      : url,
-                timeout  : system.ajaxTimeout,
-                type     : 'POST',
-                data     : data,
-
-                success : function (data, textStatus) {
-                    _gtCheck.setLoaded();
-
-                    if (data.status == 'error') {
-                        system.addAlert('error', data.errorText);
-                        return;
-                    }
-
-                    data = data.data;
-
-                    if (data.rating != undefined && data.rating != null) {
-                        $('td.status', headerRow).html(
-                            '<span class="label ' +
-                            (ratings[data.rating].classN ? ratings[data.rating].classN : '') + '">' +
-                            ratings[data.rating].text + '</span>'
-                        );
-                    } else {
-                        $('td.status', headerRow).html('');
-                    }
-
-                    if (data.newSolution) {
-                        var solution = data.newSolution;
-
-                        $('div.check-form ul.solutions').append(
-                            $("<li></li>")
-                                .append(
-                                    $("<div></div>")
-                                        .addClass("solution-header")
-                                        .append(
-                                            $("<label></label>")
-                                                .addClass(solution.multipleSolutions ? "checkbox" : "radio")
-                                                .append(
-                                                    $("<input>")
-                                                        .attr("type", solution.multipleSolutions ? "checkbox" : "radio")
-                                                        .attr("name", "ProjectGtCheckEditForm[solutions][]")
-                                                        .val(solution.id)
-                                                        .prop("checked", true)
-                                                )
-                                                .append(solution.title)
-                                                .append(
-                                                    $("<span></span>")
-                                                        .addClass("solution-control")
-                                                        .attr("data-id", solution.id)
-                                                        .append(
-                                                            $("<a></a>")
-                                                                .attr("href", "#solution")
-                                                                .click(function () {
-                                                                    _gtCheck.expandSolution(solution.id);
-                                                                })
-                                                                .append(
-                                                                    $("<i></i>")
-                                                                        .addClass("icon-chevron-down")
-                                                                )
-                                                        )
-                                                )
-                                        )
-                                )
-                                .append(
-                                    $("<div></div>")
-                                        .addClass("solution-content")
-                                        .addClass("hide")
-                                        .attr("data-id", solution.id)
-                                        .html(solution.solution)
-                                )
-                        );
-
-                        $('input[name="ProjectGtCheckEditForm[solutions][]"].custom-solution').prop("checked", false);
-                        $('textarea[name="ProjectGtCheckEditForm[solution]"]').data("wysihtml5").editor.clear();
-                        $('input[name="ProjectGtCheckEditForm[solutionTitle]"]').val("");
-                        $('input[name="ProjectGtCheckEditForm[saveSolution]"]').prop("checked", false);
-                        _gtCheck.collapseSolution(system.constants.ProjectGtCheckEditForm.CUSTOM_SOLUTION_IDENTIFIER);
-                    }
-
-                    $('i.icon-refresh', headerRow).parent().remove();
-                    $('td.actions', headerRow).append(
-                        '<a href="#reset" title="' + system.translate('Reset') + '" onclick="user.gtCheck.reset();"><i class="icon icon-refresh"></i></a>'
-                    );
-                },
-
-                error : function(jqXHR, textStatus, e) {
-                    _gtCheck.setLoaded();
-                    system.addAlert('error', system.translate('Request failed, please try again.'));
-                },
-
-                beforeSend : function (jqXHR, settings) {
-                    _gtCheck.setLoading();
-                }
-            });
-        };
-
-        /**
-         * Autosave the check.
-         */
-        this.autosave = function () {
-            var row, headerRow, data, url, nextRow;
-
-            row = $("div.check-form");
-            url = row.data("autosave-url");
-
-            data = {
-                "YII_CSRF_TOKEN": system.csrf,
-                "ProjectGtCheckEditForm[result]": $('textarea[name="ProjectGtCheckEditForm[result]"]', row).val()
             };
 
-            $.ajax({
-                dataType: "json",
-                url: url,
-                timeout: system.ajaxTimeout,
-                type: "POST",
-                data: data,
+            /**
+             * Stop target check chain
+             * @param targetId
+             * @param url
+             */
+            this.stop = function (targetId, url) {
+                $('.loader-image').show();
 
-                success : function (data, textStatus) {
-                    _gtCheck.setLoaded();
-
-                    if (data.status == "error") {
-                        system.addAlert("error", data.errorText);
-                        return;
-                    }
-                },
-
-                error : function(jqXHR, textStatus, e) {
-                    _gtCheck.setLoaded();
-                    system.addAlert("error", system.translate("Request failed, please try again."));
-                },
-
-                beforeSend : function (jqXHR, settings) {
-                    _gtCheck.setLoading();
-                }
-            });
-        };
-
-        /**
-         * Init autosave function for check id
-         */
-        this.initAutosave = function () {
-            $(".check-form").each(function () {
-                var row = $("div.check-form");
-
-                $('textarea[name="ProjectGtCheckEditForm[result]"]', row).on("paste", function () {
-                    setTimeout(function () {
-                        _gtCheck.autosave();
-                    }, 100);
-                });
-            });
-        };
-
-        /**
-         * Initialize attachments form.
-         */
-        this.initProjectGtCheckAttachmentUploadForms = function () {
-            $('input[name^="ProjectGtCheckAttachmentUploadForm"]').each(function () {
-                var url = $(this).data('upload-url'), data = {};
-
-                data['YII_CSRF_TOKEN'] = system.csrf;
-
-                $(this).fileupload({
+                $.ajax({
                     dataType: 'json',
                     url: url,
-                    forceIframeTransport: true,
-                    timeout: 120000,
-                    formData: data,
-                    dropZone:$('input[name^="ProjectGtCheckAttachmentUploadForm"]'),
+                    timeout: system.ajaxTimeout,
+                    type: 'POST',
+                    data: {
+                        "EntryControlForm[id]"        : targetId,
+                        "EntryControlForm[operation]" : 'stop',
+                        "YII_CSRF_TOKEN"               : system.csrf
+                    },
 
-                    done : function (e, data) {
+                    success : function (data, textStatus) {
                         $('.loader-image').hide();
-                        $('#upload-message').hide();
-                        $('#upload-link').show();
 
-                        var json = data.result;
+                        if (data.status == 'error') {
+                            system.addAlert('error', data.errorText);
 
-                        if (json.status == 'error') {
-                            system.addAlert('error', json.errorText);
                             return;
                         }
 
-                        data = json.data;
-
-                        var tr = $('<tr>')
-                            .attr('data-path', data.path)
-                            .attr('data-control-url', data.controlUrl)
-                            .append(
-                                $('<td>')
-                                    .addClass('info')
-                                    .append(
-                                        $('<span>')
-                                            .attr('contenteditable', 'true')
-                                            .addClass('single-line')
-                                            .addClass('title')
-                                            .blur(function () {
-                                                $(this).siblings('input').val($(this).text());
-                                            })
-                                            .text(data.title),
-                                        $('<input>')
-                                            .attr('type', 'hidden')
-                                            .attr('name', 'ProjectGtCheckEditForm[attachmentTitles][]')
-                                            .attr('data-path', data.path)
-                                            .val(data.title),
-                                        $('<div>')
-                                            .addClass('name')
-                                            .addClass('content')
-                                            .append(
-                                                $('<a>')
-                                                    .attr('href', data.url)
-                                                    .text(data.name)
-                                            )
-                                    ),
-                                $('<td>')
-                                    .addClass('actions')
-                                    .append(
-                                        $('<a>')
-                                            .attr('href', '#del')
-                                            .attr('title', system.translate("Delete"))
-                                            .attr('onclick', 'user.gtCheck.delAttachment(\'' + data.path + '\')')
-                                            .append(
-                                                $('<i>')
-                                                    .addClass('icon')
-                                                    .addClass('icon-remove')
-                                            )
-                                    )
-                            );
-
-                        if ($('div.check-form .attachment-list').length == 0)
-                            $('div.check-form .upload-message').after('<table class="table attachment-list"><tbody></tbody></table>');
-
-                        $('div.check-form .attachment-list').show();
-                        $('div.check-form .attachment-list > tbody').append(tr);
+                        $('.chain-stop-button').hide();
+                        $('.chain-start-button').show();
                     },
 
-                    fail : function (e, data) {
+                    error : function(jqXHR, textStatus, e) {
                         $('.loader-image').hide();
-                        $('#upload-message').hide();
-                        $('#upload-link').show();
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    }
+                });
+            };
+
+            /**
+             * Stop target check chain
+             * @param targetId
+             * @param url
+             */
+            this.reset = function (targetId, url) {
+                $('.loader-image').show();
+                $('.chain-reset-button').show();
+
+                $.ajax({
+                    dataType: 'json',
+                    url: url,
+                    timeout: system.ajaxTimeout,
+                    type: 'POST',
+                    data: {
+                        "EntryControlForm[id]"        : targetId,
+                        "EntryControlForm[operation]" : 'reset',
+                        "YII_CSRF_TOKEN"               : system.csrf
+                    },
+
+                    success : function (data, textStatus) {
+                        $('.loader-image').hide();
+
+                        if (data.status == 'error') {
+                            system.addAlert('error', data.errorText);
+                        }
+
+                        $('#activeChainCheck').addClass('hide');
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $('.loader-image').hide();
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    }
+                });
+            };
+
+            /**
+             * Show chain messages
+             */
+            this.messages = function (url) {
+                $('.loader-image').show();
+
+                $.ajax({
+                    dataType: "json",
+                    url: url,
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+                    data: {
+                        "YII_CSRF_TOKEN": system.csrf
+                    },
+                    'success' : function (response) {
+                        var messages = response.data.messages;
+
+                        $.each(messages, function (key, value) {
+                            var status = parseInt(value.status);
+                            var id = parseInt(value.id);
+                            var message = value.message;
+
+                            system.addAlert("success", message);
+
+                            if (id) {
+                                switch (status) {
+                                    case system.constants.Target.CHAIN_STATUS_IDLE:
+                                    case system.constants.Target.CHAIN_STATUS_STOPPED:
+                                    case system.constants.Target.CHAIN_STATUS_BREAKED:
+                                        $('.chain-start-button').removeClass('hide');
+                                        $('.chain-stop-button').addClass('hide');
+
+                                        break;
+
+                                    case system.constants.Target.CHAIN_STATUS_ACTIVE:
+                                        $('.chain-start-button').addClass('hide');
+                                        $('.chain-stop-button').removeClass('hide');
+
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+                            }
+                        });
+
+                        $(".loader-image").hide();
+                    },
+
+                    'error' : function (data) {
+                        $(".loader-image").hide();
                         system.addAlert('error', system.translate('Request failed, please try again.'));
                     },
 
-                    start : function (e) {
-                        $('.loader-image').show();
-                        $('#upload-link').hide();
-                        $('#upload-message').show();
+                    'beforeSend' : function () {
+                        $(".loader-image").show();
                     }
                 });
-            });
-        };
+            };
 
-        /**
-         * Control attachment function.
-         */
-        this._controlAttachment = function(path, operation) {
-            var url = $('tr[data-path=' + path + ']').data('control-url');
+            /**
+             * Update active check of running chain
+             * @param url
+             */
+            this.updateActiveCheck = function (url) {
+                $('.loader-image').show();
 
-            $.ajax({
-                dataType : 'json',
-                url      : url,
-                timeout  : system.ajaxTimeout,
-                type     : 'POST',
+                $.ajax({
+                    dataType: "json",
+                    url: url,
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+                    data: {
+                        "YII_CSRF_TOKEN": system.csrf
+                    },
+                    'success' : function (response) {
+                        var status = parseInt(response.data.status);
+                        var check = response.data.check;
 
-                data : {
-                    'ProjectGtCheckAttachmentControlForm[operation]': operation,
-                    'ProjectGtCheckAttachmentControlForm[path]': path,
-                    'YII_CSRF_TOKEN': system.csrf
-                },
+                        if (status == system.constants.Target.CHAIN_STATUS_ACTIVE) {
+                            setTimeout(function () {
+                                _chain.updateActiveCheck(url);
+                            }, 5000);
 
-                success : function (data, textStatus) {
-                    $('.loader-image').hide();
+                            $('#activeChainCheck').removeClass('hide');
+                            $('#activeChainCheck .check-name').text(check);
+                        } else {
+                            $('#activeChainCheck').addClass('hide');
 
-                    if (data.status == 'error') {
-                        system.addAlert('error', data.errorText);
-                        return;
-                    }
-
-                    if (operation == 'delete') {
-                        $('tr[data-path=' + path + ']').fadeOut('slow', undefined, function () {
-                            var table = $('tr[data-path=' + path + ']').parent().parent();
-
-                            $('tr[data-path=' + path + ']').remove();
-
-                            if ($('tbody > tr', table).length == 0)
-                                table.hide();
-                        });
-                    }
-                },
-
-                error : function(jqXHR, textStatus, e) {
-                    $('.loader-image').hide();
-                    system.addAlert('error', system.translate('Request failed, please try again.'));
-                },
-
-                beforeSend : function (jqXHR, settings) {
-                    $('.loader-image').show();
-                }
-            });
-        };
-
-        /**
-         * Control suggested target function.
-         */
-        this._controlTarget = function(id, operation) {
-            var url = $('tr[data-id=' + id + ']').data('control-url');
-
-            $.ajax({
-                dataType : 'json',
-                url      : url,
-                timeout  : system.ajaxTimeout,
-                type     : 'POST',
-
-                data : {
-                    'EntryControlForm[operation]': operation,
-                    'EntryControlForm[id]': id,
-                    'YII_CSRF_TOKEN': system.csrf
-                },
-
-                success : function (data, textStatus) {
-                    $('.loader-image').hide();
-
-                    if (data.status == 'error') {
-                        system.addAlert('error', data.errorText);
-                        return;
-                    }
-
-                    if (operation == 'delete') {
-                        $('tr[data-id=' + id + ']').fadeOut('slow', undefined, function () {
-                            var table = $('tr[data-id=' + id + ']').parent().parent();
-
-                            $('tr[data-id=' + id + ']').remove();
-
-                            if ($('tbody > tr', table).length == 0) {
-                                table.parent().parent().hide();
-                            }
-                        });
-                    } else if (operation == 'approve') {
-                        $('tr[data-id=' + id + '] #approve-link').remove();
-                    }
-                },
-
-                error : function(jqXHR, textStatus, e) {
-                    $('.loader-image').hide();
-                    system.addAlert('error', system.translate('Request failed, please try again.'));
-                },
-
-                beforeSend : function (jqXHR, settings) {
-                    $('.loader-image').show();
-                }
-            });
-        };
-
-        /**
-         * Delete attachment.
-         */
-        this.delAttachment = function (path) {
-            if (confirm(system.translate('Are you sure that you want to delete this object?'))) {
-                _gtCheck._controlAttachment(path, 'delete');
-            }
-        };
-
-        /**
-         * Delete suggested target.
-         */
-        this.delTarget = function (id) {
-            if (confirm(system.translate('Are you sure that you want to delete this object?'))) {
-                _gtCheck._controlTarget(id, 'delete');
-            }
-        };
-
-        /**
-         * Approve suggested target.
-         */
-        this.approveTarget = function (id) {
-            _gtCheck._controlTarget(id, 'approve');
-        };
-
-        /**
-         * Control check function.
-         */
-        this._control = function(operation) {
-            var row, headerRow, url;
-
-            headerRow = $('div.check-header');
-            row = $('div.check-form');
-            url = row.data('control-url');
-
-            $.ajax({
-                dataType : 'json',
-                url      : url,
-                timeout  : system.ajaxTimeout,
-                type     : 'POST',
-
-                data : {
-                    'EntryControlForm[operation]' : operation,
-                    'EntryControlForm[id]'        : 0,
-                    'YII_CSRF_TOKEN'              : system.csrf
-                },
-
-                success : function (data, textStatus) {
-                    _gtCheck.setLoaded();
-
-                    if (data.status == 'error') {
-                        system.addAlert('error', data.errorText);
-                        return;
-                    }
-
-                    data = data.data;
-
-                    if (operation == 'start') {
-                        $('td.status',  headerRow).html('00:00');
-                        $('td.actions', headerRow).html('');
-                        $('td.actions', headerRow).append(
-                            '<a href="#stop" title="' + system.translate('Stop') + '" onclick="user.gtCheck.stop();"><i class="icon icon-stop"></i></a> &nbsp; ' +
-                            '<span class="disabled"><i class="icon icon-refresh" title="' +
-                            system.translate('Reset') + '"></i></span>'
-                        );
-
-                        $('div.table-result', row).html('');
-
-                        _gtCheck.setLoading();
-                        $('.loader-image').hide();
-
-                        _gtCheck.runningCheck = {
-                            time: -1
-                        };
-
-                        headerRow.addClass('in-progress');
-                    } else if (operation == 'reset') {
-                        $('td.actions', headerRow).html('');
-                        $('td.status', headerRow).html('&nbsp;');
-
-                        if (data.automated) {
-                            $('td.actions', headerRow).append(
-                                '<a href="#start" title="' + system.translate('Start') + '" onclick="user.gtCheck.start();"><i class="icon icon-play"></i></a> &nbsp; '
-                            );
+                            $('.chain-start-button').removeClass('hide');
+                            $('.chain-stop-button').addClass('hide');
                         }
 
-                        $('td.actions', headerRow).append(
-                            '<span class="disabled"><i class="icon icon-refresh" title="' +
-                            system.translate('Reset') + '"></i></span>'
-                        );
+                        $(".loader-image").hide();
+                    },
 
-                        $('input[type="text"]', row).val('');
-                        $('input[type="radio"]', row).prop('checked', false);
-                        $('input[type="checkbox"]', row).prop('checked', false);
-                        $('textarea', row).val('');
-                        $('table.attachment-list', row).remove();
-                        $('div.table-result', row).html('');
+                    'error' : function (data) {
+                        $(".loader-image").hide();
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    },
 
-                        // port & protocol values
-                        if (data.protocol != null && data.protocol != undefined) {
-                            $('#ProjectGtCheckEditForm_protocol').val(data.protocol);
-                        }
-
-                        if (data.port != null && data.port != undefined) {
-                            $('#ProjectGtCheckEditForm_port').val(data.port);
-                        }
-
-                        // input values
-                        for (var i = 0; i < data.inputs.length; i++) {
-                            var input, input_obj;
-
-                            input = data.inputs[i];
-                            input_obj = $("#" + input.id);
-
-                            if (input_obj.is(":checkbox") || input_obj.is(":radio")) {
-                                continue;
-                            }
-
-                            input_obj.val(input.value);
-                        }
-                    } else if (operation == 'stop') {
-                        $('td.actions', headerRow).html('');
-                        $('td.actions', headerRow).append(
-                            '<span class="disabled"><i class="icon icon-stop" title="' +
-                            system.translate('Stop') + '"></i></span> &nbsp; ' +
-                            '<span class="disabled"><i class="icon icon-refresh" title="' +
-                            system.translate('Reset') + '"></i></span>'
-                        );
-
-                        _gtCheck.setLoading();
-                        $('.loader-image').hide();
-                    } else if (operation == 'gt-next' || operation == 'gt-prev') {
-                        $.cookie('gt_step', data.step, { path : '/' });
-                        location.reload();
-                    }
-
-                    if (operation == "reset") {
-                        $('input[name="ProjectGtCheckEditForm[rating]"][value=0]').prop("checked", true);
-                    }
-                },
-
-                error : function(jqXHR, textStatus, e) {
-                    _gtCheck.setLoaded();
-                    system.addAlert('error', system.translate('Request failed, please try again.'));
-                },
-
-                beforeSend : function (jqXHR, settings) {
-                    _gtCheck.setLoading();
-                }
-            });
-        };
-
-        /**
-         * Start check.
-         */
-        this.start = function () {
-            var row, headerRow, data, url, nextRow, rating;
-
-            headerRow = $('div.check-header');
-            row = $('div.check-form');
-            url = row.data('save-url');
-
-            if (!$("#ProjectGtCheckEditForm_target").val()) {
-                alert(system.translate("No target specified!"));
-                return;
-            }
-
-            data = _gtCheck.getData();
-            data.push({name: 'YII_CSRF_TOKEN', value: system.csrf});
-
-            _gtCheck.setLoading();
-
-            $.ajax({
-                dataType : 'json',
-                url      : url,
-                timeout  : system.ajaxTimeout,
-                type     : 'POST',
-                data     : data,
-
-                success : function (data, textStatus) {
-                    if (data.status == 'error') {
-                        _gtCheck.setLoaded();
-                        system.addAlert('error', data.errorText);
-
-                        return;
-                    }
-
-                    _gtCheck._control('start');
-                },
-
-                error : function(jqXHR, textStatus, e) {
-                    _gtCheck.setLoaded();
-                    system.addAlert('error', system.translate('Request failed, please try again.'));
-                }
-            });
-        };
-
-        /**
-         * Stop check.
-         */
-        this.stop = function () {
-            _gtCheck._control('stop');
-        };
-
-        /**
-         * Reset check.
-         */
-        this.reset = function () {
-            if (confirm(system.translate('Are you sure that you want to reset this check?'))) {
-                _gtCheck._control('reset');
-            }
-        };
-
-        /**
-         * Next check.
-         */
-        this.next = function () {
-            _gtCheck._control('gt-next');
-        };
-
-        /**
-         * Previous check.
-         */
-        this.prev = function () {
-            _gtCheck._control('gt-prev');
-        };
-
-        /**
-         * Delete table result entry
-         * @param tableId
-         * @param entryId
-         */
-        this.delTableResultEntry = function (tableId, entryId) {
-            if (confirm(system.translate("Are you sure that you want to delete this object?"))) {
-                var $table = $('table[data-table-id=' + tableId + ']');
-                var $row = $table.find('[data-id=' + entryId + ']');
-
-                $row.fadeOut("slow", function () {
-                    $(this).remove();
-
-                    if ($table.find("tr.data").length == 0) {
-                        $table.remove();
+                    'beforeSend' : function () {
+                        $(".loader-image").show();
                     }
                 });
-            }
-        };
-
-        /**
-         * Add new enrty to table_result
-         * @param tableId
-         */
-        this.newTableResultEntry = function (tableId) {
-            var $table = $('table[data-table-id=' + tableId + ']');
-            var $inputs = $table.find('.new-entry input');
-
-            if ($inputs.filter(function () {
-                return $.trim($(this).val()).length > 0
-            }).length == 0) {
-                alert(system.translate("At least one field must be filled!"));
-                return;
-            }
-
-            var newEntryId = parseInt($table.find('tr.data').last().data('id')) + 1;
-            var $newDataEntry = $('<tr>')
-                .addClass('data')
-                .attr('data-id', newEntryId);
-
-            $.each($inputs, function (key, field) {
-                $newDataEntry.append(
-                    $('<td>')
-                        .text($(field).val())
-                );
-                $(field).val('');
-            });
-
-            $newDataEntry.append(
-                $('<td>')
-                    .addClass('actions')
-                    .append(
-                        $('<a>')
-                            .attr('href', '#del')
-                            .attr('title', system.translate('Delete'))
-                            .attr('onclick', "user.gtCheck.delTableResultEntry('" + tableId + "', '" + newEntryId + "');")
-                            .append(
-                                $('<i>')
-                                    .addClass('icon')
-                                    .addClass('icon-remove')
-                            )
-                    )
-            );
-
-            $table.find('tr.data').last().after($newDataEntry);
-        };
-
-        /**
-         * Build table_result string for check
-         * @param checkForm
-         */
-        this.buildTableResult = function (checkForm) {
-            return user.check.buildTableResult(checkForm);
+            };
         };
     };
 

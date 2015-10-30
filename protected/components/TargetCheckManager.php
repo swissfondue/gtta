@@ -7,7 +7,7 @@ class TargetCheckManager {
      * Start check
      * @param $id
      */
-    public static function start($id) {
+    public static function start($id, $chain=false) {
         $id = (int) $id;
         $targetCheck = TargetCheck::model()->findByPk($id);
 
@@ -21,6 +21,7 @@ class TargetCheckManager {
                 "operation" => AutomationJob::OPERATION_START,
                 "obj_id" => $targetCheck->id,
                 "started" => $now->format(ISO_DATE_TIME),
+                "chain" => $chain,
             )
         );
     }

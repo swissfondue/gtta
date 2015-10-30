@@ -83,7 +83,6 @@ class CheckManager {
         $c->background_info = $check->background_info;
         $c->hints = $check->hints;
         $c->question = $check->question;
-        $c->advanced = $check->advanced;
         $c->automated = $check->automated;
         $c->multiple_solutions = $check->multiple_solutions;
         $c->protocol = $check->protocol;
@@ -262,7 +261,6 @@ class CheckManager {
             "background_info" => $check->background_info,
             "hints" => $check->hints,
             "question" => $check->question,
-            "advanced" => $check->advanced,
             "automated" => $check->automated,
             "multiple_solutions" => $check->multiple_solutions,
             "protocol" => $check->protocol,

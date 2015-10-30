@@ -826,7 +826,6 @@ class CheckController extends Controller
             $model->backgroundInfo = $check->background_info;
             $model->hints = $check->hints;
             $model->question = $check->question;
-            $model->advanced = $check->advanced;
             $model->automated = $check->automated;
             $model->protocol = $check->protocol;
             $model->port = $check->port;
@@ -864,7 +863,6 @@ class CheckController extends Controller
             $model->backgroundInfo = $model->defaultL10n($languages, 'backgroundInfo');
             $model->hints = $model->defaultL10n($languages, 'hints');
             $model->question = $model->defaultL10n($languages, 'question');
-            $model->advanced = isset($_POST["CheckEditForm"]["advanced"]);
             $model->automated = isset($_POST["CheckEditForm"]["automated"]);
             $model->multipleSolutions = isset($_POST["CheckEditForm"]["multipleSolutions"]);
             $model->private = isset($_POST["CheckEditForm"]["private"]);
@@ -880,7 +878,6 @@ class CheckController extends Controller
                 $check->background_info = $model->backgroundInfo;
                 $check->hints = $model->hints;
                 $check->question = $model->question;
-                $check->advanced = $model->advanced;
                 $check->automated = $model->automated;
                 $check->multiple_solutions = $model->multipleSolutions;
                 $check->private = $model->private;
@@ -1080,7 +1077,6 @@ class CheckController extends Controller
                 $dst->background_info = $src->background_info;
                 $dst->hints = $src->hints;
                 $dst->question = $src->question;
-                $dst->advanced = $src->advanced;
                 $dst->automated = $src->automated;
                 $dst->multiple_solutions = $src->multiple_solutions;
                 $dst->protocol = $src->protocol;

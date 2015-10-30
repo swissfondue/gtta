@@ -11,11 +11,11 @@ class JobManager {
         "AutomationJob",
         "BackupJob",
         "ClearLogJob",
+        "ChainJob",
         "CommunityInstallJob",
         "CommunityShareJob",
         "EmailJob",
         "GitJob",
-        "GtAutomationJob",
         "ModifiedPackagesJob",
         "PackageJob",
         "RegenerateJob",
@@ -94,5 +94,23 @@ class JobManager {
     public static function delKey($key) {
         $key = str_replace('resque:', '', $key);
         Resque::redis()->del($key);
+    }
+
+    /**
+     * Set redis key value
+     * @param $key
+     * @param $value
+     */
+    public static function setKeyValue($key, $value) {
+        Resque::redis()->set($key, $value);
+    }
+
+    /**
+     * Returns redis key value
+     * @param $key
+     * @return mixed
+     */
+    public static function getKeyValue($key) {
+        return Resque::redis()->get($key);
     }
 }

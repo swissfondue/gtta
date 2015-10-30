@@ -171,10 +171,9 @@ class AppController extends Controller {
 
         $classes = array(
             "Package",
+            "Target",
             "TargetCheck",
-            "ProjectGtCheck",
             "TargetCheckEditForm",
-            "ProjectGtCheckEditForm",
         );
 
         $constants = array();
@@ -302,8 +301,7 @@ class AppController extends Controller {
                     foreach ($projects as $project) {
                         $objects[] = array(
                             'id'   => $project->id,
-                            'name' => CHtml::encode($project->name) . ' (' . $project->year . ')',
-                            'guided' => $project->guided_test
+                            'name' => CHtml::encode($project->name) . ' (' . $project->year . ')'
                         );
                     }
 
@@ -434,9 +432,6 @@ class AppController extends Controller {
                             $criteria->addInCondition('t.check_control_id', $controlIds);
                             $criteria->together = true;
 
-                            if (!$category->advanced)
-                                $criteria->addCondition('t.advanced = FALSE');
-
                             $checks = Check::model()->with(array(
                                 'l10n' => array(
                                     'joinType' => 'LEFT JOIN',
@@ -471,178 +466,6 @@ class AppController extends Controller {
 
                     break;
 
-                case 'gt-target-check-list':
-                    $project = Project::model()->findByPk($model->id);
-
-                    if (!$project) {
-                        throw new CHttpException(404, Yii::t('app', 'Project not found.'));
-                    }
-
-                    if (!$project->guided_test || !$project->checkPermission()) {
-                        throw new CHttpException(403, Yii::t('app', 'Access denied.'));
-                    }
-
-                    $targets = array();
-
-                    $criteria = new CDbCriteria();
-                    $criteria->addColumnCondition(array('project_id' => $project->id));
-                    $criteria->order = 'target ASC';
-
-                    $checks = ProjectGtCheck::model()->findAll($criteria);
-
-                    foreach ($checks as $check) {
-                        if (!$check->target) {
-                            continue;
-                        }
-
-                        if (!in_array($check->target, $targets)) {
-                            $targets[] = $check->target;
-                        }
-                    }
-
-                    $targetId = 1;
-                    $ratings = ProjectGtCheck::getRatingNames();
-
-                    foreach ($targets as $target) {
-                        $targetData = array(
-                            'id' => $targetId,
-                            'host' => $target,
-                            'description' => "",
-                            'checks' => array()
-                        );
-
-                        // get all checks
-                        $criteria = new CDBCriteria();
-                        $criteria->addColumnCondition(array(
-                            "project_id" => $project->id,
-                            "target" => $target,
-                            "t.status" => ProjectGtCheck::STATUS_FINISHED,
-                        ));
-
-                        $criteria->addInCondition("rating", array(
-                            ProjectGtCheck::RATING_HIGH_RISK,
-                            ProjectGtCheck::RATING_MED_RISK,
-                        ));
-
-                        $checks = ProjectGtCheck::model()->with(array(
-                            'check' => array(
-                                'with' => array(
-                                    'check' => array(
-                                        'alias' => 'innerCheck',
-                                        'with' => array(
-                                            'l10n' => array(
-                                                'joinType' => 'LEFT JOIN',
-                                                'on' => 'l10n.language_id = :language_id',
-                                                'params' => array('language_id' => $language)
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ))->findAll($criteria);
-
-                        foreach ($checks as $check) {
-                            $targetData['checks'][] = array(
-                                'id' => $check->gt_check_id,
-                                'ratingName' => $ratings[$check->rating],
-                                'rating' => $check->rating,
-                                'name' => CHtml::encode($check->check->check->localizedName),
-                            );
-                        }
-
-                        $objects[] = $targetData;
-                        $targetId++;
-                    }
-
-                    break;
-
-                case 'gt-type-list':
-                    $category = GtCategory::model()->findByPk($model->id);
-
-                    if (!$category) {
-                        throw new CHttpException(404, Yii::t('app', 'Category not found.'));
-                    }
-
-                    $types = GtType::model()->with(array(
-                        'l10n' => array(
-                            'alias' => 'l10n',
-                            'joinType' => 'LEFT JOIN',
-                            'on' => 'language_id = :language_id',
-                            'params' => array('language_id' => $language)
-                        )
-                    ))->findAllByAttributes(array(
-                        'gt_category_id' => $category->id
-                    ));
-
-                    foreach ($types as $type) {
-                        $objects[] = array(
-                            'id' => $type->id,
-                            'name' => $type->localizedName,
-                        );
-                    }
-
-                    break;
-
-                case 'gt-module-list':
-                    $type = GtType::model()->findByPk($model->id);
-
-                    if (!$type) {
-                        throw new CHttpException(404, Yii::t('app', 'Type not found.'));
-                    }
-
-                    $modules = GtModule::model()->with(array(
-                        'l10n' => array(
-                            'alias' => 'l10n',
-                            'joinType' => 'LEFT JOIN',
-                            'on' => 'language_id = :language_id',
-                            'params' => array('language_id' => $language)
-                        )
-                    ))->findAllByAttributes(array(
-                        'gt_type_id' => $type->id
-                    ));
-
-                    foreach ($modules as $module) {
-                        $objects[] = array(
-                            'id' => $module->id,
-                            'name' => $module->localizedName,
-                        );
-                    }
-
-                    break;
-
-                case "gt-project-module-list":
-                    $project = Project::model()->findByPk($model->id);
-
-                    if (!$project) {
-                        throw new CHttpException(404, Yii::t("app", "Project not found."));
-                    }
-
-                    if (!$project->checkPermission()) {
-                        throw new CHttpException(403, Yii::t("app", "Access denied."));
-                    }
-
-                    $modules = ProjectGtModule::model()->with(array(
-                        "module" => array(
-                            "l10n" => array(
-                                "alias" => "l10n",
-                                "joinType" => "LEFT JOIN",
-                                "on" => "language_id = :language_id",
-                                "params" => array("language_id" => $language)
-                            )
-                        )
-                    ))->findAllByAttributes(array(
-                        "project_id" => $project->id
-                    ));
-
-                    foreach ($modules as $module) {
-                        $objects[] = array(
-                            "id" => $module->gt_module_id,
-                            "name" => $module->module->localizedName,
-                        );
-                    }
-
-                    break;
-
                 case "category-check-list":
                     $checks = Check::model()->with(array(
                         "control" => array(
@@ -663,6 +486,26 @@ class AppController extends Controller {
                         $objects[] = array(
                             "id" => $check->id,
                             "name" => $check->localizedName,
+                        );
+                    }
+
+                    break;
+
+                case "category-control-list":
+                    $category = CheckCategory::model()->findByPk($model->id);
+
+                    if (!$category) {
+                        throw new CHttpException(404, "Category not found.");
+                    }
+
+                    $controls = CheckControl::model()->findAllByAttributes(array(
+                        "check_category_id" => $category->id
+                    ));
+
+                    foreach ($controls as $control) {
+                        $objects[] = array(
+                            "id" => $control->id,
+                            "name" => $control->localizedName,
                         );
                     }
 

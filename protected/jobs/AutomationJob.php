@@ -155,15 +155,22 @@ class AutomationJob extends BackgroundJob {
             throw new VMNotFoundException("Sandbox is not running, please regenerate it.");
         }
 
-        $targetHost = $check->override_target ? $check->override_target : $target->host;
+        $targetHosts = "";
         $port = "";
 
-        if ($target->port) {
-            $port = $target->port;
-        }
+        if (!$check->override_target) {
+            $targetHosts = $target->host;
 
-        if ($check->port) {
-            $port = $check->port;
+            if ($target->port) {
+                $port = $target->port;
+            }
+
+            if ($check->port) {
+                $port = $check->port;
+            }
+        } else {
+            $targets = explode("\n", $check->override_target);
+            $targetHosts = implode(",", $targets);
         }
 
         $targetCheckScript = TargetCheckScript::model()->findByAttributes(array(
@@ -182,7 +189,7 @@ class AutomationJob extends BackgroundJob {
         }
 
         // base data
-        fwrite($targetFile, $targetHost . "\n");
+        fwrite($targetFile, $targetHosts . "\n");
         fwrite($targetFile, $check->protocol . "\n");
         fwrite($targetFile, $port . "\n");
         fwrite($targetFile, $check->language->code . "\n");
@@ -344,14 +351,16 @@ class AutomationJob extends BackgroundJob {
             $now = new DateTime();
             $package = $script->package;
 
-            $data = Yii::t("app", "The {script} script was used within this check against {target} on {date} at {time}", array(
-                "{script}" => $package->name,
-                "{target}" => $check->override_target ? $check->override_target : $target->host,
-                "{date}" => $now->format("d.m.Y"),
-                "{time}" => $now->format("H:i:s"),
-            ));
+            if (!isset($this->args['chain'])) {
+                $data = Yii::t("app", "The {script} script was used within this check against {target} on {date} at {time}", array(
+                    "{script}" => $package->name,
+                    "{target}" => $check->override_target ? $check->override_target : $target->host,
+                    "{date}" => $now->format("d.m.Y"),
+                    "{time}" => $now->format("H:i:s"),
+                ));
 
-            $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
+                $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
+            }
 
             try {
                 $pid = posix_getpid();

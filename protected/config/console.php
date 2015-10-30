@@ -17,7 +17,7 @@ return array(
 		"application.models.*",
 		"application.components.*",
         "application.components.formats.*",
-        "application.components.processors.*",
+        "application.components.filters.*",
         "application.components.reports.*",
         "application.components.reports.docx.*",
         "application.jobs.*",
@@ -66,6 +66,14 @@ return array(
                 array(
                     "class"   => "CFileLogRoute",
                     "levels"  => "error",
+                    "categories" => "bg.ChainJob",
+                    "logPath" => $mainConfig["params"]["bgLogsPath"],
+                    "logFile" => "checkchainautomation.log",
+                    'maxLogFiles' => 1,
+                ),
+                array(
+                    "class"   => "CFileLogRoute",
+                    "levels"  => "error",
                     "categories" => "bg.ClearLogJob",
                     "logPath" => $mainConfig["params"]["bgLogsPath"],
                     "logFile" => "clearlog.log",
@@ -93,14 +101,6 @@ return array(
                     "categories" => "bg.EmailJob",
                     "logPath" => $mainConfig["params"]["bgLogsPath"],
                     "logFile" => "email.log",
-                    'maxLogFiles' => 1,
-                ),
-                array(
-                    "class"   => "CFileLogRoute",
-                    "levels"  => "error",
-                    "categories" => "bg.GtAutomationJob",
-                    "logPath" => $mainConfig["params"]["bgLogsPath"],
-                    "logFile" => "gtautomation.log",
                     'maxLogFiles' => 1,
                 ),
                 array(

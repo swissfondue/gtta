@@ -48,10 +48,6 @@
                                 <td class="name">
                                     <a href="<?php echo $this->createUrl("project/view", array("id" => $project->id)); ?>"><?php echo CHtml::encode($project->name); ?></a>
 
-                                    <?php if ($project->guided_test): ?>
-                                        <i class="icon icon-hand-right"></i>
-                                    <?php endif; ?>
-
                                     <?php if (User::checkRole(User::ROLE_USER)): ?>
                                         <div class="client">
                                             <a href="<?php echo $this->createUrl("client/view", array("id" => $project->client_id)); ?>"><?php echo CHtml::encode($project->client->name); ?></a>

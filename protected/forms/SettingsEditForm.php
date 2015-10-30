@@ -143,10 +143,9 @@ class SettingsEditForm extends CFormModel
     /**
      * @return array validation rules for model attributes.
      */
-    public function rules()
-    {
+    public function rules() {
         return array(
-            array("timezone", "required"),
+            array("timezone, communityMinRating, reportLowPedestal, reportMedPedestal, reportHighPedestal, reportMaxRating, reportMedDampingLow, reportHighDampingLow, reportHighDampingMed", "required"),
             array("timezone", "in", "range" => array_keys(TimeZones::$zones)),
             array("workstationId", "length", "is" => 36),
             array("workstationKey, copyright", "length", "max" => 1000),
@@ -166,11 +165,10 @@ class SettingsEditForm extends CFormModel
     }
 
     /**
-     * @return array customized attribute labels (name=>label)
-     */
-    public function attributeLabels()
-    {
-        return array(
+	 * @return array customized attribute labels (name=>label)
+	 */
+	public function attributeLabels() {
+		return array(
             "workstationId" => Yii::t("app", "Workstation ID"),
             "workstationKey" => Yii::t("app", "Workstation Key"),
             "timezone" => Yii::t("app", "Time Zone"),
@@ -199,8 +197,7 @@ class SettingsEditForm extends CFormModel
     /**
      * Checks if language exists.
      */
-    public function checkLanguage($attribute, $params)
-    {
+    public function checkLanguage($attribute, $params) {
         $language = Language::model()->findByPk($this->languageId);
 
         if (!$language) {
