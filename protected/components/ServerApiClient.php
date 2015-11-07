@@ -106,9 +106,30 @@ class ServerApiClient {
      * @return mixed response
      */
     public function register($version) {
+        $os = "vmware";
+        $product = "gtta";
+
+        if (@file_exists(Yii::app()->params["os"]["type"])) {
+            $os = @trim(@file_get_contents(Yii::app()->params["os"]["type"]));
+        }
+
+        $data = implode(":", array($product, $version, $os));
+        $padding = 16 - (strlen($data) % 16);
+        $data .= str_repeat(chr($padding), $padding);
+        $iv = openssl_random_pseudo_bytes(16);
+
+        $token = mcrypt_encrypt(
+            MCRYPT_RIJNDAEL_128,
+            Yii::app()->params["api"]["regKey"],
+            $data,
+            MCRYPT_MODE_CBC,
+            $iv
+        );
+
         $response = $this->_sendRequest("register", array(
-            "product" => "gtta",
+            "product" => $product,
             "version" => $version,
+            "token" => base64_encode($iv . $token),
         ));
 
         return $this->_parseResponse($response);

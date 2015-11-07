@@ -131,12 +131,16 @@ return array(
 
     "api" => array(
         "url" => "http://gta-update.does-it.net:80",
-        "regKey" => "s8cowl2sv3l64menxb0jvqhci2yop7i0"
+        "regKey" => "s8cowl2sv3l64menxb0jvqhci2yop7i0",
     ),
 
     "community" => array(
         "url" => "http://community.gtta.net",
     ),
 
-    "bgLogsPath" => BASE_DIR . "/runtime/bg"
+    "bgLogsPath" => BASE_DIR . "/runtime/bg",
+
+    "os" => array(
+        "type" => BASE_DIR . "/config/type"
+    )
 );

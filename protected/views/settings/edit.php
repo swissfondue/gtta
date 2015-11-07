@@ -10,27 +10,19 @@
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
     <fieldset>
-        <div class="control-group <?php if ($form->getError('workstationId')) echo 'error'; ?>">
-            <label class="control-label" for="SettingsEditForm_workstationId"><?php echo Yii::t('app', 'Workstation ID'); ?></label>
-            <div class="controls">
-                <input type="text" class="input-xlarge" id="SettingsEditForm_workstationId" name="SettingsEditForm[workstationId]" value="<?php echo CHtml::encode($form->workstationId); ?>">
-                <?php if ($form->getError('workstationId')): ?>
-                    <p class="help-block"><?php echo $form->getError('workstationId'); ?></p>
-                <?php endif; ?>
+        <div class="control-group">
+            <label class="control-label"><?php echo Yii::t("app", "Workstation ID"); ?></label>
+            <div class="controls form-text">
+                <?= $system->workstation_id ? CHtml::encode($system->workstation_id) : Yii::t("app", "N/A"); ?>
             </div>
         </div>
 
-        <div class="control-group <?php if ($form->getError('workstationKey')) echo 'error'; ?>">
-            <label class="control-label" for="SettingsEditForm_workstationKey"><?php echo Yii::t('app', 'Workstation Key'); ?></label>
-            <div class="controls">
-                <input type="text" class="input-xlarge" id="SettingsEditForm_workstationKey" name="SettingsEditForm[workstationKey]" value="<?php echo CHtml::encode($form->workstationKey); ?>">
-                <?php if ($form->getError('workstationKey')): ?>
-                    <p class="help-block"><?php echo $form->getError('workstationKey'); ?></p>
-                <?php endif; ?>
+        <div class="control-group">
+            <label class="control-label"><?php echo Yii::t("app", "Workstation Key"); ?></label>
+            <div class="controls form-text">
+                <?= $system->workstation_key ? CHtml::encode($system->workstation_key) : Yii::t("app", "N/A"); ?>
             </div>
         </div>
-        
-        <hr>               
 
         <div class="control-group">
             <label class="control-label"><?php echo Yii::t("app", "Integration Key"); ?></label>
@@ -46,6 +38,8 @@
                 <a href="#generate" title="<?php echo Yii::t("app", "Generate New"); ?>" onclick="admin.settings.generateIntegrationKey();"><i class="icon icon-refresh"></i></a>
             </div>
         </div>
+
+        <hr>
 
         <div class="control-group <?php if ($form->getError("communityMinRating")) echo "error"; ?>">
             <label class="control-label" for="SettingsEditForm_communityMinRating"><?php echo Yii::t("app", "Community Min Rating"); ?></label>

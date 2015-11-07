@@ -3,18 +3,7 @@
 /**
  * This is the model class for settings edit form.
  */
-class SettingsEditForm extends CFormModel
-{
-    /**
-     * @var string workstation id
-     */
-    public $workstationId;
-
-    /**
-     * @var string workstation key
-     */
-    public $workstationKey;
-
+class SettingsEditForm extends FormModel {
     /**
      * @var string timezone
      */
@@ -147,8 +136,7 @@ class SettingsEditForm extends CFormModel
         return array(
             array("timezone, communityMinRating, reportLowPedestal, reportMedPedestal, reportHighPedestal, reportMaxRating, reportMedDampingLow, reportHighDampingLow, reportHighDampingMed", "required"),
             array("timezone", "in", "range" => array_keys(TimeZones::$zones)),
-            array("workstationId", "length", "is" => 36),
-            array("workstationKey, copyright", "length", "max" => 1000),
+            array("copyright", "length", "max" => 1000),
             array("communityMinRating", "numerical", "min" => 0, "max" => 5),
             array("communityAllowUnverified, checklistPoc, checklistLinks", "boolean"),
             array("reportLowPedestal, reportMedPedestal, reportHighPedestal, reportMaxRating, reportMedDampingLow, reportHighDampingLow, reportHighDampingMed", "numerical", "min" => 0),
@@ -169,8 +157,6 @@ class SettingsEditForm extends CFormModel
 	 */
 	public function attributeLabels() {
 		return array(
-            "workstationId" => Yii::t("app", "Workstation ID"),
-            "workstationKey" => Yii::t("app", "Workstation Key"),
             "timezone" => Yii::t("app", "Time Zone"),
             "reportLowPedestal" => Yii::t("app", "Low Risk Pedestal"),
             "reportMedPedestal" => Yii::t("app", "Medium Risk Pedestal"),
