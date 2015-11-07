@@ -170,6 +170,7 @@ class PackageController extends Controller {
                         "operation" => PackageJob::OPERATION_DELETE,
                         "obj_id" => $package->id,
                     ));
+
                     break;
 
                 default:

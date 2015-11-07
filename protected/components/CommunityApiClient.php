@@ -107,11 +107,12 @@ class CommunityApiClient {
     }
 
     /**
-     * Status command
+     * Set/get packages status
+     * @param array $data
      * @return mixed response
      */
-    public function status() {
-        $response = $this->_sendRequest("status");
+    public function status($data=null) {
+        $response = $this->_sendRequest("status", $data ? json_encode($data) : null);
         return $this->_parseResponse($response);
     }
 
@@ -230,13 +231,5 @@ class CommunityApiClient {
         );
 
         return $this->_parseResponse($response);
-    }
-
-    /**
-     * Finish command
-     * @param $data
-     */
-    public function finish($data) {
-        $this->_sendRequest("finish", json_encode($data));
     }
 }

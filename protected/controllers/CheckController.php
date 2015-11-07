@@ -339,6 +339,9 @@ class CheckController extends Controller
                     }
 
                     $category->delete();
+
+                    CommunityUpdateStatusJob::enqueue();
+
                     break;
 
                 default:
@@ -590,6 +593,8 @@ class CheckController extends Controller
                     }
 
                     $control->delete();
+
+                    CommunityUpdateStatusJob::enqueue();
 
                     break;
 
@@ -1296,6 +1301,8 @@ class CheckController extends Controller
                     }
 
                     $check->delete();
+
+                    CommunityUpdateStatusJob::enqueue();
 
                     break;
 

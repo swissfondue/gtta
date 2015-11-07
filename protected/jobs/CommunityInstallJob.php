@@ -28,12 +28,10 @@ class CommunityInstallJob extends BackgroundJob {
         $cm = new CheckManager();
         $pm = new PackageManager();
 
-        $finished = array(
+        $api->status(array(
             "checks" => $cm->getExternalIds(),
             "packages" => $pm->getExternalIds(),
-        );
-
-        $api->finish($finished);
+        ));
     }
 
     /**
