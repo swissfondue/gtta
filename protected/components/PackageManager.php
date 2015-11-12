@@ -14,6 +14,7 @@ class PackageManager {
     const SECTION_VERSION = "version";
     const SECTION_DESCRIPTION = "description";
     const SECTION_VALUE = "value";
+    const SECTION_VISIBLE = "visible";
     const SECTION_DEPENDENCIES = "dependencies";
     const SECTION_INPUTS = "inputs";
     const TYPE_LIBRARY = "library";
@@ -354,6 +355,8 @@ class PackageManager {
                         $inputName = $this->_getSection($input, self::SECTION_NAME);
                         $inputType = $this->_getSection($package, self::SECTION_TYPE);
                         $inputValue = $this->_getSection($package, self::SECTION_VALUE, false);
+                        $inputDescription = $this->_getSection($package, self::SECTION_DESCRIPTION, false);
+                        $inputVisible = $this->_getSection($package, self::SECTION_VISIBLE, false);
                     } catch (MissingSectionException $e) {
                         throw new Exception(
                             Yii::t("app", "Missing section {section} for input.", array(
@@ -371,15 +374,19 @@ class PackageManager {
                     }
 
                     if (!in_array($inputType, $this->_getInputTypes())) {
-                        throw new Exception(
-                            Yii::t("app", "Invalid input type: {type}", array("{type}" => $inputType))
-                        );
+                        $inputType = self::INPUT_TYPE_TEXT;
+                    }
+
+                    if (!is_bool($inputVisible)) {
+                        $inputVisible = true;
                     }
 
                     $inputs[] = array(
                         self::SECTION_NAME => $inputName,
                         self::SECTION_TYPE => $inputType,
-                        self::SECTION_VALUE => $inputValue
+                        self::SECTION_VALUE => $inputValue,
+                        self::SECTION_DESCRIPTION => $inputDescription,
+                        self::SECTION_VISIBLE => $inputVisible,
                     );
                 }
             }
@@ -1168,47 +1175,68 @@ class PackageManager {
     /**
      * Create package by id
      * @param $package
+     * @param $initial
+     * @param $dependency
      * @return Package
      * @throws Exception
      */
-    public function create($package, $initial=false) {
+    public function create($package, $initial=false, $dependency=false) {
         /** @var System $system */
         $system = System::model()->findByPk(1);
         $api = new CommunityApiClient($initial ? null : $system->integration_key);
         $package = $api->getPackage($package)->package;
+        $pkg = null;
 
-        if ($package->status == CommunityApiClient::STATUS_UNVERIFIED && !$system->community_allow_unverified) {
-            throw new Exception("Installing unverified packages is prohibited.");
-        }
-
-        if ($system->community_min_rating > 0 && $package->rating < $system->community_min_rating) {
-            throw new Exception("Package rating is below the system rating limit.");
-        }
-
-        foreach ($package->dependencies as $dep) {
-            $checkDependency = Package::model()->findByAttributes(array(
-                "external_id" => $dep->id,
-                "status" => Package::STATUS_INSTALLED,
-            ));
-
-            if ($checkDependency) {
-                continue;
+        try {
+            if ($package->status == CommunityApiClient::STATUS_UNVERIFIED && !$system->community_allow_unverified) {
+                throw new Exception("Installing unverified packages is prohibited.");
             }
 
-            $this->create($dep->id, $initial);
+            if ($system->community_min_rating > 0 && $package->rating < $system->community_min_rating) {
+                throw new Exception("Package rating is below the system rating limit.");
+            }
+
+            foreach ($package->dependencies as $dep) {
+                $checkDependency = Package::model()->findByAttributes(array(
+                    "external_id" => $dep->id,
+                    "status" => Package::STATUS_INSTALLED,
+                ));
+
+                if ($checkDependency) {
+                    continue;
+                }
+
+                $this->create($dep->id, $initial, true);
+            }
+
+            $tmpData = $this->_getTemporaryPackageData();
+            $zipPath = $tmpData["zipPath"];
+
+            $api = new CommunityApiClient($initial ? null : $system->integration_key);
+            $api->getPackageArchive($package->id, $zipPath);
+
+            if (!file_exists($zipPath)) {
+                throw new Exception("Error downloading package file: $zipPath");
+            }
+
+            $pkg = $this->scheduleForInstallation($tmpData["id"], $package->id, false);
+        } catch (Exception $e) {
+            if (!$initial) {
+                $api->installError(array(
+                    "id" => $package->id,
+                    "type" => "package",
+                    "text" => $e->getMessage(),
+                ));
+            }
+
+            if (!$dependency) {
+                throw $e;
+            } else {
+                throw new Exception("Error installing dependent package.");
+            }
         }
 
-        $tmpData = $this->_getTemporaryPackageData();
-        $zipPath = $tmpData["zipPath"];
-
-        $api = new CommunityApiClient($initial ? null : $system->integration_key);
-        $api->getPackageArchive($package->id, $zipPath);
-
-        if (!file_exists($zipPath)) {
-            throw new Exception("Error downloading package file: $zipPath");
-        }
-
-        return $this->scheduleForInstallation($tmpData["id"], $package->id, false);
+        return $pkg;
     }
 
     /**

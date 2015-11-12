@@ -42,7 +42,11 @@ class CommunityInstallJob extends BackgroundJob {
         $pm = new PackageManager();
 
         foreach ($packages as $package) {
-            $pm->create($package, $initial);
+            try {
+                $pm->create($package, $initial);
+            } catch (Exception $e) {
+                $this->log($e->getMessage(), $e->getTraceAsString());
+            }
         }
     }
 
@@ -54,11 +58,15 @@ class CommunityInstallJob extends BackgroundJob {
         $cm = new CheckManager();
 
         foreach ($checks as $check) {
-            $c = $cm->create($check, $initial);
+            try {
+                $c = $cm->create($check, $initial);
 
-            TargetCheckReindexJob::enqueue(array(
-                "category_id" => $c->control->check_category_id
-            ));
+                TargetCheckReindexJob::enqueue(array(
+                    "category_id" => $c->control->check_category_id
+                ));
+            } catch (Exception $e) {
+                $this->log($e->getMessage(), $e->getTraceAsString());
+            }
         }
     }
 

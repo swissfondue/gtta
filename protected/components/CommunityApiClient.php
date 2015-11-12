@@ -232,4 +232,14 @@ class CommunityApiClient {
 
         return $this->_parseResponse($response);
     }
+
+    /**
+     * Set check/package installation error
+     * @param array $data
+     * @return mixed response
+     */
+    public function installError($data) {
+        $response = $this->_sendRequest("install-error", json_encode($data));
+        return $this->_parseResponse($response);
+    }
 }
