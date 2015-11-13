@@ -353,10 +353,10 @@ class PackageManager {
                 foreach ($inps as $input) {
                     try {
                         $inputName = $this->_getSection($input, self::SECTION_NAME);
-                        $inputType = $this->_getSection($package, self::SECTION_TYPE);
-                        $inputValue = $this->_getSection($package, self::SECTION_VALUE, false);
-                        $inputDescription = $this->_getSection($package, self::SECTION_DESCRIPTION, false);
-                        $inputVisible = $this->_getSection($package, self::SECTION_VISIBLE, false);
+                        $inputType = $this->_getSection($input, self::SECTION_TYPE);
+                        $inputValue = $this->_getSection($input, self::SECTION_VALUE, false);
+                        $inputDescription = $this->_getSection($input, self::SECTION_DESCRIPTION, false);
+                        $inputVisible = $this->_getSection($input, self::SECTION_VISIBLE, false);
                     } catch (MissingSectionException $e) {
                         throw new Exception(
                             Yii::t("app", "Missing section {section} for input.", array(
@@ -1445,5 +1445,27 @@ class PackageManager {
         }
 
         return $messages;
+    }
+
+    /**
+     * Get check input type
+     * @param string $type
+     * @return array
+     * @throws Exception
+     */
+    public function getCheckInputType($type) {
+        $map = array(
+            self::INPUT_TYPE_TEXT => CheckInput::TYPE_TEXT,
+            self::INPUT_TYPE_TEXTAREA => CheckInput::TYPE_TEXTAREA,
+            self::INPUT_TYPE_CHECKBOX => CheckInput::TYPE_CHECKBOX,
+            self::INPUT_TYPE_RADIO => CheckInput::TYPE_RADIO,
+            self::INPUT_TYPE_FILE => CheckInput::TYPE_FILE,
+        );
+
+        if (!isset($map[$type])) {
+            throw new Exception(Yii::t("app", "Type not found: {type}", array("{type}" => $type)));
+        }
+
+        return $map[$type];
     }
 }
