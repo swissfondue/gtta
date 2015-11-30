@@ -169,7 +169,7 @@ class SettingsEditForm extends FormModel {
             "languageId" => Yii::t("app", "Default Language"),
             "communityMinRating" => Yii::t("app", "Community Min Rating"),
             "communityAllowUnverified" => Yii::t("app", "Community Allow Unverified"),
-            "checklistPoc" => Yii::t("app", "Checklist POC"),
+            "checklistPoc" => Yii::t("app", "Checklist Technical Details"),
             "checklistLinks" => Yii::t("app", "Checklist Links"),
             "email" => Yii::t("app", "Email"),
             "mailHost" => Yii::t("app", "Host"),

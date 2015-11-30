@@ -320,7 +320,7 @@
         <?php if ($this->_system->checklist_poc): ?>
             <tr>
                 <th>
-                    <?php echo Yii::t("app", "PoC"); ?>
+                    <?php echo Yii::t("app", "Technical Details"); ?>
                 </th>
                 <td>
                     <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[poc]" class="max-width wysiwyg" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_poc" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->poc); ?></textarea>

@@ -205,7 +205,7 @@
         <br>
 
         <div class="control-group">
-            <label class="control-label" for="SettingsEditForm_checklistPoc"><?php echo Yii::t("app", "Checklist POC"); ?></label>
+            <label class="control-label" for="SettingsEditForm_checklistPoc"><?php echo Yii::t("app", "Checklist Technical Details"); ?></label>
             <div class="controls">
                 <input type="checkbox" id="SettingsEditForm_checklistPoc" name="SettingsEditForm[checklistPoc]" value="1" <?php if ($form->checklistPoc) echo 'checked="checked"'; ?>>
             </div>

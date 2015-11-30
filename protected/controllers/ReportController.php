@@ -1050,7 +1050,7 @@ class ReportController extends Controller {
                                 $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                 $table->getCell($row, 2)->setBorder($this->thinBorder);
 
-                                $table->writeToCell($row, 1, Yii::t("app", "PoC"));
+                                $table->writeToCell($row, 1, Yii::t("app", "Technical Details"));
                                 $table->writeToCell($row, 2, $check["poc"]);
 
                                 $row++;
