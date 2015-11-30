@@ -10,7 +10,7 @@ class m151130_151125_default_timeout extends CDbMigration {
      */
     public function safeUp() {
         $this->execute("ALTER TABLE packages ALTER COLUMN timeout SET DEFAULT 86400");
-        $this->execute("ALTER TABLE target_check_scripts ALTER COLUMN timeout SET DEFAULT 86400"); 
+        $this->execute("ALTER TABLE target_check_scripts ALTER COLUMN timeout SET DEFAULT 86400");
 
         return true;
 	}

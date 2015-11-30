@@ -967,10 +967,12 @@ class PackageManager {
                     );
                 }
 
-                $packageDep = new PackageDependency();
-                $packageDep->from_package_id = $package->id;
-                $packageDep->to_package_id = $library->id;
-                $packageDep->save();
+                try {
+                    $packageDep = new PackageDependency();
+                    $packageDep->from_package_id = $package->id;
+                    $packageDep->to_package_id = $library->id;
+                    $packageDep->save();
+                } catch (CDbException $e) {}
             }
 
             // create script dependencies
@@ -986,10 +988,12 @@ class PackageManager {
                     );
                 }
 
-                $packageDep = new PackageDependency();
-                $packageDep->from_package_id = $package->id;
-                $packageDep->to_package_id = $script->id;
-                $packageDep->save();
+                try {
+                    $packageDep = new PackageDependency();
+                    $packageDep->from_package_id = $package->id;
+                    $packageDep->to_package_id = $script->id;
+                    $packageDep->save();
+                } catch (CDbException $e) {}
             }
 
             $package->file_name = null;
