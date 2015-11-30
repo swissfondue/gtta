@@ -13,6 +13,7 @@
  * @property integer $external_id
  * @property string $create_time
  * @property Package[] $dependencies
+ * @property integer $timeout
  */
 class Package extends ActiveRecord {
     const TYPE_LIBRARY = 0;
