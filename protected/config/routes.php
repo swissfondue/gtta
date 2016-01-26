@@ -117,8 +117,8 @@ return array(
     "client/<id:\d+>/logo/new" => "client/uploadlogo",
     "client/logo/new" => "client/uploadlogo",
     "client/<id:\d+>/logo" => "client/logo",
-    "client/logo/<path:[a-zA-Z0-9]+>" => "client/tmplogo",
     "client/logo/control" => "client/controllogo",
+    "client/logo/<path:[a-zA-Z0-9]+>" => "client/tmplogo",
 
     // settings
     "settings" => "settings/edit",
