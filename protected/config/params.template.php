@@ -93,7 +93,7 @@ return array(
             "libraries" => BASE_DIR . "/scripts/lib",
         ),
         "tmpPath" => "/tmp/gtta-package",
-        "maxSize" => 100 * 1024 * 1024, // 100 megabytes,
+        "maxSize" => 1024 * 1024 * 1024, // 1 Gb,
         "installerLock" => "/tmp/installer.lock",
         "git" => array(
             "key" => "scripts_rsa",

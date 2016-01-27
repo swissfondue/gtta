@@ -17,7 +17,8 @@ class EmailJob extends BackgroundJob {
             "password" => $system->mail_password,
         );
 
-        if ($system->email ||
+        if (
+            !$system->email ||
             !$transportOptions['host'] ||
             !$transportOptions['port'] ||
             !$transportOptions['username'] ||
