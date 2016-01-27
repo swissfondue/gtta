@@ -4,6 +4,18 @@
  */
 class TargetCheckReindexJob extends BackgroundJob {
     /**
+     * Reindex target
+     * @param Target $t
+     */
+    private function _reindexTarget(Target $t) {
+        TargetManager::reindexTargetChecks($t);
+
+        foreach ($t->_categories as $tcat) {
+            TargetManager::updateTargetCategoryStats($tcat);
+        }
+    }
+
+    /**
      * Run
      */
     public function perform() {
@@ -19,11 +31,7 @@ class TargetCheckReindexJob extends BackgroundJob {
                     throw new Exception("Target not found.");
                 }
 
-                TargetManager::reindexTargetChecks($target);
-
-                foreach ($target->_categories as $tcat) {
-                    TargetManager::updateTargetCategoryStats($tcat);
-                }
+                $this->_reindexTarget($target);
             } else if (isset($this->args['category_id'])) {
                 $category = CheckCategory::model()->findByPk($this->args['category_id']);
 
@@ -42,22 +50,18 @@ class TargetCheckReindexJob extends BackgroundJob {
                 }
 
                 $criteria = new CDbCriteria();
-                $criteria->addCondition("project.status != :status");
-                $criteria->addInCondition("t.id", $targetIds);
                 $criteria->params = array(
                     "status" => Project::STATUS_FINISHED
                 );
+                $criteria->addCondition("project.status != :status");
+                $criteria->addInCondition("t.id", $targetIds);
                 $targets = Target::model()->with("project")->findAll($criteria);
 
                 foreach ($targets as $t) {
-                    TargetManager::reindexTargetChecks($t);
-
-                    foreach ($t->_categories as $tcat) {
-                        TargetManager::updateTargetCategoryStats($tcat);
-                    }
+                    $this->_reindexTarget($t);
                 }
-            } else if (isset($this->args['template_id'])) {
-                $template = ChecklistTemplate::model()->findByPk($this->args['template_id']);
+            } else if (isset($this->args["template_id"])) {
+                $template = ChecklistTemplate::model()->findByPk($this->args["template_id"]);
 
                 if (!$template) {
                     throw new Exception("Template not found.");
@@ -74,19 +78,15 @@ class TargetCheckReindexJob extends BackgroundJob {
                 }
 
                 $criteria = new CDbCriteria();
-                $criteria->addCondition("project.status != :status");
-                $criteria->addInCondition("t.id", $targetIds);
                 $criteria->params = array(
                     "status" => Project::STATUS_FINISHED
                 );
+                $criteria->addCondition("project.status != :status");
+                $criteria->addInCondition("t.id", $targetIds);
                 $targets = Target::model()->with("project")->findAll($criteria);
 
                 foreach ($targets as $t) {
-                    TargetManager::reindexTargetChecks($t);
-
-                    foreach ($t->_categories as $tcat) {
-                        TargetManager::updateTargetCategoryStats($tcat);
-                    }
+                    $this->_reindexTarget($t);
                 }
             }
 

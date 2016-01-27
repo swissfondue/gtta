@@ -461,19 +461,7 @@ class ChecklisttemplateController extends Controller {
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Template saved.'));
 
                 $template->refresh();
-
-                $targetTemplates = TargetChecklistTemplate::model()->findAllByAttributes(array(
-                    "checklist_template_id" => $template->id
-                ));
-
-                foreach ($targetTemplates as $tt) {
-                    TargetCheckReindexJob::enqueue(array(
-                        "target_id" => $tt->target->id,
-                    ));
-                    StatsJob::enqueue(array(
-                        "target_id" => $tt->target->id,
-                    ));
-                }
+                TargetCheckReindexJob::enqueue(array("template_id" => $template->id));
 
                 if ($redirect) {
                     $this->redirect(array('checklisttemplate/edittemplate', 'id' => $category->id, 'template' => $template->id));
@@ -547,19 +535,20 @@ class ChecklisttemplateController extends Controller {
             }
 
             if ($model->operation == 'delete') {
-                $template->delete();
+                $targetIds = array();
 
                 $targetTemplates = TargetChecklistTemplate::model()->findAllByAttributes(array(
                     "checklist_template_id" => $template->id
                 ));
 
-                foreach ($targetTemplates as $tt) {
-                    TargetCheckReindexJob::enqueue(array(
-                        "target_id" => $tt->target->id,
-                    ));
-                    StatsJob::enqueue(array(
-                        "target_id" => $tt->target->id,
-                    ));
+                foreach ($targetTemplates as $tc) {
+                    $targetIds[] = $tc->target_id;
+                }
+
+                $template->delete();
+
+                foreach ($targetIds as $targetId) {
+                    TargetCheckReindexJob::enqueue(array("target_id" => $targetId));
                 }
             } else {
                 throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
@@ -709,19 +698,7 @@ class ChecklisttemplateController extends Controller {
                 }
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Category saved.'));
-
-                $targetTemplates = TargetChecklistTemplate::model()->findAllByAttributes(array(
-                    "checklist_template_id" => $template->id
-                ));
-
-                foreach ($targetTemplates as $tt) {
-                    TargetCheckReindexJob::enqueue(array(
-                        "target_id" => $tt->target->id,
-                    ));
-                    StatsJob::enqueue(array(
-                        "target_id" => $tt->target->id,
-                    ));
-                }
+                TargetCheckReindexJob::enqueue(array("template_id" => $template->id));
 
                 $this->redirect(array(
                     'checklisttemplate/editcheckcategory',
@@ -822,18 +799,7 @@ class ChecklisttemplateController extends Controller {
                 throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
             }
 
-            $targetTemplates = TargetChecklistTemplate::model()->findAllByAttributes(array(
-                "checklist_template_id" => $template->id
-            ));
-
-            foreach ($targetTemplates as $tt) {
-                TargetCheckReindexJob::enqueue(array(
-                    "target_id" => $tt->target->id,
-                ));
-                StatsJob::enqueue(array(
-                    "target_id" => $tt->target->id,
-                ));
-            }
+            TargetCheckReindexJob::enqueue(array("template_id" => $template->id));
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }

@@ -60,10 +60,7 @@ class CommunityInstallJob extends BackgroundJob {
         foreach ($checks as $check) {
             try {
                 $c = $cm->create($check, $initial);
-
-                TargetCheckReindexJob::enqueue(array(
-                    "category_id" => $c->control->check_category_id
-                ));
+                TargetCheckReindexJob::enqueue(array("category_id" => $c->control->check_category_id));
             } catch (Exception $e) {
                 $this->log($e->getMessage(), $e->getTraceAsString());
             }

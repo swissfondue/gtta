@@ -939,9 +939,7 @@ class CheckController extends Controller
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check saved.'));
                 $check->refresh();
 
-                TargetCheckReindexJob::enqueue(array(
-                    "category_id" => $check->control->check_category_id
-                ));
+                TargetCheckReindexJob::enqueue(array("category_id" => $check->control->check_category_id));
 
                 if ($redirect) {
                     $this->redirect(array(
@@ -1193,9 +1191,7 @@ class CheckController extends Controller
                     }
                 }
 
-                TargetCheckReindexJob::enqueue(array(
-                    "category_id" => $dst->control->check_category_id
-                ));
+                TargetCheckReindexJob::enqueue(array("category_id" => $dst->control->check_category_id));
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check copied.'));
                 $this->redirect(array('check/editcheck', 'id' => $dst->control->check_category_id, 'control' => $dst->check_control_id, 'check' => $dst->id));

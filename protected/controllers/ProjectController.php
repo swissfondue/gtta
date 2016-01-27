@@ -1106,13 +1106,10 @@ class ProjectController extends Controller {
                     $targetReference->save();
                 }
 
-                $target->refresh();
                 Yii::app()->user->setFlash("success", Yii::t("app", "Target saved."));
 
-
-                TargetCheckReindexJob::enqueue(array(
-                    "target_id" => $target->id
-                ));
+                $target->refresh();
+                TargetCheckReindexJob::enqueue(array("target_id" => $target->id));
 
                 if ($newRecord) {
                     $this->redirect(array("project/edittarget", "id" => $project->id, "target" => $target->id));

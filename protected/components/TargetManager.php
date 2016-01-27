@@ -63,9 +63,9 @@ class TargetManager {
 
         $criteria = new CDbCriteria();
         $criteria->addInCondition("tc.check_control_id", $controlIds);
+        $referenceIds = array();
 
         if ($target->check_source_type == Target::SOURCE_TYPE_CHECK_CATEGORIES) {
-            $referenceIds = array();
             $references = TargetReference::model()->findAllByAttributes(array(
                 "target_id" => $category->target_id
             ));
@@ -301,7 +301,7 @@ class TargetManager {
                     $targetCheck->rating = TargetCheck::RATING_NONE;
                     $targetCheck->save();
 
-                    foreach ($check->scripts as $script) {
+                    foreach ($check->check->scripts as $script) {
                         $targetCheckScript = new TargetCheckScript();
                         $targetCheckScript->check_script_id = $script->id;
                         $targetCheckScript->target_check_id = $targetCheck->id;
