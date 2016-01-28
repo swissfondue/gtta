@@ -919,7 +919,7 @@ class PackageManager {
 
             $destinationPath = $this->getPath($package);
             FileManager::rmDir($destinationPath);
-            FileManager::createDir($destinationPath, 0755, true);
+            FileManager::createDir($destinationPath, 0775, true);
 
             try {
                 FileManager::chown($destinationPath, "gtta", "gtta");
@@ -928,6 +928,9 @@ class PackageManager {
             }
 
             FileManager::copyRecursive($this->_getRootPath($packagePath), $destinationPath);
+            ProcessManager::runCommand("chown -R gtta:gtta $destinationPath", false);
+            ProcessManager::runCommand("find $destinationPath -type d | xargs chmod -R 0775", false);
+            ProcessManager::runCommand("find $destinationPath -type f | xargs chmod -R 0664", false);
 
             // change "files" directory permission
             try {
@@ -951,7 +954,7 @@ class PackageManager {
             $this->_validate($parsedPackage, true);
 
             // copy package to VM
-            FileManager::createDir($vm->virtualizePath($destinationPath), 0755, true);
+            FileManager::createDir($vm->virtualizePath($destinationPath), 0775, true);
             FileManager::copyRecursive($destinationPath, $vm->virtualizePath($destinationPath));
 
             // create library dependencies
@@ -1352,7 +1355,7 @@ class PackageManager {
             $this->_validate($package, true);
 
             // copy package to VM
-            FileManager::createDir($vm->virtualizePath($path), 0755);
+            FileManager::createDir($vm->virtualizePath($path), 0775);
             FileManager::copyRecursive($path, $vm->virtualizePath($path));
 
             // create library dependencies
