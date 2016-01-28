@@ -310,7 +310,6 @@
         </div>
         <?php if ($this->timeSession): ?>
             <script>
-                user.timesession.refresh('<?php print $this->createUrl("account/controltimerecord"); ?>');
                 user.timesession.startCounter();
             </script>
         <?php endif; ?>

@@ -2445,56 +2445,6 @@ function User()
         };
 
         /**
-         * Refresh user time session
-         * @param url
-         */
-        this.refresh = function (url) {
-            var sessionEl = $('.time-session-project-list').find('.current-session');
-            var projectId = null;
-
-            if (sessionEl.length) {
-                projectId = sessionEl.data('id');
-            }
-
-            if (projectId) {
-                setTimeout(function () {
-                    $.ajax({
-                        dataType : 'json',
-                        url      : url,
-                        timeout  : system.ajaxTimeout,
-                        type     : 'POST',
-                        data     : {
-                            "EntryControlForm[id]"        : projectId,
-                            "EntryControlForm[operation]" : "refresh",
-                            "YII_CSRF_TOKEN"              : system.csrf
-                        },
-
-                        success : function (data, textStatus) {
-                            $('.loader-image').hide();
-
-                            if (data.status == 'error') {
-                                return;
-                            }
-
-                            setTimeout(function () {
-                                _timesession.refresh(url);
-                            }, _timesession.refreshTimeout)
-                        },
-
-                        error : function(jqXHR, textStatus, e) {
-                            $('.loader-image').hide();
-                            system.addAlert('error', system.translate('Request failed, please try again.'));
-                        },
-
-                        beforeSend : function (jqXHR, settings) {
-                            $('.loader-image').show();
-                        }
-                    });
-                }, _timesession.refreshTimeout);
-            }
-        };
-
-        /**
          * Start time session counter
          */
         this.startCounter = function () {

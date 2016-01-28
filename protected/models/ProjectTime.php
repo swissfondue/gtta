@@ -11,7 +11,6 @@
  * @property string description
  * @property timestamp create_time
  * @property timestamp start_time
- * @property timestamp last_action_time
  */
 class ProjectTime extends ActiveRecord
 {
@@ -39,8 +38,7 @@ class ProjectTime extends ActiveRecord
     public function rules()
     {
         return array(
-            array( 'user_id, project_id', 'required' ),
-            array( 'create_time','default', 'value'=>new CDbExpression('NOW()'), 'setOnEmpty'=>false,'on'=>'insert' )
+            array('user_id, project_id', 'required' ),
         );
     }
 
@@ -117,15 +115,5 @@ class ProjectTime extends ActiveRecord
             "mins"  => $diff->format("%I"),
             "seconds"  => $diff->format("%S"),
         );
-    }
-
-    /**
-     * Update session last action
-     * @return bool|void
-     */
-    public function updateLastAction() {
-        $now = new DateTime();
-        $this->last_action_time = $now->format(ISO_DATE_TIME);
-        $this->save();
     }
 }

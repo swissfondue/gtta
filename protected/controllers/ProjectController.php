@@ -4288,10 +4288,10 @@ class ProjectController extends Controller {
                 $record->time = $form->hoursSpent * 3600;
 
                 // Set start_time by user hours
-                $time = new DateTime();
-                $time->sub(new DateInterval(sprintf("PT%sH", $form->hoursSpent)));
-                $record->start_time = $time->format("Y-m-d G:i:s");
-
+                $now = new DateTime();
+                $record->create_time = $now->format(ISO_DATE_TIME);
+                $now->sub(new DateInterval(sprintf("PT%sH", $form->hoursSpent)));
+                $record->start_time = $now->format(ISO_DATE_TIME);
                 $record->description = $form->description;
                 $record->save();
 
