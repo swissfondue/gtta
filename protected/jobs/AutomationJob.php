@@ -170,7 +170,17 @@ class AutomationJob extends BackgroundJob {
             }
         } else {
             $targets = explode("\n", $check->override_target);
-            $targetHosts = implode(",", $targets);
+            $filtered = array();
+
+            foreach ($targets as $t) {
+                $t = trim($t);
+
+                if ($t) {
+                    $filtered[] = $t;
+                }
+            }
+
+            $targetHosts = implode(",", $filtered);
         }
 
         $targetCheckScript = TargetCheckScript::model()->findByAttributes(array(

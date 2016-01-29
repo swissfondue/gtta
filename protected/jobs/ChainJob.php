@@ -70,7 +70,17 @@ class ChainJob extends BackgroundJob {
 
                 if (!$resuming) {
                     if ($inputTargets) {
-                        $check->override_target = $inputTargets;
+                        $filtered = array();
+
+                        foreach (explode("\n", $inputTargets) as $t) {
+                            $t = trim($t);
+
+                            if ($t) {
+                                $filtered[] = $t;
+                            }
+                        }
+
+                        $check->override_target = implode("\n", $filtered);
                         $check->save();
                     }
 
