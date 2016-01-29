@@ -130,15 +130,13 @@ class ImportManager {
                 }
 
                 foreach ($targets as $target) {
-                    if (!isset($target["Host"]) || !isset($target["Port"]) || !isset($target["Description"])) {
+                    if (!isset($target["Host"])) {
                         throw new ImportFileParsingException();
                     }
 
                     $t = new Target();
                     $t->project_id = $project->id;
                     $t->host = $target["Host"];
-                    $t->port = $target["Port"];
-                    $t->description = $target["Description"];
                     $t->save();
                 }
 
