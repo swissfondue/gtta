@@ -46,11 +46,13 @@
                         <td id="toolbar" valign="top"></td>
                     </tr>
                 </table>
-                <div id="zoomActions">
-                </div>
+
                 <?php if ($model->getError('relations')): ?>
                     <p class="help-block"><?php echo $model->getError('relations'); ?></p>
                 <?php endif; ?>
+
+                <div id="zoomActions">
+                </div>
             </div>
         </div>
         <input type="hidden" class="relations-form-input" id="RelationTemplateEditForm_relations" name="RelationTemplateEditForm[relations]" />
