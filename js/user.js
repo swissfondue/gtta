@@ -2230,7 +2230,7 @@ function User()
                                 switch (status) {
                                     case system.constants.Target.CHAIN_STATUS_IDLE:
                                     case system.constants.Target.CHAIN_STATUS_STOPPED:
-                                    case system.constants.Target.CHAIN_STATUS_BREAKED:
+                                    case system.constants.Target.CHAIN_STATUS_INTERRUPTED:
                                         $('.chain-start-button').removeClass('hide');
                                         $('.chain-stop-button').addClass('hide');
 

@@ -132,7 +132,6 @@ class ChainJob extends BackgroundJob {
      */
     private function _stopTargetChain($id) {
         $targetId = (int) $id;
-
         $target = Target::model()->findByPk($targetId);
 
         if (!$target) {
@@ -153,8 +152,18 @@ class ChainJob extends BackgroundJob {
         ));
 
         foreach ($targetChecks as $tc) {
-            TargetCheckManager::stop($tc->id);
+            try {
+                TargetCheckManager::stop($tc->id);
+            } catch (Exception $e) {}
         }
+
+        $job = JobManager::buildId(self::ID_TEMPLATE, array(
+            "operation" => self::OPERATION_START,
+            "target_id" => $targetId,
+        ));
+
+        JobManager::stop($job);
+        sleep(5);
 
         if (isset($this->args['reset'])) {
             TargetManager::setChainStatus($target->id, Target::CHAIN_STATUS_IDLE);

@@ -18,17 +18,17 @@ class TargetCheckManager {
         $now = new DateTime();
 
         AutomationJob::enqueue(array(
-                "operation" => AutomationJob::OPERATION_START,
-                "obj_id" => $targetCheck->id,
-                "started" => $now->format(ISO_DATE_TIME),
-                "chain" => $chain,
-            )
-        );
+            "operation" => AutomationJob::OPERATION_START,
+            "obj_id" => $targetCheck->id,
+            "started" => $now->format(ISO_DATE_TIME),
+            "chain" => $chain,
+        ));
     }
 
     /**
      * Stop check
      * @param $id
+     * @throws Exception
      */
     public static function stop($id) {
         $id = (int) $id;
@@ -38,11 +38,12 @@ class TargetCheckManager {
             throw new Exception("Check not found.");
         }
 
-        AutomationJob::enqueue(array(
+        if ($targetCheck->isRunning) {
+            AutomationJob::enqueue(array(
                 "operation" => AutomationJob::OPERATION_STOP,
                 "obj_id" => $targetCheck->id,
-            )
-        );
+            ));
+        }
     }
 
     /**

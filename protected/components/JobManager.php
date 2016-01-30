@@ -52,6 +52,27 @@ class JobManager {
     }
 
     /**
+     * Forcefully stop the job
+     * @param $job
+     */
+    public static function stop($job) {
+        $pid = self::getPid($job);
+
+        if ($pid) {
+            ProcessManager::killProcess($pid);
+        }
+
+        $token = Resque::redis()->get("$job.token");
+
+        if (!$token) {
+            return;
+        }
+
+        $status = new Resque_Job_Status($token);
+        $status->update(Resque_Job_Status::STATUS_COMPLETE);
+    }
+
+    /**
      * Build job ID
      * @return string
      */

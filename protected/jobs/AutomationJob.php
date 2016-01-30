@@ -502,9 +502,11 @@ class AutomationJob extends BackgroundJob {
                     $this->setVar("started", $this->args["started"]);
                     $this->_startCheck($id);
                     break;
+
                 case self::OPERATION_STOP:
                     $this->_stopCheck($id);
                     break;
+
                 default:
                     throw new Exception("Invalid operation.");
             }
