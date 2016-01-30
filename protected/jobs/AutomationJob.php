@@ -138,13 +138,13 @@ class AutomationJob extends BackgroundJob {
 
     /**
      * Create check files
-     * @param $check
-     * @param $target
-     * @param $script
+     * @param TargetCheck $check
+     * @param Target $target
+     * @param CheckScript $script
      * @return array
-     * @throws VMNotFoundException
+     * @throws Exception
      */
-    private function _createCheckFiles($check, $target, $script) {
+    private function _createCheckFiles(TargetCheck $check, Target $target, CheckScript $script) {
         $vm = new VMManager();
         $filesPath = $vm->virtualizePath(Yii::app()->params["automation"]["filesPath"]);
 
@@ -215,23 +215,66 @@ class AutomationJob extends BackgroundJob {
 
         fclose($resultFile);
 
-        $inputs = CheckInput::model()->findAllByAttributes(array(
-            'check_script_id' => $script->id
-        ));
-
+        // will use this input ids list when collecting all TargetCheckInputs below
         $inputIds = array();
 
-        foreach ($inputs as $input) {
+        // create input entries, if they do not exist
+        foreach ($script->inputs as $input) {
             $inputIds[] = $input->id;
+
+            if ($input->visible) {
+                continue;
+            }
+
+            $exists = TargetCheckInput::model()->findByAttributes(array(
+                "target_check_id" => $check->id,
+                "check_input_id" => $input->id
+            ));
+
+            if ($exists) {
+                continue;
+            }
+
+            $newInput = new TargetCheckInput();
+            $newInput->target_check_id = $check->id;
+            $newInput->check_input_id = $input->id;
+            $newInput->value = $input->value;
+            $newInput->save();
+        }
+
+        $inputs = CheckInput::model()->with(array(
+            "targetInputs" => array(
+                "alias" => "ti",
+                "on" => "ti.target_check_id = :tci",
+                "params" => array("tci" => $check->id),
+            )
+        ))->findAllByAttributes(array(
+            "check_script_id" => $script->id,
+            "visible" => true,
+        ));
+
+        /** @var CheckInput $input */
+        foreach ($inputs as $input) {
+            $exists = $input->targetInputs;
+
+            if ($exists && $exists[0]) {
+                continue;
+            }
+
+            $newInput = new TargetCheckInput();
+            $newInput->target_check_id = $check->id;
+            $newInput->check_input_id = $input->id;
+            $newInput->value = $input->value;
+            $newInput->save();
         }
 
         $criteria = new CDbCriteria();
-        $criteria->addColumnCondition(array('target_check_id' => $check->id));
-        $criteria->addInCondition('check_input_id', $inputIds);
-        $criteria->order = 'input.sort_order ASC';
+        $criteria->addColumnCondition(array("target_check_id" => $check->id));
+        $criteria->addInCondition("check_input_id", $inputIds);
+        $criteria->order = "input.sort_order ASC";
 
         // create input files
-        $inputs = TargetCheckInput::model()->with('input')->findAll($criteria);
+        $inputs = TargetCheckInput::model()->with("input")->findAll($criteria);
         $inputFiles = array();
 
         foreach ($inputs as $input) {

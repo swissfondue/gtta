@@ -13,6 +13,7 @@
  * @property integer $max_sort_order
  * @property integer $type
  * @property integer $visible
+ * @property TargetCheckInput[] $targetInputs
  */
 class CheckInput extends ActiveRecord {
     /**
