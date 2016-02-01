@@ -11,7 +11,7 @@ class VMNotFoundException extends Exception {}
 class VMManager {
     const CONTROL_COMMAND = "/usr/sbin/vzctl";
     const ID = 666;
-    const TEMPLATE = "debian-7.0-i386-minimal";
+    const TEMPLATE = "debian-8.0-x86_64-minimal";
     const CONFIG = "basic";
     const IP = "192.168.66.66";
     const HOSTNAME = "gtta";
@@ -19,7 +19,7 @@ class VMManager {
     const CPU_LIMIT = 50;
     const DISK_LIMIT = "5G";
     const MEMORY_LIMIT = "1G";
-    const OPENVZ_PRIVATE_DIR = "/var/lib/vz/private";
+    const OPENVZ_ROOT_DIR = "/var/lib/vz/root";
     const TOOLS_DIRECTORY = "tools";
     const RUN_SCRIPT = "run_script.py";
 
@@ -61,7 +61,7 @@ class VMManager {
     private function _stopAndDestroy() {
         try {
             $this->_command("stop");
-            $this->_command("destroy", array("wait" => 1));
+            $this->_command("destroy");
         } catch (Exception $e) {
             // VM container may not exist at this step
         }
@@ -112,7 +112,7 @@ class VMManager {
      * @return string
      */
     public function virtualizePath($path) {
-        return self::OPENVZ_PRIVATE_DIR . "/" . self::ID . $path;
+        return self::OPENVZ_ROOT_DIR . "/" . self::ID . $path;
     }
 
     /**
@@ -146,7 +146,6 @@ class VMManager {
                 "nameserver" => $nameserver,
                 "diskspace" => self::DISK_LIMIT,
                 "privvmpages" => self::MEMORY_LIMIT,
-                "noatime" => "yes",
                 "save" => "",
             ));
 
@@ -156,8 +155,8 @@ class VMManager {
             sleep(60);
 
             // change APT sources
-            $this->runCommand("echo \"deb ftp://ftp.debian.org/debian wheezy main contrib non-free\" > /etc/apt/sources.list");
-            $this->runCommand("echo \"deb http://security.debian.org/ wheezy/updates main contrib non-free\" >> /etc/apt/sources.list");
+            $this->runCommand("echo \"deb ftp://ftp.debian.org/debian jessie main contrib non-free\" > /etc/apt/sources.list");
+            $this->runCommand("echo \"deb http://security.debian.org/ jessie/updates main contrib non-free\" >> /etc/apt/sources.list");
             $this->runCommand("apt-get -y update");
 
             $scriptsPath = Yii::app()->params["packages"]["path"]["scripts"];

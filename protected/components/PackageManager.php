@@ -1339,7 +1339,15 @@ class PackageManager {
             $package = $this->_parse($path);
             $this->_validate($package, false);
 
-            $pkg = new Package();
+            $pkg = Package::model()->findByAttributes(array(
+                "type" => $package[self::SECTION_TYPE],
+                "name" => $package[self::SECTION_NAME]
+            ));
+
+            if (!$pkg) {
+                $pkg = new Package();
+            }
+
             $pkg->name = $package[self::SECTION_NAME];
             $pkg->type = $package[self::SECTION_TYPE];
             $pkg->version = $package[self::SECTION_VERSION];
@@ -1371,10 +1379,12 @@ class PackageManager {
                     );
                 }
 
-                $packageDep = new PackageDependency();
-                $packageDep->from_package_id = $pkg->id;
-                $packageDep->to_package_id = $library->id;
-                $packageDep->save();
+                try {
+                    $packageDep = new PackageDependency();
+                    $packageDep->from_package_id = $pkg->id;
+                    $packageDep->to_package_id = $library->id;
+                    $packageDep->save();
+                } catch (Exception $e) {}
             }
 
             // create script dependencies
@@ -1390,10 +1400,12 @@ class PackageManager {
                     );
                 }
 
-                $packageDep = new PackageDependency();
-                $packageDep->from_package_id = $pkg->id;
-                $packageDep->to_package_id = $script->id;
-                $packageDep->save();
+                try {
+                    $packageDep = new PackageDependency();
+                    $packageDep->from_package_id = $pkg->id;
+                    $packageDep->to_package_id = $script->id;
+                    $packageDep->save();
+                } catch (Exception $e) {}
             }
 
             $pkg->status = Package::STATUS_INSTALLED;
