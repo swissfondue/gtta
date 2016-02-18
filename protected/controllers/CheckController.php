@@ -818,6 +818,8 @@ class CheckController extends Controller
             }
         } else {
             $check = new Check();
+            $now = new DateTime();
+            $check->create_time = $now->format(ISO_DATE_TIME);
             $newRecord = true;
         }
 
@@ -1075,6 +1077,8 @@ class CheckController extends Controller
                 $src = Check::model()->findByPk($model->id);
 
                 $dst = new Check();
+                $now = new DateTime();
+                $dst->create_time = $now->format(ISO_DATE_TIME);
                 $dst->check_control_id = $control->id;
                 $dst->name = $src->name . ' (' . Yii::t('app', 'Copy') . ')';
                 $dst->background_info = $src->background_info;

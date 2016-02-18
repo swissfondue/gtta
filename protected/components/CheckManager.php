@@ -68,6 +68,8 @@ class CheckManager {
 
             if (!$c) {
                 $c = new Check();
+                $now = new DateTime();
+                $c->create_time = $now->format(ISO_DATE_TIME);
             }
 
             $c->external_id = $check->id;

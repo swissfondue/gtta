@@ -55,7 +55,7 @@ class Check extends ActiveRecord {
 	 */
 	public function rules() {
 		return array(
-            array("name, check_control_id, sort_order", "required"),
+            array("name, check_control_id, sort_order, create_time", "required"),
             array("name, protocol, reference_code, reference_url", "length", "max" => 1000),
             array(
                 "check_control_id, reference_id, port, effort, sort_order, external_id, status",

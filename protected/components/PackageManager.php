@@ -648,6 +648,8 @@ class PackageManager {
 
             if (!$pkg) {
                 $pkg = new Package();
+                $now = new DateTime();
+                $pkg->create_time = $now->format(ISO_DATE_TIME);
             }
 
             $pkg->file_name = $fileId;
@@ -1346,6 +1348,8 @@ class PackageManager {
 
             if (!$pkg) {
                 $pkg = new Package();
+                $now = new DateTime();
+                $pkg->create_time = $now->format(ISO_DATE_TIME);
             }
 
             $pkg->name = $package[self::SECTION_NAME];

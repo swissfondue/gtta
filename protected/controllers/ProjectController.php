@@ -2720,6 +2720,8 @@ class ProjectController extends Controller {
                 }
 
                 $check = new Check();
+                $now = new DateTime();
+                $check->create_time = $now->format(ISO_DATE_TIME);
                 $check->name = $form->name;
                 $check->background_info = $form->backgroundInfo;
                 $check->question = $form->question;
