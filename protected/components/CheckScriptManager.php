@@ -32,7 +32,7 @@ class CheckScriptManager {
         $object->sort_order = $order;
         $object->save();
 
-        $language = Language::model()->find("user_default");
+        $language = Language::model()->find("\"user_default\" OR \"default\"");
         $l10n = new CheckInputL10n();
         $l10n->check_input_id = $object->id;
         $l10n->language_id = $language->id;

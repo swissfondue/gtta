@@ -3712,7 +3712,7 @@ class ProjectController extends Controller {
                 $checkData[] = array(
                     "id" => $targetCheck->id,
                     "result" => $targetCheck->result,
-                    "tableResult" => $table ? $this->renderPartial("/project/target/check/tableresult", array("table" => $table), true) : "",
+                    "tableResult" => $table ? $this->renderPartial("/project/target/check/tableresult", array("table" => $table, "check" => $targetCheck), true) : "",
                     "finished" => $finished,
                     "time" => $time,
                     "attachmentControlUrl" => $this->createUrl("project/controlattachment"),
