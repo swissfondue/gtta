@@ -675,6 +675,11 @@ class PackageManager {
         } catch (Exception $e) {
             FileManager::unlink($zipPath);
             $exception = $e;
+
+            if ($pkg && $pkg->id) {
+                $pkg->status = Package::STATUS_ERROR;
+                $pkg->save();
+            }
         }
 
         FileManager::rmDir($packagePath);
@@ -1241,7 +1246,7 @@ class PackageManager {
             if (!$dependency) {
                 throw $e;
             } else {
-                throw new Exception("Error installing dependent package.");
+                throw new Exception("Error installing dependent package: " . $e->getMessage());
             }
         }
 
