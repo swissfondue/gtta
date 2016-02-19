@@ -3,7 +3,6 @@
 defined("BASE_DIR") or define("BASE_DIR", "/opt/gtta");
 
 return array(
-    "baseUrl" => "DEPLOY_BASE_URL",
     "entriesPerPage" => 10,
     "limitedListEntriesCount" => 5,
     "maxCheckboxes" => 3,
