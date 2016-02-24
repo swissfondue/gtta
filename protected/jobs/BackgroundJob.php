@@ -31,6 +31,11 @@ abstract class BackgroundJob {
     public $args = array();
 
     /**
+     * @var System system
+     */
+    protected $_system = null;
+
+    /**
      * Set job shared variable
      * @param $var
      * @param $value
@@ -63,6 +68,17 @@ abstract class BackgroundJob {
         }
 
         $this->setVar("pid", posix_getpid());
+
+        // timezone setup
+        $this->_system = System::model()->findByPk(1);
+
+        if (!$this->_system->timezone) {
+            $this->_system->timezone = "Europe/Zurich";
+            $this->_system->save();
+        }
+
+        date_default_timezone_set($this->_system->timezone);
+
     }
 
     /**
