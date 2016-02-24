@@ -17,17 +17,10 @@ class GitJob extends BackgroundJob {
     const ACTION_SYNC = 2;
 
     /**
-     * @var System system
-     */
-    private $_system;
-
-    /**
      * Initialize git
      * @throws Exception
      */
     private function _init() {
-        SystemManager::updateGitStatus(System::GIT_STATUS_INIT);
-
         $cmd = sprintf(
             "%s/%s %s",
             Yii::app()->params["packages"]["git"]["scripts"]["path"],
@@ -36,8 +29,6 @@ class GitJob extends BackgroundJob {
         );
 
         ProcessManager::runCommand($cmd, true);
-
-        SystemManager::updateGitStatus(System::GIT_STATUS_IDLE);
     }
 
     /**
@@ -49,7 +40,6 @@ class GitJob extends BackgroundJob {
             $this->_init();
         }
 
-        SystemManager::updateGitStatus(System::GIT_STATUS_CONFIG);
         $args = array(
             "--dir",
             Yii::app()->params["packages"]["path"]["scripts"],
@@ -79,7 +69,6 @@ class GitJob extends BackgroundJob {
         );
 
         ProcessManager::runCommand($cmd, true);
-        SystemManager::updateGitStatus(System::GIT_STATUS_IDLE);
     }
 
     /**
@@ -90,12 +79,15 @@ class GitJob extends BackgroundJob {
 
         if ($this->_system->git_proto == System::GIT_PROTO_HTTPS) {
             $parts = parse_url($this->_system->git_url);
+            $scheme = isset($parts["scheme"]) ? $parts["scheme"] : "https";
+            $url = isset($parts["host"]) && isset($parts["path"]) ? $parts["host"] . $parts["path"] : $this->_system->git_url;
+
             $url = sprintf(
                 "%s://%s:%s@%s",
-                $parts["scheme"],
+                $scheme,
                 $this->_system->git_username,
                 $this->_system->git_password,
-                $parts["host"] . $parts["path"]
+                $url
             );
         }
 
@@ -118,7 +110,6 @@ class GitJob extends BackgroundJob {
             $this->_configure();
         }
 
-        $system->updateGitStatus(System::GIT_STATUS_SYNC);
         $args = array(
             "--dir",
             Yii::app()->params["packages"]["path"]["scripts"],
@@ -143,7 +134,6 @@ class GitJob extends BackgroundJob {
 
         ProcessManager::runCommand($cmd, true);
         $this->_updatePackages();
-        $system->updateGitStatus(System::GIT_STATUS_IDLE);
     }
 
     /**
@@ -173,13 +163,11 @@ class GitJob extends BackgroundJob {
                 throw new Exception("Invalid job arguments.");
             }
 
-            $this->_system = System::model()->findByPk(1);
-
             $strategy = isset($this->args["strategy"]) ? $this->args["strategy"] : System::GIT_MERGE_STRATEGY_THEIRS;
             $this->_sync($strategy);
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e->getTraceAsString());
-            SystemManager::updateGitStatus(System::GIT_STATUS_FAILED);
+            Resque::redis()->set("gtta.packages.result.sync", $e->getMessage());
         }
     }
 }

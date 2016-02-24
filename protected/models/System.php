@@ -40,7 +40,6 @@
  * @property integer $git_proto
  * @property integer $git_username
  * @property integer $git_password
- * @property integer $git_status
  * @property Language $language
  */
 class System extends ActiveRecord {
@@ -168,13 +167,5 @@ class System extends ActiveRecord {
         $job = JobManager::buildId(RestoreJob::ID_TEMPLATE);
 
         return JobManager::isRunning($job);
-    }
-
-    /**
-     * Check if git is busy
-     * @return bool
-     */
-    public function getGitBusy() {
-        return $this->git_status != self::GIT_STATUS_IDLE && $this->git_status != self::GIT_STATUS_FAILED;
     }
 }

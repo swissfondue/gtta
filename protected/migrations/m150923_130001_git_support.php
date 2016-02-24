@@ -13,7 +13,6 @@ class m150923_130001_git_support extends CDbMigration {
         $this->addColumn("system", "git_proto", "text NOT NULL DEFAULT 0");
         $this->addColumn("system", "git_username", "text");
         $this->addColumn("system", "git_password", "text");
-        $this->addColumn("system", "git_status", "BIGINT NOT NULL DEFAULT 0");
 
         return true;
 	}
@@ -27,7 +26,6 @@ class m150923_130001_git_support extends CDbMigration {
         $this->dropColumn("system", "git_proto");
         $this->dropColumn("system", "git_username");
         $this->dropColumn("system", "git_password");
-        $this->dropColumn("system", "git_status");
 
         return true;
 	}

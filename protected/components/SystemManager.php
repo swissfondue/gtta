@@ -87,31 +87,4 @@ class SystemManager {
 
         return true;
     }
-
-    /**
-     * Update git status
-     * @param $status
-     * @throws Exception
-     */
-    public static function updateGitStatus($status) {
-        $system = System::model()->getByPk(1);
-
-        $notIdle = array(
-            System::GIT_STATUS_INIT,
-            System::GIT_STATUS_CONFIG,
-            System::GIT_STATUS_FAILED,
-            System::GIT_STATUS_SYNC
-        );
-
-        if ($status == $system->git_status) {
-            return;
-        }
-
-        if (in_array($status, $notIdle) && in_array($system->git_status, $notIdle)) {
-            throw new Exception("Permission denied.");
-        }
-
-        $system->git_status = $status;
-        $system->save();
-    }
 } 

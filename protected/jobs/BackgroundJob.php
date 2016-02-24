@@ -78,7 +78,6 @@ abstract class BackgroundJob {
         }
 
         date_default_timezone_set($this->_system->timezone);
-
     }
 
     /**

@@ -493,19 +493,22 @@ class PackageController extends Controller {
      * Sync options page
      */
     public function actionSync() {
-        $sync = false;
         $form = new SyncForm();
+
+        $job = JobManager::buildId(GitJob::ID_TEMPLATE);
+        $running = JobManager::isRunning($job);
 
         if (isset($_POST["SyncForm"])) {
             $form->attributes = $_POST["SyncForm"];
 
             if ($form->validate()) {
-                if (!$this->_system->gitBusy) {
+                if (!$running) {
                     GitJob::enqueue(array(
                         "strategy" => $form->strategy,
                         "email" => Yii::app()->user->email
                     ));
-                    $sync = true;
+
+                    $running = true;
                 }
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
@@ -520,7 +523,7 @@ class PackageController extends Controller {
         // display the page
         $this->pageTitle = Yii::t("app", "Sync Packages");
         $this->render("sync", array(
-            "sync" => $sync,
+            "sync" => $running,
             "system" => $this->_system
         ));
     }
@@ -532,13 +535,18 @@ class PackageController extends Controller {
         $response = new AjaxResponse();
 
         try {
-            $system = System::model()->findByPk(1);
-            $response->addData("sync", $system->gitBusy);
-            $failed = $system->git_status == System::GIT_STATUS_FAILED;
-            $response->addData("error", $failed);
+            $job = JobManager::buildId(GitJob::ID_TEMPLATE);
+            $running = JobManager::isRunning($job);
 
-            if ($failed) {
-                $system->updateGitStatus(System::GIT_STATUS_IDLE);
+            $response->addData("sync", $running);
+
+            if (!$running) {
+                $error = Resque::redis()->get("gtta.packages.result.sync");
+
+                if ($error) {
+                    $response->addData("error", $error);
+                    Resque::redis()->del("gtta.packages.result.sync");
+                }
             }
         } catch (Exception $e) {
             $response->setError($e->getMessage());
