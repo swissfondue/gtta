@@ -42,7 +42,7 @@
                     <p class="help-block"><?php echo $model->getError('relations'); ?></p>
                 <?php endif; ?>
                 <div id="zoomActions"></div>
-                <div id="activeChainCheck" data-url="<?php print $this->createUrl('project/chainactivecheck', array( 'id' => $project->id, 'target' => $target->id )); ?>" class="<?php if (!$activeCheck) print 'hide'; ?>">
+                <div id="activeChainCheck" data-url="<?php print $this->createUrl("project/chainactivecheck", array("id" => $project->id, "target" => $target->id)); ?>" class="<?php if (!$activeCheck) print 'hide'; ?>">
                     <?php print Yii::t("app", "Current Check") . ": ";?> <strong class="check-name"><?php print $activeCheck; ?></strong>
                 </div>
             </div>
@@ -88,7 +88,7 @@
 
     <?php if ($target->isChainRunning): ?>
         setTimeout(function () {
-            user.target.chain.updateActiveCheck('<?php print $this->createUrl('project/chainactivecheck'); ?>');
+            user.target.chain.updateActiveCheck("<?php print $this->createUrl("project/chainactivecheck", array("id" => $project->id, "target" => $target->id)); ?>");
         }, 5000);
     <?php endif; ?>
 
