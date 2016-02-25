@@ -28,7 +28,7 @@
         <?php if ($checkData->localizedBackgroundInfo): ?>
             <tr>
                 <th>
-                    <?php echo Yii::t("app", "Background Info XXX"); ?>
+                    <?php echo Yii::t("app", "Background Info"); ?>
                 </th>
                 <td class="text">
                     <div class="limiter"><?php echo $checkData->localizedBackgroundInfo; ?></div>

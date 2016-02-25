@@ -217,8 +217,9 @@ class AppController extends Controller {
                 'code' => Yii::app()->language
             ));
 
-            if ($language)
+            if ($language) {
                 $language = $language->id;
+            }
 
             $objects = array();
 
@@ -479,13 +480,18 @@ class AppController extends Controller {
                                     )
                                 )
                             )
-                        )
+                        ),
+                        "l10n" => array(
+                            "joinType" => "LEFT JOIN",
+                            "on" => "l10n.language_id = :language_id",
+                            "params" => array("language_id" => $language)
+                        ),
                     ))->findAll();
 
                     foreach ($checks as $check) {
                         $objects[] = array(
                             "id" => $check->id,
-                            "name" => $check->localizedName,
+                            "name" => CHtml::encode($check->localizedName),
                         );
                     }
 
@@ -498,14 +504,20 @@ class AppController extends Controller {
                         throw new CHttpException(404, "Category not found.");
                     }
 
-                    $controls = CheckControl::model()->findAllByAttributes(array(
+                    $controls = CheckControl::model()->with([
+                        "l10n" => array(
+                            "joinType" => "LEFT JOIN",
+                            "on" => "l10n.language_id = :language_id",
+                            "params" => array("language_id" => $language)
+                        ),
+                    ])->findAllByAttributes(array(
                         "check_category_id" => $category->id
                     ));
 
                     foreach ($controls as $control) {
                         $objects[] = array(
                             "id" => $control->id,
-                            "name" => $control->localizedName,
+                            "name" => CHtml::encode($control->localizedName),
                         );
                     }
 

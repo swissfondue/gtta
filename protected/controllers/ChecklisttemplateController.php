@@ -612,10 +612,20 @@ class ChecklisttemplateController extends Controller {
         $model = new ChecklistTemplateCheckCategoryEditForm();
         $checkIds = array();
         $categoryChecks = array();
+        
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
 
         if (!$newRecord) {
             $categories = CheckCategory::model()->findAllByPk($checkCategory->id);
             $model->categoryId = $checkCategory->id;
+            $criteria = new CDbCriteria();
+            $criteria->order = "control.sort_order, t.sort_order";
 
             $categoryChecks = Check::model()->with(array(
                 "control" => array(
@@ -627,10 +637,19 @@ class ChecklisttemplateController extends Controller {
                             "params" => array(
                                 "category_id" => $checkCategory->id
                             )
+                        ),
+                        "l10n" => array(
+                            "alias" => "l10n_c",
+                            "on" => "l10n_c.language_id = :language_id",
+                            "params" => array("language_id" => $language)
                         )
                     )
+                ),
+                "l10n" => array(
+                    "on" => "l10n.language_id = :language_id",
+                    "params" => array("language_id" => $language)
                 )
-            ))->findAll();
+            ))->findAll($criteria);
 
             foreach ($categoryChecks as $check) {
                 $tc = ChecklistTemplateCheck::model()->findByAttributes(array(
