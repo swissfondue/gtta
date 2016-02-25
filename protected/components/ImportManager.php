@@ -115,7 +115,9 @@ class ImportManager {
     public static function importTargets($path, $type=self::TYPE_NESSUS_CSV, $project) {
         if (!file_exists($path)) {
             throw new Exception("File not found.");
-        }
+        }                
+        
+        $targetCache = [];
 
         switch ($type) {
             case self::TYPE_NESSUS_CSV:
@@ -133,11 +135,19 @@ class ImportManager {
                     if (!isset($target["Host"])) {
                         throw new ImportFileParsingException();
                     }
+                    
+                    $host = $target["Host"];
+                    
+                    if (in_array($host, $targetCache)) {
+                        continue;
+                    }
 
                     $t = new Target();
                     $t->project_id = $project->id;
-                    $t->host = $target["Host"];
+                    $t->host = $host;
                     $t->save();
+                    
+                    $targetCache[] = $host;
                 }
 
                 break;
@@ -157,19 +167,24 @@ class ImportManager {
                     throw new NoValidTargetException();
                 }
 
-                foreach ($report->xpath("//ReportHost") as $reportNode) {
-                    $t = new Target();
-
+                foreach ($report->xpath("//ReportHost") as $reportNode) {                    
                     foreach ($reportNode->HostProperties->tag as $property) {
                         $attributes = $property->attributes();
 
                         if ($attributes["name"] != "host-ip") {
                             continue;
                         }
+                        
+                        if (in_array($property, $targetCache)) {
+                            continue;
+                        }
 
+                        $t = new Target();
                         $t->project_id = $project->id;
                         $t->host = $property;
                         $t->save();
+                        
+                        $targetCache[] = $property;
 
                         break;
                     }
@@ -190,16 +205,22 @@ class ImportManager {
 
                 foreach ($targets as $target) {
                     $targetData = explode(":", $target[0]);
+                    
+                    if (in_array($targetData[0], $targetCache)) {
+                        continue;
+                    }
 
                     $t = new Target();
                     $t->project_id = $project->id;
-                    $t->host       = $targetData[0];
+                    $t->host = $targetData[0];
 
                     if (count($targetData) > 1) {
                         $t->port = (int) $targetData[1];
                     }
 
                     $t->save();
+                    
+                    $targetCache[] = $targetData[0];
                 }
 
                 break;
@@ -217,16 +238,22 @@ class ImportManager {
 
                 foreach ($targets as $target) {
                     $targetData = explode(":", $target[0]);
+                    
+                    if (in_array($targetData[0], $targetCache)) {
+                        continue;
+                    }
 
                     $t = new Target();
                     $t->project_id = $project->id;
-                    $t->host       = $targetData[0];
+                    $t->host = $targetData[0];
 
                     if (count($targetData) > 1) {
                         $t->port = (int) $targetData[1];
                     }
 
                     $t->save();
+                    
+                    $targetCache[] = $targetData[0];
                 }
 
                 break;
