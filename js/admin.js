@@ -1181,7 +1181,7 @@ function Admin()
                         }, 5000);
                     } else {
                         if (data.error) {
-                            system.addAlert("error", "Synchronization failed: " + data.error);
+                            system.addAlert("error", "Synchronization failed.");
                         } else {
                             system.addAlert("success", "Synchronization succeeded.");
                         }

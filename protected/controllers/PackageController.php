@@ -544,7 +544,7 @@ class PackageController extends Controller {
                 $error = Resque::redis()->get("gtta.packages.result.sync");
 
                 if ($error) {
-                    $response->addData("error", $error);
+                    $response->addData("error", true);
                     Resque::redis()->del("gtta.packages.result.sync");
                 }
             }
