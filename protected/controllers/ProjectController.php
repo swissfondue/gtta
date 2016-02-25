@@ -1686,7 +1686,7 @@ class ProjectController extends Controller {
             "checks" => array(
                 "with" => array(
                     "targetChecks" => array(
-                        "joinType" => "LEFT JOIN",
+                        "joinType" => "INNER JOIN",
                         "alias" => "tc",
                         "on" => "tc.target_id = :target_id",
                         "params" => array("target_id" => $target->id),
