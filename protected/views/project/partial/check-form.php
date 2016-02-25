@@ -6,13 +6,13 @@
             </th>
             <td class="text">
                 <?php
-                    $reference = $check->check->_reference->name . ($check->check->reference_code ? "-" . $check->check->reference_code : "");
+                    $reference = $checkData->_reference->name . ($checkData->reference_code ? "-" . $checkData->reference_code : "");
                     $referenceUrl = "";
 
-                    if ($check->check->reference_code && $check->check->reference_url) {
-                        $referenceUrl = $check->check->reference_url;
-                    } else if ($check->check->_reference->url) {
-                        $referenceUrl = $check->check->_reference->url;
+                    if ($checkData->reference_code && $checkData->reference_url) {
+                        $referenceUrl = $checkData->reference_url;
+                    } else if ($checkData->_reference->url) {
+                        $referenceUrl = $checkData->_reference->url;
                     }
 
                     if ($referenceUrl) {
@@ -25,37 +25,37 @@
                 ?>
             </td>
         </tr>
-        <?php if ($check->check->localizedBackgroundInfo): ?>
+        <?php if ($checkData->localizedBackgroundInfo): ?>
             <tr>
                 <th>
-                    <?php echo Yii::t("app", "Background Info"); ?>
+                    <?php echo Yii::t("app", "Background Info XXX"); ?>
                 </th>
                 <td class="text">
-                    <div class="limiter"><?php echo $check->check->localizedBackgroundInfo; ?></div>
+                    <div class="limiter"><?php echo $checkData->localizedBackgroundInfo; ?></div>
                 </td>
             </tr>
         <?php endif; ?>
-        <?php if ($check->check->localizedHints): ?>
+        <?php if ($checkData->localizedHints): ?>
             <tr>
                 <th>
                     <?php echo Yii::t("app", "Hints"); ?>
                 </th>
                 <td class="text">
-                    <div class="limiter"><?php echo $check->check->localizedHints; ?></div>
+                    <div class="limiter"><?php echo $checkData->localizedHints; ?></div>
                 </td>
             </tr>
         <?php endif; ?>
-        <?php if ($check->check->localizedQuestion): ?>
+        <?php if ($checkData->localizedQuestion): ?>
             <tr>
                 <th>
                     <?php echo Yii::t("app", "Question"); ?>
                 </th>
                 <td class="text">
-                    <div class="limiter"><?php echo $check->check->localizedQuestion; ?></div>
+                    <div class="limiter"><?php echo $checkData->localizedQuestion; ?></div>
                 </td>
             </tr>
         <?php endif; ?>
-        <?php if ($check->check->automated): ?>
+        <?php if ($checkData->automated): ?>
             <tr>
                 <th>
                     <?php echo Yii::t("app", "Override Target"); ?>
@@ -64,7 +64,7 @@
                     <textarea class="max-width" rows="10" name="TargetCheckEditForm_<?php echo $check->id; ?>[overrideTarget]" id="TargetCheckEditForm_<?php echo $check->id; ?>_overrideTarget" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->override_target); ?></textarea>
                 </td>
             </tr>
-            <?php if ($check->check->protocol): ?>
+            <?php if ($checkData->protocol): ?>
                 <tr>
                     <th>
                         <?php echo Yii::t("app", "Protocol"); ?>
@@ -74,7 +74,7 @@
                     </td>
                 </tr>
             <?php endif; ?>
-            <?php if ($check->check->port): ?>
+            <?php if ($checkData->port): ?>
                 <tr>
                     <th>
                         <?php echo Yii::t("app", "Port"); ?>
@@ -85,7 +85,7 @@
                 </tr>
             <?php endif; ?>
         <?php endif; ?>
-        <?php if ($check->check->scripts && $check->check->automated && User::checkRole(User::ROLE_USER)): ?>
+        <?php if ($checkData->scripts && $checkData->automated && User::checkRole(User::ROLE_USER)): ?>
             <?php foreach ($check->scripts as $script): ?>
                 <tr class="script-inputs">
                     <th>
@@ -266,7 +266,7 @@
                 <?php
                     $showAuto = false;
 
-                    if ($check->check->automated && $check->isRunning) {
+                    if ($checkData->automated && $check->isRunning) {
                         $showAuto = true;
                     }
                 ?>
@@ -317,6 +317,30 @@
                 </div>
             </td>
         </tr>
+        <?php if (User::checkRole(User::ROLE_USER)): ?>
+            <tr class="<?php echo $results ? '' : 'hide'; ?>" ">
+                <th>
+                    <?php echo Yii::t("app", "Insert Result"); ?>
+                </th>
+                <td class="text">
+                    <ul class="results">
+                        <?php foreach ($results as $result): ?>
+                            <li>
+                                <div class="result-header">
+                                    <a href="#insert" onclick="user.check.insertResult(<?php echo $check->id; ?>, $('.result-content[data-id=<?php echo $result->id; ?>]').html());"><?php echo CHtml::encode($result->localizedTitle); ?></a>
+
+                                    <span class="result-control" data-id="<?php echo $result->id; ?>">
+                                        <a href="#result" onclick="user.check.expandResult(<?php echo $result->id; ?>);"><i class="icon-chevron-down"></i></a>
+                                    </span>
+                                </div>
+
+                                <div class="result-content hide" data-id="<?php echo $result->id; ?>"><?php echo (Utils::isHtml($result->localizedResult) ? $result->localizedResult : str_replace("\n", "<br>", $result->localizedResult)); ?></div>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </td>
+            </tr>
+        <?php endif; ?>
         <?php if ($this->_system->checklist_poc): ?>
             <tr>
                 <th>
@@ -336,38 +360,14 @@
                     <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[links]" class="max-width wysiwyg" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_links" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->links); ?></textarea>
                 </td>
             </tr>
-        <?php endif; ?>
-        <?php if (User::checkRole(User::ROLE_USER)): ?>
-            <tr class="<?php echo $check->check->results ? '' : 'hide'; ?>" ">
-                <th>
-                    <?php echo Yii::t("app", "Insert Result"); ?>
-                </th>
-                <td class="text">
-                    <ul class="results">
-                        <?php foreach ($check->check->results as $result): ?>
-                            <li>
-                                <div class="result-header">
-                                    <a href="#insert" onclick="user.check.insertResult(<?php echo $check->id; ?>, $('.result-content[data-id=<?php echo $result->id; ?>]').html());"><?php echo CHtml::encode($result->localizedTitle); ?></a>
-
-                                    <span class="result-control" data-id="<?php echo $result->id; ?>">
-                                        <a href="#result" onclick="user.check.expandResult(<?php echo $result->id; ?>);"><i class="icon-chevron-down"></i></a>
-                                    </span>
-                                </div>
-
-                                <div class="result-content hide" data-id="<?php echo $result->id; ?>"><?php echo (Utils::isHtml($result->localizedResult) ? $result->localizedResult : str_replace("\n", "<br>", $result->localizedResult)); ?></div>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </td>
-            </tr>
-        <?php endif; ?>
+        <?php endif; ?>        
         <tr>
             <th>
                 <?php echo Yii::t("app", "Solution"); ?>
             </th>
             <td class="text">
                 <ul class="solutions">
-                    <?php if (!$check->check->multiple_solutions): ?>
+                    <?php if (!$checkData->multiple_solutions): ?>
                         <li>
                             <div class="solution-header">
                                 <label class="radio">
@@ -380,7 +380,7 @@
 
                     <li>
                         <div class="solution-header">
-                            <?php if ($check->check->multiple_solutions): ?>
+                            <?php if ($checkData->multiple_solutions): ?>
                                 <label class="checkbox">
                                     <input class="custom-solution" name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="checkbox" value="<?php echo TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>" <?php if ($check->solution) echo "checked"; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "disabled"; ?>>
                             <?php else: ?>
@@ -412,7 +412,7 @@
                         </div>
                     </li>
 
-                    <?php foreach ($check->check->solutions as $solution): ?>
+                    <?php foreach ($solutions as $solution): ?>
                         <li>
                             <div class="solution-header">
                                 <?php
@@ -427,7 +427,7 @@
                                         }
                                     }
                                 ?>
-                                <?php if ($check->check->multiple_solutions): ?>
+                                <?php if ($checkData->multiple_solutions): ?>
                                     <label class="checkbox">
                                         <input name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="checkbox" value="<?php echo $solution->id; ?>" <?php if ($checked) echo "checked"; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "disabled"; ?>>
                                 <?php else: ?>

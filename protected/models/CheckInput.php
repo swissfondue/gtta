@@ -80,7 +80,7 @@ class CheckInput extends ActiveRecord {
     /**
      * @return string localized name.
      */
-    public function getLocalizedName() {
+    public function getLocalizedName() {        
         if ($this->l10n && count($this->l10n) > 0) {
             return $this->l10n[0]->name != null ? $this->l10n[0]->name : $this->name;
         }

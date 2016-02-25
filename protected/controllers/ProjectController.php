@@ -2008,10 +2008,10 @@ class ProjectController extends Controller {
                 )
             );
 
-            $check->check = Check::model()->with($lang)->findByPk($check->check_id);
+            $checkData = Check::model()->with($lang)->findByPk($check->check_id);
 
             if (!count($check->scripts)) {
-                foreach ($check->check->scripts as $script) {
+                foreach ($checkData->scripts as $script) {
                     $targetCheckScript = new TargetCheckScript();
                     $targetCheckScript->check_script_id = $script->id;
                     $targetCheckScript->target_check_id = $check->id;
@@ -2042,10 +2042,10 @@ class ProjectController extends Controller {
 
             $criteria = new CDbCriteria();
             $criteria->addColumnCondition(array("check_id" => $check->check->id));
-            $criteria->order = 'sort_order ASC';
+            $criteria->order = "sort_order ASC";
 
-            $check->check->results = CheckResult::model()->with($lang)->findAll($criteria);
-            $check->check->solutions = CheckSolution::model()->with($lang)->findAll($criteria);
+            $results = CheckResult::model()->with($lang)->findAll($criteria);
+            $solutions = CheckSolution::model()->with($lang)->findAll($criteria);
 
             // display the check form
             $html = $this->renderPartial("partial/check-form", array(
@@ -2053,6 +2053,9 @@ class ProjectController extends Controller {
                 "target" => $target,
                 "category" => $category,
                 "check" => $check,
+                "checkData" => $checkData,
+                "results" => $results,
+                "solutions" => $solutions,
                 "ratings" => TargetCheck::getRatingNames(),
             ), true);
 
