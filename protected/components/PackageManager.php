@@ -777,6 +777,7 @@ class PackageManager {
 
         try {
             $this->_lockInstaller();
+            $vm->runCommand("DEBIAN_FRONTEND=noninteractive apt-get -y update", false);
             $vm->runCommand("DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install $package 2>&1");
             $this->_checkSystemDependency($package);
         } catch (Exception $e) {
