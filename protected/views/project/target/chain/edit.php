@@ -9,9 +9,26 @@
         </div>
         <div class="pull-right buttons">
             <?php if (User::checkRole(User::ROLE_USER)): ?>
-                <a href="#resetchain" title="Reset" class="btn chain-reset-button" data-target-id="<?php print $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>" onclick="user.target.chain.reset($(this).data('target-id'), $(this).data('control-url'))"><i class="icon icon-refresh"></i></a>&nbsp;
-                <a href="#startchain" title="Start" class="btn chain-start-button <?php if ($target->isChainRunning) print 'hide'; ?>" data-target-id="<?php print $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>" onclick="user.target.chain.start($(this).data('target-id'), $(this).data('control-url'))"><i class="icon icon-play"></i><?php echo Yii::t("app", "Start"); ?></a>&nbsp;
-                <a href="#stopchain" title="Stop" class="btn chain-stop-button <?php if (!$target->isChainRunning) print 'hide'; ?>" data-target-id="<?php print $target->id; ?>" data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>" onclick="user.target.chain.stop($(this).data('target-id'), $(this).data('control-url'))"><i class="icon icon-stop"></i><?php echo Yii::t("app", "Stop"); ?></a>
+                <button
+                   title="Reset"
+                   class="btn chain-reset-button"
+                   data-target-id="<?php print $target->id; ?>"
+                   data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>"
+                   onclick="user.target.chain.reset($(this).data('target-id'), $(this).data('control-url'))"
+                   <?php if ($target->isChainRunning) print 'disabled'; ?>><i class="icon icon-refresh"></i></button>&nbsp;
+                <button href="#startchain"
+                   title="Start"
+                   class="btn chain-start-button <?php if ($target->isChainRunning) print 'hide'; ?>"
+                   data-target-id="<?php print $target->id; ?>"
+                   data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>"
+                   onclick="user.target.chain.start($(this).data('target-id'), $(this).data('control-url'))"><i class="icon icon-play"></i><?php echo Yii::t("app", "Start"); ?></button>&nbsp;
+                <button href="#stopchain"
+                   title="Stop"
+                   class="btn chain-stop-button <?php if (!$target->isChainRunning) print 'hide'; ?>"
+                   data-target-id="<?php print $target->id; ?>"
+                   data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>"
+                   onclick="user.target.chain.stop($(this).data('target-id'), $(this).data('control-url'))"
+                   <?php if ($target->isChainRunning) print 'disabled'; ?>><i class="icon icon-stop"></i><?php echo Yii::t("app", "Stop"); ?></button>
             <?php endif; ?>
         </div>
 
@@ -27,7 +44,7 @@
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
     <fieldset>
-        <div class="control-group relations-graph <?php if ($model->getError('relations')) echo 'error'; ?>" data-get-check-url="<?php print $this->createUrl('project/checklink'); ?>">
+        <div class="control-group relations-graph <?php if ($model->getError('relations')) echo 'error'; ?>" data-get-check-url="<?php print $this->createUrl('project/checklink'); ?>" data-target-id="<?= $target->id ?>">
             <label class="control-label"><?php echo Yii::t('app', 'Relations'); ?></label>
             <div class="controls">
                 <table border="0" width="730px">
