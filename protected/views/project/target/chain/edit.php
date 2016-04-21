@@ -56,41 +56,48 @@
     </fieldset>
 </form>
 <script>
-    function onInit(editor) {
-        admin.mxgraph.init.call(this, editor);
-    }
+    if (system.isIE11()) {
+        $(".relations-graph")
+            .parent()
+            .empty()
+            .text(system.translate("Relation Editor does not support this version of the browser, use the Microsoft Edge instead."));
+    } else {
+        function onInit(editor) {
+            admin.mxgraph.init.call(this, editor);
+        }
 
-    var configNode = mxUtils.load("<?php echo Yii::app()->request->baseUrl; ?>/js/mxgraph/grapheditor/config/main.xml").getDocumentElement();
-    admin.mxgraph.editor = new mxEditor(configNode);
+        var configNode = mxUtils.load("<?php echo Yii::app()->request->baseUrl; ?>/js/mxgraph/grapheditor/config/main.xml").getDocumentElement();
+        admin.mxgraph.editor = new mxEditor(configNode);
 
-    <?php foreach ($categories as $category): ?>
+        <?php foreach ($categories as $category): ?>
         admin.mxgraph.checkCategories.push({
             id : <?php print $category->id; ?>,
             name : "<?php print $category->localizedName; ?>"
         });
-    <?php endforeach; ?>
+        <?php endforeach; ?>
 
-    <?php foreach ($filters as $filter): ?>
+        <?php foreach ($filters as $filter): ?>
         admin.mxgraph.filters.push({ name: "<?php print $filter['name']; ?>", title: "<?php print $filter['title']; ?>" });
-    <?php endforeach; ?>
+        <?php endforeach; ?>
 
-    $('#languages-tab a').click(function (e) {
-        e.preventDefault();
-        $(this).tab('show');
-    });
+        $('#languages-tab a').click(function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
 
-    user.target.targetId = parseInt("<?php print $target->id; ?>");
-    admin.mxgraph.buildByXML('<?php print $model->relations; ?>');
+        user.target.targetId = parseInt("<?php print $target->id; ?>");
+        admin.mxgraph.buildByXML('<?php print $model->relations; ?>');
 
-    setInterval(function () {
-        user.target.chain.messages('<?php print $this->createUrl('project/chainmessages'); ?>');
-    }, 5000);
+        setInterval(function () {
+            user.target.chain.messages('<?php print $this->createUrl('project/chainmessages'); ?>');
+        }, 5000);
 
-    <?php if ($target->isChainRunning): ?>
+        <?php if ($target->isChainRunning): ?>
         setTimeout(function () {
             user.target.chain.updateActiveCheck("<?php print $this->createUrl("project/chainactivecheck", array("id" => $project->id, "target" => $target->id)); ?>");
         }, 5000);
-    <?php endif; ?>
+        <?php endif; ?>
 
-    admin.mxgraph.target = parseInt('<?php print $target->id; ?>')
+        admin.mxgraph.target = parseInt('<?php print $target->id; ?>');
+    }
 </script>

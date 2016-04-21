@@ -86,6 +86,14 @@ function System() {
     };
 
     /**
+     * Detect IE11
+     * @returns {boolean}
+     */
+    this.isIE11 = function () {
+        return !(window.ActiveXObject) && "ActiveXObject" in window;
+    };
+
+    /**
      * Toggle collapsible content block.
      */
     this.toggleBlock = function (blockId) {
