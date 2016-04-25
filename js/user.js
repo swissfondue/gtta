@@ -2173,6 +2173,7 @@ function User()
             this.reset = function (targetId, url) {
                 $('.loader-image').show();
                 $('.chain-reset-button').show();
+                $(".chain-reset-button, .chain-start-button, .chain-stop-button").prop("disabled", true);
 
                 $.ajax({
                     dataType: 'json',
@@ -2206,6 +2207,7 @@ function User()
              * Show chain messages
              */
             this.messages = function (url) {
+                var currentTarget = parseInt($(".relations-graph").data("target-id"));
                 $('.loader-image').show();
 
                 $.ajax({
@@ -2223,6 +2225,11 @@ function User()
                             var status = parseInt(value.status);
                             var id = parseInt(value.id);
                             var message = value.message;
+
+                            // Chain is idle
+                            if (status == 0 && id == currentTarget) {
+                                $(".chain-reset-button, .chain-start-button, .chain-stop-button").prop("disabled", false);
+                            }
 
                             system.addAlert("success", message);
 
