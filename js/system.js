@@ -4,12 +4,37 @@
 function System() {
     var _system = this;
 
-    // attributes
-    this.csrf = null;
-    this.ajaxTimeout = 60000;
-    this.messageTimeout = 5000;
-    this.l10nMessages = {};
-    this.constants = {};
+    /**
+     * Init
+     */
+    this.init = function () {
+        this.csrf = null;
+        this.ajaxTimeout = 60000;
+        this.messageTimeout = 5000;
+        this.l10nMessages = {};
+        this.constants = {};
+
+        $("select.show-hide-toggle").change(function () {
+            var option = $(this).find("option:selected");
+            $(option.data("hide")).hide();
+            $(option.data("show")).show();
+        });
+    };
+
+    /**
+     * Refresh page without request
+     */
+    this.refreshPage = function () {
+        this.redirect(window.location.href.split("#")[0]);
+    };
+
+    /**
+     * Redirect to url
+     * @param url
+     */
+    this.redirect = function (url) {
+        window.location = url;
+    };
 
     /**
      * Add alert in alerts queue
@@ -58,6 +83,14 @@ function System() {
             return _system.l10nMessages[sourceString];
 
         return sourceString;
+    };
+
+    /**
+     * Detect IE11
+     * @returns {boolean}
+     */
+    this.isIE11 = function () {
+        return !(window.ActiveXObject) && "ActiveXObject" in window;
     };
 
     /**
@@ -383,9 +416,7 @@ function System() {
          * Switch save button state for the project report form
          */
         this._projectFormSwitchButton = function () {
-            var guided = parseInt($('#ProjectReportForm_projectId option:selected').attr("data-guided"));
-
-            if ((!guided && $('.report-target-list input:checked').length == 0) ||
+            if (($('.report-target-list input:checked').length == 0) ||
                 $('#ProjectReportForm_templateId').val() == 0 ||
                 ($("#ProjectReportForm_templateId option:selected").data("type") == 0 && $('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() == 0)
             ) {
@@ -427,7 +458,6 @@ function System() {
                             for (var i = 0; i < data.objects.length; i++) {
                                 $('<option>')
                                     .val(data.objects[i].id)
-                                    .attr("data-guided", data.objects[i].guided ? 1 : 0)
                                     .html(data.objects[i].name)
                                     .appendTo('#ProjectReportForm_projectId');
                             }
@@ -451,55 +481,45 @@ function System() {
                 $('.form-actions > button[type="submit"]').prop('disabled', true);
 
                 if (val != 0) {
-                    var guided = parseInt($('#ProjectReportForm_projectId option:selected').attr("data-guided"));
+                    _system.control.loadObjects(val, 'target-list', function (data) {
+                        $('#target-list > .controls > .report-target-list > li').remove();
 
-                    if (guided) {
-                        if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0) {
-                            _report._refreshChecks(true, true);
-                        }
+                        if (data && data.objects.length) {
+                            for (var i = 0; i < data.objects.length; i++) {
+                                var li = $('<li>'),
+                                    label = $('<label>'),
+                                    input = $('<input>');
 
-                        _report._projectFormSwitchButton();
-                    } else {
-                        _system.control.loadObjects(val, 'target-list', function (data) {
-                            $('#target-list > .controls > .report-target-list > li').remove();
+                                input
+                                    .attr('type', 'checkbox')
+                                    .prop('checked', true)
+                                    .attr('name', 'ProjectReportForm[targetIds][]')
+                                    .attr('id', 'ProjectReportForm_targetIds_' + data.objects[i].id)
+                                    .val(data.objects[i].id)
+                                    .click(function () {
+                                        system.report.projectFormChange(this);
+                                    })
+                                    .appendTo(label);
 
-                            if (data && data.objects.length) {
-                                for (var i = 0; i < data.objects.length; i++) {
-                                    var li = $('<li>'),
-                                        label = $('<label>'),
-                                        input = $('<input>');
+                                label
+                                    .append(' ' + data.objects[i].host)
+                                    .appendTo(li);
 
-                                    input
-                                        .attr('type', 'checkbox')
-                                        .prop('checked', true)
-                                        .attr('name', 'ProjectReportForm[targetIds][]')
-                                        .attr('id', 'ProjectReportForm_targetIds_' + data.objects[i].id)
-                                        .val(data.objects[i].id)
-                                        .click(function () {
-                                            system.report.projectFormChange(this);
-                                        })
-                                        .appendTo(label);
-
-                                    label
-                                        .append(' ' + data.objects[i].host)
-                                        .appendTo(li);
-
-                                    $('#target-list > .controls > .report-target-list').append(li);
-                                }
-
-                                $('#target-list').show();
-
-                                if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0) {
-                                    _report._refreshChecks(true, false);
-                                }
-
-                                _report._projectFormSwitchButton();
-                            } else {
-                                $('#project-list').addClass('error');
-                                $('#project-list > div > .help-block').show();
+                                $('#target-list > .controls > .report-target-list').append(li);
                             }
-                        });
-                    }
+
+                            $('#target-list').show();
+
+                            if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0) {
+                                _report._refreshChecks(true, false);
+                            }
+
+                            _report._projectFormSwitchButton();
+                        } else {
+                            $('#project-list').addClass('error');
+                            $('#project-list > div > .help-block').show();
+                        }
+                    });
                 }
             } else if (e.id.match(/^ProjectReportForm_targetIds_/i)) {
                 if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0) {
@@ -558,8 +578,7 @@ function System() {
                             _report._riskMatrixCategories = data.objects;
 
                             if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0) {
-                                var guided = parseInt($('#ProjectReportForm_projectId option:selected').attr("data-guided"));
-                                _report._refreshChecks(true, guided);
+                                _report._refreshChecks(true);
                             }
 
                             _report._projectFormSwitchButton();
@@ -600,13 +619,11 @@ function System() {
                             for (var i = 0; i < data.objects.length; i++) {
                                 $('<option>')
                                     .val(data.objects[i].id)
-                                    .attr("data-guided", data.objects[i].guided ? 1 : 0)
                                     .html(data.objects[i].name)
                                     .appendTo('#ProjectComparisonForm_projectId1');
 
                                 $('<option>')
                                     .val(data.objects[i].id)
-                                    .attr("data-guided", data.objects[i].guided ? 1 : 0)
                                     .html(data.objects[i].name)
                                     .appendTo('#ProjectComparisonForm_projectId2');
                             }
@@ -627,8 +644,7 @@ function System() {
 
                 if (project1.val() != 0 &&
                     project2.val() != 0 &&
-                    project1.val() != project2.val() &&
-                    project1.find("option:selected").attr("data-guided") == project2.find("option:selected").attr("data-guided")
+                    project1.val() != project2.val()
                 ) {
                     $('.form-actions > button[type="submit"]').prop('disabled', false);
                 }
@@ -661,7 +677,6 @@ function System() {
                             for (var i = 0; i < data.objects.length; i++) {
                                 $('<option>')
                                     .val(data.objects[i].id)
-                                    .attr("data-guided", data.objects[i].guided ? 1 : 0)
                                     .html(data.objects[i].name)
                                     .appendTo('#FulfillmentDegreeForm_projectId');
                             }
@@ -680,45 +695,39 @@ function System() {
                 $('.form-actions > button[type="submit"]').prop('disabled', true);
 
                 if (val != 0) {
-                    var guided = parseInt($('#FulfillmentDegreeForm_projectId option:selected').attr("data-guided"));
+                    _system.control.loadObjects(val, 'target-list', function (data) {
+                        $('#target-list > .controls > .report-target-list > li').remove();
 
-                    if (guided) {
-                        $('.form-actions > button[type="submit"]').prop('disabled', false);
-                    } else {
-                        _system.control.loadObjects(val, 'target-list', function (data) {
-                            $('#target-list > .controls > .report-target-list > li').remove();
+                        if (data && data.objects.length) {
+                            for (var i = 0; i < data.objects.length; i++) {
+                                var li    = $('<li>'),
+                                    label = $('<label>'),
+                                    input = $('<input>');
 
-                            if (data && data.objects.length) {
-                                for (var i = 0; i < data.objects.length; i++) {
-                                    var li    = $('<li>'),
-                                        label = $('<label>'),
-                                        input = $('<input>');
+                                input
+                                    .attr('type', 'checkbox')
+                                    .prop('checked', true)
+                                    .attr('name', 'FulfillmentDegreeForm[targetIds][]')
+                                    .val(data.objects[i].id)
+                                    .click(function () {
+                                        user.report.fulfillmentFormChange(this);
+                                    })
+                                    .appendTo(label);
 
-                                    input
-                                        .attr('type', 'checkbox')
-                                        .prop('checked', true)
-                                        .attr('name', 'FulfillmentDegreeForm[targetIds][]')
-                                        .val(data.objects[i].id)
-                                        .click(function () {
-                                            user.report.fulfillmentFormChange(this);
-                                        })
-                                        .appendTo(label);
+                                label
+                                    .append(' ' + data.objects[i].host)
+                                    .appendTo(li);
 
-                                    label
-                                        .append(' ' + data.objects[i].host)
-                                        .appendTo(li);
-
-                                    $('#target-list > .controls > .report-target-list').append(li);
-                                }
-
-                                $('#target-list').show();
-                                $('.form-actions > button[type="submit"]').prop('disabled', false);
-                            } else {
-                                $('#project-list').addClass('error');
-                                $('#project-list > div > .help-block').show();
+                                $('#target-list > .controls > .report-target-list').append(li);
                             }
-                        });
-                    }
+
+                            $('#target-list').show();
+                            $('.form-actions > button[type="submit"]').prop('disabled', false);
+                        } else {
+                            $('#project-list').addClass('error');
+                            $('#project-list > div > .help-block').show();
+                        }
+                    });
                 }
             } else {
                 if ($('.report-target-list input:checked').length == 0) {
@@ -732,7 +741,7 @@ function System() {
         /**
          * Refresh check list.
          */
-        this._refreshChecks = function (projectReport, guidedTest) {
+        this._refreshChecks = function (projectReport) {
             var targets, delTargets, addTargets, i, k, id, target;
 
             $('.form-actions > button[type="submit"]').prop('disabled', true);
@@ -778,21 +787,11 @@ function System() {
                 });
             }
 
-            if (guidedTest || addTargets.length > 0) {
+            if (addTargets.length > 0) {
                 var param, cmd;
 
-                if (guidedTest) {
-                    if (projectReport) {
-                        param = $('#ProjectReportForm_projectId').val();
-                    } else {
-                        param = $('#RiskMatrixForm_projectId').val();
-                    }
-
-                    cmd = 'gt-target-check-list';
-                } else {
-                    param = addTargets.join(',');
-                    cmd = 'target-check-list';
-                }
+                param = addTargets.join(',');
+                cmd = 'target-check-list';
 
                 _system.control.loadObjects(param, cmd, function (data) {
                     var targetHeader, targetDiv, category, categoryDiv, check, checkDiv, i, k, j, rating, risk, field,
@@ -985,7 +984,6 @@ function System() {
                             for (var i = 0; i < data.objects.length; i++) {
                                 $('<option>')
                                     .val(data.objects[i].id)
-                                    .attr("data-guided", data.objects[i].guided ? 1 : 0)
                                     .html(data.objects[i].name)
                                     .appendTo('#RiskMatrixForm_projectId');
                             }
@@ -1012,44 +1010,38 @@ function System() {
                 $('.report-target-content').remove();
 
                 if (val != 0) {
-                    var guided = parseInt($('#RiskMatrixForm_projectId option:selected').attr("data-guided"));
+                    _system.control.loadObjects(val, 'target-list', function (data) {
+                        if (data && data.objects.length) {
+                            for (var i = 0; i < data.objects.length; i++) {
+                                var li    = $('<li>'),
+                                    label = $('<label>'),
+                                    input = $('<input>');
 
-                    if (guided) {
-                        _report._refreshChecks(false, true);
-                    } else {
-                        _system.control.loadObjects(val, 'target-list', function (data) {
-                            if (data && data.objects.length) {
-                                for (var i = 0; i < data.objects.length; i++) {
-                                    var li    = $('<li>'),
-                                        label = $('<label>'),
-                                        input = $('<input>');
+                                input
+                                    .attr('type', 'checkbox')
+                                    .prop('checked', true)
+                                    .attr('id', 'RiskMatrixForm_targetIds_' + data.objects[i].id)
+                                    .attr('name', 'RiskMatrixForm[targetIds][]')
+                                    .val(data.objects[i].id)
+                                    .click(function () {
+                                        system.report.riskMatrixFormChange(this);
+                                    })
+                                    .appendTo(label);
 
-                                    input
-                                        .attr('type', 'checkbox')
-                                        .prop('checked', true)
-                                        .attr('id', 'RiskMatrixForm_targetIds_' + data.objects[i].id)
-                                        .attr('name', 'RiskMatrixForm[targetIds][]')
-                                        .val(data.objects[i].id)
-                                        .click(function () {
-                                            system.report.riskMatrixFormChange(this);
-                                        })
-                                        .appendTo(label);
+                                label
+                                    .append(' ' + data.objects[i].host)
+                                    .appendTo(li);
 
-                                    label
-                                        .append(' ' + data.objects[i].host)
-                                        .appendTo(li);
-
-                                    $('#target-list > .controls > .report-target-list').append(li);
-                                }
-
-                                $('#target-list').show();
-                                _report._refreshChecks(false, false);
-                            } else {
-                                $('#project-list').addClass('error');
-                                $('#project-list > div > .help-block').show();
+                                $('#target-list > .controls > .report-target-list').append(li);
                             }
-                        });
-                    }
+
+                            $('#target-list').show();
+                            _report._refreshChecks(false, false);
+                        } else {
+                            $('#project-list').addClass('error');
+                            $('#project-list > div > .help-block').show();
+                        }
+                    });
                 }
             } else if (e.id.match(/^RiskMatrixForm_targetIds_/i)) {
                 _report._refreshChecks(false, false);
@@ -1109,7 +1101,6 @@ function System() {
                             for (var i = 0; i < data.objects.length; i++) {
                                 $('<option>')
                                     .val(data.objects[i].id)
-                                    .attr("data-guided", data.objects[i].guided ? 1 : 0)
                                     .html(data.objects[i].name)
                                     .appendTo('#VulnExportReportForm_projectId');
                             }
@@ -1133,48 +1124,41 @@ function System() {
                 $('input[name="VulnExportReportForm[columns][]"]').prop('checked', true);
 
                 if (val != 0) {
-                    var guided = parseInt($('#VulnExportReportForm_projectId option:selected').attr("data-guided"));
+                    _system.control.loadObjects(val, 'target-list', function (data) {
+                        $('#target-list > .controls > .report-target-list > li').remove();
 
-                    if (guided) {
-                        $('#report-details').show();
-                        $('.form-actions > button[type="submit"]').prop('disabled', false);
-                    } else {
-                        _system.control.loadObjects(val, 'target-list', function (data) {
-                            $('#target-list > .controls > .report-target-list > li').remove();
+                        if (data && data.objects.length) {
+                            for (var i = 0; i < data.objects.length; i++) {
+                                var li    = $('<li>'),
+                                    label = $('<label>'),
+                                    input = $('<input>');
 
-                            if (data && data.objects.length) {
-                                for (var i = 0; i < data.objects.length; i++) {
-                                    var li    = $('<li>'),
-                                        label = $('<label>'),
-                                        input = $('<input>');
+                                input
+                                    .attr('type', 'checkbox')
+                                    .prop('checked', true)
+                                    .attr('id', 'VulnExportReportForm_targetIds_' + data.objects[i].id)
+                                    .attr('name', 'VulnExportReportForm[targetIds][]')
+                                    .val(data.objects[i].id)
+                                    .click(function () {
+                                        system.report.vulnExportFormChange(this);
+                                    })
+                                    .appendTo(label);
 
-                                    input
-                                        .attr('type', 'checkbox')
-                                        .prop('checked', true)
-                                        .attr('id', 'VulnExportReportForm_targetIds_' + data.objects[i].id)
-                                        .attr('name', 'VulnExportReportForm[targetIds][]')
-                                        .val(data.objects[i].id)
-                                        .click(function () {
-                                            system.report.vulnExportFormChange(this);
-                                        })
-                                        .appendTo(label);
+                                label
+                                    .append(' ' + data.objects[i].host)
+                                    .appendTo(li);
 
-                                    label
-                                        .append(' ' + data.objects[i].host)
-                                        .appendTo(li);
-
-                                    $('#target-list > .controls > .report-target-list').append(li);
-                                }
-
-                                $('#target-list').show();
-                                $('#report-details').show();
-                                $('.form-actions > button[type="submit"]').prop('disabled', false);
-                            } else {
-                                $('#project-list').addClass('error');
-                                $('#project-list > div > .help-block').show();
+                                $('#target-list > .controls > .report-target-list').append(li);
                             }
-                        });
-                    }
+
+                            $('#target-list').show();
+                            $('#report-details').show();
+                            $('.form-actions > button[type="submit"]').prop('disabled', false);
+                        } else {
+                            $('#project-list').addClass('error');
+                            $('#project-list > div > .help-block').show();
+                        }
+                    });
                 }
             } else if (e.id.match(/^VulnExportReportForm_targetIds_/i)) {
                 $('#report-details').hide();
@@ -1210,7 +1194,7 @@ function System() {
          * Calculate effort.
          */
         this._calculateEffort = function () {
-            var effort, checks, category, check, advanced, targets, references;
+            var effort, checks, category, check, targets, references;
 
             category   = $('#EffortEstimateForm_categoryId').val();
             targets    = $('#EffortEstimateForm_targets').val();
@@ -1219,8 +1203,6 @@ function System() {
                     return parseInt($(this).val());
                 }
             ).get();
-
-            advanced = $('#EffortEstimateForm_advanced').is(':checked');
 
             checks = 0;
             effort = 0;
@@ -1236,9 +1218,6 @@ function System() {
 
                         if ($.inArray(check.reference, references) != -1)
                         {
-                            if (!advanced && check.advanced)
-                                continue;
-
                             effort += check.effort;
                             checks++;
                         }
@@ -1357,7 +1336,6 @@ function System() {
 
             // refresh the form
             $('#EffortEstimateForm_categoryId').val(0);
-            $('#EffortEstimateForm_advanced').prop('checked', true);
             $('input[name="EffortEstimateForm[referenceIds][]"]').prop('checked', true);
             $('#EffortEstimateForm_targets').val(1);
 
@@ -1418,6 +1396,10 @@ function System() {
 
 var system = new System();
 
+$(function () {
+    system.init();
+});
+
 /**
  * Number zero padding.
  */
@@ -1442,7 +1424,8 @@ String.prototype.isHTML = function () {
         "<u>",
         "<ul>",
         "<ol>",
-        "<br />"
+        "<br />",
+        "<br>"
     ];
 
     for (var i = 0; i < htmlTest.length; i++) {

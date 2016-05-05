@@ -4,6 +4,7 @@
             <ul class="nav nav-pills">
                 <li class="active"><a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'View'); ?></a></li>
                 <li><a href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+                <li><a href="<?php echo $this->createUrl('project/editchain', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'Check Chain'); ?></a></li>
             </ul>
         </div>
 
@@ -76,3 +77,9 @@
         </div>
     </div>
 </div>
+
+<script>
+    setInterval(function () {
+        user.target.chain.messages('<?php print $this->createUrl('project/chainmessages'); ?>');
+    }, 5000);
+</script>

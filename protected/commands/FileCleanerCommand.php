@@ -93,7 +93,6 @@ class FileCleanerCommand extends ConsoleCommand {
 
         $tca = TargetCheckAttachment::model()->findAll(array( 'select' => 'path' ));
         $tcca = TargetCustomCheckAttachment::model()->findAll(array( 'select' => 'path' ));
-        $pgta = ProjectGtCheckAttachment::model()->findAll(array( 'select' => 'path' ));
 
         $attachments = array();
 
@@ -102,10 +101,6 @@ class FileCleanerCommand extends ConsoleCommand {
         }
 
         foreach ($tcca as $attachment) {
-            $attachments[] = $dir . '/' . $attachment->path;
-        }
-
-        foreach ($pgta as $attachment) {
             $attachments[] = $dir . '/' . $attachment->path;
         }
 

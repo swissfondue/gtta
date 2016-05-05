@@ -72,7 +72,7 @@ class ControlManager {
             $api = new CommunityApiClient($system->integration_key);
             $control->external_id = $api->shareControl(array("control" => $data))->id;
         } catch (Exception $e) {
-            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
+            throw new Exception($e->getMessage());
         }
 
         $control->status = CheckControl::STATUS_INSTALLED;
@@ -84,13 +84,9 @@ class ControlManager {
      * @param $externalId
      * @return CheckCategory
      */
-    private function _getCategoryId($externalId) {
-        $category = CheckCategory::model()->findByAttributes(array("external_id" => $externalId));
-
-        if (!$category) {
-            $cm = new CategoryManager();
-            $category = $cm->create($externalId);
-        }
+    private function _getCategoryId($externalId, $initial) {
+        $cm = new CategoryManager();
+        $category = $cm->create($externalId, $initial);
 
         return $category->id;
     }
@@ -101,28 +97,28 @@ class ControlManager {
      * @return CheckControl
      * @throws Exception
      */
-    public function create($control) {
+    public function create($control, $initial) {
         /** @var System $system */
         $system = System::model()->findByPk(1);
-        $api = new CommunityApiClient($system->integration_key);
+
+        $api = new CommunityApiClient($initial ? null : $system->integration_key);
         $control = $api->getControl($control)->control;
+        $category = $this->_getCategoryId($control->category_id, $initial);
+        $c = CheckControl::model()->findByAttributes(array("external_id" => $control->id));
 
-        $id = $control->id;
-        $existingControl = CheckControl::model()->findByAttributes(array("external_id" => $id));
-
-        if ($existingControl) {
-            return $existingControl;
+        if (!$c) {
+            $c = new CheckControl();
         }
 
-        $category = $this->_getCategoryId($control->category_id);
-
-        $c = new CheckControl();
         $c->check_category_id = $category;
         $c->external_id = $control->id;
         $c->sort_order = $control->sort_order;
         $c->name = $control->name;
         $c->status = CheckControl::STATUS_INSTALLED;
         $c->save();
+
+        // l10n
+        CheckControlL10n::model()->deleteAllByAttributes(array("check_control_id" => $c->id));
 
         foreach ($control->l10n as $l10n) {
             $l = new CheckControlL10n();

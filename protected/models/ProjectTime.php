@@ -3,7 +3,7 @@
 /**
  * This is the model class for table "project_time".
  *
- * The followings are the available columns in table 'target_references':
+ * The followings are the available columns in table "target_references":
  * @property integer id (pk)
  * @property integer user_id
  * @property integer project_id
@@ -11,47 +11,40 @@
  * @property string description
  * @property timestamp create_time
  * @property timestamp start_time
- * @property timestamp last_action_time
  */
-class ProjectTime extends ActiveRecord
-{
+class ProjectTime extends ActiveRecord {
     /**
      * Returns the static model of the specified AR class.
      * @param string $className active record class name.
      * @return TargetReference the static model class
      */
-    public static function model($className=__CLASS__)
-    {
+    public static function model($className=__CLASS__) {
         return parent::model($className);
     }
 
     /**
      * @return string the associated database table name
      */
-    public function tableName()
-    {
-        return 'project_time';
+    public function tableName() {
+        return "project_time";
     }
 
     /**
      * @return array validation rules for model attributes.
      */
-    public function rules()
-    {
+    public function rules() {
         return array(
-            array( 'user_id, project_id', 'required' ),
-            array( 'create_time','default', 'value'=>new CDbExpression('NOW()'), 'setOnEmpty'=>false,'on'=>'insert' )
+            array("user_id, project_id", "required"),
         );
     }
 
     /**
      * @return array relational rules.
      */
-    public function relations()
-    {
+    public function relations() {
         return array(
-            'user'    => array( self::BELONGS_TO, 'User',    'user_id' ),
-            'project' => array( self::BELONGS_TO, 'Project', 'project_id' ),
+            "user" => array(self::BELONGS_TO, "User", "user_id"),
+            "project" => array(self::BELONGS_TO, "Project", "project_id"),
         );
     }
 
@@ -117,15 +110,5 @@ class ProjectTime extends ActiveRecord
             "mins"  => $diff->format("%I"),
             "seconds"  => $diff->format("%S"),
         );
-    }
-
-    /**
-     * Update session last action
-     * @return bool|void
-     */
-    public function updateLastAction() {
-        $now = new DateTime();
-        $this->last_action_time = $now->format(ISO_DATE_TIME);
-        $this->save();
     }
 }

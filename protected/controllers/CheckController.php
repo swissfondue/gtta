@@ -339,6 +339,9 @@ class CheckController extends Controller
                     }
 
                     $category->delete();
+
+                    CommunityUpdateStatusJob::enqueue();
+
                     break;
 
                 default:
@@ -591,6 +594,8 @@ class CheckController extends Controller
 
                     $control->delete();
 
+                    CommunityUpdateStatusJob::enqueue();
+
                     break;
 
                 case 'up':
@@ -813,6 +818,8 @@ class CheckController extends Controller
             }
         } else {
             $check = new Check();
+            $now = new DateTime();
+            $check->create_time = $now->format(ISO_DATE_TIME);
             $newRecord = true;
         }
 
@@ -826,11 +833,11 @@ class CheckController extends Controller
             $model->backgroundInfo = $check->background_info;
             $model->hints = $check->hints;
             $model->question = $check->question;
-            $model->advanced = $check->advanced;
             $model->automated = $check->automated;
             $model->protocol = $check->protocol;
             $model->port = $check->port;
             $model->multipleSolutions = $check->multiple_solutions;
+            $model->private = $check->private;
             $model->referenceId = $check->reference_id;
             $model->referenceCode = $check->reference_code;
             $model->referenceUrl = $check->reference_url;
@@ -863,18 +870,9 @@ class CheckController extends Controller
             $model->backgroundInfo = $model->defaultL10n($languages, 'backgroundInfo');
             $model->hints = $model->defaultL10n($languages, 'hints');
             $model->question = $model->defaultL10n($languages, 'question');
-
-            if (!isset($_POST['CheckEditForm']['advanced'])) {
-                $model->advanced = false;
-            }
-
-            if (!isset($_POST['CheckEditForm']['automated'])) {
-                $model->automated = false;
-            }
-
-            if (!isset($_POST['CheckEditForm']['multipleSolutions'])) {
-                $model->multipleSolutions = false;
-            }
+            $model->automated = isset($_POST["CheckEditForm"]["automated"]);
+            $model->multipleSolutions = isset($_POST["CheckEditForm"]["multipleSolutions"]);
+            $model->private = isset($_POST["CheckEditForm"]["private"]);
 
 			if ($model->validate()) {
                 $redirect = false;
@@ -887,9 +885,9 @@ class CheckController extends Controller
                 $check->background_info = $model->backgroundInfo;
                 $check->hints = $model->hints;
                 $check->question = $model->question;
-                $check->advanced = $model->advanced;
                 $check->automated = $model->automated;
                 $check->multiple_solutions = $model->multipleSolutions;
+                $check->private = $model->private;
                 $check->protocol = $model->protocol;
                 $check->port = $model->port;
                 $check->check_control_id = $model->controlId;
@@ -943,9 +941,7 @@ class CheckController extends Controller
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check saved.'));
                 $check->refresh();
 
-                TargetCheckReindexJob::enqueue(array(
-                    "category_id" => $check->control->check_category_id
-                ));
+                TargetCheckReindexJob::enqueue(array("category_id" => $check->control->check_category_id));
 
                 if ($redirect) {
                     $this->redirect(array(
@@ -1081,12 +1077,13 @@ class CheckController extends Controller
                 $src = Check::model()->findByPk($model->id);
 
                 $dst = new Check();
+                $now = new DateTime();
+                $dst->create_time = $now->format(ISO_DATE_TIME);
                 $dst->check_control_id = $control->id;
                 $dst->name = $src->name . ' (' . Yii::t('app', 'Copy') . ')';
                 $dst->background_info = $src->background_info;
                 $dst->hints = $src->hints;
                 $dst->question = $src->question;
-                $dst->advanced = $src->advanced;
                 $dst->automated = $src->automated;
                 $dst->multiple_solutions = $src->multiple_solutions;
                 $dst->protocol = $src->protocol;
@@ -1198,9 +1195,7 @@ class CheckController extends Controller
                     }
                 }
 
-                TargetCheckReindexJob::enqueue(array(
-                    "category_id" => $dst->control->check_category_id
-                ));
+                TargetCheckReindexJob::enqueue(array("category_id" => $dst->control->check_category_id));
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check copied.'));
                 $this->redirect(array('check/editcheck', 'id' => $dst->control->check_category_id, 'control' => $dst->check_control_id, 'check' => $dst->id));
@@ -1306,6 +1301,8 @@ class CheckController extends Controller
                     }
 
                     $check->delete();
+
+                    CommunityUpdateStatusJob::enqueue();
 
                     break;
 
@@ -2236,6 +2233,7 @@ class CheckController extends Controller
             $newRecord = true;
         }
 
+        $scriptChanged = false;
 		$model = new CheckScriptEditForm();
 
         if (!$newRecord) {
@@ -2243,43 +2241,81 @@ class CheckController extends Controller
         }
 
 		// collect user input data
-		if (isset($_POST['CheckScriptEditForm'])) {
-			$model->attributes = $_POST['CheckScriptEditForm'];
+		if (isset($_POST["CheckScriptEditForm"])) {
+			$model->attributes = $_POST["CheckScriptEditForm"];
 
 			if ($model->validate()) {
-                $script->check_id = $check->id;
-                $script->package_id = $model->packageId;
-                $script->save();
+                $trx = Yii::app()->db->beginTransaction();
 
-                $targetChecks = TargetCheck::model()->findAllByAttributes(array(
-                    "check_id" => $script->check_id
-                ));
+                try {
+                    if (!$newRecord && $script->package_id != $model->packageId) {
+                        $scriptChanged = true;
+                    }
 
-                // Add new target_check_scripts row
-                // to target checks related with current check
-                foreach ($targetChecks as $tc) {
-                    $targetCheckScript = TargetCheckScript::model()->findByAttributes(array(
-                        "target_check_id" => $tc->id,
-                        "check_script_id" => $script->id
+                    $script->check_id = $check->id;
+                    $script->package_id = $model->packageId;
+                    $script->save();
+                    $script->refresh();
+
+                    $targetChecks = TargetCheck::model()->findAllByAttributes(array(
+                        "check_id" => $script->check_id
                     ));
 
-                    if (!$targetCheckScript) {
-                        $targetCheckScript = new TargetCheckScript();
-                        $targetCheckScript->target_check_id = $tc->id;
-                        $targetCheckScript->check_script_id = $script->id;
-                        $targetCheckScript->save();
+                    // Add new target_check_scripts row
+                    // to target checks related with current check
+                    foreach ($targetChecks as $tc) {
+                        $targetCheckScript = TargetCheckScript::model()->findByAttributes(array(
+                            "target_check_id" => $tc->id,
+                            "check_script_id" => $script->id
+                        ));
+
+                        if (!$targetCheckScript) {
+                            $targetCheckScript = new TargetCheckScript();
+                            $targetCheckScript->target_check_id = $tc->id;
+                            $targetCheckScript->check_script_id = $script->id;
+                            $targetCheckScript->save();
+                        }
                     }
-                }
 
-                Yii::app()->user->setFlash('success', Yii::t('app', 'Script saved.'));
+                    // remove old check inputs
+                    if ($scriptChanged) {
+                        CheckInput::model()->deleteAllByAttributes(array("check_script_id" => $script->id));
+                    }
 
-                $script->refresh();
+                    // add bundled inputs
+                    if ($newRecord || $scriptChanged) {
+                        try {
+                            $csm = new CheckScriptManager();
+                            $csm->createInputs($script);
+                        } catch (Exception $e) {
+                            $model->addError("packageId", Yii::t("app", "Error parsing package: {msg}", array(
+                                "{msg}" => $e->getMessage()
+                            )));
 
-                if ($newRecord) {
-                    $this->redirect(array('check/editscript', 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'script' => $script->id));
+                            throw $e;
+                        }
+
+                    }
+
+                    $trx->commit();
+
+                    Yii::app()->user->setFlash("success", Yii::t("app", "Script saved."));
+
+                    if ($newRecord) {
+                        $this->redirect(array(
+                            "check/editscript",
+                            "id" => $category->id,
+                            "control" => $control->id,
+                            "check" => $check->id,
+                            "script" => $script->id
+                        ));
+                    }
+                } catch (Exception $e) {
+                    Yii::log($e->getMessage() . "\n" . $e->getTraceAsString(), CLogger::LEVEL_ERROR);
+                    Yii::app()->user->setFlash("error", Yii::t("app", "Error saving script."));
                 }
             } else {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
 		}
 
@@ -3039,6 +3075,10 @@ class CheckController extends Controller
 
         if (!$check) {
             throw new CHttpException(404, Yii::t("app", "Check not found."));
+        }
+
+        if ($check->private) {
+            throw new CHttpException(403, Yii::t("app", "Permission denied."));
         }
 
         $form = new ShareForm();

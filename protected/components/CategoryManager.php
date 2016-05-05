@@ -63,7 +63,7 @@ class CategoryManager {
             $api = new CommunityApiClient($system->integration_key);
             $category->external_id = $api->shareCategory(array("category" => $data))->id;
         } catch (Exception $e) {
-            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
+            throw new Exception($e->getMessage());
         }
 
         $category->status = CheckCategory::STATUS_INSTALLED;
@@ -76,24 +76,25 @@ class CategoryManager {
      * @return CheckCategory
      * @throws Exception
      */
-    public function create($category) {
+    public function create($category, $initial=false) {
         /** @var System $system */
         $system = System::model()->findByPk(1);
-        $api = new CommunityApiClient($system->integration_key);
+
+        $api = new CommunityApiClient($initial ? null : $system->integration_key);
         $category = $api->getCategory($category)->category;
+        $c = CheckCategory::model()->findByAttributes(array("external_id" => $category->id));
 
-        $id = $category->id;
-        $existingCategory = CheckCategory::model()->findByAttributes(array("external_id" => $id));
-
-        if ($existingCategory) {
-            return $existingCategory;
+        if (!$c) {
+            $c = new CheckCategory();
         }
 
-        $c = new CheckCategory();
         $c->external_id = $category->id;
         $c->name = $category->name;
         $c->status = CheckCategory::STATUS_INSTALLED;
         $c->save();
+
+        // l10n
+        CheckCategoryL10n::model()->deleteAllByAttributes(array("check_category_id" => $c->id));
 
         foreach ($category->l10n as $l10n) {
             $l = new CheckCategoryL10n();

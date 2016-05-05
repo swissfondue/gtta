@@ -154,7 +154,8 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 .risk-template-list .actions,
 .summary-list .actions,
 .section-list .actions,
-.time-records-list .actions {
+.time-records-list .actions,
+.relation-template-list .actions {
     width:30px;
     text-align:right;
 }
@@ -437,17 +438,17 @@ table.check-form > tbody > tr > td {
     list-style:none;
 }
 
-.check-form .results li, .check-form .solutions > li {
+.check-form .results > li, .check-form .solutions > li {
     border-top:1px solid #ddd;
     padding-top:10px;
 }
 
-.check-form .results li:first-child, .check-form .solutions > li:first-child {
+.check-form .results > li:first-child, .check-form .solutions > li:first-child {
     border-top:none;
     padding-top:0;
 }
 
-.check-form .results li,
+.check-form .results > li,
 .check-form .solutions > li,
 .check-form .rating li,
 .check-form .radio-input li {
@@ -596,12 +597,12 @@ table.process-monitor .actions {
     margin-bottom:10px;
 }
 
-.risk-category-category-header, .risk-category-control-header, .gt-category-header, .gt-category-type-header {
+.risk-category-category-header, .risk-category-control-header {
     border-top:1px solid #ddd;
     padding:8px;
 }
 
-.risk-category-category-header-bold, .gt-category-header-bold {
+.risk-category-category-header-bold {
     padding:8px;
     font-weight:bold;
 }
@@ -610,12 +611,12 @@ table.process-monitor .actions {
     font-weight:normal;
 }
 
-.risk-category-category-content, .gt-category-content {
+.risk-category-category-content {
     padding-left:20px;
     border-top:1px solid #ddd;
 }
 
-.risk-category-control-header:first-child, .gt-category-type-header:first-child {
+.risk-category-control-header:first-child {
     border-top:none;
 }
 
@@ -634,7 +635,7 @@ div.risk-category-check-header:first-child {
     border-top:none;
 }
 
-div.risk-category-check-content, .gt-category-type-content {
+div.risk-category-check-content {
     background-color:#f0f0f0;
     padding:8px;
     margin:0;
@@ -682,6 +683,11 @@ input[type="text"].search-query {
 
 input[type="text"].search-query:focus {
     color:#333;
+}
+
+input[type="file"] {
+    line-height: 10px;
+    padding-top: 5px;
 }
 
 .report-target-header {
@@ -845,24 +851,27 @@ table.table-result .new-entry input {
 }
 
 .script-inputs {
-    border-bottom:1px solid #999 !important;
+    background-color:#ddd !important;
 }
 
 .script-inputs th {
     text-align:left !important;
-    background-color:#ddd !important;
 }
 
-.gt-check .module-header, .suggested-targets .suggested-targets-header {
+.script-inputs th label.checkbox {
+    font-weight:bold;
+}
+
+.module-header, .suggested-targets .suggested-targets-header {
     padding:8px;
     font-weight:bold;
 }
 
-.gt-check .module-header span {
+.module-header span {
     color:#999;
 }
 
-.gt-check .check-description {
+.check-description {
     padding:8px;
 }
 
@@ -1258,4 +1267,27 @@ ul.breadcrumb {
 #TargetEditForm .template-category-list {
     margin-left: 0;
     padding-top: 3px;
+}
+
+/* MxGraph */
+.relations-graph #graph {
+    position: relative;
+    height: 480px;
+    width: 684px;
+    overflow: hidden;
+    cursor: default;
+    border: 1px solid #cccccc;
+}
+.relations-graph #toolbar {
+    width: 16px;
+    padding-left: 20px;
+}
+.relations-graph #zoomActions {
+    float: left;
+    padding-top: 4px;
+}
+.relations-graph #activeChainCheck {
+    float: right;
+    padding-top: 4px;
+    margin-right: 90px;
 }

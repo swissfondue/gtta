@@ -10,7 +10,6 @@
  * @property string $background_info
  * @property string $hints
  * @property string $question
- * @property boolean $advanced
  * @property boolean $automated
  * @property boolean $multiple_solutions
  * @property string $protocol
@@ -23,6 +22,7 @@
  * @property integer $status
  * @property integer $external_id
  * @property string $create_time
+ * @property boolean $private
  * @property TargetCheck[] $targetChecks
  * @property CheckL10n[] $l10n
  * @property CheckScript[] $scripts
@@ -55,14 +55,14 @@ class Check extends ActiveRecord {
 	 */
 	public function rules() {
 		return array(
-            array("name, check_control_id, sort_order", "required"),
+            array("name, check_control_id, sort_order, create_time", "required"),
             array("name, protocol, reference_code, reference_url", "length", "max" => 1000),
             array(
                 "check_control_id, reference_id, port, effort, sort_order, external_id, status",
                 "numerical",
                 "integerOnly" => true
             ),
-            array("advanced, automated, multiple_solutions", "boolean"),
+            array("automated, multiple_solutions, private", "boolean"),
             array("status", "in", "range" => array(
                 self::STATUS_INSTALLED,
                 self::STATUS_SHARE,
@@ -105,7 +105,7 @@ class Check extends ActiveRecord {
         if ($this->l10n && count($this->l10n) > 0) {
             return $this->l10n[0]->background_info != NULL ? $this->l10n[0]->background_info : $this->background_info;
         }
-
+        
         return $this->background_info;
     }
 

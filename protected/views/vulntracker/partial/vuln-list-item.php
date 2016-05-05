@@ -1,42 +1,26 @@
 <tr<?php if (User::checkRole(User::ROLE_USER) && $check->vulnOverdued && $check->vuln_status == TargetCheck::STATUS_VULN_OPEN) echo ' class="delete-row"'; ?>>
     <td class="check">
-        <?php if ($project->guided_test): ?>
+        <?php if ($type == TargetCheck::TYPE): ?>
             <?php if ($project->checkAdmin()): ?>
-                <a href="<?php echo $this->createUrl('vulntracker/edit', array('id' => $project->id, 'target' => '0', 'check' => $check->gt_check_id)); ?>"><?php echo CHtml::encode($check->check->check->localizedName); ?></a>
+                <a href="<?php echo $this->createUrl('vulntracker/edit', array( 'id' => $project->id, 'target' => $check->target_id, 'check' => $check->check_id, 'type' => 'check' )); ?>"><?php echo CHtml::encode($check->check->localizedName); ?></a>
             <?php else: ?>
-                <?php echo CHtml::encode($check->check->check->localizedName); ?>
+                <?php echo CHtml::encode($check->check->localizedName); ?>
             <?php endif; ?>
-
-            <div class="description">
-                <?php if ($check->target): ?>
-                    <?php echo CHtml::encode($check->target); ?>
-                <?php else: ?>
-                    <?php echo Yii::t('app', 'N/A'); ?>
-                <?php endif; ?>
-            </div>
-        <?php else: ?>
-            <?php if ($type == TargetCheck::TYPE): ?>
-                <?php if ($project->checkAdmin()): ?>
-                    <a href="<?php echo $this->createUrl('vulntracker/edit', array( 'id' => $project->id, 'target' => $check->target_id, 'check' => $check->check_id, 'type' => 'check' )); ?>"><?php echo CHtml::encode($check->check->localizedName); ?></a>
-                <?php else: ?>
-                    <?php echo CHtml::encode($check->check->localizedName); ?>
-                <?php endif; ?>
-            <?php elseif ($type == TargetCustomCheck::TYPE): ?>
-                <?php if ($project->checkAdmin()): ?>
-                    <a href="<?php echo $this->createUrl('vulntracker/edit', array( 'id' => $project->id, 'target' => $check->target_id, 'check' => $check->id, 'type' => 'custom' )); ?>"><?php echo $check->name ? CHtml::encode($check->name) : "CUSTOM-CHECK-" . $check->reference; ?></a>
-                <?php else: ?>
-                    <?php echo CHtml::encode($check->check->name); ?>
-                <?php endif; ?>
+        <?php elseif ($type == TargetCustomCheck::TYPE): ?>
+            <?php if ($project->checkAdmin()): ?>
+                <a href="<?php echo $this->createUrl('vulntracker/edit', array( 'id' => $project->id, 'target' => $check->target_id, 'check' => $check->id, 'type' => 'custom' )); ?>"><?php echo $check->name ? CHtml::encode($check->name) : "CUSTOM-CHECK-" . $check->reference; ?></a>
+            <?php else: ?>
+                <?php echo CHtml::encode($check->check->name); ?>
             <?php endif; ?>
-
-            <div class="description">
-                <?php if (User::checkRole(User::ROLE_USER)): ?>
-                    <a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $check->target_id )); ?>"><?php echo CHtml::encode($check->target->host); ?></a>
-                <?php else: ?>
-                    <?php echo CHtml::encode($check->target->host); ?>
-                <?php endif; ?>
-            </div>
         <?php endif; ?>
+
+        <div class="description">
+            <?php if (User::checkRole(User::ROLE_USER)): ?>
+                <a href="<?php echo $this->createUrl('project/target', array( 'id' => $project->id, 'target' => $check->target_id )); ?>"><?php echo CHtml::encode($check->target->host); ?></a>
+            <?php else: ?>
+                <?php echo CHtml::encode($check->target->host); ?>
+            <?php endif; ?>
+        </div>
     </td>
     <?php if (User::checkRole(User::ROLE_USER)): ?>
         <td class="assigned">

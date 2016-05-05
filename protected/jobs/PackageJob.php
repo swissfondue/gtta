@@ -49,15 +49,9 @@ class PackageJob extends BackgroundJob {
         }
 
         $pm = new PackageManager();
+        $pm->delete($package);
 
-        try {
-            $pm->delete($package);
-        } catch (Exception $e) {
-            $package->status = Package::STATUS_ERROR;
-            $package->save();
-
-            throw $e;
-        }
+        CommunityUpdateStatusJob::enqueue();
     }
 
     /**
@@ -86,9 +80,11 @@ class PackageJob extends BackgroundJob {
                     case self::OPERATION_INSTALL:
                         $this->_installPackage($id);
                         break;
+
                     case self::OPERATION_DELETE:
                         $this->_deletePackage($id);
                         break;
+
                     default:
                         throw new Exception("Invalid operation.");
                 }

@@ -142,44 +142,6 @@ class VulntrackerController extends Controller {
     }
 
     /**
-     * GT project vulnerabilities
-     * @param $project
-     * @param $page
-     */
-    private function _gtProjectVulns($project, $language, $page) {
-        $criteria = new CDbCriteria();
-        $criteria->addInCondition('t.rating', $this->_allowedRiskValues);
-        $criteria->order = 't.target ASC, COALESCE(l10n.name, "check".name) ASC';
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
-        $criteria->together = true;
-
-        $checks = ProjectGtCheck::model()->with(array(
-            'check' => array(
-                'with' => array(
-                    'check' => array(
-                        'alias' => 'innerCheck',
-                        'with' => array(
-                            'l10n' => array(
-                                'joinType' => 'LEFT JOIN',
-                                'on' => 'l10n.language_id = :language_id',
-                                'params' => array('language_id' => $language)
-                            ),
-                        )
-                    )
-                ),
-            ),
-            'vuln' => array(
-                'with' => 'user'
-            ),
-        ))->findAll($criteria);
-
-        $checkCount = ProjectGtCheck::model()->count($criteria);
-
-        return array($checks, $checkCount);
-    }
-
-    /**
      * Vulnerabilities.
      */
     public function actionVulns($id, $page=1) {
@@ -208,11 +170,7 @@ class VulntrackerController extends Controller {
             $language = $language->id;
         }
 
-        if ($project->guided_test) {
-            list($checks, $checkCount) = $this->_gtProjectVulns($project, $language, $page);
-        } else {
-            list($checks, $customChecks, $checkCount) = $this->_projectVulns($project, $language, $page);
-        }
+        list($checks, $customChecks, $checkCount) = $this->_projectVulns($project, $language, $page);
 
         $paginator = new Paginator($checkCount, $page);
         Yii::app()->user->returnUrl = $this->createUrl('vulntracker/vulns', array('id' => $project->id, 'page' => $page));
@@ -309,89 +267,6 @@ class VulntrackerController extends Controller {
     }
 
     /**
-     * GT project edit
-     * @param $project
-     * @param $language
-     * @param $check
-     */
-    private function _gtProjectEdit($project, $language, $check) {
-        $newRecord = false;
-
-        $check = ProjectGtCheck::model()->with(array(
-            'check' => array(
-                'with' => array(
-                    'check' => array(
-                        'alias' => 'innerCheck',
-                        'with' => array(
-                            'l10n' => array(
-                                'joinType' => 'LEFT JOIN',
-                                'on' => 'l10n.language_id = :language_id',
-                                'params' => array('language_id' => $language)
-                            ),
-                        )
-                    )
-                ),
-            )
-        ))->findByAttributes(array(
-            'gt_check_id' => $check,
-            'project_id' => $project->id
-        ));
-
-        if (!$check || !in_array($check->rating, $this->_allowedRiskValues)) {
-            throw new CHttpException(404, Yii::t('app', 'Check not found.'));
-        }
-
-        $vuln = ProjectGtCheckVuln::model()->findByAttributes(array(
-            'gt_check_id' => $check->gt_check_id,
-            'project_id' => $project->id
-        ));
-
-        if (!$vuln) {
-            $vuln = new ProjectGtCheckVuln();
-            $vuln->gt_check_id  = $check->gt_check_id;
-            $vuln->project_id = $project->id;
-            $newRecord = true;
-        }
-
-		$model = new VulnEditForm();
-
-        if (!$newRecord) {
-            $model->status = $vuln->status;
-            $model->userId = $vuln->user_id;
-            $model->deadline = $vuln->deadline;
-        } else {
-            $model->deadline = date('Y-m-d');
-        }
-
-		// collect user input data
-		if (isset($_POST['VulnEditForm'])) {
-			$model->attributes = $_POST['VulnEditForm'];
-
-            if (!$model->userId) {
-                $model->userId = null;
-            }
-
-			if ($model->validate()) {
-                $vuln->status = $model->status;
-                $vuln->user_id = $model->userId;
-                $vuln->deadline = $model->deadline;
-
-                $vuln->save();
-
-                Yii::app()->user->setFlash('success', Yii::t('app', 'Vulnerability saved.'));
-
-                $project->refresh();
-
-                $this->redirect(Yii::app()->user->returnUrl);
-            } else {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
-            }
-		}
-
-        return array($check->check->check->localizedName, $model);
-    }
-
-    /**
      * Vulnerability edit page.
      */
 	public function actionEdit($id, $target, $check, $type) {
@@ -417,11 +292,7 @@ class VulntrackerController extends Controller {
             $language = $language->id;
         }
 
-        if ($project->guided_test) {
-            list($checkName, $model) = $this->_gtProjectEdit($project, $language, $check);
-        } else {
-            list($checkName, $model) = $this->_projectEdit($project, $language, $target, $check, $type == TargetCustomCheck::TYPE);
-        }
+        list($checkName, $model) = $this->_projectEdit($project, $language, $target, $check, $type == TargetCustomCheck::TYPE);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerability Tracker'), $this->createUrl('vulntracker/index'));
         $this->breadcrumbs[] = array($project->name, $this->createUrl('vulntracker/vulns', array('id' => $project->id)));

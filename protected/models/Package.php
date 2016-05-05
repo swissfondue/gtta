@@ -13,11 +13,12 @@
  * @property integer $external_id
  * @property string $create_time
  * @property Package[] $dependencies
+ * @property integer $timeout
  */
 class Package extends ActiveRecord {
     const TYPE_LIBRARY = 0;
     const TYPE_SCRIPT = 1;
-    const STATUS_INSTALL = 0;
+    const STATUS_NOT_INSTALLED = 0;
     const STATUS_INSTALLED = 1;
     const STATUS_SHARE = 2;
     const STATUS_ERROR = 100;
@@ -64,7 +65,7 @@ class Package extends ActiveRecord {
             array("type, status, external_id", "numerical", "integerOnly" => true),
             array("type", "in", "range" => array(self::TYPE_LIBRARY, self::TYPE_SCRIPT)),
             array("status", "in", "range" => array(
-                self::STATUS_INSTALL,
+                self::STATUS_NOT_INSTALLED,
                 self::STATUS_INSTALLED,
                 self::STATUS_SHARE,
                 self::STATUS_ERROR
@@ -91,7 +92,7 @@ class Package extends ActiveRecord {
      */
     public function getStatusName() {
         $names = array(
-            self::STATUS_INSTALL => Yii::t("app", "Installing"),
+            self::STATUS_NOT_INSTALLED => Yii::t("app", "Not Installed"),
             self::STATUS_INSTALLED => Yii::t("app", "Installed"),
             self::STATUS_SHARE => Yii::t("app", "Sharing"),
             self::STATUS_ERROR => Yii::t("app", "Error"),

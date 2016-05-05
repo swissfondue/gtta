@@ -28,7 +28,20 @@
                 <label class="control-label"><?php echo Yii::t('app', 'Checks'); ?></label>
                 <div class="controls">
                     <div class="check-list">
+                        <?php
+                            $prevControl = null;
+                        ?>
                         <?php foreach ($checks as $check): ?>
+                            <?php if ($check->check_control_id != $prevControl): ?>                        
+                                <?php if ($prevControl): ?>
+                                    <br>
+                                <?php endif; ?>
+                        
+                                <b><?= CHtml::encode($check->control->localizedName); ?></b> 
+                                <hr>
+                                <?php $prevControl = $check->check_control_id; ?>
+                            <?php endif; ?>
+                                
                             <label class="checkbox">
                                 <input type="checkbox" id="ChecklistTemplateCheckCategoryEditForm_checkIds_<?php echo $check->id; ?>" name="ChecklistTemplateCheckCategoryEditForm[checkIds][]" value="<?php echo $check->id; ?>" <?php if (in_array($check->id, $model->checkIds)) echo 'checked'; ?> onchange="admin.checklisttemplate.toggleChecklistButton()">
                                 <?php echo CHtml::encode($check->localizedName); ?>

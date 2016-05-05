@@ -4,12 +4,10 @@
  * Server API client class
  */
 class ServerApiClient {
-    const URL = "api";
+    const URL = "api/workstation";
     const TIMEOUT = 3600;
     const WORKSTATION_ID_HEADER = "X_WORKSTATION_ID";
     const WORKSTATION_KEY_HEADER = "X_WORKSTATION_KEY";
-    const PARAM_VERSION = "version";
-    const PARAM_INTEGRATION_KEY = "integrationKey";
 
     private $id;
     private $key;
@@ -28,32 +26,34 @@ class ServerApiClient {
      * Send API request
      * @param string $url
      * @param array|null $postFields
-     * @param string|null $destFilePath
+     * @param string|null $destination
      * @return string response
      */
-    private function _sendRequest($url, $postFields=null, $destFilePath=null) {
+    private function _sendRequest($url, $postFields=null, $destination=null, $contentType="application/json") {
         $curl = curl_init();
         $outFile = null;
+        $url = sprintf("%s/%s/%s", Yii::app()->params["api"]["url"], self::URL, $url);
 
         $options = array(
-            CURLOPT_URL => sprintf("%s/%s/%s", Yii::app()->params["api"]["url"], self::URL, $url),
+            CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => self::TIMEOUT,
             CURLOPT_HTTPHEADER => array(
                 self::WORKSTATION_ID_HEADER . ": " . $this->id,
                 self::WORKSTATION_KEY_HEADER . ": " . $this->key,
+                "Content-Type: " . $contentType,
             ),
         );
 
-        if ($destFilePath !== null) {
-            if (file_exists($destFilePath)) {
-                @unlink($destFilePath);
+        if ($destination !== null) {
+            if (file_exists($destination)) {
+                @unlink($destination);
             }
 
-            $outFile = fopen($destFilePath, "wb");
+            $outFile = fopen($destination, "wb");
 
             if ($outFile === false) {
-                throw new Exception("Unable to open file for writing: $destFilePath");
+                throw new Exception("Unable to open file for writing: $destination");
             }
 
             $options[CURLOPT_RETURNTRANSFER] = false;
@@ -61,6 +61,10 @@ class ServerApiClient {
         }
 
         if ($postFields !== null) {
+            if ($contentType == "application/json") {
+                $postFields = json_encode($postFields);
+            }
+
             $options += array(
                 CURLOPT_POST => true,
                 CURLOPT_POSTFIELDS => $postFields
@@ -81,7 +85,7 @@ class ServerApiClient {
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
         if ($code != 200) {
-            throw new Exception("Server API error: " . $code);
+            throw new Exception("Server API error: " . $code . ", url = " . $url);
         }
 
         return $result;
@@ -102,7 +106,32 @@ class ServerApiClient {
      * @return mixed response
      */
     public function register($version) {
-        $response = $this->_sendRequest("register", array(self::PARAM_VERSION => $version));
+        $os = "vmware";
+        $product = "gtta";
+
+        if (@file_exists(Yii::app()->params["os"]["type"])) {
+            $os = @trim(@file_get_contents(Yii::app()->params["os"]["type"]));
+        }
+
+        $data = implode(":", array($product, $version, $os));
+        $padding = 16 - (strlen($data) % 16);
+        $data .= str_repeat(chr($padding), $padding);
+        $iv = openssl_random_pseudo_bytes(16);
+
+        $token = mcrypt_encrypt(
+            MCRYPT_RIJNDAEL_128,
+            Yii::app()->params["api"]["regKey"],
+            $data,
+            MCRYPT_MODE_CBC,
+            $iv
+        );
+
+        $response = $this->_sendRequest("register", array(
+            "product" => $product,
+            "version" => $version,
+            "token" => base64_encode($iv . $token),
+        ));
+
         return $this->_parseResponse($response);
     }
 
@@ -114,8 +143,8 @@ class ServerApiClient {
      */
     public function setStatus($version, $integrationKey) {
         $response = $this->_sendRequest("status", array(
-            self::PARAM_VERSION => $version,
-            self::PARAM_INTEGRATION_KEY => $integrationKey,
+            "version" => $version,
+            "integration_key" => $integrationKey,
         ));
 
         return $this->_parseResponse($response);
@@ -123,19 +152,17 @@ class ServerApiClient {
 
     /**
      * Get update archive and save it to the file specified
-     * @param $version
      * @param $pathToSave
      */
-    public function getUpdateArchive($version, $pathToSave) {
-        $this->_sendRequest("update/$version/zip", null, $pathToSave);
+    public function getUpdateArchive($pathToSave) {
+        $this->_sendRequest("update", array("file" => "zip"), $pathToSave);
     }
 
     /**
      * Get update signature and save it to the file specified
-     * @param $version
      * @param $pathToSave
      */
-    public function getUpdateSignature($version, $pathToSave) {
-        $this->_sendRequest("update/$version/sig", null, $pathToSave);
+    public function getUpdateSignature($pathToSave) {
+        $this->_sendRequest("update", array("file" => "sig"), $pathToSave);
     }
 }

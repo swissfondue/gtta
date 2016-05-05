@@ -38,7 +38,7 @@ class ReferenceManager {
             $api = new CommunityApiClient($system->integration_key);
             $reference->external_id = $api->shareReference(array("reference" => $data))->id;
         } catch (Exception $e) {
-            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
+            throw new Exception($e->getMessage());
         }
 
         $reference->status = Reference::STATUS_INSTALLED;
@@ -51,20 +51,18 @@ class ReferenceManager {
      * @return Reference
      * @throws Exception
      */
-    public function create($reference) {
+    public function create($reference, $initial) {
         /** @var System $system */
         $system = System::model()->findByPk(1);
-        $api = new CommunityApiClient($system->integration_key);
+
+        $api = new CommunityApiClient($initial ? null : $system->integration_key);
         $reference = $api->getReference($reference)->reference;
+        $r = Reference::model()->findByAttributes(array("external_id" => $reference->id));
 
-        $id = $reference->id;
-        $existingReference = Reference::model()->findByAttributes(array("external_id" => $id));
-
-        if ($existingReference) {
-            return $existingReference;
+        if (!$r) {
+            $r = new Reference();
         }
 
-        $r = new Reference();
         $r->external_id = $reference->id;
         $r->name = $reference->name;
         $r->url = $reference->url;

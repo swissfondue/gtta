@@ -32,7 +32,7 @@ class PackageController extends Controller {
         $criteria->limit = Yii::app()->params["entriesPerPage"];
         $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
         $criteria->addInCondition("status", array(
-            Package::STATUS_INSTALL,
+            Package::STATUS_NOT_INSTALLED,
             Package::STATUS_INSTALLED,
             Package::STATUS_SHARE,
             Package::STATUS_ERROR
@@ -105,10 +105,13 @@ class PackageController extends Controller {
 			$model->attributes = $_POST["PackageAddForm"];
 
 			if ($model->validate()) {
-                $pm = new PackageManager();
-                $pm->scheduleForInstallation($model->id);
-
-                Yii::app()->user->setFlash("success", Yii::t("app", "Package scheduled for installation."));
+                try {
+                    $pm = new PackageManager();
+                    $pm->scheduleForInstallation($model->id);
+                    Yii::app()->user->setFlash("success", Yii::t("app", "Package scheduled for installation."));
+                } catch (Exception $e) {
+                    Yii::app()->user->setFlash("error", Yii::t("app", $e->getMessage()));
+                }
 
                 $this->redirect(array("package/index"));
             } else {
@@ -167,6 +170,7 @@ class PackageController extends Controller {
                         "operation" => PackageJob::OPERATION_DELETE,
                         "obj_id" => $package->id,
                     ));
+
                     break;
 
                 default:
@@ -459,7 +463,7 @@ class PackageController extends Controller {
 
         $this->_system->refresh();
 
-        $this->breadcrumbs[] = array(Yii::t("app", "Scripts"), $this->createUrl("package/index"));
+        $this->breadcrumbs[] = array(Yii::t("app", "Packages"), $this->createUrl("package/index"));
         $this->breadcrumbs[] = array(Yii::t("app", "Regenerate Sandbox"), "");
 
         // display the page
@@ -470,7 +474,7 @@ class PackageController extends Controller {
 	}
 
     /**
-     * Regenerate status page
+     * Get regenerate status
      */
     public function actionRegenerateStatus() {
         $response = new AjaxResponse();
@@ -478,6 +482,72 @@ class PackageController extends Controller {
         try {
             $system = System::model()->findByPk(1);
             $response->addData("regenerating", $system->isRegenerating);
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Sync options page
+     */
+    public function actionSync() {
+        $form = new SyncForm();
+
+        $job = JobManager::buildId(GitJob::ID_TEMPLATE);
+        $running = JobManager::isRunning($job);
+
+        if (isset($_POST["SyncForm"])) {
+            $form->attributes = $_POST["SyncForm"];
+
+            if ($form->validate()) {
+                if (!$running) {
+                    GitJob::enqueue(array(
+                        "strategy" => $form->strategy,
+                        "email" => Yii::app()->user->email
+                    ));
+
+                    $running = true;
+                }
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+        }
+
+        $this->_system->refresh();
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Packages"), $this->createUrl("package/index"));
+        $this->breadcrumbs[] = array(Yii::t("app", "Sync"), "");
+
+        // display the page
+        $this->pageTitle = Yii::t("app", "Sync Packages");
+        $this->render("sync", array(
+            "sync" => $running,
+            "system" => $this->_system
+        ));
+    }
+
+    /**
+     * Get packages sync status
+     */
+    public function actionSyncStatus() {
+        $response = new AjaxResponse();
+
+        try {
+            $job = JobManager::buildId(GitJob::ID_TEMPLATE);
+            $running = JobManager::isRunning($job);
+
+            $response->addData("sync", $running);
+
+            if (!$running) {
+                $error = Resque::redis()->get("gtta.packages.result.sync");
+
+                if ($error) {
+                    $response->addData("error", true);
+                    Resque::redis()->del("gtta.packages.result.sync");
+                }
+            }
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }

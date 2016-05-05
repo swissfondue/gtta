@@ -7,7 +7,7 @@ class TargetCheckManager {
      * Start check
      * @param $id
      */
-    public static function start($id) {
+    public static function start($id, $chain=false) {
         $id = (int) $id;
         $targetCheck = TargetCheck::model()->findByPk($id);
 
@@ -18,16 +18,17 @@ class TargetCheckManager {
         $now = new DateTime();
 
         AutomationJob::enqueue(array(
-                "operation" => AutomationJob::OPERATION_START,
-                "obj_id" => $targetCheck->id,
-                "started" => $now->format(ISO_DATE_TIME),
-            )
-        );
+            "operation" => AutomationJob::OPERATION_START,
+            "obj_id" => $targetCheck->id,
+            "started" => $now->format(ISO_DATE_TIME),
+            "chain" => $chain,
+        ));
     }
 
     /**
      * Stop check
      * @param $id
+     * @throws Exception
      */
     public static function stop($id) {
         $id = (int) $id;
@@ -37,11 +38,12 @@ class TargetCheckManager {
             throw new Exception("Check not found.");
         }
 
-        AutomationJob::enqueue(array(
+        if ($targetCheck->isRunning) {
+            AutomationJob::enqueue(array(
                 "operation" => AutomationJob::OPERATION_STOP,
                 "obj_id" => $targetCheck->id,
-            )
-        );
+            ));
+        }
     }
 
     /**
@@ -56,7 +58,11 @@ class TargetCheckManager {
             "obj_id" => "*",
         ));
         $mask .= ".pid";
-        $keys = explode(" ", Resque::redis()->keys($mask));
+        $keys = Resque::redis()->keys($mask);
+
+        if (!is_array($keys)) {
+            $keys = explode(" ", $keys);
+        }
 
         $ids = array();
 

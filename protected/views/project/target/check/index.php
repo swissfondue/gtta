@@ -5,15 +5,18 @@
 <script src="/ckeditor/adapters/jquery.js"></script>
 
 <?php if (User::checkRole(User::ROLE_USER)): ?>
-    <div class="pull-right buttons">
-        <div class="btn-group" data-toggle="buttons-radio">
-            <button class="btn <?php if (!$category->advanced) echo "active"; ?>" onclick="user.check.setAdvanced('<?php echo $this->createUrl("project/savecategory", array( "id" => $project->id, "target" => $target->id, "category" => $category->check_category_id )); ?>', 0);"><?php echo Yii::t("app", "Basic"); ?></button>
-            <button class="btn <?php if ($category->advanced)  echo "active"; ?>" onclick="user.check.setAdvanced('<?php echo $this->createUrl("project/savecategory", array( "id" => $project->id, "target" => $target->id, "category" => $category->check_category_id )); ?>', 1);"><?php echo Yii::t("app", "Advanced"); ?></button>
+    <div class="active-header">
+        <div class="pull-right">
+            <ul class="nav nav-pills">
+                <li><a href="<?php echo $this->createUrl('project/editchain', array( 'id' => $project->id, 'target' => $target->id )); ?>"><?php echo Yii::t('app', 'Check Chain'); ?></a></li>
+            </ul>
         </div>
-    </div>
-<?php endif; ?>
 
-<h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+        <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+    </div>
+<?php else: ?>
+    <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+<?php endif; ?>
 
 <hr>
 
@@ -134,7 +137,7 @@
                                         <?php if ($this->_system->checklist_poc): ?>
                                             <tr>
                                                 <th>
-                                                    <?php echo Yii::t("app", "PoC"); ?>
+                                                    <?php echo Yii::t("app", "Technical Details"); ?>
                                                 </th>
                                                 <td>
                                                     <textarea name="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>[poc]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>_poc" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>></textarea>
@@ -308,7 +311,7 @@
                                         <?php if ($this->_system->checklist_poc): ?>
                                             <tr>
                                                 <th>
-                                                    <?php echo Yii::t("app", "PoC"); ?>
+                                                    <?php echo Yii::t("app", "Technical Details"); ?>
                                                 </th>
                                                 <td>
                                                     <textarea name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[poc]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_poc" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($custom->poc); ?></textarea>
@@ -502,6 +505,14 @@
         }, 1000);
 
         $(".wysiwyg").ckeditor();
+
+        <?php if ($controlToOpen): ?>
+            user.check.toggleControl(<?php print $controlToOpen; ?>, function () {
+                <?php if ($checkToOpen): ?>
+                    user.check.toggle(<?php print $checkToOpen; ?>);
+                <?php endif; ?>
+            });
+        <?php endif; ?>
     });
 <?php endif; ?>
 </script>

@@ -18,15 +18,11 @@
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id )); ?>">Manually</a></li>
+                    <li><a href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id )); ?>">Single Target</a></li>
+                    <li><a href="<?php echo $this->createUrl('project/addtargetlist', array( 'id' => $project->id )); ?>">Target List</a></li>
                     <li><a href="<?php echo $this->createUrl('project/importtarget', array( 'id' => $project->id )); ?>">Import From File</a></li>
                 </ul>
             </div>
-            <?php if (count($project->targets) == 0): ?>
-                <div class="btn-group">
-                    <a class="btn" href="#gt" onclick="user.project.toggleGuidedTest('<?php echo $this->createUrl('project/control'); ?>', <?php echo $project->id; ?>);"><i class="icon icon-hand-right"></i> <?php echo Yii::t('app', 'Guided Test'); ?></a>
-                </div>
-            <?php endif; ?>
         <?php endif; ?>
     </div>
 

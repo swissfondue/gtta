@@ -27,28 +27,8 @@ class SettingsController extends Controller {
         /** @var System $system  */
         $system = System::model()->findByPk(1);
 
-        $form->workstationId = $system->workstation_id;
-        $form->workstationKey = $system->workstation_key;
-        $form->timezone = $system->timezone;
-        $form->reportLowPedestal = $system->report_low_pedestal;
-        $form->reportMedPedestal = $system->report_med_pedestal;
-        $form->reportHighPedestal = $system->report_high_pedestal;
-        $form->reportMaxRating = $system->report_max_rating;
-        $form->reportMedDampingLow = $system->report_med_damping_low;
-        $form->reportHighDampingLow = $system->report_high_damping_low;
-        $form->reportHighDampingMed = $system->report_high_damping_med;
-        $form->copyright = $system->copyright;
+        $form->fromModel($system);
         $form->languageId = $system->language->id;
-        $form->communityAllowUnverified = $system->community_allow_unverified;
-        $form->communityMinRating = $system->community_min_rating;
-        $form->checklistPoc = $system->checklist_poc;
-        $form->checklistLinks = $system->checklist_links;
-        $form->email = $system->email;
-        $form->mailHost = $system->mail_host;
-        $form->mailPort = $system->mail_port;
-        $form->mailUsername = $system->mail_username;
-        $form->mailPassword = $system->mail_password;
-        $form->mailEncryption = $system->mail_encryption;
 
         // collect form input data
 		if (isset($_POST["SettingsEditForm"])) {
@@ -67,30 +47,17 @@ class SettingsController extends Controller {
                 }
 
                 $lang->setUserDefault();
+                $system->fromForm($form, array("git_username", "git_password"));
 
-                $system->workstation_id = $form->workstationId ? $form->workstationId : null;
-                $system->workstation_key = $form->workstationKey ? $form->workstationKey : null;
-                $system->timezone = $form->timezone;
-                $system->report_low_pedestal = $form->reportLowPedestal;
-                $system->report_med_pedestal = $form->reportMedPedestal;
-                $system->report_high_pedestal = $form->reportHighPedestal;
-                $system->report_max_rating = $form->reportMaxRating;
-                $system->report_med_damping_low = $form->reportMedDampingLow;
-                $system->report_high_damping_low = $form->reportHighDampingLow;
-                $system->report_high_damping_med = $form->reportHighDampingMed;
-                $system->copyright = $form->copyright;
-                $system->community_allow_unverified = $form->communityAllowUnverified;
-                $system->checklist_poc= $form->checklistPoc;
-                $system->checklist_links = $form->checklistLinks;
-                $system->community_min_rating = $form->communityMinRating;
-                $system->email = $form->email;
-                $system->mail_host = $form->mailHost;
-                $system->mail_port = $form->mailPort;
-                $system->mail_username = $form->mailUsername;
-                $system->mail_password = $form->mailPassword;
-                $system->mail_encryption = $form->mailEncryption;
+                if ($form->gitProto == System::GIT_PROTO_HTTPS) {
+                    $system->git_username = $form->gitUsername;
+                    $system->git_password = $form->gitPassword ? $form->gitPassword : $system->git_password;
+                } elseif ($form->gitProto == System::GIT_PROTO_SSH) {
+                    $form->gitKey = CUploadedFile::getInstanceByName("SettingsEditForm[gitKey]");
+                    $form->gitKey->saveAs(Yii::app()->params["system"]["filesPath"] . DS . Yii::app()->params["packages"]["git"]["key"]);
+                }
+
                 $system->save();
-
                 $this->_system->refresh();
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "Settings saved."));
@@ -114,7 +81,7 @@ class SettingsController extends Controller {
     /**
      * Upload logo.
      */
-    function actionUploadLogo() {
+    public function actionUploadLogo() {
         $response = new AjaxResponse();
 
         try {

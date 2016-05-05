@@ -6,31 +6,23 @@
 
 <hr>
 
-<form class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
+<form class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post" enctype="multipart/form-data">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
     <fieldset>
-        <div class="control-group <?php if ($form->getError('workstationId')) echo 'error'; ?>">
-            <label class="control-label" for="SettingsEditForm_workstationId"><?php echo Yii::t('app', 'Workstation ID'); ?></label>
-            <div class="controls">
-                <input type="text" class="input-xlarge" id="SettingsEditForm_workstationId" name="SettingsEditForm[workstationId]" value="<?php echo CHtml::encode($form->workstationId); ?>">
-                <?php if ($form->getError('workstationId')): ?>
-                    <p class="help-block"><?php echo $form->getError('workstationId'); ?></p>
-                <?php endif; ?>
+        <div class="control-group">
+            <label class="control-label"><?php echo Yii::t("app", "Workstation ID"); ?></label>
+            <div class="controls form-text">
+                <?= $system->workstation_id ? CHtml::encode($system->workstation_id) : Yii::t("app", "N/A"); ?>
             </div>
         </div>
 
-        <div class="control-group <?php if ($form->getError('workstationKey')) echo 'error'; ?>">
-            <label class="control-label" for="SettingsEditForm_workstationKey"><?php echo Yii::t('app', 'Workstation Key'); ?></label>
-            <div class="controls">
-                <input type="text" class="input-xlarge" id="SettingsEditForm_workstationKey" name="SettingsEditForm[workstationKey]" value="<?php echo CHtml::encode($form->workstationKey); ?>">
-                <?php if ($form->getError('workstationKey')): ?>
-                    <p class="help-block"><?php echo $form->getError('workstationKey'); ?></p>
-                <?php endif; ?>
+        <div class="control-group">
+            <label class="control-label"><?php echo Yii::t("app", "Workstation Key"); ?></label>
+            <div class="controls form-text">
+                <?= $system->workstation_key ? CHtml::encode($system->workstation_key) : Yii::t("app", "N/A"); ?>
             </div>
         </div>
-        
-        <hr>               
 
         <div class="control-group">
             <label class="control-label"><?php echo Yii::t("app", "Integration Key"); ?></label>
@@ -46,6 +38,8 @@
                 <a href="#generate" title="<?php echo Yii::t("app", "Generate New"); ?>" onclick="admin.settings.generateIntegrationKey();"><i class="icon icon-refresh"></i></a>
             </div>
         </div>
+
+        <hr>
 
         <div class="control-group <?php if ($form->getError("communityMinRating")) echo "error"; ?>">
             <label class="control-label" for="SettingsEditForm_communityMinRating"><?php echo Yii::t("app", "Community Min Rating"); ?></label>
@@ -211,7 +205,7 @@
         <br>
 
         <div class="control-group">
-            <label class="control-label" for="SettingsEditForm_checklistPoc"><?php echo Yii::t("app", "Checklist POC"); ?></label>
+            <label class="control-label" for="SettingsEditForm_checklistPoc"><?php echo Yii::t("app", "Checklist Technical Details"); ?></label>
             <div class="controls">
                 <input type="checkbox" id="SettingsEditForm_checklistPoc" name="SettingsEditForm[checklistPoc]" value="1" <?php if ($form->checklistPoc) echo 'checked="checked"'; ?>>
             </div>
@@ -281,6 +275,63 @@
                 <input type="text" class="input-xlarge" id="SettingsEditForm_email" name="SettingsEditForm[email]" value="<?php echo CHtml::encode($form->email); ?>">
                 <?php if ($form->getError('email')): ?>
                     <p class="help-block"><?php echo $form->getError('email'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <hr>
+
+        <h3><?php echo Yii::t("app", "Git Settings"); ?></h3>
+
+        <div class="control-group <?php if ($form->getError('gitUrl')) echo 'error'; ?>">
+            <label class="control-label" for="SettingsEditForm_gitUrl"><?php echo Yii::t('app', 'Repository URL'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="SettingsEditForm_gitUrl" name="SettingsEditForm[gitUrl]" value="<?php echo CHtml::encode($form->gitUrl); ?>">
+                <?php if ($form->getError('gitUrl')): ?>
+                    <p class="help-block"><?php echo $form->getError('gitUrl'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($form->getError('gitProto')) echo 'error'; ?>">
+            <label class="control-label" for="SettingsEditForm_gitProto"><?php echo Yii::t('app', 'Protocol'); ?></label>
+            <div class="controls">
+                <select class="input-xlarge show-hide-toggle" id="SettingsEditForm_gitProto" name="SettingsEditForm[gitProto]">
+                    <option value="<?php echo System::GIT_PROTO_HTTPS; ?>" data-hide=".git-proto-field" data-show=".git-proto-field-https-group" <?php if ($form->gitProto == System::GIT_PROTO_HTTPS) echo 'selected'; ?>><?php echo Yii::t("app", "HTTPS"); ?></option>
+                    <option value="<?php echo System::GIT_PROTO_SSH; ?>" data-hide=".git-proto-field" data-show=".git-proto-field-ssh-group" <?php if ($form->gitProto == System::GIT_PROTO_SSH) echo 'selected'; ?>><?php echo Yii::t("app", "SSH"); ?></option>
+                </select>
+                <?php if ($form->getError('gitProto')): ?>
+                    <p class="help-block"><?php echo $form->getError('gitProto'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group git-proto-field git-proto-field-https-group <?php if ($form->gitProto != System::GIT_PROTO_HTTPS) echo "hide"; ?> <?php if ($form->getError('gitUsername')) echo 'error'; ?>">
+            <label class="control-label" for="SettingsEditForm_gitUsername"><?php echo Yii::t('app', 'Username'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="SettingsEditForm_gitUsername" name="SettingsEditForm[gitUsername]" value="<?php echo CHtml::encode($form->gitUsername); ?>">
+                <?php if ($form->getError('gitUsername')): ?>
+                    <p class="help-block"><?php echo $form->getError('gitUsername'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group git-proto-field git-proto-field-https-group <?php if ($form->gitProto != System::GIT_PROTO_HTTPS) echo "hide"; ?> <?php if ($form->getError('gitPassword')) echo 'error'; ?>">
+            <label class="control-label" for="SettingsEditForm_gitPassword"><?php echo Yii::t('app', 'Password'); ?></label>
+            <div class="controls">
+                <input type="password" class="input-xlarge" id="SettingsEditForm_gitPassword" name="SettingsEditForm[gitPassword]" value="<?php echo CHtml::encode($form->gitPassword); ?>">
+                <?php if ($form->getError('gitPassword')): ?>
+                    <p class="help-block"><?php echo $form->getError('gitPassword'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group git-proto-field git-proto-field-ssh-group <?php if ($form->gitProto != System::GIT_PROTO_SSH) echo "hide"; ?> <?php if ($form->getError('gitKey')) echo 'error'; ?>"">
+            <label class="control-label"><?php echo Yii::t("app", "Private Key"); ?></label>
+            <div class="controls">
+                <input type="file" class="form-control" name="SettingsEditForm[gitKey]">
+                <?php if ($form->getError('gitKey')): ?>
+                    <p class="help-block"><?php echo $form->getError('gitKey'); ?></p>
                 <?php endif; ?>
             </div>
         </div>

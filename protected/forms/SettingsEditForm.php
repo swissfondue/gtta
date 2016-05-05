@@ -3,17 +3,7 @@
 /**
  * This is the model class for settings edit form.
  */
-class SettingsEditForm extends CFormModel {
-    /**
-     * @var string workstation id
-     */
-    public $workstationId;
-
-    /**
-     * @var string workstation key
-     */
-    public $workstationKey;
-
+class SettingsEditForm extends FormModel {
     /**
      * @var string timezone
      */
@@ -115,14 +105,38 @@ class SettingsEditForm extends CFormModel {
     public $mailEncryption;
 
     /**
-	 * @return array validation rules for model attributes.
-	 */
-	public function rules() {
-		return array(
-			array("timezone", "required"),
+     * @var string git repo url
+     */
+    public $gitUrl;
+
+    /**
+     * @var string git protocol
+     */
+    public $gitProto;
+
+    /**
+     * @var string git username to sync
+     */
+    public $gitUsername;
+
+    /**
+     * @var string git password to sync
+     */
+    public $gitPassword;
+
+    /**
+     * @var file git private key
+     */
+    public $gitKey;
+
+    /**
+     * @return array validation rules for model attributes.
+     */
+    public function rules() {
+        return array(
+            array("timezone, communityMinRating, reportLowPedestal, reportMedPedestal, reportHighPedestal, reportMaxRating, reportMedDampingLow, reportHighDampingLow, reportHighDampingMed", "required"),
             array("timezone", "in", "range" => array_keys(TimeZones::$zones)),
-            array("workstationId", "length", "is" => 36),
-            array("workstationKey, copyright", "length", "max" => 1000),
+            array("copyright", "length", "max" => 1000),
             array("communityMinRating", "numerical", "min" => 0, "max" => 5),
             array("communityAllowUnverified, checklistPoc, checklistLinks", "boolean"),
             array("reportLowPedestal, reportMedPedestal, reportHighPedestal, reportMaxRating, reportMedDampingLow, reportHighDampingLow, reportHighDampingMed", "numerical", "min" => 0),
@@ -132,18 +146,18 @@ class SettingsEditForm extends CFormModel {
             array("languageId", "checkLanguage"),
             array("email", "email"),
             array("mailPort", "numerical", "integerOnly" => true, "min" => 1, "max" => 65535),
-            array("mailHost, mailUsername, mailPassword", "safe"),
-		);
-	}
-    
+            array("mailHost, mailUsername, mailPassword, gitUrl, gitUsername, gitPassword, gitKey", "safe"),
+            array("gitProto", "in", "range" => array(System::GIT_PROTO_HTTPS, System::GIT_PROTO_SSH)),
+            array("gitProto", "checkProto"),
+        );
+    }
+
     /**
 	 * @return array customized attribute labels (name=>label)
 	 */
 	public function attributeLabels() {
 		return array(
-            "workstationId" => Yii::t("app", "Workstation ID"),
-            "workstationKey" => Yii::t("app", "Workstation Key"),
-			"timezone" => Yii::t("app", "Time Zone"),
+            "timezone" => Yii::t("app", "Time Zone"),
             "reportLowPedestal" => Yii::t("app", "Low Risk Pedestal"),
             "reportMedPedestal" => Yii::t("app", "Medium Risk Pedestal"),
             "reportHighPedestal" => Yii::t("app", "High Risk Pedestal"),
@@ -155,7 +169,7 @@ class SettingsEditForm extends CFormModel {
             "languageId" => Yii::t("app", "Default Language"),
             "communityMinRating" => Yii::t("app", "Community Min Rating"),
             "communityAllowUnverified" => Yii::t("app", "Community Allow Unverified"),
-            "checklistPoc" => Yii::t("app", "Checklist POC"),
+            "checklistPoc" => Yii::t("app", "Checklist Technical Details"),
             "checklistLinks" => Yii::t("app", "Checklist Links"),
             "email" => Yii::t("app", "Email"),
             "mailHost" => Yii::t("app", "Host"),
@@ -163,8 +177,8 @@ class SettingsEditForm extends CFormModel {
             "mailUsername" => Yii::t("app", "Username"),
             "mailPassword" => Yii::t("app", "Password"),
             "mailEncryption" => Yii::t("app", "Encryption"),
-		);
-	}
+        );
+    }
 
     /**
      * Checks if language exists.
@@ -175,6 +189,37 @@ class SettingsEditForm extends CFormModel {
         if (!$language) {
             $this->addError("languageId", Yii::t("app", "Language not found."));
             return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check git protocol
+     * @param $attribute
+     * @param $params
+     * @return bool
+     */
+    public function checkProto($attribute, $params) {
+        if (!$this->gitUrl) {
+            return true;
+        }
+
+        if ($this->gitProto == System::GIT_PROTO_HTTPS) {
+            if (!$this->gitUsername) {
+                $this->addError("gitUsername", Yii::t("app", "Username can't be blank."));
+                return false;
+            }
+
+            if (!$this->gitPassword) {
+                $this->addError("gitPassword", Yii::t("app", "Password can't be blank."));
+                return false;
+            }
+        } elseif ($this->gitProto == System::GIT_PROTO_SSH) {
+            if (!file_exists($_FILES["SettingsEditForm"]["tmp_name"]["gitKey"])) {
+                $this->addError("gitKey", Yii::t("app", "Key can't be blank."));
+                return false;
+            }
         }
 
         return true;

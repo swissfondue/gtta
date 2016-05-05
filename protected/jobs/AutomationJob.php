@@ -138,13 +138,13 @@ class AutomationJob extends BackgroundJob {
 
     /**
      * Create check files
-     * @param $check
-     * @param $target
-     * @param $script
+     * @param TargetCheck $check
+     * @param Target $target
+     * @param CheckScript $script
      * @return array
-     * @throws VMNotFoundException
+     * @throws Exception
      */
-    private function _createCheckFiles($check, $target, $script) {
+    private function _createCheckFiles(TargetCheck $check, Target $target, CheckScript $script) {
         $vm = new VMManager();
         $filesPath = $vm->virtualizePath(Yii::app()->params["automation"]["filesPath"]);
 
@@ -155,15 +155,32 @@ class AutomationJob extends BackgroundJob {
             throw new VMNotFoundException("Sandbox is not running, please regenerate it.");
         }
 
-        $targetHost = $check->override_target ? $check->override_target : $target->host;
+        $targetHosts = "";
         $port = "";
 
-        if ($target->port) {
-            $port = $target->port;
-        }
+        if (!$check->override_target) {
+            $targetHosts = $target->host;
 
-        if ($check->port) {
-            $port = $check->port;
+            if ($target->port) {
+                $port = $target->port;
+            }
+
+            if ($check->port) {
+                $port = $check->port;
+            }
+        } else {
+            $targets = explode("\n", $check->override_target);
+            $filtered = array();
+
+            foreach ($targets as $t) {
+                $t = trim($t);
+
+                if ($t) {
+                    $filtered[] = $t;
+                }
+            }
+
+            $targetHosts = implode(",", $filtered);
         }
 
         $targetCheckScript = TargetCheckScript::model()->findByAttributes(array(
@@ -182,7 +199,7 @@ class AutomationJob extends BackgroundJob {
         }
 
         // base data
-        fwrite($targetFile, $targetHost . "\n");
+        fwrite($targetFile, $targetHosts . "\n");
         fwrite($targetFile, $check->protocol . "\n");
         fwrite($targetFile, $port . "\n");
         fwrite($targetFile, $check->language->code . "\n");
@@ -198,23 +215,66 @@ class AutomationJob extends BackgroundJob {
 
         fclose($resultFile);
 
-        $inputs = CheckInput::model()->findAllByAttributes(array(
-            'check_script_id' => $script->id
-        ));
-
+        // will use this input ids list when collecting all TargetCheckInputs below
         $inputIds = array();
 
-        foreach ($inputs as $input) {
+        // create input entries, if they do not exist
+        foreach ($script->inputs as $input) {
             $inputIds[] = $input->id;
+
+            if ($input->visible) {
+                continue;
+            }
+
+            $exists = TargetCheckInput::model()->findByAttributes(array(
+                "target_check_id" => $check->id,
+                "check_input_id" => $input->id
+            ));
+
+            if ($exists) {
+                continue;
+            }
+
+            $newInput = new TargetCheckInput();
+            $newInput->target_check_id = $check->id;
+            $newInput->check_input_id = $input->id;
+            $newInput->value = $input->value;
+            $newInput->save();
+        }
+
+        $inputs = CheckInput::model()->with(array(
+            "targetInputs" => array(
+                "alias" => "ti",
+                "on" => "ti.target_check_id = :tci",
+                "params" => array("tci" => $check->id),
+            )
+        ))->findAllByAttributes(array(
+            "check_script_id" => $script->id,
+            "visible" => true,
+        ));
+
+        /** @var CheckInput $input */
+        foreach ($inputs as $input) {
+            $exists = $input->targetInputs;
+
+            if ($exists && $exists[0]) {
+                continue;
+            }
+
+            $newInput = new TargetCheckInput();
+            $newInput->target_check_id = $check->id;
+            $newInput->check_input_id = $input->id;
+            $newInput->value = $input->value;
+            $newInput->save();
         }
 
         $criteria = new CDbCriteria();
-        $criteria->addColumnCondition(array('target_check_id' => $check->id));
-        $criteria->addInCondition('check_input_id', $inputIds);
-        $criteria->order = 'input.sort_order ASC';
+        $criteria->addColumnCondition(array("target_check_id" => $check->id));
+        $criteria->addInCondition("check_input_id", $inputIds);
+        $criteria->order = "input.sort_order ASC";
 
         // create input files
-        $inputs = TargetCheckInput::model()->with('input')->findAll($criteria);
+        $inputs = TargetCheckInput::model()->with("input")->findAll($criteria);
         $inputFiles = array();
 
         foreach ($inputs as $input) {
@@ -344,14 +404,16 @@ class AutomationJob extends BackgroundJob {
             $now = new DateTime();
             $package = $script->package;
 
-            $data = Yii::t("app", "The {script} script was used within this check against {target} on {date} at {time}", array(
-                "{script}" => $package->name,
-                "{target}" => $check->override_target ? $check->override_target : $target->host,
-                "{date}" => $now->format("d.m.Y"),
-                "{time}" => $now->format("H:i:s"),
-            ));
+            if (!isset($this->args['chain'])) {
+                $data = Yii::t("app", "The {script} script was used within this check against {target} on {date} at {time}", array(
+                    "{script}" => $package->name,
+                    "{target}" => $check->override_target ? $check->override_target : $target->host,
+                    "{date}" => $now->format("d.m.Y"),
+                    "{time}" => $now->format("H:i:s"),
+                ));
 
-            $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
+                $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
+            }
 
             try {
                 $pid = posix_getpid();
@@ -440,9 +502,11 @@ class AutomationJob extends BackgroundJob {
                     $this->setVar("started", $this->args["started"]);
                     $this->_startCheck($id);
                     break;
+
                 case self::OPERATION_STOP:
                     $this->_stopCheck($id);
                     break;
+
                 default:
                     throw new Exception("Invalid operation.");
             }

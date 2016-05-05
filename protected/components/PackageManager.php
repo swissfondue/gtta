@@ -14,6 +14,7 @@ class PackageManager {
     const SECTION_VERSION = "version";
     const SECTION_DESCRIPTION = "description";
     const SECTION_VALUE = "value";
+    const SECTION_VISIBLE = "visible";
     const SECTION_DEPENDENCIES = "dependencies";
     const SECTION_INPUTS = "inputs";
     const TYPE_LIBRARY = "library";
@@ -352,8 +353,10 @@ class PackageManager {
                 foreach ($inps as $input) {
                     try {
                         $inputName = $this->_getSection($input, self::SECTION_NAME);
-                        $inputType = $this->_getSection($package, self::SECTION_TYPE);
-                        $inputValue = $this->_getSection($package, self::SECTION_VALUE, false);
+                        $inputType = $this->_getSection($input, self::SECTION_TYPE);
+                        $inputValue = $this->_getSection($input, self::SECTION_VALUE, false);
+                        $inputDescription = $this->_getSection($input, self::SECTION_DESCRIPTION, false);
+                        $inputVisible = $this->_getSection($input, self::SECTION_VISIBLE, false);
                     } catch (MissingSectionException $e) {
                         throw new Exception(
                             Yii::t("app", "Missing section {section} for input.", array(
@@ -371,33 +374,21 @@ class PackageManager {
                     }
 
                     if (!in_array($inputType, $this->_getInputTypes())) {
-                        throw new Exception(
-                            Yii::t("app", "Invalid input type: {type}", array("{type}" => $inputType))
-                        );
+                        $inputType = self::INPUT_TYPE_TEXT;
+                    }
+
+                    if (!is_bool($inputVisible)) {
+                        $inputVisible = true;
                     }
 
                     $inputs[] = array(
                         self::SECTION_NAME => $inputName,
                         self::SECTION_TYPE => $inputType,
-                        self::SECTION_VALUE => $inputValue
+                        self::SECTION_VALUE => $inputValue,
+                        self::SECTION_DESCRIPTION => $inputDescription,
+                        self::SECTION_VISIBLE => $inputVisible,
                     );
                 }
-            }
-        }
-
-        // scan top-level sections
-        $allowedTopLevel = array(
-            self::SECTION_NAME,
-            self::SECTION_TYPE,
-            self::SECTION_VERSION,
-            self::SECTION_DESCRIPTION,
-            self::SECTION_DEPENDENCIES,
-            self::SECTION_INPUTS,
-        );
-
-        foreach ($package as $key => $value) {
-            if (!in_array($key, $allowedTopLevel)) {
-                throw new Exception(Yii::t("app", "Invalid section: {section}", array("{section}" => $key)));
             }
         }
 
@@ -420,11 +411,18 @@ class PackageManager {
         $vm = new VMManager();
 
         try {
+            $this->_lockInstaller();
             $vm->runCommand("dpkg --list $package | grep ^ii");
         } catch (Exception $e) {
-            throw new Exception(
+            $exception = new Exception(
                 Yii::t("app", "Unsatisfied system dependency: {dependency}.", array("{dependency}" => $package))
             );
+        }
+
+        $this->_unlockInstaller();
+
+        if (isset($exception)) {
+            throw $exception;
         }
     }
 
@@ -441,6 +439,7 @@ class PackageManager {
             $name = explode("_", $package);
             $name = $name[0];
 
+            $this->_lockInstaller();
             $requiredVersion = ProcessManager::runCommand("dpkg --info $packagePath/$package | grep Version | cut -d \" \" -f 3");
             $currentVersion = $vm->runCommand("dpkg-query -W $name | cut -f 2");
 
@@ -448,9 +447,15 @@ class PackageManager {
                 throw new Exception();
             }
         } catch (Exception $e) {
-            throw new Exception(
+            $exception = new Exception(
                 Yii::t("app", "Unsatisfied deb dependency: {dependency}.", array("{dependency}" => $package))
             );
+        }
+
+        $this->_unlockInstaller();
+
+        if (isset($exception)) {
+            throw $exception;
         }
     }
 
@@ -612,13 +617,15 @@ class PackageManager {
 
     /**
      * Schedule package for installation
-     * @param $id
+     * @param $fileId
+     * @param $externalId
+     * @param $async
      * @return Package
      * @throws Exception
      */
-    public function scheduleForInstallation($id) {
-        $packagePath = Yii::app()->params["packages"]["tmpPath"] . "/" . $id;
-        $zipPath = Yii::app()->params["packages"]["tmpPath"] . "/" . $id . ".zip";
+    public function scheduleForInstallation($fileId, $externalId=0, $async=true) {
+        $packagePath = Yii::app()->params["packages"]["tmpPath"] . "/" . $fileId;
+        $zipPath = Yii::app()->params["packages"]["tmpPath"] . "/" . $fileId . ".zip";
         $package = null;
         $exception = null;
         $pkg = null;
@@ -628,29 +635,51 @@ class PackageManager {
             $package = $this->_parse($this->_getRootPath($packagePath));
             $this->_validate($package, false);
 
-            $pkg = Package::model()->findByAttributes(array(
-                "type" => $package[self::SECTION_TYPE],
-                "name" => $package[self::SECTION_NAME]
-            ));
+            if ($externalId) {
+                $pkg = Package::model()->findByAttributes(array("external_id" => $externalId));
+            }
+
+            if (!$pkg) {
+                $pkg = Package::model()->findByAttributes(array(
+                    "type" => $package[self::SECTION_TYPE],
+                    "name" => $package[self::SECTION_NAME]
+                ));
+            }
 
             if (!$pkg) {
                 $pkg = new Package();
+                $now = new DateTime();
+                $pkg->create_time = $now->format(ISO_DATE_TIME);
             }
 
-            $pkg->file_name = $id;
+            $pkg->file_name = $fileId;
             $pkg->name = $package[self::SECTION_NAME];
             $pkg->type = $package[self::SECTION_TYPE];
             $pkg->version = $package[self::SECTION_VERSION];
-            $pkg->status = Package::STATUS_INSTALL;
+            $pkg->status = Package::STATUS_NOT_INSTALLED;
+
+            if ($externalId) {
+                $pkg->external_id = $externalId;
+            }
+
             $pkg->save();
 
-            PackageJob::enqueue(array(
-                'operation' => PackageJob::OPERATION_INSTALL,
-                'obj_id' => $pkg->id,
-            ));
+            if ($async) {
+                PackageJob::enqueue(array(
+                    "operation" => PackageJob::OPERATION_INSTALL,
+                    "obj_id" => $pkg->id,
+                ));
+            } else {
+                $this->install($pkg);
+            }
         } catch (Exception $e) {
             FileManager::unlink($zipPath);
             $exception = $e;
+
+            if ($pkg && $pkg->id) {
+                $pkg->status = Package::STATUS_ERROR;
+                $pkg->save();
+            }
         }
 
         FileManager::rmDir($packagePath);
@@ -670,7 +699,7 @@ class PackageManager {
         $packageDir = Yii::app()->params["packages"]["tmpPath"];
 
         if (!is_dir($packageDir)) {
-            FileManager::createDir($packageDir, 0777);
+            FileManager::createDir($packageDir, 0777, true);
         }
 
         $id = md5(uniqid("", true));
@@ -719,6 +748,26 @@ class PackageManager {
     }
 
     /**
+     * Lock installer (dpkg/apt)
+     * @return bool
+     */
+    private function _lockInstaller() {
+        $filepath = Yii::app()->params["packages"]["installerLock"];
+        $handle = fopen($filepath, "w");
+        flock($handle, LOCK_EX);
+    }
+
+    /**
+     * Unlock installer (dpkg/apt)
+     * @return bool
+     */
+    private function _unlockInstaller() {
+        $filepath = Yii::app()->params["packages"]["installerLock"];
+        $handle = fopen($filepath, "w");
+        flock($handle, LOCK_UN);
+    }
+
+    /**
      * Install system dependency through the apt system
      * @param $package
      * @throws Exception
@@ -727,9 +776,17 @@ class PackageManager {
         $vm = new VMManager();
 
         try {
-            $vm->runCommand("DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install $package");
+            $this->_lockInstaller();
+            $vm->runCommand("DEBIAN_FRONTEND=noninteractive apt-get -y update", false);
+            $vm->runCommand("DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install $package 2>&1");
             $this->_checkSystemDependency($package);
         } catch (Exception $e) {
+            $exception = $e;
+        }
+
+        $this->_unlockInstaller();
+
+        if (isset($exception)) {
             throw new Exception(
                 Yii::t("app", "Unable to install system dependency: {dependency}.", array("{dependency}" => $package))
             );
@@ -749,6 +806,7 @@ class PackageManager {
 
         try {
             FileManager::copy($debPath, $virtualDebPath);
+            $this->_lockInstaller();
             $vm->runCommand("dpkg --install /tmp/$package");
             $this->_checkDebDependency($package, $packagePath);
         } catch (Exception $e) {
@@ -757,6 +815,7 @@ class PackageManager {
             );
         }
 
+        $this->_unlockInstaller();
         FileManager::unlink($virtualDebPath);
 
         if ($exception) {
@@ -868,16 +927,25 @@ class PackageManager {
 
             $destinationPath = $this->getPath($package);
             FileManager::rmDir($destinationPath);
-            FileManager::createDir($destinationPath, 0755);
-            FileManager::chown($destinationPath, "gtta", "gtta");
+            FileManager::createDir($destinationPath, 0775, true);
+
+            try {
+                FileManager::chown($destinationPath, "gtta", "gtta");
+            } catch (Exception $e) {
+                // pass
+            }
+
             FileManager::copyRecursive($this->_getRootPath($packagePath), $destinationPath);
+            ProcessManager::runCommand("chown -R gtta:gtta $destinationPath", false);
+            ProcessManager::runCommand("find $destinationPath -type d | xargs chmod -R 0775", false);
+            ProcessManager::runCommand("find $destinationPath -type f | xargs chmod -R 0664", false);
 
             // change "files" directory permission
             try {
                 $filesPath = "$destinationPath/files";
 
                 if (!@is_dir($filesPath)) {
-                    FileManager::createDir($filesPath, 0775);
+                    FileManager::createDir($filesPath, 0775, true);
                 }
 
                 FileManager::chmod($filesPath, 0775);
@@ -894,7 +962,7 @@ class PackageManager {
             $this->_validate($parsedPackage, true);
 
             // copy package to VM
-            FileManager::createDir($vm->virtualizePath($destinationPath), 0755);
+            FileManager::createDir($vm->virtualizePath($destinationPath), 0775, true);
             FileManager::copyRecursive($destinationPath, $vm->virtualizePath($destinationPath));
 
             // create library dependencies
@@ -910,10 +978,12 @@ class PackageManager {
                     );
                 }
 
-                $packageDep = new PackageDependency();
-                $packageDep->from_package_id = $package->id;
-                $packageDep->to_package_id = $library->id;
-                $packageDep->save();
+                try {
+                    $packageDep = new PackageDependency();
+                    $packageDep->from_package_id = $package->id;
+                    $packageDep->to_package_id = $library->id;
+                    $packageDep->save();
+                } catch (CDbException $e) {}
             }
 
             // create script dependencies
@@ -929,10 +999,12 @@ class PackageManager {
                     );
                 }
 
-                $packageDep = new PackageDependency();
-                $packageDep->from_package_id = $package->id;
-                $packageDep->to_package_id = $script->id;
-                $packageDep->save();
+                try {
+                    $packageDep = new PackageDependency();
+                    $packageDep->from_package_id = $package->id;
+                    $packageDep->to_package_id = $script->id;
+                    $packageDep->save();
+                } catch (CDbException $e) {}
             }
 
             $package->file_name = null;
@@ -1118,56 +1190,66 @@ class PackageManager {
     /**
      * Create package by id
      * @param $package
+     * @param $initial
+     * @param $dependency
      * @return Package
      * @throws Exception
      */
-    public function create($package) {
+    public function create($package, $initial=false, $dependency=false) {
         /** @var System $system */
         $system = System::model()->findByPk(1);
-        $api = new CommunityApiClient($system->integration_key);
+        $api = new CommunityApiClient($initial ? null : $system->integration_key);
         $package = $api->getPackage($package)->package;
+        $pkg = null;
 
-        if ($package->status == CommunityApiClient::STATUS_UNVERIFIED && !$system->community_allow_unverified) {
-            throw new Exception("Installing unverified packages is prohibited.");
-        }
-
-        if ($system->community_min_rating > 0 && $package->rating < $system->community_min_rating) {
-            throw new Exception("Package rating is below the system rating limit.");
-        }
-
-        $id = $package->id;
-        $checkPackage = Package::model()->findByAttributes(array("external_id" => $id));
-
-        if ($checkPackage) {
-            return $checkPackage;
-        }
-
-        foreach ($package->dependencies as $dep) {
-            $checkDependency = Package::model()->findByAttributes(array(
-                "external_id" => $dep->id,
-            ));
-
-            if ($checkDependency) {
-                continue;
+        try {
+            if ($package->status == CommunityApiClient::STATUS_UNVERIFIED && !$system->community_allow_unverified) {
+                throw new Exception("Installing unverified packages is prohibited.");
             }
 
-            $this->create($dep->id);
+            if ($system->community_min_rating > 0 && $package->rating < $system->community_min_rating) {
+                throw new Exception("Package rating is below the system rating limit.");
+            }
+
+            foreach ($package->dependencies as $dep) {
+                $checkDependency = Package::model()->findByAttributes(array(
+                    "external_id" => $dep->id,
+                    "status" => Package::STATUS_INSTALLED,
+                ));
+
+                if ($checkDependency) {
+                    continue;
+                }
+
+                $this->create($dep->id, $initial, true);
+            }
+
+            $tmpData = $this->_getTemporaryPackageData();
+            $zipPath = $tmpData["zipPath"];
+
+            $api = new CommunityApiClient($initial ? null : $system->integration_key);
+            $api->getPackageArchive($package->id, $zipPath);
+
+            if (!file_exists($zipPath)) {
+                throw new Exception("Error downloading package file: $zipPath");
+            }
+
+            $pkg = $this->scheduleForInstallation($tmpData["id"], $package->id, false);
+        } catch (Exception $e) {
+            if (!$initial) {
+                $api->installError(array(
+                    "id" => $package->id,
+                    "type" => "package",
+                    "text" => $e->getMessage(),
+                ));
+            }
+
+            if (!$dependency) {
+                throw $e;
+            } else {
+                throw new Exception("Error installing dependent package: " . $e->getMessage());
+            }
         }
-
-        $tmpData = $this->_getTemporaryPackageData();
-        $zipPath = $tmpData["zipPath"];
-
-        $api = new CommunityApiClient($system->integration_key);
-        $api->getPackageArchive($id, $zipPath);
-
-        if (!file_exists($zipPath)) {
-            throw new Exception("Error downloading package file: $zipPath");
-        }
-
-        $pkg = $this->scheduleForInstallation($tmpData["id"]);
-        $pkg->external_id = $id;
-        $pkg->save();
-        $this->install($pkg);
 
         return $pkg;
     }
@@ -1178,9 +1260,12 @@ class PackageManager {
      */
     public function getExternalIds() {
         $packageIds = array();
-        $packages = Package::model()->findAll("external_id IS NOT NULL AND status = :status", array(
-            "status" => Package::STATUS_INSTALLED
-        ));
+
+        $criteria = new CDbCriteria();
+        $criteria->addCondition("external_id IS NOT NULL");
+        $criteria->addInCondition("status", array(Package::STATUS_INSTALLED, Package::STATUS_ERROR));
+
+        $packages = Package::model()->findAll($criteria);
 
         foreach ($packages as $package) {
             $packageIds[] = $package->external_id;
@@ -1239,7 +1324,7 @@ class PackageManager {
             $api = new CommunityApiClient($system->integration_key);
             $package->external_id = $api->sharePackage($zipPath)->id;
         } catch (Exception $e) {
-            Yii::log($e->getMessage(), CLogger::LEVEL_ERROR, "console");
+            throw new Exception($e->getMessage());
         }
 
         $package->status = Check::STATUS_INSTALLED;
@@ -1262,12 +1347,22 @@ class PackageManager {
             $package = $this->_parse($path);
             $this->_validate($package, false);
 
-            $pkg = new Package();
+            $pkg = Package::model()->findByAttributes(array(
+                "type" => $package[self::SECTION_TYPE],
+                "name" => $package[self::SECTION_NAME]
+            ));
+
+            if (!$pkg) {
+                $pkg = new Package();
+                $now = new DateTime();
+                $pkg->create_time = $now->format(ISO_DATE_TIME);
+            }
+
             $pkg->name = $package[self::SECTION_NAME];
             $pkg->type = $package[self::SECTION_TYPE];
             $pkg->version = $package[self::SECTION_VERSION];
             $pkg->file_name = null;
-            $pkg->status = Package::STATUS_INSTALLED;
+            $pkg->status = Package::STATUS_NOT_INSTALLED;
             $pkg->save();
 
             // install dependencies
@@ -1278,7 +1373,7 @@ class PackageManager {
             $this->_validate($package, true);
 
             // copy package to VM
-            FileManager::createDir($vm->virtualizePath($path), 0755);
+            FileManager::createDir($vm->virtualizePath($path), 0775);
             FileManager::copyRecursive($path, $vm->virtualizePath($path));
 
             // create library dependencies
@@ -1294,10 +1389,12 @@ class PackageManager {
                     );
                 }
 
-                $packageDep = new PackageDependency();
-                $packageDep->from_package_id = $pkg->id;
-                $packageDep->to_package_id = $library->id;
-                $packageDep->save();
+                try {
+                    $packageDep = new PackageDependency();
+                    $packageDep->from_package_id = $pkg->id;
+                    $packageDep->to_package_id = $library->id;
+                    $packageDep->save();
+                } catch (Exception $e) {}
             }
 
             // create script dependencies
@@ -1313,11 +1410,16 @@ class PackageManager {
                     );
                 }
 
-                $packageDep = new PackageDependency();
-                $packageDep->from_package_id = $pkg->id;
-                $packageDep->to_package_id = $script->id;
-                $packageDep->save();
+                try {
+                    $packageDep = new PackageDependency();
+                    $packageDep->from_package_id = $pkg->id;
+                    $packageDep->to_package_id = $script->id;
+                    $packageDep->save();
+                } catch (Exception $e) {}
             }
+
+            $pkg->status = Package::STATUS_INSTALLED;
+            $pkg->save();
         } catch (Exception $e) {
             $exception = $e;
 
@@ -1344,7 +1446,12 @@ class PackageManager {
             "obj_id" => "[0-9]*"
         ));
         $mask .= '.message';
-        $keys = explode(" ", Resque::redis()->keys($mask));
+        $keys = Resque::redis()->keys($mask);
+
+        if (!is_array($keys)) {
+            $keys = explode(" ", $keys);
+        }
+
         $pattern = JobManager::buildId(PackageJob::ID_TEMPLATE, array(
             "operation" => sprintf("(%s|%s)", PackageJob::OPERATION_INSTALL, PackageJob::OPERATION_DELETE),
             "obj_id" => "(\d+)"
@@ -1367,5 +1474,27 @@ class PackageManager {
         }
 
         return $messages;
+    }
+
+    /**
+     * Get check input type
+     * @param string $type
+     * @return array
+     * @throws Exception
+     */
+    public function getCheckInputType($type) {
+        $map = array(
+            self::INPUT_TYPE_TEXT => CheckInput::TYPE_TEXT,
+            self::INPUT_TYPE_TEXTAREA => CheckInput::TYPE_TEXTAREA,
+            self::INPUT_TYPE_CHECKBOX => CheckInput::TYPE_CHECKBOX,
+            self::INPUT_TYPE_RADIO => CheckInput::TYPE_RADIO,
+            self::INPUT_TYPE_FILE => CheckInput::TYPE_FILE,
+        );
+
+        if (!isset($map[$type])) {
+            throw new Exception(Yii::t("app", "Type not found: {type}", array("{type}" => $type)));
+        }
+
+        return $map[$type];
     }
 }

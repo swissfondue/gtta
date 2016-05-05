@@ -257,9 +257,11 @@ class AccountController extends Controller
 
                     $now = new DateTime();
                     $record = new ProjectTime();
+                    $record->create_time = $now->format(ISO_DATE_TIME);
                     $record->start_time = $now->format(ISO_DATE_TIME);
                     $record->project_id = $project->id;
                     $record->user_id = $user->id;
+                    $record->description = Yii::t("app", "Project time tracker.");
                     $record->save();
 
                     break;
@@ -271,6 +273,7 @@ class AccountController extends Controller
                         throw new CHttpException(404, Yii::t("app", "Project not found."));
                     }
 
+                    /** @var ProjectTime $record */
                     $record = ProjectTime::model()->findByAttributes(array(
                         "user_id" => $user->id,
                         "project_id" => $project->id,
@@ -278,7 +281,7 @@ class AccountController extends Controller
                     ));
 
                     if (!$record) {
-                        throw new Exception("Time session not started.");
+                        throw new Exception(Yii::t("app", "Time session not started."));
                     }
 
                     $record->stop();
@@ -293,23 +296,6 @@ class AccountController extends Controller
                     }
 
                     $record->delete();
-
-                    break;
-
-                case "refresh":
-                    $project = Project::model()->findByPk($model->id);
-
-                    $record = ProjectTime::model()->findByAttributes(array(
-                        "user_id" => $user->id,
-                        "project_id" => $project->id,
-                        "time" => null,
-                    ));
-
-                    if (!$record) {
-                        throw new Exception("Session not found.");
-                    }
-
-                    $record->updateLastAction();
 
                     break;
 

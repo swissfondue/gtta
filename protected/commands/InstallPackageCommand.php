@@ -47,8 +47,7 @@ class InstallPackageCommand extends ConsoleCommand {
             $pm->installFromPath($path);
             echo "OK\n";
         } catch (Exception $e) {
-            echo "FAILED\n";
-            throw $e;
+            echo "FAILED: " . $e->getMessage() . "\n";
         }
     }
 

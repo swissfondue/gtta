@@ -3,7 +3,6 @@
 defined("BASE_DIR") or define("BASE_DIR", "/opt/gtta");
 
 return array(
-    "baseUrl" => "DEPLOY_BASE_URL",
     "entriesPerPage" => 10,
     "limitedListEntriesCount" => 5,
     "maxCheckboxes" => 3,
@@ -93,7 +92,21 @@ return array(
             "libraries" => BASE_DIR . "/scripts/lib",
         ),
         "tmpPath" => "/tmp/gtta-package",
-        "maxSize" => 100 * 1024 * 1024, // 100 megabytes
+        "maxSize" => 1024 * 1024 * 1024, // 1 Gb,
+        "installerLock" => "/tmp/installer.lock",
+        "git" => array(
+            "key" => "scripts_rsa",
+            "scripts" => array(
+                "path" => BASE_DIR . "/current/tools/git",
+                "init" => "init.sh",
+                "configure" => "configure.sh",
+                "sync" => "sync.sh",
+            )
+        )
+    ),
+
+    "system" => array(
+        "filesPath" => BASE_DIR . "/files/system",
     ),
 
     "filesPath" => BASE_DIR . "/current/web/files",
@@ -116,12 +129,17 @@ return array(
     "yiicPath" => dirname(__FILE__) . "/../",
 
     "api" => array(
-        "url" => "http://gta-update.does-it.net:8080",
+        "url" => "http://update.phishing-server.com:80",
+        "regKey" => "s8cowl2sv3l64menxb0jvqhci2yop7i0",
     ),
 
     "community" => array(
         "url" => "http://community.gtta.net",
     ),
 
-    "bgLogsPath" => BASE_DIR . "/runtime/bg"
+    "bgLogsPath" => BASE_DIR . "/runtime/bg",
+
+    "os" => array(
+        "type" => BASE_DIR . "/config/type"
+    )
 );

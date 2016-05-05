@@ -42,6 +42,8 @@ class UserIdentity extends CUserIdentity {
 			$this->errorCode = self::ERROR_NONE;
 
             $entry = new LoginHistory();
+			$now = new DateTime();
+			$entry->create_time = $now->format(ISO_DATE_TIME);
             $entry->user_id = $user->id;
             $entry->user_name = $user->name ? $user->name : $user->email;
             $entry->save();

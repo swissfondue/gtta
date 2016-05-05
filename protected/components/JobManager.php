@@ -11,10 +11,12 @@ class JobManager {
         "AutomationJob",
         "BackupJob",
         "ClearLogJob",
+        "ChainJob",
         "CommunityInstallJob",
         "CommunityShareJob",
+        "CommunityUpdateStatusJob",
         "EmailJob",
-        "GtAutomationJob",
+        "GitJob",
         "ModifiedPackagesJob",
         "PackageJob",
         "RegenerateJob",
@@ -47,6 +49,27 @@ class JobManager {
         $status = new Resque_Job_Status($token);
 
         return $status->get();
+    }
+
+    /**
+     * Forcefully stop the job
+     * @param $job
+     */
+    public static function stop($job) {
+        $pid = self::getPid($job);
+
+        if ($pid) {
+            ProcessManager::killProcess($pid);
+        }
+
+        $token = Resque::redis()->get("$job.token");
+
+        if (!$token) {
+            return;
+        }
+
+        $status = new Resque_Job_Status($token);
+        $status->update(Resque_Job_Status::STATUS_COMPLETE);
     }
 
     /**
@@ -93,5 +116,23 @@ class JobManager {
     public static function delKey($key) {
         $key = str_replace('resque:', '', $key);
         Resque::redis()->del($key);
+    }
+
+    /**
+     * Set redis key value
+     * @param $key
+     * @param $value
+     */
+    public static function setKeyValue($key, $value) {
+        Resque::redis()->set($key, $value);
+    }
+
+    /**
+     * Returns redis key value
+     * @param $key
+     * @return mixed
+     */
+    public static function getKeyValue($key) {
+        return Resque::redis()->get($key);
     }
 }
