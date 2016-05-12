@@ -2113,10 +2113,6 @@ function User()
 
                         $('.chain-start-button').addClass('hide');
                         $('.chain-stop-button').removeClass('hide');
-
-                        setTimeout(function () {
-                            _chain.updateActiveCheck($('#activeChainCheck').data('url'));
-                        }, 5000);
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -2225,10 +2221,6 @@ function User()
                         var currentTarget = parseInt($(".relations-graph").data("target-id"));
 
                         if (status == system.constants.Target.CHAIN_STATUS_ACTIVE) {
-                            setTimeout(function () {
-                                _chain.updateActiveCheck(url);
-                            }, 5000);
-
                             $('#activeChainCheck').removeClass('hide');
                             $('#activeChainCheck .check-name').text(check);
                         } else {

@@ -59,7 +59,7 @@
                     <p class="help-block"><?php echo $model->getError('relations'); ?></p>
                 <?php endif; ?>
                 <div id="zoomActions"></div>
-                <div id="activeChainCheck" data-url="<?php print $this->createUrl("project/chainactivecheck", array("id" => $project->id, "target" => $target->id)); ?>" class="<?php if (!$activeCheck) print 'hide'; ?>">
+                <div id="activeChainCheck" class="<?php if (!$activeCheck) print 'hide'; ?>">
                     <?php print Yii::t("app", "Current Check") . ": ";?> <strong class="check-name"><?php print $activeCheck; ?></strong>
                 </div>
             </div>
