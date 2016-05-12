@@ -58,7 +58,6 @@ return array(
     "project/<id:\d+>/target/<target:\d+>/chain/edit" => "project/editchain",
     "project/<id:\d+>/target/<target:\d+>/chain/control" => "project/controlchain",
     "project/<id:\d+>/target/<target:\d+>/chain/messages" => "project/chainmessages",
-    "project/<id:\d+>/target/<target:\d+>/chain/activecheck" => "project/chainactivecheck",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/control/<controlToOpen:\d+>/check/<checkToOpen:\d+>" => "project/checks",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>" => "project/checks",
     "project/<id:\d+>/target/<target:\d+>/category/control" => "project/controlcategory",
