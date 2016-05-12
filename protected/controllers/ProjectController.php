@@ -1488,22 +1488,11 @@ class ProjectController extends Controller {
     }
 
     /**
-     * Display messages of scheduled packages
-     */
-    public function actionChainMessages() {
-        $response = new AjaxResponse();
-
-        $response->addData("messages", TargetManager::getChainMessages());
-
-        echo $response->serialize();
-    }
-
-    /**
-     * Returns chain status and active check
+     * Returns chain status / active check / chain messages
      * @param $id
      * @param $target
      */
-    public function actionChainActiveCheck($id, $target) {
+    public function actionChainMessages($id, $target) {
         $response = new AjaxResponse();
 
         $id = (int) $id;
@@ -1542,6 +1531,7 @@ class ProjectController extends Controller {
         } catch (Exception $e) {}
 
         $response->addData("check", $activeCheck);
+        $response->addData("messages", TargetManager::getChainMessages());
 
         echo $response->serialize();
     }
