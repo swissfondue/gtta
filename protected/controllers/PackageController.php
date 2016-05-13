@@ -29,8 +29,8 @@ class PackageController extends Controller {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->limit = Yii::app()->params["entriesPerPage"];
-        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->limit = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->addInCondition("status", array(
             Package::STATUS_NOT_INSTALLED,
             Package::STATUS_INSTALLED,

@@ -195,8 +195,8 @@ class AccountController extends Controller
             "user_id" => Yii::app()->user->id
         ));
         $criteria->addCondition("time IS NOT NULL");
-        $criteria->limit  = Yii::app()->params["entriesPerPage"];
-        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order = "create_time DESC";
         $criteria->together = true;
 
