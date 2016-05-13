@@ -35,7 +35,7 @@ class Paginator
             $this->pageCount = 1;
 
         if ($this->page > $this->pageCount) {
-            $this->page = 1;
+            throw new CHttpException(404, 'Page not found.');
         }
 
         $this->prevPage = 0;
