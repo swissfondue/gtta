@@ -39,7 +39,7 @@
         </ul>
     <?php endif; ?>
 
-    <form style="display: inline-block; float: right; vertical-align: middle; margin-left: 20px;">
+    <form class="pagination-item-count">
         <div class="control-group">
             <div class="controls">
                 <select class="input-medium" onchange="system.paginator.itemCountChange($(this).val(), $(this).data('url'))" data-url="<?= $this->createUrl($url, array_merge($params, array('page' => 1))); ?>">
