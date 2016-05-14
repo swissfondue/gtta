@@ -117,6 +117,18 @@
         </div>
         
         <hr>
+
+        <div class="control-group <?php if ($form->getError("scriptsVerbosity")) echo "error"; ?>">
+            <label class="control-label" for="SettingsEditForm_scriptsVerbosity"><?php echo Yii::t("app", "Scripts Verbosity"); ?></label>
+            <div class="controls">
+                <input type="checkbox" id="SettingsEditForm_scriptsVerbosity" name="SettingsEditForm[scriptsVerbosity]" value="1" <?php if ($form->scriptsVerbosity) echo "checked"; ?>>
+                <?php if ($form->getError("scriptsVerbosity")): ?>
+                    <p class="help-block"><?php echo $form->getError("scriptsVerbosity"); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <hr>
         
         <h3><?php echo Yii::t("app", "Report Settings"); ?></h3>
 

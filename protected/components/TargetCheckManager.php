@@ -17,12 +17,17 @@ class TargetCheckManager {
 
         $now = new DateTime();
 
-        AutomationJob::enqueue(array(
+        $params = [
             "operation" => AutomationJob::OPERATION_START,
             "obj_id" => $targetCheck->id,
             "started" => $now->format(ISO_DATE_TIME),
-            "chain" => $chain,
-        ));
+        ];
+
+        if ($chain) {
+            $params["chain"] = true;
+        }
+
+        AutomationJob::enqueue($params);
     }
 
     /**
@@ -88,5 +93,27 @@ class TargetCheckManager {
         ));
 
         return JobManager::getVar($job, "started");
+    }
+
+    /**
+     * Update result
+     * @param $check
+     * @param $data
+     * @param bool $verbosity
+     */
+    public static function updateResult($check, $data, $verbosity=true) {
+        $system = System::model()->findByPk(1);
+
+        if ($verbosity && !$system->scripts_verbosity) {
+            return;
+        }
+
+        if (!$check->result) {
+            $check->result = "";
+        }
+
+        if ($data) {
+            $check->result .= $data;
+        }
     }
 }

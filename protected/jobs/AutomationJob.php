@@ -62,11 +62,12 @@ class AutomationJob extends BackgroundJob {
             $fileOutput = file_get_contents($outFileName);
         }
 
-        if (!$check->result) {
-            $check->result = '';
+        if ($fileOutput) {
+            TargetCheckManager::updateResult($check, $fileOutput, false);
+        } else {
+            TargetCheckManager::updateResult($check, Yii::t("app", "No output."));
         }
 
-        $check->result .= $fileOutput ? $fileOutput : 'No output.';
         $check->save();
     }
 
@@ -395,16 +396,14 @@ class AutomationJob extends BackgroundJob {
         }
 
         foreach ($scripts as $script) {
-            if (!$check->result) {
-                $check->result = '';
-            } else {
-                $check->result .= "\n";
+            if ($check->result) {
+                TargetCheckManager::updateResult($check, "\n");
             }
 
             $now = new DateTime();
             $package = $script->package;
 
-            if (!isset($this->args['chain'])) {
+            if (!isset($this->args["chain"])) {
                 $data = Yii::t("app", "The {script} script was used within this check against {target} on {date} at {time}", array(
                     "{script}" => $package->name,
                     "{target}" => $check->override_target ? $check->override_target : $target->host,
@@ -412,7 +411,7 @@ class AutomationJob extends BackgroundJob {
                     "{time}" => $now->format("H:i:s"),
                 ));
 
-                $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
+                TargetCheckManager::updateResult($check, "$data\n" . str_repeat("-", 16) . "\n");
             }
 
             try {
@@ -446,10 +445,10 @@ class AutomationJob extends BackgroundJob {
                     $data = $fileOutput ? $fileOutput : $output;
 
                     $check->refresh();
-                    $check->result .= $data;
+                    TargetCheckManager::updateResult($check, $data, false);
 
                     if (!$data) {
-                        $check->result .= Yii::t('app', 'No output.');
+                        TargetCheckManager::updateResult($check, Yii::t('app', 'No output.'));
                     }
 
                     $this->_getTables($check);
@@ -472,7 +471,7 @@ class AutomationJob extends BackgroundJob {
                 }
             } catch (VMNotFoundException $e) {
                 $check->refresh();
-                $check->result .= $e->getMessage();
+                TargetCheckManager::updateResult($check, $e->getMessage());
             } catch (Exception $e) {
                 $check->automationError($e->getMessage());
             }

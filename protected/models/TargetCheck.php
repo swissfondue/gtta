@@ -169,13 +169,11 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "{code}" => $uniqueHash
         ));
 
-        if (!$this->result) {
-            $this->result = "";
-        } else {
-            $this->result .= "\n";
+        if ($this->result) {
+            TargetCheckManager::updateResult($this, "\n");
         }
 
-        $this->result .= $message;
+        TargetCheckManager::updateResult($this, $message);
         $this->status = TargetCheck::STATUS_FINISHED;
         $this->save();
     }
