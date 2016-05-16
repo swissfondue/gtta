@@ -2223,8 +2223,10 @@ function User()
                         if (status == system.constants.Target.CHAIN_STATUS_ACTIVE && Object.keys(check).length) {
                             user.mxgraph.setCheckActive(check);
                         } else {
-                            $('#activeChainCheck').addClass('hide');
+                            user.mxgraph.activeCheck = null;
+                            user.mxgraph.refreshChecks();
 
+                            $('#activeChainCheck').addClass('hide');
                             $('.chain-start-button').removeClass('hide');
                             $('.chain-stop-button').addClass('hide');
                         }
@@ -2481,6 +2483,12 @@ function User()
         this.target = null;
 
         /**
+         * Current running check
+         * @type {null}
+         */
+        this.activeCheck = null;
+
+        /**
          * Returns all graph cells
          * @returns {*}
          */
@@ -2514,6 +2522,10 @@ function User()
 
             if (stopper) {
                 cell.setStyle("STYLE_CELL_STOPPED");
+            }
+
+            if (cell.id == _mxgraph.activeCheck) {
+                cell.setStyle("STYLE_ACTIVE_CHECK");
             }
 
             _mxgraph.editor.graph.refresh();
@@ -3084,6 +3096,13 @@ function User()
             var dec = new mxCodec(doc);
             dec.decode(doc.documentElement, _mxgraph.editor.graph.getModel());
 
+            _mxgraph.refreshChecks();
+        };
+
+        /**
+         * Refresh graph
+         */
+        this.refreshChecks = function () {
             $.each(_mxgraph.getAllCells(), function (key, cell) {
                 if (cell.getAttribute('type') == _mxgraph.CELL_TYPE_CHECK) {
                     _mxgraph.updateCheckStyles(cell);
@@ -3148,18 +3167,8 @@ function User()
             var activeChainCheck = $("#activeChainCheck");
             activeChainCheck.removeClass("hide");
             activeChainCheck.find(".check-name").text(check["name"]);
-
-            var cells = user.mxgraph.getAllCells();
-
-            $.each(cells, function (k, v) {
-                if (v.id == check["id"]) {
-                    v.setActive();
-                } else {
-                    v.delStyle();
-                }
-            });
-
-            _mxgraph.editor.graph.refresh();
+            _mxgraph.activeCheck = check.id;
+            _mxgraph.refreshChecks();
         };
     };
 
