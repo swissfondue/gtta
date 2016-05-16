@@ -70,23 +70,23 @@
 			    });
 
 				cell.setAttribute("start_check", "1");
-				admin.relationTemplate.updateRelations();
+				user.relationTemplate.updateRelations();
 			}
 		]]></add>
         <add as="setStopped"><![CDATA[
 			function (editor, cell)
 			{
 				cell.setAttribute("stopped", "1");
-                admin.mxgraph.updateCheckStyles(cell);
-				admin.relationTemplate.updateRelations();
+                user.mxgraph.updateCheckStyles(cell);
+				user.relationTemplate.updateRelations();
 			}
 		]]></add>
         <add as="setUnStopped"><![CDATA[
 			function (editor, cell)
 			{
 				cell.setAttribute("stopped", "0");
-                admin.mxgraph.updateCheckStyles(cell);
-				admin.relationTemplate.updateRelations();
+                user.mxgraph.updateCheckStyles(cell);
+				user.relationTemplate.updateRelations();
 			}
 		]]></add>
         <add as="openCheck"><![CDATA[
@@ -94,7 +94,7 @@
 			{
 			    var checkId = cell.getAttribute('check_id');
 
-                admin.mxgraph.getCheckLink($('.relations-graph').data('get-check-url'), admin.mxgraph.target, checkId, function (url) {
+                user.mxgraph.getCheckLink($('.relations-graph').data('get-check-url'), user.mxgraph.target, checkId, function (url) {
                     window.location.replace(url);
                 });
 			}

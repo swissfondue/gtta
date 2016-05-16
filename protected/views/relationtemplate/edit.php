@@ -70,21 +70,21 @@
             .text(system.translate("Relation Editor does not support this version of the browser, use the Microsoft Edge instead."));
     } else {
         function onInit(editor) {
-            admin.mxgraph.init.call(this, editor);
+            user.mxgraph.init.call(this, editor);
         }
 
         var configNode = mxUtils.load("<?php echo Yii::app()->request->baseUrl; ?>/js/mxgraph/grapheditor/config/main.xml").getDocumentElement();
-        admin.mxgraph.editor = new mxEditor(configNode);
+        user.mxgraph.editor = new mxEditor(configNode);
 
         <?php foreach ($categories as $category): ?>
-            admin.mxgraph.checkCategories.push({
+            user.mxgraph.checkCategories.push({
                 id: <?php print $category->id; ?>,
                 name: "<?php print $category->localizedName; ?>"
             });
         <?php endforeach; ?>
 
         <?php foreach ($filters as $filter): ?>
-            admin.mxgraph.filters.push({
+            user.mxgraph.filters.push({
                 name: "<?php print $filter['name']; ?>",
                 title: "<?php print $filter['title']; ?>"
             });
@@ -96,9 +96,9 @@
         });
 
         <?php if ($model->relations): ?>
-            admin.mxgraph.buildByXML('<?php print $model->relations; ?>');
+            user.mxgraph.buildByXML('<?php print $model->relations; ?>');
         <?php elseif (!$template->isNewRecord): ?>
-            admin.mxgraph.buildByXML('<?php print $template->relations; ?>');
+            user.mxgraph.buildByXML('<?php print $template->relations; ?>');
         <?php endif; ?>
     }
 </script>

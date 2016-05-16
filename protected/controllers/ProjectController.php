@@ -1526,11 +1526,14 @@ class ProjectController extends Controller {
 
             if ($cellId) {
                 $cell = RelationManager::getCell($relations, $cellId);
-                $activeCheck = (string) $cell->attributes()->label;
+                $name = (string) $cell->attributes()->label;
             }
         } catch (Exception $e) {}
 
-        $response->addData("check", ["id" => $cellId, "name" => $cell]);
+        if (isset($cellId) && $cellId) {
+            $response->addData("check", ["id" => $cellId, "name" => $name]);
+        }
+
         $response->addData("messages", TargetManager::getChainMessages());
 
         echo $response->serialize();
