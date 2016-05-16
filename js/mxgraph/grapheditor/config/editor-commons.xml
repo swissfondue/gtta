@@ -71,6 +71,8 @@
 
 				cell.setAttribute("start_check", "1");
 				user.relationTemplate.updateRelations();
+				user.activeCheck = cell.id;
+				user.mxgraph.refreshChecks();
 			}
 		]]></add>
         <add as="setStopped"><![CDATA[
