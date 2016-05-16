@@ -29,7 +29,6 @@
         </script>
         <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl; ?>/js/mxgraph/src/js/mxClient.js"></script>
         <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl; ?>/js/mxgraph/grapheditor/grapheditor.js"></script>
-        <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl; ?>/js/mxgraph/grapheditor/styles.js"></script>
 
         <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
             <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/admin.js"></script>

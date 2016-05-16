@@ -2970,12 +2970,6 @@ function User()
             _mxgraph.editor = editor;
             _mxgraph.editor.graph.setConnectable(true);
             _mxgraph.editor.graph.connectionHandler.createTarget = true;
-
-            // Check cell styles
-            _mxgraph.editor.graph.getStylesheet().putCellStyle('STYLE_CELL_STOPPED', STYLE_CELL_STOPPED);
-            _mxgraph.editor.graph.getStylesheet().putCellStyle('STYLE_NO_CHECK_SELECTED', STYLE_NO_CHECK_SELECTED);
-            _mxgraph.editor.graph.getStylesheet().putCellStyle('STYLE_ACTIVE_CHECK', STYLE_ACTIVE_CHECK);
-
             _mxgraph.editor.graph.createHandler = function (state) {
                 if (state != null && this.model.isVertex(state.cell)) {
                     if (state.cell.isCheck()) {

@@ -187,6 +187,24 @@
 				<add as="verticalAlign" value="middle"/>
 				<add as="image" value="/js/mxgraph/grapheditor/images/draw/mxlogo.jpg"/>
 			</add>
+			<add as="STYLE_NO_CHECK_SELECTED">
+				<add as="strokeColor" value="#FFCC00"/>
+                <add as="strokeWidth" value="2"/>
+			</add>
+			<add as="STYLE_CELL_STOPPED">
+				<add as="strokeColor" value="#FF0000"/>
+                <add as="strokeWidth" value="2"/>
+			</add>
+			<add as="STYLE_ACTIVE_CHECK">
+				<add as="shape" value="label"/>
+                <add as="imageAlign" value="center"/>
+                <add as="spacing" value="3"/>
+                <add as="imageVerticalAlign" value="top"/>
+                <add as="imageAlign" value="right"/>
+                <add as="image" value="/js/mxgraph/grapheditor/images/play.png"/>
+                <add as="imageWidth" value="16"/>
+                <add as="imageHeight" value="16"/>
+			</add>
 		</mxStylesheet>
 		<mxGraphModel as="model">
 			<add as="valueForCellChanged"><![CDATA[
