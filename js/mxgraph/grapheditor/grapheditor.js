@@ -34,6 +34,13 @@ mxCell.prototype.setActive = function () {
 };
 
 /**
+ * Set cell as start check
+ */
+mxCell.prototype.setStart = function () {
+    this.setStyle("STYLE_START_CHECK");
+};
+
+/**
  * Erase cell's style
  */
 mxCell.prototype.delStyle = function () {

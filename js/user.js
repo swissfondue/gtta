@@ -2565,11 +2565,8 @@ function User()
 
             // Started check icon
             if (this.state.cell.isStartCheck()) {
-                img = mxUtils.createImage('/js/mxgraph/grapheditor/images/play.png');
-                img.style.width = '16px';
-                img.style.height = '16px';
-
-                this.domNode.appendChild(img);
+                this.state.cell.setStart();
+                _mxgraph.refreshChecks();
             }
 
             // Settings

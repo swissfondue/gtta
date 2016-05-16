@@ -196,6 +196,10 @@
                 <add as="strokeWidth" value="2"/>
 			</add>
 			<add as="STYLE_ACTIVE_CHECK">
+                <add as="strokeColor" value="#00C800"/>
+                <add as="strokeWidth" value="5"/>
+			</add>
+			<add as="STYLE_START_CHECK">
 				<add as="shape" value="label"/>
                 <add as="imageAlign" value="center"/>
                 <add as="spacing" value="3"/>
