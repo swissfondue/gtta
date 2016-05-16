@@ -2,7 +2,7 @@
  * Returns true if cell is "check" type
  * @returns {boolean}
  */
-mxCell.prototype.isCheck = function () {
+mxCell.prototype.isCheck = function () { 
     var type = this.getAttribute("type");
     return type == admin.mxgraph.CELL_TYPE_CHECK;
 };
