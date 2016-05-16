@@ -59,7 +59,7 @@
                     <p class="help-block"><?php echo $model->getError('relations'); ?></p>
                 <?php endif; ?>
                 <div id="zoomActions"></div>
-                <div id="activeChainCheck" data-url="<?php print $this->createUrl("project/chainactivecheck", array("id" => $project->id, "target" => $target->id)); ?>" class="<?php if (!$activeCheck) print 'hide'; ?>">
+                <div id="activeChainCheck" class="<?php if (!$activeCheck) print 'hide'; ?>">
                     <?php print Yii::t("app", "Current Check") . ": ";?> <strong class="check-name"><?php print $activeCheck; ?></strong>
                 </div>
             </div>
@@ -80,21 +80,21 @@
             .text(system.translate("Relation Editor does not support this version of the browser, use the Microsoft Edge instead."));
     } else {
         function onInit(editor) {
-            admin.mxgraph.init.call(this, editor);
+            user.mxgraph.init.call(this, editor);
         }
 
         var configNode = mxUtils.load("<?php echo Yii::app()->request->baseUrl; ?>/js/mxgraph/grapheditor/config/main.xml").getDocumentElement();
-        admin.mxgraph.editor = new mxEditor(configNode);
+        user.mxgraph.editor = new mxEditor(configNode);
 
         <?php foreach ($categories as $category): ?>
-        admin.mxgraph.checkCategories.push({
+        user.mxgraph.checkCategories.push({
             id : <?php print $category->id; ?>,
             name : "<?php print $category->localizedName; ?>"
         });
         <?php endforeach; ?>
 
         <?php foreach ($filters as $filter): ?>
-        admin.mxgraph.filters.push({ name: "<?php print $filter['name']; ?>", title: "<?php print $filter['title']; ?>" });
+        user.mxgraph.filters.push({ name: "<?php print $filter['name']; ?>", title: "<?php print $filter['title']; ?>" });
         <?php endforeach; ?>
 
         $('#languages-tab a').click(function (e) {
@@ -103,18 +103,12 @@
         });
 
         user.target.targetId = parseInt("<?php print $target->id; ?>");
-        admin.mxgraph.buildByXML('<?php print $model->relations; ?>');
+        user.mxgraph.buildByXML('<?php print $model->relations; ?>');
 
         setInterval(function () {
-            user.target.chain.messages('<?php print $this->createUrl('project/chainmessages'); ?>');
+            user.target.chain.messages('<?php print $this->createUrl('project/chainmessages', array("id" => $project->id, "target" => $target->id)); ?>');
         }, 5000);
 
-        <?php if ($target->isChainRunning): ?>
-        setTimeout(function () {
-            user.target.chain.updateActiveCheck("<?php print $this->createUrl("project/chainactivecheck", array("id" => $project->id, "target" => $target->id)); ?>");
-        }, 5000);
-        <?php endif; ?>
-
-        admin.mxgraph.target = parseInt('<?php print $target->id; ?>');
+        user.mxgraph.target = parseInt('<?php print $target->id; ?>');
     }
 </script>
