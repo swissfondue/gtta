@@ -26,17 +26,13 @@ mxCell.prototype.isFilter = function () {
     return type == admin.mxgraph.CELL_TYPE_FILTER;
 };
 
+mxCell.prototype.setActive = function () {
+
+};
+
 /**
  * Erase cell's style
  */
 mxCell.prototype.delStyle = function () {
     this.setStyle('');
 };
-
-var stoppedCellStyle = {};
-stoppedCellStyle[mxConstants.STYLE_STROKECOLOR] = '#FF0000';
-stoppedCellStyle[mxConstants.STYLE_STROKEWIDTH] = 2;
-
-var noCheckSelectedStyle = {};
-noCheckSelectedStyle[mxConstants.STYLE_STROKECOLOR] = '#FFCC00';
-noCheckSelectedStyle[mxConstants.STYLE_STROKEWIDTH] = 2;

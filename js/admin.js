@@ -1987,11 +1987,11 @@ function Admin()
             cell.delStyle();
 
             if (!checkTied) {
-                cell.setStyle("noCheckSelectedStyle");
+                cell.setStyle("STYLE_NO_CHECK_SELECTED");
             }
 
             if (stopper) {
-                cell.setStyle("stoppedCellStyle");
+                cell.setStyle("STYLE_CELL_STOPPED");
             }
 
             _mxgraph.editor.graph.refresh();
@@ -2438,8 +2438,9 @@ function Admin()
             _mxgraph.editor.graph.connectionHandler.createTarget = true;
 
             // Check cell styles
-            _mxgraph.editor.graph.getStylesheet().putCellStyle('stoppedCellStyle', stoppedCellStyle);
-            _mxgraph.editor.graph.getStylesheet().putCellStyle('noCheckSelectedStyle', noCheckSelectedStyle);
+            _mxgraph.editor.graph.getStylesheet().putCellStyle('STYLE_CELL_STOPPED', STYLE_CELL_STOPPED);
+            _mxgraph.editor.graph.getStylesheet().putCellStyle('STYLE_NO_CHECK_SELECTED', STYLE_NO_CHECK_SELECTED);
+            _mxgraph.editor.graph.getStylesheet().putCellStyle('STYLE_ACTIVE_CHECK', STYLE_ACTIVE_CHECK);
 
             _mxgraph.editor.graph.createHandler = function (state) {
                 if (state != null && this.model.isVertex(state.cell)) {
