@@ -1530,7 +1530,7 @@ class ProjectController extends Controller {
             }
         } catch (Exception $e) {}
 
-        $response->addData("check", $activeCheck);
+        $response->addData("check", ["id" => $cellId, "name" => $cell]);
         $response->addData("messages", TargetManager::getChainMessages());
 
         echo $response->serialize();
