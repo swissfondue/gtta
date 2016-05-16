@@ -2513,19 +2513,28 @@ function User()
         this.updateCheckStyles = function (cell) {
             var checkTied = parseInt(cell.getAttribute('check_id'));
             var stopper = parseInt(cell.getAttribute('stopped'));
+            var startCheck = parseInt(cell.getAttribute('start_check'));
 
             cell.delStyle();
 
             if (!checkTied) {
-                cell.setStyle("STYLE_NO_CHECK_SELECTED");
+                cell.setNoCheck();
             }
 
             if (stopper) {
-                cell.setStyle("STYLE_CELL_STOPPED");
+                cell.setStopped();
+            }
+
+            if (startCheck) {
+                cell.setStart();
             }
 
             if (cell.id == _mxgraph.activeCheck) {
-                cell.setStyle("STYLE_ACTIVE_CHECK");
+                if (startCheck) {
+                    cell.setActiveStart();
+                } else {
+                    cell.setActive();
+                }
             }
 
             _mxgraph.editor.graph.refresh();
@@ -2562,12 +2571,6 @@ function User()
          */
         this.mxCheckHandlerInit = function () {
             var md = (mxClient.IS_TOUCH) ? 'touchstart' : 'mousedown';
-
-            // Started check icon
-            if (this.state.cell.isStartCheck()) {
-                this.state.cell.setStart();
-                _mxgraph.refreshChecks();
-            }
 
             // Settings
             var img = mxUtils.createImage('/js/mxgraph/grapheditor/images/settings.png');
