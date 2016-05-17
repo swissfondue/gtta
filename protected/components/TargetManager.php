@@ -229,14 +229,14 @@ class TargetManager {
                 ));
 
                 foreach ($checksToAdd as $check) {
-                    $targetCheck = new TargetCheck();
-                    $targetCheck->target_id = $target->id;
-                    $targetCheck->check_id = $check->id;
-                    $targetCheck->user_id = $admin;
-                    $targetCheck->language_id = $language->id;
-                    $targetCheck->status = TargetCheck::STATUS_OPEN;
-                    $targetCheck->rating = TargetCheck::RATING_NONE;
-                    $targetCheck->save();
+                    $targetCheck = TargetCheckManager::create([
+                        "target_id" => $target->id,
+                        "check_id" => $check->id,
+                        "user_id" => $admin,
+                        "language_id" => $language->id,
+                        "status" => TargetCheck::STATUS_OPEN,
+                        "rating" => TargetCheck::RATING_NONE
+                    ]);
 
                     foreach ($check->scripts as $script) {
                         $targetCheckScript = new TargetCheckScript();

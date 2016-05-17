@@ -2748,17 +2748,17 @@ class ProjectController extends Controller {
                 $checkL10n->name = $form->name;
                 $checkL10n->save();
 
-                $targetCheck = new TargetCheck();
-                $targetCheck->target_id = $target->id;
-                $targetCheck->check_id = $check->id;
-                $targetCheck->user_id = Yii::app()->user->id;
-                $targetCheck->language_id = $language->id;
-                $targetCheck->result = $form->result;
-                $targetCheck->status = TargetCheck::STATUS_FINISHED;
-                $targetCheck->rating = $form->rating;
-                $targetCheck->poc = $form->poc;
-                $targetCheck->links = $form->links;
-                $targetCheck->save();
+                $targetCheck = TargetCheckManager::create([
+                    "target_id" => $target->id,
+                    "check_id" => $check->id,
+                    "user_id" => Yii::app()->user->id,
+                    "language_id" => $language->id,
+                    "result" => $form->result,
+                    "status" => $form->status,
+                    "rating" => $form->rating,
+                    "poc" => $form->poc,
+                    "links" => $form->links
+                ]);
 
                 if ($form->solutionTitle && $form->solution) {
                     $solution = new CheckSolution();

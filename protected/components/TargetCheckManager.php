@@ -4,6 +4,57 @@
  */
 class TargetCheckManager {
     /**
+     * Target check create
+     * @param $data
+     * @return TargetCheck
+     * @throws Exception
+     */
+    public static function create($data) {
+        $targetCheck = new TargetCheck();
+
+        if (!isset($data["target_id"]) ||
+            !isset($data["check_id"]) ||
+            !isset($data["user_id"]) ||
+            !isset($data["language_id"])) {
+            throw new Exception("Invalid check data.", 403);
+        }
+
+        try {
+            $targetCheck->target_id = $data["target_id"];
+            $targetCheck->check_id = $data["check_id"];
+            $targetCheck->user_id = $data["user_id"];
+            $targetCheck->language_id = $data["language_id"];
+
+            if ($data["status"]) {
+                $targetCheck->status = $data["status"];
+            }
+
+            if ($data["result"]) {
+                $targetCheck->result = $data["result"];
+            }
+
+            if ($data["rating"]) {
+                $targetCheck->rating = $data["rating"];
+            }
+
+            if ($data["poc"]) {
+                $targetCheck->poc = $data["poc"];
+            }
+
+            if ($data["links"]) {
+                $targetCheck->links = $data["links"];
+            }
+
+            $targetCheck->save();
+        } catch (Exception $e) {
+            throw new Exception("Can't create check.");
+        }
+
+
+        return $targetCheck;
+    }
+
+    /**
      * Start check
      * @param $id
      */
