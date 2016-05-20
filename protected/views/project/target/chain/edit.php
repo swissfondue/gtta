@@ -14,21 +14,20 @@
                    class="btn chain-reset-button"
                    data-target-id="<?php print $target->id; ?>"
                    data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>"
-                   onclick="user.target.chain.reset($(this).data('target-id'), $(this).data('control-url'))"
+                   onclick="user.target.chain.control('reset', $(this).data('target-id'), $(this).data('control-url'))"
                    <?php if ($target->isChainRunning) print 'disabled'; ?>><i class="icon icon-refresh"></i></button>&nbsp;
                 <button href="#startchain"
                    title="Start"
                    class="btn chain-start-button <?php if ($target->isChainRunning) print 'hide'; ?>"
                    data-target-id="<?php print $target->id; ?>"
                    data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>"
-                   onclick="user.target.chain.start($(this).data('target-id'), $(this).data('control-url'))"><i class="icon icon-play"></i><?php echo Yii::t("app", "Start"); ?></button>&nbsp;
+                   onclick="user.target.chain.control('start', $(this).data('target-id'), $(this).data('control-url'))"><i class="icon icon-play"></i><?php echo Yii::t("app", "Start"); ?></button>&nbsp;
                 <button href="#stopchain"
                    title="Stop"
                    class="btn chain-stop-button <?php if (!$target->isChainRunning) print 'hide'; ?>"
                    data-target-id="<?php print $target->id; ?>"
                    data-control-url="<?php echo $this->createUrl('project/controlchain', array( 'id' => $project->id, 'target' => $target->id )); ?>"
-                   onclick="user.target.chain.stop($(this).data('target-id'), $(this).data('control-url'))"
-                   <?php if ($target->isChainRunning) print 'disabled'; ?>><i class="icon icon-stop"></i><?php echo Yii::t("app", "Stop"); ?></button>
+                   onclick="user.target.chain.control('stop', $(this).data('target-id'), $(this).data('control-url'))"><i class="icon icon-stop"></i><?php echo Yii::t("app", "Stop"); ?></button>
             <?php endif; ?>
         </div>
 
