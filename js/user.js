@@ -2214,20 +2214,21 @@ function User()
                     data: {
                         "YII_CSRF_TOKEN": system.csrf
                     },
-                    'success' : function (response) {
+                    
+                    "success": function (response) {
                         var status = parseInt(response.data.status);
                         var check = response.data.check;
                         var messages = response.data.messages;
                         var currentTarget = parseInt($(".relations-graph").data("target-id"));
 
                         if (status == system.constants.Target.CHAIN_STATUS_ACTIVE) {
-                            $('#activeChainCheck').removeClass('hide');
-                            $('#activeChainCheck .check-name').text(check);
+                            $("#activeChainCheck").removeClass("hide");
+                            $("#activeChainCheck .check-name").text(check);
                         } else {
-                            $('#activeChainCheck').addClass('hide');
+                            $("#activeChainCheck").addClass("hide");
 
-                            $('.chain-start-button').removeClass('hide');
-                            $('.chain-stop-button').addClass('hide');
+                            $(".chain-start-button").removeClass("hide");
+                            $(".chain-stop-button").addClass("hide");
                         }
 
                         $.each(messages, function (key, value) {
@@ -2247,14 +2248,14 @@ function User()
                                     case system.constants.Target.CHAIN_STATUS_IDLE:
                                     case system.constants.Target.CHAIN_STATUS_STOPPED:
                                     case system.constants.Target.CHAIN_STATUS_INTERRUPTED:
-                                        $('.chain-start-button').removeClass('hide');
-                                        $('.chain-stop-button').addClass('hide');
+                                        $(".chain-start-button").removeClass("hide");
+                                        $(".chain-stop-button").addClass("hide");
 
                                         break;
 
                                     case system.constants.Target.CHAIN_STATUS_ACTIVE:
-                                        $('.chain-start-button').addClass('hide');
-                                        $('.chain-stop-button').removeClass('hide');
+                                        $(".chain-start-button").addClass("hide");
+                                        $(".chain-stop-button").removeClass("hide");
 
                                         break;
 
@@ -2267,12 +2268,12 @@ function User()
                         $(".loader-image").hide();
                     },
 
-                    'error' : function (data) {
+                    "error" : function (data) {
                         $(".loader-image").hide();
-                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                        system.addAlert("error", system.translate("Request failed, please try again."));
                     },
 
-                    'beforeSend' : function () {
+                    "beforeSend" : function () {
                         $(".loader-image").show();
                     }
                 });
