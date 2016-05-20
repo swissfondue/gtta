@@ -170,10 +170,10 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         ));
 
         if ($this->result) {
-            TargetCheckManager::updateResult($this, "\n");
+            TargetCheckManager::appendResult($this, "\n");
         }
 
-        TargetCheckManager::updateResult($this, $message);
+        TargetCheckManager::appendResult($this, $message);
         $this->status = TargetCheck::STATUS_FINISHED;
         $this->save();
     }

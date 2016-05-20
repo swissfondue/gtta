@@ -101,7 +101,7 @@ class TargetCheckManager {
      * @param $data
      * @param bool $verbosity
      */
-    public static function updateResult($check, $data, $verbosity=true) {
+    public static function appendResult($check, $data, $verbosity=true) {
         $system = System::model()->findByPk(1);
 
         if ($verbosity && !$system->scripts_verbosity) {

@@ -63,9 +63,9 @@ class AutomationJob extends BackgroundJob {
         }
 
         if ($fileOutput) {
-            TargetCheckManager::updateResult($check, $fileOutput, false);
+            TargetCheckManager::appendResult($check, $fileOutput, false);
         } else {
-            TargetCheckManager::updateResult($check, Yii::t("app", "No output."));
+            TargetCheckManager::appendResult($check, Yii::t("app", "No output."));
         }
 
         $check->save();
@@ -397,7 +397,7 @@ class AutomationJob extends BackgroundJob {
 
         foreach ($scripts as $script) {
             if ($check->result) {
-                TargetCheckManager::updateResult($check, "\n");
+                TargetCheckManager::appendResult($check, "\n");
             }
 
             $now = new DateTime();
@@ -411,7 +411,7 @@ class AutomationJob extends BackgroundJob {
                     "{time}" => $now->format("H:i:s"),
                 ));
 
-                TargetCheckManager::updateResult($check, "$data\n" . str_repeat("-", 16) . "\n");
+                TargetCheckManager::appendResult($check, "$data\n" . str_repeat("-", 16) . "\n");
             }
 
             try {
@@ -445,10 +445,10 @@ class AutomationJob extends BackgroundJob {
                     $data = $fileOutput ? $fileOutput : $output;
 
                     $check->refresh();
-                    TargetCheckManager::updateResult($check, $data, false);
+                    TargetCheckManager::appendResult($check, $data, false);
 
                     if (!$data) {
-                        TargetCheckManager::updateResult($check, Yii::t('app', 'No output.'));
+                        TargetCheckManager::appendResult($check, Yii::t('app', 'No output.'));
                     }
 
                     $this->_getTables($check);
@@ -471,7 +471,7 @@ class AutomationJob extends BackgroundJob {
                 }
             } catch (VMNotFoundException $e) {
                 $check->refresh();
-                TargetCheckManager::updateResult($check, $e->getMessage());
+                TargetCheckManager::appendResult($check, $e->getMessage());
             } catch (Exception $e) {
                 $check->automationError($e->getMessage());
             }
