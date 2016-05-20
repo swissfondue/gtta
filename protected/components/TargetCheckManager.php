@@ -94,26 +94,4 @@ class TargetCheckManager {
 
         return JobManager::getVar($job, "started");
     }
-
-    /**
-     * Update result
-     * @param $check
-     * @param $data
-     * @param bool $verbosity
-     */
-    public static function appendResult($check, $data, $verbosity=true) {
-        $system = System::model()->findByPk(1);
-
-        if ($verbosity && !$system->scripts_verbosity) {
-            return;
-        }
-
-        if (!$check->result) {
-            $check->result = "";
-        }
-
-        if ($data) {
-            $check->result .= $data;
-        }
-    }
 }
