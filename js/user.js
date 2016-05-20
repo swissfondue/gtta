@@ -2086,9 +2086,54 @@ function User()
             var _chain = this;
 
             /**
-             * Start target check chain
+             * Control chain
+             * @param action
+             * @param tId
+             * @param url
              */
-            this.start = function (targetId, url) {
+            this.control = function (action, tId, url) {
+                $(".chain-start-button, .chain-stop-button, .chain-reset-button").prop("disabled", true);
+
+                switch (action) {
+                    case "start":
+                        _chain.start(tId, url, function () {
+                            $('.chain-start-button').addClass('hide');
+                            $('.chain-stop-button').removeClass('hide').prop("disabled", false);
+                            $(".chain-reset-button").prop("disabled", true);
+
+                            setTimeout(function () {
+                                _chain.updateActiveCheck($('#activeChainCheck').data('url'));
+                            }, 5000);
+                        });
+                        break;
+
+                    case "stop":
+                        _chain.stop(tId, url, function () {
+                            $('.chain-start-button').removeClass("hide").prop("disabled", false);
+                            $('.chain-stop-button').addClass("hide");
+                            $(".chain-reset-button").prop("disabled", false);
+                        });
+                        break;
+
+                    case "reset":
+                        _chain.reset(tId, url, function () {
+                            $(".chain-start-button, .chain-stop-button, .chain-reset-button").prop("disabled", false);
+                            $('#activeChainCheck').addClass('hide');
+                        });
+                        break;
+
+                    default:
+                        console.error("Invalid chain control action.");
+                }
+            };
+
+            /**
+             * Start target check chain
+             * @param targetId
+             * @param url
+             * @param successCallback
+             */
+            this.start = function (targetId, url, successCallback) {
                 $('.loader-image').show();
 
                 $.ajax({
@@ -2111,8 +2156,12 @@ function User()
                             return;
                         }
 
-                        $('.chain-start-button').addClass('hide');
-                        $('.chain-stop-button').removeClass('hide');
+                        $(".chain-start-button").addClass("hide");
+                        $(".chain-stop-button").removeClass("hide");
+
+                        if (successCallback) {
+                            successCallback();
+                        }
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -2126,8 +2175,9 @@ function User()
              * Stop target check chain
              * @param targetId
              * @param url
+             * @param successCallback
              */
-            this.stop = function (targetId, url) {
+            this.stop = function (targetId, url, successCallback) {
                 $('.loader-image').show();
 
                 $.ajax({
@@ -2150,8 +2200,9 @@ function User()
                             return;
                         }
 
-                        $('.chain-stop-button').hide();
-                        $('.chain-start-button').show();
+                        if (successCallback) {
+                            successCallback();
+                        }
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -2165,10 +2216,10 @@ function User()
              * Stop target check chain
              * @param targetId
              * @param url
+             * @param successCallback
              */
-            this.reset = function (targetId, url) {
+            this.reset = function (targetId, url, successCallback) {
                 $('.loader-image').show();
-                $('.chain-reset-button').show();
                 $(".chain-reset-button, .chain-start-button, .chain-stop-button").prop("disabled", true);
 
                 $.ajax({
@@ -2189,7 +2240,9 @@ function User()
                             system.addAlert('error', data.errorText);
                         }
 
-                        $('#activeChainCheck').addClass('hide');
+                        if (successCallback) {
+                            successCallback();
+                        }
                     },
 
                     error : function(jqXHR, textStatus, e) {

@@ -41,6 +41,7 @@
  * @property integer $git_username
  * @property integer $git_password
  * @property Language $language
+ * @property boolean $scripts_verbosity
  */
 class System extends ActiveRecord {
     /**
@@ -107,7 +108,7 @@ class System extends ActiveRecord {
             array("status", "in", "range" => self::validStatuses()),
             array("report_low_pedestal, report_med_pedestal, report_high_pedestal, report_max_rating, report_med_damping_low, report_high_damping_low, report_high_damping_med", "numerical", "min" => 0),
             array("community_min_rating", "numerical", "min" => 0, "max" => 5),
-            array("community_allow_unverified, checklist_poc, checklist_links", "boolean"),
+            array("community_allow_unverified, checklist_poc, checklist_links, scripts_verbosity", "boolean"),
             array("backup, timezone, update_check_time, update_time, gitUrl, git_username, git_password", "safe"),
             array("git_proto", "in", "range" => array(System::GIT_PROTO_HTTPS, System::GIT_PROTO_SSH)),
 		);
