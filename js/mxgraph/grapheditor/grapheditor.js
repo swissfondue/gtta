@@ -4,7 +4,7 @@
  */
 mxCell.prototype.isCheck = function () {
     var type = this.getAttribute("type");
-    return type == admin.mxgraph.CELL_TYPE_CHECK;
+    return type == user.mxgraph.CELL_TYPE_CHECK;
 };
 
 /**
@@ -23,20 +23,19 @@ mxCell.prototype.isStartCheck = function () {
  */
 mxCell.prototype.isFilter = function () {
     var type = this.getAttribute("type");
-    return type == admin.mxgraph.CELL_TYPE_FILTER;
+    return type == user.mxgraph.CELL_TYPE_FILTER;
+};
+
+/**
+ * Set cell as active check
+ */
+mxCell.prototype.setActive = function () {
+    this.setStyle("STYLE_ACTIVE_CHECK");
 };
 
 /**
  * Erase cell's style
  */
 mxCell.prototype.delStyle = function () {
-    this.setStyle('');
+    this.setStyle("");
 };
-
-var stoppedCellStyle = {};
-stoppedCellStyle[mxConstants.STYLE_STROKECOLOR] = '#FF0000';
-stoppedCellStyle[mxConstants.STYLE_STROKEWIDTH] = 2;
-
-var noCheckSelectedStyle = {};
-noCheckSelectedStyle[mxConstants.STYLE_STROKECOLOR] = '#FFCC00';
-noCheckSelectedStyle[mxConstants.STYLE_STROKEWIDTH] = 2;
