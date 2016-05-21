@@ -34,6 +34,34 @@ mxCell.prototype.setActive = function () {
 };
 
 /**
+ * Set cell as start check
+ */
+mxCell.prototype.setStart = function () {
+    this.setStyle("STYLE_START_CHECK");
+};
+
+/**
+ * Set cell as start and active check
+ */
+mxCell.prototype.setActiveStart = function () {
+    this.setStyle("STYLE_ACTIVE_START_CHECK");
+};
+
+/**
+ * Set cell as stopped check
+ */
+mxCell.prototype.setStopped = function () {
+    this.setStyle("STYLE_CELL_STOPPED");
+};
+
+/**
+ * Set cell as no check
+ */
+mxCell.prototype.setNoCheck = function () {
+    this.setStyle("STYLE_NO_CHECK_SELECTED");
+};
+
+/**
  * Erase cell's style
  */
 mxCell.prototype.delStyle = function () {

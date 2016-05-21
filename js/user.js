@@ -2567,19 +2567,28 @@ function User()
         this.updateCheckStyles = function (cell) {
             var checkTied = parseInt(cell.getAttribute('check_id'));
             var stopper = parseInt(cell.getAttribute('stopped'));
+            var startCheck = parseInt(cell.getAttribute('start_check'));
 
             cell.delStyle();
 
             if (!checkTied) {
-                cell.setStyle("STYLE_NO_CHECK_SELECTED");
+                cell.setNoCheck();
             }
 
             if (stopper) {
-                cell.setStyle("STYLE_CELL_STOPPED");
+                cell.setStopped();
+            }
+
+            if (startCheck) {
+                cell.setStart();
             }
 
             if (cell.id == _mxgraph.activeCheck) {
-                cell.setStyle("STYLE_ACTIVE_CHECK");
+                if (startCheck) {
+                    cell.setActiveStart();
+                } else {
+                    cell.setActive();
+                }
             }
 
             _mxgraph.editor.graph.refresh();
@@ -2616,15 +2625,6 @@ function User()
          */
         this.mxCheckHandlerInit = function () {
             var md = (mxClient.IS_TOUCH) ? 'touchstart' : 'mousedown';
-
-            // Started check icon
-            if (this.state.cell.isStartCheck()) {
-                img = mxUtils.createImage('/js/mxgraph/grapheditor/images/play.png');
-                img.style.width = '16px';
-                img.style.height = '16px';
-
-                this.domNode.appendChild(img);
-            }
 
             // Settings
             var img = mxUtils.createImage('/js/mxgraph/grapheditor/images/settings.png');
@@ -3024,12 +3024,6 @@ function User()
             _mxgraph.editor = editor;
             _mxgraph.editor.graph.setConnectable(true);
             _mxgraph.editor.graph.connectionHandler.createTarget = true;
-
-            // Check cell styles
-            _mxgraph.editor.graph.getStylesheet().putCellStyle('STYLE_CELL_STOPPED', STYLE_CELL_STOPPED);
-            _mxgraph.editor.graph.getStylesheet().putCellStyle('STYLE_NO_CHECK_SELECTED', STYLE_NO_CHECK_SELECTED);
-            _mxgraph.editor.graph.getStylesheet().putCellStyle('STYLE_ACTIVE_CHECK', STYLE_ACTIVE_CHECK);
-
             _mxgraph.editor.graph.createHandler = function (state) {
                 if (state != null && this.model.isVertex(state.cell)) {
                     if (state.cell.isCheck()) {
