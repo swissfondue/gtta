@@ -3,7 +3,7 @@
 defined("BASE_DIR") or define("BASE_DIR", "/opt/gtta");
 
 return array(
-    "entriesPerPage" => 10,
+    "entriesPerPage" => 20,
     "limitedListEntriesCount" => 5,
     "maxCheckboxes" => 3,
 
