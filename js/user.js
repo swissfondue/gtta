@@ -2086,9 +2086,54 @@ function User()
             var _chain = this;
 
             /**
-             * Start target check chain
+             * Control chain
+             * @param action
+             * @param tId
+             * @param url
              */
-            this.start = function (targetId, url) {
+            this.control = function (action, tId, url) {
+                $(".chain-start-button, .chain-stop-button, .chain-reset-button").prop("disabled", true);
+
+                switch (action) {
+                    case "start":
+                        _chain.start(tId, url, function () {
+                            $('.chain-start-button').addClass('hide');
+                            $('.chain-stop-button').removeClass('hide').prop("disabled", false);
+                            $(".chain-reset-button").prop("disabled", true);
+
+                            setTimeout(function () {
+                                _chain.updateActiveCheck($('#activeChainCheck').data('url'));
+                            }, 5000);
+                        });
+                        break;
+
+                    case "stop":
+                        _chain.stop(tId, url, function () {
+                            $('.chain-start-button').removeClass("hide").prop("disabled", false);
+                            $('.chain-stop-button').addClass("hide");
+                            $(".chain-reset-button").prop("disabled", false);
+                        });
+                        break;
+
+                    case "reset":
+                        _chain.reset(tId, url, function () {
+                            $(".chain-start-button, .chain-stop-button, .chain-reset-button").prop("disabled", false);
+                            $('#activeChainCheck').addClass('hide');
+                        });
+                        break;
+
+                    default:
+                        console.error("Invalid chain control action.");
+                }
+            };
+
+            /**
+             * Start target check chain
+             * @param targetId
+             * @param url
+             * @param successCallback
+             */
+            this.start = function (targetId, url, successCallback) {
                 $('.loader-image').show();
 
                 $.ajax({
@@ -2111,8 +2156,12 @@ function User()
                             return;
                         }
 
-                        $('.chain-start-button').addClass('hide');
-                        $('.chain-stop-button').removeClass('hide');
+                        $(".chain-start-button").addClass("hide");
+                        $(".chain-stop-button").removeClass("hide");
+
+                        if (successCallback) {
+                            successCallback();
+                        }
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -2126,8 +2175,9 @@ function User()
              * Stop target check chain
              * @param targetId
              * @param url
+             * @param successCallback
              */
-            this.stop = function (targetId, url) {
+            this.stop = function (targetId, url, successCallback) {
                 $('.loader-image').show();
 
                 $.ajax({
@@ -2150,8 +2200,9 @@ function User()
                             return;
                         }
 
-                        $('.chain-stop-button').hide();
-                        $('.chain-start-button').show();
+                        if (successCallback) {
+                            successCallback();
+                        }
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -2165,10 +2216,10 @@ function User()
              * Stop target check chain
              * @param targetId
              * @param url
+             * @param successCallback
              */
-            this.reset = function (targetId, url) {
+            this.reset = function (targetId, url, successCallback) {
                 $('.loader-image').show();
-                $('.chain-reset-button').show();
                 $(".chain-reset-button, .chain-start-button, .chain-stop-button").prop("disabled", true);
 
                 $.ajax({
@@ -2189,7 +2240,9 @@ function User()
                             system.addAlert('error', data.errorText);
                         }
 
-                        $('#activeChainCheck').addClass('hide');
+                        if (successCallback) {
+                            successCallback();
+                        }
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -2214,7 +2267,8 @@ function User()
                     data: {
                         "YII_CSRF_TOKEN": system.csrf
                     },
-                    'success' : function (response) {
+                    
+                    "success": function (response) {
                         var status = parseInt(response.data.status);
                         var check = response.data.check;
                         var messages = response.data.messages;
@@ -2226,9 +2280,9 @@ function User()
                             user.mxgraph.activeCheck = null;
                             user.mxgraph.refreshChecks();
 
-                            $('#activeChainCheck').addClass('hide');
-                            $('.chain-start-button').removeClass('hide');
-                            $('.chain-stop-button').addClass('hide');
+                            $("#activeChainCheck").addClass("hide");
+                            $(".chain-start-button").removeClass("hide");
+                            $(".chain-stop-button").addClass("hide");
                         }
 
                         $.each(messages, function (key, value) {
@@ -2248,14 +2302,14 @@ function User()
                                     case system.constants.Target.CHAIN_STATUS_IDLE:
                                     case system.constants.Target.CHAIN_STATUS_STOPPED:
                                     case system.constants.Target.CHAIN_STATUS_INTERRUPTED:
-                                        $('.chain-start-button').removeClass('hide');
-                                        $('.chain-stop-button').addClass('hide');
+                                        $(".chain-start-button").removeClass("hide");
+                                        $(".chain-stop-button").addClass("hide");
 
                                         break;
 
                                     case system.constants.Target.CHAIN_STATUS_ACTIVE:
-                                        $('.chain-start-button').addClass('hide');
-                                        $('.chain-stop-button').removeClass('hide');
+                                        $(".chain-start-button").addClass("hide");
+                                        $(".chain-stop-button").removeClass("hide");
 
                                         break;
 
@@ -2268,12 +2322,12 @@ function User()
                         $(".loader-image").hide();
                     },
 
-                    'error' : function (data) {
+                    "error" : function (data) {
                         $(".loader-image").hide();
-                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                        system.addAlert("error", system.translate("Request failed, please try again."));
                     },
 
-                    'beforeSend' : function () {
+                    "beforeSend" : function () {
                         $(".loader-image").show();
                     }
                 });
