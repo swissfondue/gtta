@@ -20,16 +20,23 @@ class Paginator
         $this->page       = $page;
         $this->entryCount = $entryCount;
 
-        $this->pageCount = (int) ($this->entryCount / Yii::app()->params['entriesPerPage']);
+        $limit = Yii::app()->params["entriesPerPage"];
 
-        if ($this->entryCount % Yii::app()->params['entriesPerPage'] > 0)
+        if (Yii::app()->request && isset(Yii::app()->request->cookies["per_page_item_limit"])) {
+            $limit = (int) Yii::app()->request->cookies["per_page_item_limit"]->value;
+        }
+
+        $this->pageCount = (int) ($this->entryCount / ($limit > 0 ? $limit : $this->entryCount));
+
+        if ($this->entryCount % $limit > 0)
             $this->pageCount += 1;
 
         if ($this->pageCount == 0)
             $this->pageCount = 1;
 
-        if ($this->page > $this->pageCount)
+        if ($this->page > $this->pageCount) {
             throw new CHttpException(404, 'Page not found.');
+        }
 
         $this->prevPage = 0;
         $this->nextPage = 0;

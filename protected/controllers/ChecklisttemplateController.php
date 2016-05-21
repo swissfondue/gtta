@@ -36,8 +36,8 @@ class ChecklisttemplateController extends Controller {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->limit = Yii::app()->params["entriesPerPage"];
-        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->limit = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->together = true;
 
         $categories = ChecklistTemplateCategory::model()->with(array(
@@ -94,8 +94,8 @@ class ChecklisttemplateController extends Controller {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->limit = Yii::app()->params["entriesPerPage"];
-        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->limit = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->addColumnCondition(array( "checklist_template_category_id" => $category->id ));
         $criteria->together = true;
 
@@ -325,9 +325,9 @@ class ChecklisttemplateController extends Controller {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->limit = Yii::app()->params["entriesPerPage"];
+        $criteria->limit = $this->entriesPerPage;
         $criteria->addInCondition("id", $categoryIds);
-        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
 
         $checkCategories = CheckCategory::model()->findAll($criteria);
         $categoryCount = CheckCategory::model()->count($criteria);

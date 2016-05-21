@@ -23,9 +23,10 @@ function System() {
 
     /**
      * Refresh page without request
+     * @param url
      */
-    this.refreshPage = function () {
-        this.redirect(window.location.href.split("#")[0]);
+    this.refreshPage = function (url) {
+        this.redirect(url ? url : window.location.href.split("#")[0]);
     };
 
     /**
@@ -1390,6 +1391,27 @@ function System() {
             win.document.writeln('</html>');
             win.print();
             win.close();
+        };
+    };
+
+    /**
+     * Paginator
+     */
+    this.paginator = new function () {
+        var _paginator = this;
+
+        /**
+         * Change list item count event
+         * @param c
+         * @param url
+         */
+        this.itemCountChange = function (c, url) {
+            var count = parseInt(c);
+
+            if (count) {
+                $.cookie("per_page_item_limit", count, {path: "/"});
+                _system.refreshPage(url);
+            }
         };
     };
 }

@@ -35,6 +35,11 @@ class Controller extends CController {
     public $projects = null;
 
     /**
+     * @var integer list entriesPerPage
+     */
+    public $entriesPerPage = null;
+
+    /**
      * Controller initialization.
      */
     function init() {
@@ -68,6 +73,12 @@ class Controller extends CController {
 
         date_default_timezone_set($system->timezone);
         $this->_system = $system;
+
+        $this->entriesPerPage = $app->params["entriesPerPage"];
+
+        if (isset($app->request->cookies["per_page_item_limit"])) {
+            $this->entriesPerPage = (int) $app->request->cookies["per_page_item_limit"]->value;
+        }
 
         if (!Yii::app()->user->isGuest) {
             $criteria = new CDbCriteria();

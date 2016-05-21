@@ -1291,3 +1291,9 @@ ul.breadcrumb {
     padding-top: 4px;
     margin-right: 90px;
 }
+
+.pagination-item-count {
+    display: inline-block;
+    float: right;
+    vertical-align: middle;
+}
