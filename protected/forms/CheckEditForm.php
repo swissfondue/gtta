@@ -75,6 +75,11 @@ class CheckEditForm extends LocalizedFormModel
      */
     public $controlId;
 
+    /**
+     * @varv array fields
+     */
+    public $fields;
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
@@ -85,7 +90,7 @@ class CheckEditForm extends LocalizedFormModel
             array( 'name, protocol, referenceCode, referenceUrl', 'length', 'max' => 1000 ),
             array( 'port', 'numerical', 'integerOnly' => true, 'min' => 0, 'max' => 1000 ),
             array( 'automated, multipleSolutions, private', 'boolean' ),
-            array( 'localizedItems, backgroundInfo, hints, question', 'safe' ),
+            array( 'localizedItems, fields', 'safe' ),
             array( 'referenceUrl', 'url', 'defaultScheme' => 'http' ),
             array( 'referenceId, effort', 'numerical', 'integerOnly' => true ),
             array( 'referenceId', 'checkReference' ),

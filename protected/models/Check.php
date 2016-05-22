@@ -84,6 +84,7 @@ class Check extends ActiveRecord {
             "solutions" => array(self::HAS_MANY, "CheckSolution", "check_id"),
             "scripts" => array(self::HAS_MANY, "CheckScript", "check_id"),
             "riskCategories" => array(self::HAS_MANY, "RiskCategoryCheck", "check_id"),
+            "fields" => array(self::HAS_MANY, "CheckField", "check_id"),
 		);
 	}
 
@@ -147,5 +148,77 @@ class Check extends ActiveRecord {
         }
 
         return $names[$this->status];
+    }
+
+    /**
+     * Get background info
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getBackgroundInfo() {
+        $field = CheckField::model()->findByAttributes([
+            "check_id" => $this->id,
+            "name" => CheckField::FIELD_BACKGROUND_INFO
+        ]);
+
+        if (!$field) {
+            throw new Exception("Check's system not exists.");
+        }
+
+        return $field->value;
+    }
+
+    /**
+     * Get question
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getQuestion() {
+        $field = CheckField::model()->findByAttributes([
+            "check_id" => $this->id,
+            "name" => CheckField::FIELD_QUESTION
+        ]);
+
+        if (!$field) {
+            throw new Exception("Check's system not exists.");
+        }
+
+        return $field->value;
+    }
+
+    /**
+     * Get hints
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getHints() {
+        $field = CheckField::model()->findByAttributes([
+            "check_id" => $this->id,
+            "name" => CheckField::FIELD_HINTS
+        ]);
+
+        if (!$field) {
+            throw new Exception("Check's system not exists.");
+        }
+
+        return $field->value;
+    }
+
+    /**
+     * Get result
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getResult() {
+        $field = CheckField::model()->findByAttributes([
+            "check_id" => $this->id,
+            "name" => CheckField::FIELD_RESULT
+        ]);
+
+        if (!$field) {
+            throw new Exception("Check's system not exists.");
+        }
+
+        return $field->value;
     }
 }

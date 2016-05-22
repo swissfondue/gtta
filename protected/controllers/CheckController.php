@@ -830,9 +830,9 @@ class CheckController extends Controller
 
         if (!$newRecord) {
             $model->name = $check->name;
-            $model->backgroundInfo = $check->background_info;
-            $model->hints = $check->hints;
-            $model->question = $check->question;
+            //$model->backgroundInfo = $check->background_info;
+            //$model->hints = $check->hints;
+            //$model->question = $check->question;
             $model->automated = $check->automated;
             $model->protocol = $check->protocol;
             $model->port = $check->port;
@@ -852,9 +852,6 @@ class CheckController extends Controller
                 $i = array();
 
                 $i['name'] = $cl->name;
-                $i['backgroundInfo'] = $cl->background_info;
-                $i['hints'] = $cl->hints;
-                $i['question'] = $cl->question;
 
                 $model->localizedItems[$cl->language_id] = $i;
             }
@@ -882,9 +879,6 @@ class CheckController extends Controller
                 }
 
                 $check->name = $model->name;
-                $check->background_info = $model->backgroundInfo;
-                $check->hints = $model->hints;
-                $check->question = $model->question;
                 $check->automated = $model->automated;
                 $check->multiple_solutions = $model->multipleSolutions;
                 $check->private = $model->private;
@@ -919,23 +913,55 @@ class CheckController extends Controller
                         $value['name'] = null;
                     }
 
-                    if ($value['backgroundInfo'] == '') {
-                        $value['backgroundInfo'] = null;
-                    }
-
-                    if ($value['hints'] == '') {
-                        $value['hints'] = null;
-                    }
-
-                    if ($value['question'] == '') {
-                        $value['question'] = null;
-                    }
-
+                    /**
+                     * TODO: field saving
+                     */
                     $checkL10n->name = $value['name'];
-                    $checkL10n->background_info = $value['backgroundInfo'];
-                    $checkL10n->hints = $value['hints'];
-                    $checkL10n->question = $value['question'];
                     $checkL10n->save();
+                }
+
+                foreach ($model->fields as $languageId => $fields) {
+                    foreach ($fields as $name => $value) {
+                        $cf = CheckField::model()->findByAttributes([
+                            "name" => $name,
+                            "check_id" => $check->id
+                        ]);
+
+                        if (!$cf) {
+                            $cf = new CheckField();
+                            $cf->check_id = $check->id;
+                            // TODO; add new type field support
+                            $cf->type = CheckField::TYPE_TEXTAREA;
+                            $cf->name = $name;
+                        }
+
+                        // TODO: modify fields
+                        // $cf->type = CheckField::TYPE_TEXTAREA;
+                        $cf->save();
+
+                        $criteria = new CDbCriteria();
+                        $criteria->addColumnCondition([
+                            "f.check_id" => $check->id,
+                            "f.name" => $name,
+                            "t.language_id" => $languageId
+                        ]);
+
+                        $cfl10n = CheckFieldL10n::model()->with([
+                            "field" => [
+                                "alias" => "f"
+                            ]
+                        ])->find($criteria);
+
+                        if (!$cfl10n) {
+                            $cfl10n = new CheckFieldL10n();
+                            $cfl10n->check_field_id = $cf->id;
+                            $cfl10n->language_id = $languageId;
+                        }
+
+                        $cfl10n->title = "Title";
+                        $cfl10n->value = $value;
+                        $cfl10n->save();
+                    }
                 }
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check saved.'));
@@ -971,6 +997,20 @@ class CheckController extends Controller
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
             }
 		}
+
+        $model->fields = [];
+
+        foreach ($check->fields as $field) {
+            foreach ($field->l10n as $l10n) {
+                $model->fields[$field->name][$l10n->language->id] = [
+                    "type" => $field->type,
+                    "title" => $l10n->title,
+                    "value" => $l10n->value
+                ];
+            }
+        }
+
+        FileManager::updateFile("/tmp/model_fields.txt", json_encode($model->fields));
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
         $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array('id' => $category->id)));

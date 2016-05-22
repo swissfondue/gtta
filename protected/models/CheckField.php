@@ -9,8 +9,6 @@
  * @property integer $type
  * @property boolean $project_only
  * @property string $name
- * @property string $title
- * @property string $content
  * @property integer $order
  * @property boolean $hidden
  */
@@ -25,6 +23,11 @@ class CheckField extends ActiveRecord {
     const TYPE_RADIO = 40;
     const TYPE_CHECKBOX = 50;
 
+    // system fields
+    const FIELD_BACKGROUND_INFO = "background_info";
+    const FIELD_QUESTION = "question";
+    const FIELD_HINTS = "hints";
+    const FIELD_RESULT = "result";
     public $system = [
         "background_info",
         "question",
@@ -63,8 +66,8 @@ class CheckField extends ActiveRecord {
      */
     public function rules() {
         return array(
-            array("check_id, type, name, title, sort_order", "required" ),
-            array("name, title", "length", "max" => 1000 ),
+            array("check_id, type, name, sort_order", "required" ),
+            array("name", "length", "max" => 1000 ),
             array("sort_order", "numerical", "integerOnly" => true, "min" => 0 ),
             array("type", "in", "range" => [
                 self::TYPE_TEXT,
@@ -75,7 +78,6 @@ class CheckField extends ActiveRecord {
                 self::TYPE_CHECKBOX,
             ]),
             array("project_only", "boolean"),
-            array("value", "safe"),
         );
     }
 

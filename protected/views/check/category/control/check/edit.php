@@ -51,26 +51,16 @@
                         </div>
                     </div>
 
-                    <div class="control-group">
-                        <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_backgroundInfo"><?php echo Yii::t('app', 'Background Info'); ?></label>
-                        <div class="controls">
-                            <textarea class="wysiwyg" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_backgroundInfo" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][backgroundInfo]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['backgroundInfo']) : ''; ?></textarea>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_hints"><?php echo Yii::t('app', 'Hints'); ?></label>
-                        <div class="controls">
-                            <textarea class="wysiwyg" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_hints" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][hints]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['hints']) : ''; ?></textarea>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_question"><?php echo Yii::t('app', 'Question'); ?></label>
-                        <div class="controls">
-                            <textarea class="wysiwyg" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_question" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][question]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['question']) : ''; ?></textarea>
-                        </div>
-                    </div>
+                    <?php foreach ($model->fields as $name => $f): ?>
+                        <?= $this->renderPartial("/check/partial/check-field", [
+                                "type" => $f[$language->id]["type"],
+                                "name" => "CheckEditForm[fields][" . CHtml::encode($language->id) . "][" . CHtml::encode($name) . "]",
+                                "label" => CHtml::encode($f[$language->id]["title"]),
+                                "id" => "CheckEditForm_fields_" . CHtml::encode($language->id) . "_" . $name,
+                                "value" => CHtml::encode($f[$language->id]["value"]),
+                            ]
+                        ); ?>
+                    <?php endforeach; ?>
                 </div>
             <?php endforeach; ?>
         </div>

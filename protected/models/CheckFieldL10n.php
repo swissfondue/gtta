@@ -7,7 +7,8 @@
  * @property integer $check_field_id
  * @property integer $language_id
  * @property string $name
- * @property string $description
+ * @property string $title
+ * @property string $value
  */
 class CheckFieldL10n extends ActiveRecord
 {
@@ -36,9 +37,9 @@ class CheckFieldL10n extends ActiveRecord
     {
         return array(
             ["check_field_id, language_id", "required"],
-            ["name", "length", "max" => 1000],
+            ["name, title", "length", "max" => 1000],
             ["check_field_id, language_id", "numerical", "integerOnly" => true],
-            ["description", "safe"],
+            ["value", "safe"],
         );
     }
 
