@@ -19,7 +19,27 @@ class CustomizationController extends Controller
         );
     }
 
-    public function actionIndex($page = 1) {
+    /**
+     * Categories list
+     */
+    public function actionIndex() {
+        $this->breadcrumbs[] = array(Yii::t("app", "Customization"), "");
+
+        $this->pageTitle = Yii::t("app", "Customization");
+        $this->render("index", []);
     }
+
+    /**
+     * Checks customization categories
+     */
+    public function actionChecks() {
+        $this->breadcrumbs[] = array(Yii::t("app", "Customization"), $this->createUrl("customization/index"));
+        $this->breadcrumbs[] = array(Yii::t("app", "Checks"), "");
+
+        $this->pageTitle = Yii::t("app", "Checks");
+        $this->render("check/index", []);
+    }
+
+    public function actionCheckFields($page = 1) {}
 }
 

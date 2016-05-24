@@ -313,4 +313,8 @@ return array(
     // history
     "history/logins/<page:\d+>" => "history/logins",
     "history/logins"            => "history/logins",
+
+    "customization"                 => "customization/index",
+    "customization/checks"          => "customization/checks",
+    "customization/checks/fields"   => "customization/checkfields",
 );

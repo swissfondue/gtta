@@ -113,6 +113,8 @@
                                         <li <?php if (Yii::app()->controller->id == 'backup' && Yii::app()->controller->action->id == 'index') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('backup/index'); ?>"><?php echo Yii::t('app', 'Backup'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'backup' && Yii::app()->controller->action->id == 'restore') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('backup/restore'); ?>"><?php echo Yii::t('app', 'Restore'); ?></a></li>
                                         <li class="divider"></li>
+                                        <li <?php if (Yii::app()->controller->id == 'customization') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('customization/index'); ?>"><?php echo Yii::t('app', 'Customization'); ?></a></li>
+                                        <li class="divider"></li>
                                         <li <?php if (Yii::app()->controller->id == 'update') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('update/index'); ?>"><?php echo Yii::t('app', 'Update'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'settings') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('settings/edit'); ?>"><?php echo Yii::t('app', 'Settings'); ?></a></li>
                                     </ul>
