@@ -124,6 +124,16 @@ class m160516_193144_editable_check_fields extends CDbMigration {
             )"
         );
 
+        $this->execute(
+            "INSERT INTO check_fields_l10n (check_field_id, language_id, title, \"value\")
+            (
+              SELECT check_fields.id, checks_l10n.language_id, 'Result', ''
+              FROM checks_l10n
+              LEFT JOIN checks ON checks_l10n.check_id = checks.id
+              LEFT JOIN check_fields ON check_fields.check_id = checks.id AND check_fields.name = 'result'
+            )"
+        );
+
         $this->createTable(
             "target_check_fields",
             [
@@ -226,15 +236,35 @@ class m160516_193144_editable_check_fields extends CDbMigration {
         //revert original values of `checks` table
         $this->execute(
             "UPDATE checks
-             SET background_info = (SELECT value FROM check_fields WHERE check_id = checks.id AND name = 'background_info');"
+             SET background_info = (
+                 SELECT check_fields_l10n.value
+                 FROM check_fields_l10n
+                 INNER JOIN check_fields on check_fields_l10n.check_field_id = check_fields.id
+                 INNER JOIN languages on check_fields_l10n.language_id = languages.id AND (languages.default OR languages.user_default)
+                 WHERE check_fields.check_id = checks.id AND check_fields.name = 'background_info'
+             );"
         );
+
         $this->execute(
             "UPDATE checks
-             SET hints = (SELECT value FROM check_fields WHERE check_id = checks.id AND name = 'hints');"
+             SET hints = (
+                 SELECT check_fields_l10n.value
+                 FROM check_fields_l10n
+                 INNER JOIN check_fields on check_fields_l10n.check_field_id = check_fields.id
+                 INNER JOIN languages on check_fields_l10n.language_id = languages.id AND (languages.default OR languages.user_default)
+                 WHERE check_fields.check_id = checks.id AND check_fields.name = 'hints'
+             );"
         );
+
         $this->execute(
             "UPDATE checks
-             SET question = (SELECT value FROM check_fields WHERE check_id = checks.id AND name = 'question');"
+             SET question = (
+                 SELECT check_fields_l10n.value
+                 FROM check_fields_l10n
+                 INNER JOIN check_fields on check_fields_l10n.check_field_id = check_fields.id
+                 INNER JOIN languages on check_fields_l10n.language_id = languages.id AND (languages.default OR languages.user_default)
+                 WHERE check_fields.check_id = checks.id AND check_fields.name = 'question'
+             );"
         );
 
         $this->execute(

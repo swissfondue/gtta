@@ -100,39 +100,6 @@ class Check extends ActiveRecord {
     }
 
     /**
-     * @return string localized background info.
-     */
-    public function getLocalizedBackgroundInfo() {
-        if ($this->l10n && count($this->l10n) > 0) {
-            return $this->l10n[0]->background_info != NULL ? $this->l10n[0]->background_info : $this->background_info;
-        }
-        
-        return $this->background_info;
-    }
-
-    /**
-     * @return string localized hints.
-     */
-    public function getLocalizedHints() {
-        if ($this->l10n && count($this->l10n) > 0) {
-            return $this->l10n[0]->hints != NULL ? $this->l10n[0]->hints : $this->hints;
-        }
-
-        return $this->hints;
-    }
-    
-    /**
-     * @return string localized question.
-     */
-    public function getLocalizedQuestion() {
-        if ($this->l10n && count($this->l10n) > 0) {
-            return $this->l10n[0]->question != NULL ? $this->l10n[0]->question : $this->question;
-        }
-
-        return $this->question;
-    }
-
-    /**
      * Get status name
      * @return string
      * @throws Exception
@@ -151,72 +118,38 @@ class Check extends ActiveRecord {
     }
 
     /**
-     * Get background info
+     * Get field value
+     * @param $field
+     * @param null $languageId
      * @return mixed|null
      * @throws Exception
      */
-    public function getBackgroundInfo() {
-        $field = CheckField::model()->findByAttributes([
-            "check_id" => $this->id,
-            "name" => CheckField::FIELD_BACKGROUND_INFO
-        ]);
+    public function getFieldValue($field, $languageId = null) {
+        $language = Language::model()->find("\"user_default\" OR \"default\"");
 
-        if (!$field) {
-            throw new Exception("Check's system not exists.");
+        if ($languageId) {
+            $language = Language::model()->findByPk($languageId);
+
+            if (!$language) {
+                throw new Exception("Language not exists.");
+            }
         }
 
-        return $field->value;
-    }
-
-    /**
-     * Get question
-     * @return mixed|null
-     * @throws Exception
-     */
-    public function getQuestion() {
-        $field = CheckField::model()->findByAttributes([
-            "check_id" => $this->id,
-            "name" => CheckField::FIELD_QUESTION
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition([
+            "f.check_id" => $this->id,
+            "f.name" => $field,
+            "t.language_id" => $language->id
         ]);
 
-        if (!$field) {
-            throw new Exception("Check's system not exists.");
-        }
-
-        return $field->value;
-    }
-
-    /**
-     * Get hints
-     * @return mixed|null
-     * @throws Exception
-     */
-    public function getHints() {
-        $field = CheckField::model()->findByAttributes([
-            "check_id" => $this->id,
-            "name" => CheckField::FIELD_HINTS
-        ]);
+        $field = CheckFieldL10n::model()->with([
+            "field" => [
+                "alias" => "f"
+            ]
+        ])->find($criteria);
 
         if (!$field) {
-            throw new Exception("Check's system not exists.");
-        }
-
-        return $field->value;
-    }
-
-    /**
-     * Get result
-     * @return mixed|null
-     * @throws Exception
-     */
-    public function getResult() {
-        $field = CheckField::model()->findByAttributes([
-            "check_id" => $this->id,
-            "name" => CheckField::FIELD_RESULT
-        ]);
-
-        if (!$field) {
-            throw new Exception("Check's system not exists.");
+            return null;
         }
 
         return $field->value;

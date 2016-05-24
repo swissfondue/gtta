@@ -40,7 +40,7 @@
 
         <div class="tab-content">
             <?php foreach ($languages as $language): ?>
-                <div class="tab-pane<?php if ($language->default) echo ' active'; ?>" id="<?php echo CHtml::encode($language->code); ?>">
+                <div class="language-tab tab-pane<?php if ($language->default) echo ' active'; ?>" id="<?php echo CHtml::encode($language->code); ?>" data-language-id="<?= $language->id ?>">
                     <div class="control-group <?php if ($model->getError('name')) echo 'error'; ?>">
                         <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_name"><?php echo Yii::t('app', 'Name'); ?></label>
                         <div class="controls">
@@ -52,17 +52,32 @@
                     </div>
 
                     <?php foreach ($model->fields as $name => $f): ?>
-                        <?= $this->renderPartial("/check/partial/check-field", [
-                                "type" => $f[$language->id]["type"],
-                                "name" => "CheckEditForm[fields][" . CHtml::encode($language->id) . "][" . CHtml::encode($name) . "]",
-                                "label" => CHtml::encode($f[$language->id]["title"]),
-                                "id" => "CheckEditForm_fields_" . CHtml::encode($language->id) . "_" . $name,
-                                "value" => CHtml::encode($f[$language->id]["value"]),
-                            ]
-                        ); ?>
+                        <div class="check-field-item">
+                            <div class="control-group">
+                                <div class="controls">
+                                    <input type="text"
+                                           class="check-field-title input-xlarge"
+                                           name="CheckEditForm[fields][<?= $language->id ?>][title]"
+                                           placeholder="<?= Yii::t("app", "Title") ?>"
+                                           value="<?= $f[$language->id]["title"]?>" />
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <div class="controls">
+                                    <textarea class="check-field-value wysiwyg" id="CheckEditForm_fields_<?= $language->id ?>_value" name="CheckEditForm[fields][<?= $language->id ?>][value]"><?= CHtml::encode($f[$language->id]["value"])?></textarea>
+                                </div>
+                            </div>
+                        </div>
                     <?php endforeach; ?>
                 </div>
             <?php endforeach; ?>
+        </div>
+
+        <div class="offset6" style="padding-left:30px;">
+            <button type="button" class="btn">
+                <span class="glyphicon"><i class="icon-plus"></i></span>
+            </button>
         </div>
 
         <hr>

@@ -113,5 +113,17 @@ class CheckField extends ActiveRecord {
         return $this->content;
     }
 
-    public function setOrder() {}
+    /**
+     * Set order
+     */
+    public function setOrder() {
+        $criteria = new CDbCriteria();
+        $criteria->order = "sort_order DESC";
+        $criteria->limit = 1;
+        $criteria->addColumnCondition([
+            "check_id" => $this->check_id,
+        ]);
+        $field = CheckField::model()->findByAttributes($criteria);
+        $this->sort_order = $field ? $field->sort_order : 0;
+    }
 }
