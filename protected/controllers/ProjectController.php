@@ -90,8 +90,8 @@ class ProjectController extends Controller {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params["entriesPerPage"];
-        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->together = true;
         $criteria->addInCondition("status", $showStatuses);
 
@@ -211,8 +211,8 @@ class ProjectController extends Controller {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order  = 't.host ASC';
         $criteria->addCondition('t.project_id = :project_id');
         $criteria->params = array( 'project_id' => $project->id );
@@ -475,8 +475,8 @@ class ProjectController extends Controller {
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order  = 't.subject ASC';
         $criteria->addCondition('t.project_id = :project_id');
         $criteria->params = array( 'project_id' => $project->id );
@@ -606,8 +606,8 @@ class ProjectController extends Controller {
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order  = 't.create_time ASC';
         $criteria->addCondition('t.project_id = :project_id');
         $criteria->params = array( 'project_id' => $project->id );
@@ -716,8 +716,8 @@ class ProjectController extends Controller {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->limit = Yii::app()->params["entriesPerPage"];
-        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->limit = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order = "COALESCE(l10n.name, category.name) ASC";
         $criteria->addCondition("t.target_id = :target_id");
         $criteria->params = array( "target_id" => $target->id );
@@ -1488,22 +1488,11 @@ class ProjectController extends Controller {
     }
 
     /**
-     * Display messages of scheduled packages
-     */
-    public function actionChainMessages() {
-        $response = new AjaxResponse();
-
-        $response->addData("messages", TargetManager::getChainMessages());
-
-        echo $response->serialize();
-    }
-
-    /**
-     * Returns chain status and active check
+     * Returns chain status / active check / chain messages
      * @param $id
      * @param $target
      */
-    public function actionChainActiveCheck($id, $target) {
+    public function actionChainMessages($id, $target) {
         $response = new AjaxResponse();
 
         $id = (int) $id;
@@ -1537,11 +1526,15 @@ class ProjectController extends Controller {
 
             if ($cellId) {
                 $cell = RelationManager::getCell($relations, $cellId);
-                $activeCheck = (string) $cell->attributes()->label;
+                $name = (string) $cell->attributes()->label;
             }
         } catch (Exception $e) {}
 
-        $response->addData("check", $activeCheck);
+        if (isset($cellId) && $cellId) {
+            $response->addData("check", ["id" => $cellId, "name" => $name]);
+        }
+
+        $response->addData("messages", TargetManager::getChainMessages());
 
         echo $response->serialize();
     }
@@ -3863,8 +3856,8 @@ class ProjectController extends Controller {
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order  = 'admin DESC, role DESC, name ASC';
         $criteria->addColumnCondition(array(
             'project_id' => $project->id

@@ -31,8 +31,8 @@ class UserController extends Controller
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order  = 't.role ASC, t.name ASC, t.email ASC';
 
         $users = User::model()->findAll($criteria);
@@ -248,8 +248,8 @@ class UserController extends Controller
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order  = 'deadline ASC, project.name ASC';
         $criteria->addColumnCondition(array(
             'user_id' => $user->id

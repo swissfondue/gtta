@@ -68,12 +68,17 @@ class TargetCheckManager {
 
         $now = new DateTime();
 
-        AutomationJob::enqueue(array(
+        $params = [
             "operation" => AutomationJob::OPERATION_START,
             "obj_id" => $targetCheck->id,
             "started" => $now->format(ISO_DATE_TIME),
-            "chain" => $chain,
-        ));
+        ];
+
+        if ($chain) {
+            $params["chain"] = true;
+        }
+
+        AutomationJob::enqueue($params);
     }
 
     /**

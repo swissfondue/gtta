@@ -304,7 +304,7 @@ class BackupManager {
         $version = str_replace("<version>", "", $version);
         $version = str_replace("</version>", "", $version);
 
-        return $version == $system->version;
+        return $version <= $system->version;
     }
 
     /**

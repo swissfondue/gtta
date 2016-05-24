@@ -90,8 +90,8 @@ class VulntrackerController extends Controller {
         $criteria->addInCondition('t.target_id', $targetIds);
         $criteria->addInCondition('t.rating', $this->_allowedRiskValues);
         $criteria->order = 'target.host ASC, COALESCE(l10n.name, "check".name) ASC';
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->together = true;
 
         $targetCheckRelations = array(
@@ -119,14 +119,14 @@ class VulntrackerController extends Controller {
 
         $totalCheckCount += (int) TargetCustomCheck::model()->count($criteria);
 
-        if ($tCheckCount == Yii::app()->params['entriesPerPage']) {
+        if ($tCheckCount == $this->entriesPerPage) {
             return array($targetChecks, array(), $totalCheckCount);
-        } elseif ($tCheckCount < Yii::app()->params['entriesPerPage'] && $tCheckCount > 0) {
-            $limit = Yii::app()->params['entriesPerPage'] - $tCheckCount;
+        } elseif ($tCheckCount < $this->entriesPerPage && $tCheckCount > 0) {
+            $limit = $this->entriesPerPage - $tCheckCount;
             $offset = 0;
         } elseif ($tCheckCount == 0) {
-            $limit = Yii::app()->params['entriesPerPage'];
-            $offset = ($page - 1) * Yii::app()->params['entriesPerPage'] - TargetCheck::model()->count($criteria);
+            $limit = $this->entriesPerPage;
+            $offset = ($page - 1) * $this->entriesPerPage - TargetCheck::model()->count($criteria);
         } else {
             throw new CHttpException(500, Yii::t("app", "Invalid target checks count!"));
         }

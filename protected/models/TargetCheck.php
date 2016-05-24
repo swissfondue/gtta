@@ -169,13 +169,11 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "{code}" => $uniqueHash
         ));
 
-        if (!$this->result) {
-            $this->result = "";
-        } else {
-            $this->result .= "\n";
+        if ($this->result) {
+            $this->appendResult($this, "\n");
         }
 
-        $this->result .= $message;
+        $this->appendResult($this, $message);
         $this->status = TargetCheck::STATUS_FINISHED;
         $this->save();
     }
@@ -307,5 +305,26 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         }
 
         return false;
+    }
+
+    /**
+     * Append string to result field
+     * @param $data
+     * @param bool $verbosity
+     */
+    public function appendResult($data, $verbosity=true) {
+        $system = System::model()->findByPk(1);
+
+        if ($verbosity && !$system->scripts_verbosity) {
+            return;
+        }
+
+        if (!$this->result) {
+            $this->result = "";
+        }
+
+        if ($data) {
+            $this->result .= $data;
+        }
     }
 }

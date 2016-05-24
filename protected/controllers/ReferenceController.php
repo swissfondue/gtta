@@ -29,8 +29,8 @@ class ReferenceController extends Controller
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order  = 't.name ASC';
 
         $references = Reference::model()->findAll($criteria);

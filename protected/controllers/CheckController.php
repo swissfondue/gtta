@@ -38,8 +38,8 @@ class CheckController extends Controller
         }
 
         $criteria = new CDbCriteria();
-        $criteria->limit = Yii::app()->params["entriesPerPage"];
-        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->limit = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order = "COALESCE(l10n.name, t.name) ASC";
         $criteria->together = true;
 
@@ -125,8 +125,8 @@ class CheckController extends Controller
         }
 
         $criteria = new CDbCriteria();
-        $criteria->limit = Yii::app()->params["entriesPerPage"];
-        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->limit = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order = "t.sort_order ASC";
         $criteria->addColumnCondition(array( "check_category_id" => $category->id ));
         $criteria->together = true;
@@ -722,8 +722,8 @@ class CheckController extends Controller
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order  = 't.sort_order ASC';
         $criteria->addColumnCondition(array( 'check_control_id' => $control->id ));
         $criteria->together = true;
@@ -1485,8 +1485,8 @@ class CheckController extends Controller
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order  = 't.sort_order ASC';
         $criteria->addColumnCondition(array( 'check_id' => $check->id ));
         $criteria->together = true;
@@ -1830,8 +1830,8 @@ class CheckController extends Controller
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order  = 't.sort_order ASC';
         $criteria->addColumnCondition(array( 'check_id' => $check->id ));
 
@@ -2173,8 +2173,8 @@ class CheckController extends Controller
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order  = 't.id ASC';
         $criteria->addColumnCondition(array('check_id' => $check->id));
 
@@ -2513,8 +2513,8 @@ class CheckController extends Controller
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order  = 't.sort_order ASC';
         $criteria->addColumnCondition(array('check_script_id' => $script->id));
 

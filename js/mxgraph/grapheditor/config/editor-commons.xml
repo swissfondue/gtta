@@ -1,8 +1,8 @@
 <mxEditor>
-	<ui>
-		<resource basename="/js/mxgraph/grapheditor/resources/mxApplication"/>
-	</ui>
-	<mxDefaultPopupMenu as="popupHandler">
+    <ui>
+        <resource basename="/js/mxgraph/grapheditor/resources/mxApplication"/>
+    </ui>
+    <mxDefaultPopupMenu as="popupHandler">
         <add as="stopHere" action="setStopped" if="isUnstoppedCheck"></add>
         <add as="unstopHere" action="setUnStopped" if="isStoppedCheck"></add>
         <add as="setStartCheck" action="setStartCheck" if="isCheck"></add>
@@ -55,9 +55,9 @@
                 return cell.getAttribute("stopped") == "1" ? false : true;
             }
         ]]></condition>
-	</mxDefaultPopupMenu>
-	<include name="/js/mxgraph/grapheditor/config/keyhandler-commons.xml"/>
-	<Array as="actions">
+    </mxDefaultPopupMenu>
+    <include name="/js/mxgraph/grapheditor/config/keyhandler-commons.xml"/>
+    <Array as="actions">
         <add as="setStartCheck"><![CDATA[
 			function (editor, cell)
 			{
@@ -70,23 +70,25 @@
 			    });
 
 				cell.setAttribute("start_check", "1");
-				admin.relationTemplate.updateRelations();
+				user.relationTemplate.updateRelations();
+				user.activeCheck = cell.id;
+				user.mxgraph.refreshChecks();
 			}
 		]]></add>
         <add as="setStopped"><![CDATA[
 			function (editor, cell)
 			{
 				cell.setAttribute("stopped", "1");
-                admin.mxgraph.updateCheckStyles(cell);
-				admin.relationTemplate.updateRelations();
+                user.mxgraph.updateCheckStyles(cell);
+				user.relationTemplate.updateRelations();
 			}
 		]]></add>
         <add as="setUnStopped"><![CDATA[
 			function (editor, cell)
 			{
 				cell.setAttribute("stopped", "0");
-                admin.mxgraph.updateCheckStyles(cell);
-				admin.relationTemplate.updateRelations();
+                user.mxgraph.updateCheckStyles(cell);
+				user.relationTemplate.updateRelations();
 			}
 		]]></add>
         <add as="openCheck"><![CDATA[
@@ -94,10 +96,10 @@
 			{
 			    var checkId = cell.getAttribute('check_id');
 
-                admin.mxgraph.getCheckLink($('.relations-graph').data('get-check-url'), admin.mxgraph.target, checkId, function (url) {
+                user.mxgraph.getCheckLink($('.relations-graph').data('get-check-url'), user.mxgraph.target, checkId, function (url) {
                     window.location.replace(url);
                 });
 			}
 		]]></add>
-	</Array>
+    </Array>
 </mxEditor>
