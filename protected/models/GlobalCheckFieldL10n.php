@@ -36,7 +36,7 @@ class GlobalCheckFieldL10n extends ActiveRecord
     {
         return array(
             ["global_check_field_id, language_id", "required"],
-            ["name, title", "length", "max" => 1000],
+            ["title", "length", "max" => 1000],
             ["global_check_field_id, language_id", "numerical", "integerOnly" => true],
             ["value", "safe"],
         );

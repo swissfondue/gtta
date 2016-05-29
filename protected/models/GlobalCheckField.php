@@ -21,13 +21,22 @@ class GlobalCheckField extends ActiveRecord {
     const TYPE_RADIO = 40;
     const TYPE_CHECKBOX = 50;
 
+    public static $fieldTypes = [
+        self::TYPE_TEXT => "Text",
+        self::TYPE_TEXTAREA => "Textarea",
+        self::TYPE_WYSIWYG => "WYSIWYG",
+        self::TYPE_WYSIWYG_READONLY => "WYSIWYG (Read Only)",
+        self::TYPE_RADIO => "Radio",
+        self::TYPE_CHECKBOX => "Checkbox",
+    ];
+
     // readonly fields
     const FIELD_BACKGROUND_INFO = "background_info";
     const FIELD_QUESTION = "question";
     const FIELD_HINTS = "hints";
     const FIELD_RESULT = "result";
 
-    public $readonly = [
+    public static $readonly = [
         "background_info",
         "question",
         "hints",
@@ -48,6 +57,35 @@ class GlobalCheckField extends ActiveRecord {
      */
     public function tableName() {
         return "global_check_fields";
+    }
+
+    /**
+     * Before save hook
+     * @return bool
+     */
+    protected function beforeSave() {
+        $field = self::model()->findByAttributes([
+            "name" => $this->name
+        ]);
+
+        if ($field) {
+            if ($this->id != $field->id) {
+                $this->addError("name", "Field with that name already exists.");
+                return false;
+            }
+        }
+
+        if ($this->id) {
+            $field = self::model()->findByPk($this->id);
+
+            if (in_array($field->name, GlobalCheckField::$readonly) && $this->name != $field->name) {
+                $this->addError("name", "Access denied.");
+
+                return false;
+            }
+        }
+
+        return parent::beforeSave();
     }
 
     /**
@@ -74,7 +112,7 @@ class GlobalCheckField extends ActiveRecord {
      */
     public function relations() {
         return array(
-            "l10n" => array(self::HAS_MANY, "GlobalCheckFieldL10n", "system_check_field_id"),
+            "l10n" => array(self::HAS_MANY, "GlobalCheckFieldL10n", "global_check_field_id"),
         );
     }
 

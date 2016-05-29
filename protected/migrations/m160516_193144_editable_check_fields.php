@@ -30,6 +30,24 @@ class m160516_193144_editable_check_fields extends CDbMigration {
                 "PRIMARY KEY (global_check_field_id, language_id)"
             ]
         );
+        $this->addForeignKey(
+            "global_check_fields_l10n_global_check_field_id_fkey",
+            "global_check_fields_l10n",
+            "global_check_field_id",
+            "global_check_fields",
+            "id",
+            "CASCADE",
+            "CASCADE"
+        );
+        $this->addForeignKey(
+            "global_check_fields_l10n_language_id_fkey",
+            "global_check_fields_l10n",
+            "language_id",
+            "languages",
+            "id",
+            "CASCADE",
+            "CASCADE"
+        );
         $this->execute(
             "INSERT INTO global_check_fields (type, name, title)
              VALUES
@@ -42,6 +60,14 @@ class m160516_193144_editable_check_fields extends CDbMigration {
                 "wysiwyg_type" => GlobalCheckField::TYPE_WYSIWYG
             ]
         );
+        $this->execute(
+            "INSERT INTO global_check_fields_l10n (global_check_field_id, language_id, title)
+             (
+                  SELECT global_check_fields.id, languages.id, global_check_fields.title
+                  FROM global_check_fields
+                  LEFT JOIN languages ON languages.code = 'en'
+             )"
+        );
 
         $this->createTable(
             "check_fields",
@@ -50,7 +76,6 @@ class m160516_193144_editable_check_fields extends CDbMigration {
                 "global_check_field_id" => "bigserial NOT NULL",
                 "check_id" => "bigserial NOT NULL",
                 "value" => "text",
-                "possible_values" => "text",
                 "PRIMARY KEY (id)",
                 "UNIQUE (global_check_field_id, check_id)"
             ]
@@ -112,7 +137,6 @@ class m160516_193144_editable_check_fields extends CDbMigration {
                 "check_field_id" => "bigserial NOT NULL",
                 "language_id" => "bigint NOT NULL",
                 "value" => "text",
-                "possible_values" => "text",
                 "PRIMARY KEY (check_field_id, language_id)"
             ]
         );

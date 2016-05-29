@@ -51,33 +51,16 @@
                         </div>
                     </div>
 
-                    <?php foreach ($model->fields as $name => $f): ?>
-                        <div class="check-field-item">
-                            <div class="control-group">
-                                <div class="controls">
-                                    <input type="text"
-                                           class="check-field-title input-xlarge"
-                                           name="CheckEditForm[fields][<?= $language->id ?>][title]"
-                                           placeholder="<?= Yii::t("app", "Title") ?>"
-                                           value="<?= $f[$language->id]["title"]?>" />
-                                </div>
-                            </div>
-
-                            <div class="control-group">
-                                <div class="controls">
-                                    <textarea class="check-field-value wysiwyg" id="CheckEditForm_fields_<?= $language->id ?>_value" name="CheckEditForm[fields][<?= $language->id ?>][value]"><?= CHtml::encode($f[$language->id]["value"])?></textarea>
-                                </div>
-                            </div>
-                        </div>
+                    <?php foreach ($check->fields as $field): ?>
+                        <?= $this->renderPartial("partial/check-field",
+                            [
+                                "language" => $language,
+                                "field" => $field,
+                                "form" => $model
+                            ]); ?>
                     <?php endforeach; ?>
                 </div>
             <?php endforeach; ?>
-        </div>
-
-        <div class="offset6" style="padding-left:30px;">
-            <button type="button" class="btn">
-                <span class="glyphicon"><i class="icon-plus"></i></span>
-            </button>
         </div>
 
         <hr>

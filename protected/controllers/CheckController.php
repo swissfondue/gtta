@@ -827,12 +827,10 @@ class CheckController extends Controller
 
 		$model = new CheckEditForm();
         $model->localizedItems = array();
+        $model->fields = array();
 
         if (!$newRecord) {
             $model->name = $check->name;
-            //$model->backgroundInfo = $check->background_info;
-            //$model->hints = $check->hints;
-            //$model->question = $check->question;
             $model->automated = $check->automated;
             $model->protocol = $check->protocol;
             $model->port = $check->port;
@@ -854,6 +852,18 @@ class CheckController extends Controller
                 $i['name'] = $cl->name;
 
                 $model->localizedItems[$cl->language_id] = $i;
+            }
+
+            foreach ($check->fields as $f) {
+                $l10ns = $f->l10n;
+
+                foreach ($l10ns as $l10n) {
+                    if (!isset($model->fields[$l10n->language_id])) {
+                        $model->fields[$l10n->language_id] = [];
+                    }
+
+                    $model->fields[$l10n->language_id][$f->global->name] = $l10n->value;
+                }
             }
         } else {
             $model->controlId = $control->id;
@@ -913,54 +923,38 @@ class CheckController extends Controller
                         $value['name'] = null;
                     }
 
-                    /**
-                     * TODO: field saving
-                     */
                     $checkL10n->name = $value['name'];
                     $checkL10n->save();
                 }
 
                 foreach ($model->fields as $languageId => $fields) {
                     foreach ($fields as $name => $value) {
-                        $cf = CheckField::model()->findByAttributes([
-                            "name" => $name,
+                        $global = GlobalCheckField::model()->findByAttributes([
+                            "name" => $name
+                        ]);
+
+                        if (!$global) {
+                            throw new Exception("Global field not found.", 404);
+                        }
+
+                        $checkField = CheckField::model()->findByAttributes([
+                            "global_check_field_id" => $global->id,
                             "check_id" => $check->id
                         ]);
 
-                        if (!$cf) {
-                            $cf = new CheckField();
-                            $cf->check_id = $check->id;
-                            // TODO; add new type field support
-                            $cf->type = CheckField::TYPE_TEXTAREA;
-                            $cf->name = $name;
+                        if (!$checkField) {
+                            throw new Exception("Check field not found.", 404);
                         }
 
-                        // TODO: modify fields
-                        // $cf->type = CheckField::TYPE_TEXTAREA;
-                        $cf->save();
+                        $checkField->value = $model->defaultL10n($languages, $name, "fields");
 
-                        $criteria = new CDbCriteria();
-                        $criteria->addColumnCondition([
-                            "f.check_id" => $check->id,
-                            "f.name" => $name,
-                            "t.language_id" => $languageId
+                        $checkFieldL10n = CheckFieldL10n::model()->findByAttributes([
+                            "check_field_id" => $checkField->id,
+                            "language_id" => $languageId
                         ]);
 
-                        $cfl10n = CheckFieldL10n::model()->with([
-                            "field" => [
-                                "alias" => "f"
-                            ]
-                        ])->find($criteria);
-
-                        if (!$cfl10n) {
-                            $cfl10n = new CheckFieldL10n();
-                            $cfl10n->check_field_id = $cf->id;
-                            $cfl10n->language_id = $languageId;
-                        }
-
-                        $cfl10n->title = "Title";
-                        $cfl10n->value = $value;
-                        $cfl10n->save();
+                        $checkFieldL10n->value = $value;
+                        $checkFieldL10n->save();
                     }
                 }
 
@@ -996,21 +990,7 @@ class CheckController extends Controller
             } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
             }
-		}
-
-        $model->fields = [];
-
-        foreach ($check->fields as $field) {
-            foreach ($field->l10n as $l10n) {
-                $model->fields[$field->name][$l10n->language->id] = [
-                    "type" => $field->type,
-                    "title" => $l10n->title,
-                    "value" => $l10n->value
-                ];
-            }
         }
-
-        FileManager::updateFile("/tmp/model_fields.txt", json_encode($model->fields));
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
         $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array('id' => $category->id)));

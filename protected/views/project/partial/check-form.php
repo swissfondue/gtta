@@ -25,7 +25,17 @@
                 ?>
             </td>
         </tr>
-        <?php if ($checkData->localizedBackgroundInfo): ?>
+
+        <?php foreach ($check->fields as $field): ?>
+            <?= $this->renderPartial("partial/check-field",
+                [
+                    "field" => $field,
+                    "name" => sprintf("TargetCheckEditForm[fields][%s]", $field->name),
+                    "id" => sprintf("TargetCheckEditForm_fields_%s", $field->name)
+                ]); ?>
+        <?php endforeach; ?>
+
+        <?php if (false)://$checkData->localizedBackgroundInfo): ?>
             <tr>
                 <th>
                     <?php echo Yii::t("app", "Background Info"); ?>
@@ -35,7 +45,7 @@
                 </td>
             </tr>
         <?php endif; ?>
-        <?php if ($checkData->localizedHints): ?>
+        <?php if (false)://$checkData->localizedHints): ?>
             <tr>
                 <th>
                     <?php echo Yii::t("app", "Hints"); ?>
@@ -45,7 +55,7 @@
                 </td>
             </tr>
         <?php endif; ?>
-        <?php if ($checkData->localizedQuestion): ?>
+        <?php if (false)://$checkData->localizedQuestion): ?>
             <tr>
                 <th>
                     <?php echo Yii::t("app", "Question"); ?>
@@ -256,6 +266,8 @@
                 <?php endforeach; ?>
             <?php endforeach; ?>
         <?php endif; ?>
+
+        <?php if (false): ?>
         <tr>
             <th>
                 <?php echo Yii::t("app", "Result"); ?>
@@ -317,6 +329,8 @@
                 </div>
             </td>
         </tr>
+        <?php endif; ?>
+
         <?php if (User::checkRole(User::ROLE_USER)): ?>
             <tr class="<?php echo $results ? '' : 'hide'; ?>" ">
                 <th>

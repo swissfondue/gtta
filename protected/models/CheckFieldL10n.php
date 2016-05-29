@@ -6,8 +6,6 @@
  * The followings are the available columns in table 'check_fields_l10n':
  * @property integer $check_field_id
  * @property integer $language_id
- * @property string $name
- * @property string $title
  * @property string $value
  */
 class CheckFieldL10n extends ActiveRecord
@@ -37,7 +35,6 @@ class CheckFieldL10n extends ActiveRecord
     {
         return array(
             ["check_field_id, language_id", "required"],
-            ["name, title", "length", "max" => 1000],
             ["check_field_id, language_id", "numerical", "integerOnly" => true],
             ["value", "safe"],
         );

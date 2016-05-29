@@ -86,6 +86,7 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 
 .category-list .percent,
 .category-list .stats,
+.field-list .visible,
 .target-list .stats,
 .control-header .stats,
 .control-header .percent,
@@ -94,6 +95,10 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 .project-list .stats,
 .project-list .percent {
     width:70px;
+}
+
+.field-list .type {
+    width: 200px;
 }
 
 .category-list td.stats,
@@ -155,7 +160,8 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 .summary-list .actions,
 .section-list .actions,
 .time-records-list .actions,
-.relation-template-list .actions {
+.relation-template-list .actions,
+.field-list .actions {
     width:30px;
     text-align:right;
 }

@@ -16,7 +16,7 @@
                 </tr>
                 <tr>
                     <td class="name">
-                        <a href="<?php echo $this->createUrl("customization/checks/"); ?>"><?php echo Yii::t("app", "Checks"); ?></a>
+                        <a href="<?php echo $this->createUrl("customization/checks/fields"); ?>"><?php echo Yii::t("app", "Fields"); ?></a>
                     </td>
                 </tr>
                 </tbody>

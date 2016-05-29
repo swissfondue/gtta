@@ -153,6 +153,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "attachments" => array(self::HAS_MANY, "TargetCheckAttachment", "target_check_id"),
             "scripts" => array(self::HAS_MANY, "TargetCheckScript", "target_check_id"),
             "startScripts" => array(self::HAS_MANY, 'CheckScript', array('check_script_id' => 'id'), 'through' => 'scripts', 'condition' => "scripts.start = 't'"),
+            "fields" => array(self::HAS_MANY, "TargetCheckField", "target_check_id"),
 		);
 	}
 
