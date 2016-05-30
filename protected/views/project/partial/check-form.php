@@ -29,7 +29,8 @@
         <?php foreach ($check->fields as $field): ?>
             <?= $this->renderPartial("partial/check-field",
                 [
-                    "field" => $field
+                    "field" => $field,
+                    "targetCheck" => $check
                 ]); ?>
         <?php endforeach; ?>
 

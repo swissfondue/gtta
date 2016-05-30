@@ -1,7 +1,7 @@
 <?php if (!$field->hidden): ?>
     <?php
-        $name = sprintf("TargetCheckEditForm[fields][%s]", $field->name);
-        $id = sprintf("TargetCheckEditForm_fields_%s", $field->name);
+        $name = sprintf("TargetCheckEditForm_%d[fields][%s]", $targetCheck->id, $field->name);
+        $id = sprintf("TargetCheckEditForm_fields_%d_%s", $targetCheck->id, $field->name);
     ?>
 
     <tr>
@@ -13,13 +13,11 @@
                 <?php if (in_array($field->type, [GlobalCheckField::TYPE_TEXTAREA, GlobalCheckField::TYPE_WYSIWYG])): ?>
                     <?php $wysiwyg = in_array($field->type, [GlobalCheckField::TYPE_WYSIWYG, GlobalCheckField::TYPE_WYSIWYG_READONLY]); ?>
 
-                    <textarea class="max-width <?= $wysiwyg ? "wysiwyg" : "" ?>"
+                    <textarea class="max-width target-check-field <?= $wysiwyg ? "wysiwyg" : "" ?>"
                               rows="10"
                               id="<?= $id ?>"
                               name="<?= $name ?>"
-                              <?php if ($field->type == GlobalCheckField::TYPE_WYSIWYG_READONLY) echo "readonly"; ?>>
-                        <?php echo CHtml::encode($field->value); ?>
-                    </textarea>
+                              <?php if ($field->type == GlobalCheckField::TYPE_WYSIWYG_READONLY) echo "readonly"; ?>><?php echo CHtml::encode($field->value); ?></textarea>
                 <?php endif; ?>
 
                 <?php if ($field->type == GlobalCheckField::TYPE_WYSIWYG_READONLY): ?>
@@ -27,22 +25,25 @@
                 <?php endif ?>
 
                 <?php if ($field->type == GlobalCheckField::TYPE_TEXT): ?>
-                    <input type="text"
+                    <input type="text target-check-field"
                            class="input-xlarge"
                            id="<?= $id?>"
                            name="<?= $name ?>"
                            value="<?= $field->value ?>">
                 <?php endif; ?>
-
                 <?php if ($field->type == GlobalCheckField::TYPE_RADIO): ?>
-                    <?php $values = @json_decode($field->value); ?>
+                    <?php $values = @json_decode($field->field->getValue()); ?>
 
                     <?php if ($values): ?>
-                        <ul>
+                        <ul style="list-style-type: none; margin-left: 0;">
                             <?php foreach ($values as $value => $title): ?>
                                 <li>
-                                    <input type="radio" class="input-xlarge" name="<?= $name ?>" <?php if ($value == $field->value) echo "checked"; ?>"><?= $title ?>
-                                </li><br>
+                                    <input type="radio"
+                                           class="input-xlarge target-check-field"
+                                           name="<?= $name ?>"
+                                           value="<?= $value ?>"
+                                           <?php if ($value == $field->value) echo "checked=\"checked\""; ?>">&nbsp;<?= $title ?>
+                                </li><br />
                             <?php endforeach; ?>
                         </ul>
                     <?php else: ?>
@@ -51,7 +52,7 @@
                 <?php endif; ?>
 
                 <?php if ($field->type == GlobalCheckField::TYPE_CHECKBOX): ?>
-                    <input type="checkbox" class="input-xlarge" name="<?= $name ?>" id="<?= $id ?>" <?php if (isset($field->value) && $field->value) echo "checked"; ?>>
+                    <input type="checkbox" class="input-xlarge target-check-field" name="<?= $name ?>" id="<?= $id ?>" <?php if (isset($field->value) && $field->value) echo "checked"; ?>>
                 <?php endif; ?>
             </div>
         </td>

@@ -2165,10 +2165,6 @@ class ProjectController extends Controller {
                 $model->port = null;
             }
 
-            if ($model->result == "") {
-                $model->result = null;
-            }
-
             if ($model->tableResult == "") {
                 $model->tableResult = null;
             }
@@ -2277,8 +2273,6 @@ class ProjectController extends Controller {
                         )
                     )
                 ));
-            } else {
-                $targetCheck->result = $model->result;
             }
 
             $targetCheck->table_result = $model->tableResult;
@@ -2392,6 +2386,11 @@ class ProjectController extends Controller {
                     $attachment->title = $decodedTitle->title;
                     $attachment->save();
                 }
+            }
+
+            foreach ($targetCheck->fields as $field) {
+                $value = isset($model->fields[$field->name]) ? $model->fields[$field->name] : null;
+                $field->setValue($value);
             }
 
             // add inputs
@@ -2544,7 +2543,6 @@ class ProjectController extends Controller {
                 throw new Exception($errorText);
             }
 
-            $targetCheck->result = $model->result;
             $targetCheck->save();
 
             if ($project->status == Project::STATUS_OPEN) {
@@ -2661,10 +2659,6 @@ class ProjectController extends Controller {
                 $form->question = null;
             }
 
-            if ($form->result == "") {
-                $form->result = null;
-            }
-
             if (!$form->solution) {
                 $form->solution = null;
             }
@@ -2721,7 +2715,6 @@ class ProjectController extends Controller {
                     "check_id" => $check->id,
                     "user_id" => Yii::app()->user->id,
                     "language_id" => $language->id,
-                    "result" => $form->result,
                     "status" => $form->status,
                     "rating" => $form->rating
                 ]);
@@ -3328,7 +3321,6 @@ class ProjectController extends Controller {
                         "target_check_id" => $targetCheck->id,
                     ));
 
-                    $targetCheck->result = null;
                     $targetCheck->target_file = null;
                     $targetCheck->status = TargetCheck::STATUS_OPEN;
                     $targetCheck->result_file = null;
@@ -3674,7 +3666,6 @@ class ProjectController extends Controller {
 
                 $checkData[] = array(
                     "id" => $targetCheck->id,
-                    "result" => $targetCheck->result,
                     "tableResult" => $table ? $this->renderPartial("/project/target/check/tableresult", array("table" => $table, "check" => $targetCheck), true) : "",
                     "finished" => $finished,
                     "time" => $time,

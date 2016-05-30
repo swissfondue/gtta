@@ -373,7 +373,7 @@ function User()
          */
         this.collapse = function (id, callback) {
             var selector = $("div.check-form[data-type=check][data-id=" + id + "]");
-            
+
             selector.slideUp("slow", undefined, function () {
                 if (!selector.data("limited")) {
                     $("div.check-form[data-type=check][data-id=" + id + "]").html("");
@@ -582,7 +582,7 @@ function User()
          */
         this.getData = function (id) {
             var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, solutions, resultTitle, saveResult,
-                attachments, rating, data, solution, solutionTitle, saveSolution, scripts, timeouts;
+                attachments, rating, data, solution, solutionTitle, saveSolution, scripts, timeouts, fields;
 
             row = $('div.check-form[data-type=check][data-id="' + id + '"]');
 
@@ -653,7 +653,7 @@ function User()
                     }
                 }
             );
-                
+
             saveResult = $('input[name="TargetCheckEditForm_' + id + '[saveResult]"]', row).is(":checked");
 
             solutions = $('input[name^="TargetCheckEditForm_' + id + '[solutions]"]:checked', row).map(
@@ -681,6 +681,19 @@ function User()
                     }
                 }
             ).get();
+
+            fields = $(".check-form[data-id=" + id +"]").find(".target-check-field").map(
+                function () {
+                    if ($(this).attr("type") == "radio" && !$(this).is(":checked")) {
+                        return;
+                    }
+
+                    return {
+                        name: $(this).attr("name"),
+                        value: _check.fieldValue($(this))
+                    }
+                }
+            );
 
             rating = $('input[name="TargetCheckEditForm_' + id + '[rating]"]:checked', row).val();
 
@@ -740,6 +753,10 @@ function User()
                 data.push(attachments[i]);
             }
 
+            for (i = 0; i < fields.length; i++) {
+                data.push(fields[i]);
+            }
+
             for (i = 0; i < scripts.length; i++) {
                 data.push(scripts[i]);
             }
@@ -749,6 +766,33 @@ function User()
             }
 
             return data;
+        };
+
+        /**
+         * Get field value
+         * @param el
+         * @returns {*}
+         */
+        this.fieldValue = function (el) {
+            switch ($(el).prop("tagName")) {
+                case "INPUT":
+                    var type = $(el).attr("type");
+
+                    if (type == "text" || type == "radio") {
+                        return $(el).val();
+                    } else if (type == "checkbox") {
+                        return $(el).is(":checked")
+                    }
+
+                    break;
+
+                case "TEXTAREA":
+                    return $(el).val();
+
+                default:
+                    console.error("Invalid field tagname.");
+                    return null;
+            }
         };
 
         /**
@@ -2212,7 +2256,7 @@ function User()
                     data: {
                         "YII_CSRF_TOKEN": system.csrf
                     },
-                    
+
                     "success": function (response) {
                         var status = parseInt(response.data.status);
                         var check = response.data.check;

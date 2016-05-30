@@ -86,6 +86,11 @@ class TargetCheckEditForm extends CFormModel {
      */
     public $tableResult;
 
+    /**
+     * @var array fields
+     */
+    public $fields;
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
@@ -96,7 +101,7 @@ class TargetCheckEditForm extends CFormModel {
             array("protocol, solutionTitle, resultTitle", "length", "max" => 1000),
             array("overrideTarget", "checkOverrideTarget"),
             array("saveSolution, saveResult", "boolean"),
-            array("inputs, result, solutions, solution, attachmentTitles, tableResult, scripts, timeouts", "safe"),
+            array("inputs, result, solutions, solution, attachmentTitles, tableResult, scripts, timeouts, fields", "safe"),
 		);
 	}
 

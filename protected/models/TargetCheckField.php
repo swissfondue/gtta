@@ -78,4 +78,22 @@ class TargetCheckField extends ActiveRecord {
     public function getHidden() {
         return $this->field->hidden;
     }
+
+    /**
+     * Set value
+     * @param $value
+     * @throws Exception
+     */
+    public function setValue($value) {
+        if ($this->type == GlobalCheckField::TYPE_WYSIWYG_READONLY) {
+            return;
+        }
+
+        if ($this->type == GlobalCheckField::TYPE_CHECKBOX) {
+            $value = (bool) $value;
+        }
+
+        $this->value = $value;
+        $this->save();
+    }
 }

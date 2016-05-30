@@ -67,21 +67,46 @@ class CheckField extends ActiveRecord {
     }
 
     /**
-     * Get field value
+     * Return value if it exist in any language (for checkbox or radio)
      * @param null $languageId
      * @return mixed|null|string
      */
     public function getValue($languageId = null) {
-        if (!$languageId) {
-            return $this->value;
+        if ($languageId) {
+            $l10n = CheckFieldL10n::model()->findByAttributes([
+                "check_field_id" => $this->id,
+                "language_id" => $languageId
+            ]);
+
+            return $l10n->value ? $l10n->value : null;
         }
 
-        $l10n = CheckFieldL10n::model()->findByAttributes([
-            "check_field_id" => $this->id,
-            "language_id" => $languageId
-        ]);
+        $value = $this->value;
 
-        return $l10n->value;
+        // use user_default language
+        if (!$value) {
+            $language = Language::model()->findByAttributes(["user_default" => true]);
+
+            $l10n = CheckFieldL10n::model()->findByAttributes([
+                "check_field_id" => $this->id,
+                "language_id" => $language->id
+            ]);
+            $value = $l10n->value ? $l10n->value : null;
+        }
+
+        if (!$value) {
+            $criteria = new CDbCriteria();
+            $criteria->addColumnCondition(["check_field_id" => $this->id]);
+            $criteria->addNotInCondition("language_id", [$language->id]);
+            $criteria->addCondition("value IS NOT NULL");
+            $l10n = CheckFieldL10n::model()->find($criteria);
+
+            if (!$l10n) {
+                return null;
+            }
+        }
+
+        return $value;
     }
 
     /**

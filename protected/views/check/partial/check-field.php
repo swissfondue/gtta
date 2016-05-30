@@ -13,9 +13,7 @@
                       rows="10"
                       name="<?= $name ?>"
                       id="<?= $id ?>"
-                <?php if ($field->global->type == GlobalCheckField::TYPE_WYSIWYG_READONLY) echo "readonly"; ?>>
-                <?= $value ?>
-            </textarea>
+                <?php if ($field->global->type == GlobalCheckField::TYPE_WYSIWYG_READONLY) echo "readonly"; ?>><?= $value ?></textarea>
         <?php endif; ?>
 
         <?php if ($field->global->type == GlobalCheckField::TYPE_TEXT): ?>
