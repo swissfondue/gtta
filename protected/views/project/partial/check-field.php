@@ -1,44 +1,59 @@
-<?php
-    $id = isset($id) ? $id : "";
-    $name = isset($name) ? $name : "";
-?>
+<?php if (!$field->hidden): ?>
+    <?php
+        $name = sprintf("TargetCheckEditForm[fields][%s]", $field->name);
+        $id = sprintf("TargetCheckEditForm_fields_%s", $field->name);
+    ?>
 
-<div class="control-group">
-    <label class="control-label" for="<?= $id ?>"><?php echo Yii::t('app', 'Name'); ?></label>
-    <div class="controls">
-        <?php if (in_array($field->global->type, [GlobalCheckField::TYPE_TEXTAREA, GlobalCheckField::TYPE_WYSIWYG, GlobalCheckField::TYPE_WYSIWYG_READONLY])): ?>
-            <?php $wysiwyg = in_array($field->global->type, [GlobalCheckField::TYPE_WYSIWYG, GlobalCheckField::TYPE_WYSIWYG_READONLY]); ?>
+    <tr>
+        <th>
+            <?= $field->localizedTitle; ?>
+        </th>
+        <td class="text">
+            <div class="limiter">
+                <?php if (in_array($field->type, [GlobalCheckField::TYPE_TEXTAREA, GlobalCheckField::TYPE_WYSIWYG])): ?>
+                    <?php $wysiwyg = in_array($field->type, [GlobalCheckField::TYPE_WYSIWYG, GlobalCheckField::TYPE_WYSIWYG_READONLY]); ?>
 
-            <textarea class="max-width <?= $wysiwyg ? "wysiwyg" : "" ?>"
-                      rows="10"
-                      id="<?= $id ?>"
-                      name="<?= $name ?>"
-                      <?php if ($field->global->type == GlobalCheckField::TYPE_WYSIWYG_READONLY) echo "readonly"; ?>>
-                <?php echo CHtml::encode($field->value); ?>
-            </textarea>
-        <?php endif; ?>
+                    <textarea class="max-width <?= $wysiwyg ? "wysiwyg" : "" ?>"
+                              rows="10"
+                              id="<?= $id ?>"
+                              name="<?= $name ?>"
+                              <?php if ($field->type == GlobalCheckField::TYPE_WYSIWYG_READONLY) echo "readonly"; ?>>
+                        <?php echo CHtml::encode($field->value); ?>
+                    </textarea>
+                <?php endif; ?>
 
-        <?php if ($field->global->type == GlobalCheckField::TYPE_TEXT): ?>
-            <input type="text"
-                   class="input-xlarge"
-                   id="<?= $id?>"
-                   name="<?= $name ?>"
-                   value="<?= $field->value ?>">
-        <?php endif; ?>
+                <?php if ($field->type == GlobalCheckField::TYPE_WYSIWYG_READONLY): ?>
+                    <?= $field->value; ?>
+                <?php endif ?>
 
-        <?php if ($field->global->type == GlobalCheckField::TYPE_RADIO): ?>
-            <?php $possibleValues = json_decode($field->field->possible_values); ?>
+                <?php if ($field->type == GlobalCheckField::TYPE_TEXT): ?>
+                    <input type="text"
+                           class="input-xlarge"
+                           id="<?= $id?>"
+                           name="<?= $name ?>"
+                           value="<?= $field->value ?>">
+                <?php endif; ?>
 
-            <?php foreach ($possibleValues as $pv): ?>
-                <input type="radio"
-                       class="input-xlarge"
-                       name="<?= $name ?>"
-                       <?php if ($pv == $field->value) echo "checked"; ?>">
-            <?php endforeach; ?>
-        <?php endif; ?>
+                <?php if ($field->type == GlobalCheckField::TYPE_RADIO): ?>
+                    <?php $values = @json_decode($field->value); ?>
 
-        <?php if ($field->global->type == GlobalCheckField::TYPE_CHECKBOX): ?>
-            <input type="checkbox" class="input-xlarge" name="<?= $name ?>" id="<?= $id ?>" <?php if (isset($field->value) && $field->value) echo "checked"; ?>>
-        <?php endif; ?>
-    </div>
-</div>
+                    <?php if ($values): ?>
+                        <ul>
+                            <?php foreach ($values as $value => $title): ?>
+                                <li>
+                                    <input type="radio" class="input-xlarge" name="<?= $name ?>" <?php if ($value == $field->value) echo "checked"; ?>"><?= $title ?>
+                                </li><br>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php else: ?>
+                        <?= Yii::t("app", "No values.") ?>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <?php if ($field->type == GlobalCheckField::TYPE_CHECKBOX): ?>
+                    <input type="checkbox" class="input-xlarge" name="<?= $name ?>" id="<?= $id ?>" <?php if (isset($field->value) && $field->value) echo "checked"; ?>>
+                <?php endif; ?>
+            </div>
+        </td>
+    </tr>
+<?php endif; ?>

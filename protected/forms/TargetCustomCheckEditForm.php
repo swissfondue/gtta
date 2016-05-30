@@ -55,16 +55,6 @@ class TargetCustomCheckEditForm extends CFormModel {
     public $controlId;
 
     /**
-     * @var string poc.
-     */
-    public $poc;
-
-    /**
-     * @var string links.
-     */
-    public $links;
-
-    /**
      * @var array attachment titles
      */
     public $attachmentTitles;
@@ -78,7 +68,7 @@ class TargetCustomCheckEditForm extends CFormModel {
             array("name, solutionTitle", "length", "max" => 1000),
             array("id, controlId", "numerical", "integerOnly" => true),
             array("createCheck", "boolean"),
-            array("backgroundInfo, question, result, solution, poc, links, attachmentTitles", "safe"),
+            array("backgroundInfo, question, result, solution, attachmentTitles", "safe"),
 		);
 	}
 }

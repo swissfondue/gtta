@@ -151,4 +151,36 @@ class CheckEditForm extends LocalizedFormModel
 
         return true;
 	}
+
+    /**
+     * Parse fields
+     * @param Check $check
+     */
+    public function parseFields(Check $check) {
+        foreach ($check->fields as $f) {
+            $l10ns = $f->l10n;
+
+            foreach ($l10ns as $l10n) {
+                if (!isset($this->fields[$l10n->language_id])) {
+                    $this->fields[$l10n->language_id] = [];
+                }
+
+                $this->fields[$l10n->language_id][$f->global->name] = $l10n->value;
+            }
+        }
+    }
+
+    /**
+     * Return field value
+     * @param $fieldName
+     * @param $languageId
+     * @return null
+     */
+    public function getFieldValue($fieldName, $languageId) {
+        if (!$this->fields) {
+            return null;
+        }
+
+        return isset($this->fields[$languageId][$fieldName]) ? $this->fields[$languageId][$fieldName] : null;
+    }
 }

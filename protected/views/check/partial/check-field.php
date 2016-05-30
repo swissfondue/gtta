@@ -19,6 +19,7 @@
         <?php endif; ?>
 
         <?php if ($field->global->type == GlobalCheckField::TYPE_TEXT): ?>
+            <input type="text" class="input-xlarge" name="<?= $name ?>" value="<?= $value ?>">
         <?php endif; ?>
 
         <?php if ($field->global->type == GlobalCheckField::TYPE_RADIO): ?>

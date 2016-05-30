@@ -7,6 +7,7 @@
  * @property integer $check_field_id
  * @property integer $language_id
  * @property string $value
+ * @property CheckField $field
  */
 class CheckFieldL10n extends ActiveRecord
 {
@@ -49,5 +50,51 @@ class CheckFieldL10n extends ActiveRecord
             "field" => [self::BELONGS_TO, "CheckField", "check_field_id"],
             "language"   => [self::BELONGS_TO, "Language",   "language_id"],
         ];
+    }
+
+    /**
+     * Get type
+     * @return mixed|null
+     */
+    public function getType() {
+        return $this->field->type;
+    }
+
+    /**
+     * Get name
+     * @return mixed|null
+     */
+    public function getName() {
+        return $this->field->name;
+    }
+
+    /**
+     * Set value
+     * @param $value
+     */
+    public function setValue($value) {
+        // case if checkbox, update all possible values
+        if ($this->type == GlobalCheckField::TYPE_CHECKBOX) {
+            $value = (int) $value;
+
+            $criteria = new CDbCriteria();
+            $criteria->addNotInCondition("language_id", [$this->language_id]);
+            $criteria->addColumnCondition([
+                "check_field_id" => $this->check_field_id
+            ]);
+            $l10ns = CheckFieldL10n::model()->findAll($criteria);
+
+            foreach ($l10ns as $l10n) {
+                $l10n->value = $value;
+                $l10n->save();
+            }
+
+            $this->field->value = $value;
+            $this->field->save();
+        }
+
+        $this->value = $value;
+
+        $this->save();
     }
 }

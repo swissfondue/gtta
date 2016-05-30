@@ -1042,34 +1042,6 @@ class ReportController extends Controller {
                                 $row++;
                             }
 
-                            if (isset($check["poc"]) && $check["poc"] && $this->_system->checklist_poc) {
-                                $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 2)->setBorder($this->thinBorder);
-
-                                $table->writeToCell($row, 1, Yii::t("app", "Technical Details"));
-                                $table->writeToCell($row, 2, $check["poc"]);
-
-                                $row++;
-                            }
-                            
-                            if (isset($check["links"]) && $check["links"] && $this->_system->checklist_links) {
-                                $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 2)->setBorder($this->thinBorder);
-
-                                $table->writeToCell($row, 1, Yii::t("app", "Links"));
-                                $table->writeToCell($row, 2, $check["links"]);
-
-                                $row++;
-                            }
-
                             if ($check['solutions']) {
                                 $table->addRows(count($check['solutions']));
 
@@ -1428,11 +1400,6 @@ class ReportController extends Controller {
                             "id" => $check->target_id . "-" . $check->check_control_id,
                             "custom" => true,
                             "name" => $check->name,
-                            "background" => $this->_prepareProjectReportText($check->background_info),
-                            "question" => $this->_prepareProjectReportText($check->question),
-                            "result" => $check->result,
-                            "poc" => $check->poc,
-                            "links" => $check->links,
                             "tableResult" => null,
                             "rating" => $check->rating,
                             "ratingName" => $ratings[$check->rating],
@@ -1529,8 +1496,6 @@ class ReportController extends Controller {
                                 "solution" => $checkData["solutions"] ? implode("\n", $checkData["solutions"]) : "",
                                 "rating" => $checkData["rating"],
                                 "result" => $checkData["result"],
-                                "poc" => $checkData["poc"],
-                                "links" => $checkData["links"],
                                 "ratingValue" => $checkData["ratingValue"],
                                 "custom" => true,
                             );
@@ -1598,8 +1563,6 @@ class ReportController extends Controller {
                                 "background" => $this->_prepareProjectReportText($check->localizedBackgroundInfo),
                                 "question" => $this->_prepareProjectReportText($check->localizedQuestion),
                                 "result" => $tc->result,
-                                "poc" => $tc->poc,
-                                "links" => $tc->links,
                                 "tableResult" => $tc->table_result,
                                 "rating" => 0,
                                 "ratingName" => $ratings[$tc->rating],
@@ -1704,8 +1667,6 @@ class ReportController extends Controller {
                                     "solution" => $checkData["solutions"] ? implode("\n", $checkData["solutions"]) : "",
                                     "rating" => $checkData["rating"],
                                     "result" => $checkData["result"],
-                                    "poc" => $checkData["poc"],
-                                    "links" => $checkData["links"],
                                     "ratingValue" => $checkData["ratingValue"],
                                 );
                             }
@@ -2395,7 +2356,6 @@ class ReportController extends Controller {
                     }
 
                     $problem = $check["result"];
-                    $details = $check["poc"];
 
                     $cell = $table->getCell($row, 3);
 
@@ -2407,16 +2367,6 @@ class ReportController extends Controller {
                         }
 
                         $cell->writeText("<br><br>");
-                    }
-
-                    if ($details) {
-                        $cell->writeText("Technical Details:<br>");
-
-                        if (Utils::isHtml($details)) {
-                            $this->_renderText($cell, $details, false);
-                        } else {
-                            $cell->writeText($details);
-                        }
                     }
 
 
@@ -4389,6 +4339,7 @@ class ReportController extends Controller {
             }
         }
 
+
         if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
             if ($type == TargetCheck::TYPE) {
                 $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($check->check->localizedBackgroundInfo);
@@ -4408,6 +4359,7 @@ class ReportController extends Controller {
         if (in_array(TargetCheck::COLUMN_RESULT, $model->columns)) {
             $row[TargetCheck::COLUMN_RESULT] = $check->result;
         }
+
 
         if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns)) {
             if ($type == TargetCheck::TYPE) {
@@ -4493,6 +4445,7 @@ class ReportController extends Controller {
                 $header[TargetCheck::COLUMN_REFERENCE] = Yii::t('app', 'Reference');
             }
 
+            /*
             if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
                 $header[TargetCheck::COLUMN_BACKGROUND_INFO] = Yii::t('app', 'Background Info');
             }
@@ -4504,6 +4457,7 @@ class ReportController extends Controller {
             if (in_array(TargetCheck::COLUMN_RESULT, $model->columns)) {
                 $header[TargetCheck::COLUMN_RESULT] = Yii::t('app', 'Result');
             }
+            */
 
             if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns)) {
                 $header[TargetCheck::COLUMN_SOLUTION] = Yii::t('app', 'Solution');

@@ -854,17 +854,7 @@ class CheckController extends Controller
                 $model->localizedItems[$cl->language_id] = $i;
             }
 
-            foreach ($check->fields as $f) {
-                $l10ns = $f->l10n;
-
-                foreach ($l10ns as $l10n) {
-                    if (!isset($model->fields[$l10n->language_id])) {
-                        $model->fields[$l10n->language_id] = [];
-                    }
-
-                    $model->fields[$l10n->language_id][$f->global->name] = $l10n->value;
-                }
-            }
+            $model->parseFields($check);
         } else {
             $model->controlId = $control->id;
         }
@@ -927,41 +917,31 @@ class CheckController extends Controller
                     $checkL10n->save();
                 }
 
-                foreach ($model->fields as $languageId => $fields) {
-                    foreach ($fields as $name => $value) {
-                        $global = GlobalCheckField::model()->findByAttributes([
-                            "name" => $name
-                        ]);
+                foreach ($check->fields as $field) {
+                    if ($field->type == GlobalCheckField::TYPE_CHECKBOX) {
+                        $value = false;
 
-                        if (!$global) {
-                            throw new Exception("Global field not found.", 404);
+                        foreach ($languages as $l) {
+                            $value = (bool) $model->getFieldValue($field->name, $l->id);
+
+                            if ($value) {
+                                break;
+                            }
                         }
 
-                        $checkField = CheckField::model()->findByAttributes([
-                            "global_check_field_id" => $global->id,
-                            "check_id" => $check->id
-                        ]);
-
-                        if (!$checkField) {
-                            throw new Exception("Check field not found.", 404);
+                        $field->setValue($value, $l->id);
+                    } else {
+                        foreach ($languages as $l) {
+                            $field->setValue($model->getFieldValue($field->name, $l->id), $l->id);
                         }
-
-                        $checkField->value = $model->defaultL10n($languages, $name, "fields");
-
-                        $checkFieldL10n = CheckFieldL10n::model()->findByAttributes([
-                            "check_field_id" => $checkField->id,
-                            "language_id" => $languageId
-                        ]);
-
-                        $checkFieldL10n->value = $value;
-                        $checkFieldL10n->save();
                     }
                 }
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check saved.'));
                 $check->refresh();
 
-                TargetCheckReindexJob::enqueue(array("category_id" => $check->control->check_category_id));
+                TargetCheckReindexJob::enqueue(["check_id" => $check->id]);
+                TargetCheckReindexJob::enqueue(["category_id" => $check->control->check_category_id]);
 
                 if ($redirect) {
                     $this->redirect(array(
@@ -1101,9 +1081,6 @@ class CheckController extends Controller
                 $dst->create_time = $now->format(ISO_DATE_TIME);
                 $dst->check_control_id = $control->id;
                 $dst->name = $src->name . ' (' . Yii::t('app', 'Copy') . ')';
-                $dst->background_info = $src->background_info;
-                $dst->hints = $src->hints;
-                $dst->question = $src->question;
                 $dst->automated = $src->automated;
                 $dst->multiple_solutions = $src->multiple_solutions;
                 $dst->protocol = $src->protocol;
@@ -1128,9 +1105,6 @@ class CheckController extends Controller
                     $newL10n->check_id = $dst->id;
                     $newL10n->language_id = $l10n->language_id;
                     $newL10n->name = $l10n->name . ' (' . Yii::t('app', 'Copy') . ')';
-                    $newL10n->background_info = $l10n->background_info;
-                    $newL10n->hints = $l10n->hints;
-                    $newL10n->question = $l10n->question;
                     $newL10n->save();
                 }
 
@@ -2858,9 +2832,6 @@ class CheckController extends Controller
 
                 $searchCriteria = new CDbCriteria();
                 $searchCriteria->addSearchCondition('t.name', $model->query, true, 'OR', 'ILIKE');
-                $searchCriteria->addSearchCondition('t.background_info', $model->query, true, 'OR', 'ILIKE');
-                $searchCriteria->addSearchCondition('t.hints', $model->query, true, 'OR', 'ILIKE');
-                $searchCriteria->addSearchCondition('t.question', $model->query, true, 'OR', 'ILIKE');
                 $criteria->mergeWith($searchCriteria);
 
                 $checks = CheckL10n::model()->findAll($criteria);

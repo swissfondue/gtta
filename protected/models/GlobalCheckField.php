@@ -71,6 +71,7 @@ class GlobalCheckField extends ActiveRecord {
         if ($field) {
             if ($this->id != $field->id) {
                 $this->addError("name", "Field with that name already exists.");
+
                 return false;
             }
         }
@@ -80,6 +81,12 @@ class GlobalCheckField extends ActiveRecord {
 
             if (in_array($field->name, GlobalCheckField::$readonly) && $this->name != $field->name) {
                 $this->addError("name", "Access denied.");
+
+                return false;
+            }
+
+            if ($this->type != $field->type) {
+                $this->addError("type", "You cannot change type of existing field.");
 
                 return false;
             }

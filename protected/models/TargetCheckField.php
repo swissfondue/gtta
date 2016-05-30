@@ -20,16 +20,6 @@ class TargetCheckField extends ActiveRecord {
     }
 
     /**
-     * Set order field
-     * @return bool
-     */
-    protected function beforeSave() {
-        $this->setOrder();
-
-        return parent::beforeSave();
-    }
-
-    /**
      * @return string the associated database table name
      */
     public function tableName() {
@@ -41,9 +31,8 @@ class TargetCheckField extends ActiveRecord {
      */
     public function rules() {
         return array(
-            array("target_check_id, check_field_id, sort_order", "required" ),
-            array("target_check_id, check_field_id, sort_order", "numerical", "integerOnly" => true),
-            array("hidden", "boolean"),
+            array("target_check_id, check_field_id", "required" ),
+            array("target_check_id, check_field_id", "numerical", "integerOnly" => true),
             array("value", "safe"),
         );
     }
@@ -58,5 +47,35 @@ class TargetCheckField extends ActiveRecord {
         );
     }
 
-    public function setOrder() {}
+    /**
+     * Get name
+     * @return mixed
+     */
+    public function getName() {
+        return $this->field->name;
+    }
+
+    /**
+     * Get type
+     * @return mixed
+     */
+    public function getType() {
+        return $this->field->type;
+    }
+
+    /**
+     * Get title
+     * @return mixed
+     */
+    public function getLocalizedTitle() {
+        return $this->field->localizedTitle;
+    }
+
+    /**
+     * Check if hidden
+     * @return mixed
+     */
+    public function getHidden() {
+        return $this->field->hidden;
+    }
 }

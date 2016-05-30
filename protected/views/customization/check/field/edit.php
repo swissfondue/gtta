@@ -55,7 +55,7 @@
         <div class="control-group <?php if ($form->getError("type")) echo "error"; ?>">
             <label class="control-label" for="GlobalCheckFieldEditForm_type"><?php echo Yii::t("app", "Type"); ?></label>
             <div class="controls">
-                <select class="input-xlarge" id="GlobalCheckFieldEditForm_type" name="GlobalCheckFieldEditForm[type]">
+                <select class="input-xlarge" id="GlobalCheckFieldEditForm_type" name="GlobalCheckFieldEditForm[type]" <?= !$newRecord ? "disabled" : "" ?>>
                     <?php foreach (GlobalCheckField::$fieldTypes as $key => $title): ?>
                         <option value="<?= $key ?>" <?php if ($form->type == $key) echo "selected"; ?>><?= $title; ?></option>
                     <?php endforeach; ?>

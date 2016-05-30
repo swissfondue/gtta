@@ -7,9 +7,6 @@
  * @property integer $id
  * @property integer $check_control_id
  * @property string $name
- * @property string $background_info
- * @property string $hints
- * @property string $question
  * @property boolean $automated
  * @property boolean $multiple_solutions
  * @property string $protocol

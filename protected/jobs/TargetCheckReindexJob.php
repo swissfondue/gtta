@@ -24,7 +24,7 @@ class TargetCheckReindexJob extends BackgroundJob {
                 !isset($this->args["target_id"]) &&
                 !isset($this->args['template_id']) &&
                 !isset($this->args["global_check_field_id"]) &&
-                !isset($this->args["check_field_id"])
+                !isset($this->args["check_id"])
             ) {
                 throw new Exception("Invalid job params.");
             }
@@ -101,14 +101,16 @@ class TargetCheckReindexJob extends BackgroundJob {
                 }
 
                 FieldManager::reindexCheckFields($field);
-            } else if (isset($this->args["check_field_id"])) {
-                $field = CheckField::model()->findByPk($this->args["check_field_id"]);
+            } else if (isset($this->args["check_id"])) {
+                $check = Check::model()->findByPk($this->args["check_id"]);
 
-                if (!$field) {
-                    throw new Exception("Field not found.", 404);
+                if (!$check) {
+                    throw new Exception("Check not found.", 404);
                 }
 
-                FieldManager::reindexTargetCheckFields($field);
+                foreach ($check->fields as $field) {
+                    FieldManager::reindexTargetCheckFields($field);
+                }
             }
 
             ProjectPlanner::updateAllStats();

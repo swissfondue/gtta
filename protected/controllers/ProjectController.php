@@ -296,9 +296,6 @@ class ProjectController extends Controller {
                 TargetCheck::COLUMN_TARGET          => Yii::t("app", "Target"),
                 TargetCheck::COLUMN_NAME            => Yii::t("app", "Name"),
                 TargetCheck::COLUMN_REFERENCE       => Yii::t("app", "Reference"),
-                TargetCheck::COLUMN_BACKGROUND_INFO => Yii::t("app", "Background Info"),
-                TargetCheck::COLUMN_QUESTION        => Yii::t("app", "Question"),
-                TargetCheck::COLUMN_RESULT          => Yii::t("app", "Result"),
                 TargetCheck::COLUMN_SOLUTION        => Yii::t("app", "Solution"),
                 TargetCheck::COLUMN_RATING          => Yii::t("app", "Rating"),
             ),
@@ -2172,14 +2169,6 @@ class ProjectController extends Controller {
                 $model->result = null;
             }
 
-            if ($model->poc == "") {
-                $model->poc = null;
-            }
-
-            if ($model->links == "") {
-                $model->links = null;
-            }
-
             if ($model->tableResult == "") {
                 $model->tableResult = null;
             }
@@ -2246,8 +2235,6 @@ class ProjectController extends Controller {
             $targetCheck->port = $model->port;
             $targetCheck->status = TargetCheck::STATUS_FINISHED;
             $targetCheck->rating = $model->rating;
-            $targetCheck->poc = $model->poc;
-            $targetCheck->links = $model->links;
 
             if (User::checkRole(User::ROLE_ADMIN) && $model->saveResult) {
                 if (!$model->resultTitle) {
@@ -2678,14 +2665,6 @@ class ProjectController extends Controller {
                 $form->result = null;
             }
 
-            if (!$form->poc) {
-                $form->poc = null;
-            }
-
-            if (!$form->links) {
-                $form->links = null;
-            }
-
             if (!$form->solution) {
                 $form->solution = null;
             }
@@ -2719,8 +2698,6 @@ class ProjectController extends Controller {
                 $now = new DateTime();
                 $check->create_time = $now->format(ISO_DATE_TIME);
                 $check->name = $form->name;
-                $check->background_info = $form->backgroundInfo;
-                $check->question = $form->question;
                 $check->check_control_id = $control->id;
                 $check->reference_id = $reference->id;
                 $check->reference_code = "CHECK-" . $customCheck->reference;
@@ -2736,8 +2713,6 @@ class ProjectController extends Controller {
                 $checkL10n = new CheckL10n();
                 $checkL10n->check_id = $check->id;
                 $checkL10n->language_id = $language->id;
-                $checkL10n->background_info = $form->backgroundInfo;
-                $checkL10n->question = $form->question;
                 $checkL10n->name = $form->name;
                 $checkL10n->save();
 
@@ -2748,9 +2723,7 @@ class ProjectController extends Controller {
                     "language_id" => $language->id,
                     "result" => $form->result,
                     "status" => $form->status,
-                    "rating" => $form->rating,
-                    "poc" => $form->poc,
-                    "links" => $form->links
+                    "rating" => $form->rating
                 ]);
 
                 if ($form->solutionTitle && $form->solution) {
@@ -2787,14 +2760,9 @@ class ProjectController extends Controller {
             } else {
                 $customCheck->user_id = Yii::app()->user->id;
                 $customCheck->name = $form->name;
-                $customCheck->background_info = $form->backgroundInfo;
-                $customCheck->question = $form->question;
-                $customCheck->result = $form->result;
                 $customCheck->solution_title = $form->solutionTitle;
                 $customCheck->solution = $form->solution;
                 $customCheck->rating = $form->rating;
-                $customCheck->poc = $form->poc;
-                $customCheck->links = $form->links;
 
                 if (count($form->attachmentTitles)) {
                     foreach ($form->attachmentTitles as $title) {
@@ -3562,9 +3530,6 @@ class ProjectController extends Controller {
 
                 case "reset":
                     $customCheck->name = null;
-                    $customCheck->background_info = null;
-                    $customCheck->question = null;
-                    $customCheck->result = null;
                     $customCheck->solution_title = null;
                     $customCheck->solution = null;
                     $customCheck->rating = TargetCustomCheck::RATING_NONE;

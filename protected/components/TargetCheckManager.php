@@ -37,14 +37,6 @@ class TargetCheckManager {
                 $targetCheck->rating = $data["rating"];
             }
 
-            if ($data["poc"]) {
-                $targetCheck->poc = $data["poc"];
-            }
-
-            if ($data["links"]) {
-                $targetCheck->links = $data["links"];
-            }
-
             $targetCheck->save();
         } catch (Exception $e) {
             throw new Exception("Can't create check.");

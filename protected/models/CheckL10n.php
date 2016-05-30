@@ -7,9 +7,6 @@
  * @property integer $check_id
  * @property integer $language_id
  * @property string $name
- * @property string $background_info
- * @property string $hints
- * @property string $question
  */
 class CheckL10n extends ActiveRecord
 {   

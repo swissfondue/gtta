@@ -8,6 +8,9 @@
  * @property integer $global_check_field_id
  * @property integer $check_id
  * @property string $value
+ * @property GlobalCheckField $global
+ * @property CheckFieldL10n $l10n
+ * @property Check $check
  */
 class CheckField extends ActiveRecord {
     /**
@@ -45,5 +48,76 @@ class CheckField extends ActiveRecord {
             "check" => array(self::BELONGS_TO, "Check", "check_id"),
             "global" => array(self::BELONGS_TO, "GlobalCheckField", "global_check_field_id"),
         );
+    }
+
+    /**
+     * Get type
+     * @return mixed
+     */
+    public function getType() {
+        return $this->global->type;
+    }
+
+    /**
+     * Get name
+     * @return string
+     */
+    public function getName() {
+        return $this->global->name;
+    }
+
+    /**
+     * Get field value
+     * @param null $languageId
+     * @return mixed|null|string
+     */
+    public function getValue($languageId = null) {
+        if (!$languageId) {
+            return $this->value;
+        }
+
+        $l10n = CheckFieldL10n::model()->findByAttributes([
+            "check_field_id" => $this->id,
+            "language_id" => $languageId
+        ]);
+
+        return $l10n->value;
+    }
+
+    /**
+     * Set value
+     * @param $value
+     * @param null $languageId
+     */
+    public function setValue($value, $languageId = null) {
+        if (!$languageId) {
+            $this->value = $value;
+            $this->save();
+
+            return;
+        }
+
+        $l10n = CheckFieldL10n::model()->findByAttributes([
+            "check_field_id" => $this->id,
+            "language_id" => $languageId
+        ]);
+
+        $l10n->setValue($value);
+    }
+
+    /**
+     * Get title
+     * @return mixed
+     */
+    public function getLocalizedTitle() {
+        return $this->global->localizedTitle;
+    }
+
+    /**
+     * Check if hidden
+     * @return bool
+     */
+    public function getHidden() {
+        return $this->global->hidden;
     }
 }

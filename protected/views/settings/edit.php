@@ -212,26 +212,6 @@
 
         <hr>
 
-        <h3><?php echo Yii::t("app", "Checklist Settings"); ?></h3>
-
-        <br>
-
-        <div class="control-group">
-            <label class="control-label" for="SettingsEditForm_checklistPoc"><?php echo Yii::t("app", "Checklist Technical Details"); ?></label>
-            <div class="controls">
-                <input type="checkbox" id="SettingsEditForm_checklistPoc" name="SettingsEditForm[checklistPoc]" value="1" <?php if ($form->checklistPoc) echo 'checked="checked"'; ?>>
-            </div>
-        </div>
-        
-        <div class="control-group">
-            <label class="control-label" for="SettingsEditForm_checklistLinks"><?php echo Yii::t("app", "Checklist Links"); ?></label>
-            <div class="controls">
-                <input type="checkbox" id="SettingsEditForm_checklistLinks" name="SettingsEditForm[checklistLinks]" value="1" <?php if ($form->checklistLinks) echo 'checked="checked"'; ?>>
-            </div>
-        </div>
-
-        <hr>
-
         <h3><?php echo Yii::t("app", "Mail Settings"); ?></h3>
 
         <div class="control-group <?php if ($form->getError('mailHost')) echo 'error'; ?>">

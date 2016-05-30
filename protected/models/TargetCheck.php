@@ -20,8 +20,6 @@
  * @property string $table_result
  * @property string $solution
  * @property string $solution_title
- * @property string $poc
- * @property string $links
  * @property User $user
  * @property Check $check
  * @property Target $target
@@ -134,7 +132,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             array("target_file, result_file, protocol, override_target", "length", "max" => 1000),
             array("status", "in", "range" => array(self::STATUS_OPEN, self::STATUS_FINISHED)),
             array("rating", "in", "range" => self::getValidRatings()),
-            array("result, table_result, solution, solution_title, poc, links", "safe"),
+            array("result, table_result, solution, solution_title", "safe"),
 		);
 	}
 
@@ -220,8 +218,6 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "rating" => $abbreviations[$this->rating],
             "rating_name" => $names[$this->rating],
             "target" => $this->override_target ? $this->override_target : $this->target->host,
-            "links" => $this->links,
-            "poc" => $this->poc,
             "result" => $this->result,
             "reference" => $check->_reference->name . ($check->reference_code ? "-" . $check->reference_code : ""),
             "solution" => array(),

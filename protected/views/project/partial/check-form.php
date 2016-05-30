@@ -29,42 +29,10 @@
         <?php foreach ($check->fields as $field): ?>
             <?= $this->renderPartial("partial/check-field",
                 [
-                    "field" => $field,
-                    "name" => sprintf("TargetCheckEditForm[fields][%s]", $field->name),
-                    "id" => sprintf("TargetCheckEditForm_fields_%s", $field->name)
+                    "field" => $field
                 ]); ?>
         <?php endforeach; ?>
 
-        <?php if (false)://$checkData->localizedBackgroundInfo): ?>
-            <tr>
-                <th>
-                    <?php echo Yii::t("app", "Background Info"); ?>
-                </th>
-                <td class="text">
-                    <div class="limiter"><?php echo $checkData->localizedBackgroundInfo; ?></div>
-                </td>
-            </tr>
-        <?php endif; ?>
-        <?php if (false)://$checkData->localizedHints): ?>
-            <tr>
-                <th>
-                    <?php echo Yii::t("app", "Hints"); ?>
-                </th>
-                <td class="text">
-                    <div class="limiter"><?php echo $checkData->localizedHints; ?></div>
-                </td>
-            </tr>
-        <?php endif; ?>
-        <?php if (false)://$checkData->localizedQuestion): ?>
-            <tr>
-                <th>
-                    <?php echo Yii::t("app", "Question"); ?>
-                </th>
-                <td class="text">
-                    <div class="limiter"><?php echo $checkData->localizedQuestion; ?></div>
-                </td>
-            </tr>
-        <?php endif; ?>
         <?php if ($checkData->automated): ?>
             <tr>
                 <th>
@@ -355,26 +323,6 @@
                 </td>
             </tr>
         <?php endif; ?>
-        <?php if ($this->_system->checklist_poc): ?>
-            <tr>
-                <th>
-                    <?php echo Yii::t("app", "Technical Details"); ?>
-                </th>
-                <td>
-                    <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[poc]" class="max-width wysiwyg" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_poc" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->poc); ?></textarea>
-                </td>
-            </tr>
-        <?php endif; ?>
-        <?php if ($this->_system->checklist_links): ?>
-            <tr>
-                <th>
-                    <?php echo Yii::t("app", "Links"); ?>
-                </th>
-                <td>
-                    <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[links]" class="max-width wysiwyg" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_links" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->links); ?></textarea>
-                </td>
-            </tr>
-        <?php endif; ?>        
         <tr>
             <th>
                 <?php echo Yii::t("app", "Solution"); ?>

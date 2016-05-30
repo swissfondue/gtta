@@ -9,6 +9,9 @@ class m160516_193144_editable_check_fields extends CDbMigration {
      * @return bool
      */
     public function safeUp() {
+        $this->dropColumn("target_checks", "poc");
+        $this->dropColumn("target_checks", "links");
+
         $this->createTable(
             "global_check_fields",
             [
@@ -54,10 +57,10 @@ class m160516_193144_editable_check_fields extends CDbMigration {
              (:wysiwyg_ro_type, 'background_info', 'Background Info'),
              (:wysiwyg_ro_type, 'question', 'Question'),
              (:wysiwyg_ro_type, 'hints', 'Hints'),
-             (:wysiwyg_type, 'result', 'Result')",
+             (:textarea_type, 'result', 'Result')",
             [
                 "wysiwyg_ro_type" => GlobalCheckField::TYPE_WYSIWYG_READONLY,
-                "wysiwyg_type" => GlobalCheckField::TYPE_WYSIWYG
+                "textarea_type" => GlobalCheckField::TYPE_TEXTAREA
             ]
         );
         $this->execute(
@@ -390,6 +393,9 @@ class m160516_193144_editable_check_fields extends CDbMigration {
         $this->dropTable("check_fields");
         $this->dropTable("global_check_fields_l10n");
         $this->dropTable("global_check_fields");
+
+        $this->addColumn("target_checks", "poc", "text");
+        $this->addColumn("target_checks", "links", "text");
 
 		return true;
 	}

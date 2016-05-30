@@ -74,9 +74,6 @@ class CheckManager {
 
             $c->external_id = $check->id;
             $c->name = $check->name;
-            $c->background_info = $check->background_info;
-            $c->hints = $check->hints;
-            $c->question = $check->question;
             $c->automated = $check->automated;
             $c->multiple_solutions = $check->multiple_solutions;
             $c->protocol = $check->protocol;
@@ -97,9 +94,6 @@ class CheckManager {
                 $l->language_id = $this->_languages[$l10n->code];
                 $l->check_id = $c->id;
                 $l->name = $l10n->name;
-                $l->background_info = $l10n->background_info;
-                $l->hints = $l10n->hints;
-                $l->question = $l10n->question;
                 $l->save();
             }
 
@@ -189,6 +183,14 @@ class CheckManager {
                     }
                 }
             }
+
+            foreach ($check->field as $field) {
+                $f = new CheckField();
+                $f->check_id = $c->id;
+                $f->global_check_field_id = $field->global_check_field_id;
+                $f->value = $field->value;
+                $f->save();
+            }
         } catch (Exception $e) {
             if (!$initial) {
                 $api->installError(array(
@@ -276,9 +278,6 @@ class CheckManager {
             "reference_code" => $check->reference_code,
             "reference_url" => $check->reference_url,
             "name" => $check->name,
-            "background_info" => $check->background_info,
-            "hints" => $check->hints,
-            "question" => $check->question,
             "automated" => $check->automated,
             "multiple_solutions" => $check->multiple_solutions,
             "protocol" => $check->protocol,
@@ -287,16 +286,14 @@ class CheckManager {
             "l10n" => array(),
             "results" => array(),
             "solutions" => array(),
-            "scripts" => array()
+            "scripts" => array(),
+            "fields" => array(),
         );
 
         foreach ($check->l10n as $l10n) {
             $data["l10n"][] = array(
                 "code" => $l10n->language->code,
                 "name" => $l10n->name,
-                "background_info" => $l10n->background_info,
-                "hints" => $l10n->hints,
-                "question" => $l10n->question,
             );
         }
 
@@ -371,6 +368,15 @@ class CheckManager {
             }
 
             $data["scripts"][] = $s;
+        }
+
+        foreach ($check->fields as $field) {
+            $f = [
+                "name" => $field->name,
+                "value" => $field->value
+            ];
+
+            $data["fields"][] = $f;
         }
 
         try {
