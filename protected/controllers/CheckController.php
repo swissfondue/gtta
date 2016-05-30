@@ -828,6 +828,7 @@ class CheckController extends Controller
 		$model = new CheckEditForm();
         $model->localizedItems = array();
         $model->fields = array();
+        $model->hidden = array();
 
         if (!$newRecord) {
             $model->name = $check->name;
@@ -855,6 +856,10 @@ class CheckController extends Controller
             }
 
             $model->parseFields($check);
+
+            foreach ($check->fields as $f) {
+                $model->hidden[$f->name] = $f->hidden;
+            }
         } else {
             $model->controlId = $control->id;
         }
@@ -918,6 +923,11 @@ class CheckController extends Controller
                 }
 
                 foreach ($check->fields as $field) {
+                    if (isset($model->hidden[$field->name]) && $model->hidden[$field->name]) {
+                        $field->hidden = true;
+                        $field->save();
+                    }
+
                     if ($field->type == GlobalCheckField::TYPE_CHECKBOX) {
                         $value = false;
 

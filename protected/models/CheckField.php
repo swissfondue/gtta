@@ -11,6 +11,7 @@
  * @property GlobalCheckField $global
  * @property CheckFieldL10n $l10n
  * @property Check $check
+ * @property boolean $hidden
  */
 class CheckField extends ActiveRecord {
     /**
@@ -35,6 +36,7 @@ class CheckField extends ActiveRecord {
     public function rules() {
         return array(
             array("global_check_field_id, check_id", "required" ),
+            array("hidden", "boolean"),
             array("value", "safe"),
         );
     }
@@ -142,7 +144,11 @@ class CheckField extends ActiveRecord {
      * Check if hidden
      * @return bool
      */
-    public function getHidden() {
-        return $this->global->hidden;
+    public function getSuperHidden() {
+        if ($this->global->hidden) {
+            return true;
+        }
+
+        return false;
     }
 }

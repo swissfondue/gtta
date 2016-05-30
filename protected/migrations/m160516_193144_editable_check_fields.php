@@ -78,6 +78,7 @@ class m160516_193144_editable_check_fields extends CDbMigration {
                 "id" => "bigserial NOT NULL",
                 "global_check_field_id" => "bigserial NOT NULL",
                 "check_id" => "bigserial NOT NULL",
+                "hidden" => "boolean NOT NULL DEFAULT 'f'",
                 "value" => "text",
                 "PRIMARY KEY (id)",
                 "UNIQUE (global_check_field_id, check_id)"
@@ -208,6 +209,7 @@ class m160516_193144_editable_check_fields extends CDbMigration {
                 "target_check_id" => "bigint NOT NULL",
                 "check_field_id" => "bigint NOT NULL",
                 "value" => "text",
+                "hidden" => "boolean NOT NULL DEFAULT 'f'",
                 "PRIMARY KEY (target_check_id, check_field_id)"
             ]
         );

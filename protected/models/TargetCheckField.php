@@ -33,6 +33,7 @@ class TargetCheckField extends ActiveRecord {
         return array(
             array("target_check_id, check_field_id", "required" ),
             array("target_check_id, check_field_id", "numerical", "integerOnly" => true),
+            array("hidden", "boolean"),
             array("value", "safe"),
         );
     }
@@ -72,11 +73,15 @@ class TargetCheckField extends ActiveRecord {
     }
 
     /**
-     * Check if hidden
+     * Check if hidden by parent
      * @return mixed
      */
-    public function getHidden() {
-        return $this->field->hidden;
+    public function getSuperHidden() {
+        if ($this->field->superHidden) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

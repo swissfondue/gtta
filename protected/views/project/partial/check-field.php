@@ -1,4 +1,4 @@
-<?php if (!$field->hidden): ?>
+<?php if (!$field->superHidden): ?>
     <?php
         $name = sprintf("TargetCheckEditForm_%d[fields][%s]", $targetCheck->id, $field->name);
         $id = sprintf("TargetCheckEditForm_fields_%d_%s", $targetCheck->id, $field->name);
@@ -25,8 +25,8 @@
                 <?php endif ?>
 
                 <?php if ($field->type == GlobalCheckField::TYPE_TEXT): ?>
-                    <input type="text target-check-field"
-                           class="input-xlarge"
+                    <input type="text"
+                           class="input-xlarge target-check-field"
                            id="<?= $id?>"
                            name="<?= $name ?>"
                            value="<?= $field->value ?>">
