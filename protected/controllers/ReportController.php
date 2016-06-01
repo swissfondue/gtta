@@ -1067,6 +1067,24 @@ class ReportController extends Controller {
                                 $row++;
                             }
 
+                            if (isset($check["fields"])) {
+                                foreach ($check["fields"] as $field) {
+                                    $table->addRow();
+                                    $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                    $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                    $table->getCell($row, 1)->setBorder($this->thinBorder);
+                                    $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                    $table->getCell($row, 2)->setBorder($this->thinBorder);
+
+                                    $table->writeToCell($row, 1, $field["title"]);
+
+                                    $cell = $table->getCell($row, 2);
+                                    $this->_renderText($cell, $field["value"], false);
+
+                                    $row++;
+                                }
+                            }
+
                             if ($check['solutions']) {
                                 $table->addRows(count($check['solutions']));
 
@@ -1596,6 +1614,15 @@ class ReportController extends Controller {
                                 "name" => GlobalCheckField::FIELD_RESULT
                             ]);
 
+                            $fields = [];
+
+                            foreach ($tc->fields as $f) {
+                                $fields[] = [
+                                    "title" => $f->field->global->localizedTitle,
+                                    "value" => $f->value
+                                ];
+                            }
+
                             $checkData = array(
                                 "id" => $check->id,
                                 "custom" => false,
@@ -1612,6 +1639,7 @@ class ReportController extends Controller {
                                     "title" => $resultField->localizedTitle,
                                     "value" => $tc->result,
                                 ],
+                                "fields" => $fields,
                                 "tableResult" => $tc->table_result,
                                 "rating" => 0,
                                 "ratingName" => $ratings[$tc->rating],
