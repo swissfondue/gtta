@@ -65,6 +65,6 @@ class CheckUpdateCommand extends ConsoleCommand {
      * @param array $args
      */
     protected function runLocked($args) {
-        print Utils::camelize("background_info");
+        $this->_checkUpdate();
     }
 }

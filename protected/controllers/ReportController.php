@@ -4420,7 +4420,7 @@ class ReportController extends Controller {
 
         if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
             if ($type == TargetCheck::TYPE) {
-                $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($check->check->localizedBackgroundInfo);
+                $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($check->check->backgroundInfo);
             } elseif ($type == TargetCustomCheck::TYPE) {
                 $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $check->background_info;
             }
@@ -4428,7 +4428,7 @@ class ReportController extends Controller {
 
         if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns)) {
             if ($type == TargetCheck::TYPE) {
-                $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareVulnExportText($check->check->localizedQuestion);
+                $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareVulnExportText($check->check->question);
             } elseif ($type == TargetCustomCheck::TYPE) {
                 $row[TargetCheck::COLUMN_QUESTION] = $check->question;
             }
@@ -4523,19 +4523,23 @@ class ReportController extends Controller {
                 $header[TargetCheck::COLUMN_REFERENCE] = Yii::t('app', 'Reference');
             }
 
-            /*
+            $biField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_BACKGROUND_INFO]);
+
             if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
-                $header[TargetCheck::COLUMN_BACKGROUND_INFO] = Yii::t('app', 'Background Info');
+                $header[TargetCheck::COLUMN_BACKGROUND_INFO] = $biField->localizedTitle;
             }
+
+            $qField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_QUESTION]);
 
             if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns)) {
-                $header[TargetCheck::COLUMN_QUESTION] = Yii::t('app', 'Question');
+                $header[TargetCheck::COLUMN_QUESTION] = $qField->localizedTitle;
             }
 
+            $rField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_RESULT]);
+
             if (in_array(TargetCheck::COLUMN_RESULT, $model->columns)) {
-                $header[TargetCheck::COLUMN_RESULT] = Yii::t('app', 'Result');
+                $header[TargetCheck::COLUMN_RESULT] = $rField->localizedTitle;
             }
-            */
 
             if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns)) {
                 $header[TargetCheck::COLUMN_SOLUTION] = Yii::t('app', 'Solution');
@@ -4740,6 +4744,10 @@ class ReportController extends Controller {
 
         $clients = Client::model()->findAll($criteria);
 
+        $bInfoField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_BACKGROUND_INFO]);
+        $questionField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_QUESTION]);
+        $resultField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_RESULT]);
+
         $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerability Export'), '');
 
         // display the report generation form
@@ -4752,9 +4760,9 @@ class ReportController extends Controller {
                 TargetCheck::COLUMN_TARGET => Yii::t('app', 'Target'),
                 TargetCheck::COLUMN_NAME => Yii::t('app', 'Name'),
                 TargetCheck::COLUMN_REFERENCE => Yii::t('app', 'Reference'),
-                TargetCheck::COLUMN_BACKGROUND_INFO => Yii::t('app', 'Background Info'),
-                TargetCheck::COLUMN_QUESTION => Yii::t('app', 'Question'),
-                TargetCheck::COLUMN_RESULT => Yii::t('app', 'Result'),
+                TargetCheck::COLUMN_BACKGROUND_INFO => $bInfoField->localizedTitle,
+                TargetCheck::COLUMN_QUESTION => $questionField->localizedTitle,
+                TargetCheck::COLUMN_RESULT => $resultField->localizedTitle,
                 TargetCheck::COLUMN_SOLUTION => Yii::t('app', 'Solution'),
                 TargetCheck::COLUMN_RATING => Yii::t('app', 'Rating'),
                 TargetCheck::COLUMN_ASSIGNED_USER => Yii::t('app', 'Assigned'),
