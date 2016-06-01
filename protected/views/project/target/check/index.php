@@ -103,18 +103,38 @@
                                                 <input type="text" class="input-xlarge" name="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>[name]" id="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>_name" value="" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>>
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Background Info"); ?>
+                                            </th>
+                                            <td>
+                                                <textarea name="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>[backgroundInfo]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>_backgroundInfo" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>></textarea>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Question"); ?>
+                                            </th>
+                                            <td>
+                                                <textarea name="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>[question]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>_question" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>></textarea>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Result"); ?>
+                                            </th>
+                                            <td>
+                                                <textarea name="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>[result]" class="max-width" rows="10" id="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>_result" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>></textarea>
+                                                <br>
 
-                                        <?php foreach ($fields as $field): ?>
-                                            <?= $this->renderPartial("partial/check-field",
-                                                [
-                                                    "field" => $field,
-                                                    "project" => $project,
-                                                    "htmlName" => sprintf("TargetCustomCheckTemplateEditForm_%d[fields][%s]", $control->id, $field->name),
-                                                    "htmlId" => sprintf("TargetCustomCheckTemplateEditForm_%d_fields_%s", $control->id, $field->name),
-                                                    "custom" => true
-                                                ]); ?>
-                                        <?php endforeach; ?>
-
+                                                <span class="help-block pull-right">
+                                                    <a class="btn btn-default" href="#editor" onclick="user.check.toggleEditor('TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>_result');">
+                                                        <span class="glyphicon glyphicon-edit"></span>
+                                                        <?php echo Yii::t("app", "WYSIWYG"); ?>
+                                                    </a>
+                                                </span>
+                                            </td>
+                                        </tr>
                                         <tr>
                                             <th>
                                                 <?php echo Yii::t("app", "Solution Title"); ?>
@@ -146,6 +166,14 @@
                                                         </li>
                                                     <?php endforeach; ?>
                                                 </ul>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Create New Check"); ?>
+                                            </th>
+                                            <td class="text">
+                                                <input type="checkbox" name="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>[createCheck]" value="1" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "disabled"; ?>>
                                             </td>
                                         </tr>
 
@@ -231,6 +259,38 @@
                                         </tr>
                                         <tr>
                                             <th>
+                                                <?php echo Yii::t("app", "Background Info"); ?>
+                                            </th>
+                                            <td>
+                                                <textarea name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[backgroundInfo]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_backgroundInfo" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($custom->background_info); ?></textarea>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Question"); ?>
+                                            </th>
+                                            <td>
+                                                <textarea name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[question]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_question" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($custom->question); ?></textarea>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Result"); ?>
+                                            </th>
+                                            <td>
+                                                <textarea name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[result]" class="max-width" rows="10" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_result" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($custom->result); ?></textarea>
+                                                <br>
+
+                                                <span class="help-block pull-right">
+                                                    <a class="btn btn-default" href="#editor" onclick="user.check.toggleEditor('TargetCustomCheckEditForm_<?php echo $custom->id; ?>_result');">
+                                                        <span class="glyphicon glyphicon-edit"></span>
+                                                        <?php echo Yii::t("app", "WYSIWYG"); ?>
+                                                    </a>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
                                                 <?php echo Yii::t("app", "Solution Title"); ?>
                                             </th>
                                             <td>
@@ -296,6 +356,14 @@
                                                         </li>
                                                     <?php endforeach; ?>
                                                 </ul>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <?php echo Yii::t("app", "Create New Check"); ?>
+                                            </th>
+                                            <td class="text">
+                                                <input type="checkbox" name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[createCheck]" value="1" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "disabled"; ?>>
                                             </td>
                                         </tr>
 

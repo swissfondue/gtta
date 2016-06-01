@@ -2689,109 +2689,169 @@ class ProjectController extends Controller {
                 $form->name = null;
             }
 
-            if (!$form->solution) {
-                $form->solution = null;
+            if (!$form->backgroundInfo) {
+                $form->backgroundInfo = null;
+            }
+
+            if (!$form->question) {
+                $form->question = null;
+            }
+
+            if ($form->result == "") {
+                $form->result = null;
+            }
+
+            if (!$form->poc) {
+                $form->poc = null;
+            }
+
+            if (!$form->links) {
+                $form->links = null;
             }
 
             if (!$form->solutionTitle) {
                 $form->solutionTitle = null;
             }
 
-            $cm = new CheckManager();
-            $reference = Reference::model()->findByAttributes(array("name" => "CUSTOM"));
+            if ($form->createCheck) {
+                $cm = new CheckManager();
+                $reference = Reference::model()->findByAttributes(array("name" => "CUSTOM"));
 
-            if (!$reference) {
-                $reference = Reference::model()->find();
-            }
+                if (!$reference) {
+                    $reference = Reference::model()->find();
+                }
 
-            if (!$reference) {
-               throw new CHttpException(500, Yii::t("app", "At least one reference should be created first."));
-            }
+                if (!$reference) {
+                    throw new CHttpException(500, Yii::t("app", "At least one reference should be created first."));
+                }
 
-            $language = Language::model()->findByAttributes(array(
-                "code" => Yii::app()->language
-            ));
-
-            if (!$language) {
                 $language = Language::model()->findByAttributes(array(
-                    "default" => true
+                    "code" => Yii::app()->language
                 ));
-            }
 
-            $check = new Check();
-            $now = new DateTime();
-            $check->create_time = $now->format(ISO_DATE_TIME);
-            $check->name = $form->name;
-            $check->check_control_id = $control->id;
-            $check->reference_id = $reference->id;
-            $check->reference_code = "CHECK-" . $customCheck->reference;
-            $check->reference_url = $reference->url;
-            $check->automated = false;
-            $check->multiple_solutions = false;
-            $check->status = Check::STATUS_INSTALLED;
-            $check->save();
+                if (!$language) {
+                    $language = Language::model()->findByAttributes(array(
+                        "default" => true
+                    ));
+                }
 
-            $check->sort_order = $check->id;
-            $check->save();
+                $check = new Check();
+                $now = new DateTime();
+                $check->create_time = $now->format(ISO_DATE_TIME);
+                $check->name = $form->name;
+                $check->check_control_id = $control->id;
+                $check->reference_id = $reference->id;
+                $check->reference_code = "CHECK-" . $customCheck->reference;
+                $check->reference_url = $reference->url;
+                $check->automated = false;
+                $check->multiple_solutions = false;
+                $check->status = Check::STATUS_INSTALLED;
+                $check->save();
 
-            $checkL10n = new CheckL10n();
-            $checkL10n->check_id = $check->id;
-            $checkL10n->language_id = $language->id;
-            $checkL10n->name = $form->name;
-            $checkL10n->save();
+                $check->sort_order = $check->id;
+                $check->save();
 
-            $cm->reindexFields($check);
+                $checkL10n = new CheckL10n();
+                $checkL10n->check_id = $check->id;
+                $checkL10n->language_id = $language->id;
+                $checkL10n->name = $form->name;
+                $checkL10n->save();
 
-            foreach ($check->fields as $field) {
-                if (isset($form->fields[$field->name])) {
-                    foreach (Language::model()->findAll() as $l) {
-                        $field->setValue($form->fields[$field->name], $l->id);
+                $cm->reindexFields($check);
+
+                foreach ($check->fields as $field) {
+                    $formField = Utils::camelize($field->name);
+
+                    if (in_array($field->name, GlobalCheckField::$system) && isset($form->{$formField})) {
+                        foreach (Language::model()->findAll() as $l) {
+                            $field->setValue($form->{$formField}, $l->id);
+                        }
                     }
                 }
+
+                $targetCheck = TargetCheckManager::create([
+                    "target_id" => $target->id,
+                    "check_id" => $check->id,
+                    "user_id" => Yii::app()->user->id,
+                    "language_id" => $language->id,
+                    "status" => TargetCheck::STATUS_FINISHED,
+                    "rating" => $form->rating
+                ]);
+
+                if ($form->solutionTitle && $form->solution) {
+                    $solution = new CheckSolution();
+                    $solution->check_id = $check->id;
+                    $solution->sort_order = 0;
+                    $solution->title = $form->solutionTitle;
+                    $solution->solution = $form->solution;
+                    $solution->save();
+
+                    $solutionL10n = new CheckSolutionL10n();
+                    $solutionL10n->check_solution_id = $solution->id;
+                    $solutionL10n->language_id = $language->id;
+                    $solutionL10n->title = $form->solutionTitle;
+                    $solutionL10n->solution = $form->solution;
+                    $solutionL10n->save();
+
+                    $checkSolution = new TargetCheckSolution();
+                    $checkSolution->target_check_id = $targetCheck->id;
+                    $checkSolution->check_solution_id = $solution->id;
+                    $checkSolution->save();
+                }
+
+                if (!$customCheck->isNewRecord) {
+                    $customCheck->delete();
+                }
+
+                foreach ($check->fields as $field) {
+                    FieldManager::reindexTargetCheckFields($field);
+                }
+
+                $response->addData("createCheck", true);
+
+                StatsJob::enqueue(array(
+                    "category_id" => $targetCheck->check->control->check_category_id,
+                    "target_id" => $targetCheck->target_id,
+                ));
+            } else {
+                $customCheck->user_id = Yii::app()->user->id;
+                $customCheck->name = $form->name;
+                $customCheck->background_info = $form->backgroundInfo;
+                $customCheck->question = $form->question;
+                $customCheck->result = $form->result;
+                $customCheck->solution_title = $form->solutionTitle;
+                $customCheck->solution = $form->solution;
+                $customCheck->rating = $form->rating;
+                $customCheck->poc = $form->poc;
+                $customCheck->links = $form->links;
+
+                if (count($form->attachmentTitles)) {
+                    foreach ($form->attachmentTitles as $title) {
+                        $decodedTitle = json_decode($title);
+
+                        $attachment = TargetCustomCheckAttachment::model()->findByAttributes(array(
+                            "path" => $decodedTitle->path,
+                            "target_custom_check_id" => $customCheck->id,
+                        ));
+
+                        if (!$attachment) {
+                            throw new CHttpException(404, 'Attachment not found.');
+                        }
+
+                        $attachment->title = $decodedTitle->title;
+                        $attachment->save();
+                    }
+                }
+
+                $customCheck->save();
+
+                $response->addData("rating", $customCheck->rating);
+
+                StatsJob::enqueue(array(
+                    "category_id" => $customCheck->control->check_category_id,
+                    "target_id" => $customCheck->target_id,
+                ));
             }
-
-            $targetCheck = TargetCheckManager::create([
-                "target_id" => $target->id,
-                "check_id" => $check->id,
-                "user_id" => Yii::app()->user->id,
-                "language_id" => $language->id,
-                "rating" => $form->rating
-            ]);
-
-            if ($form->solutionTitle && $form->solution) {
-                $solution = new CheckSolution();
-                $solution->check_id = $check->id;
-                $solution->sort_order = 0;
-                $solution->title = $form->solutionTitle;
-                $solution->solution = $form->solution;
-                $solution->save();
-
-                $solutionL10n = new CheckSolutionL10n();
-                $solutionL10n->check_solution_id = $solution->id;
-                $solutionL10n->language_id = $language->id;
-                $solutionL10n->title = $form->solutionTitle;
-                $solutionL10n->solution = $form->solution;
-                $solutionL10n->save();
-
-                $checkSolution = new TargetCheckSolution();
-                $checkSolution->target_check_id = $targetCheck->id;
-                $checkSolution->check_solution_id = $solution->id;
-                $checkSolution->save();
-            }
-
-            if (!$customCheck->isNewRecord) {
-                $customCheck->delete();
-            }
-
-            foreach ($check->fields as $field) {
-                FieldManager::reindexTargetCheckFields($field);
-            }
-
-            StatsJob::enqueue(array(
-                "category_id" => $targetCheck->check->control->check_category_id,
-                "target_id" => $targetCheck->target_id,
-            ));
-
 
             if ($project->status == Project::STATUS_OPEN) {
                 $project->status = Project::STATUS_IN_PROGRESS;

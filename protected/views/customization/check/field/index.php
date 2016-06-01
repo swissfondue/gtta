@@ -39,7 +39,7 @@
                                     <?php endif; ?>
                                 </td>
                                 <td class="actions">
-                                    <?php if (!in_array($field->name, GlobalCheckField::$readonly)): ?>
+                                    <?php if (!in_array($field->name, GlobalCheckField::$system)): ?>
                                         <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?= $field->id; ?>);"><i class="icon icon-remove"></i></a>
                                     <?php endif; ?>
                                 </td>

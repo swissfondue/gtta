@@ -321,4 +321,58 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             $this->result .= $data;
         }
     }
+
+    /**
+     * Returns target check field value
+     * @param $name
+     * @return mixed|null
+     */
+    private function _getFieldValue($name) {
+        $criteria = new CDbCriteria();
+        $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
+        $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
+        $criteria->addColumnCondition([
+            "gcf.name" => $name,
+            "t.target_check_id" => $this->id,
+        ]);
+        $field = TargetCheckField::model()->find($criteria);
+
+        if (!$field) {
+            return null;
+        }
+
+        return $field->value;
+    }
+
+    /**
+     * Return `background_info` field value
+     * @return mixed|null
+     */
+    public function getBackgroundInfo() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_BACKGROUND_INFO);
+    }
+
+    /**
+     * Return `question` field value
+     * @return mixed|null
+     */
+    public function getQuestion() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_QUESTION);
+    }
+
+    /**
+     * Return `hints` field value
+     * @return mixed|null
+     */
+    public function getHints() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_HINTS);
+    }
+
+    /**
+     * Return `result` field value
+     * @return mixed|null
+     */
+    public function getResult() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_RESULT);
+    }
 }

@@ -222,7 +222,7 @@ class CustomizationController extends Controller
 
             switch ($form->operation) {
                 case "delete":
-                    if (in_array($field->name, GlobalCheckField::$readonly)) {
+                    if (in_array($field->name, GlobalCheckField::$system)) {
                         throw new Exception("Access denied.", 403);
                     }
 

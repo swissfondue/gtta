@@ -69,7 +69,7 @@ class GlobalCheckFieldEditForm extends LocalizedFormModel
                 throw new Exception("Field not found", 404);
             }
 
-            if (in_array($field->name, GlobalCheckField::$readonly)) {
+            if (in_array($field->name, GlobalCheckField::$system)) {
                 if ($this->name != $field->name) {
                     $this->addError("name", "You cannot change system field's name.");
 

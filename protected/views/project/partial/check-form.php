@@ -30,9 +30,7 @@
             <?= $this->renderPartial("partial/check-field",
                 [
                     "field" => $field,
-                    "project" => $project,
-                    "htmlName" => sprintf("TargetCheckEditForm_%d[fields][%s]", $check->id, $field->name),
-                    "htmlId" => sprintf("TargetCheckEditForm_fields_%d_%s", $check->id, $field->name)
+                    "targetCheck" => $check
                 ]); ?>
         <?php endforeach; ?>
 

@@ -905,42 +905,12 @@ class ReportController extends Controller {
                             $row++;
 
                             if ($check['background']) {
-                                $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 2)->setBorder($this->thinBorder);
-
-                                $table->writeToCell($row, 1, Yii::t('app', 'Background Info'));
-
-                                $cell = $table->getCell($row, 2);
-                                $this->_renderText($cell, $check['background'], false);
-
-                                $row++;
-                            }
-
-                            if ($check['question']) {
-                                $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 2)->setBorder($this->thinBorder);
-
-                                $table->writeToCell($row, 1, Yii::t('app', 'Question'));
-
-                                $cell = $table->getCell($row, 2);
-                                $this->_renderText($cell, $check['question'], false);
-
-                                $row++;
-                            }
-
-                            if ($check['result']) {
-                                $cutPos = mb_strpos($check["result"], "@cut", 0, "UTF-8");
-
-                                if ($cutPos !== false) {
-                                    $check["result"] = str_replace("@cut", "---", $check["result"]);
+                                if (is_array($check["background"])) {
+                                    $title = $check["background"]["title"];
+                                    $value = $check["background"]["value"];
+                                } else {
+                                    $title = Yii::t("app", "Background Info");
+                                    $value = $check["background"];
                                 }
 
                                 $table->addRow();
@@ -949,12 +919,67 @@ class ReportController extends Controller {
                                 $table->getCell($row, 1)->setBorder($this->thinBorder);
                                 $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                 $table->getCell($row, 2)->setBorder($this->thinBorder);
-                                $table->writeToCell($row, 1, Yii::t('app', 'Result'));
 
-                                if (Utils::isHtml($check["result"])) {
-                                    $this->_renderText($table->getCell($row, 2), $check["result"], false);
+                                $table->writeToCell($row, 1, $title);
+
+                                $cell = $table->getCell($row, 2);
+                                $this->_renderText($cell, $value, false);
+
+                                $row++;
+                            }
+
+                            if ($check['question']) {
+                                if (is_array($check["question"])) {
+                                    $title = $check["question"]["title"];
+                                    $value = $check["question"]["value"];
                                 } else {
-                                    $table->writeToCell($row, 2, $check["result"]);
+                                    $title = Yii::t("app", "Background Info");
+                                    $value = $check["question"];
+                                }
+
+                                $table->addRow();
+                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($this->thinBorder);
+                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 2)->setBorder($this->thinBorder);
+
+                                $table->writeToCell($row, 1, $title);
+
+                                $cell = $table->getCell($row, 2);
+                                $this->_renderText($cell, $value, false);
+
+                                $row++;
+                            }
+
+                            if ($check["result"]) {
+                                if (is_array($check["result"])) {
+                                    $title = $check["result"]["title"];
+                                    $value = $check["result"]["value"];
+                                } else {
+                                    $title = Yii::t("app", "Background Info");
+                                    $value = $check["result"];
+                                }
+
+                                $cutPos = mb_strpos($value, "@cut", 0, "UTF-8");
+
+                                if ($cutPos !== false) {
+                                    $value = str_replace("@cut", "---", $value);
+                                }
+
+                                $table->addRow();
+                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                $table->getCell($row, 1)->setBorder($this->thinBorder);
+                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                $table->getCell($row, 2)->setBorder($this->thinBorder);
+
+                                $table->writeToCell($row, 1, $title);
+
+                                if (Utils::isHtml($value)) {
+                                    $this->_renderText($table->getCell($row, 2), $value, false);
+                                } else {
+                                    $table->writeToCell($row, 2, $value);
                                 }
 
                                 $row++;
@@ -1400,6 +1425,11 @@ class ReportController extends Controller {
                             "id" => $check->target_id . "-" . $check->check_control_id,
                             "custom" => true,
                             "name" => $check->name,
+                            "background" => $this->_prepareProjectReportText($check->background_info),
+                            "question" => $this->_prepareProjectReportText($check->question),
+                            "result" => $check->result,
+                            "poc" => $check->poc,
+                            "links" => $check->links,
                             "tableResult" => null,
                             "rating" => $check->rating,
                             "ratingName" => $ratings[$check->rating],
@@ -1556,13 +1586,32 @@ class ReportController extends Controller {
                         $ctr = 0;
 
                         foreach ($check->targetChecks as $tc) {
+                            $backgroundInfoField = GlobalCheckField::model()->findByAttributes([
+                                "name" => GlobalCheckField::FIELD_BACKGROUND_INFO
+                            ]);
+                            $questionField = GlobalCheckField::model()->findByAttributes([
+                                "name" => GlobalCheckField::FIELD_QUESTION
+                            ]);
+                            $resultField = GlobalCheckField::model()->findByAttributes([
+                                "name" => GlobalCheckField::FIELD_RESULT
+                            ]);
+
                             $checkData = array(
                                 "id" => $check->id,
                                 "custom" => false,
                                 "name" => $check->localizedName . ($ctr > 0 ? " " . ($ctr + 1) : ""),
-                                "background" => $this->_prepareProjectReportText($check->localizedBackgroundInfo),
-                                "question" => $this->_prepareProjectReportText($check->localizedQuestion),
-                                "result" => $tc->result,
+                                "background" => [
+                                    "title" => $backgroundInfoField->localizedTitle,
+                                    "value" => $this->_prepareProjectReportText($check->backgroundInfo),
+                                ],
+                                "question" => [
+                                    "title" => $questionField->localizedTitle,
+                                    "value" => $this->_prepareProjectReportText($check->question),
+                                ],
+                                "result" => [
+                                    "title" => $resultField->localizedTitle,
+                                    "value" => $tc->result,
+                                ],
                                 "tableResult" => $tc->table_result,
                                 "rating" => 0,
                                 "ratingName" => $ratings[$tc->rating],
@@ -1663,10 +1712,10 @@ class ReportController extends Controller {
                                     ),
                                     "id" => $checkData["id"],
                                     "name" => $checkData["name"],
-                                    "question" => $checkData["question"],
+                                    "question" => $checkData["question"]["value"],
                                     "solution" => $checkData["solutions"] ? implode("\n", $checkData["solutions"]) : "",
                                     "rating" => $checkData["rating"],
-                                    "result" => $checkData["result"],
+                                    "result" => $checkData["result"]["value"],
                                     "ratingValue" => $checkData["ratingValue"],
                                 );
                             }
@@ -2350,12 +2399,13 @@ class ReportController extends Controller {
 
                     $cell = $table->getCell($row, 2);
 
-                    if ($check['question']) {
+                    if ($check["question"]) {
+                        $question = is_array($check["question"]) ? $check["question"]["value"] : $check["question"];
                         $cell->writeText("<br>");
-                        $this->_renderText($cell, "(" . $check['question'] . ')', false);
+                        $this->_renderText($cell, "(" . $question . ')', false);
                     }
 
-                    $problem = $check["result"];
+                    $problem = is_array($check["result"]) ? $check["result"]["value"] : $check["result"];
 
                     $cell = $table->getCell($row, 3);
 

@@ -121,7 +121,7 @@ class Check extends ActiveRecord {
      * @return mixed|null
      * @throws Exception
      */
-    public function getFieldValue($field, $languageId = null) {
+    private function _getFieldValue($field, $languageId = null) {
         $language = Language::model()->find("\"user_default\" OR \"default\"");
 
         if ($languageId) {
@@ -133,22 +133,52 @@ class Check extends ActiveRecord {
         }
 
         $criteria = new CDbCriteria();
+        $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
+        $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
         $criteria->addColumnCondition([
-            "f.check_id" => $this->id,
-            "f.name" => $field,
+            "cf.check_id" => $this->id,
+            "gcf.name" => $field,
             "t.language_id" => $language->id
         ]);
 
-        $field = CheckFieldL10n::model()->with([
-            "field" => [
-                "alias" => "f"
-            ]
-        ])->find($criteria);
+        $field = CheckFieldL10n::model()->find($criteria);
 
         if (!$field) {
             return null;
         }
 
         return $field->value;
+    }
+
+    /**
+     * Return `background_info` field value
+     * @return mixed|null
+     */
+    public function getBackgroundInfo() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_BACKGROUND_INFO);
+    }
+
+    /**
+     * Return `question` field value
+     * @return mixed|null
+     */
+    public function getQuestion() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_QUESTION);
+    }
+
+    /**
+     * Return `hints` field value
+     * @return mixed|null
+     */
+    public function getHints() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_HINTS);
+    }
+
+    /**
+     * Return `result` field value
+     * @return mixed|null
+     */
+    public function getResult() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_RESULT);
     }
 }

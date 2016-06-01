@@ -36,7 +36,7 @@ class GlobalCheckField extends ActiveRecord {
     const FIELD_HINTS = "hints";
     const FIELD_RESULT = "result";
 
-    public static $readonly = [
+    public static $system = [
         "background_info",
         "question",
         "hints",
@@ -79,7 +79,7 @@ class GlobalCheckField extends ActiveRecord {
         if ($this->id) {
             $field = self::model()->findByPk($this->id);
 
-            if (in_array($field->name, GlobalCheckField::$readonly) && $this->name != $field->name) {
+            if (in_array($field->name, GlobalCheckField::$system) && $this->name != $field->name) {
                 $this->addError("name", "Access denied.");
 
                 return false;

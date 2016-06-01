@@ -28,7 +28,7 @@
                        id="GlobalCheckFieldEditForm_name"
                        name="GlobalCheckFieldEditForm[name]"
                        value="<?php echo CHtml::encode($form->name); ?>"
-                       <?php if (in_array($field->name, GlobalCheckField::$readonly)) print "readonly"; ?>>
+                       <?php if (in_array($field->name, GlobalCheckField::$system)) print "readonly"; ?>>
                 <?php if ($form->getError("name")): ?>
                     <p class="help-block"><?php echo $form->getError("name"); ?></p>
                 <?php endif; ?>
