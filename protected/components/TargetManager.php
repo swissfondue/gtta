@@ -224,8 +224,12 @@ class TargetManager {
                 ));
                 TargetCheck::model()->deleteAll($criteria);
 
+                FileManager::updateFile("/tmp/checkids.txt", print_r($checkIds, 1));
+                FileManager::updateFile("/tmp/targetcheckids.txt", print_r($targetCheckIds, 1));
+                FileManager::updateFile("/tmp/diff.txt", print_r(array_diff($checkIds, $targetCheckIds), 1));
+
                 $checksToAdd = Check::model()->findAllByAttributes(array(
-                    "id" => array_diff($checkIds, $targetCheckIds)
+                    "id" => array_values(array_diff($checkIds, $targetCheckIds))
                 ));
 
                 foreach ($checksToAdd as $check) {

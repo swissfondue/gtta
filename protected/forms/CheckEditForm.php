@@ -80,12 +80,13 @@ class CheckEditForm extends LocalizedFormModel
             array( 'name, protocol, referenceCode, referenceUrl', 'length', 'max' => 1000 ),
             array( 'port', 'numerical', 'integerOnly' => true, 'min' => 0, 'max' => 1000 ),
             array( 'automated, multipleSolutions, private', 'boolean' ),
-            array( 'localizedItems, fields, hidden', 'safe' ),
+            array( 'localizedItems, hidden', 'safe' ),
             array( 'referenceUrl', 'url', 'defaultScheme' => 'http' ),
             array( 'referenceId, effort', 'numerical', 'integerOnly' => true ),
             array( 'referenceId', 'checkReference' ),
             array( 'controlId', 'checkControl' ),
             array( 'effort', 'in', 'range' => array( 2, 5, 20, 40, 60, 120 ) ),
+            array( 'fields', 'checkFields' )
 		);
 	}
     
@@ -169,5 +170,30 @@ class CheckEditForm extends LocalizedFormModel
         }
 
         return isset($this->fields[$languageId][$fieldName]) ? $this->fields[$languageId][$fieldName] : null;
+    }
+
+    /**
+     * Check fields
+     * @param $attribute
+     * @param $params
+     */
+    public function checkFields($attribute, $params) {
+        if (!$this->fields) {
+            return true;
+        }
+
+        foreach ($this->fields as $language => $fields) {
+            foreach ($fields as $name => $value) {
+                $field = GlobalCheckField::model()->findByAttributes([
+                    "name" => $name
+                ]);
+
+                if ($field->type == GlobalCheckField::TYPE_RADIO && !FieldManager::validateField($field->type, $value)) {
+                    $this->addError("fields_" . $name, "Invalid JSON.");
+                }
+            }
+        }
+
+        return true;
     }
 }

@@ -872,6 +872,7 @@ class CheckController extends Controller
             $model->automated = isset($_POST["CheckEditForm"]["automated"]);
             $model->multipleSolutions = isset($_POST["CheckEditForm"]["multipleSolutions"]);
             $model->private = isset($_POST["CheckEditForm"]["private"]);
+            $model->hidden = isset($_POST["CheckEditForm"]["hidden"]) ? $_POST["CheckEditForm"]["hidden"] : [];
 
 			if ($model->validate()) {
                 $redirect = false;
@@ -1207,11 +1208,12 @@ class CheckController extends Controller
                     $newField->check_id = $dst->id;
                     $newField->global_check_field_id = $field->global_check_field_id;
                     $newField->value = $field->value;
+                    $newField->hidden = $field->hidden;
                     $newField->save();
 
                     foreach ($field->l10n as $l10n) {
                         $newL10n = new CheckFieldL10n();
-                        $newL10n->check_field_id = $l10n->check_field_id;
+                        $newL10n->check_field_id = $newField->id;
                         $newL10n->language_id = $l10n->language_id;
                         $newL10n->value = $l10n->value;
                         $newL10n->save();

@@ -377,6 +377,7 @@ class ProjectController extends Controller {
 		// collect user input data
 		if (isset($_POST["ProjectEditForm"])) {
 			$model->attributes = $_POST["ProjectEditForm"];
+            $model->hiddenFields = isset($_POST["ProjectEditForm"]["hiddenFields"]) ? $_POST["ProjectEditForm"]["hiddenFields"] : [];
 
 			if ($model->validate()) {
                 // delete all client accounts from this project

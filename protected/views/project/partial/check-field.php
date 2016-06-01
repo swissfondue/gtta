@@ -36,13 +36,23 @@
 
                     <?php if ($values): ?>
                         <ul style="list-style-type: none; margin-left: 0;">
-                            <?php foreach ($values as $value => $title): ?>
-                                <li>
+                            <li>
+                                <label>
                                     <input type="radio"
                                            class="input-xlarge target-check-field"
                                            name="<?= $name ?>"
+                                           value=""
+                                           <?php if (!$field->value) echo "checked=\"checked\""; ?>/>&nbsp;<?= Yii::t("app", "N/A"); ?>
+                                </label>
+                            </li><br />
+                            <?php foreach ($values as $value => $title): ?>
+                                <li>
+                                    <label>
+                                        <input type="radio"
+                                           class="input-xlarge target-check-field"
+                                           name="<?= $name ?>"
                                            value="<?= $value ?>"
-                                    <?php if ($value == $field->value) echo "checked=\"checked\""; ?>">&nbsp;<?= $title ?>
+                                        <?php if ($value == $field->value) echo "checked=\"checked\""; ?>">&nbsp;<?= $title ?></label>
                                 </li><br />
                             <?php endforeach; ?>
                         </ul>

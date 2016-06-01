@@ -82,7 +82,7 @@ class TargetCheckField extends ActiveRecord {
             return true;
         }
 
-        return false;
+        return $this->field->hidden;
     }
 
     /**
