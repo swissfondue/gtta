@@ -869,9 +869,6 @@ class CheckController extends Controller
 			$model->attributes = $_POST['CheckEditForm'];
 
             $model->name = $model->defaultL10n($languages, 'name');
-            $model->backgroundInfo = $model->defaultL10n($languages, 'backgroundInfo');
-            $model->hints = $model->defaultL10n($languages, 'hints');
-            $model->question = $model->defaultL10n($languages, 'question');
             $model->automated = isset($_POST["CheckEditForm"]["automated"]);
             $model->multipleSolutions = isset($_POST["CheckEditForm"]["multipleSolutions"]);
             $model->private = isset($_POST["CheckEditForm"]["private"]);
@@ -900,6 +897,9 @@ class CheckController extends Controller
                 if ($newRecord) {
                     $check->sort_order = $check->id;
                     $check->save();
+
+                    $cm = new CheckManager();
+                    $cm->reindexFields($check);
                 }
 
                 foreach ($model->localizedItems as $languageId => $value) {
@@ -925,6 +925,9 @@ class CheckController extends Controller
                 foreach ($check->fields as $field) {
                     if (isset($model->hidden[$field->name]) && $model->hidden[$field->name]) {
                         $field->hidden = true;
+                        $field->save();
+                    } else {
+                        $field->hidden = false;
                         $field->save();
                     }
 
@@ -1195,6 +1198,22 @@ class CheckController extends Controller
                         $newL10n->language_id = $l10n->language_id;
                         $newL10n->title = $l10n->title;
                         $newL10n->solution = $l10n->solution;
+                        $newL10n->save();
+                    }
+                }
+
+                foreach ($src->fields as $field) {
+                    $newField = new CheckField();
+                    $newField->check_id = $dst->id;
+                    $newField->global_check_field_id = $field->global_check_field_id;
+                    $newField->value = $field->value;
+                    $newField->save();
+
+                    foreach ($field->l10n as $l10n) {
+                        $newL10n = new CheckFieldL10n();
+                        $newL10n->check_field_id = $l10n->check_field_id;
+                        $newL10n->language_id = $l10n->language_id;
+                        $newL10n->value = $l10n->value;
                         $newL10n->save();
                     }
                 }

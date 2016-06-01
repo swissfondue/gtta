@@ -206,11 +206,13 @@ class m160516_193144_editable_check_fields extends CDbMigration {
         $this->createTable(
             "target_check_fields",
             [
+                "id" => "bigserial NOT NULL",
                 "target_check_id" => "bigint NOT NULL",
                 "check_field_id" => "bigint NOT NULL",
                 "value" => "text",
                 "hidden" => "boolean NOT NULL DEFAULT 'f'",
-                "PRIMARY KEY (target_check_id, check_field_id)"
+                "PRIMARY KEY (id)",
+                "UNIQUE (target_check_id, check_field_id)"
             ]
         );
         $this->addForeignKey(

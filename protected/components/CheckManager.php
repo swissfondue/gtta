@@ -389,4 +389,34 @@ class CheckManager {
         $check->status = Check::STATUS_INSTALLED;
         $check->save();
     }
+
+    /**
+     * Reindex check fields
+     * @param Check $check
+     * @throws Exception
+     */
+    public function reindexFields(Check $check) {
+        $globalFields = GlobalCheckField::model()->findAll();
+
+        foreach ($globalFields as $gf) {
+            $checkField = CheckField::model()->findByAttributes([
+                "check_id" => $check->id,
+                "global_check_field_id" => $gf->id
+            ]);
+
+            if (!$checkField) {
+                $checkField = new CheckField();
+                $checkField->global_check_field_id = $gf->id;
+                $checkField->check_id = $check->id;
+                $checkField->save();
+
+                foreach (Language::model()->findAll() as $l) {
+                    $l10n = new CheckFieldL10n();
+                    $l10n->check_field_id = $checkField->id;
+                    $l10n->language_id = $l->id;
+                    $l10n->save();
+                }
+            }
+        }
+    }
 }

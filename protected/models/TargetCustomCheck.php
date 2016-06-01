@@ -109,7 +109,7 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
             array("target_id, check_control_id, user_id", "numerical", "integerOnly" => true),
             array("name, solution_title", "length", "max" => 1000),
             array("rating", "in", "range" => self::getValidRatings()),
-            array("solution, result, question, background_info", "safe"),
+            array("solution", "safe"),
 		);
 	}
 
@@ -147,9 +147,6 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
 
         $checkData = array(
             "name" => $this->name ? $this->name : "CUSTOM-CHECK-" . $this->reference,
-            "background_info" => $this->background_info,
-            "hints" => "",
-            "question" => $this->question,
             "rating" => $abbreviations[$this->rating],
             "rating_name" => $names[$this->rating],
             "target" => $this->target->host,

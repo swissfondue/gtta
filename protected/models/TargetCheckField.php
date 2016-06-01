@@ -4,6 +4,7 @@
  * This is the model class for table "target_check_field".
  *
  * The followings are the available columns in table "target_check_fields":
+ * @property integer $id
  * @property integer $target_check_id
  * @property integer $check_field_id
  * @property string $value

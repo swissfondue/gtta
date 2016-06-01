@@ -339,4 +339,25 @@ class Project extends ActiveRecord implements IVariableScopeObject {
 
         return $hours;
     }
+
+    /**
+     * Check if field is hidden in project scope
+     * @param $name
+     */
+    public function isFieldHidden($name) {
+        $criteria = new CDbCriteria();
+        $criteria->select = "g.name";
+        $criteria->group = "g.name";
+        $criteria->join = "LEFT JOIN target_checks tc ON tc.id = t.target_check_id";
+        $criteria->join .= " LEFT JOIN targets tr ON tr.id = tc.target_id";
+        $criteria->join .= " LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
+        $criteria->join .= " LEFT JOIN global_check_fields g ON g.id = cf.global_check_field_id";
+        $criteria->addColumnCondition([
+            "tr.project_id" => $this->id,
+            "t.hidden" => true,
+            "g.name" => $name
+        ]);
+
+        return TargetCheckField::model()->count($criteria) > 0;
+    }
 }

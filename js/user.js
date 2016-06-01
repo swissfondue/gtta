@@ -978,7 +978,7 @@ function User()
          * @param id
          */
         this.getCustomData = function (id) {
-            var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck, attachments;
+            var i, row, name, background, question, result, rating, data, solution, solutionTitle, attachments;
 
             row = $('div.check-form[data-type=custom-check][data-id=' + id + ']');
 
@@ -988,7 +988,6 @@ function User()
             rating = $('input[name="TargetCustomCheckEditForm_' + id + '[rating]"]:checked', row).val();
             solutionTitle = $('input[name="TargetCustomCheckEditForm_' + id + '[solutionTitle]"]', row).val();
             solution = $('textarea[name="TargetCustomCheckEditForm_' + id + '[solution]"]', row).val();
-            createCheck = $('input[name="TargetCustomCheckEditForm_' + id + '[createCheck]"]', row).is(":checked");
 
             result = _check.ckeditors["TargetCustomCheckEditForm_" + id + "_result"] ?
                 _check.ckeditors["TargetCustomCheckEditForm_" + id + "_result"].getData() :
@@ -1024,10 +1023,6 @@ function User()
             }
 
             data = [];
-
-            if (createCheck) {
-                data.push({name: "TargetCustomCheckEditForm[createCheck]", value: "1"});
-            }
 
             data.push({name: "TargetCustomCheckEditForm[id]", value: id});
             data.push({name: "TargetCustomCheckEditForm[name]", value: name});
@@ -1075,19 +1070,7 @@ function User()
 
                     data = data.data;
 
-                    if (data.createCheck) {
-                        location.reload();
-                    }
-
-                    if (data.rating != undefined && data.rating != null) {
-                        $("td.status", headerRow).html(
-                            '<span class="label ' +
-                            (ratings[data.rating].classN ? ratings[data.rating].classN : '') + '">' +
-                            ratings[data.rating].text + '</span>'
-                        );
-                    } else {
-                        $("td.status", headerRow).html("");
-                    }
+                    location.reload();
                 },
 
                 error: function(jqXHR, textStatus, e) {
@@ -1106,7 +1089,7 @@ function User()
          * @param id
          */
         this.getCustomTemplateData = function (id) {
-            var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck;
+            var i, row, name, background, question, result, rating, data, solution, solutionTitle, fields;
 
             row = $('div.check-form[data-type=custom-template][data-id=' + id + ']');
             name = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[name]"]', row).val();
@@ -1115,7 +1098,6 @@ function User()
             rating = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[rating]"]:checked', row).val();
             solutionTitle = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[solutionTitle]"]', row).val();
             solution = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[solution]"]', row).val();
-            createCheck = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[createCheck]"]', row).is(":checked");
             result = _check.ckeditors["TargetCustomCheckTemplateEditForm_" + id + "_result"] ?
                 _check.ckeditors["TargetCustomCheckTemplateEditForm_" + id + "_result"].getData() :
                 $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[result]"]').val();
@@ -1140,20 +1122,30 @@ function User()
                 rating = "";
             }
 
-            data = [];
+            fields = row.find(".target-check-field").map(
+                function () {
+                    if ($(this).attr("type") == "radio" && !$(this).is(":checked")) {
+                        return;
+                    }
 
-            if (createCheck) {
-                data.push({name: "TargetCustomCheckEditForm[createCheck]", value: "1"});
-            }
+                    return {
+                        name: "TargetCustomCheckEditForm[fields][" + $(this).data("field-name") + "]",
+                        value: _check.fieldValue($(this))
+                    }
+                }
+            );
+
+            data = [];
 
             data.push({name: "TargetCustomCheckEditForm[controlId]", value: id});
             data.push({name: "TargetCustomCheckEditForm[name]", value: name});
-            data.push({name: "TargetCustomCheckEditForm[backgroundInfo]", value: background});
-            data.push({name: "TargetCustomCheckEditForm[question]", value: question});
-            data.push({name: "TargetCustomCheckEditForm[result]", value: result});
             data.push({name: "TargetCustomCheckEditForm[rating]", value: rating});
             data.push({name: "TargetCustomCheckEditForm[solution]", value: solution ? solution : ""});
             data.push({name: "TargetCustomCheckEditForm[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
+
+            $.each(fields, function (key, value) {
+                data.push(value);
+            });
 
             return data;
         };

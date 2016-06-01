@@ -11,21 +11,6 @@ class CheckEditForm extends LocalizedFormModel
     public $name;
 
     /**
-     * @var string background info.
-     */
-    public $backgroundInfo;
-
-    /**
-     * @var string hints.
-     */
-    public $hints;
-
-    /**
-     * @var string question.
-     */
-    public $question;
-
-    /**
      * @var integer reference id.
      */
     public $referenceId;
@@ -111,9 +96,6 @@ class CheckEditForm extends LocalizedFormModel
 	{
 		return array(
 			'name'           => Yii::t('app', 'Name'),
-            'backgroundInfo' => Yii::t('app', 'Background Info'),
-            'hints     '     => Yii::t('app', 'Hints'),
-            'question'       => Yii::t('app', 'Question'),
             'automated'      => Yii::t('app', 'Automated'),
             'protocol'       => Yii::t('app', 'Protocol'),
             'port'           => Yii::t('app', 'Port'),

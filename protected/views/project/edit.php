@@ -99,6 +99,27 @@
             </div>
         </div>
 
+        <div class="control-group <?php if ($model->getError("hiddenFields")) echo 'error'; ?>">
+            <label class="control-label" for="ProjectEditForm_hiddenFields"><?php echo Yii::t("app", "Hidden Check Fields"); ?></label>
+            <div class="controls">
+                <ul style="list-style-type: none; margin-left: 0;">
+                    <?php foreach ($fields as $f): ?>
+                        <li>
+                            <label style="padding-left: 15px; text-indent: -15px;">
+                                <input style="margin: 0;" type="checkbox"
+                                   id="ProjectEditForm_hiddenFields_<?= $f->name ?>"
+                                   name="ProjectEditForm[hiddenFields][]"
+                                   value="<?= $f->name ?>"
+                                <?php if (in_array($f->name, $model->hiddenFields)) echo 'checked="checked"'; ?>>&nbsp;<?= CHtml::encode($f->title) ?></label>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+                <?php if ($model->getError("hiddenFields")): ?>
+                    <p class="help-block"><?php echo $model->getError("hiddenFields"); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>
         </div>

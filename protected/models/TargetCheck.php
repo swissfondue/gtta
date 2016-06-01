@@ -212,9 +212,6 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
 
         $checkData = array(
             "name" => $check->getLocalizedName(),
-            "background_info" => $check->getLocalizedBackgroundInfo(),
-            "hints" => $check->getLocalizedHints(),
-            "question" => $check->getLocalizedQuestion(),
             "rating" => $abbreviations[$this->rating],
             "rating_name" => $names[$this->rating],
             "target" => $this->override_target ? $this->override_target : $this->target->host,

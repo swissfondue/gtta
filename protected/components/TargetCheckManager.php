@@ -24,16 +24,13 @@ class TargetCheckManager {
             $targetCheck->check_id = $data["check_id"];
             $targetCheck->user_id = $data["user_id"];
             $targetCheck->language_id = $data["language_id"];
+            $targetCheck->status = isset($data["status"]) ? $data["status"] : TargetCheck::STATUS_OPEN;
 
-            if ($data["status"]) {
-                $targetCheck->status = $data["status"];
-            }
-
-            if ($data["result"]) {
+            if (isset($data["result"])) {
                 $targetCheck->result = $data["result"];
             }
 
-            if ($data["rating"]) {
+            if (isset($data["rating"])) {
                 $targetCheck->rating = $data["rating"];
             }
 
