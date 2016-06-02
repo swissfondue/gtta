@@ -28,7 +28,6 @@ class CheckUpdateCommand extends ConsoleCommand {
     private function _checkUpdate() {
         // check if setup has been completed
         if (!file_exists(self::SETUP_COMPLETED_FLAG)) {
-
             return;
         }
 

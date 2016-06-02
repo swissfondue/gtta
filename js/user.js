@@ -122,9 +122,9 @@ function User()
                                             $("<td>")
                                                 .addClass("name")
                                                 .append(
-                                                $("<a>")
-                                                    .attr("href", attachment.url)
-                                                    .html(attachment.name)
+                                                    $("<a>")
+                                                        .attr("href", attachment.url)
+                                                        .html(attachment.name)
                                             )
                                         );
 
@@ -132,13 +132,13 @@ function User()
                                             $("<td>")
                                                 .addClass("actions")
                                                 .append(
-                                                $("<a>")
-                                                    .attr("href", "#del")
-                                                    .attr("title", system.translate("Delete"))
-                                                    .html('<i class="icon icon-remove"></i>')
-                                                    .click(function () {
-                                                        user.check.delAttachment(attachment.path);
-                                                    })
+                                                    $("<a>")
+                                                        .attr("href", "#del")
+                                                        .attr("title", system.translate("Delete"))
+                                                        .html('<i class="icon icon-remove"></i>')
+                                                        .click(function () {
+                                                            user.check.delAttachment(attachment.path);
+                                                        })
                                             )
                                         );
 
