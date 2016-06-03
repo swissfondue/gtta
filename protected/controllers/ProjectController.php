@@ -1810,6 +1810,43 @@ class ProjectController extends Controller {
 	}
 
     /**
+     * Get running checks list
+     * @param $id
+     * @param $target
+     */
+    public function actionRunningChecks() {
+        $response = new AjaxResponse();
+
+        try {
+            if (isset($_POST["RunningChecksForm"])) {
+                $targetId = $_POST["RunningChecksForm"]["target_id"];
+            }
+
+            $target = Target::model()->findByPk($targetId);
+
+            if (!$target) {
+                throw new CHttpException(404, Yii::t("app", "Target not found."));
+            }
+
+            $checkIds = [];
+
+            foreach ($target->targetChecks as $tc) {
+                if ($tc->isRunning) {
+                    $time = TargetCheckManager::getStartTime($tc->id);
+
+                    $checkIds[] = TargetCheckManager::getData($tc);
+                }
+            }
+
+            $response->addData("checks", $checkIds);
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
      * List of checks in control
      * @param $id
      * @param $target
@@ -3707,16 +3744,7 @@ class ProjectController extends Controller {
 
                 $finished = !$targetCheck->isRunning;
 
-                $checkData[] = array(
-                    "id" => $targetCheck->id,
-                    "result" => $targetCheck->result,
-                    "tableResult" => $table ? $this->renderPartial("/project/target/check/tableresult", array("table" => $table, "check" => $targetCheck), true) : "",
-                    "finished" => $finished,
-                    "time" => $time,
-                    "attachmentControlUrl" => $this->createUrl("project/controlattachment"),
-                    "attachments" => $attachmentList,
-                    "startedText" => $startedText,
-                );
+                $checkData[] = TargetCheckManager::getData($targetCheck);
             }
 
             $response->addData('checks', $checkData);
