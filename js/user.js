@@ -2625,6 +2625,8 @@ function User()
          */
         this.mxCheckHandlerInit = function () {
             var md = (mxClient.IS_TOUCH) ? 'touchstart' : 'mousedown';
+            var graph = _mxgraph.editor.graph;
+            var cell = graph.getSelectionCell();
 
             // Settings
             var img = mxUtils.createImage('/js/mxgraph/grapheditor/images/settings.png');
@@ -2637,8 +2639,6 @@ function User()
             }));
 
             mxEvent.addListener(img, 'click', mxUtils.bind(this, function(evt) {
-                var graph = _mxgraph.editor.graph;
-                var cell = graph.getSelectionCell();
                 var bounds = this.graph.getCellBounds(cell);
 
                 if (_mxgraph.properties) {
@@ -2858,6 +2858,13 @@ function User()
                     $categories.append(option);
                 });
             }));
+
+            // set first check as start_check
+            if (_mxgraph.getAllCells().length == 1) {
+                if (parseInt(cell.getAttribute("start_check")) != 1) {
+                    cell.setAttribute("start_check", "1");
+                }
+            }
 
             this.domNode.appendChild(img);
 
