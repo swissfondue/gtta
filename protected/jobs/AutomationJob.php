@@ -321,7 +321,7 @@ class AutomationJob extends BackgroundJob {
             }
 
             $check->table_result .= substr($check->result, $tablePos);
-            $check->result = substr($check->result, 0, $tablePos);
+            $check->setResult(substr($check->result, 0, $tablePos));
         }
     }
 

@@ -90,7 +90,7 @@ function User()
 
                                 check = data.checks[i];
 
-                                $('#TargetCheckEditForm_' + check.id + '_result').val(check.result);
+                                $('#TargetCheckEditForm_fields_' + check.id + '_result').val(check.result);
                                 $('div.check-form[data-type=check][data-id="' + check.id + '"] div.table-result').html(check.tableResult);
 
                                 if (check.startedText) {
@@ -305,7 +305,7 @@ function User()
         this.expand = function (id, callback) {
             var header, form, url;
 
-            _check.destroyEditor("TargetCheckEditForm_" + id + "_result");
+            _check.destroyEditor("TargetCheckEditForm_fields_" + id + "_result");
 
             header = $("div.check-header[data-type=check][data-id=" + id + "]");
             form = $("div.check-form[data-type=check][data-id=" + id + "]");
@@ -523,7 +523,7 @@ function User()
             result = result.replace(/\n<br>/g, '\n').replace(/<br>\n/g, '\n').replace(/\n<br \/>/g, '\n').replace(/<br \/>\n/g, '\n');
             result = result.replace(/<br>/g, '\n').replace(/<br \/>/g, '\n');
 
-            var editor = _check.getEditor("TargetCheckEditForm_" + id + "_result");
+            var editor = _check.getEditor("TargetCheckEditForm_fields_" + id + "_result");
 
             if (editor) {
                 result = original + "<br><br>";
@@ -539,7 +539,7 @@ function User()
                     result = result + "\n\n";
                 }
 
-                var textarea = $('#TargetCheckEditForm_' + id + '_result');
+                var textarea = $('#TargetCheckEditForm_fields_' + id + '_result');
                 textarea.val(result + textarea.val());
                 textarea.trigger('change');
             }
@@ -626,8 +626,8 @@ function User()
             protocol = $('input[name="TargetCheckEditForm_' + id + '[protocol]"]', row).val();
             port     = $('input[name="TargetCheckEditForm_' + id + '[port]"]', row).val();
             resultTitle = $('input[name="TargetCheckEditForm_' + id + '[resultTitle]"]', row).val();
-            result = _check.ckeditors["TargetCheckEditForm_" + id + "_result"] ?
-                _check.ckeditors["TargetCheckEditForm_" + id + "_result"].getData() :
+            result = _check.ckeditors["TargetCheckEditForm_fields_" + id + "_result"] ?
+                _check.ckeditors["TargetCheckEditForm_fields_" + id + "_result"].getData() :
                 $('textarea[name="TargetCheckEditForm_' + id + '[result]"]').val();
 
             scripts = $('input[name^="TargetCheckEditForm_' + id + '[scripts]"]', row).map(
@@ -990,8 +990,8 @@ function User()
             solution = $('textarea[name="TargetCustomCheckEditForm_' + id + '[solution]"]', row).val();
             createCheck = $('input[name="TargetCustomCheckEditForm_' + id + '[createCheck]"]', row).is(":checked");
 
-            result = _check.ckeditors["TargetCustomCheckEditForm_" + id + "_result"] ?
-                _check.ckeditors["TargetCustomCheckEditForm_" + id + "_result"].getData() :
+            result = _check.ckeditors["TargetCustomCheckEditForm_fields_" + id + "_result"] ?
+                _check.ckeditors["TargetCustomCheckEditForm_fields_" + id + "_result"].getData() :
                 $('textarea[name="TargetCustomCheckEditForm_' + id + '[result]"]').val();
 
             attachments = $('input[name^="TargetCustomCheckEditForm_' + id + '[attachmentTitles]"]', row).map(
@@ -1116,8 +1116,8 @@ function User()
             solutionTitle = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[solutionTitle]"]', row).val();
             solution = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[solution]"]', row).val();
             createCheck = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[createCheck]"]', row).is(":checked");
-            result = _check.ckeditors["TargetCustomCheckTemplateEditForm_" + id + "_result"] ?
-                _check.ckeditors["TargetCustomCheckTemplateEditForm_" + id + "_result"].getData() :
+            result = _check.ckeditors["TargetCustomCheckTemplateEditForm_fields_" + id + "_result"] ?
+                _check.ckeditors["TargetCustomCheckTemplateEditForm_fields_" + id + "_result"].getData() :
                 $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[result]"]').val();
 
             if (name == undefined) {

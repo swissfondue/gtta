@@ -26,12 +26,12 @@ class TargetCheckManager {
             $targetCheck->language_id = $data["language_id"];
             $targetCheck->status = isset($data["status"]) ? $data["status"] : TargetCheck::STATUS_OPEN;
 
-            if (isset($data["result"])) {
-                $targetCheck->result = $data["result"];
-            }
-
             if (isset($data["rating"])) {
                 $targetCheck->rating = $data["rating"];
+            }
+
+            if (isset($data["result"])) {
+                $targetCheck->setResult($data["result"]);
             }
 
             $targetCheck->save();
