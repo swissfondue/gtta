@@ -1215,11 +1215,6 @@ ul.breadcrumb {
     padding: 2px 5px;
 }
 
-.time-records-list {
-    left: auto;
-    right: 0;
-}
-
 .time-record-row table td {
     text-align: left;
 }
