@@ -85,6 +85,7 @@ class CheckManager {
             $c->reference_id = $reference;
             $c->reference_code = $check->reference_code;
             $c->reference_url = $check->reference_url;
+            $c->effort = $check->effort;
             $c->sort_order = $check->sort_order;
             $c->status = Check::STATUS_INSTALLED;
             $c->save();
@@ -283,6 +284,7 @@ class CheckManager {
             "multiple_solutions" => $check->multiple_solutions,
             "protocol" => $check->protocol,
             "port" => $check->port,
+            "effort" => $check->effort,
             "sort_order" => $check->sort_order,
             "l10n" => array(),
             "results" => array(),
