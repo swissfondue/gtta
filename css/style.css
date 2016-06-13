@@ -1292,3 +1292,7 @@ ul.breadcrumb {
     float: right;
     vertical-align: middle;
 }
+
+div.time-tracker {
+    margin-right:20px;
+}

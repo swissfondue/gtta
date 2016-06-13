@@ -202,9 +202,9 @@
             <hr>
             
             <footer>
-                <div class="pull-left">
+                <div class="pull-left time-tracker">
                     <?php if (!Yii::app()->user->isGuest): ?>
-                        <div id="time-tracker" class="panel-wrapped pull-left">
+                        <div id="time-tracker">
                             <div class="btn-group dropup btn-time-records inline">
                                 <a class="<?php if (!$this->timeRecords) print "disabled"; ?>" data-toggle="dropdown" href="#" title="<?= Yii::t("app", "Previous Time Records"); ?>">
                                     <i class="icon icon-time"></i>
@@ -302,20 +302,19 @@
                             </div>
                         </div>
                     <?php endif; ?>
-                    <div class="clearfix"></div>
-                    <div class="pull-left">
-                        <?php echo Yii::t('app', 'Copyright'); ?> &copy; <?php echo date('Y'); ?> <?php echo $this->_system->copyright; ?><br>
-                        <?php echo Yii::t('app', 'All Rights Reserved'); ?><br>
-                    </div>
                 </div>
 
                 <?php if (!Yii::app()->user->isGuest): ?>
-                    <div class="pull-right">
+                    <div class="pull-left">
                         <a href="http://community.gtta.net" target="_blank">[<?php echo Yii::t("app", "COMMUNITY"); ?>]</a>
                         &nbsp;<a href="<?php echo $this->createUrl("app/help"); ?>" target="_blank">[<?php echo Yii::t("app", "HELP"); ?>]</a>
                     </div>
                 <?php endif; ?>
 
+                <div class="pull-right">
+                    <?php echo Yii::t('app', 'Copyright'); ?> &copy; <?php echo date('Y'); ?> <?php echo $this->_system->copyright; ?><br>
+                    <?php echo Yii::t('app', 'All Rights Reserved'); ?><br>
+                </div>
             </footer>
         </div>
         <?php if ($this->timeSession): ?>
