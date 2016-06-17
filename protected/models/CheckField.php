@@ -89,6 +89,10 @@ class CheckField extends ActiveRecord {
         if (!$value) {
             $language = Language::model()->findByAttributes(["user_default" => true]);
 
+            if (!$language) {
+                $language = System::model()->findByPk(1)->language;
+            }
+
             $l10n = CheckFieldL10n::model()->findByAttributes([
                 "check_field_id" => $this->id,
                 "language_id" => $language->id

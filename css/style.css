@@ -1304,3 +1304,11 @@ ul.breadcrumb {
     float: right;
     vertical-align: middle;
 }
+
+.radio-field-item {
+    margin-bottom: 10px;
+}
+
+.link {
+    cursor: pointer;
+}

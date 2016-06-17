@@ -47,14 +47,14 @@
                                            <?php if (!$field->value) echo "checked=\"checked\""; ?>/>&nbsp;<?= Yii::t("app", "N/A"); ?>
                                 </label>
                             </li><br />
-                            <?php foreach ($values as $value => $title): ?>
+                            <?php foreach ($values as $value): ?>
                                 <li>
                                     <label>
                                         <input type="radio"
                                            class="input-xlarge target-check-field"
                                            name="<?= $name ?>"
                                            value="<?= $value ?>"
-                                        <?php if ($value == $field->value) echo "checked=\"checked\""; ?>">&nbsp;<?= $title ?></label>
+                                        <?php if ($value == $field->value) echo "checked=\"checked\""; ?>">&nbsp;<?= $value ?></label>
                                 </li><br />
                             <?php endforeach; ?>
                         </ul>

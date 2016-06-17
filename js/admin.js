@@ -43,6 +43,74 @@ function Admin()
                 }
             });
         };
+
+        /**
+         * Save check
+         */
+        this.save = function (formId) {
+            var languageTab = $("#" + formId + " .language-tab.active");
+            var radioFields = languageTab.find(".check-field-radio");
+            var fields = {};
+
+            $.each(radioFields, function (key, value) {
+                var fieldName = $(value).data("field-name");
+                var fieldValue = [];
+
+                $(value).find("li.radio-field-item input[type=text]").each(function (inputKey, inputValue) {
+                    if ($(inputValue).val()) {
+                        fieldValue.push($(inputValue).val());
+                    }
+                });
+
+                $("#" + formId).append(
+                    $("<input>")
+                        .attr("type", "hidden")
+                        .attr("name", formId + "[fields]" + "[" + languageTab.data("language-id") + "]" + "[" + fieldName + "]")
+                        .val(JSON.stringify(fieldValue))
+                )
+            });
+
+            $("#" + formId).submit();
+        };
+
+        /**
+         * Append radio field item
+         * @param button
+         */
+        this.appendRadioFieldItem = function (button) {
+            $(button).before(
+                $("<li>")
+                    .addClass("radio-field-item")
+                    .append(
+                        $("<input>")
+                            .attr("type", "text")
+                            .attr("class", "input-xlarge"),
+                        "&nbsp;",
+                        $("<a>")
+                            .addClass("link")
+                            .append(
+                                $("<i>")
+                                    .addClass("icon")
+                                    .addClass("icon-remove")
+                            )
+                            .click(function () {
+                                _check.removeRadioFieldItem(this);
+
+                                return false;
+                            })
+                    )
+            );
+        };
+
+        /**
+         * Remove radio field item
+         * @param button
+         */
+        this.removeRadioFieldItem = function (button) {
+            if ($(button).parent().siblings().length > 1) {
+                $(button).parent().remove();
+            }
+        };
     };
 
     /**

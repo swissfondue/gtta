@@ -23,7 +23,7 @@
 
 <hr>
 
-<form class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
+<form id="CheckEditForm" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
     <fieldset>
@@ -171,7 +171,7 @@
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>
+            <button type="submit" class="btn" onclick="admin.check.save('CheckEditForm'); return false;"><?php echo Yii::t('app', 'Save'); ?></button>
         </div>
     </fieldset>
 </form>

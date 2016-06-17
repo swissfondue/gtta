@@ -2,7 +2,7 @@
     <?php
         $name = sprintf("CheckEditForm[fields][%s][%s]", $language->id, $field->global->name);
         $id = sprintf("CheckEditForm_fields_%s_%s", $language->id, $field->global->name);
-        $value = isset($form->fields[$language->id][$field->global->name]) ? CHtml::encode($form->fields[$language->id][$field->global->name]) : "";
+        $value = isset($form->fields[$language->id][$field->global->name]) ? $form->fields[$language->id][$field->global->name] : "";
         $error = $form->getError("fields_" . $field->global->name);
 
         $hiddenName = sprintf("CheckEditForm[hidden][%s]", $field->name);
@@ -26,19 +26,34 @@
             <?php endif; ?>
 
             <?php if ($field->global->type == GlobalCheckField::TYPE_RADIO): ?>
-                <textarea class="input-xlarge" rows="10" name="<?= $name ?>" id="<?= isset($id) ? $id : '' ?>"><?= $value ?></textarea>
-                <p class="help-block">
-                    <?php if (!isset($error)): ?>
-                        <?= $field->global->type == GlobalCheckField::TYPE_RADIO ? Yii::t("app", "One Level JSON") : "" ?>
+                <?php $values = @json_decode($value); ?>
+
+                <ul class="check-field-radio span4" data-field-name="<?= $field->global->name ?>" style="list-style-type: none; margin-left:0px;">
+                    <?php if (!count($values)): ?>
+                        <li class="radio-field-item">
+                            <input type="text" class="input-xlarge" />
+                            <a class="link" onclick="admin.check.removeRadioFieldItem(this); return false;"><i class="icon icon-remove"></i></a>
+                        </li>
                     <?php else: ?>
-                        <?php print $error; ?>
+                        <?php foreach ($values as $value): ?>
+                            <li class="radio-field-item">
+                                <input type="text" class="input-xlarge" value="<?= $value ?>" />
+                                <a class="link" onclick="admin.check.removeRadioFieldItem(this); return false;"><i class="icon icon-remove"></i></a>
+                            </li>
+                        <?php endforeach; ?>
                     <?php endif; ?>
-                </p>
+
+                    <button class="btn" onclick="admin.check.appendRadioFieldItem(this); return false;" style="margin-left: 40%;">
+                        <i class="icon icon-plus"></i>
+                    </button>
+                </ul>
             <?php endif; ?>
 
             <?php if ($field->global->type == GlobalCheckField::TYPE_CHECKBOX): ?>
                 <input type="checkbox" class="input-xlarge" name="<?= $name ?>" <?php if (isset($field->value) && $field->value) echo "checked"; ?>>
             <?php endif; ?>
+
+            <div class="clearfix"></div>
 
             <label>
                 <input type="checkbox"
