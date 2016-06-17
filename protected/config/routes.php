@@ -74,6 +74,7 @@ return array(
     "project/target/control" => "project/controltarget",
     "project/search" => "project/search",
     "project/target/<target:\d+>/check/<check:\d+>/link" => "project/checklink",
+    "project/target/running-checks" => "project/runningchecks",
 
     // custom checks
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/custom-check/save" => "project/savecustomcheck",

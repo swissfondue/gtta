@@ -439,29 +439,12 @@
 <?php if (User::checkRole(User::ROLE_USER)): ?>
     $(function () {
         user.check.initTargetCustomCheckAttachmentUploadForms();
-        user.check.runningChecks = [
-            <?php
-                $runningChecks = array();
 
-                foreach ($controls as $control) {
-                    foreach ($control->checks as $check) {
-                        foreach ($check->targetChecks as $tc) {
-                            if ($tc->isRunning) {
-                                $started = TargetCheckManager::getStartTime($tc->id);
-                                $runningChecks[] = json_encode(array(
-                                    "id" => $tc->id,
-                                    "time" => $started != NULL ? time() - strtotime($started) : -1,
-                                ));
-                            }
-                        }
-                    }
-                }
+        setInterval(function () {
+            user.check.getRunningChecks("<?= $this->createUrl("project/runningchecks"); ?>", <?= $target->id ?>);
+        }, 1000);
 
-                echo implode(",", $runningChecks);
-            ?>
-        ];
-
-        setTimeout(function () {
+        setInterval(function () {
             user.check.update("<?php echo $this->createUrl("project/updatechecks", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id)); ?>");
         }, 1000);
 

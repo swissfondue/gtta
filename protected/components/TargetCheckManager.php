@@ -170,4 +170,64 @@ class TargetCheckManager {
             }
         }
     }
+
+    /**	
+     * Get check human readable data
+     * @param TargetCheck $tc
+     * @return array
+     */
+    public static function getData(TargetCheck $tc) {
+        $renderController = new CController("RenderController");
+
+        $attachmentList = array();
+        $attachments = TargetCheckAttachment::model()->findAllByAttributes(array(
+            "target_check_id" => $tc->id
+        ));
+
+        foreach ($attachments as $attachment) {
+            $attachmentList[] = array(
+                "name" => CHtml::encode($attachment->name),
+                "path" => $attachment->path,
+                "url" => Yii::app()->createUrl('project/attachment', array('path' => $attachment->path)),
+            );
+        }
+
+        $table = null;
+
+        if ($tc->table_result) {
+            $table = new ResultTable();
+            $table->parse($tc->table_result);
+        }
+
+        $time = TargetCheckManager::getStartTime($tc->id);
+        $startedText = null;
+
+        if ($time) {
+            $started = new DateTime($time);
+            $time = time() - strtotime($time);
+            $user = $tc->user;
+
+            if ($tc->status != TargetCheck::STATUS_FINISHED) {
+                $startedText = Yii::t("app", "Started by {user} on {date} at {time}", array(
+                    "{user}" => $user->name ? $user->name : $user->email,
+                    "{date}" => $started->format("d.m.Y"),
+                    "{time}" => $started->format("H:i:s"),
+                ));
+            }
+        } else {
+            $time = -1;
+        }
+
+        return [
+            "id" => $tc->id,
+            "overrideTarget" => $tc->override_target,
+            "result" => $tc->result,
+            "tableResult" => $table ? $renderController->renderPartial("/project/target/check/tableresult", array("table" => $table, "check" => $tc), true) : "",
+            "finished" => !$tc->isRunning,
+            "time" => $time,
+            "attachmentControlUrl" => Yii::app()->createUrl("project/controlattachment"),
+            "attachments" => $attachmentList,
+            "startedText" => $startedText,
+        ];
+    }
 }

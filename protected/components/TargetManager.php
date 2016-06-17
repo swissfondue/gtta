@@ -489,4 +489,29 @@ class TargetManager {
 
         return $messages;
     }
+
+    /**
+     * Get chain checks
+     * @param Target $target
+     * @return array|CActiveRecord|mixed|null
+     * @throws Exception
+     */
+    public static function getChainChecks(Target $target) {
+        if (!$target->relations) {
+            return [];
+        }
+
+        try {
+            $relations = new SimpleXMLElement($target->relations, LIBXML_NOERROR);
+        } catch (Exception $e) {
+            throw new Exception("Invalid target relations.");
+        }
+
+        $checkIds = RelationManager::getCheckIds($relations);
+
+        return TargetCheck::model()->findAllByAttributes([
+            "check_id" => $checkIds,
+            "target_id" => $target->id
+        ]);
+    }
 }

@@ -1848,6 +1848,43 @@ class ProjectController extends Controller {
 	}
 
     /**
+     * Get running checks list
+     * @param $id
+     * @param $target
+     */
+    public function actionRunningChecks() {
+        $response = new AjaxResponse();
+
+        try {
+            if (isset($_POST["RunningChecksForm"])) {
+                $targetId = $_POST["RunningChecksForm"]["target_id"];
+            }
+
+            $target = Target::model()->findByPk($targetId);
+
+            if (!$target) {
+                throw new CHttpException(404, Yii::t("app", "Target not found."));
+            }
+
+            $checkIds = [];
+
+            foreach ($target->targetChecks as $tc) {
+                if ($tc->isRunning) {
+                    $time = TargetCheckManager::getStartTime($tc->id);
+
+                    $checkIds[] = TargetCheckManager::getData($tc);
+                }
+            }
+
+            $response->addData("checks", $checkIds);
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
      * List of checks in control
      * @param $id
      * @param $target
@@ -3680,57 +3717,7 @@ class ProjectController extends Controller {
             $checkData = array();
 
             foreach ($checks as $targetCheck) {
-                $time = TargetCheckManager::getStartTime($targetCheck->id);
-                $startedText = null;
-
-                if ($time) {
-                    $started = new DateTime($time);
-                    $time = time() - strtotime($time);
-                    $user = $targetCheck->user;
-
-                    if ($targetCheck->status != TargetCheck::STATUS_FINISHED) {
-                        $startedText = Yii::t("app", "Started by {user} on {date} at {time}", array(
-                            "{user}" => $user->name ? $user->name : $user->email,
-                            "{date}" => $started->format("d.m.Y"),
-                            "{time}" => $started->format("H:i:s"),
-                        ));
-                    }
-                } else {
-                    $time = -1;
-                }
-
-                $table = null;
-
-                if ($targetCheck->table_result) {
-                    $table = new ResultTable();
-                    $table->parse($targetCheck->table_result);
-                }
-
-                $attachmentList = array();
-                $attachments = TargetCheckAttachment::model()->findAllByAttributes(array(
-                    "target_check_id" => $targetCheck->id
-                ));
-
-                foreach ($attachments as $attachment) {
-                    $attachmentList[] = array(
-                        "name" => CHtml::encode($attachment->name),
-                        "path" => $attachment->path,
-                        "url" => $this->createUrl('project/attachment', array('path' => $attachment->path)),
-                    );
-                }
-
-                $finished = !$targetCheck->isRunning;
-
-                $checkData[] = array(
-                    "id" => $targetCheck->id,
-                    "result" => $targetCheck->result,
-                    "tableResult" => $table ? $this->renderPartial("/project/target/check/tableresult", array("table" => $table, "check" => $targetCheck), true) : "",
-                    "finished" => $finished,
-                    "time" => $time,
-                    "attachmentControlUrl" => $this->createUrl("project/controlattachment"),
-                    "attachments" => $attachmentList,
-                    "startedText" => $startedText,
-                );
+                $checkData[] = TargetCheckManager::getData($targetCheck);
             }
 
             $response->addData('checks', $checkData);

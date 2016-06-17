@@ -50,12 +50,7 @@ function User()
                 $('td.status', headingRow).html(minutes.zeroPad(2) + ':' + seconds.zeroPad(2));
             }
 
-            if (_check.updateIteration < 5)
-                setTimeout(function () {
-                    _check.update(url);
-                }, 1000);
-            else
-            {
+            if (_check.updateIteration > 5) {
                 var checkIds = [];
 
                 _check.updateIteration = 0;
@@ -90,7 +85,8 @@ function User()
 
                                 check = data.checks[i];
 
-                                $('#TargetCheckEditForm_fields_' + check.id + '_result').val(check.result);
+				$('#TargetCheckEditForm_fields_' + check.id + '_result').val(check.result);
+                                $('#TargetCheckEditForm_' + check.id + '_overrideTarget').val(check.overrideTarget);
                                 $('div.check-form[data-type=check][data-id="' + check.id + '"] div.table-result').html(check.tableResult);
 
                                 if (check.startedText) {
@@ -179,10 +175,6 @@ function User()
                                 }
                             }
                         }
-
-                        setTimeout(function () {
-                            _check.update(url);
-                        }, 1000);
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -196,6 +188,83 @@ function User()
                 });
 
             }
+        };
+
+        /**
+         * Get running check list
+         * @param url
+         * @param targetId
+         */
+        this.getRunningChecks = function (url, targetId) {
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                success : function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    if (data.data.checks) {
+                        $.each(data.data.checks, function (key, value) {
+                            var exists =_check.runningChecks.filter(function (obj) {
+                                return obj.id == value["id"]
+                            });
+
+                            if (!exists.length) {
+                                _check.setLoading(value["id"]);
+                                var actions = $('div.check-header[data-type=check][data-id="' + value["id"] + '"] .actions');
+                                actions.empty();
+
+                                actions.append(
+                                    $("<a>")
+                                        .attr("href", "#stop")
+                                        .attr("title", system.translate('Stop'))
+                                        .click(function () {
+                                            user.check.stop(value["id"])
+                                        })
+                                        .append(
+                                            $("<i>")
+                                                .addClass("icon icon-stop")
+                                        ),
+                                    " &nbsp; ",
+                                    $("<span>")
+                                        .addClass("disabled")
+                                        .append(
+                                            $("<i>")
+                                                .addClass("icon icon-refresh")
+                                                .attr("title", system.translate("Reset"))
+                                        )
+                                );
+
+                                _check.runningChecks.push({
+                                    "id" : value["id"],
+                                    "time" : value["time"]
+                                });
+                            }
+                        });
+                    }
+                },
+
+                data : {
+                    "RunningChecksForm[target_id]": targetId,
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
         };
 
         /**
@@ -2614,6 +2683,8 @@ function User()
          */
         this.mxCheckHandlerInit = function () {
             var md = (mxClient.IS_TOUCH) ? 'touchstart' : 'mousedown';
+            var graph = _mxgraph.editor.graph;
+            var cell = graph.getSelectionCell();
 
             // Settings
             var img = mxUtils.createImage('/js/mxgraph/grapheditor/images/settings.png');
@@ -2626,8 +2697,6 @@ function User()
             }));
 
             mxEvent.addListener(img, 'click', mxUtils.bind(this, function(evt) {
-                var graph = _mxgraph.editor.graph;
-                var cell = graph.getSelectionCell();
                 var bounds = this.graph.getCellBounds(cell);
 
                 if (_mxgraph.properties) {
@@ -2847,6 +2916,13 @@ function User()
                     $categories.append(option);
                 });
             }));
+
+            // set first check as start_check
+            if (_mxgraph.getAllCells().length == 1) {
+                if (parseInt(cell.getAttribute("start_check")) != 1) {
+                    cell.setAttribute("start_check", "1");
+                }
+            }
 
             this.domNode.appendChild(img);
 
