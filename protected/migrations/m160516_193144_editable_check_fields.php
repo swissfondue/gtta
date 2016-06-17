@@ -19,6 +19,7 @@ class m160516_193144_editable_check_fields extends CDbMigration {
                 "type" => "bigint NOT NULL",
                 "name" => "text NOT NULL",
                 "title" => "text NOT NULL",
+                "sort_order" => "bigint NOT NULL DEFAULT currval('global_check_fields_id_seq')",
                 "hidden" => "boolean NOT NULL DEFAULT 'f'",
                 "PRIMARY KEY (id)"
             ]
@@ -76,8 +77,8 @@ class m160516_193144_editable_check_fields extends CDbMigration {
             "check_fields",
             [
                 "id" => "bigserial NOT NULL",
-                "global_check_field_id" => "bigserial NOT NULL",
-                "check_id" => "bigserial NOT NULL",
+                "global_check_field_id" => "bigint NOT NULL",
+                "check_id" => "bigint NOT NULL",
                 "hidden" => "boolean NOT NULL DEFAULT 'f'",
                 "value" => "text",
                 "PRIMARY KEY (id)",
@@ -138,7 +139,7 @@ class m160516_193144_editable_check_fields extends CDbMigration {
         $this->createTable(
             "check_fields_l10n",
             [
-                "check_field_id" => "bigserial NOT NULL",
+                "check_field_id" => "bigint NOT NULL",
                 "language_id" => "bigint NOT NULL",
                 "value" => "text",
                 "PRIMARY KEY (check_field_id, language_id)"
@@ -283,6 +284,9 @@ class m160516_193144_editable_check_fields extends CDbMigration {
 
         $this->dropColumn("target_checks", "result");
 
+        $this->dropColumn("target_custom_checks", "poc");
+        $this->dropColumn("target_custom_checks", "links");
+
         return true;
 	}
 
@@ -400,6 +404,9 @@ class m160516_193144_editable_check_fields extends CDbMigration {
 
         $this->addColumn("target_checks", "poc", "text");
         $this->addColumn("target_checks", "links", "text");
+
+        $this->addColumn("target_custom_checks", "poc", "text");
+        $this->addColumn("target_custom_checks", "links", "text");
 
 		return true;
 	}

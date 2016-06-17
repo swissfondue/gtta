@@ -933,7 +933,7 @@ class ReportController extends Controller {
                                     $title = $check["question"]["title"];
                                     $value = $check["question"]["value"];
                                 } else {
-                                    $title = Yii::t("app", "Background Info");
+                                    $title = Yii::t("app", "Question");
                                     $value = $check["question"];
                                 }
 
@@ -957,7 +957,7 @@ class ReportController extends Controller {
                                     $title = $check["result"]["title"];
                                     $value = $check["result"]["value"];
                                 } else {
-                                    $title = Yii::t("app", "Background Info");
+                                    $title = Yii::t("app", "Result");
                                     $value = $check["result"];
                                 }
 
@@ -1069,6 +1069,10 @@ class ReportController extends Controller {
 
                             if (isset($check["fields"])) {
                                 foreach ($check["fields"] as $field) {
+                                    if (in_array($field["name"], GlobalCheckField::$system)) {
+                                        continue;
+                                    }
+
                                     $table->addRow();
                                     $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                     $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
@@ -1320,10 +1324,11 @@ class ReportController extends Controller {
      * @param $targetIds
      * @param $templateCategoryIds
      * @param $project
+     * @param $fields
      * @param $language
      * @return array
      */
-    private function _projectReport($targetIds, $templateCategoryIds, $project, $language) {
+    private function _projectReport($targetIds, $templateCategoryIds, $project, $fields, $language) {
         $criteria = new CDbCriteria();
         $criteria->addInCondition('id', $targetIds);
         $criteria->addColumnCondition(array('project_id' => $project->id));
@@ -1446,8 +1451,6 @@ class ReportController extends Controller {
                             "background" => $this->_prepareProjectReportText($check->background_info),
                             "question" => $this->_prepareProjectReportText($check->question),
                             "result" => $check->result,
-                            "poc" => $check->poc,
-                            "links" => $check->links,
                             "tableResult" => null,
                             "rating" => $check->rating,
                             "ratingName" => $ratings[$check->rating],
@@ -1614,13 +1617,17 @@ class ReportController extends Controller {
                                 "name" => GlobalCheckField::FIELD_RESULT
                             ]);
 
-                            $fields = [];
+                            $checkFields = [];
 
                             foreach ($tc->fields as $f) {
-                                $fields[] = [
-                                    "title" => $f->field->global->localizedTitle,
-                                    "value" => $f->value
-                                ];
+                                if (in_array($f->field->global->name, GlobalCheckField::$system) ||
+                                   (in_array($f->field->global->name, $fields) && !$f->hidden && !$f->superHidden)) {
+                                    $checkFields[] = [
+                                        "name" => $f->field->global->name,
+                                        "title" => $f->field->global->localizedTitle,
+                                        "value" => $f->value
+                                    ];
+                                }
                             }
 
                             $checkData = array(
@@ -1639,7 +1646,7 @@ class ReportController extends Controller {
                                     "title" => $resultField->localizedTitle,
                                     "value" => $tc->result,
                                 ],
-                                "fields" => $fields,
+                                "fields" => $checkFields,
                                 "tableResult" => $tc->table_result,
                                 "rating" => 0,
                                 "ratingName" => $ratings[$tc->rating],
@@ -1819,6 +1826,11 @@ class ReportController extends Controller {
         $targetIds = $model->targetIds;
         $options = $model->options;
         $templateId = $model->templateId;
+        $fields = $model->fields;
+
+        if (!$fields) {
+            $fields = array();
+        }
 
         if (!$options) {
             $options = array();
@@ -1902,7 +1914,7 @@ class ReportController extends Controller {
 
         FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
 
-        $data = $this->_projectReport($targetIds, $templateCategoryIds, $project, $language);
+        $data = $this->_projectReport($targetIds, $templateCategoryIds, $project, $fields, $language);
 
         if ($template->type == ReportTemplate::TYPE_DOCX) {
             $plugin = ReportPlugin::getPlugin($template, $data);
@@ -2918,6 +2930,7 @@ class ReportController extends Controller {
             'clients'       => $clients,
             'templates'     => $templates,
             'riskTemplates' => $riskTemplates,
+            'fields'        => GlobalCheckField::model()->findAll(["order" => "sort_order ASC"]),
             'infoChecksLocation' => array(
                 ProjectReportForm::INFO_LOCATION_TARGET   => Yii::t('app', 'in the main list'),
                 ProjectReportForm::INFO_LOCATION_TABLE    => Yii::t('app', 'in a separate table'),

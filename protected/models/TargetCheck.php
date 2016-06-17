@@ -156,6 +156,22 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
 	}
 
     /**
+     * Check fields
+     * @return array|CActiveRecord|mixed|null
+     */
+    public function getOrderedFields() {
+        $criteria = new CDbCriteria();
+        $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
+        $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
+        $criteria->order = "gcf.sort_order ASC";
+        $criteria->addColumnCondition([
+            "t.target_check_id" => $this->id
+        ]);
+
+        return TargetCheckField::model()->findAll($criteria);
+    }
+
+    /**
      * Set automation error.
      */
     public function automationError($error) {

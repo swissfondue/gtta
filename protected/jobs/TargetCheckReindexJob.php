@@ -100,7 +100,33 @@ class TargetCheckReindexJob extends BackgroundJob {
                     throw new Exception("Field not found.", 404);
                 }
 
-                FieldManager::reindexCheckFields($field);
+                $criteria = new CDbCriteria();
+                $criteria->addColumnCondition([
+                    "gf.id" => $field->id
+                ]);
+                $checks = Check::model()->with([
+                    "fields" => [
+                        "alias" => "f",
+                        "with" => [
+                            "global" => ["alias" => "gf"]
+                        ]
+                    ],
+                ])->findAll($criteria);
+
+                $checkIds = [];
+
+                foreach ($checks as $c) {
+                    $checkIds[] = $c->id;
+                }
+
+                $criteria = new CDbCriteria();
+                $criteria->addNotInCondition("id", $checkIds);
+                $noFieldChecks = Check::model()->findAll($criteria);
+                $cm = new CheckManager();
+
+                foreach ($noFieldChecks as $check) {
+                    $cm->reindexFields($check, [$field]);
+                }
             } else if (isset($this->args["check_id"])) {
                 $check = Check::model()->findByPk($this->args["check_id"]);
 
@@ -109,7 +135,7 @@ class TargetCheckReindexJob extends BackgroundJob {
                 }
 
                 foreach ($check->fields as $field) {
-                    FieldManager::reindexTargetCheckFields($field);
+                    TargetCheckManager::reindexFields($field);
                 }
             }
 

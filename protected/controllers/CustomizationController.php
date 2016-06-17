@@ -30,17 +30,6 @@ class CustomizationController extends Controller
     }
 
     /**
-     * Checks customization category list
-     */
-    public function actionChecks() {
-        $this->breadcrumbs[] = array(Yii::t("app", "Customization"), $this->createUrl("customization/index"));
-        $this->breadcrumbs[] = array(Yii::t("app", "Checks"), "");
-
-        $this->pageTitle = Yii::t("app", "Checks");
-        $this->render("check/index", []);
-    }
-
-    /**
      * Check fields list
      * @param int $page
      * @throws CHttpException
@@ -63,7 +52,7 @@ class CustomizationController extends Controller
         $criteria = new CDbCriteria();
         $criteria->limit = $this->entriesPerPage;
         $criteria->offset = ($page - 1) * $this->entriesPerPage;
-        $criteria->order = "COALESCE(l10n.title, t.title) ASC";
+        $criteria->order = "sort_order ASC";
         $criteria->together = true;
 
         $fields = GlobalCheckField::model()->with(array(
@@ -78,12 +67,11 @@ class CustomizationController extends Controller
         $paginator = new Paginator($fieldCount, $page);
 
         $this->breadcrumbs[] = array(Yii::t("app", "Customization"), $this->createUrl("customization/index"));
-        $this->breadcrumbs[] = array(Yii::t("app", "Checks"), $this->createUrl("customization/checks"));
-        $this->breadcrumbs[] = array(Yii::t("app", "Fields"), "");
+        $this->breadcrumbs[] = array(Yii::t("app", "Check Fields"), "");
 
         // display the page
-        $this->pageTitle = Yii::t("app", "Fields");
-        $this->render("check/field/index", array(
+        $this->pageTitle = Yii::t("app", "Check Fields");
+        $this->render("field/index", array(
             "fields" => $fields,
             "p" => $paginator,
         ));
@@ -173,7 +161,6 @@ class CustomizationController extends Controller
         }
 
         $this->breadcrumbs[] = array(Yii::t("app", "Customization"), $this->createUrl("customization/index"));
-        $this->breadcrumbs[] = array(Yii::t("app", "Checks"), $this->createUrl("customization/checks"));
         $this->breadcrumbs[] = array(Yii::t("app", "Fields"), $this->createUrl("customization/checks/fields"));
 
         if ($newRecord) {
@@ -184,7 +171,7 @@ class CustomizationController extends Controller
 
         // display the page
         $this->pageTitle = $newRecord ? Yii::t("app", "New Field") : $field->localizedTitle;
-        $this->render("check/field/edit", array(
+        $this->render("field/edit", array(
             "newRecord" => $newRecord,
             "form" => $form,
             "field" => $field,
@@ -227,6 +214,65 @@ class CustomizationController extends Controller
                     }
 
                     GlobalCheckField::model()->deleteByPk($form->id);
+
+                    break;
+
+                case "up":
+                    $criteria = new CDbCriteria();
+                    $criteria->addCondition("t.sort_order < :sort_order");
+                    $criteria->params = array(
+                        "sort_order"  => $field->sort_order
+                    );
+                    $criteria->select = "MAX(t.sort_order) as nearest_sort_order";
+                    $nearestField = GlobalCheckField::model()->find($criteria);
+
+                    if (!$nearestField || $nearestField->nearest_sort_order === null)
+                        throw new CHttpException(403, Yii::t("app", "Field is already first on the list."));
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addColumnCondition(array(
+                        "t.sort_order" => $nearestField->nearest_sort_order
+                    ));
+
+                    $nearestField = GlobalCheckField::model()->find($criteria);
+
+                    $newSortOrder = $nearestField->sort_order;
+                    $nearestField->sort_order = $field->sort_order;
+                    $field->sort_order = $newSortOrder;
+
+                    $nearestField->save();
+                    $field->save();
+
+                    break;
+
+                case "down":
+                    $criteria = new CDbCriteria();
+                    $criteria->addCondition("t.sort_order > :sort_order");
+                    $criteria->params = array(
+                        "sort_order"  => $field->sort_order,
+                    );
+                    $criteria->select = "MIN(t.sort_order) as nearest_sort_order";
+
+                    $nearestField = GlobalCheckField::model()->find($criteria);
+
+                    if (!$nearestField || $nearestField->nearest_sort_order === null) {
+                        throw new CHttpException(403, Yii::t("app", "Field is already last on the list."));
+                    }
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addColumnCondition([
+                            "t.sort_order" => $nearestField->nearest_sort_order
+                        ]
+                    );
+
+                    $nearestField = GlobalCheckField::model()->find($criteria);
+
+                    $newSortOrder = $nearestField->sort_order;
+                    $nearestField->sort_order = $field->sort_order;
+                    $field->sort_order = $newSortOrder;
+
+                    $nearestField->save();
+                    $field->save();
 
                     break;
 

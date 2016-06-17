@@ -419,14 +419,16 @@ class ProjectController extends Controller {
                 }
 
                 $criteria = new CDbCriteria();
-                $criteria->join = "LEFT JOIN target_checks tc ON tc.id = t.target_check_id";
-                $criteria->join .= " LEFT JOIN targets tr ON tr.id = tc.target_id";
-                $criteria->join .= " LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
-                $criteria->join .= " LEFT JOIN global_check_fields g ON g.id = cf.global_check_field_id";
-                $criteria->addColumnCondition([
-                    "tr.project_id" => $project->id
-                ]);
-                $criteria->addInCondition("g.name", $model->hiddenFields);
+                $criteria->join = "INNER JOIN target_checks tc ON tc.id = t.target_check_id";
+                $criteria->join .= sprintf(" INNER JOIN targets tr ON tr.id = tc.target_id AND tr.project_id = %d", $project->id);
+                $criteria->join .= " INNER JOIN check_fields cf ON cf.id = t.check_field_id";
+                $criteria->join .= " INNER JOIN global_check_fields g ON g.id = cf.global_check_field_id";
+
+                $hiddenFields = array_map(function ($item) {
+                    return "'$item'";
+                }, $model->hiddenFields);
+
+                $criteria->join .=  sprintf(" AND g.name IN (%s)", count($hiddenFields) ? implode(",", $hiddenFields) : "''");
 
                 $hiddenFields = TargetCheckField::model()->findAll($criteria);
                 $hiddenFieldIds = [];
@@ -483,7 +485,7 @@ class ProjectController extends Controller {
                 Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
                 Project::STATUS_FINISHED => Yii::t("app", "Finished"),
             ),
-            "fields" => GlobalCheckField::model()->findAll()
+            "fields" => GlobalCheckField::model()->findAll(["order" => "sort_order ASC"])
         ));
 	}
 
@@ -2702,14 +2704,6 @@ class ProjectController extends Controller {
                 $form->result = null;
             }
 
-            if (!$form->poc) {
-                $form->poc = null;
-            }
-
-            if (!$form->links) {
-                $form->links = null;
-            }
-
             if (!$form->solutionTitle) {
                 $form->solutionTitle = null;
             }
@@ -2804,10 +2798,6 @@ class ProjectController extends Controller {
                     $customCheck->delete();
                 }
 
-                foreach ($check->fields as $field) {
-                    FieldManager::reindexTargetCheckFields($field);
-                }
-
                 $response->addData("createCheck", true);
 
                 StatsJob::enqueue(array(
@@ -2823,8 +2813,6 @@ class ProjectController extends Controller {
                 $customCheck->solution_title = $form->solutionTitle;
                 $customCheck->solution = $form->solution;
                 $customCheck->rating = $form->rating;
-                $customCheck->poc = $form->poc;
-                $customCheck->links = $form->links;
 
                 if (count($form->attachmentTitles)) {
                     foreach ($form->attachmentTitles as $title) {

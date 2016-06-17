@@ -72,6 +72,11 @@ class ProjectReportForm extends CFormModel {
     public $fileType;
 
     /**
+     * @var array check fields
+     */
+    public $fields;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
@@ -83,6 +88,7 @@ class ProjectReportForm extends CFormModel {
             array("fontFamily", "in", "range" => Yii::app()->params["reports"]["fonts"]),
             array("infoChecksLocation", "in", "range" => array(self::INFO_LOCATION_TARGET, self::INFO_LOCATION_TABLE, self::INFO_LOCATION_APPENDIX)),
             array("clientId, projectId, targetIds, options, templateId", "safe"),
+            array("fields", "checkFields"),
 		);
 	}
 
@@ -100,4 +106,24 @@ class ProjectReportForm extends CFormModel {
 			"targetIds" => Yii::t("app", "Targets"),
 		);
 	}
+
+    /**
+     * Check field list
+     * @param $attribute
+     * @param $params
+     * @return bool
+     */
+    public function checkFields($attribute, $params) {
+        $fields = GlobalCheckField::model()->findAllByAttributes([
+            "name" => $this->{$attribute}
+        ]);
+
+        if (count($fields) != count($this->{$attribute})) {
+            $this->addError("fields", Yii::t("app", "Invalid field list."));
+
+            return false;
+        }
+
+        return true;
+    }
 }

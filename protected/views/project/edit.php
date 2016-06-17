@@ -100,7 +100,7 @@
         </div>
 
         <div class="control-group <?php if ($model->getError("hiddenFields")) echo 'error'; ?>">
-            <label class="control-label" for="ProjectEditForm_hiddenFields"><?php echo Yii::t("app", "Hidden Check Fields"); ?></label>
+            <label class="control-label" for="ProjectEditForm_hiddenFields"><?php echo Yii::t("app", "Hide Fields"); ?></label>
             <div class="controls">
                 <ul style="list-style-type: none; margin-left: 0;">
                     <?php foreach ($fields as $f): ?>

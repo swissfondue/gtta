@@ -1,4 +1,6 @@
-<?php if (!$field->superHidden): ?>
+<?php $hidden = $field->superHidden || $field->hidden; ?>
+
+<?php if (!$hidden): ?>
     <?php
         $name = sprintf("TargetCheckEditForm_%d[fields][%s]", $targetCheck->id, $field->name);
         $id = sprintf("TargetCheckEditForm_fields_%d_%s", $targetCheck->id, $field->name);

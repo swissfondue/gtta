@@ -86,6 +86,21 @@ class Check extends ActiveRecord {
 	}
 
     /**
+     * Check fields
+     * @return array|CActiveRecord|mixed|null
+     */
+    public function getOrderedFields() {
+        return CheckField::model()->with([
+            "global" => [
+                "joinType" => "LEFT JOIN",
+                "order" => "global.sort_order ASC"
+            ]
+        ])->findAllByAttributes([
+            "check_id" => $this->id
+        ]);
+    }
+
+    /**
      * @return string localized name.
      */
     public function getLocalizedName() {
@@ -128,7 +143,7 @@ class Check extends ActiveRecord {
             $language = Language::model()->findByPk($languageId);
 
             if (!$language) {
-                throw new Exception("Language not exists.");
+                throw new Exception(Yii::t("app", "Language not exists."));
             }
         }
 

@@ -857,7 +857,7 @@ class CheckController extends Controller
 
             $model->parseFields($check);
 
-            foreach ($check->fields as $f) {
+            foreach ($check->orderedFields as $f) {
                 $model->hidden[$f->name] = $f->hidden;
             }
         } else {

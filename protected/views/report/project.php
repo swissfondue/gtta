@@ -115,6 +115,20 @@
                 </div>
             </div>
 
+            <div class="control-group" id="checks-fields">
+                <label class="control-label" for="ProjectReportForm_fields"><?php echo Yii::t('app', 'Check Fields'); ?></label>
+                <div class="controls">
+                    <?php foreach ($fields as $field): ?>
+                        <?php if (!in_array($field->name, GlobalCheckField::$system)): ?>
+                            <label class="checkbox">
+                                <input class="always-disabled" type="checkbox" id="ProjectReportForm_fields" name="ProjectReportForm[fields][]" value="<?= $field->name ?>" checked="checked">
+                                <?= $field->localizedTitle ?>
+                            </label>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
             <div class="control-group" id="risk-template-list">
                 <label class="control-label" for="RiskMatrixForm_templateId"><?php echo Yii::t('app', 'Risk Matrix Template'); ?></label>
                 <div class="controls">

@@ -65,29 +65,6 @@
 
         <hr>
 
-        <?php if ($check->fields): ?>
-            <div class="control-group">
-                <label class="control-label"><?php echo Yii::t('app', 'Hidden Fields'); ?></label>
-                <div class="controls">
-                    <ul style="list-style-type: none; margin-left: 0;">
-                        <?php foreach ($check->fields as $f): ?>
-                            <?php if (!$f->superHidden): ?>
-                                <li>
-                                    <label><input type="checkbox"
-                                           id="CheckEditForm_hidden_<?= $f->name ?>"
-                                           name="CheckEditForm[hidden][<?= $f->name ?>]"
-                                           value="1"
-                                        <?php if (isset($model->hidden[$f->name]) && $model->hidden[$f->name]) echo 'checked="checked"'; ?>>&nbsp;<?= $f->localizedTitle; ?>
-                                </li></label><br />
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            </div>
-
-            <hr>
-        <?php endif; ?>
-
         <div class="control-group <?php if ($model->getError('controlId')) echo 'error'; ?>">
             <label class="control-label" for="CheckEditForm_controlId"><?php echo Yii::t('app', 'Control'); ?></label>
             <div class="controls">

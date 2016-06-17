@@ -393,10 +393,13 @@ class CheckManager {
     /**
      * Reindex check fields
      * @param Check $check
+     * @param array $globalFields
      * @throws Exception
      */
-    public function reindexFields(Check $check) {
-        $globalFields = GlobalCheckField::model()->findAll();
+    public function reindexFields(Check $check, $globalFields = []) {
+        if (!$globalFields) {
+            $globalFields = GlobalCheckField::model()->findAll();
+        }
 
         foreach ($globalFields as $gf) {
             $checkField = CheckField::model()->findByAttributes([

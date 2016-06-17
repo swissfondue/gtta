@@ -43,6 +43,8 @@ class GlobalCheckField extends ActiveRecord {
         "result",
     ];
 
+    public $nearest_sort_order;
+
     /**
      * Returns the static model of the specified AR class.
      * @param string $className active record class name.

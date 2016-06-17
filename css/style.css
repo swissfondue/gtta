@@ -166,6 +166,7 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
     text-align:right;
 }
 
+.field-list .actions,
 .check-list .actions,
 .suggested-target-list .actions,
 .backups-list .actions {

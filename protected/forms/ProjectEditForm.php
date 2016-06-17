@@ -81,7 +81,7 @@ class ProjectEditForm extends CFormModel {
             array("status", "in", "range" => Project::getValidStatuses()),
             array("hoursAllocated", "numerical", "min" => 0),
             array("hoursAllocated", "checkHours"),
-            array("hiddenFields", "checkHours"),
+            array("hiddenFields", "safe"),
 		);
 	}
     

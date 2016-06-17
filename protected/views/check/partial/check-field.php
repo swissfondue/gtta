@@ -4,6 +4,9 @@
         $id = sprintf("CheckEditForm_fields_%s_%s", $language->id, $field->global->name);
         $value = isset($form->fields[$language->id][$field->global->name]) ? CHtml::encode($form->fields[$language->id][$field->global->name]) : "";
         $error = $form->getError("fields_" . $field->global->name);
+
+        $hiddenName = sprintf("CheckEditForm[hidden][%s]", $field->name);
+        $hiddenId = sprintf("CheckEditForm_hidden_%s", $field->name);
     ?>
 
     <div class="control-group <?php if ($error) print 'error'; ?>">
@@ -36,6 +39,14 @@
             <?php if ($field->global->type == GlobalCheckField::TYPE_CHECKBOX): ?>
                 <input type="checkbox" class="input-xlarge" name="<?= $name ?>" <?php if (isset($field->value) && $field->value) echo "checked"; ?>>
             <?php endif; ?>
+
+            <label>
+                <input type="checkbox"
+                   id="<?= $hiddenId ?>"
+                   name="<?= $hiddenName ?>"
+                   value="1"
+                   <?php if (isset($form->hidden[$field->name]) && $form->hidden[$field->name]) echo 'checked="checked"'; ?>>&nbsp;<?= Yii::t("app", "Hidden"); ?>
+            </label>
         </div>
     </div>
 <?php endif; ?>
