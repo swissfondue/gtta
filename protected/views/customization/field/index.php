@@ -39,12 +39,8 @@
                                     <?php endif; ?>
                                 </td>
                                 <td class="actions">
-                                    <a href="#up" title="<?php echo Yii::t('app', 'Move Up'); ?>" onclick="system.control.up(<?= $field->id; ?>);">
-                                        <i class="icon icon-arrow-up"></i>
-                                    </a>
-                                    <a href="#down" title="<?php echo Yii::t('app', 'Move Down'); ?>" onclick="system.control.down(<?= $field->id; ?>);">
-                                        <i class="icon icon-arrow-down"></i>
-                                    </a>
+                                    <a href="#up" title="<?php echo Yii::t('app', 'Move Up'); ?>" onclick="system.control.up(<?= $field->id; ?>);"><i class="icon icon-arrow-up"></i></a>
+                                    <a href="#down" title="<?php echo Yii::t('app', 'Move Down'); ?>" onclick="system.control.down(<?= $field->id; ?>);"><i class="icon icon-arrow-down"></i></a>
                                     <div class="action-del" style="width: 15px; height: 15px; display: inline-block;">
                                         <?php if (!in_array($field->name, GlobalCheckField::$system)): ?>
                                             <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?= $field->id; ?>);"><i class="icon icon-remove"></i></a>

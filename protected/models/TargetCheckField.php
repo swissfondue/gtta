@@ -102,4 +102,14 @@ class TargetCheckField extends ActiveRecord {
         $this->value = $value;
         $this->save();
     }
+
+    /**
+     * Reset field value
+     */
+    public function reset() {
+        if ($this->type != GlobalCheckField::TYPE_WYSIWYG_READONLY) {
+            $this->value = "";
+            $this->save();
+        }
+    }
 }

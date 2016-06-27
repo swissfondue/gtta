@@ -38,7 +38,6 @@
  * @property integer $git_proto
  * @property integer $git_username
  * @property integer $git_password
- * @property Language $language
  * @property boolean $scripts_verbosity
  */
 class System extends ActiveRecord {
@@ -124,15 +123,6 @@ class System extends ActiveRecord {
     }
 
     /**
-     * @return array relational rules.
-     */
-    public function relations() {
-        return array(
-            "language" => array(self::BELONGS_TO, "Language", "", "on" => "language.user_default OR language.default"),
-        );
-    }
-
-    /**
      * Check if system is regenerating
      */
     public function getIsRegenerating() {
@@ -166,5 +156,30 @@ class System extends ActiveRecord {
         $job = JobManager::buildId(RestoreJob::ID_TEMPLATE);
 
         return JobManager::isRunning($job);
+    }
+
+    /**
+     * Get language
+     * @return CActiveRecord
+     * @throws Exception
+     */
+    public function getLanguage() {
+        if (isset(Yii::app()->language)) {
+            $language = Language::model()->findByAttributes(["code" => Yii::app()->language]);
+        }
+
+        if (!$language) {
+            $language = Language::model()->findByAttributes(["user_default" => true]);
+        }
+
+        if (!$language) {
+            $language = Language::model()->findByAttributes(["default" => true]);
+        }
+
+        if (!$language) {
+            throw new Exception("Language not exists.");
+        }
+
+        return $language;
     }
 }

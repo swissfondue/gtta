@@ -26,7 +26,7 @@
             </td>
         </tr>
 
-        <?php foreach ($check->fields as $field): ?>
+        <?php foreach ($fields as $field): ?>
             <?= $this->renderPartial("partial/check-field",
                 [
                     "field" => $field,

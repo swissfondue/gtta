@@ -74,7 +74,7 @@ class GlobalCheckField extends ActiveRecord {
 
         if ($field) {
             if ($this->id != $field->id) {
-                $this->addError("name", "Field with that name already exists.");
+                $this->addError("name", Yii::t("app", "Field with that name already exists."));
 
                 return false;
             }
@@ -84,13 +84,13 @@ class GlobalCheckField extends ActiveRecord {
             $field = self::model()->findByPk($this->id);
 
             if (in_array($field->name, GlobalCheckField::$system) && $this->name != $field->name) {
-                $this->addError("name", "Access denied.");
+                $this->addError("name", Yii::t("app", "Access denied."));
 
                 return false;
             }
 
             if ($this->type != $field->type) {
-                $this->addError("type", "You cannot change type of existing field.");
+                $this->addError("type", Yii::t("app", "You cannot change type of existing field."));
 
                 return false;
             }

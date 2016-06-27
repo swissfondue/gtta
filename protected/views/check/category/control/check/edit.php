@@ -51,7 +51,7 @@
                         </div>
                     </div>
 
-                    <?php foreach ($check->fields as $field): ?>
+                    <?php foreach ($fields as $field): ?>
                         <?= $this->renderPartial("partial/check-field",
                             [
                                 "language" => $language,

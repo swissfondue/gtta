@@ -354,11 +354,6 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         ]);
 
         $targetCheckField = TargetCheckField::model()->find($criteria);
-
-        if (!$targetCheckField) {
-            throw new Exception("Result field not found.", 500);
-        }
-
         $targetCheckField->value = $data;
         $targetCheckField->save();
     }

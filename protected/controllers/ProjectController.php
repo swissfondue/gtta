@@ -2121,6 +2121,7 @@ class ProjectController extends Controller {
                 "target" => $target,
                 "category" => $category,
                 "check" => $check,
+                "fields" => $check->orderedFields,
                 "checkData" => $checkData,
                 "results" => $results,
                 "solutions" => $solutions,
@@ -3432,6 +3433,11 @@ class ProjectController extends Controller {
                     $inputValues = array();
                     $timeoutValues = array();
                     $startScripts = array();
+
+                    // reset fields
+                    foreach ($targetCheck->fields as $field) {
+                        $field->reset();
+                    }
 
                     // get default input values
                     if ($check->automated) {
