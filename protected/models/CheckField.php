@@ -70,29 +70,14 @@ class CheckField extends ActiveRecord {
 
     /**
      * Return value if it exist in any language (for checkbox or radio)
-     * @param null $languageId
      * @return mixed|null|string
      */
-    public function getValue($languageId = null) {
-        if ($languageId) {
-            $l10n = CheckFieldL10n::model()->findByAttributes([
-                "check_field_id" => $this->id,
-                "language_id" => $languageId
-            ]);
-
-            return $l10n->value ? $l10n->value : null;
-        }
-
+    public function getValue() {
         $value = $this->value;
 
         // use user_default language
         if (!$value) {
-            $language = Language::model()->findByAttributes(["user_default" => true]);
-
-            if (!$language) {
-                $language = System::model()->findByPk(1)->language;
-            }
-
+            $language = System::model()->findByPk(1)->language;
             $l10n = CheckFieldL10n::model()->findByAttributes([
                 "check_field_id" => $this->id,
                 "language_id" => $language->id

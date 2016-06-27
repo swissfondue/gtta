@@ -134,14 +134,6 @@ class TargetCheckManager {
      * @throws Exception
      */
     public static function reindexFields(CheckField $checkField) {
-        $language = Language::model()->findByAttributes([
-            "user_default" => true
-        ]);
-
-        if (!$language) {
-            $language = System::model()->findByPk(1)->language;
-        }
-
         foreach ($checkField->check->targetChecks as $targetCheck) {
             $targetCheckField = TargetCheckField::model()->findByAttributes([
                 "check_field_id" => $checkField->id,
@@ -151,14 +143,14 @@ class TargetCheckManager {
             // if readonly field -> update value
             if ($targetCheckField) {
                 if ($checkField->global->type == GlobalCheckField::TYPE_WYSIWYG_READONLY) {
-                    $targetCheckField->value = $checkField->getValue($language->id);
+                    $targetCheckField->value = $checkField->getValue();
                     $targetCheckField->save();
                 }
             } else {
                 $tcf = new TargetCheckField();
                 $tcf->target_check_id = $targetCheck->id;
                 $tcf->check_field_id = $checkField->id;
-                $tcf->value = $checkField->getValue($language->id);
+                $tcf->value = $checkField->getValue();
                 $tcf->save();
             }
         }

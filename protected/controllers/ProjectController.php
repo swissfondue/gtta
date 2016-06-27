@@ -3434,6 +3434,11 @@ class ProjectController extends Controller {
                     $timeoutValues = array();
                     $startScripts = array();
 
+                    // reset fields
+                    foreach ($targetCheck->fields as $field) {
+                        $field->reset();
+                    }
+
                     // get default input values
                     if ($check->automated) {
                         $criteria = new CDbCriteria();
