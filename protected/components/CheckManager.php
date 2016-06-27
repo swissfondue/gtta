@@ -424,4 +424,21 @@ class CheckManager {
             }
         }
     }
+
+    /**
+     * Filter checks by string
+     * @param $query
+     * @param $language
+     * @param array $exclude
+     * @return array
+     */
+    public function filter($query, $language, $exclude=[]) {
+        $criteria = new CDbCriteria();
+        $criteria->order = "t.name ASC";
+        $criteria->addColumnCondition(["language_id" => $language]);
+        $criteria->addSearchCondition("t.name", $query, true, "OR", "ILIKE");
+        $criteria->addNotInCondition("t.check_id", $exclude);
+
+        return CheckL10n::model()->findAll($criteria);
+    }
 }

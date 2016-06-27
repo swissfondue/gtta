@@ -31,7 +31,7 @@ class TargetCheckManager {
             }
 
             if (isset($data["result"])) {
-                $targetCheck->setResult($data["result"]);
+                $targetCheck->setPoc($data["result"]);
             }
 
             $targetCheck->save();

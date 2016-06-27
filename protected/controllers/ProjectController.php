@@ -4405,4 +4405,185 @@ class ProjectController extends Controller {
 
         echo $response->serialize();
     }
+
+    /**
+     * Action search issues
+     * @param $id
+     */
+    public function actionSearchIssues($id) {
+        $response = new AjaxResponse();
+
+        try {
+            $model = new SearchForm();
+            $model->attributes = $_POST['SearchForm'];
+
+            if (!$model->validate()) {
+                $errorText = '';
+
+                foreach ($model->getErrors() as $error)
+                {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new Exception("Project not found.", 404);
+            }
+
+            $cm = new CheckManager();
+            $language = Language::model()->findByAttributes(array(
+                "code" => Yii::app()->language
+            ));
+            $projectIssues = Issue::model()->findAllByAttributes([
+                "project_id" => $project->id
+            ]);
+            $exclude = [];
+
+            foreach ($projectIssues as $issue) {
+                $exclude[] = $issue->id;
+            }
+
+            $checks = $cm->filter($model->query, $language->id, $exclude);
+            $data = [];
+
+            foreach ($checks as $check) {
+                $data[] = $check->check->serialize($language->id);
+            }
+
+            $response->addData("checks", $data);
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Bind issue to project
+     * @param $id
+     * @param $check
+     * @throws CHttpException
+     * @throws Exception
+     */
+    public function actionBindIssue($id, $check) {
+        $id = (int) $id;
+        $check = (int) $check;
+
+        $project = Project::model()->findByPk($id);
+
+        if (!$project) {
+            throw new CHttpException(404, Yii::t("app", "Project not found."));
+        }
+
+        $check = Check::model()->findByPk($check);
+
+        if (!$check) {
+            throw new CHttpException(404, Yii::t("app", "Check not found."));
+        }
+
+        $exists = Issue::model()->findByPk([
+            "check_id" => $check,
+            "project_id" => $project->id
+        ]);
+
+        if ($exists) {
+            throw new CHttpException(403, Yii::t("app", "Permission denied."));
+        }
+
+        $issue = new Issue();
+        $issue->project_id = $project->id;
+        $issue->check_id = $check->id;
+        $issue->title = $check->localizedTitle;
+        $issue->save();
+
+        $this->redirect([
+            "project/issueedit",
+            "id" => $project->id,
+            "issue" => $issue->id
+        ]);
+    }
+
+    /**
+     * Project issue list
+     * @param $id
+     * @param int $page
+     * @throws CHttpException
+     */
+    public function actionIssues($id, $page=1) {
+        $page = (int) $page;
+        $id = (int) $id;
+
+        if ($page < 1) {
+            throw new CHttpException(404, Yii::t("app", "Page not found."));
+        }
+
+        $project = Project::model()->findByPk($id);
+
+        if (!$project) {
+            throw new CHttpException(404, "Project not found.");
+        }
+
+        $issues = Issue::model()->findAllByAttributes([
+            "project_id" => $project->id
+        ]);
+        $issueCount = Issue::model()->countByAttributes([
+            "project_id" => $project->id
+        ]);
+
+        $paginator = new Paginator($issueCount, $page);
+
+        $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
+        $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
+        $this->breadcrumbs[] = [Yii::t("app", "Issues"), ""];
+
+        // display the page
+        $this->pageTitle = Yii::t("app", "Issues");
+        $this->render("project/issue/index", array(
+            "issues" => $issues,
+            "p" => $paginator,
+        ));
+    }
+
+    /**
+     * Edit issue
+     * @param $id
+     * @param $issue
+     * @throws CHttpException
+     */
+    public function actionEditIssue($id, $issue) {
+        $id = (int) $id;
+        $issue = (int) $issue;
+
+        $project = Project::model()->findByPk($id);
+
+        if (!$project) {
+            throw new CHttpException(404, Yii::t("app", "Project not found."));
+        }
+
+        $issue = Issue::model()->findByPk($issue);
+
+        if (!$issue) {
+            throw new CHttpException(404, Yii::t("app", "Issue not found."));
+        }
+
+        $form = new IssueEditForm();
+
+        $title = $issue->title;
+        $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
+        $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
+        $this->breadcrumbs[] = [Yii::t("app", "Issues"), $this->createUrl("project/issues", ["id" => $project->id])];
+        $this->breadcrumbs[] = [$title, ""];
+
+        // display the page
+        $this->pageTitle = $title;
+        $this->render("user/edit", array(
+            "form" => $form,
+            "project" => $project,
+        ));
+    }
 }

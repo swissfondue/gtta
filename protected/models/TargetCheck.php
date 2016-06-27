@@ -8,6 +8,7 @@
  * @property integer $target_id
  * @property integer $check_id
  * @property string $result
+ * @property string $poc
  * @property string $rating
  * @property string $status
  * @property string $target_file
@@ -185,10 +186,10 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         ));
 
         if ($this->result) {
-            $this->appendResult($this, "\n");
+            $this->appendPoc($this, "\n");
         }
 
-        $this->appendResult($this, $message);
+        $this->appendPoc($this, $message);
         $this->status = TargetCheck::STATUS_FINISHED;
         $this->save();
     }
@@ -318,37 +319,37 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     }
 
     /**
-     * Append string to result field
+     * Append string to PoC field
      * @param $data
      * @param bool $verbosity
      */
-    public function appendResult($data, $verbosity=true) {
+    public function appendPoc($data, $verbosity=true) {
         $system = System::model()->findByPk(1);
 
         if ($verbosity && !$system->scripts_verbosity) {
             return;
         }
 
-        if (!$this->result) {
-            $this->setResult("");
+        if (!$this->poc) {
+            $this->setPoc("");
         }
 
         if ($data) {
-            $this->setResult($this->_getFieldValue(GlobalCheckField::FIELD_RESULT) . $data);
+            $this->setPoc($this->_getFieldValue(GlobalCheckField::FIELD_POC) . $data);
         }
     }
 
     /**
-     * Set result
+     * Set PoC
      * @param $data
      * @throws Exception
      */
-    public function setResult($data) {
+    public function setPoc($data) {
         $criteria = new CDbCriteria();
         $criteria->join = "LEFT JOIN check_fields cf on cf.id = t.check_field_id";
         $criteria->join .= " LEFT JOIN global_check_fields gcf on gcf.id = cf.global_check_field_id";
         $criteria->addColumnCondition([
-            "gcf.name" => GlobalCheckField::FIELD_RESULT,
+            "gcf.name" => GlobalCheckField::FIELD_POC,
             "t.target_check_id" => $this->id
         ]);
 
@@ -414,5 +415,13 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      */
     public function getResult() {
         return $this->_getFieldValue(GlobalCheckField::FIELD_RESULT);
+    }
+
+    /**
+     * Result `PoC` field value
+     * @return mixed|null
+     */
+    public function getPoc() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_POC);
     }
 }

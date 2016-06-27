@@ -196,4 +196,37 @@ class Check extends ActiveRecord {
     public function getResult() {
         return $this->_getFieldValue(GlobalCheckField::FIELD_RESULT);
     }
+
+    /**
+     * Serialize check
+     * @param null $language
+     * @return array
+     */
+    public function serialize($language = null) {
+        if ($language) {
+            $translate = CheckL10n::model()->findByPk([
+                "language_id" => $language,
+                "check_id" => $this->id
+            ]);
+        }
+
+        return [
+            "id" => $this->id,
+            "check_control_id" => $this->check_control_id,
+            "name" => $language ? $translate->name : $this->name,
+            "automated" => $this->automated,
+            "multiple_solutions" => $this->multiple_solutions,
+            "protocol" => $this->protocol,
+            "port" => $this->port,
+            "reference_id" => $this->reference_id,
+            "reference_code" => $this->reference_code,
+            "reference_url" => $this->reference_url,
+            "effort" => $this->effort,
+            "sort_order" => $this->sort_order,
+            "status" => $this->status,
+            "external_id" => $this->external_id,
+            "create_time" => $this->create_time,
+            "private" => $this->private,
+        ];
+    }
 }

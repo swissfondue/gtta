@@ -63,9 +63,9 @@ class AutomationJob extends BackgroundJob {
         }
 
         if ($fileOutput) {
-            $check->appendResult($fileOutput, false);
+            $check->appendPoc($fileOutput, false);
         } else {
-            $check->appendResult(Yii::t("app", "No output."));
+            $check->appendPoc(Yii::t("app", "No output."));
         }
 
         $check->save();

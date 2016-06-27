@@ -2855,17 +2855,9 @@ class CheckController extends Controller
         {
             $model->attributes = $_POST['SearchForm'];
 
-            if ($model->validate())
-            {
-                $criteria = new CDbCriteria();
-                $criteria->order = 't.name ASC';
-                $criteria->addColumnCondition(array( 'language_id' => $language ));
-
-                $searchCriteria = new CDbCriteria();
-                $searchCriteria->addSearchCondition('t.name', $model->query, true, 'OR', 'ILIKE');
-                $criteria->mergeWith($searchCriteria);
-
-                $checks = CheckL10n::model()->findAll($criteria);
+            if ($model->validate()) {
+                $cm = new CheckManager();
+                $checks = $cm->filter($model->query, $language);
             }
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));

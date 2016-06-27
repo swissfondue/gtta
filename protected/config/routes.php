@@ -76,6 +76,9 @@ return array(
     "project/target/<target:\d+>/check/<check:\d+>/link" => "project/checklink",
     "project/target/running-checks" => "project/runningchecks",
 
+    // project issues
+    "project/<id:\d+>/issue/<issue:\d+>/edit" => "project/issueedit",
+
     // custom checks
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/custom-check/save" => "project/savecustomcheck",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/custom-check/control" => "project/controlcustomcheck",
@@ -154,6 +157,7 @@ return array(
     "check/new"                 => "check/edit",
     "check/control"             => "check/control",
     "check/search"              => "check/search",
+    "check/filter"              => "check/filter",
 
     // checklist template categories
     "checklist-templates/<page:\d+>"                                   => "checklisttemplate/index",

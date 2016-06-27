@@ -35,12 +35,14 @@ class GlobalCheckField extends ActiveRecord {
     const FIELD_QUESTION = "question";
     const FIELD_HINTS = "hints";
     const FIELD_RESULT = "result";
+    const FIELD_POC = "poc";
 
     public static $system = [
-        "background_info",
-        "question",
-        "hints",
-        "result",
+        self::FIELD_BACKGROUND_INFO,
+        self::FIELD_QUESTION,
+        self::FIELD_HINTS,
+        self::FIELD_RESULT,
+        self::FIELD_POC,
     ];
 
     public $nearest_sort_order;
