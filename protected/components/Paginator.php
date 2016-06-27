@@ -26,7 +26,15 @@ class Paginator
             $limit = (int) Yii::app()->request->cookies["per_page_item_limit"]->value;
         }
 
-        $this->pageCount = (int) ($this->entryCount / ($limit > 0 ? $limit : $this->entryCount));
+        if ($limit > 0) {
+            $this->pageCount = (int) $this->entryCount / $limit;
+        } else {
+            if ($this->entryCount) {
+                $this->pageCount = (int) $this->entryCount / $this->entryCount;
+            } else {
+                $this->pageCount = 0;
+            }
+        }
 
         if ($this->entryCount % $limit > 0)
             $this->pageCount += 1;
