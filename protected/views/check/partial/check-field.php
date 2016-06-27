@@ -37,14 +37,15 @@
                     <?php else: ?>
                         <?php foreach ($values as $value): ?>
                             <li class="radio-field-item">
-                                <input type="text" class="input-xlarge" value="<?= $value ?>" />
+                                <input type="text" class="input-xlarge" value="<?= $value ?>" placeholder="Option Text"/>
                                 <a class="link" onclick="admin.check.removeRadioFieldItem(this); return false;"><i class="icon icon-remove"></i></a>
                             </li>
                         <?php endforeach; ?>
                     <?php endif; ?>
 
-                    <button class="btn" onclick="admin.check.appendRadioFieldItem(this); return false;" style="margin-left: 40%;">
+                    <button class="btn" onclick="admin.check.appendRadioFieldItem(this); return false;">
                         <i class="icon icon-plus"></i>
+                        <?= Yii::t("app", "Add Option") ?>
                     </button>
                 </ul>
             <?php endif; ?>

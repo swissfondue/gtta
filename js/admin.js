@@ -84,7 +84,8 @@ function Admin()
                     .append(
                         $("<input>")
                             .attr("type", "text")
-                            .attr("class", "input-xlarge"),
+                            .attr("class", "input-xlarge")
+                            .attr("placeholder", "Option Text"),
                         "&nbsp;",
                         $("<a>")
                             .addClass("link")

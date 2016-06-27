@@ -119,12 +119,10 @@
                 <label class="control-label" for="ProjectReportForm_fields"><?php echo Yii::t('app', 'Check Fields'); ?></label>
                 <div class="controls">
                     <?php foreach ($fields as $field): ?>
-                        <?php if (!in_array($field->name, GlobalCheckField::$system)): ?>
-                            <label class="checkbox">
-                                <input class="always-disabled" type="checkbox" id="ProjectReportForm_fields" name="ProjectReportForm[fields][]" value="<?= $field->name ?>" checked="checked">
-                                <?= $field->localizedTitle ?>
-                            </label>
-                        <?php endif; ?>
+                        <label class="checkbox">
+                            <input class="always-disabled" type="checkbox" id="ProjectReportForm_fields" name="ProjectReportForm[fields][]" value="<?= $field->name ?>" checked="checked" <?= in_array($field->name, GlobalCheckField::$system) ? 'disabled="disabled"': "" ?>>
+                            <?= $field->localizedTitle ?>
+                        </label>
                     <?php endforeach; ?>
                 </div>
             </div>

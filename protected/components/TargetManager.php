@@ -244,6 +244,15 @@ class TargetManager {
                         $targetCheckScript->target_check_id = $targetCheck->id;
                         $targetCheckScript->save();
                     }
+
+                    foreach ($check->fields as $field) {
+                        $targetCheckField = new TargetCheckField();
+                        $targetCheckField->target_check_id = $targetCheck->id;
+                        $targetCheckField->check_field_id = $field->id;
+                        $targetCheckField->value = $field->getValue();
+                        $targetCheckField->hidden = $field->hidden;
+                        $targetCheckField->save();
+                    }
                 }
 
                 break;

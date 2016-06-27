@@ -12,13 +12,6 @@ class TargetCheckManager {
     public static function create($data) {
         $targetCheck = new TargetCheck();
 
-        if (!isset($data["target_id"]) ||
-            !isset($data["check_id"]) ||
-            !isset($data["user_id"]) ||
-            !isset($data["language_id"])) {
-            throw new Exception("Invalid check data.", 500);
-        }
-
         try {
             $targetCheck->target_id = $data["target_id"];
             $targetCheck->check_id = $data["check_id"];

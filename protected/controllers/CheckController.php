@@ -1031,6 +1031,7 @@ class CheckController extends Controller
             'category' => $category,
             'control' => $control,
             'check' => $check,
+            'fields' => $check->orderedFields,
             'languages' => $languages,
             'references' => $references,
             'categories' => $categories,
