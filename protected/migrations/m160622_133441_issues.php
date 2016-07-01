@@ -33,7 +33,8 @@ class m160622_133441_issues extends CDbMigration {
                 "project_id" => "bigint NOT NULL",
                 "check_id" => "bigint NOT NULL",
                 "name" => "text NOT NULL",
-                "PRIMARY KEY (id)"
+                "PRIMARY KEY (id)",
+                "UNIQUE (project_id, check_id)",
             ]
         );
 
