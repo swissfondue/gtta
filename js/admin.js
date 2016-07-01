@@ -327,6 +327,118 @@ function Admin()
     };
 
     /**
+     * Issue object
+     */
+    this.issue = new function () {
+        var _issue = this;
+
+        /**
+         * Timeout before keypress & search
+         * @type {number}
+         */
+        this.searchTimeout = 500;
+        this.searchTimeoutHandler = null;
+
+        /**
+         * Show add issue popup
+         */
+        this.showAddPopup = function () {
+            var modal = $("#issue-check-select-dialog");
+            modal.find(".issue-search-query").val("");
+            modal.find(".no-search-result").hide();
+
+            $("#issue-check-select-dialog").modal();
+        };
+
+        /**
+         * Load check list
+         * @param url
+         * @param query
+         */
+        this.loadChecks = function (url, query) {
+            var list = $("#issue-check-select-dialog table.check-list");
+
+            if (query.length < 3) {
+                list.empty();
+
+                return;
+            }
+
+            if (_issue.searchTimeoutHandler) {
+                clearTimeout(_issue.searchTimeoutHandler);
+            }
+
+            _issue.searchTimeoutHandler = setTimeout(function () {
+                var data = {
+                    "YII_CSRF_TOKEN": system.csrf
+                };
+
+                if (query) {
+                    data["SearchForm[query]"] = query;
+                }
+
+                $.ajax({
+                    dataType : "json",
+                    url      : url,
+                    timeout  : system.ajaxTimeout,
+                    type     : "POST",
+
+                    data : data,
+
+                    success : function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error")
+                        {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        var checks = data.data.checks;
+                        list.empty();
+                        list.siblings(".no-search-result").hide();
+
+                        if (checks.length) {
+                            var link;
+                            list.append($("<tbody>"));
+
+                            $.each(checks, function (key, value) {
+                                link = $("<a>")
+                                    .attr("href", value.url)
+                                    .text(value.name);
+
+                                if (value.name.toLowerCase().indexOf(query.toLowerCase()) != -1) {
+                                    link = $("<b>").append(link);
+                                }
+
+                                list.find("tbody").append(
+                                    $("<tr>")
+                                        .append(
+                                        $("<td>")
+                                            .addClass("name")
+                                            .append(link)
+                                    )
+                                )
+                            });
+                        } else {
+                            list.siblings(".no-search-result").show();
+                        }
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend : function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+            }, _issue.searchTimeout);
+        };
+    };
+
+    /**
      * Report template object.
      */
     this.reportTemplate = new function () {

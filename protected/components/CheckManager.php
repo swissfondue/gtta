@@ -433,11 +433,32 @@ class CheckManager {
      * @return array
      */
     public function filter($query, $language, $exclude=[]) {
+        $escapedQuery = pg_escape_string($query);
+
         $criteria = new CDbCriteria();
         $criteria->order = "t.name ASC";
-        $criteria->addColumnCondition(["language_id" => $language]);
+        $criteria->addColumnCondition(["t.language_id" => $language]);
         $criteria->addSearchCondition("t.name", $query, true, "OR", "ILIKE");
         $criteria->addNotInCondition("t.check_id", $exclude);
+        $criteria->order = "nameContains DESC, t.name ASC";
+        $criteria->select = "t.*, position(lower('$escapedQuery') in lower(t.name))::boolean AS nameContains";
+
+        $fieldName = GlobalCheckField::FIELD_BACKGROUND_INFO;
+
+        $criteria->join = "INNER JOIN check_fields cf ON cf.check_id = t.check_id ";
+        $criteria->join .= "INNER JOIN check_fields_l10n cfl10n ON cfl10n.check_field_id = cf.id AND cfl10n.language_id = t.language_id ";
+        $criteria->join .= "INNER JOIN global_check_fields gcf ON gcf.name = '$fieldName' AND gcf.id = cf.global_check_field_id";
+
+        if ($query) {
+            $criteria->addSearchCondition("cfl10n.value", $query, true, "AND", "ILIKE");
+            $criteria->addSearchCondition("t.name", $query, true, "OR", "ILIKE");
+        }
+
+        $criteria->addColumnCondition(["t.language_id" => $language], "OR");
+
+        if ($exclude) {
+            $criteria->addNotInCondition("t.check_id", $exclude);
+        }
 
         return CheckL10n::model()->findAll($criteria);
     }

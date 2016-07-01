@@ -300,6 +300,7 @@ class ProjectController extends Controller {
                 TargetCheck::COLUMN_RATING          => Yii::t("app", "Rating"),
             ),
             "quickTargets" => $quickTargets,
+            "checks" => Check::model()->findAll()
         ));
     }
 
@@ -4413,21 +4414,31 @@ class ProjectController extends Controller {
     }
 
     /**
-     * Action search issues
+     * Action search checks for issue bind
      * @param $id
      */
-    public function actionSearchIssues($id) {
+    public function actionSearchChecks($id) {
         $response = new AjaxResponse();
 
         try {
-            $model = new SearchForm();
-            $model->attributes = $_POST['SearchForm'];
+            $id = (int) $id;
+            $project = Project::model()->findByPk($id);
 
-            if (!$model->validate()) {
+            if (!$project) {
+                throw new Exception("Project not found.", 404);
+            }
+
+            if (!isset($_POST["SearchForm"])) {
+                throw new Exception("Invalid search query", 400);
+            }
+
+            $form = new SearchForm();
+            $form->attributes = $_POST["SearchForm"];
+
+            if (!$form->validate()) {
                 $errorText = '';
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($form->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -4442,23 +4453,28 @@ class ProjectController extends Controller {
             }
 
             $cm = new CheckManager();
-            $language = Language::model()->findByAttributes(array(
+            $language = Language::model()->findByAttributes([
                 "code" => Yii::app()->language
-            ));
+            ]);
             $projectIssues = Issue::model()->findAllByAttributes([
                 "project_id" => $project->id
             ]);
             $exclude = [];
 
             foreach ($projectIssues as $issue) {
-                $exclude[] = $issue->id;
+                $exclude[] = $issue->check->id;
             }
 
-            $checks = $cm->filter($model->query, $language->id, $exclude);
+            $checks = $cm->filter($form->query, $language->id, $exclude);
             $data = [];
 
             foreach ($checks as $check) {
-                $data[] = $check->check->serialize($language->id);
+                $checkData = $check->check->serialize($language->id);
+                $checkData["url"] = $this->createUrl("project/bindissue", [
+                    "id" => $id,
+                    "check" => $check->check->id
+                ]);
+                $data[] = $checkData;
             }
 
             $response->addData("checks", $data);
@@ -4492,8 +4508,8 @@ class ProjectController extends Controller {
             throw new CHttpException(404, Yii::t("app", "Check not found."));
         }
 
-        $exists = Issue::model()->findByPk([
-            "check_id" => $check,
+        $exists = Issue::model()->findByAttributes([
+            "check_id" => $check->id,
             "project_id" => $project->id
         ]);
 
@@ -4504,14 +4520,11 @@ class ProjectController extends Controller {
         $issue = new Issue();
         $issue->project_id = $project->id;
         $issue->check_id = $check->id;
-        $issue->title = $check->localizedTitle;
+        $issue->name = $check->localizedName;
         $issue->save();
+        $issue->refresh();
 
-        $this->redirect([
-            "project/issueedit",
-            "id" => $project->id,
-            "issue" => $issue->id
-        ]);
+        $this->redirect(["project/editissue", "id" => $project->id, "issue" => $issue->id]);
     }
 
     /**
@@ -4549,10 +4562,47 @@ class ProjectController extends Controller {
 
         // display the page
         $this->pageTitle = Yii::t("app", "Issues");
-        $this->render("project/issue/index", array(
+        $this->render("issue/index", array(
+            "project" => $project,
             "issues" => $issues,
             "p" => $paginator,
         ));
+    }
+
+    /**
+     * Issue view action
+     * @param $id
+     * @param $issue
+     * @throws CHttpException
+     */
+    public function actionIssue($id, $issue) {
+        $id = (int) $id;
+        $issue = (int) $issue;
+
+        $project = Project::model()->findByPk($id);
+
+        if (!$project) {
+            throw new CHttpException(404, Yii::t("app", "Project not found."));
+        }
+
+        $issue = Issue::model()->findByPk($issue);
+
+        if (!$issue) {
+            throw new CHttpException(404, Yii::t("app", "Issue not found."));
+        }
+
+        $title = $issue->name;
+        $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
+        $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
+        $this->breadcrumbs[] = [Yii::t("app", "Issues"), $this->createUrl("project/issues", ["id" => $project->id])];
+        $this->breadcrumbs[] = [$title, ""];
+
+        // display the page
+        $this->pageTitle = $title;
+        $this->render("issue/view", [
+            "project" => $project,
+            "issue" => $issue,
+        ]);
     }
 
     /**
@@ -4579,7 +4629,17 @@ class ProjectController extends Controller {
 
         $form = new IssueEditForm();
 
-        $title = $issue->title;
+        if (isset($_POST["IssueEditForm"])) {
+            $form->attributes = $_POST["IssueEditForm"];
+
+            if ($form->validate()) {
+                Yii::app()->user->setFlash("success", Yii::t("app", "Issue saved."));
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+        }
+
+        $title = $issue->name;
         $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
         $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
         $this->breadcrumbs[] = [Yii::t("app", "Issues"), $this->createUrl("project/issues", ["id" => $project->id])];
@@ -4587,9 +4647,56 @@ class ProjectController extends Controller {
 
         // display the page
         $this->pageTitle = $title;
-        $this->render("user/edit", array(
+        $this->render("issue/edit", array(
             "form" => $form,
             "project" => $project,
+            "issue" => $issue,
         ));
+    }
+
+    /**
+     * Control issue
+     */
+    public function actionControlIssue() {
+        $response = new AjaxResponse();
+
+        try {
+            $form = new EntryControlForm();
+            $form->attributes = $_POST["EntryControlForm"];
+
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $id = $form->id;
+            $issue = Issue::model()->findByPk($id);
+
+            if ($issue === null) {
+                throw new CHttpException(404, Yii::t("app", "Issue not found."));
+            }
+
+            switch ($form->operation) {
+                case "delete":
+                    $issue->delete();
+
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t("app", "Unknown operation."));
+
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
     }
 }

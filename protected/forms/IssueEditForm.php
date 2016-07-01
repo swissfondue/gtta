@@ -7,7 +7,7 @@ class IssueEditForm extends CFormModel {
     /**
      * @var string title
      */
-    public $title;
+    public $name;
 
     /**
      * @return array validation rules for model attributes.
@@ -15,8 +15,8 @@ class IssueEditForm extends CFormModel {
     public function rules()
     {
         return [
-            ["email", "required"],
-            ["email", "length", "max" => 1000]
+            ["name", "required"],
+            ["name", "length", "max" => 1000]
         ];
     }
 }

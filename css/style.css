@@ -1311,3 +1311,12 @@ ul.breadcrumb {
 div.time-tracker {
     margin-right:20px;
 }
+
+#issue-check-select-dialog {
+    margin-left: -225px;
+    width: 450px;
+}
+
+#issue-check-select-dialog .issue-search-query {
+    width: 98%;
+}

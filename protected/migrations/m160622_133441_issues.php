@@ -32,9 +32,29 @@ class m160622_133441_issues extends CDbMigration {
                 "id" => "bigserial NOT NULL",
                 "project_id" => "bigint NOT NULL",
                 "check_id" => "bigint NOT NULL",
-                "title" => "text NOT NULL",
-                "PRIMARY KEY (project_id, check_id)"
+                "name" => "text NOT NULL",
+                "PRIMARY KEY (id)"
             ]
+        );
+
+        $this->addForeignKey(
+            "issues_project_id_fkey",
+            "issues",
+            "project_id",
+            "projects",
+            "id",
+            "CASCADE",
+            "CASCADE"
+        );
+
+        $this->addForeignKey(
+            "issued_check_id_fkey",
+            "issues",
+            "check_id",
+            "checks",
+            "id",
+            "CASCADE",
+            "CASCADE"
         );
 
         return true;

@@ -260,15 +260,15 @@
                                         </a>
                                         <div class="modal fade" id="time-session-project-select" tabindex="-1" role="dialog" aria-labelledby="smallModal" aria-hidden="true">
                                             <?php
-                                            $projectIdToSelect = null;
+                                                $projectIdToSelect = null;
 
-                                            if (Yii::app()->controller->id == 'project') {
-                                                $projectIdToSelect = Yii::app()->getRequest()->getQuery('id');
-                                            }
+                                                if (Yii::app()->controller->id == 'project') {
+                                                    $projectIdToSelect = Yii::app()->getRequest()->getQuery('id');
+                                                }
 
-                                            if ($this->timeSession) {
-                                                $projectIdToSelect = $this->timeSession->project_id;
-                                            }
+                                                if ($this->timeSession) {
+                                                    $projectIdToSelect = $this->timeSession->project_id;
+                                                }
                                             ?>
                                             <div class="modal-dialog modal-sm">
                                                 <div class="modal-content">

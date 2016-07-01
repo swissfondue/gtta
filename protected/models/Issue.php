@@ -7,7 +7,7 @@
  * @property integer $id
  * @property integer $project_id
  * @property integer $check_id
- * @property string title
+ * @property string name
  */
 class Issue extends ActiveRecord
 {
@@ -35,9 +35,9 @@ class Issue extends ActiveRecord
     public function rules()
     {
         return [
-            ["project_id, check_id, title", "required"],
+            ["project_id, check_id, name", "required"],
             ["project_id, check_id", "numerical", "integerOnly" => true],
-            ["name, protocol, reference_code, reference_url", "length", "max" => 1000],
+            ["name", "length", "max" => 1000],
         ];
     }
 

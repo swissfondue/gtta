@@ -14,13 +14,15 @@
             <div class="btn-group">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
                     <i class="icon icon-plus"></i>
-                    <?php echo Yii::t('app', 'New Target'); ?>
+                    <?php echo Yii::t('app', 'New...'); ?>
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id )); ?>">Single Target</a></li>
-                    <li><a href="<?php echo $this->createUrl('project/addtargetlist', array( 'id' => $project->id )); ?>">Target List</a></li>
-                    <li><a href="<?php echo $this->createUrl('project/importtarget', array( 'id' => $project->id )); ?>">Import From File</a></li>
+                    <li><a href="<?= $this->createUrl("project/edittarget", array("id" => $project->id )); ?>"><?= Yii::t("app", "Single Target") ?></a></li>
+                    <li><a href="<?= $this->createUrl("project/addtargetlist", array("id" => $project->id )); ?>"><?= Yii::t("app", "Target List") ?></a></li>
+                    <li><a href="<?= $this->createUrl("project/importtarget", array("id" => $project->id )); ?>"><?= Yii::t("app", "Import Targets From File") ?></a></li>
+                    <hr>
+                    <li><a href="#" onclick="admin.issue.showAddPopup()"><?= Yii::t("app", "Issue") ?></a></li>
                 </ul>
             </div>
         <?php endif; ?>
@@ -145,8 +147,35 @@
     </div>
 </div>
 
+<div class="modal fade" id="issue-check-select-dialog" tabindex="-1" role="dialog" aria-labelledby="smallModal" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h3><?= Yii::t("app", "Select Check") ?></h3>
+            </div>
+            <div class="modal-body">
+                <input class="issue-search-query"
+                       placeholder="<?= Yii::t("app", "Search String (At Least 3 Symbol)...") ?>"
+                       type="text" />
+                <table class="table check-list"></table>
+                <span class="no-search-result" style="display:none"><?= Yii::t("app", "No Checks") ?></span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     $(".shortened").tooltip({
         placement:"right"
+    });
+
+    $(function () {
+        $("#issue-check-select-dialog input.issue-search-query").keyup(function (e) {
+            // if alpha or backspace
+            if (/[a-zA-Z0-9_ -]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8) {
+                admin.issue.loadChecks('<?= $this->createUrl("project/searchchecks", ["id" => $project->id]) ?>', $(this).val())
+            }
+        });
     });
 </script>

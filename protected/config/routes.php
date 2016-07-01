@@ -77,7 +77,12 @@ return array(
     "project/target/running-checks" => "project/runningchecks",
 
     // project issues
-    "project/<id:\d+>/issue/<issue:\d+>/edit" => "project/issueedit",
+    "project/<id:\d+>/issues" => "project/issues",
+    "project/<id:\d+>/check/<check:\d+>/bind" => "project/bindissue",
+    "project/<id:\d+>/issue/<issue:\d+>/edit" => "project/editissue",
+    "project/<id:\d+>/issue/<issue:\d+>" => "project/viewissue",
+    "project/issue/control" => "project/controlissue",
+    "project/<id:\d+>/check/search" => "project/searchchecks",
 
     // custom checks
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/custom-check/save" => "project/savecustomcheck",
