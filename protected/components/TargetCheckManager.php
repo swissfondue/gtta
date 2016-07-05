@@ -208,7 +208,7 @@ class TargetCheckManager {
 
         return [
             "id" => $tc->id,
-            "overrideTarget" => $tc->override_target,
+            "overrideTarget" => $tc->overrideTarget,
             "result" => $tc->result,
             "tableResult" => $table ? $renderController->renderPartial("/project/target/check/tableresult", array("table" => $table, "check" => $tc), true) : "",
             "finished" => !$tc->isRunning,

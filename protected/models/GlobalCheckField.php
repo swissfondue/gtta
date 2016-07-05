@@ -57,6 +57,14 @@ class GlobalCheckField extends ActiveRecord {
         self::FIELD_POC,
     ];
 
+    public static $automated = [
+        self::FIELD_OVERRIDE_TARGET,
+        self::FIELD_APPLICATION_PROTOCOL,
+        self::FIELD_TRANSPORT_PROTOCOL,
+        self::FIELD_PORT,
+        self::FIELD_POC,
+    ];
+
     public $nearest_sort_order;
 
     /**
@@ -148,5 +156,13 @@ class GlobalCheckField extends ActiveRecord {
         }
 
         return $this->title;
+    }
+
+    /**
+     * Check if field uses in automated checks only
+     * @return bool
+     */
+    public function getAutomated() {
+        return in_array($this->name, self::$automated);
     }
 }

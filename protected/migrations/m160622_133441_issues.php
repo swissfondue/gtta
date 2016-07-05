@@ -17,8 +17,8 @@ class m160622_133441_issues extends CDbMigration {
              (:radio_type, 'transport_protocol', 'Transport Protocol'),
              (:text_type, 'port', 'Port'),
              (:textarea_type, 'override_target', 'Override Target'),
-             (:textarea_type, 'solution', 'Solution'),
              (:text_type, 'solution_title', 'Solution Title'),
+             (:textarea_type, 'solution', 'Solution'),
              (:textarea_type, 'poc', 'PoC')",
             [
                 "textarea_type" => GlobalCheckField::TYPE_TEXTAREA,

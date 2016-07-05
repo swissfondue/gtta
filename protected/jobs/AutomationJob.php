@@ -159,7 +159,7 @@ class AutomationJob extends BackgroundJob {
         $targetHosts = "";
         $port = "";
 
-        if (!$check->override_target) {
+        if (!$check->overrideTarget) {
             $targetHosts = $target->host;
 
             if ($target->port) {
@@ -170,7 +170,7 @@ class AutomationJob extends BackgroundJob {
                 $port = $check->port;
             }
         } else {
-            $targets = explode("\n", $check->override_target);
+            $targets = explode("\n", $check->overrideTarget);
             $filtered = array();
 
             foreach ($targets as $t) {
@@ -406,7 +406,7 @@ class AutomationJob extends BackgroundJob {
             if (!isset($this->args["chain"])) {
                 $data = Yii::t("app", "The {script} script was used within this check against {target} on {date} at {time}", array(
                     "{script}" => $package->name,
-                    "{target}" => $check->override_target ? $check->override_target : $target->host,
+                    "{target}" => $check->overrideTarget ? $check->overrideTarget : $target->host,
                     "{date}" => $now->format("d.m.Y"),
                     "{time}" => $now->format("H:i:s"),
                 ));

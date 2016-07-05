@@ -7,20 +7,13 @@
  * @property integer $id
  * @property integer $target_id
  * @property integer $check_id
- * @property string $result
- * @property string $poc
  * @property string $rating
  * @property string $status
  * @property string $target_file
  * @property string $result_file
  * @property integer $language_id
- * @property string $protocol
- * @property integer $port
- * @property string $override_target
  * @property integer $user_id
  * @property string $table_result
- * @property string $solution
- * @property string $solution_title
  * @property User $user
  * @property Check $check
  * @property Target $target
@@ -129,11 +122,11 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
 	public function rules() {
 		return array(
             array("target_id, check_id", "required"),
-            array("target_id, check_id, port, language_id, user_id", "numerical", "integerOnly" => true),
-            array("target_file, result_file, protocol, override_target", "length", "max" => 1000),
+            array("target_id, check_id, language_id, user_id", "numerical", "integerOnly" => true),
+            array("target_file, result_file", "length", "max" => 1000),
             array("status", "in", "range" => array(self::STATUS_OPEN, self::STATUS_FINISHED)),
             array("rating", "in", "range" => self::getValidRatings()),
-            array("result, table_result, solution, solution_title", "safe"),
+            array("table_result", "safe"),
 		);
 	}
 
@@ -423,5 +416,37 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      */
     public function getPoc() {
         return $this->_getFieldValue(GlobalCheckField::FIELD_POC);
+    }
+
+    /**
+     * Override target field value
+     * @return mixed|null
+     */
+    public function getOverrideTarget() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_OVERRIDE_TARGET);
+    }
+
+    /**
+     * Solution field value
+     * @return mixed|null
+     */
+    public function getSolution() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_SOLUTION);
+    }
+
+    /**
+     * Solution title field value
+     * @return mixed|null
+     */
+    public function getSolutionTitle() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE);
+    }
+
+    /**
+     * Port field value
+     * @return mixed|null
+     */
+    public function getPort() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_PORT);
     }
 }

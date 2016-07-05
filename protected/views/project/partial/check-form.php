@@ -27,6 +27,11 @@
         </tr>
 
         <?php foreach ($fields as $field): ?>
+            <?= $field->field->global->name ?>
+            <?php if ($field->field->global->automated && !$checkData->automated): ?>
+                <?php continue; ?>
+            <?php endif; ?>
+
             <?= $this->renderPartial("partial/check-field",
                 [
                     "field" => $field,
@@ -34,36 +39,6 @@
                 ]); ?>
         <?php endforeach; ?>
 
-        <?php if ($checkData->automated): ?>
-            <tr>
-                <th>
-                    <?php echo Yii::t("app", "Override Target"); ?>
-                </th>
-                <td>
-                    <textarea class="max-width" rows="10" name="TargetCheckEditForm_<?php echo $check->id; ?>[overrideTarget]" id="TargetCheckEditForm_<?php echo $check->id; ?>_overrideTarget" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->getFieldValue(GlobalCheckField::FIELD_OVERRIDE_TARGET)); ?></textarea>
-                </td>
-            </tr>
-            <?php if ($checkData->protocol): ?>
-                <tr>
-                    <th>
-                        <?php echo Yii::t("app", "Protocol"); ?>
-                    </th>
-                    <td>
-                        <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[protocol]" id="TargetCheckEditForm_<?php echo $check->id; ?>_protocol" value="<?php echo CHtml::encode($check->getFieldValue(GlobalCheckField::FIELD_APPLICATION_PROTOCOL)); ?>" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>>
-                    </td>
-                </tr>
-            <?php endif; ?>
-            <?php if ($checkData->port): ?>
-                <tr>
-                    <th>
-                        <?php echo Yii::t("app", "Port"); ?>
-                    </th>
-                    <td>
-                        <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[port]" id="TargetCheckEditForm_<?php echo $check->id; ?>_port" value="<?php echo $check->getFieldValue(GlobalCheckField::FIELD_PORT); ?>" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>>
-                    </td>
-                </tr>
-            <?php endif; ?>
-        <?php endif; ?>
         <?php if ($checkData->scripts && $checkData->automated && User::checkRole(User::ROLE_USER)): ?>
             <?php foreach ($check->scripts as $script): ?>
                 <tr class="script-inputs">
@@ -281,10 +256,10 @@
                         <div class="solution-header">
                             <?php if ($checkData->multiple_solutions): ?>
                                 <label class="checkbox">
-                                    <input class="custom-solution" name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="checkbox" value="<?php echo TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>" <?php if ($check->getFieldValue(GlobalCheckField::FIELD_SOLUTION)) echo "checked"; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "disabled"; ?>>
+                                    <input class="custom-solution" name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="checkbox" value="<?php echo TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>" <?php if ($check->solution) echo "checked"; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "disabled"; ?>>
                             <?php else: ?>
                                 <label class="radio">
-                                    <input class="custom-solution" name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="radio" value="<?php echo TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>" <?php if ($check->getFieldValue(GlobalCheckField::FIELD_SOLUTION)) echo "checked"; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "disabled"; ?>>
+                                    <input class="custom-solution" name="TargetCheckEditForm_<?php echo $check->id; ?>[solutions][]" type="radio" value="<?php echo TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>" <?php if ($check->solution) echo "checked"; ?> <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "disabled"; ?>>
                             <?php endif; ?>
                                 <?php echo Yii::t("app", "Custom Solution"); ?>
 
@@ -299,8 +274,8 @@
                         </div>
 
                         <div class="solution-content hide" data-id="<?php echo $check->id; ?>-<?php echo TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>">
-                            <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[solutionTitle]" class="max-width" id="TargetCheckEditForm_<?php echo $check->id; ?>_solutionTitle" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?> value="<?php echo CHtml::encode($check->getFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE)); ?>">
-                            <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[solution]" class="solution-edit wysiwyg max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_solution" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->getFieldvalue(GlobalCheckField::FIELD_SOLUTION)); ?></textarea>
+                            <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[solutionTitle]" class="max-width" id="TargetCheckEditForm_<?php echo $check->id; ?>_solutionTitle" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?> value="<?php echo CHtml::encode($check->solutionTitle); ?>">
+                            <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[solution]" class="solution-edit wysiwyg max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_solution" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->solution); ?></textarea>
 
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                 <label class="checkbox">

@@ -2306,9 +2306,6 @@ class ProjectController extends Controller {
 
             $targetCheck->user_id = Yii::app()->user->id;
             $targetCheck->language_id = $language->id;
-            $targetCheck->override_target = $model->overrideTarget;
-            $targetCheck->protocol = $model->protocol;
-            $targetCheck->port = $model->port;
             $targetCheck->status = TargetCheck::STATUS_FINISHED;
             $targetCheck->rating = $model->rating;
 
@@ -3420,12 +3417,7 @@ class ProjectController extends Controller {
                     $targetCheck->target_file = null;
                     $targetCheck->status = TargetCheck::STATUS_OPEN;
                     $targetCheck->result_file = null;
-                    $targetCheck->protocol = $check->protocol;
-                    $targetCheck->port = $check->port;
-                    $targetCheck->override_target = null;
                     $targetCheck->table_result = null;
-                    $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION, null);
-                    $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE, null);
                     $targetCheck->save();
 
                     $response->addData("automated", $check->automated);
