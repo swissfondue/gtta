@@ -7,6 +7,7 @@
  * @property integer $id
  * @property integer $project_id
  * @property string $host
+ * @property boolean $ip
  * @property string $description
  * @property integer $port
  * @property integer $check_source_type

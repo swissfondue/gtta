@@ -2,6 +2,8 @@
 
 /**
  * This is the model class for edit issue.
+ * @property string $name
+ * @property boolean $hidden
  */
 class IssueEditForm extends CFormModel {
     /**
@@ -16,7 +18,7 @@ class IssueEditForm extends CFormModel {
     {
         return [
             ["name", "required"],
-            ["name", "length", "max" => 1000]
+            ["name", "length", "max" => 1000],
         ];
     }
 }

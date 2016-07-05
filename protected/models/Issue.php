@@ -3,7 +3,7 @@
 /**
  * This is the model class for table "issues".
  *
- * The followings are the available columns in table 'checks':
+ * The followings are the available columns in table 'issues':
  * @property integer $id
  * @property integer $project_id
  * @property integer $check_id

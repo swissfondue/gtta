@@ -128,6 +128,16 @@
             </div>
         </div>
 
+        <div class="control-group <?php if ($form->getError("hostResolve")) echo "error"; ?>">
+            <label class="control-label" for="SettingsEditForm_hostResolve"><?php echo Yii::t("app", "Resolve Hosts"); ?></label>
+            <div class="controls">
+                <input type="checkbox" id="SettingsEditForm_hostResolve" name="SettingsEditForm[hostResolve]" value="1" <?php if ($form->hostResolve) echo "checked"; ?>>
+                <?php if ($form->getError("hostResolve")): ?>
+                    <p class="help-block"><?php echo $form->getError("hostResolve"); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <hr>
         
         <h3><?php echo Yii::t("app", "Report Settings"); ?></h3>

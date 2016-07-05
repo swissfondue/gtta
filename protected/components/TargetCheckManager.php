@@ -24,7 +24,10 @@ class TargetCheckManager {
             }
 
             if (isset($data["result"])) {
-                $targetCheck->setPoc($data["result"]);
+                $targetCheck->setFieldValue(
+                    GlobalCheckField::FIELD_POC,
+                    $data["result"]
+                );
             }
 
             $targetCheck->save();

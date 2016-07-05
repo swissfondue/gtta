@@ -35,6 +35,12 @@ class GlobalCheckField extends ActiveRecord {
     const FIELD_QUESTION = "question";
     const FIELD_HINTS = "hints";
     const FIELD_RESULT = "result";
+    const FIELD_APPLICATION_PROTOCOL = "application_protocol";
+    const FIELD_TRANSPORT_PROTOCOL = "transport_protocol";
+    const FIELD_PORT = "port";
+    const FIELD_OVERRIDE_TARGET = "override_target";
+    const FIELD_SOLUTION = "solution";
+    const FIELD_SOLUTION_TITLE = "solution_title";
     const FIELD_POC = "poc";
 
     public static $system = [
@@ -42,6 +48,12 @@ class GlobalCheckField extends ActiveRecord {
         self::FIELD_QUESTION,
         self::FIELD_HINTS,
         self::FIELD_RESULT,
+        self::FIELD_APPLICATION_PROTOCOL,
+        self::FIELD_TRANSPORT_PROTOCOL,
+        self::FIELD_PORT,
+        self::FIELD_OVERRIDE_TARGET,
+        self::FIELD_SOLUTION,
+        self::FIELD_SOLUTION_TITLE,
         self::FIELD_POC,
     ];
 

@@ -80,7 +80,7 @@ return array(
     "project/<id:\d+>/issues" => "project/issues",
     "project/<id:\d+>/check/<check:\d+>/bind" => "project/bindissue",
     "project/<id:\d+>/issue/<issue:\d+>/edit" => "project/editissue",
-    "project/<id:\d+>/issue/<issue:\d+>" => "project/viewissue",
+    "project/<id:\d+>/issue/<issue:\d+>" => "project/issue",
     "project/issue/control" => "project/controlissue",
     "project/<id:\d+>/check/search" => "project/searchchecks",
 

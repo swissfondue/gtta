@@ -331,31 +331,36 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         }
 
         if (!$this->poc) {
-            $this->setPoc("");
+            $this->setFieldValue(GlobalCheckField::FIELD_POC, $data);
         }
 
         if ($data) {
-            $this->setPoc($this->_getFieldValue(GlobalCheckField::FIELD_POC) . $data);
+            $this->setFieldValue(
+                GlobalCheckField::FIELD_POC,
+                $this->_getFieldValue(GlobalCheckField::FIELD_POC) . $data
+            );
         }
     }
 
     /**
-     * Set PoC
-     * @param $data
-     * @throws Exception
+     * Set field value
+     * @param $name
+     * @param $value
      */
-    public function setPoc($data) {
+    public function setFieldValue($name, $value) {
         $criteria = new CDbCriteria();
-        $criteria->join = "LEFT JOIN check_fields cf on cf.id = t.check_field_id";
-        $criteria->join .= " LEFT JOIN global_check_fields gcf on gcf.id = cf.global_check_field_id";
+        $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
+        $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
         $criteria->addColumnCondition([
-            "gcf.name" => GlobalCheckField::FIELD_POC,
-            "t.target_check_id" => $this->id
+            "gcf.name" => $name,
+            "t.target_check_id" => $this->id,
         ]);
+        $field = TargetCheckField::model()->find($criteria);
 
-        $targetCheckField = TargetCheckField::model()->find($criteria);
-        $targetCheckField->value = $data;
-        $targetCheckField->save();
+        if ($field) {
+            $field->value = $value;
+            $field->save();
+        }
     }
 
     /**

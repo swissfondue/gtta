@@ -101,11 +101,19 @@ class Check extends ActiveRecord {
     }
 
     /**
-     * @return string localized name.
+     * Get localized name
+     * @return mixed|null|string
      */
     public function getLocalizedName() {
-        if ($this->l10n && count($this->l10n) > 0) {
-            return $this->l10n[0]->name != NULL ? $this->l10n[0]->name : $this->name;
+        $language = System::model()->findByPk(1)->language;
+
+        $translate = CheckL10n::model()->findByAttributes([
+            "check_id" => $this->id,
+            "language_id" => $language->id
+        ]);
+
+        if ($translate) {
+            return $translate->name;
         }
 
         return $this->name;
@@ -195,6 +203,60 @@ class Check extends ActiveRecord {
      */
     public function getResult() {
         return $this->_getFieldValue(GlobalCheckField::FIELD_RESULT);
+    }
+
+    /**
+     * Return `application protocol` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getAppProto() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_APPLICATION_PROTOCOL);
+    }
+
+    /**
+     * Return `transport protocol` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getTransportProto() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_TRANSPORT_PROTOCOL);
+    }
+
+    /**
+     * Return `port` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getPort() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_PORT);
+    }
+
+    /**
+     * Return `override target` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getOverrideTarget() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_OVERRIDE_TARGET);
+    }
+
+    /**
+     * Return `solution` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getSolution() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_SOLUTION);
+    }
+
+    /**
+     * Return `solution title` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getSolutionTitle() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE);
     }
 
     /**

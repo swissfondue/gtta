@@ -2439,12 +2439,12 @@ class ProjectController extends Controller {
                         $checkSolution->check_solution_id = $solution->id;
                         $checkSolution->save();
 
-                        $targetCheck->solution = null;
-                        $targetCheck->solution_title = null;
+                        $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION, null);
+                        $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE, null);
                         $targetCheck->save();
                     } else {
-                        $targetCheck->solution = $model->solution;
-                        $targetCheck->solution_title = $model->solutionTitle;
+                        $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION, $model->solution);
+                        $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE, $model->solutionTitle);
                         $targetCheck->save();
                     }
                 }
@@ -3424,8 +3424,8 @@ class ProjectController extends Controller {
                     $targetCheck->port = $check->port;
                     $targetCheck->override_target = null;
                     $targetCheck->table_result = null;
-                    $targetCheck->solution = null;
-                    $targetCheck->solution_title = null;
+                    $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION, null);
+                    $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE, null);
                     $targetCheck->save();
 
                     $response->addData("automated", $check->automated);
@@ -4633,6 +4633,9 @@ class ProjectController extends Controller {
             $form->attributes = $_POST["IssueEditForm"];
 
             if ($form->validate()) {
+                $issue->name = $form->name;
+                $issue->save();
+
                 Yii::app()->user->setFlash("success", Yii::t("app", "Issue saved."));
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
