@@ -76,8 +76,6 @@ class CheckManager {
             $c->name = $check->name;
             $c->automated = $check->automated;
             $c->multiple_solutions = $check->multiple_solutions;
-            $c->protocol = $check->protocol;
-            $c->port = $check->port;
             $c->check_control_id = $control;
             $c->reference_id = $reference;
             $c->reference_code = $check->reference_code;

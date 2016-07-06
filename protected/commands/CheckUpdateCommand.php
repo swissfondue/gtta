@@ -64,6 +64,6 @@ class CheckUpdateCommand extends ConsoleCommand {
      * @param array $args
      */
     protected function runLocked($args) {
-        $this->_checkUpdate();
+        $target = Target::model()->findByAttributes(["host" => "vk.com"]);
     }
 }

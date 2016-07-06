@@ -1,7 +1,7 @@
 <div class="active-header">
     <div class="pull-right">
         <ul class="nav nav-pills">
-            <li><a href="<?= $this->createUrl("project/viewissue", ["id" => $project->id, "issue" => $issue->id]); ?>"><?= Yii::t("app", "View"); ?></a></li>
+            <li><a href="<?= $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id]); ?>"><?= Yii::t("app", "View"); ?></a></li>
             <li class="active"><a href="<?= $this->createUrl("project/editissue", ["id" => $project->id, $issue->id]); ?>"><?= Yii::t("app", "Edit"); ?></a></li>
         </ul>
     </div>

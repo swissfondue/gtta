@@ -449,4 +449,20 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     public function getPort() {
         return $this->_getFieldValue(GlobalCheckField::FIELD_PORT);
     }
+
+    /**
+     * Transport protocol value
+     * @return mixed|null
+     */
+    public function getTransportProtocol() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_TRANSPORT_PROTOCOL);
+    }
+
+    /**
+     * Application protocol value
+     * @return mixed|null
+     */
+    public function getApplicationProtocol() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_APPLICATION_PROTOCOL);
+    }
 }

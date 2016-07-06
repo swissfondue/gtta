@@ -85,8 +85,7 @@ function User()
 
                                 check = data.checks[i];
 
-				$('#TargetCheckEditForm_fields_' + check.id + '_result').val(check.result);
-                                $('#TargetCheckEditForm_' + check.id + '_overrideTarget').val(check.overrideTarget);
+				                $('#TargetCheckEditForm_fields_' + check.id + '_result').val(check.result);
                                 $('div.check-form[data-type=check][data-id="' + check.id + '"] div.table-result').html(check.tableResult);
 
                                 if (check.startedText) {
@@ -691,9 +690,6 @@ function User()
                 }
             ).get();
 
-            override = $('textarea[name="TargetCheckEditForm_' + id + '[overrideTarget]"]', row).val();
-            protocol = $('input[name="TargetCheckEditForm_' + id + '[protocol]"]', row).val();
-            port     = $('input[name="TargetCheckEditForm_' + id + '[port]"]', row).val();
             resultTitle = $('input[name="TargetCheckEditForm_' + id + '[resultTitle]"]', row).val();
             result = _check.ckeditors["TargetCheckEditForm_fields_" + id + "_result"] ?
                 _check.ckeditors["TargetCheckEditForm_fields_" + id + "_result"].getData() :
@@ -783,9 +779,6 @@ function User()
 
             data = [];
 
-            data.push({ name : 'TargetCheckEditForm_' + id + '[overrideTarget]', value : override });
-            data.push({ name : 'TargetCheckEditForm_' + id + '[protocol]',       value : protocol });
-            data.push({ name : 'TargetCheckEditForm_' + id + '[port]',           value : port     });
             data.push({ name : 'TargetCheckEditForm_' + id + '[result]',         value : result   });
             data.push({ name : 'TargetCheckEditForm_' + id + '[resultTitle]',    value : resultTitle   });
             data.push({ name : 'TargetCheckEditForm_' + id + '[rating]',         value : rating   });

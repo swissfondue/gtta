@@ -50,6 +50,20 @@ class TargetCheckField extends ActiveRecord {
     }
 
     /**
+     * Before save hook
+     * @return bool
+     */
+    protected function beforeSave() {
+        if ($this->field->global->name == GlobalCheckField::FIELD_TRANSPORT_PROTOCOL) {
+            if (!in_array($this->value, ["TCP", "UDP"])) {
+                $this->value = "TCP";
+            }
+        }
+
+        return parent::beforeSave();
+    }
+
+    /**
      * Get name
      * @return mixed
      */

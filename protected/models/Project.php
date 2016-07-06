@@ -356,4 +356,18 @@ class Project extends ActiveRecord implements IVariableScopeObject {
 
         return TargetCheckField::model()->count($criteria) > 0;
     }
+
+    /**
+     * Get project admin user
+     * @return null
+     */
+    public function getAdmin() {
+        foreach ($this->projectUsers as $user) {
+            if ($user->admin) {
+                return $user->user;
+            }
+        }
+
+        return null;
+    }
 }

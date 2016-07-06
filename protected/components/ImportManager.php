@@ -118,6 +118,7 @@ class ImportManager {
         }                
         
         $targetCache = [];
+        $ids = [];
 
         switch ($type) {
             case self::TYPE_NESSUS_CSV:
@@ -130,6 +131,8 @@ class ImportManager {
                 if (!count($targets)) {
                     throw new NoValidTargetException();
                 }
+
+                $ids = [];
 
                 foreach ($targets as $target) {
                     if (!isset($target["Host"])) {
@@ -146,6 +149,8 @@ class ImportManager {
                     $t->project_id = $project->id;
                     $t->host = $host;
                     $t->save();
+                    $t->refresh();
+                    $ids[] = $t->id;
                     
                     $targetCache[] = $host;
                 }
@@ -183,6 +188,8 @@ class ImportManager {
                         $t->project_id = $project->id;
                         $t->host = $property;
                         $t->save();
+                        $t->refresh();
+                        $ids[] = $t->id;
                         
                         $targetCache[] = $property;
 
@@ -219,6 +226,8 @@ class ImportManager {
                     }
 
                     $t->save();
+                    $t->refresh();
+                    $ids[] = $t->id;
                     
                     $targetCache[] = $targetData[0];
                 }
@@ -252,6 +261,8 @@ class ImportManager {
                     }
 
                     $t->save();
+                    $t->refresh();
+                    $ids[] = $t->id;
                     
                     $targetCache[] = $targetData[0];
                 }
@@ -262,5 +273,9 @@ class ImportManager {
                 throw new Exception("Unknown file type.");
                 break;
         }
+
+        HostResolveJob::enqueue([
+            "targets" => $ids
+        ]);
     }
 }

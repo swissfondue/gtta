@@ -7,21 +7,6 @@ class TargetCheckEditForm extends CFormModel {
     const CUSTOM_SOLUTION_IDENTIFIER = "custom";
 
     /**
-     * @var string override target.
-     */
-    public $overrideTarget;
-
-    /**
-     * @var string protocol.
-     */
-    public $protocol;
-
-    /**
-     * @var integer port.
-     */
-    public $port;
-
-    /**
      * @var array (json) scripts
      */
     public $scripts;
@@ -97,27 +82,35 @@ class TargetCheckEditForm extends CFormModel {
 	public function rules() {
 		return array(
             array("rating", "in", "range" => TargetCheck::getValidRatings()),
-            array("port", "numerical", "integerOnly" => true, "min" => 0, "max" => 65536),
-            array("protocol, solutionTitle, resultTitle", "length", "max" => 1000),
-            array("overrideTarget", "checkOverrideTarget"),
             array("saveSolution, saveResult", "boolean"),
-            array("inputs, result, solutions, solution, attachmentTitles, tableResult, scripts, timeouts, fields", "safe"),
+            array("fields", "checkFields"),
+            array("inputs, result, solutions, solution, attachmentTitles, tableResult, scripts, timeouts", "safe"),
 		);
 	}
 
     /**
-     * Validate override target
-     * @param $target
-     * @return bool
+     * Validate fields
+     * @param $attribute
+     * @param $params
      */
-    public function checkOverrideTarget($attribute,$params) {
-        $target  = trim($this->overrideTarget);
+    public function checkFields($attribute, $params) {
+        foreach ($this->{$attribute} as $name => $value) {
+            if ($name == GlobalCheckField::FIELD_OVERRIDE_TARGET) {
+                $this->{$attribute}[$name] = trim($value);
+            }
 
-        if (!$target) {
-            return true;
+            if ($name == GlobalCheckField::FIELD_PORT) {
+                $value = (int) $value;
+
+                if ($value < 0 || $value > 65536) {
+                    $this->addError("fields", "Port must be between 0 and 65536");
+
+                    return false;
+                }
+
+                $this->{$attribute}[$name] = $value;
+            }
         }
-
-        $this->overrideTarget = $target;
 
         return true;
     }

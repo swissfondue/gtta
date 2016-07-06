@@ -26,16 +26,6 @@ class CheckEditForm extends LocalizedFormModel
     public $referenceUrl;
 
     /**
-     * @var string protocol.
-     */
-    public $protocol;
-
-    /**
-     * @var integer port.
-     */
-    public $port;
-
-    /**
      * @var boolean automated.
      */
     public $automated;
@@ -77,8 +67,7 @@ class CheckEditForm extends LocalizedFormModel
 	{
 		return array(
 			array( 'name, referenceId, controlId', 'required' ),
-            array( 'name, protocol, referenceCode, referenceUrl', 'length', 'max' => 1000 ),
-            array( 'port', 'numerical', 'integerOnly' => true, 'min' => 0, 'max' => 1000 ),
+            array( 'name, referenceCode, referenceUrl', 'length', 'max' => 1000 ),
             array( 'automated, multipleSolutions, private', 'boolean' ),
             array( 'localizedItems, hidden', 'safe' ),
             array( 'referenceUrl', 'url', 'defaultScheme' => 'http' ),
@@ -190,6 +179,22 @@ class CheckEditForm extends LocalizedFormModel
 
                 if ($field->type == GlobalCheckField::TYPE_RADIO && !FieldManager::validateField($field->type, $value)) {
                     $this->addError("fields_" . $name, Yii::t("app", "Invalid JSON."));
+                }
+
+                if ($name == GlobalCheckField::FIELD_OVERRIDE_TARGET) {
+                    $this->{$attribute}[$language][$name] = trim($value);
+                }
+
+                if ($name == GlobalCheckField::FIELD_PORT) {
+                    $value = (int) $value;
+
+                    if ($value < 0 || $value > 65536) {
+                        $this->addError("fields_" . $name, "Port must be between 0 and 65536");
+
+                        return false;
+                    }
+
+                    $this->{$attribute}[$language][$name] = $value;
                 }
             }
         }

@@ -147,23 +147,7 @@ class TargetManager {
      * @throws Exception
      */
     public static function reindexTargetChecks(Target $target) {
-        $admin = null;
-
-        foreach ($target->project->projectUsers as $user) {
-            if ($user->admin) {
-                $admin = $user->user_id;
-                break;
-            }
-        }
-
-        if ($admin == null) {
-            $admin = User::model()->findByAttributes(array("role" => User::ROLE_ADMIN));
-
-            if ($admin) {
-                $admin = $admin->id;
-            }
-        }
-
+        $admin = $target->project->admin ? $target->project->admin : User::getAdmin();
         $language = Language::model()->findByAttributes(array("default" => true));
 
         switch ($target->check_source_type) {
@@ -232,7 +216,7 @@ class TargetManager {
                     $targetCheck = TargetCheckManager::create([
                         "target_id" => $target->id,
                         "check_id" => $check->id,
-                        "user_id" => $admin,
+                        "user_id" => $admin->id,
                         "language_id" => $language->id,
                         "status" => TargetCheck::STATUS_OPEN,
                         "rating" => TargetCheck::RATING_NONE
@@ -520,6 +504,127 @@ class TargetManager {
 
         return TargetCheck::model()->findAllByAttributes([
             "check_id" => $checkIds,
+            "target_id" => $target->id
+        ]);
+    }
+
+    /**
+     * Resolve hostname
+     * @param Target $target
+     * @throws Exception
+     */
+    public function resolveHost(Target $target) {
+        $host = trim($target->host);
+        $resolved = gethostbyname($host);
+
+        if ($resolved != $host) {
+            $target->ip = $resolved;
+            $target->save();
+        }
+    }
+
+    /**
+     * Bind target to issue
+     * @param Target $target
+     * @param Issue $issue
+     * @throws Exception
+     */
+    public function bindToIssue(Target $target, Issue $issue) {
+        $check = $issue->check;
+        $targetCheck = TargetCheck::model()->findByAttributes([
+            "check_id" => $issue->check_id,
+            "target_id" => $target->id
+        ]);
+
+        if (!$targetCheck) {
+            if ($target->check_source_type == Target::SOURCE_TYPE_CHECKLIST_TEMPLATES) {
+                $categoryIds = [];
+
+                foreach ($target->targetChecks as $tc) {
+                    $id = $tc->check->control->category_id;
+
+                    if (!in_array($id, $categoryIds)) {
+                        $categoryIds[] = $id;
+                    }
+                }
+
+                foreach ($categoryIds as $id) {
+                    $targetCheckCategory = TargetCheckCategory::model()->findByAttributes([
+                        "check_category_id" => $id,
+                        "target_id" => $target->id
+                    ]);
+
+                    if (!$targetCheckCategory) {
+                        $targetCheckCategory = new TargetCheckCategory();
+                        $targetCheckCategory->check_category_id = $id;
+                        $targetCheckCategory->target_id = $target->id;
+                        $targetCheckCategory->save();
+                    }
+                }
+
+                $target->check_source_type = Target::SOURCE_TYPE_CHECK_CATEGORIES;
+                $target->save();
+            }
+
+            $targetCheckCategory = TargetCheckCategory::model()->findByAttributes([
+                "target_id" => $target->id,
+                "check_category_id" => $issue->check->control->category_id
+            ]);
+
+            if (!$targetCheckCategory) {
+                $targetCheckCategory = new TargetCheckCategory();
+                $targetCheckCategory->check_category_id = $issue->check->control->category_id;
+                $targetCheckCategory->target_id = $target->id;
+                $targetCheckCategory->save();
+            }
+
+            $targetReference = TargetReference::model()->findByAttributes([
+                "target_id" => $target->id,
+                 "reference_id" => $check->reference_id
+            ]);
+
+            if (!$targetReference) {
+                $targetReference = new TargetReference();
+                $targetReference->target_id = $target->id;
+                $targetReference->reference_id = $check->reference_id;
+                $target->save();
+            }
+
+            $admin = $target->project->admin ? $target->project->admin : User::getAdmin();
+            $language = System::model()->findByPk(1)->language;
+
+            $targetCheck = TargetCheckManager::create([
+                "target_id" => $target->id,
+                "check_id" => $issue->check->id,
+                "user_id" => $admin->id,
+                "language_id" => $language->id,
+                "status" => TargetCheck::STATUS_OPEN,
+                "rating" => TargetCheck::RATING_NONE
+            ]);
+
+            foreach ($check->scripts as $script) {
+                $targetCheckScript = new TargetCheckScript();
+                $targetCheckScript->check_script_id = $script->id;
+                $targetCheckScript->target_check_id = $targetCheck->id;
+                $targetCheckScript->save();
+            }
+
+            foreach ($check->fields as $field) {
+                $targetCheckField = new TargetCheckField();
+                $targetCheckField->target_check_id = $targetCheck->id;
+                $targetCheckField->check_field_id = $field->id;
+                $targetCheckField->value = $field->getValue();
+                $targetCheckField->hidden = $field->hidden;
+                $targetCheckField->save();
+            }
+        }
+
+        $evidence = new IssueEvidence();
+        $evidence->issue_id = $issue->id;
+        $evidence->target_check_id = $targetCheck->id;
+        $evidence->save();
+
+        ReindexJob::enqueue([
             "target_id" => $target->id
         ]);
     }

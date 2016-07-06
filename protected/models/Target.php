@@ -292,4 +292,16 @@ class Target extends ActiveRecord implements IVariableScopeObject {
 
         return JobManager::isRunning($job);
     }
+
+    /**
+     * Get target check by check id
+     * @param $id
+     * @return CActiveRecord
+     */
+    public function getCheck($id) {
+        return TargetCheck::model()->findByAttributes([
+            "target_id" => $this->id,
+            "check_id" => $id
+        ]);
+    }
 }

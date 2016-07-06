@@ -16,6 +16,10 @@ a[disabled] {
     background:none;
 }
 
+.red {
+    color: red;
+}
+
 .navbar .brand {
     color:#fff;
 }
@@ -37,6 +41,12 @@ a[disabled] {
 
 ul.nav li.dropdown:hover > ul.dropdown-menu {
     display: block;
+}
+
+ul.clear-ul {
+    list-style-type: none;
+    list-style-image: none;
+    margin-left: 0;
 }
 
 .loader-image {
@@ -1319,4 +1329,8 @@ div.time-tracker {
 
 #issue-check-select-dialog .issue-search-query {
     width: 98%;
+}
+
+#issue-information .field-block {
+    margin-bottom: 20px;
 }

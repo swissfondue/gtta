@@ -16,7 +16,7 @@
                     <tbody>
                         <tr>
                             <th class="name"><?= Yii::t("app", "Name"); ?></th>
-                            <th class="time-logged"><?= Yii::t("app", "Evidence"); ?></th>
+                            <th class="time-logged"><?= Yii::t("app", "Assets"); ?></th>
                         </tr>
                         <?php foreach ($issues as $issue): ?>
                             <tr data-id="<?= $issue->id; ?>" data-control-url="<?= $this->createUrl("project/controlissue"); ?>">
@@ -26,7 +26,7 @@
                                     </a>
                                 </td>
                                 <td class="time-logged">
-                                    <?= count($issue->check->targetChecks); ?>
+                                    <?= count($issue->evidences); ?>
                                 </td>
                                 <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                     <td class="actions">

@@ -833,8 +833,6 @@ class CheckController extends Controller
         if (!$newRecord) {
             $model->name = $check->name;
             $model->automated = $check->automated;
-            $model->protocol = $check->protocol;
-            $model->port = $check->port;
             $model->multipleSolutions = $check->multiple_solutions;
             $model->private = $check->private;
             $model->referenceId = $check->reference_id;
@@ -885,8 +883,6 @@ class CheckController extends Controller
                 $check->automated = $model->automated;
                 $check->multiple_solutions = $model->multipleSolutions;
                 $check->private = $model->private;
-                $check->protocol = $model->protocol;
-                $check->port = $model->port;
                 $check->check_control_id = $model->controlId;
                 $check->reference_id = $model->referenceId;
                 $check->reference_code = $model->referenceCode;
@@ -954,8 +950,8 @@ class CheckController extends Controller
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check saved.'));
                 $check->refresh();
 
-                TargetCheckReindexJob::enqueue(["check_id" => $check->id]);
-                TargetCheckReindexJob::enqueue(["category_id" => $check->control->check_category_id]);
+                ReindexJob::enqueue(["check_id" => $check->id]);
+                ReindexJob::enqueue(["category_id" => $check->control->check_category_id]);
 
                 if ($redirect) {
                     $this->redirect(array(
@@ -1098,8 +1094,6 @@ class CheckController extends Controller
                 $dst->name = $src->name . ' (' . Yii::t('app', 'Copy') . ')';
                 $dst->automated = $src->automated;
                 $dst->multiple_solutions = $src->multiple_solutions;
-                $dst->protocol = $src->protocol;
-                $dst->port = $src->port;
                 $dst->reference_id = $src->reference_id;
                 $dst->reference_code = $src->reference_code;
                 $dst->reference_url = $src->reference_url;
@@ -1221,7 +1215,7 @@ class CheckController extends Controller
                     }
                 }
 
-                TargetCheckReindexJob::enqueue(array("category_id" => $dst->control->check_category_id));
+                ReindexJob::enqueue(array("category_id" => $dst->control->check_category_id));
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check copied.'));
                 $this->redirect(array('check/editcheck', 'id' => $dst->control->check_category_id, 'control' => $dst->check_control_id, 'check' => $dst->id));

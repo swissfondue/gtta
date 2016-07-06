@@ -7,7 +7,10 @@
  * @property integer $id
  * @property integer $project_id
  * @property integer $check_id
- * @property string name
+ * @property string $name
+ * @property Project $property
+ * @property Check $check
+ * @property IssueEvidence[] $evidences
  */
 class Issue extends ActiveRecord
 {
@@ -49,6 +52,19 @@ class Issue extends ActiveRecord
         return [
             "project" => [self::BELONGS_TO, "Project", "project_id"],
             "check" => [self::BELONGS_TO, "Check", "check_id"],
+            "evidences" => [self::HAS_MANY, "IssueEvidence", "issue_id"],
         ];
+    }
+
+    /**
+     * Get issue evidence by target check
+     * @param $targetCheckId
+     * @return CActiveRecord
+     */
+    public function getEvidence($targetCheckId) {
+        return IssueEvidence::model()->findByAttributes([
+            "issue_id" => $this->id,
+            "target_check_id" => $targetCheckId
+        ]);
     }
 }

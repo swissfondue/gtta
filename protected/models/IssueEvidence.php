@@ -7,6 +7,7 @@
  * @property integer $id
  * @property integer $issue_id
  * @property integer $target_check_id
+ * @property TargetCheck $targetCheck
  */
 class IssueEvidence extends ActiveRecord
 {
@@ -42,7 +43,7 @@ class IssueEvidence extends ActiveRecord
     public function relations() {
         return [
             "issue" => [self::BELONGS_TO, "Issue", "issue_id"],
-            "target_check_id" => [self::BELONGS_TO, "TargetCheck", "target_check_id"],
+            "targetCheck" => [self::BELONGS_TO, "TargetCheck", "target_check_id"],
         ];
     }
 }

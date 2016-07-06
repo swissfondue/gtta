@@ -27,7 +27,6 @@
         </tr>
 
         <?php foreach ($fields as $field): ?>
-            <?= $field->field->global->name ?>
             <?php if ($field->field->global->automated && !$checkData->automated): ?>
                 <?php continue; ?>
             <?php endif; ?>

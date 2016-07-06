@@ -84,4 +84,12 @@ class User extends ActiveRecord {
 
         return false;
     }
+
+    /**
+     * Get admin user of system
+     * @return CActiveRecord
+     */
+    public static function getAdmin() {
+        return User::model()->findByAttributes(["role" => User::ROLE_ADMIN]);
+    }
 }

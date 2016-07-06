@@ -146,9 +146,9 @@ return array(
                 array(
                     "class"   => "CFileLogRoute",
                     "levels"  => "error",
-                    "categories" => "bg.TargetCheckReindexJob",
+                    "categories" => "bg.ReindexJob",
                     "logPath" => $mainConfig["params"]["bgLogsPath"],
-                    "logFile" => "targetcheckreindex.log",
+                    "logFile" => "reindex.log",
                     'maxLogFiles' => 1,
                 ),
                 array(

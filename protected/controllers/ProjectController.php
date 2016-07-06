@@ -1147,7 +1147,10 @@ class ProjectController extends Controller {
                 Yii::app()->user->setFlash("success", Yii::t("app", "Target saved."));
 
                 $target->refresh();
-                TargetCheckReindexJob::enqueue(array("target_id" => $target->id));
+                ReindexJob::enqueue(["target_id" => $target->id]);
+                HostResolveJob::enqueue([
+                    "targets" => [$target->id]
+                ]);
 
                 if ($newRecord) {
                     $this->redirect(array("project/edittarget", "id" => $project->id, "target" => $target->id));
@@ -1257,16 +1260,24 @@ class ProjectController extends Controller {
                 try {
                     $targets = trim($form->targetList);
                     $targets = explode("\n", $targets);
+                    $ids = [];
 
                     foreach ($targets as $target) {
                         $t = new Target();
                         $t->project_id = $project->id;
                         $t->host = $target;
                         $t->save();
+
+                        $t->refresh();
+                        $ids[] = $t->id;
                     }
                 } catch (Exception $e) {
                     throw $e;
                 }
+
+                HostResolveJob::enqueue([
+                    "targets" => $ids
+                ]);
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "Targets added."));
                 $this->redirect(array("project/view", "id" => $project->id));
@@ -2233,18 +2244,6 @@ class ProjectController extends Controller {
                 ));
             }
 
-            if (!$model->overrideTarget) {
-                $model->overrideTarget = null;
-            }
-
-            if (!$model->protocol) {
-                $model->protocol = null;
-            }
-
-            if (!$model->port) {
-                $model->port = null;
-            }
-
             if ($model->tableResult == "") {
                 $model->tableResult = null;
             }
@@ -2369,6 +2368,11 @@ class ProjectController extends Controller {
             $targetCheck->vuln_deadline = null;
             $targetCheck->vuln_status = null;
 
+            foreach ($targetCheck->fields as $field) {
+                $value = isset($model->fields[$field->name]) ? $model->fields[$field->name] : null;
+                $field->setValue($value);
+            }
+
             // add solutions
             if ($model->solutions) {
                 $hasCustom = false;
@@ -2436,6 +2440,7 @@ class ProjectController extends Controller {
                         $checkSolution->check_solution_id = $solution->id;
                         $checkSolution->save();
 
+
                         $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION, null);
                         $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE, null);
                         $targetCheck->save();
@@ -2463,11 +2468,6 @@ class ProjectController extends Controller {
                     $attachment->title = $decodedTitle->title;
                     $attachment->save();
                 }
-            }
-
-            foreach ($targetCheck->fields as $field) {
-                $value = isset($model->fields[$field->name]) ? $model->fields[$field->name] : null;
-                $field->setValue($value);
             }
 
             // add inputs
@@ -4516,7 +4516,24 @@ class ProjectController extends Controller {
         $issue->save();
         $issue->refresh();
 
-        $this->redirect(["project/editissue", "id" => $project->id, "issue" => $issue->id]);
+        foreach ($check->targetChecks as $tc) {
+            $evidence = new IssueEvidence();
+            $evidence->issue_id = $issue->id;
+            $evidence->target_check_id = $tc->id;
+            $evidence->save();
+            $evidence->refresh();
+
+            foreach ($tc->fields as $tcField) {
+                $evidenceField = new IssueEvidenceField();
+                $evidenceField->issue_evidence_id = $evidence->id;
+                $evidenceField->target_check_field_id = $tcField->id;
+                $evidenceField->value = $tcField->value;
+                $evidenceField->hidden = $tcField->hidden;
+                $evidenceField->save();
+            }
+        }
+
+        $this->redirect(["project/issue", "id" => $project->id, "issue" => $issue->id]);
     }
 
     /**
@@ -4583,6 +4600,47 @@ class ProjectController extends Controller {
             throw new CHttpException(404, Yii::t("app", "Issue not found."));
         }
 
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+        $criteria = new CDbCriteria();
+        $criteria->order  = "t.host ASC";
+        $criteria->addCondition("t.project_id = :project_id");
+        $criteria->params = array("project_id" => $project->id);
+        $criteria->together = true;
+
+        $quickTargets = Target::model()->with([
+            "categories" => [
+                "with" => [
+                    "l10n" => [
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => ["language_id" => $language->id]
+                    ],
+                ],
+                "order" => "categories.name",
+            ]
+        ])->findAll($criteria);
+        $client = Client::model()->findByPk($project->client_id);
+
+        $ips = [];
+
+        foreach ($issue->evidences as $evidence) {
+            $ip = $evidence->targetCheck->target->ip;
+
+            if ($ip) {
+                $ips[] = $evidence->targetCheck->target->ip;
+            }
+        }
+
+        $evidenceGroups = array_count_values($ips);
+
+        foreach ($evidenceGroups as $key => $value) {
+            $evidenceGroups[$key] = Target::model()->findAllByAttributes([
+                "ip" => $key
+            ]);
+        }
+
         $title = $issue->name;
         $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
         $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
@@ -4594,6 +4652,16 @@ class ProjectController extends Controller {
         $this->render("issue/view", [
             "project" => $project,
             "issue" => $issue,
+            "targets" => $issue,
+            "quickTargets" => $quickTargets,
+            "client" => $client,
+            "statuses" => [
+                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
+                Project::STATUS_OPEN        => Yii::t("app", "Open"),
+                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
+                Project::STATUS_FINISHED    => Yii::t("app", "Finished"),
+            ],
+            "evidenceGroups" => $evidenceGroups
         ]);
     }
 

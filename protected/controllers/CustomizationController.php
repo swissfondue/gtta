@@ -145,7 +145,7 @@ class CustomizationController extends Controller
 
                 // add new field to checks
                 if ($newRecord) {
-                    TargetCheckReindexJob::enqueue([
+                    ReindexJob::enqueue([
                         "global_check_field_id" => $field->id
                     ]);
                 }

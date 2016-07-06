@@ -22,7 +22,7 @@ class JobManager {
         "RegenerateJob",
         "RestoreJob",
         "StatsJob",
-        "TargetCheckReindexJob",
+        "ReindexJob",
         "UpdateJob",
     );
     /**

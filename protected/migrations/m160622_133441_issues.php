@@ -11,15 +11,15 @@ class m160622_133441_issues extends CDbMigration {
     public function safeUp() {
         // global_check_fields
         $this->execute(
-            "INSERT INTO global_check_fields (type, name, title)
+            "INSERT INTO global_check_fields (type, name, title, hidden)
              VALUES
-             (:text_type, 'application_protocol', 'Application Protocol'),
-             (:radio_type, 'transport_protocol', 'Transport Protocol'),
-             (:text_type, 'port', 'Port'),
-             (:textarea_type, 'override_target', 'Override Target'),
-             (:text_type, 'solution_title', 'Solution Title'),
-             (:textarea_type, 'solution', 'Solution'),
-             (:textarea_type, 'poc', 'PoC')",
+             (:text_type, 'application_protocol', 'Application Protocol', 'f'),
+             (:radio_type, 'transport_protocol', 'Transport Protocol', 'f'),
+             (:text_type, 'port', 'Port', 'f'),
+             (:textarea_type, 'override_target', 'Override Target', 'f'),
+             (:text_type, 'solution_title', 'Solution Title', 't'),
+             (:textarea_type, 'solution', 'Solution', 't'),
+             (:textarea_type, 'poc', 'PoC', 'f')",
             [
                 "textarea_type" => GlobalCheckField::TYPE_TEXTAREA,
                 "text_type" => GlobalCheckField::TYPE_TEXT,
@@ -170,7 +170,7 @@ class m160622_133441_issues extends CDbMigration {
         $this->execute(
             "INSERT INTO target_check_fields (target_check_id, check_field_id, \"value\")
              (
-               SELECT target_checks.id as target_check_id, check_fields.id as check_field_id, check_fields.value
+               SELECT target_checks.id as target_check_id, check_fields.id as check_field_id, 'TCP'
                FROM target_checks
                LEFT JOIN checks ON checks.id = target_checks.check_id
                LEFT JOIN global_check_fields ON global_check_fields.name = 'transport_protocol'
@@ -262,7 +262,8 @@ class m160622_133441_issues extends CDbMigration {
                 "id" => "bigserial NOT NULL",
                 "issue_id" => "bigint NOT NULL",
                 "target_check_id" => "bigint NOT NULL",
-                "PRIMARY KEY (id)"
+                "PRIMARY KEY (id)",
+                "UNIQUE (issue_id, target_check_id)"
             ]
         );
         $this->addForeignKey(
@@ -321,7 +322,7 @@ class m160622_133441_issues extends CDbMigration {
         $this->addColumn(
             "system",
             "host_resolve",
-            "boolean NOT NULL DEFAULT 'f'"
+            "boolean NOT NULL DEFAULT 't'"
         );
 
         return true;
@@ -368,7 +369,7 @@ class m160622_133441_issues extends CDbMigration {
              FROM target_check_fields
              INNER JOIN check_fields ON check_fields.id = target_check_fields.check_field_id
              INNER JOIN global_check_fields ON global_check_fields.id = check_fields.global_check_field_id
-             WHERE global_check_fields.name = 'port'"
+             WHERE global_check_fields.name = 'port' AND target_check_fields.value IS NOT NULL"
         );
         $this->execute(
             "UPDATE target_checks
