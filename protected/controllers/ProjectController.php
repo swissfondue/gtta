@@ -4438,12 +4438,6 @@ class ProjectController extends Controller {
                 throw new Exception($errorText);
             }
 
-            $project = Project::model()->findByPk($id);
-
-            if (!$project) {
-                throw new Exception("Project not found.", 404);
-            }
-
             $cm = new CheckManager();
             $language = Language::model()->findByAttributes([
                 "code" => Yii::app()->language
@@ -4526,10 +4520,16 @@ class ProjectController extends Controller {
             foreach ($tc->fields as $tcField) {
                 $evidenceField = new IssueEvidenceField();
                 $evidenceField->issue_evidence_id = $evidence->id;
-                $evidenceField->target_check_field_id = $tcField->id;
+                $evidenceField->check_field_id = $tc->check->id;
                 $evidenceField->value = $tcField->value;
-                $evidenceField->hidden = $tcField->hidden;
                 $evidenceField->save();
+            }
+
+            foreach ($tc->solutions as $solution) {
+                $evidenceSolution = new IssueEvidenceSolution();
+                $evidenceSolution->issue_evidence_id = $evidence->id;
+                $evidenceSolution->check_solution_id = $solution->check_solution_id;
+                $evidenceSolution->save();
             }
         }
 
@@ -4652,7 +4652,6 @@ class ProjectController extends Controller {
         $this->render("issue/view", [
             "project" => $project,
             "issue" => $issue,
-            "targets" => $issue,
             "quickTargets" => $quickTargets,
             "client" => $client,
             "statuses" => [
@@ -4761,5 +4760,210 @@ class ProjectController extends Controller {
         }
 
         echo $response->serialize();
+    }
+
+    /**
+     * Search targets
+     * @param $issue
+     */
+    public function actionSearchTargets($issue) {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $issue;
+            $issue = Issue::model()->findByPk($issue);
+
+            if (!$issue) {
+                throw new Exception("Issue not found.", 404);
+            }
+
+            if (!isset($_POST["SearchForm"])) {
+                throw new Exception("Invalid search query", 400);
+            }
+
+            $form = new SearchForm();
+            $form->attributes = $_POST["SearchForm"];
+
+            if (!$form->validate()) {
+                $errorText = '';
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $tm = new TargetManager();
+            $language = Language::model()->findByAttributes([
+                "code" => Yii::app()->language
+            ]);
+
+            $exclude = [];
+
+            foreach ($issue->evidences as $evidence) {
+                if (!in_array($evidence->targetCheck->target_id, $exclude)) {
+                    $exclude[] = $evidence->targetCheck->target_id;
+                }
+            }
+
+            $targets = $tm->filter($form->query, $exclude);
+            $data = [];
+
+            foreach ($targets as $target) {
+                $targetData = $target->serialize($language->id);
+                $targetData["url"] = $this->createUrl("project/bindtarget", [
+                    "issue" => $id,
+                    "target" => $target->id
+                ]);
+                $data[] = $targetData;
+            }
+
+            $response->addData("targets", $data);
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    public function actionEditEvidence($id, $issue, $evidence) {
+        $id = (int) $id;
+        $issue = (int) $issue;
+        $evidence = (int) $evidence;
+
+        $project = Project::model()->findByPk($id);
+
+        if (!$project) {
+            throw new CHttpException(404, Yii::t("app", "Project not found."));
+        }
+
+        $issue = Issue::model()->findByPk($issue);
+
+        if (!$issue) {
+            throw new CHttpException(404, Yii::t("app", "Issue not found."));
+        }
+
+        if ($issue->project_id != $project->id) {
+            throw new CHttpException(403, Yii::t("app", "Permission denied."));
+        }
+
+        $evidence = IssueEvidence::model()->findByPk($evidence);
+
+        if (!$evidence) {
+            throw new CHttpException(404, Yii::t("app", "Issue evidence not found."));
+        }
+
+        if ($evidence->issue_id != $issue->id) {
+            throw new CHttpException(403, Yii::t("app", "Permission denied."));
+        }
+
+        $form = new IssueEvidenceEditForm();
+
+        if (isset($_POST["IssueEvidenceEditForm"])) {
+            $form->attributes = $_POST["IssueEvidenceEditForm"];
+
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+        }
+
+        if ($form->tableResult == "") {
+            $form->tableResult = null;
+        }
+
+        $evidence->status = TargetCheck::STATUS_FINISHED;
+        $evidence->rating = $form->rating;
+        $evidence->table_result = $form->tableResult;
+        $evidence->save();
+
+        foreach ($evidence->fields as $field) {
+            $value = isset($form->fields[$field->name]) ? $form->fields[$field->name] : null;
+            $field->setValue($value);
+        }
+
+        // add solutions
+        if ($form->solutions) {
+            $hasCustom = false;
+
+            foreach ($form->solutions as $solutionId) {
+                // reset solution
+                if (!$solutionId) {
+                    break;
+                }
+
+                // custom solution
+                if ($solutionId == IssueEvidenceEditForm::CUSTOM_SOLUTION_IDENTIFIER) {
+                    $hasCustom = true;
+                    continue;
+                }
+
+                $solution = CheckSolution::model()->findByAttributes([
+                    "id" => $solutionId,
+                    "check_id" => $evidence->targetCheck->check->id
+                ]);
+
+                if (!$solution) {
+                    throw new CHttpException(404, Yii::t("app", "Solution not found."));
+                }
+
+                $solution = new IssueEvidenceSolution();
+                $solution->issue_evidence_id = $evidence->id;
+                $solution->check_solution_id = $solutionId;
+                $solution->save();
+            }
+
+            if ($hasCustom && $form->solution) {
+                $evidence->setFieldValue(GlobalCheckField::FIELD_SOLUTION, $form->solution);
+                $evidence->setFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE, $form->solutionTitle);
+                $evidence->save();
+            }
+        }
+
+        if (count($form->attachmentTitles)) {
+            foreach ($form->attachmentTitles as $title) {
+                $decodedTitle = json_decode($title);
+
+                $attachment = IssueEvidenceAttachment::model()->findByAttributes(array(
+                    "path" => $decodedTitle->path,
+                    "target_check_id" => $targetCheck->id,
+                ));
+
+                if (!$attachment) {
+                    throw new CHttpException(404, 'Attachment not found.');
+                }
+
+                $attachment->title = $decodedTitle->title;
+                $attachment->save();
+            }
+        }
+
+        if ($project->status == Project::STATUS_OPEN) {
+            $project->status = Project::STATUS_IN_PROGRESS;
+            $project->save();
+        }
+
+        $title = $issue->name;
+        $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
+        $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
+        $this->breadcrumbs[] = [Yii::t("app", "Issues"), $this->createUrl("project/issues", ["id" => $project->id])];
+        $this->breadcrumbs[] = [$title, ""];
+
+        // display the page
+        $this->pageTitle = $title;
+        $this->render("issue/evidence/edit", array(
+            "form" => $form,
+            "project" => $project,
+            "issue" => $issue,
+            "evidence" => $evidence,
+        ));
     }
 }

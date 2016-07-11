@@ -83,6 +83,8 @@ return array(
     "project/<id:\d+>/issue/<issue:\d+>" => "project/issue",
     "project/issue/control" => "project/controlissue",
     "project/<id:\d+>/check/search" => "project/searchchecks",
+    "issue/<issue:\d+>/target/search" => "project/searchtargets",
+    "project/<id:\d+>/issue/<issue:\d+>/evidence/<evidence:\d+>" => "project/editevidence",
 
     // custom checks
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/custom-check/save" => "project/savecustomcheck",

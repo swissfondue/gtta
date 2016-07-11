@@ -435,8 +435,6 @@ class CheckManager {
 
         $criteria = new CDbCriteria();
         $criteria->order = "t.name ASC";
-        $criteria->addColumnCondition(["t.language_id" => $language]);
-        $criteria->addSearchCondition("t.name", $query, true, "OR", "ILIKE");
         $criteria->addNotInCondition("t.check_id", $exclude);
         $criteria->order = "nameContains DESC, t.name ASC";
         $criteria->select = "t.*, position(lower('$escapedQuery') in lower(t.name))::boolean AS nameContains";

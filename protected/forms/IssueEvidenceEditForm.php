@@ -3,10 +3,10 @@
 /**
  * This is the model class for target check edit form.
  */
-class TargetCheckEditForm extends CFormModel {
+class IssueEvidenceEditForm extends CFormModel {
     const CUSTOM_SOLUTION_IDENTIFIER = "custom";
 
-	/**
+    /**
      * @var string result.
      */
     public $result;
@@ -15,6 +15,16 @@ class TargetCheckEditForm extends CFormModel {
      * @var string rating.
      */
     public $rating;
+
+    /**
+     * @var string solution title
+     */
+    public $solutionTitle;
+
+    /**
+     * @var string solution.
+     */
+    public $solution;
 
     /**
      * @var array solutions.
@@ -27,14 +37,14 @@ class TargetCheckEditForm extends CFormModel {
     public $attachmentTitles;
 
     /**
-     * @var string solution.
+     * @var boolean save solution.
      */
-    public $solution;
+    public $saveSolution;
 
     /**
-     * @var string solution title.
+     * @var array inputs.
      */
-    public $solutionTitle;
+    public $inputs;
 
     /**
      * @var string table_result
@@ -46,17 +56,17 @@ class TargetCheckEditForm extends CFormModel {
      */
     public $fields;
 
-	/**
-	 * @return array validation rules for model attributes.
-	 */
-	public function rules() {
-		return array(
+    /**
+     * @return array validation rules for model attributes.
+     */
+    public function rules() {
+        return array(
             array("rating", "in", "range" => TargetCheck::getValidRatings()),
             array("saveSolution, saveResult", "boolean"),
             array("fields", "checkFields"),
             array("inputs, result, solutions, solution, attachmentTitles, tableResult, scripts, timeouts", "safe"),
-		);
-	}
+        );
+    }
 
     /**
      * Validate fields

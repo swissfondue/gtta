@@ -342,12 +342,25 @@ function Admin()
         /**
          * Show add issue popup
          */
-        this.showAddPopup = function () {
+        this.showIssueAddPopup = function () {
             var modal = $("#issue-check-select-dialog");
+            var list = modal.find("table.check-list");
             modal.find(".issue-search-query").val("");
+            list.empty();
             modal.find(".no-search-result").hide();
+            modal.modal();
+        };
 
-            $("#issue-check-select-dialog").modal();
+        /**
+         * Show add issue popup
+         */
+        this.showTargetAddPopup = function () {
+            var modal = $("#target-select-dialog");
+            var list = modal.find("table.target-list");
+            modal.find(".target-search-query").val("");
+            list.empty();
+            modal.find(".no-search-result").hide();
+            modal.modal();
         };
 
         /**
@@ -408,6 +421,93 @@ function Admin()
                                     .text(value.name);
 
                                 if (value.name.toLowerCase().indexOf(query.toLowerCase()) != -1) {
+                                    link = $("<b>").append(link);
+                                }
+
+                                list.find("tbody").append(
+                                    $("<tr>")
+                                        .append(
+                                        $("<td>")
+                                            .addClass("name")
+                                            .append(link)
+                                    )
+                                )
+                            });
+                        } else {
+                            list.siblings(".no-search-result").show();
+                        }
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend : function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+            }, _issue.searchTimeout);
+        };
+
+        /**
+         * Load target list
+         * @param url
+         * @param query
+         */
+        this.loadTargets = function (url, query) {
+            var list = $("#target-select-dialog table.target-list");
+
+            if (query.length < 3) {
+                list.empty();
+
+                return;
+            }
+
+            if (_issue.searchTimeoutHandler) {
+                clearTimeout(_issue.searchTimeoutHandler);
+            }
+
+            _issue.searchTimeoutHandler = setTimeout(function () {
+                var data = {
+                    "YII_CSRF_TOKEN": system.csrf
+                };
+
+                if (query) {
+                    data["SearchForm[query]"] = query;
+                }
+
+                $.ajax({
+                    dataType : "json",
+                    url      : url,
+                    timeout  : system.ajaxTimeout,
+                    type     : "POST",
+
+                    data : data,
+
+                    success : function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error")
+                        {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        var targets = data.data.targets;
+                        list.empty();
+                        list.siblings(".no-search-result").hide();
+
+                        if (targets.length) {
+                            var link;
+                            list.append($("<tbody>"));
+
+                            $.each(targets, function (key, value) {
+                                link = $("<a>")
+                                    .attr("href", value.url)
+                                    .text(value.ip);
+
+                                if (value.ip.toLowerCase().indexOf(query.toLowerCase()) != -1) {
                                     link = $("<b>").append(link);
                                 }
 

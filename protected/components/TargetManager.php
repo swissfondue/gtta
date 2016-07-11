@@ -628,4 +628,31 @@ class TargetManager {
             "target_id" => $target->id
         ]);
     }
+
+    /**
+     * Filter targets
+     * @param $query
+     * @param array $exclude
+     * @return array
+     */
+    public function filter($query, $exclude = []) {
+        $escapedQuery = pg_escape_string($query);
+
+        $criteria = new CDbCriteria();
+        $criteria->order = "t.ip ASC";
+        $criteria->addNotInCondition("t.id", $exclude);
+        $criteria->order = "ipContains DESC, t.ip ASC";
+        $criteria->select = "t.*, position(lower('$escapedQuery') in lower(t.ip))::boolean AS ipContains";
+
+        if ($query) {
+            $criteria->addSearchCondition("t.description", $query, true, "AND", "ILIKE");
+            $criteria->addSearchCondition("t.ip", $query, true, "OR", "ILIKE");
+        }
+
+        if ($exclude) {
+            $criteria->addNotInCondition("t.id", $exclude);
+        }
+
+        return Target::model()->findAll($criteria);
+    }
 }

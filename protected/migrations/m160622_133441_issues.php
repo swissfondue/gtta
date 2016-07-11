@@ -262,6 +262,11 @@ class m160622_133441_issues extends CDbMigration {
                 "id" => "bigserial NOT NULL",
                 "issue_id" => "bigint NOT NULL",
                 "target_check_id" => "bigint NOT NULL",
+                "target_file" => "varchar(1000)",
+                "status" => "integer",
+                "result_file" => "varchar(1000)",
+                "table_result" => "text",
+                "rating" => "integer",
                 "PRIMARY KEY (id)",
                 "UNIQUE (issue_id, target_check_id)"
             ]
@@ -285,45 +290,8 @@ class m160622_133441_issues extends CDbMigration {
             "CASCADE"
         );
 
-        $this->createTable(
-            "issue_evidence_fields",
-            [
-                "id" => "bigserial NOT NULL",
-                "issue_evidence_id" => "bigint NOT NULL",
-                "target_check_field_id" => "bigint NOT NULL",
-                "value" => "text",
-                "hidden" => "boolean NOT NULL DEFAULT 'f'"
-            ]
-        );
-        $this->addForeignKey(
-            "issue_evidence_fields_issue_evidence_id_fkey",
-            "issue_evidence_fields",
-            "issue_evidence_id",
-            "issue_evidences",
-            "id",
-            "CASCADE",
-            "CASCADE"
-        );
-        $this->addForeignKey(
-            "issue_evidence_fields_target_check_field_id_fkey",
-            "issue_evidence_fields",
-            "target_check_field_id",
-            "target_check_fields",
-            "id",
-            "CASCADE",
-            "CASCADE"
-        );
-
-        $this->addColumn(
-            "targets",
-            "ip",
-            "text"
-        );
-        $this->addColumn(
-            "system",
-            "host_resolve",
-            "boolean NOT NULL DEFAULT 't'"
-        );
+        $this->addColumn("targets", "ip", "text");
+        $this->addColumn("system", "host_resolve", "boolean NOT NULL DEFAULT 't'");
 
         return true;
 	}
@@ -402,7 +370,6 @@ class m160622_133441_issues extends CDbMigration {
             ]
         );
 
-        $this->dropTable("issue_evidence_fields");
         $this->dropTable("issue_evidences");
         $this->dropTable("issues");
 

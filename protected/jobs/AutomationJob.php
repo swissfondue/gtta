@@ -142,10 +142,12 @@ class AutomationJob extends BackgroundJob {
      * @param TargetCheck $check
      * @param Target $target
      * @param CheckScript $script
+     * @param bool $issue
      * @return array
      * @throws Exception
+     * @throws VMNotFoundException
      */
-    private function _createCheckFiles(TargetCheck $check, Target $target, CheckScript $script) {
+    private function _createCheckFiles(TargetCheck $check, Target $target, CheckScript $script, $issueMode = false) {
         $vm = new VMManager();
         $filesPath = $vm->virtualizePath(Yii::app()->params["automation"]["filesPath"]);
 
@@ -156,21 +158,48 @@ class AutomationJob extends BackgroundJob {
             throw new VMNotFoundException("Sandbox is not running, please regenerate it.");
         }
 
-        $targetHosts = "";
-        $port = "";
+        if ($issueMode) {
+            $issue = Issue::model()->findByAttributes([
+                "project_id" => $target->project_id,
+                "check_id" => $check->check_id
+            ]);
 
-        if (!$check->overrideTarget) {
+            if (!$issue) {
+                throw new Exception("Issue not found.")
+            }
+
+            $evidence = IssueEvidence::model()->findByAttributes([
+                "issue_id" => $issue->id,
+                "target_check_id" => $check->id
+            ]);
+
+            if (!$evidence) {
+                throw new Exception("Evidence not found.");
+            }
+        }
+
+        $port = "";
+        $overrideTarget = $issueMode ? $evidence->overrideTarget : $check->overrideTarget;
+        $protocol = $issueMode ? $evidence->applicationProtocol : $check->applicationProtocol;
+
+        if (!$overrideTarget) {
             $targetHosts = $target->host;
 
             if ($target->port) {
                 $port = $target->port;
             }
 
-            if ($check->port) {
-                $port = $check->port;
+            if ($issueMode) {
+                if ($evidence->port) {
+                    $port = $evidence->port;
+                }
+            } else {
+                if ($check->port) {
+                    $port = $check->port;
+                }
             }
         } else {
-            $targets = explode("\n", $check->overrideTarget);
+            $targets = explode("\n", $overrideTarget);
             $filtered = array();
 
             foreach ($targets as $t) {
@@ -201,7 +230,7 @@ class AutomationJob extends BackgroundJob {
 
         // base data
         fwrite($targetFile, $targetHosts . "\n");
-        fwrite($targetFile, $check->protocol . "\n");
+        fwrite($targetFile, $protocol . "\n");
         fwrite($targetFile, $port . "\n");
         fwrite($targetFile, $check->language->code . "\n");
         fwrite($targetFile, $timeout . "\n");

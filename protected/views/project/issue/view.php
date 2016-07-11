@@ -45,7 +45,7 @@
                 <div class="span8">
                     <b style="font-size: 20px"><?= Yii::t("app", "Assets affected by this Issue") ?></b>
                     &nbsp;—&nbsp;
-                    <a href="#"><?= Yii::t("app", "Add") ?></a>
+                    <a href="#" onclick="admin.issue.showTargetAddPopup()"><?= Yii::t("app", "Add") ?></a>
                 </div>
             </div>
             <br>
@@ -115,12 +115,32 @@
                                                 </tr>
                                                 </tbody>
                                             </table>
-                                            <div class="field-block">
-                                                <b><?= Yii::t("app", "Result") ?></b>
-                                                <br/>
-                                                <?= $tc->result ?>
-                                            </div>
+                                            <?php if ($tc->result): ?>
+                                                <div class="field-block">
+                                                    <b><?= Yii::t("app", "Result") ?></b>
+                                                    <br/>
+                                                    <?= $tc->result ?>
+                                                </div>
+                                            <?php endif; ?>
+                                            <?php if ($tc->poc): ?>
+                                                <div class="field-block">
+                                                    <b><?= Yii::t("app", "PoC") ?></b>
+                                                    <br/>
+                                                    <?= $tc->poc ?>
+                                                </div>
+                                            <?php endif; ?>
+                                            <?php if ($tc->solution): ?>
+                                                <div class="field-block">
+                                                    <b><?= Yii::t("app", "Solution") ?></b>
+                                                    <br/>
+                                                    <?= $tc->solutionTitle ?>
+                                                    <br>
+                                                    <?= $tc->solution ?>
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
+
+                                        <hr>
                                     </div>
 
                                     <?php $i++; ?>
@@ -147,9 +167,36 @@
     </div>
 </div>
 
+<div class="modal fade" id="target-select-dialog" tabindex="-1" role="dialog" aria-labelledby="smallModal" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h3><?= Yii::t("app", "Select Target") ?></h3>
+            </div>
+            <div class="modal-body">
+                <input class="target-search-query"
+                       placeholder="<?= Yii::t("app", "Search String (At Least 3 Symbol)...") ?>"
+                       type="text" />
+                <table class="table target-list"></table>
+                <span class="no-search-result" style="display:none"><?= Yii::t("app", "No Target") ?></span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     $('.target-tabs a').click(function (e) {
         e.preventDefault();
         $(this).tab('show');
-    })
+    });
+
+    $(function () {
+        $("#target-select-dialog input.target-search-query").keyup(function (e) {
+            // if alpha or backspace
+            if (/[a-zA-Z0-9_ -]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8) {
+                admin.issue.loadTargets('<?= $this->createUrl("project/searchtargets", ["issue" => $issue->id]) ?>', $(this).val())
+            }
+        });
+    });
 </script>

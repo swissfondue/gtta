@@ -1327,7 +1327,13 @@ div.time-tracker {
     width: 450px;
 }
 
-#issue-check-select-dialog .issue-search-query {
+#target-select-dialog {
+    margin-left: -200px;
+    width: 400px;
+}
+
+#issue-check-select-dialog .issue-search-query,
+#target-select-dialog .target-search-query {
     width: 98%;
 }
 

@@ -304,4 +304,20 @@ class Target extends ActiveRecord implements IVariableScopeObject {
             "check_id" => $id
         ]);
     }
+
+    /**
+     * Serialize
+     * @return array
+     */
+    public function serialize() {
+        return [
+            "id" => $this->id,
+            "project_id" => $this->project_id,
+            "host" => $this->host,
+            "ip" => $this->ip,
+            "description" => $this->description,
+            "port" => $this->port,
+            "relation_template_id" => $this->relation_template_id,
+        ];
+    }
 }
