@@ -142,12 +142,10 @@ class AutomationJob extends BackgroundJob {
      * @param TargetCheck $check
      * @param Target $target
      * @param CheckScript $script
-     * @param bool $issue
      * @return array
      * @throws Exception
-     * @throws VMNotFoundException
      */
-    private function _createCheckFiles(TargetCheck $check, Target $target, CheckScript $script, $issueMode = false) {
+    private function _createCheckFiles(TargetCheck $check, Target $target, CheckScript $script) {
         $vm = new VMManager();
         $filesPath = $vm->virtualizePath(Yii::app()->params["automation"]["filesPath"]);
 
@@ -158,48 +156,21 @@ class AutomationJob extends BackgroundJob {
             throw new VMNotFoundException("Sandbox is not running, please regenerate it.");
         }
 
-        if ($issueMode) {
-            $issue = Issue::model()->findByAttributes([
-                "project_id" => $target->project_id,
-                "check_id" => $check->check_id
-            ]);
-
-            if (!$issue) {
-                throw new Exception("Issue not found.")
-            }
-
-            $evidence = IssueEvidence::model()->findByAttributes([
-                "issue_id" => $issue->id,
-                "target_check_id" => $check->id
-            ]);
-
-            if (!$evidence) {
-                throw new Exception("Evidence not found.");
-            }
-        }
-
+        $targetHosts = "";
         $port = "";
-        $overrideTarget = $issueMode ? $evidence->overrideTarget : $check->overrideTarget;
-        $protocol = $issueMode ? $evidence->applicationProtocol : $check->applicationProtocol;
 
-        if (!$overrideTarget) {
+        if (!$check->overrideTarget) {
             $targetHosts = $target->host;
 
             if ($target->port) {
                 $port = $target->port;
             }
 
-            if ($issueMode) {
-                if ($evidence->port) {
-                    $port = $evidence->port;
-                }
-            } else {
-                if ($check->port) {
-                    $port = $check->port;
-                }
+            if ($check->port) {
+                $port = $check->port;
             }
         } else {
-            $targets = explode("\n", $overrideTarget);
+            $targets = explode("\n", $check->overrideTarget);
             $filtered = array();
 
             foreach ($targets as $t) {
@@ -230,7 +201,7 @@ class AutomationJob extends BackgroundJob {
 
         // base data
         fwrite($targetFile, $targetHosts . "\n");
-        fwrite($targetFile, $protocol . "\n");
+        fwrite($targetFile, $check->applicationProtocol . "\n");
         fwrite($targetFile, $port . "\n");
         fwrite($targetFile, $check->language->code . "\n");
         fwrite($targetFile, $timeout . "\n");
@@ -426,7 +397,7 @@ class AutomationJob extends BackgroundJob {
 
         foreach ($scripts as $script) {
             if ($check->result) {
-                $check->appendResult("\n");
+                $check->appendPoc("\n");
             }
 
             $now = new DateTime();
@@ -440,7 +411,7 @@ class AutomationJob extends BackgroundJob {
                     "{time}" => $now->format("H:i:s"),
                 ));
 
-                $check->appendResult("$data\n" . str_repeat("-", 16) . "\n");
+                $check->appendPoc("$data\n" . str_repeat("-", 16) . "\n");
             }
 
             try {
@@ -473,10 +444,10 @@ class AutomationJob extends BackgroundJob {
                     $fileOutput = file_get_contents($vm->virtualizePath($filesPath . '/' . $check->result_file));
                     $data = $fileOutput ? $fileOutput : $output;
 
-                    $check->appendResult($data, false);
+                    $check->appendPoc($data, false);
 
                     if (!$data) {
-                        $check->appendResult(Yii::t('app', 'No output.'));
+                        $check->appendPoc(Yii::t('app', 'No output.'));
                     }
 
                     $this->_getTables($check);
@@ -498,7 +469,7 @@ class AutomationJob extends BackgroundJob {
                     }
                 }
             } catch (VMNotFoundException $e) {
-                $check->appendResult($e->getMessage());
+                $check->appendPoc($e->getMessage());
             } catch (Exception $e) {
                 $check->automationError($e->getMessage());
             }

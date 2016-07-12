@@ -93,6 +93,14 @@ class m160622_133441_issues extends CDbMigration {
                 LEFT JOIN global_check_fields ON global_check_fields.name = 'solution_title'
             )"
         );
+        $this->execute(
+            "INSERT INTO check_fields (global_check_field_id, check_id, value)
+            (
+                SELECT global_check_fields.id, checks.id, ''
+                FROM checks
+                LEFT JOIN global_check_fields ON global_check_fields.name = 'poc'
+            )"
+        );
 
         // check_fields_l10n
         $this->execute(
@@ -152,6 +160,16 @@ class m160622_133441_issues extends CDbMigration {
               FROM checks_l10n
               LEFT JOIN checks ON checks_l10n.check_id = checks.id
               LEFT JOIN global_check_fields ON global_check_fields.name = 'solution_title'
+              LEFT JOIN check_fields ON check_fields.check_id = checks.id AND check_fields.global_check_field_id = global_check_fields.id
+            )"
+        );
+        $this->execute(
+            "INSERT INTO check_fields_l10n (check_field_id, language_id, \"value\")
+            (
+              SELECT check_fields.id, checks_l10n.language_id, ''
+              FROM checks_l10n
+              LEFT JOIN checks ON checks_l10n.check_id = checks.id
+              LEFT JOIN global_check_fields ON global_check_fields.name = 'poc'
               LEFT JOIN check_fields ON check_fields.check_id = checks.id AND check_fields.global_check_field_id = global_check_fields.id
             )"
         );
@@ -217,6 +235,16 @@ class m160622_133441_issues extends CDbMigration {
                LEFT JOIN check_fields ON check_fields.check_id = target_checks.check_id AND check_fields.global_check_field_id = global_check_fields.id
              )"
         );
+        $this->execute(
+            "INSERT INTO target_check_fields (target_check_id, check_field_id, \"value\")
+             (
+               SELECT target_checks.id as target_check_id, check_fields.id as check_field_id, ''
+               FROM target_checks
+               LEFT JOIN checks ON checks.id = target_checks.check_id
+               LEFT JOIN global_check_fields ON global_check_fields.name = 'poc'
+               LEFT JOIN check_fields ON check_fields.check_id = target_checks.check_id AND check_fields.global_check_field_id = global_check_fields.id
+             )"
+        );
 
         $this->dropColumn("target_checks", "protocol");
         $this->dropColumn("target_checks", "port");
@@ -231,7 +259,6 @@ class m160622_133441_issues extends CDbMigration {
                 "id" => "bigserial NOT NULL",
                 "project_id" => "bigint NOT NULL",
                 "check_id" => "bigint NOT NULL",
-                "name" => "text NOT NULL",
                 "PRIMARY KEY (id)",
                 "UNIQUE (project_id, check_id)",
             ]
@@ -262,11 +289,6 @@ class m160622_133441_issues extends CDbMigration {
                 "id" => "bigserial NOT NULL",
                 "issue_id" => "bigint NOT NULL",
                 "target_check_id" => "bigint NOT NULL",
-                "target_file" => "varchar(1000)",
-                "status" => "integer",
-                "result_file" => "varchar(1000)",
-                "table_result" => "text",
-                "rating" => "integer",
                 "PRIMARY KEY (id)",
                 "UNIQUE (issue_id, target_check_id)"
             ]

@@ -43,50 +43,6 @@ class IssueEvidence extends ActiveRecord {
         return [
             "issue" => [self::BELONGS_TO, "Issue", "issue_id"],
             "targetCheck" => [self::BELONGS_TO, "TargetCheck", "target_check_id"],
-            "fields" => [self::HAS_MANY, "IssueEvidenceField", "issue_evidence_id"],
         ];
-    }
-
-    /**
-     * Set field value
-     * @param $name
-     * @param $value
-     */
-    public function setFieldValue($name, $value) {
-        $criteria = new CDbCriteria();
-        $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
-        $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
-        $criteria->addColumnCondition([
-            "gcf.name" => $name,
-            "t.issue_evidence_id" => $this->id,
-        ]);
-        $field = IssueEvidenceField::model()->find($criteria);
-
-        if ($field) {
-            $field->value = $value;
-            $field->save();
-        }
-    }
-
-    /**
-     * Returns target check field value
-     * @param $name
-     * @return mixed|null
-     */
-    private function _getFieldValue($name) {
-        $criteria = new CDbCriteria();
-        $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
-        $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
-        $criteria->addColumnCondition([
-            "gcf.name" => $name,
-            "t.target_check_id" => $this->id,
-        ]);
-        $field = TargetCheckField::model()->find($criteria);
-
-        if (!$field) {
-            return null;
-        }
-
-        return $field->value;
     }
 }

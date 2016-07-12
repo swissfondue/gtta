@@ -6,10 +6,30 @@
 class TargetCheckEditForm extends CFormModel {
     const CUSTOM_SOLUTION_IDENTIFIER = "custom";
 
-	/**
+    /**
+     * @var array (json) scripts
+     */
+    public $scripts;
+
+    /**
+     * @var array (json) script timeouts
+     */
+    public $timeouts;
+
+    /**
+     * @var string resultTitle.
+     */
+    public $resultTitle;
+
+    /**
      * @var string result.
      */
     public $result;
+
+    /**
+     * @var boolean save solution.
+     */
+    public $saveResult;
 
     /**
      * @var string rating.
@@ -37,6 +57,16 @@ class TargetCheckEditForm extends CFormModel {
     public $solutionTitle;
 
     /**
+     * @var boolean save solution.
+     */
+    public $saveSolution;
+
+    /**
+     * @var array inputs.
+     */
+    public $inputs;
+
+    /**
      * @var string table_result
      */
     public $tableResult;
@@ -46,17 +76,17 @@ class TargetCheckEditForm extends CFormModel {
      */
     public $fields;
 
-	/**
-	 * @return array validation rules for model attributes.
-	 */
-	public function rules() {
-		return array(
+    /**
+     * @return array validation rules for model attributes.
+     */
+    public function rules() {
+        return array(
             array("rating", "in", "range" => TargetCheck::getValidRatings()),
             array("saveSolution, saveResult", "boolean"),
             array("fields", "checkFields"),
-            array("inputs, result, solutions, solution, attachmentTitles, tableResult, scripts, timeouts", "safe"),
-		);
-	}
+            array("inputs, result, solutions, solution, solutionTitle, attachmentTitles, tableResult, scripts, timeouts", "safe"),
+        );
+    }
 
     /**
      * Validate fields

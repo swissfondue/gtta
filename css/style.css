@@ -264,6 +264,7 @@ fieldset hr {
     word-wrap:break-word;
 }
 
+.project-quick-nav-issues > .issue > a,
 .project-quick-nav > .target > a {
     font-weight:bold;
 }
@@ -287,6 +288,7 @@ fieldset hr {
     content: "";
 }
 
+.project-quick-nav-issue,
 .project-quick-nav {
     border-top:1px dashed #666;
     padding-bottom:5px;
@@ -499,6 +501,31 @@ table.check-form > tbody > tr > td {
     margin-right:5px;
     display:block;
     float:left;
+}
+
+.marker {
+    width: 10px;
+    height: 10px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.marker.med-risk {
+    background-color:#dace2f;
+}
+
+.marker.high-risk {
+    background-color:#d63515;
+}
+
+.marker.low-risk {
+    background-color:#53a254;
+}
+
+.label-no-risk {
+    background-color: rgba(0, 0, 0, 0.31);
 }
 
 .label-high-risk, .label-admin, .label-error {
@@ -1339,4 +1366,9 @@ div.time-tracker {
 
 #issue-information .field-block {
     margin-bottom: 20px;
+}
+
+#left-menu {
+    margin-left: -325px;
+    position: fixed;
 }

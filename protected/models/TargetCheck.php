@@ -25,6 +25,8 @@
  * @property integer $vuln_status
  */
 class TargetCheck extends ActiveRecord implements IVariableScopeObject {
+    public $mr;
+
     /**
      * Target check type
      */
@@ -44,6 +46,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
 
     /**
      * Result ratings.
+     * ordered by gravity (important)
      */
     const RATING_NONE = 0;
     const RATING_NO_VULNERABILITY = 10;
@@ -179,10 +182,10 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         ));
 
         if ($this->result) {
-            $this->appendPoc($this, "\n");
+            $this->appendPoc("\n");
         }
 
-        $this->appendPoc($this, $message);
+        $this->appendPoc($message);
         $this->status = TargetCheck::STATUS_FINISHED;
         $this->save();
     }
@@ -464,5 +467,16 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      */
     public function getApplicationProtocol() {
         return $this->_getFieldValue(GlobalCheckField::FIELD_APPLICATION_PROTOCOL);
+    }
+
+    /**
+     * TargetCheckCategory relation
+     * @return array|CActiveRecord|mixed|null
+     */
+    public function getCategory() {
+        return TargetCheckCategory::model()->findByAttributes([
+            "target_id" => $this->target_id,
+            "check_category_id" => $this->check->control->check_category_id
+        ]);
     }
 }

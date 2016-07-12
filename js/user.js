@@ -85,7 +85,7 @@ function User()
 
                                 check = data.checks[i];
 
-				                $('#TargetCheckEditForm_fields_' + check.id + '_result').val(check.result);
+				                $('#TargetCheckEditForm_fields_' + check.id + '_poc').val(check.poc);
                                 $('div.check-form[data-type=check][data-id="' + check.id + '"] div.table-result').html(check.tableResult);
 
                                 if (check.startedText) {
@@ -410,9 +410,6 @@ function User()
                     }
 
                     form.html(data.data.html);
-                    $(".wysiwyg", form).ckeditor();
-                    _check.initTargetCheckAttachmentUploadForms(id);
-                    _check.initAutosave(id);
 
                     form.slideDown("slow", function () {
                         if (callback) {
@@ -1026,6 +1023,9 @@ function User()
 
                 error : function(jqXHR, textStatus, e) {
                     _check.setLoaded(id);
+
+                    console.log(jqXHR);
+
                     system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 

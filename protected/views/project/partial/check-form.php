@@ -1,3 +1,5 @@
+<?php $goToNext = isset($goToNext) ? $goToNext : false ?>
+
 <table class="table check-form">
     <tbody>
         <tr>
@@ -385,24 +387,34 @@
                 <td>&nbsp;</td>
                 <td>
                     <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, false);" <?php if ($check->isRunning) echo "disabled"; ?>><?php echo Yii::t("app", "Save"); ?></button>&nbsp;
-                    <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, true);" <?php if ($check->isRunning) echo "disabled"; ?>><?php echo Yii::t("app", "Save & Next"); ?></button>
+                    <?php if ($goToNext): ?>
+                        <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, true);" <?php if ($check->isRunning) echo "disabled"; ?>><?php echo Yii::t("app", "Save & Next"); ?></button>
+                    <?php endif; ?>
                 </td>
             </tr>
         <?php endif; ?>
     </tbody>
 </table>
 <script>
-    $.each($('.html_content'), function () {
-        user.check.enableEditor($(this).attr('id'));
-    });
+    $(function () {
+        $.each($('.html_content'), function () {
+            user.check.enableEditor($(this).attr('id'));
+        });
 
-    $('#TargetCheckEditForm_' + <?php echo $check->id; ?> + '_result').unbind('change input propertychange');
-    $('#TargetCheckEditForm_' + <?php echo $check->id; ?> + '_result').bind('change input propertychange', function () {
-        var val = $(this).val();
-        var id = $(this).attr('id');
+        $('#TargetCheckEditForm_' + <?php echo $check->id; ?> + '_result').unbind('change input propertychange');
+        $('#TargetCheckEditForm_' + <?php echo $check->id; ?> + '_result').bind('change input propertychange', function () {
+            var val = $(this).val();
+            var id = $(this).attr('id');
 
-        if ($(this).val().isHTML()) {
-            user.check.enableEditor(id);
-        }
+            if ($(this).val().isHTML()) {
+                user.check.enableEditor(id);
+            }
+        });
+        var id = <?= $check->id ?>;
+        var form = $("div.check-form[data-type=check][data-id=" + id + "]");
+
+        $(".wysiwyg", form).ckeditor();
+        user.check.initTargetCheckAttachmentUploadForms(id);
+        user.check.initAutosave(id);
     });
 </script>

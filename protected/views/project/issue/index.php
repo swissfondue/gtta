@@ -16,16 +16,68 @@
                     <tbody>
                         <tr>
                             <th class="name"><?= Yii::t("app", "Name"); ?></th>
-                            <th class="time-logged"><?= Yii::t("app", "Assets"); ?></th>
+                            <th class="status"><?= Yii::t("app", "Status"); ?></th>
+                            <th><?= Yii::t("app", "Assets"); ?></th>
                         </tr>
                         <?php foreach ($issues as $issue): ?>
                             <tr data-id="<?= $issue->id; ?>" data-control-url="<?= $this->createUrl("project/controlissue"); ?>">
                                 <td class="name">
                                     <a href="<?= $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id]); ?>">
-                                        <?= CHtml::encode($issue->name); ?>
+                                        <?= CHtml::encode($issue->check->name); ?>
                                     </a>
                                 </td>
-                                <td class="time-logged">
+                                <td>
+                                    <?php
+                                        switch ($issue->highestRating) {
+                                            case TargetCheck::RATING_HIGH_RISK:
+                                                $label = Yii::t("app", "High");
+                                                $ratingClass = "label-high-risk";
+
+                                                break;
+
+                                            case TargetCheck::RATING_MED_RISK:
+                                                $label = Yii::t("app", "Medium");
+                                                $ratingClass = "label-med-risk";
+
+                                                break;
+
+                                            case TargetCheck::RATING_LOW_RISK:
+                                                $label = Yii::t("app", "Low");
+                                                $ratingClass = "label-low-risk";
+
+                                                break;
+
+                                            case TargetCheck::RATING_INFO:
+                                                $ratingClass = "label-info";
+                                                $label = Yii::t("app", "Info");
+
+                                                break;
+
+                                            case TargetCheck::RATING_NONE:
+                                                $label = Yii::t("app", "None");
+                                                $ratingClass = "";
+
+                                                break;
+
+                                            case TargetCheck::RATING_HIDDEN:
+                                                $label = Yii::t("app", "Hidden");
+                                                $ratingClass = "";
+
+                                                break;
+
+                                            case TargetCheck::RATING_NO_VULNERABILITY:
+                                                $label = Yii::t("app", "No Vulnerability");
+                                                $ratingClass = "";
+
+                                                break;
+
+                                            default:
+                                                break;
+                                        }
+                                    ?>
+                                    <span class="label <?= $ratingClass ?>"><?= $label ?></span>
+                                </td>
+                                <td>
                                     <?= count($issue->evidences); ?>
                                 </td>
                                 <?php if (User::checkRole(User::ROLE_ADMIN)): ?>

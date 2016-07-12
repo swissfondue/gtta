@@ -7,13 +7,15 @@
  * @property integer $id
  * @property integer $project_id
  * @property integer $check_id
- * @property string $name
  * @property Project $property
  * @property Check $check
  * @property IssueEvidence[] $evidences
  */
 class Issue extends ActiveRecord
 {
+    // sql query column aliases
+    public $rating;
+
     /**
      * Returns the static model of the specified AR class.
      * @param string $className active record class name.
@@ -38,9 +40,8 @@ class Issue extends ActiveRecord
     public function rules()
     {
         return [
-            ["project_id, check_id, name", "required"],
+            ["project_id, check_id", "required"],
             ["project_id, check_id", "numerical", "integerOnly" => true],
-            ["name", "length", "max" => 1000],
         ];
     }
 
@@ -66,5 +67,19 @@ class Issue extends ActiveRecord
             "issue_id" => $this->id,
             "target_check_id" => $targetCheckId
         ]);
+    }
+
+    /**
+     * Get highest rating value of this issue
+     */
+    public function getHighestRating() {
+        $criteria = new CDbCriteria();
+        $criteria->join = "LEFT JOIN checks AS c ON c.id = t.check_id ";
+        $criteria->join .= "LEFT JOIN issue_evidences AS ie ON ie.issue_id = t.id ";
+        $criteria->join .= "LEFT JOIN target_checks AS tc ON tc.id = ie.target_check_id";
+        $criteria->group = "c.id";
+        $criteria->select = "MAX(tc.rating) AS rating";
+
+        return self::model()->findByPk($this->id, $criteria)->rating;
     }
 }

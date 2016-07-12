@@ -166,11 +166,7 @@ class TargetManager {
                     $referenceIds[] = $reference->reference_id;
                 }
 
-                $targetCategories = TargetCheckCategory::model()->findAllByAttributes(array(
-                    "target_id" => $target->id
-                ));
-
-                foreach ($targetCategories as $tc) {
+                foreach ($target->_categories as $tc) {
                     $categoryIds[] = $tc->check_category_id;
                 }
 

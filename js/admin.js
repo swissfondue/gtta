@@ -345,10 +345,12 @@ function Admin()
         this.showIssueAddPopup = function () {
             var modal = $("#issue-check-select-dialog");
             var list = modal.find("table.check-list");
-            modal.find(".issue-search-query").val("");
+            var field = modal.find(".issue-search-query");
+            field.val("");
             list.empty();
             modal.find(".no-search-result").hide();
             modal.modal();
+            field.focus();
         };
 
         /**
@@ -357,10 +359,11 @@ function Admin()
         this.showTargetAddPopup = function () {
             var modal = $("#target-select-dialog");
             var list = modal.find("table.target-list");
-            modal.find(".target-search-query").val("");
+            var field = modal.find(".target-search-query").val("");
             list.empty();
             modal.find(".no-search-result").hide();
             modal.modal();
+            field.focus();
         };
 
         /**
@@ -505,7 +508,7 @@ function Admin()
                             $.each(targets, function (key, value) {
                                 link = $("<a>")
                                     .attr("href", value.url)
-                                    .text(value.ip);
+                                    .text(value.ip + " — " + value.host);
 
                                 if (value.ip.toLowerCase().indexOf(query.toLowerCase()) != -1) {
                                     link = $("<b>").append(link);
@@ -535,6 +538,295 @@ function Admin()
                     }
                 });
             }, _issue.searchTimeout);
+        };
+
+        this.evidence = new function () {
+            var _evidence = this;
+
+            this.runningChecks = [];
+            this.updateIteration = 0;
+
+            /**
+             * Start evidence
+             * @param url
+             * @param id
+             */
+            this.start = function (url, id) {
+                $.ajax({
+                    dataType: 'json',
+                    url: url,
+                    timeout: system.ajaxTimeout,
+                    type: 'POST',
+
+                    data: {
+                        'EntryControlForm[operation]': "start",
+                        'EntryControlForm[id]': id,
+                        'YII_CSRF_TOKEN': system.csrf
+                    },
+
+                    success: function (data, textStatus) {
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        var row = $("[data-target-check-id=" + id + "]");
+
+                        row.find(".run-info .check-time").html("00:00");
+                        row.find(".start-button").addClass("hide");
+                        row.find(".stop-button").removeClass("hide");
+                        row.find(".start-button", ".stop-button").prop("disabled", true);
+
+
+                        $(".loader-image").hide();
+
+                        _evidence.runningChecks.push({
+                            id: id,
+                            time: -1,
+                            result: ""
+                        });
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    }
+                });
+            };
+
+            /**
+             * Stop evidence
+             * @param url
+             * @param id
+             */
+            this.stop = function (url, id) {
+                $.ajax({
+                    dataType: 'json',
+                    url: url,
+                    timeout: system.ajaxTimeout,
+                    type: 'POST',
+
+                    data: {
+                        'EntryControlForm[operation]': "stop",
+                        'EntryControlForm[id]': id,
+                        'YII_CSRF_TOKEN': system.csrf
+                    },
+
+                    success: function (data, textStatus) {
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        var row = $("#[data-target-check-id=" + id + "]");
+
+                        row.find(".run-info .check-time").empty();
+                        row.find(".run-info .run-buttons").append(
+                            $("<a>")
+                                .attr("href", "#start")
+                                .attr("title", system.translate("Start"))
+                                .click(function () {
+                                    _evidence.start(url, id);
+                                }),
+                            $("<i>")
+                                .attr("class", "icon icon-play")
+                        );
+
+                        $('.loader-image').hide();
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        _evidence.setLoaded(id, custom);
+                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                    }
+                });
+            };
+
+            /**
+             * Update status of running checks
+             * @param url
+             */
+            this.update = function (url) {
+                var i, k;
+
+                if (_evidence.runningChecks.length > 0) {
+                    _evidence.updateIteration++;
+                }
+
+                for (i = 0; i < _evidence.runningChecks.length; i++) {
+                    var headingRow, minutes, seconds, time;
+
+                    var check = _evidence.runningChecks[i];
+                    var row = $("#[data-target-check-id=" + check.id + "]");
+
+                    headingRow = $("div.check-header[data-type=check][data-id=" + check.id + "]");
+
+                    if (check.time > -1) {
+                        check.time++;
+
+                        minutes = 0;
+                        seconds = check.time;
+                    } else {
+                        minutes = 0;
+                        seconds = 0;
+                    }
+
+                    if (seconds > 59) {
+                        minutes = Math.floor(seconds / 60);
+                        seconds = seconds - (minutes * 60);
+                    }
+
+                    row.find(".run-info .check-time").html(minutes.zeroPad(2) + ":" + seconds.zeroPad(2));
+                }
+
+                if (_evidence.updateIteration > 5) {
+                    var checkIds = [];
+
+                    _evidence.updateIteration = 0;
+
+                    for (i = 0; i < _evidence.runningChecks.length; i++) {
+                        checkIds.push(_evidence.runningChecks[i].id);
+                    }
+
+                    data = [];
+                    data.push({ name : "TargetCheckUpdateForm[checks]", value : checkIds.join(",") })
+                    data.push({ name : "YII_CSRF_TOKEN",                value : system.csrf });
+
+                    $.ajax({
+                        dataType : "json",
+                        url      : url,
+                        timeout  : system.ajaxTimeout,
+                        type     : "POST",
+                        data     : data,
+
+                        success : function (data, textStatus) {
+                            $(".loader-image").hide();
+
+                            if (data.status == "error") {
+                                system.addAlert("error", data.errorText);
+                                return;
+                            }
+
+                            data = data.data;
+
+                            if (data.checks) {
+                                for (i = 0; i < data.checks.length; i++) {
+                                    var check, checkIdx;
+
+                                    check = data.checks[i];
+                                    var row = $("#[data-target-check-id=" + check.id + "]");
+
+                                    row.find(".evidence-field field-value").val(check.poc);
+
+                                    for (k = 0; k < _evidence.runningChecks.length; k++) {
+                                        var innerCheck = _evidence.runningChecks[k];
+
+                                        if (innerCheck.id == check.id) {
+                                            checkIdx = k;
+                                            innerCheck.time = check.time;
+
+                                            break;
+                                        }
+                                    }
+
+                                    if (check.finished) {
+                                        _evidence.runningChecks.splice(checkIdx, 1);
+
+                                        row.find(".run-info .check-time").empty();
+                                    }
+                                }
+                            }
+                        },
+
+                        error : function(jqXHR, textStatus, e) {
+                            $(".loader-image").hide();
+                            system.addAlert("error", system.translate("Request failed, please try again."));
+                        },
+
+                        beforeSend : function (jqXHR, settings) {
+                            $(".loader-image").show();
+                        }
+                    });
+
+                }
+            };
+
+            /**
+             * Get running check list
+             * @param url
+             */
+            this.getRunningChecks = function (url) {
+                $.ajax({
+                    dataType: "json",
+                    url: url,
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+                    data: {
+                        "YII_CSRF_TOKEN": system.csrf
+                    },
+
+                    success : function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        if (data.data.checks) {
+                            $.each(data.data.checks, function (key, value) {
+                                var exists =_check.runningChecks.filter(function (obj) {
+                                    return obj.id == value["id"]
+                                });
+
+                                if (!exists.length) {
+                                    var row = $("[data-target-check-id=" + id + "]");
+                                    row.find(".start-button").addClass("hide");
+                                    row.find(".stop-button").removeClass("hide");
+
+                                    actions.append(
+                                        $("<a>")
+                                            .attr("href", "#stop")
+                                            .attr("title", system.translate('Stop'))
+                                            .click(function () {
+                                                user.check.stop(value["id"])
+                                            })
+                                            .append(
+                                            $("<i>")
+                                                .addClass("icon icon-stop")
+                                        ),
+                                        " &nbsp; ",
+                                        $("<span>")
+                                            .addClass("disabled")
+                                            .append(
+                                            $("<i>")
+                                                .addClass("icon icon-refresh")
+                                                .attr("title", system.translate("Reset"))
+                                        )
+                                    );
+
+                                    _check.runningChecks.push({
+                                        "id" : value["id"],
+                                        "time" : value["time"]
+                                    });
+                                }
+                            });
+                        }
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend : function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+            };
         };
     };
 

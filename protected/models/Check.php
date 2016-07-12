@@ -9,8 +9,6 @@
  * @property string $name
  * @property boolean $automated
  * @property boolean $multiple_solutions
- * @property string $protocol
- * @property integer $port
  * @property integer $reference_id
  * @property string $reference_code
  * @property string $reference_url
@@ -210,7 +208,7 @@ class Check extends ActiveRecord {
      * @return mixed|null
      * @throws Exception
      */
-    public function getAppProto() {
+    public function getApplicationProtocol() {
         return $this->_getFieldValue(GlobalCheckField::FIELD_APPLICATION_PROTOCOL);
     }
 
@@ -219,7 +217,7 @@ class Check extends ActiveRecord {
      * @return mixed|null
      * @throws Exception
      */
-    public function getTransportProto() {
+    public function getTransportProtocol() {
         return $this->_getFieldValue(GlobalCheckField::FIELD_TRANSPORT_PROTOCOL);
     }
 
@@ -278,7 +276,7 @@ class Check extends ActiveRecord {
             "name" => $language ? $translate->name : $this->name,
             "automated" => $this->automated,
             "multiple_solutions" => $this->multiple_solutions,
-            "protocol" => $this->protocol,
+            "protocol" => $this->applicationProtocol,
             "port" => $this->port,
             "reference_id" => $this->reference_id,
             "reference_code" => $this->reference_code,

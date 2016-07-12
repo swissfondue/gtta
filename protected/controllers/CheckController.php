@@ -197,8 +197,7 @@ class CheckController extends Controller
 		$model = new CheckCategoryEditForm();
         $model->localizedItems = array();
 
-        if (!$newRecord)
-        {
+        if (!$newRecord) {
             $model->name = $category->name;
 
             $categoryL10n = CheckCategoryL10n::model()->findAllByAttributes(array(

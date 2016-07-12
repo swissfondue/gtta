@@ -2989,11 +2989,6 @@ class ReportController extends Controller {
                 $rating = 0;
                 $checkCount = 0;
 
-                // get all categories
-                $categories = TargetCheckCategory::model()->findAllByAttributes(array(
-                    'target_id' => $target->id
-                ));
-
                 // get all references (they are the same across all target categories)
                 $referenceIds = array();
 
@@ -3007,7 +3002,7 @@ class ReportController extends Controller {
 
                 $checksData = array();
 
-                foreach ($categories as $category) {
+                foreach ($target->_categories as $category) {
                     $controls = CheckControl::model()->with(array(
                         "customChecks" => array(
                             "alias" => "custom",
@@ -3703,11 +3698,7 @@ class ReportController extends Controller {
                 $referenceIds[] = $reference->reference_id;
             }
 
-            $categories = TargetCheckCategory::model()->findAllByAttributes(
-                array('target_id' => $target->id )
-            );
-
-            foreach ($categories as $category) {
+            foreach ($target->_categories as $category) {
                 $controlIds = array();
 
                 $controls = CheckControl::model()->findAllByAttributes(array(

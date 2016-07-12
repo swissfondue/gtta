@@ -79,12 +79,13 @@ return array(
     // project issues
     "project/<id:\d+>/issues" => "project/issues",
     "project/<id:\d+>/check/<check:\d+>/bind" => "project/bindissue",
-    "project/<id:\d+>/issue/<issue:\d+>/edit" => "project/editissue",
     "project/<id:\d+>/issue/<issue:\d+>" => "project/issue",
     "project/issue/control" => "project/controlissue",
     "project/<id:\d+>/check/search" => "project/searchchecks",
-    "issue/<issue:\d+>/target/search" => "project/searchtargets",
-    "project/<id:\d+>/issue/<issue:\d+>/evidence/<evidence:\d+>" => "project/editevidence",
+    "project/<id:\d+>/issue/<issue:\d+>/target/search" => "project/searchtargets",
+    "project/<id:\d+>/issue/<issue:\d+>/evidence/<evidence:\d+>" => "project/evidence",
+    "project/<id:\d+>/issue/<issue:\d+>/checks/update" => "project/updateissuechecks",
+    "project/<id:\d+>/issue/<issue:\d+>/checks/running" => "project/issuerunningchecks",
 
     // custom checks
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/custom-check/save" => "project/savecustomcheck",
