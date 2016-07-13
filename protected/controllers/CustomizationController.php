@@ -14,8 +14,8 @@ class CustomizationController extends Controller
             "https",
             "checkAuth",
             "checkAdmin",
-            "ajaxOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput, controlscript",
-            "postOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput, controlscript"
+            "ajaxOnly + controlcheckfield",
+            "postOnly + controlcheckfield"
         );
     }
 

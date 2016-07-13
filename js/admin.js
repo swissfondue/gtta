@@ -704,7 +704,7 @@ function Admin()
          * @param callback
          */
         this.delete = function (url, id, callback) {
-            if (confirm(system.translate('Are you sure that you want to delete this issue?'))) {
+            if (confirm(system.translate("Are you sure that you want to delete this issue?"))) {
                 _issue.control(url, id, "delete", callback);
             }
         };
@@ -770,15 +770,15 @@ function Admin()
              */
             this.start = function (url, id) {
                 $.ajax({
-                    dataType: 'json',
+                    dataType: "json",
                     url: url,
                     timeout: system.ajaxTimeout,
-                    type: 'POST',
+                    type: "POST",
 
                     data: {
-                        'EntryControlForm[operation]': "start",
-                        'EntryControlForm[id]': id,
-                        'YII_CSRF_TOKEN': system.csrf
+                        "EntryControlForm[operation]": "start",
+                        "EntryControlForm[id]": id,
+                        "YII_CSRF_TOKEN": system.csrf
                     },
 
                     success: function (data, textStatus) {
@@ -807,7 +807,7 @@ function Admin()
                     },
 
                     error: function(jqXHR, textStatus, e) {
-                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                        system.addAlert("error", system.translate("Request failed, please try again."));
                     }
                 });
             };
@@ -819,15 +819,15 @@ function Admin()
              */
             this.stop = function (url, id) {
                 $.ajax({
-                    dataType: 'json',
+                    dataType: "json",
                     url: url,
                     timeout: system.ajaxTimeout,
-                    type: 'POST',
+                    type: "POST",
 
                     data: {
-                        'EntryControlForm[operation]': "stop",
-                        'EntryControlForm[id]': id,
-                        'YII_CSRF_TOKEN': system.csrf
+                        "EntryControlForm[operation]": "stop",
+                        "EntryControlForm[id]": id,
+                        "YII_CSRF_TOKEN": system.csrf
                     },
 
                     success: function (data, textStatus) {
@@ -843,12 +843,12 @@ function Admin()
                         row.find(".start-button").addClass("hide");
                         row.find(".stop-button").removeClass("hide").prop("disabled", true);
 
-                        $('.loader-image').hide();
+                        $(".loader-image").hide();
                     },
 
                     error: function(jqXHR, textStatus, e) {
                         _evidence.setLoaded(id, custom);
-                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                        system.addAlert("error", system.translate("Request failed, please try again."));
                     }
                 });
             };
@@ -860,7 +860,7 @@ function Admin()
              * @param callback
              */
             this.delete = function (url, id, callback) {
-                if (confirm(system.translate('Are you sure that you want to delete this evidence?'))) {
+                if (confirm(system.translate("Are you sure that you want to delete this evidence?"))) {
                     _issue.control(url, id, "delete", callback);
                 }
             };

@@ -4,12 +4,6 @@
 
 <hr>
 
-<form class="hide" action="<?= $this->createUrl("project/controlissue", ["id" => $project->id, "issue" => $issue->id]) ?>" method="POST">
-    <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
-    <input type="hidden" name="operation" />
-    <input type="hidden" name="id" />
-</form>
-
 <div class="container">
     <div class="row">
         <?= $this->renderPartial("partial/left-menu", ["project" => $project]) ?>
@@ -144,13 +138,19 @@
                                                 </tr>
                                                 </tbody>
                                             </table>
-                                            <?php if ($tc->result): ?>
                                                 <div class="field-block">
                                                     <b><?= Yii::t("app", "Result") ?></b>
                                                     <br/>
-                                                    <?= $tc->result ?>
+                                                    <div class="field-value">
+                                                        <?php if ($tc->result): ?>
+                                                            <?= $tc->result ?>
+                                                            <br/>
+                                                        <?php else: ?>
+                                                            <i class="icon icon-minus"></i>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <br/>
                                                 </div>
-                                            <?php endif; ?>
                                                 <div class="field-block evidence-field poc">
                                                     <b><?= Yii::t("app", "PoC") ?></b>
                                                     <br/>
@@ -161,16 +161,25 @@
                                                             <i class="icon icon-minus"></i>
                                                         <?php endif; ?>
                                                     </div>
+                                                    <br/>
                                                 </div>
-                                            <?php if ($tc->solution): ?>
                                                 <div class="field-block">
                                                     <b><?= Yii::t("app", "Solution") ?></b>
                                                     <br/>
-                                                    <?= $tc->solutionTitle ?>
-                                                    <br>
-                                                    <?= $tc->solution ?>
+                                                    <?php if (!count($tc->solutions) && !$tc->solution && !$tc->solutionTitle): ?>
+                                                        <i class="icon icon-minus"></i>
+                                                    <?php elseif (count($tc->solutions)): ?>
+                                                        <?php foreach ($tc->solutions as $solution): ?>
+                                                            <?= $solution->solution->title ?>
+                                                            <br>
+                                                            <?= $solution->solution->solution ?>
+                                                        <?php endforeach; ?>
+                                                    <?php else: ?>
+                                                        <?= $tc->solutionTitle ?>
+                                                        <br>
+                                                        <?= $tc->solution ?>
+                                                    <?php endif; ?>
                                                 </div>
-                                            <?php endif; ?>
                                         </div>
 
                                         <hr>

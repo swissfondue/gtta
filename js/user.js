@@ -1023,9 +1023,6 @@ function User()
 
                 error : function(jqXHR, textStatus, e) {
                     _check.setLoaded(id);
-
-                    console.log(jqXHR);
-
                     system.addAlert('error', system.translate('Request failed, please try again.'));
                 },
 

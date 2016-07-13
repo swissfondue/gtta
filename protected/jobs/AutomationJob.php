@@ -396,8 +396,6 @@ class AutomationJob extends BackgroundJob {
         }
 
         foreach ($scripts as $script) {
-            error_log("STARTING");
-
             if ($check->result) {
                 $check->appendPoc("\n");
             }
