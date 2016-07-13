@@ -5028,7 +5028,6 @@ class ProjectController extends Controller {
         ]);
 
         if (!$targetCheck) {
-            error_log("NOT EXISTS");
             $category = TargetCheckCategory::model()->findByAttributes([
                 "check_category_id" => $check->control->check_category_id,
                 "target_id" => $target->id
@@ -5064,7 +5063,6 @@ class ProjectController extends Controller {
                 "status" => TargetCheck::STATUS_OPEN,
                 "rating" => TargetCheck::RATING_NONE
             ]);
-            $targetCheck->refresh();
 
             foreach ($check->scripts as $script) {
                 $targetCheckScript = new TargetCheckScript();
@@ -5103,5 +5101,51 @@ class ProjectController extends Controller {
         $evidence->refresh();
 
         $this->redirect(["project/issue", "id" => $project->id, "issue" => $issue->id]);
+    }
+
+    /**
+     * Control evidence
+     */
+    public function actionControlEvidence() {
+        $response = new AjaxResponse();
+
+        try {
+            $form = new EntryControlForm();
+            $form->attributes = $_POST["EntryControlForm"];
+
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $id = $form->id;
+            $evidence = IssueEvidence::model()->findByPk($id);
+
+            if ($evidence === null) {
+                throw new CHttpException(404, Yii::t("app", "Evidence not found."));
+            }
+
+            switch ($form->operation) {
+                case "delete":
+                    $evidence->delete();
+
+                    break;
+
+                default:
+                    throw new CHttpException(403, Yii::t("app", "Unknown operation."));
+
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
     }
 }

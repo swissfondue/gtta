@@ -31,6 +31,7 @@ class TargetCheckManager {
             }
 
             $targetCheck->save();
+            $targetCheck->refresh();
         } catch (Exception $e) {
             throw new Exception("Can't create check.");
         }

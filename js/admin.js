@@ -332,6 +332,9 @@ function Admin()
     this.issue = new function () {
         var _issue = this;
 
+        this.runningChecks = [];
+        this.updateIteration = 0;
+
         /**
          * Timeout before keypress & search
          * @type {number}
@@ -540,11 +543,225 @@ function Admin()
             }, _issue.searchTimeout);
         };
 
+        /**
+         * Update status of running checks
+         * @param url
+         */
+        this.update = function (url) {
+            var i, k;
+
+            if (_issue.runningChecks.length > 0) {
+                _issue.updateIteration++;
+            }
+
+            for (i = 0; i < _issue.runningChecks.length; i++) {
+                var minutes, seconds, time;
+
+                var check = _issue.runningChecks[i];
+                var row = $("[data-target-check-id=" + check.id + "]");
+
+                if (check.time > -1) {
+                    check.time++;
+
+                    minutes = 0;
+                    seconds = check.time;
+                } else {
+                    minutes = 0;
+                    seconds = 0;
+                }
+
+                if (seconds > 59) {
+                    minutes = Math.floor(seconds / 60);
+                    seconds = seconds - (minutes * 60);
+                }
+
+                row.find(".run-info .check-time").html(minutes.zeroPad(2) + ":" + seconds.zeroPad(2));
+            }
+
+            if (_issue.updateIteration > 5) {
+                $.ajax({
+                    dataType : "json",
+                    url      : url,
+                    timeout  : system.ajaxTimeout,
+                    type     : "POST",
+                    data     : {
+                        "YII_CSRF_TOKEN": system.csrf
+                    },
+
+                    success : function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        if (data.checks) {
+                            for (i = 0; i < data.checks.length; i++) {
+                                var check;
+
+                                check = data.checks[i];
+                                var row = $("[data-target-check-id=" + check.id + "]");
+
+                                if (check.poc) {
+                                    row.find(".evidence-field.poc .field-value").text(check.poc);
+                                }
+
+                                if (check.finished) {
+                                    var innerCheck = _issue.runningChecks.filter(function (obj) {
+                                        return obj.id == check.id
+                                    });
+
+                                    if (innerCheck.length) {
+                                        _issue.runningChecks.splice(_issue.runningChecks.indexOf(innerCheck), 1);
+                                    }
+
+                                    row.find(".start-button").removeClass("hide");
+                                    row.find(".stop-button").addClass("hide");
+                                    row.find(".start-button", ".stop-button").prop("disabled", true);
+
+                                    row.find(".run-info .check-time").empty();
+                                }
+                            }
+                        }
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend : function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+
+            }
+        };
+
+        /**
+         * Get running check list
+         * @param url
+         */
+        this.getRunningChecks = function (url) {
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+                data: {
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    if (data.data.checks) {
+                        $.each(data.data.checks, function (key, value) {
+                            var exists = _issue.runningChecks.filter(function (obj) {
+                                return obj.id == value.id
+                            });
+
+                            if (!exists.length) {
+                                var row = $("[data-target-check-id=" + value["id"] + "]");
+
+                                row.find(".start-button").addClass("hide");
+                                row.find(".stop-button").removeClass("hide");
+
+                                _issue.runningChecks.push({
+                                    "id" : value.id,
+                                    "time" : value.time
+                                });
+                            } else {
+                                exists[0].time = value.time;
+                            }
+                        });
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
+         * Delete issue
+         * @param url
+         * @param id
+         * @param callback
+         */
+        this.delete = function (url, id, callback) {
+            if (confirm(system.translate('Are you sure that you want to delete this issue?'))) {
+                _issue.control(url, id, "delete", callback);
+            }
+        };
+
+        /**
+         * Control issue
+         * @param url
+         * @param id
+         * @param operation
+         * @param callback
+         */
+        this.control = function (url, id, operation, callback) {
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data: {
+                    "EntryControlForm[operation]": operation,
+                    "EntryControlForm[id]": id,
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    data = data.data;
+
+                    if (operation == "delete") {
+                        if (callback) {
+                            callback();
+                        }
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
+         * Evidence object
+         */
         this.evidence = new function () {
             var _evidence = this;
-
-            this.runningChecks = [];
-            this.updateIteration = 0;
 
             /**
              * Start evidence
@@ -582,7 +799,7 @@ function Admin()
 
                         $(".loader-image").hide();
 
-                        _evidence.runningChecks.push({
+                        _issue.runningChecks.push({
                             id: id,
                             time: -1,
                             result: ""
@@ -621,19 +838,10 @@ function Admin()
 
                         data = data.data;
 
-                        var row = $("#[data-target-check-id=" + id + "]");
+                        var row = $("[data-target-check-id=" + id + "]");
 
-                        row.find(".run-info .check-time").empty();
-                        row.find(".run-info .run-buttons").append(
-                            $("<a>")
-                                .attr("href", "#start")
-                                .attr("title", system.translate("Start"))
-                                .click(function () {
-                                    _evidence.start(url, id);
-                                }),
-                            $("<i>")
-                                .attr("class", "icon icon-play")
-                        );
+                        row.find(".start-button").addClass("hide");
+                        row.find(".stop-button").removeClass("hide").prop("disabled", true);
 
                         $('.loader-image').hide();
                     },
@@ -646,186 +854,15 @@ function Admin()
             };
 
             /**
-             * Update status of running checks
+             * Delete evidence
              * @param url
+             * @param id
+             * @param callback
              */
-            this.update = function (url) {
-                var i, k;
-
-                if (_evidence.runningChecks.length > 0) {
-                    _evidence.updateIteration++;
+            this.delete = function (url, id, callback) {
+                if (confirm(system.translate('Are you sure that you want to delete this evidence?'))) {
+                    _issue.control(url, id, "delete", callback);
                 }
-
-                for (i = 0; i < _evidence.runningChecks.length; i++) {
-                    var headingRow, minutes, seconds, time;
-
-                    var check = _evidence.runningChecks[i];
-                    var row = $("#[data-target-check-id=" + check.id + "]");
-
-                    headingRow = $("div.check-header[data-type=check][data-id=" + check.id + "]");
-
-                    if (check.time > -1) {
-                        check.time++;
-
-                        minutes = 0;
-                        seconds = check.time;
-                    } else {
-                        minutes = 0;
-                        seconds = 0;
-                    }
-
-                    if (seconds > 59) {
-                        minutes = Math.floor(seconds / 60);
-                        seconds = seconds - (minutes * 60);
-                    }
-
-                    row.find(".run-info .check-time").html(minutes.zeroPad(2) + ":" + seconds.zeroPad(2));
-                }
-
-                if (_evidence.updateIteration > 5) {
-                    var checkIds = [];
-
-                    _evidence.updateIteration = 0;
-
-                    for (i = 0; i < _evidence.runningChecks.length; i++) {
-                        checkIds.push(_evidence.runningChecks[i].id);
-                    }
-
-                    data = [];
-                    data.push({ name : "TargetCheckUpdateForm[checks]", value : checkIds.join(",") })
-                    data.push({ name : "YII_CSRF_TOKEN",                value : system.csrf });
-
-                    $.ajax({
-                        dataType : "json",
-                        url      : url,
-                        timeout  : system.ajaxTimeout,
-                        type     : "POST",
-                        data     : data,
-
-                        success : function (data, textStatus) {
-                            $(".loader-image").hide();
-
-                            if (data.status == "error") {
-                                system.addAlert("error", data.errorText);
-                                return;
-                            }
-
-                            data = data.data;
-
-                            if (data.checks) {
-                                for (i = 0; i < data.checks.length; i++) {
-                                    var check, checkIdx;
-
-                                    check = data.checks[i];
-                                    var row = $("#[data-target-check-id=" + check.id + "]");
-
-                                    row.find(".evidence-field field-value").val(check.poc);
-
-                                    for (k = 0; k < _evidence.runningChecks.length; k++) {
-                                        var innerCheck = _evidence.runningChecks[k];
-
-                                        if (innerCheck.id == check.id) {
-                                            checkIdx = k;
-                                            innerCheck.time = check.time;
-
-                                            break;
-                                        }
-                                    }
-
-                                    if (check.finished) {
-                                        _evidence.runningChecks.splice(checkIdx, 1);
-
-                                        row.find(".run-info .check-time").empty();
-                                    }
-                                }
-                            }
-                        },
-
-                        error : function(jqXHR, textStatus, e) {
-                            $(".loader-image").hide();
-                            system.addAlert("error", system.translate("Request failed, please try again."));
-                        },
-
-                        beforeSend : function (jqXHR, settings) {
-                            $(".loader-image").show();
-                        }
-                    });
-
-                }
-            };
-
-            /**
-             * Get running check list
-             * @param url
-             */
-            this.getRunningChecks = function (url) {
-                $.ajax({
-                    dataType: "json",
-                    url: url,
-                    timeout: system.ajaxTimeout,
-                    type: "POST",
-                    data: {
-                        "YII_CSRF_TOKEN": system.csrf
-                    },
-
-                    success : function (data, textStatus) {
-                        $(".loader-image").hide();
-
-                        if (data.status == "error") {
-                            system.addAlert("error", data.errorText);
-                            return;
-                        }
-
-                        if (data.data.checks) {
-                            $.each(data.data.checks, function (key, value) {
-                                var exists =_check.runningChecks.filter(function (obj) {
-                                    return obj.id == value["id"]
-                                });
-
-                                if (!exists.length) {
-                                    var row = $("[data-target-check-id=" + id + "]");
-                                    row.find(".start-button").addClass("hide");
-                                    row.find(".stop-button").removeClass("hide");
-
-                                    actions.append(
-                                        $("<a>")
-                                            .attr("href", "#stop")
-                                            .attr("title", system.translate('Stop'))
-                                            .click(function () {
-                                                user.check.stop(value["id"])
-                                            })
-                                            .append(
-                                            $("<i>")
-                                                .addClass("icon icon-stop")
-                                        ),
-                                        " &nbsp; ",
-                                        $("<span>")
-                                            .addClass("disabled")
-                                            .append(
-                                            $("<i>")
-                                                .addClass("icon icon-refresh")
-                                                .attr("title", system.translate("Reset"))
-                                        )
-                                    );
-
-                                    _check.runningChecks.push({
-                                        "id" : value["id"],
-                                        "time" : value["time"]
-                                    });
-                                }
-                            });
-                        }
-                    },
-
-                    error : function(jqXHR, textStatus, e) {
-                        $(".loader-image").hide();
-                        system.addAlert("error", system.translate("Request failed, please try again."));
-                    },
-
-                    beforeSend : function (jqXHR, settings) {
-                        $(".loader-image").show();
-                    }
-                });
             };
         };
     };

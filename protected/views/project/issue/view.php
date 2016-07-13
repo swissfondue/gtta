@@ -17,7 +17,7 @@
             <div id="issue-information">
                 <span style="font-size: 20px;"><?= Yii::t("app", "Issue Information") ?></span>&nbsp;—&nbsp;
                 <a href="<?= $this->createUrl("check/editcheck", ["id" => $check->control->check_category_id, "control" => $check->check_control_id, "check" => $check->id]) ?>"><?= Yii::t("app", "Edit") ?></a>
-                <a class="red" href="#" onclick="alert("deleting")"><?= Yii::t("app", "Delete") ?></a>
+                <a class="red" href="#" onclick="admin.issue.delete('<?= $this->createUrl("project/controlissue") ?>', <?= $issue->id ?>, function () { system.redirect('<?= $this->createUrl("project/issues", ["id" => $project->id]) ?>') })"><?= Yii::t("app", "Delete") ?></a>
                 <br/><br/>
                 <div class="field-block">
                     <h3><?= Yii::t("app", "Title") ?></h3>
@@ -95,15 +95,17 @@
                                         <div class="control-group">
                                             <span style="font-size: 16px; margin-left: 5px;"><?= Yii::t("app", "Evidence for this instance") ?></span>&nbsp;—&nbsp;
                                             <a href="<?= $this->createUrl("project/evidence", ["id" => $project->id, "issue" => $issue->id, "evidence" => $evidence->id]) ?>"><?= Yii::t("app", "Edit") ?></a>
-                                            <a class="red" href="<?= $this->createUrl("project/controlevidence", ["id" => $project->id, "issue" => $issue->id, "evidence" => $issue->getEvidence($tc->id)->id]) ?>"><?= Yii::t("app", "Delete") ?></a>
+                                            <a class="red" href="#" onclick="admin.issue.evidence.delete('<?= $this->createUrl("project/controlevidence") ?>', <?= $evidence->id ?>, function () { system.redirect('<?= $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id]) ?>') });"><?= Yii::t("app", "Delete") ?></a>
 
                                             <?php if ($tc->check->automated): ?>
-                                                <div class="run-buttons" style="float:right">
-                                                    <a href="#start" title="<?php echo Yii::t("app", "Start"); ?>" class="start-button <?= $tc->isRunning ? "hide" : "" ?>" onclick="admin.issue.evidence.start('<?= $this->createUrl("project/controlcheck", ["id" => $project->id, "target" => $tc->target_id, "category" => $tc->check->control->check_category_id, "check" => $tc->id]); ?>', <?= $tc->id; ?>);"><i class="icon icon-play"></i></a>
-                                                    <a href="#stop" title="<?php echo Yii::t("app", "Stop"); ?>" class="stop-button <?= !$tc->isRunning ? "hide" : "" ?>" onclick="admin.issue.evidence.stop('<?= $this->createUrl("project/controlcheck", ["id" => $project->id, "target" => $tc->target_id, "category" => $tc->check->control->check_category_id, "check" => $tc->id]); ?>', <?php echo $tc->id; ?>);"><i class="icon icon-stop"></i></a>
-                                                </div>
-                                                <div class="run-info">
-                                                    <div class="check-time"></div>
+                                                <div style="float:right">
+                                                    <div class="run-info inline">
+                                                        <div class="check-time"></div>
+                                                    </div>
+                                                    <div class="run-buttons inline">
+                                                        <a href="#start" title="<?php echo Yii::t("app", "Start"); ?>" class="start-button <?= $tc->isRunning ? "hide" : "" ?>" onclick="admin.issue.evidence.start('<?= $this->createUrl("project/controlcheck", ["id" => $project->id, "target" => $tc->target_id, "category" => $tc->check->control->check_category_id, "check" => $tc->id]); ?>', <?= $tc->id; ?>);"><i class="icon icon-play"></i></a>
+                                                        <a href="#stop" title="<?php echo Yii::t("app", "Stop"); ?>" class="stop-button <?= !$tc->isRunning ? "hide" : "" ?>" onclick="admin.issue.evidence.stop('<?= $this->createUrl("project/controlcheck", ["id" => $project->id, "target" => $tc->target_id, "category" => $tc->check->control->check_category_id, "check" => $tc->id]); ?>', <?php echo $tc->id; ?>);"><i class="icon icon-stop"></i></a>
+                                                    </div>
                                                 </div>
                                             <?php endif; ?>
                                             <hr>
@@ -149,15 +151,17 @@
                                                     <?= $tc->result ?>
                                                 </div>
                                             <?php endif; ?>
-                                            <?php if ($tc->poc): ?>
-                                                <div class="field-block evidence-field">
+                                                <div class="field-block evidence-field poc">
                                                     <b><?= Yii::t("app", "PoC") ?></b>
                                                     <br/>
                                                     <div class="field-value">
-                                                        <?= $tc->poc ?>
+                                                        <?php if ($tc->poc): ?>
+                                                            <?= $tc->poc ?>
+                                                        <?php else: ?>
+                                                            <i class="icon icon-minus"></i>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </div>
-                                            <?php endif; ?>
                                             <?php if ($tc->solution): ?>
                                                 <div class="field-block">
                                                     <b><?= Yii::t("app", "Solution") ?></b>
@@ -229,11 +233,11 @@
         });
 
         setInterval(function () {
-            user.check.getRunningChecks("<?= $this->createUrl("project/runningchecks"); ?>", <?= $target->id ?>);
+            admin.issue.getRunningChecks("<?= $this->createUrl("project/issuerunningchecks", ["id" => $project->id, "issue" => $issue->id]); ?>");
         }, 1000);
 
         setInterval(function () {
-            user.check.update("<?php echo $this->createUrl("project/updatechecks", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id)); ?>");
+            admin.issue.update("<?php echo $this->createUrl("project/updateissuechecks", ["id" => $project->id, "issue" => $issue->id]); ?>");
         }, 1000);
     });
 </script>

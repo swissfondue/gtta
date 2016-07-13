@@ -643,6 +643,7 @@ class TargetManager {
         if ($query) {
             $criteria->addSearchCondition("t.description", $query, true, "AND", "ILIKE");
             $criteria->addSearchCondition("t.ip", $query, true, "OR", "ILIKE");
+            $criteria->addSearchCondition("t.host", $query, true, "OR", "ILIKE");
         }
 
         if ($exclude) {
