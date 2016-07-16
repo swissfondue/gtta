@@ -17,8 +17,9 @@ class Paginator
      */
     public function __construct($entryCount, $page)
     {
-        $this->page       = $page;
+        $this->page = $page;
         $this->entryCount = $entryCount;
+        $this->pageCount = 0;
 
         $limit = Yii::app()->params["entriesPerPage"];
 
@@ -27,23 +28,19 @@ class Paginator
         }
 
         if ($limit > 0) {
-            $this->pageCount = (int) $this->entryCount / $limit;
-        } else {
-            if ($this->entryCount) {
-                $this->pageCount = (int) $this->entryCount / $this->entryCount;
-            } else {
-                $this->pageCount = 0;
+            $this->pageCount = (int) ($this->entryCount / $limit);
+
+            if ($this->entryCount % $limit > 0) {
+                $this->pageCount += 1;
             }
         }
 
-        if ($this->entryCount % $limit > 0)
-            $this->pageCount += 1;
-
-        if ($this->pageCount == 0)
+        if ($this->pageCount == 0) {
             $this->pageCount = 1;
+        }
 
         if ($this->page > $this->pageCount) {
-            throw new CHttpException(404, 'Page not found.');
+            throw new CHttpException(404, "Page not found.");
         }
 
         $this->prevPage = 0;
