@@ -112,6 +112,22 @@ function Admin()
                 $(button).parent().remove();
             }
         };
+
+        /**
+         * Toggle field hide
+         */
+        this.toggleHiddenField = function (checkbox, name) {
+            var field = $(".field-control-" + name),
+                otherCheckboxes = $("input[type=checkbox][name=\"" + checkbox.name + "\"]");
+
+            if (checkbox.checked) {
+                otherCheckboxes.prop("checked", "checked");
+                field.slideUp();
+            } else {
+                otherCheckboxes.prop("checked", null);
+                field.slideDown();
+            }
+        };
     };
 
     /**

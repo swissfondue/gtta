@@ -403,6 +403,7 @@ class CheckManager {
             $globalFields = GlobalCheckField::model()->findAll();
         }
 
+        /** @var GlobalCheckField $gf */
         foreach ($globalFields as $gf) {
             $checkField = CheckField::model()->findByAttributes([
                 "check_id" => $check->id,
@@ -413,6 +414,7 @@ class CheckManager {
                 $checkField = new CheckField();
                 $checkField->global_check_field_id = $gf->id;
                 $checkField->check_id = $check->id;
+                $checkField->value = $gf->value;
                 $checkField->save();
 
                 foreach (Language::model()->findAll() as $l) {

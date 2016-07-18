@@ -9,6 +9,7 @@
  * @property string $name
  * @property string $title
  * @property boolean $hidden
+ * @property string $value
  */
 class GlobalCheckField extends ActiveRecord {
     /**
