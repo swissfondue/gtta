@@ -160,15 +160,35 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      * @return array|CActiveRecord|mixed|null
      */
     public function getOrderedFields() {
-        $criteria = new CDbCriteria();
-        $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
-        $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
-        $criteria->order = "gcf.sort_order ASC";
-        $criteria->addColumnCondition([
-            "t.target_check_id" => $this->id
-        ]);
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
 
-        return TargetCheckField::model()->findAll($criteria);
+        if (!$language) {
+            $language = Language::model()->findByAttributes(array(
+                "default" => true
+            ));
+        }
+
+        return TargetCheckField::model()->with([
+            "field" => [
+                "joinType" => "LEFT JOIN",
+                "with" => [
+                    "global" => [
+                        "joinType" => "LEFT JOIN",
+                        "order" => "global.sort_order ASC",
+                        "with" => [
+                            "l10n" => [
+                                "on" => "l10n.language_id = :language_id",
+                                "params" => ["language_id" => $language->id],
+                            ],
+                        ],
+                    ],
+                ],
+            ]
+        ])->findAllByAttributes([
+            "target_check_id" => $this->id
+        ]);
     }
 
     /**

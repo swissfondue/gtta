@@ -2768,26 +2768,25 @@ class ReportController extends Controller {
     /**
      * Show project report form.
      */
-    public function actionProject()
-    {
+    public function actionProject() {
         $model = new ProjectReportForm();
 
-        if (isset($_POST['ProjectReportForm'])) {
-            $model->attributes = $_POST['ProjectReportForm'];
+        if (isset($_POST["ProjectReportForm"])) {
+            $model->attributes = $_POST["ProjectReportForm"];
 
             if ($model->validate()) {
                 $this->_generateProjectReport($model);
             } else {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
         }
 
         $criteria = new CDbCriteria();
-        $criteria->order = 't.name ASC';
+        $criteria->order = "t.name ASC";
 
         if (!User::checkRole(User::ROLE_ADMIN)) {
-            $projects = ProjectUser::model()->with('project')->findAllByAttributes(array(
-                'user_id' => Yii::app()->user->id
+            $projects = ProjectUser::model()->with("project")->findAllByAttributes(array(
+                "user_id" => Yii::app()->user->id
             ));
 
             $clientIds = array();
@@ -2798,13 +2797,13 @@ class ReportController extends Controller {
                 }
             }
 
-            $criteria->addInCondition('id', $clientIds);
+            $criteria->addInCondition("id", $clientIds);
         }
 
         $clients = Client::model()->findAll($criteria);
 
         $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
+            "code" => Yii::app()->language
         ));
 
         if ($language) {
@@ -2812,42 +2811,46 @@ class ReportController extends Controller {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
+        $criteria->order = "COALESCE(l10n.name, t.name) ASC";
         $criteria->together = true;
 
         $templates = ReportTemplate::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on"       => "language_id = :language_id",
+                "params"   => array( "language_id" => $language )
             )
         ))->findAll($criteria);
+        
+        $lang = [
+            "l10n" => [
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => ["language_id" => $language]
+            ]
+        ];
 
-        $riskTemplates = RiskTemplate::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
-            )
-        ))->findAllByAttributes(
+        $riskTemplates = RiskTemplate::model()->with($lang)->findAllByAttributes(
             array(),
-            array( 'order' => 'COALESCE(l10n.name, t.name) ASC' )
+            array("order" => "COALESCE(l10n.name, t.name) ASC")
         );
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Project Report'), '');
+        $fields = GlobalCheckField::model()->with($lang)->findAll(["order" => "sort_order ASC"]);
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Project Report"), "");
 
         // display the report generation form
-        $this->pageTitle = Yii::t('app', 'Project Report');
-		$this->render('project', array(
-            'model'         => $model,
-            'clients'       => $clients,
-            'templates'     => $templates,
-            'riskTemplates' => $riskTemplates,
-            'fields'        => GlobalCheckField::model()->findAll(["order" => "sort_order ASC"]),
-            'infoChecksLocation' => array(
-                ProjectReportForm::INFO_LOCATION_TARGET   => Yii::t('app', 'in the main list'),
-                ProjectReportForm::INFO_LOCATION_TABLE    => Yii::t('app', 'in a separate table'),
-                ProjectReportForm::INFO_LOCATION_APPENDIX => Yii::t('app', 'in the appendix'),
+        $this->pageTitle = Yii::t("app", "Project Report");
+		$this->render("project", array(
+            "model"         => $model,
+            "clients"       => $clients,
+            "templates"     => $templates,
+            "riskTemplates" => $riskTemplates,
+            "fields"        => $fields,
+            "infoChecksLocation" => array(
+                ProjectReportForm::INFO_LOCATION_TARGET   => Yii::t("app", "in the main list"),
+                ProjectReportForm::INFO_LOCATION_TABLE    => Yii::t("app", "in a separate table"),
+                ProjectReportForm::INFO_LOCATION_APPENDIX => Yii::t("app", "in the appendix"),
             ),
         ));
     }

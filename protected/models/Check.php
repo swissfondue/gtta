@@ -90,10 +90,25 @@ class Check extends ActiveRecord {
      * @return array|CActiveRecord|mixed|null
      */
     public function getOrderedFields() {
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+        
         return CheckField::model()->with([
             "global" => [
                 "joinType" => "LEFT JOIN",
-                "order" => "global.sort_order ASC"
+                "order" => "global.sort_order ASC",
+                "with" => [
+                    "l10n" => [
+                        "joinType" => "LEFT JOIN",
+                        "on" => "l10n.language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    ]
+                ]
             ]
         ])->findAllByAttributes([
             "check_id" => $this->id

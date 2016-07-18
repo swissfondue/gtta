@@ -10,7 +10,7 @@
     ?>
 
     <div class="control-group <?php if ($error) print 'error'; ?>">
-        <label class="control-label" for="<?= $id ?>"><?= $field->global->localizedTitle ?></label>
+        <label class="control-label" for="<?= $id ?>"><?= $field->localizedTitle ?></label>
 
         <div class="controls">
             <div class="field-control-<?= $field->name; ?> <?php if (isset($form->hidden[$field->name]) && $form->hidden[$field->name]) echo "hide"; ?>">
