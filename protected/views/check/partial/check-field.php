@@ -31,13 +31,13 @@
                 <ul class="check-field-radio span4" data-field-name="<?= $field->global->name ?>" style="list-style-type: none; margin-left:0px;">
                     <?php if (!count($values)): ?>
                         <li class="radio-field-item">
-                            <input type="text" class="input-xlarge" />
+                            <input type="text" class="input-xlarge" placeholder="<?= Yii::t("app", "Option Text"); ?>"/>
                             <a class="link" onclick="admin.check.removeRadioFieldItem(this); return false;"><i class="icon icon-remove"></i></a>
                         </li>
                     <?php else: ?>
                         <?php foreach ($values as $value): ?>
                             <li class="radio-field-item">
-                                <input type="text" class="input-xlarge" value="<?= $value ?>" placeholder="Option Text"/>
+                                <input type="text" class="input-xlarge" value="<?= $value ?>" placeholder="<?= Yii::t("app", "Option Text"); ?>"/>
                                 <a class="link" onclick="admin.check.removeRadioFieldItem(this); return false;"><i class="icon icon-remove"></i></a>
                             </li>
                         <?php endforeach; ?>

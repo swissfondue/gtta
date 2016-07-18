@@ -422,6 +422,8 @@ class CheckManager {
                     $l10n->save();
                 }
             }
+
+            TargetCheckManager::reindexFields($checkField);
         }
     }
 }
