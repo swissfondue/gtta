@@ -43,7 +43,7 @@
         <div class="control-group">
             <div class="controls">
                 <select class="input-medium" onchange="system.paginator.itemCountChange($(this).val(), $(this).data('url'))" data-url="<?= $this->createUrl($url, array_merge($params, array('page' => 1))); ?>">
-                    <?php foreach ([-1, 20, 50, 100] as $limit): ?>
+                    <?php foreach ([20, 50, 100, -1] as $limit): ?>
                         <option id="paginator_item_count" value="<?= $limit ?>" <?php if ($limit == $this->entriesPerPage) echo 'selected'; ?>><?= $limit == -1 ? Yii::t("app", "All") : $limit; ?></option>
                     <?php endforeach; ?>
                 </select>
