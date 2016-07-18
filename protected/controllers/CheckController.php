@@ -857,8 +857,8 @@ class CheckController extends Controller
 
             $model->parseFields($check);
 
-            foreach ($check->orderedFields as $f) {
-                $model->hidden[$f->name] = $f->hidden;
+            foreach ($check->getOrderedFields() as $f) {
+                $model->hidden[$f->name] = $f->getHidden();
             }
         } else {
             $model->controlId = $control->id;
@@ -934,6 +934,7 @@ class CheckController extends Controller
 
                     if ($field->type == GlobalCheckField::TYPE_CHECKBOX) {
                         $value = false;
+                        $l = null;
 
                         foreach ($languages as $l) {
                             $value = (bool) $model->getFieldValue($field->name, $l->id);
@@ -943,7 +944,9 @@ class CheckController extends Controller
                             }
                         }
 
-                        $field->setValue($value, $l->id);
+                        if ($l) {
+                            $field->setValue($value, $l->id);
+                        }
                     } else {
                         foreach ($languages as $l) {
                             $field->setValue($model->getFieldValue($field->name, $l->id), $l->id);

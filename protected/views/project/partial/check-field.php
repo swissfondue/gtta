@@ -1,4 +1,4 @@
-<?php $hidden = $field->superHidden || $field->hidden; ?>
+<?php $hidden = $field->getHidden(); ?>
 
 <?php if (!$hidden): ?>
     <?php

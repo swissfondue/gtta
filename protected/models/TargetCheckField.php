@@ -77,12 +77,8 @@ class TargetCheckField extends ActiveRecord {
      * Check if hidden by parent
      * @return mixed
      */
-    public function getSuperHidden() {
-        if ($this->field->superHidden) {
-            return true;
-        }
-
-        return $this->field->hidden;
+    public function getHidden() {
+        return $this->field->getHidden() || $this->hidden;
     }
 
     /**

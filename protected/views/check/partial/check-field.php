@@ -1,4 +1,4 @@
-<?php if (!$field->superHidden): ?>
+<?php if (!$field->getHidden()): ?>
     <?php
         $name = sprintf("CheckEditForm[fields][%s][%s]", $language->id, $field->global->name);
         $id = sprintf("CheckEditForm_fields_%s_%s", $language->id, $field->global->name);
@@ -27,7 +27,7 @@
                 <?php elseif ($field->global->type == GlobalCheckField::TYPE_RADIO): ?>
                     <?php $values = @json_decode($value); ?>
 
-                    <ul class="check-field-radio span4" data-field-name="<?= $field->global->name ?>" style="list-style-type: none; margin-left:0px;">
+                    <ul class="check-field-radio span4" data-field-name="<?= $name ?>" style="list-style-type: none; margin-left:0px;">
                         <?php if (!count($values)): ?>
                             <li class="radio-field-item">
                                 <input type="text" class="input-xlarge" placeholder="<?= Yii::t("app", "Option Text"); ?>"/>

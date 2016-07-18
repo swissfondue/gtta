@@ -133,11 +133,7 @@ class CheckField extends ActiveRecord {
      * Check if hidden
      * @return bool
      */
-    public function getSuperHidden() {
-        if ($this->global->hidden) {
-            return true;
-        }
-
-        return false;
+    public function getHidden() {
+        return $this->global->hidden || $this->hidden;
     }
 }

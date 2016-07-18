@@ -48,8 +48,8 @@ function Admin()
          * Save check
          */
         this.save = function (formId) {
-            var languageTab = $("#" + formId + " .language-tab.active");
-            var radioFields = languageTab.find(".check-field-radio");
+            var form = $("#" + formId);
+            var radioFields = form.find(".check-field-radio");
             var fields = {};
 
             $.each(radioFields, function (key, value) {
@@ -65,12 +65,12 @@ function Admin()
                 $("#" + formId).append(
                     $("<input>")
                         .attr("type", "hidden")
-                        .attr("name", formId + "[fields]" + "[" + languageTab.data("language-id") + "]" + "[" + fieldName + "]")
+                        .attr("name", fieldName)
                         .val(JSON.stringify(fieldValue))
                 )
             });
 
-            $("#" + formId).submit();
+            form.submit();
         };
 
         /**
