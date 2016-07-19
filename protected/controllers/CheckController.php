@@ -924,33 +924,11 @@ class CheckController extends Controller
                 }
 
                 foreach ($check->fields as $field) {
-                    if (isset($model->hidden[$field->name]) && $model->hidden[$field->name]) {
-                        $field->hidden = true;
-                        $field->save();
-                    } else {
-                        $field->hidden = false;
-                        $field->save();
-                    }
+                    $field->hidden = isset($model->hidden[$field->name]) && $model->hidden[$field->name];
+                    $field->save();
 
-                    if ($field->type == GlobalCheckField::TYPE_CHECKBOX) {
-                        $value = false;
-                        $l = null;
-
-                        foreach ($languages as $l) {
-                            $value = (bool) $model->getFieldValue($field->name, $l->id);
-
-                            if ($value) {
-                                break;
-                            }
-                        }
-
-                        if ($l) {
-                            $field->setValue($value, $l->id);
-                        }
-                    } else {
-                        foreach ($languages as $l) {
-                            $field->setValue($model->getFieldValue($field->name, $l->id), $l->id);
-                        }
+                    foreach ($languages as $l) {
+                        $field->setValue($model->getFieldValue($field->name, $l->id), $l->id);
                     }
                 }
 

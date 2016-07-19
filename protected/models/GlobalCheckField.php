@@ -10,6 +10,7 @@
  * @property string $title
  * @property boolean $hidden
  * @property string $value
+ * @property GlobalCheckFieldL10n[] $l10n
  */
 class GlobalCheckField extends ActiveRecord {
     /**
@@ -73,7 +74,7 @@ class GlobalCheckField extends ActiveRecord {
 
         if ($field) {
             if ($this->id != $field->id) {
-                $this->addError("name", Yii::t("app", "Field with that name already exists."));
+                $this->addError("name", Yii::t("app", "Field with this name already exists."));
 
                 return false;
             }
@@ -135,5 +136,16 @@ class GlobalCheckField extends ActiveRecord {
         }
 
         return $this->title;
+    }
+
+    /**
+     * @return string localized name.
+     */
+    public function getLocalizedValue() {
+        if ($this->l10n && count($this->l10n) > 0) {
+            return $this->l10n[0]->value != null ? $this->l10n[0]->value : $this->value;
+        }
+
+        return $this->value;
     }
 }

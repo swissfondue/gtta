@@ -56,7 +56,6 @@ class GlobalCheckFieldEditForm extends LocalizedFormModel
     public function checkName($attribute, $params) {
         if (!preg_match("/^[a-zA-Z0-9_]+$/", $this->{$attribute})) {
             $this->addError($attribute, Yii::t("app", "Invalid field name."));
-
             return false;
         }
 
@@ -93,12 +92,12 @@ class GlobalCheckFieldEditForm extends LocalizedFormModel
         if ($existing) {
             if (!$field) {
                 // if new record
-                $this->addError($attribute, Yii::t("app", "Field with that name already exists."));
+                $this->addError($attribute, Yii::t("app", "Field with this name already exists."));
 
                 return false;
             } else {
                 if ($field->id != $existing->id) {
-                    $this->addError($attribute, Yii::t("app", "Field with that name already exists."));
+                    $this->addError($attribute, Yii::t("app", "Field with this name already exists."));
                     return false;
                 }
             }

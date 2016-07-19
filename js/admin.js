@@ -50,15 +50,14 @@ function Admin()
         this.save = function (formId) {
             var form = $("#" + formId);
             var radioFields = form.find(".check-field-radio");
-            var fields = {};
 
             $.each(radioFields, function (key, value) {
                 var fieldName = $(value).data("field-name");
-                var fieldValue = [];
+                var fieldValues = [];
 
                 $(value).find("li.radio-field-item input[type=text]").each(function (inputKey, inputValue) {
                     if ($(inputValue).val()) {
-                        fieldValue.push($(inputValue).val());
+                        fieldValues.push($(inputValue).val());
                     }
                 });
 
@@ -66,7 +65,7 @@ function Admin()
                     $("<input>")
                         .attr("type", "hidden")
                         .attr("name", fieldName)
-                        .val(JSON.stringify(fieldValue))
+                        .val(JSON.stringify(fieldValues))
                 )
             });
 

@@ -32,6 +32,7 @@ class m160516_193144_editable_check_fields extends CDbMigration {
                 "global_check_field_id" => "bigint NOT NULL",
                 "language_id" => "bigint NOT NULL",
                 "title" => "text NOT NULL",
+                "value" => "text",
                 "PRIMARY KEY (global_check_field_id, language_id)"
             ]
         );

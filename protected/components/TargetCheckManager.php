@@ -140,9 +140,9 @@ class TargetCheckManager {
                 "target_check_id" => $targetCheck->id
             ]);
 
-            // if readonly field -> update value
+            // if empty field -> update value
             if ($targetCheckField) {
-                if ($checkField->global->type == GlobalCheckField::TYPE_WYSIWYG_READONLY) {
+                if (!$targetCheckField->value) {
                     $targetCheckField->value = $checkField->getValue();
                     $targetCheckField->save();
                 }
