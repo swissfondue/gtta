@@ -51,7 +51,7 @@
                         </div>
                     </div>
 
-                    <?php foreach ($fields as $field): ?>
+                    <?php foreach ($check->getOrderedFields() as $field): ?>
                         <?= $this->renderPartial("partial/check-field",
                             [
                                 "language" => $language,

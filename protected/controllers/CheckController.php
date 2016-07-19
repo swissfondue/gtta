@@ -854,8 +854,8 @@ class CheckController extends Controller
 
             $model->parseFields($check);
 
-            foreach ($check->orderedFields as $f) {
-                $model->hidden[$f->name] = $f->hidden;
+            foreach ($check->getOrderedFields() as $f) {
+                $model->hidden[$f->name] = $f->getHidden();
             }
         } else {
             $model->controlId = $control->id;
@@ -919,30 +919,11 @@ class CheckController extends Controller
                 }
 
                 foreach ($check->fields as $field) {
-                    if (isset($model->hidden[$field->name]) && $model->hidden[$field->name]) {
-                        $field->hidden = true;
-                        $field->save();
-                    } else {
-                        $field->hidden = false;
-                        $field->save();
-                    }
+                    $field->hidden = isset($model->hidden[$field->name]) && $model->hidden[$field->name];
+                    $field->save();
 
-                    if ($field->type == GlobalCheckField::TYPE_CHECKBOX) {
-                        $value = false;
-
-                        foreach ($languages as $l) {
-                            $value = (bool) $model->getFieldValue($field->name, $l->id);
-
-                            if ($value) {
-                                break;
-                            }
-                        }
-
-                        $field->setValue($value, $l->id);
-                    } else {
-                        foreach ($languages as $l) {
-                            $field->setValue($model->getFieldValue($field->name, $l->id), $l->id);
-                        }
+                    foreach ($languages as $l) {
+                        $field->setValue($model->getFieldValue($field->name, $l->id), $l->id);
                     }
                 }
 
@@ -1026,7 +1007,6 @@ class CheckController extends Controller
             'category' => $category,
             'control' => $control,
             'check' => $check,
-            'fields' => $check->orderedFields,
             'languages' => $languages,
             'references' => $references,
             'categories' => $categories,

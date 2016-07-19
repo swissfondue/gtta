@@ -48,29 +48,28 @@ function Admin()
          * Save check
          */
         this.save = function (formId) {
-            var languageTab = $("#" + formId + " .language-tab.active");
-            var radioFields = languageTab.find(".check-field-radio");
-            var fields = {};
+            var form = $("#" + formId);
+            var radioFields = form.find(".check-field-radio");
 
             $.each(radioFields, function (key, value) {
                 var fieldName = $(value).data("field-name");
-                var fieldValue = [];
+                var fieldValues = [];
 
                 $(value).find("li.radio-field-item input[type=text]").each(function (inputKey, inputValue) {
                     if ($(inputValue).val()) {
-                        fieldValue.push($(inputValue).val());
+                        fieldValues.push($(inputValue).val());
                     }
                 });
 
                 $("#" + formId).append(
                     $("<input>")
                         .attr("type", "hidden")
-                        .attr("name", formId + "[fields]" + "[" + languageTab.data("language-id") + "]" + "[" + fieldName + "]")
-                        .val(JSON.stringify(fieldValue))
+                        .attr("name", fieldName)
+                        .val(JSON.stringify(fieldValues))
                 )
             });
 
-            $("#" + formId).submit();
+            form.submit();
         };
 
         /**
@@ -110,6 +109,22 @@ function Admin()
         this.removeRadioFieldItem = function (button) {
             if ($(button).parent().siblings().length > 1) {
                 $(button).parent().remove();
+            }
+        };
+
+        /**
+         * Toggle field hide
+         */
+        this.toggleHiddenField = function (checkbox, name) {
+            var field = $(".field-control-" + name),
+                otherCheckboxes = $("input[type=checkbox][name=\"" + checkbox.name + "\"]");
+
+            if (checkbox.checked) {
+                otherCheckboxes.prop("checked", "checked");
+                field.slideUp();
+            } else {
+                otherCheckboxes.prop("checked", null);
+                field.slideDown();
             }
         };
     };

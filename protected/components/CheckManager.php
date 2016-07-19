@@ -401,6 +401,7 @@ class CheckManager {
             $globalFields = GlobalCheckField::model()->findAll();
         }
 
+        /** @var GlobalCheckField $gf */
         foreach ($globalFields as $gf) {
             $checkField = CheckField::model()->findByAttributes([
                 "check_id" => $check->id,
@@ -411,15 +412,28 @@ class CheckManager {
                 $checkField = new CheckField();
                 $checkField->global_check_field_id = $gf->id;
                 $checkField->check_id = $check->id;
-                $checkField->save();
+            }
 
-                foreach (Language::model()->findAll() as $l) {
+            $checkField->value = $gf->value;
+            $checkField->save();
+
+            foreach ($gf->l10n as $l) {
+                $l10n = CheckFieldL10n::model()->findByAttributes([
+                    "check_field_id" => $checkField->id,
+                    "language_id" => $l->language_id
+                ]);
+
+                if (!$l10n) {
                     $l10n = new CheckFieldL10n();
                     $l10n->check_field_id = $checkField->id;
-                    $l10n->language_id = $l->id;
-                    $l10n->save();
+                    $l10n->language_id = $l->language_id;
                 }
+
+                $l10n->value = $l->value;
+                $l10n->save();
             }
+
+            TargetCheckManager::reindexFields($checkField);
         }
     }
 

@@ -85,37 +85,16 @@ class ReindexJob extends BackgroundJob {
                     $this->_reindexTarget($t);
                 }
             } else if (isset($this->args["global_check_field_id"])) {
-                $field = GlobalCheckField::model()->findByPk($this->args["global_check_field_id"]);
+                $field = GlobalCheckField::model()->with("l10n")->findByPk($this->args["global_check_field_id"]);
 
                 if (!$field) {
                     throw new Exception("Field not found.", 404);
                 }
 
-                $criteria = new CDbCriteria();
-                $criteria->addColumnCondition([
-                    "gf.id" => $field->id
-                ]);
-                $checks = Check::model()->with([
-                    "fields" => [
-                        "alias" => "f",
-                        "with" => [
-                            "global" => ["alias" => "gf"]
-                        ]
-                    ],
-                ])->findAll($criteria);
-
-                $checkIds = [];
-
-                foreach ($checks as $c) {
-                    $checkIds[] = $c->id;
-                }
-
-                $criteria = new CDbCriteria();
-                $criteria->addNotInCondition("id", $checkIds);
-                $noFieldChecks = Check::model()->findAll($criteria);
+                $checks = Check::model()->findAll();
                 $cm = new CheckManager();
 
-                foreach ($noFieldChecks as $check) {
+                foreach ($checks as $check) {
                     $cm->reindexFields($check, [$field]);
                 }
             } else if (isset($this->args["check_id"])) {

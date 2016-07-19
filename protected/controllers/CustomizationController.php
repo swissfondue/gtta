@@ -85,8 +85,22 @@ class CustomizationController extends Controller
         $id = (int) $id;
         $newRecord = false;
 
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
         if ($id) {
-            $field = GlobalCheckField::model()->findByPk($id);
+            $field = GlobalCheckField::model()->with([
+                "l10n" => [
+                    "joinType" => "LEFT JOIN",
+                    "on" => "language_id = :language_id",
+                    "params" => ["language_id" => $language],
+                ],
+            ])->findByPk($id);
         } else {
             $field = new GlobalCheckField();
             $newRecord = true;
@@ -95,6 +109,7 @@ class CustomizationController extends Controller
         $languages = Language::model()->findAll();
 
         $form = new GlobalCheckFieldEditForm();
+        $form->id = $id;
         $form->localizedItems = array();
 
         if (!$newRecord) {
@@ -109,6 +124,7 @@ class CustomizationController extends Controller
             foreach ($l10n as $l) {
                 $i = [];
                 $i["title"] = $l->title;
+                $i["value"] = $l->value;
 
                 $form->localizedItems[$l->language_id] = $i;
             }
@@ -120,6 +136,7 @@ class CustomizationController extends Controller
 
             if ($form->validate()) {
                 $field->title = $form->defaultL10n($languages, "title");
+                $field->value = $form->defaultL10n($languages, "value");
                 $field->name = $form->name;
                 $field->type = $form->type;
                 $field->hidden = isset($_POST["GlobalCheckFieldEditForm"]["hidden"]);
@@ -140,15 +157,14 @@ class CustomizationController extends Controller
                     }
 
                     $fieldL10n->title = $value["title"];
+                    $fieldL10n->value = isset($value["value"]) ? $value["value"] : "";
                     $fieldL10n->save();
                 }
 
                 // add new field to checks
-                if ($newRecord) {
-                    ReindexJob::enqueue([
-                        "global_check_field_id" => $field->id
-                    ]);
-                }
+                ReindexJob::enqueue([
+                    "global_check_field_id" => $field->id
+                ]);
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "Field saved."));
 

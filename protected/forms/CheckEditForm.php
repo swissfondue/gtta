@@ -177,7 +177,11 @@ class CheckEditForm extends LocalizedFormModel
                     "name" => $name
                 ]);
 
-                if ($field->type == GlobalCheckField::TYPE_RADIO && !FieldManager::validateField($field->type, $value)) {
+                if (
+                    $field &&
+                    $field->type == GlobalCheckField::TYPE_RADIO &&
+                    !FieldManager::validateField($field->type, $value)
+                ) {
                     $this->addError("fields_" . $name, Yii::t("app", "Invalid JSON."));
                 }
 

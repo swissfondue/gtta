@@ -21,6 +21,7 @@ class m160516_193144_editable_check_fields extends CDbMigration {
                 "title" => "text NOT NULL",
                 "sort_order" => "bigint NOT NULL DEFAULT currval('global_check_fields_id_seq')",
                 "hidden" => "boolean NOT NULL DEFAULT 'f'",
+                "value" => "text",
                 "PRIMARY KEY (id)"
             ]
         );
@@ -31,6 +32,7 @@ class m160516_193144_editable_check_fields extends CDbMigration {
                 "global_check_field_id" => "bigint NOT NULL",
                 "language_id" => "bigint NOT NULL",
                 "title" => "text NOT NULL",
+                "value" => "text",
                 "PRIMARY KEY (global_check_field_id, language_id)"
             ]
         );

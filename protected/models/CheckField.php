@@ -73,31 +73,13 @@ class CheckField extends ActiveRecord {
      * @return mixed|null|string
      */
     public function getValue() {
-        $value = $this->value;
+        $language = System::model()->findByPk(1)->language;
+        $l10n = CheckFieldL10n::model()->findByAttributes([
+            "check_field_id" => $this->id,
+            "language_id" => $language->id
+        ]);
 
-        // use user_default language
-        if (!$value) {
-            $language = System::model()->findByPk(1)->language;
-            $l10n = CheckFieldL10n::model()->findByAttributes([
-                "check_field_id" => $this->id,
-                "language_id" => $language->id
-            ]);
-            $value = $l10n->value ? $l10n->value : null;
-        }
-
-        if (!$value) {
-            $criteria = new CDbCriteria();
-            $criteria->addColumnCondition(["check_field_id" => $this->id]);
-            $criteria->addNotInCondition("language_id", [$language->id]);
-            $criteria->addCondition("value IS NOT NULL");
-            $l10n = CheckFieldL10n::model()->find($criteria);
-
-            if (!$l10n) {
-                return null;
-            }
-        }
-
-        return $value;
+        return $l10n->value ? $l10n->value : $this->value;
     }
 
     /**
@@ -133,11 +115,7 @@ class CheckField extends ActiveRecord {
      * Check if hidden
      * @return bool
      */
-    public function getSuperHidden() {
-        if ($this->global->hidden) {
-            return true;
-        }
-
-        return false;
+    public function getHidden() {
+        return $this->global->hidden || $this->hidden;
     }
 }

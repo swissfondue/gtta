@@ -8,9 +8,9 @@
  * @property integer $language_id
  * @property string $name
  * @property string $title
+ * @property string $value
  */
-class GlobalCheckFieldL10n extends ActiveRecord
-{
+class GlobalCheckFieldL10n extends ActiveRecord {
     /**
      * Returns the static model of the specified AR class.
      * @param string $className active record class name.
@@ -49,7 +49,7 @@ class GlobalCheckFieldL10n extends ActiveRecord
     {
         return [
             "field" => [self::BELONGS_TO, "GlobalCheckField", "check_field_id"],
-            "language"   => [self::BELONGS_TO, "Language",   "language_id"],
+            "language" => [self::BELONGS_TO, "Language", "language_id"],
         ];
     }
 }

@@ -2077,7 +2077,7 @@ class ProjectController extends Controller {
             "target" => $target,
             "category" => $category,
             "check" => $targetCheck,
-            "fields" => $targetCheck->orderedFields,
+            "fields" => $targetCheck->getOrderedFields(),
             "checkData" => $check,
             "results" => $results,
             "solutions" => $solutions,

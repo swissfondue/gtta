@@ -1,6 +1,6 @@
-<?php $hidden = $field->superHidden || $field->hidden; ?>
 <?php $issue = isset($issue); ?>
 <?php $formName = $issue ? "IssueEvidenceEditForm" : "TargetCheckEditForm"; ?>
+<?php $hidden = $field->getHidden(); ?>
 
 <?php if (!$hidden): ?>
     <?php
