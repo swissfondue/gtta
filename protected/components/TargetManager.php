@@ -225,24 +225,33 @@ class TargetManager {
                 TargetCheck::model()->deleteAll($criteria);
 
                 $checksToAdd = Check::model()->findAllByAttributes(array(
-                    "id" => array_diff($checkIds, $targetCheckIds)
+                    "id" => array_values(array_diff($checkIds, $targetCheckIds))
                 ));
 
                 foreach ($checksToAdd as $check) {
-                    $targetCheck = new TargetCheck();
-                    $targetCheck->target_id = $target->id;
-                    $targetCheck->check_id = $check->id;
-                    $targetCheck->user_id = $admin;
-                    $targetCheck->language_id = $language->id;
-                    $targetCheck->status = TargetCheck::STATUS_OPEN;
-                    $targetCheck->rating = TargetCheck::RATING_NONE;
-                    $targetCheck->save();
+                    $targetCheck = TargetCheckManager::create([
+                        "target_id" => $target->id,
+                        "check_id" => $check->id,
+                        "user_id" => $admin,
+                        "language_id" => $language->id,
+                        "status" => TargetCheck::STATUS_OPEN,
+                        "rating" => TargetCheck::RATING_NONE
+                    ]);
 
                     foreach ($check->scripts as $script) {
                         $targetCheckScript = new TargetCheckScript();
                         $targetCheckScript->check_script_id = $script->id;
                         $targetCheckScript->target_check_id = $targetCheck->id;
                         $targetCheckScript->save();
+                    }
+
+                    foreach ($check->fields as $field) {
+                        $targetCheckField = new TargetCheckField();
+                        $targetCheckField->target_check_id = $targetCheck->id;
+                        $targetCheckField->check_field_id = $field->id;
+                        $targetCheckField->value = $field->getValue();
+                        $targetCheckField->hidden = $field->hidden;
+                        $targetCheckField->save();
                     }
                 }
 

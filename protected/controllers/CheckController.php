@@ -827,12 +827,11 @@ class CheckController extends Controller
 
 		$model = new CheckEditForm();
         $model->localizedItems = array();
+        $model->fields = array();
+        $model->hidden = array();
 
         if (!$newRecord) {
             $model->name = $check->name;
-            $model->backgroundInfo = $check->background_info;
-            $model->hints = $check->hints;
-            $model->question = $check->question;
             $model->automated = $check->automated;
             $model->protocol = $check->protocol;
             $model->port = $check->port;
@@ -852,11 +851,14 @@ class CheckController extends Controller
                 $i = array();
 
                 $i['name'] = $cl->name;
-                $i['backgroundInfo'] = $cl->background_info;
-                $i['hints'] = $cl->hints;
-                $i['question'] = $cl->question;
 
                 $model->localizedItems[$cl->language_id] = $i;
+            }
+
+            $model->parseFields($check);
+
+            foreach ($check->getOrderedFields() as $f) {
+                $model->hidden[$f->name] = $f->getHidden();
             }
         } else {
             $model->controlId = $control->id;
@@ -867,12 +869,10 @@ class CheckController extends Controller
 			$model->attributes = $_POST['CheckEditForm'];
 
             $model->name = $model->defaultL10n($languages, 'name');
-            $model->backgroundInfo = $model->defaultL10n($languages, 'backgroundInfo');
-            $model->hints = $model->defaultL10n($languages, 'hints');
-            $model->question = $model->defaultL10n($languages, 'question');
             $model->automated = isset($_POST["CheckEditForm"]["automated"]);
             $model->multipleSolutions = isset($_POST["CheckEditForm"]["multipleSolutions"]);
             $model->private = isset($_POST["CheckEditForm"]["private"]);
+            $model->hidden = isset($_POST["CheckEditForm"]["hidden"]) ? $_POST["CheckEditForm"]["hidden"] : [];
 
 			if ($model->validate()) {
                 $redirect = false;
@@ -882,9 +882,6 @@ class CheckController extends Controller
                 }
 
                 $check->name = $model->name;
-                $check->background_info = $model->backgroundInfo;
-                $check->hints = $model->hints;
-                $check->question = $model->question;
                 $check->automated = $model->automated;
                 $check->multiple_solutions = $model->multipleSolutions;
                 $check->private = $model->private;
@@ -901,6 +898,9 @@ class CheckController extends Controller
                 if ($newRecord) {
                     $check->sort_order = $check->id;
                     $check->save();
+
+                    $cm = new CheckManager();
+                    $cm->reindexFields($check);
                 }
 
                 foreach ($model->localizedItems as $languageId => $value) {
@@ -919,29 +919,24 @@ class CheckController extends Controller
                         $value['name'] = null;
                     }
 
-                    if ($value['backgroundInfo'] == '') {
-                        $value['backgroundInfo'] = null;
-                    }
-
-                    if ($value['hints'] == '') {
-                        $value['hints'] = null;
-                    }
-
-                    if ($value['question'] == '') {
-                        $value['question'] = null;
-                    }
-
                     $checkL10n->name = $value['name'];
-                    $checkL10n->background_info = $value['backgroundInfo'];
-                    $checkL10n->hints = $value['hints'];
-                    $checkL10n->question = $value['question'];
                     $checkL10n->save();
+                }
+
+                foreach ($check->fields as $field) {
+                    $field->hidden = isset($model->hidden[$field->name]) && $model->hidden[$field->name];
+                    $field->save();
+
+                    foreach ($languages as $l) {
+                        $field->setValue($model->getFieldValue($field->name, $l->id), $l->id);
+                    }
                 }
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check saved.'));
                 $check->refresh();
 
-                TargetCheckReindexJob::enqueue(array("category_id" => $check->control->check_category_id));
+                TargetCheckReindexJob::enqueue(["check_id" => $check->id]);
+                TargetCheckReindexJob::enqueue(["category_id" => $check->control->check_category_id]);
 
                 if ($redirect) {
                     $this->redirect(array(
@@ -970,7 +965,7 @@ class CheckController extends Controller
             } else {
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
             }
-		}
+        }
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
         $this->breadcrumbs[] = array($category->localizedName, $this->createUrl('check/view', array('id' => $category->id)));
@@ -1081,9 +1076,6 @@ class CheckController extends Controller
                 $dst->create_time = $now->format(ISO_DATE_TIME);
                 $dst->check_control_id = $control->id;
                 $dst->name = $src->name . ' (' . Yii::t('app', 'Copy') . ')';
-                $dst->background_info = $src->background_info;
-                $dst->hints = $src->hints;
-                $dst->question = $src->question;
                 $dst->automated = $src->automated;
                 $dst->multiple_solutions = $src->multiple_solutions;
                 $dst->protocol = $src->protocol;
@@ -1108,9 +1100,6 @@ class CheckController extends Controller
                     $newL10n->check_id = $dst->id;
                     $newL10n->language_id = $l10n->language_id;
                     $newL10n->name = $l10n->name . ' (' . Yii::t('app', 'Copy') . ')';
-                    $newL10n->background_info = $l10n->background_info;
-                    $newL10n->hints = $l10n->hints;
-                    $newL10n->question = $l10n->question;
                     $newL10n->save();
                 }
 
@@ -1191,6 +1180,23 @@ class CheckController extends Controller
                         $newL10n->language_id = $l10n->language_id;
                         $newL10n->title = $l10n->title;
                         $newL10n->solution = $l10n->solution;
+                        $newL10n->save();
+                    }
+                }
+
+                foreach ($src->fields as $field) {
+                    $newField = new CheckField();
+                    $newField->check_id = $dst->id;
+                    $newField->global_check_field_id = $field->global_check_field_id;
+                    $newField->value = $field->value;
+                    $newField->hidden = $field->hidden;
+                    $newField->save();
+
+                    foreach ($field->l10n as $l10n) {
+                        $newL10n = new CheckFieldL10n();
+                        $newL10n->check_field_id = $newField->id;
+                        $newL10n->language_id = $l10n->language_id;
+                        $newL10n->value = $l10n->value;
                         $newL10n->save();
                     }
                 }
@@ -2838,9 +2844,6 @@ class CheckController extends Controller
 
                 $searchCriteria = new CDbCriteria();
                 $searchCriteria->addSearchCondition('t.name', $model->query, true, 'OR', 'ILIKE');
-                $searchCriteria->addSearchCondition('t.background_info', $model->query, true, 'OR', 'ILIKE');
-                $searchCriteria->addSearchCondition('t.hints', $model->query, true, 'OR', 'ILIKE');
-                $searchCriteria->addSearchCondition('t.question', $model->query, true, 'OR', 'ILIKE');
                 $criteria->mergeWith($searchCriteria);
 
                 $checks = CheckL10n::model()->findAll($criteria);

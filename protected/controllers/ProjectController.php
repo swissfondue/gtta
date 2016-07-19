@@ -296,9 +296,6 @@ class ProjectController extends Controller {
                 TargetCheck::COLUMN_TARGET          => Yii::t("app", "Target"),
                 TargetCheck::COLUMN_NAME            => Yii::t("app", "Name"),
                 TargetCheck::COLUMN_REFERENCE       => Yii::t("app", "Reference"),
-                TargetCheck::COLUMN_BACKGROUND_INFO => Yii::t("app", "Background Info"),
-                TargetCheck::COLUMN_QUESTION        => Yii::t("app", "Question"),
-                TargetCheck::COLUMN_RESULT          => Yii::t("app", "Result"),
                 TargetCheck::COLUMN_SOLUTION        => Yii::t("app", "Solution"),
                 TargetCheck::COLUMN_RATING          => Yii::t("app", "Rating"),
             ),
@@ -353,6 +350,7 @@ class ProjectController extends Controller {
             User::checkRole(User::ROLE_ADMIN) ? ProjectEditForm::ADMIN_SCENARIO : ProjectEditForm::USER_SCENARIO,
             $id
         );
+        $model->hiddenFields = [];
 
         if (!$newRecord) {
             $model->name = $project->name;
@@ -362,6 +360,14 @@ class ProjectController extends Controller {
             $model->deadline = $project->deadline;
             $model->startDate = $project->start_date ? $project->start_date : date("Y-m-d");
             $model->hoursAllocated = $project->hours_allocated;
+
+            $fields = GlobalCheckField::model()->findAll();
+
+            foreach ($fields as $f) {
+                if ($project->isFieldHidden($f->name)) {
+                    $model->hiddenFields[] = $f->name;
+                }
+            }
         } else {
             $model->year = date("Y");
             $model->deadline = date("Y-m-d");
@@ -371,6 +377,7 @@ class ProjectController extends Controller {
 		// collect user input data
 		if (isset($_POST["ProjectEditForm"])) {
 			$model->attributes = $_POST["ProjectEditForm"];
+            $model->hiddenFields = isset($_POST["ProjectEditForm"]["hiddenFields"]) ? $_POST["ProjectEditForm"]["hiddenFields"] : [];
 
 			if ($model->validate()) {
                 // delete all client accounts from this project
@@ -411,6 +418,35 @@ class ProjectController extends Controller {
                     $projectUser->save();
                 }
 
+                $criteria = new CDbCriteria();
+                $criteria->join = "INNER JOIN target_checks tc ON tc.id = t.target_check_id";
+                $criteria->join .= sprintf(" INNER JOIN targets tr ON tr.id = tc.target_id AND tr.project_id = %d", $project->id);
+                $criteria->join .= " INNER JOIN check_fields cf ON cf.id = t.check_field_id";
+                $criteria->join .= " INNER JOIN global_check_fields g ON g.id = cf.global_check_field_id";
+
+                $hiddenFields = array_map(function ($item) {
+                    return "'$item'";
+                }, $model->hiddenFields);
+
+                $criteria->join .=  sprintf(" AND g.name IN (%s)", count($hiddenFields) ? implode(",", $hiddenFields) : "''");
+
+                $hiddenFields = TargetCheckField::model()->findAll($criteria);
+                $hiddenFieldIds = [];
+
+                foreach ($hiddenFields as $f) {
+                    $hiddenFieldIds[] = $f->id;
+                }
+
+                // make not hidden removed checkboxes
+                $criteria = new CDbCriteria();
+                $criteria->addNotInCondition("id", $hiddenFieldIds);
+                TargetCheckField::model()->updateAll(["hidden" => false], $criteria);
+
+                // make hidden added fields
+                $criteria = new CDbCriteria();
+                $criteria->addInCondition("id", $hiddenFieldIds);
+                TargetCheckField::model()->updateAll(["hidden" => true], $criteria);
+
                 Yii::app()->user->setFlash("success", Yii::t("app", "Project saved."));
 
                 $project->refresh();
@@ -448,7 +484,8 @@ class ProjectController extends Controller {
                 Project::STATUS_OPEN => Yii::t("app", "Open"),
                 Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
                 Project::STATUS_FINISHED => Yii::t("app", "Finished"),
-            )
+            ),
+            "fields" => GlobalCheckField::model()->findAll(["order" => "sort_order ASC"])
         ));
 	}
 
@@ -1806,6 +1843,7 @@ class ProjectController extends Controller {
             "quickTargets" => $quickTargets,
             "controlToOpen" => $controlToOpen,
             "checkToOpen" => $checkToOpen,
+            "fields" => GlobalCheckField::model()->findAll()
         ));
 	}
 
@@ -2083,6 +2121,7 @@ class ProjectController extends Controller {
                 "target" => $target,
                 "category" => $category,
                 "check" => $check,
+                "fields" => $check->getOrderedFields(),
                 "checkData" => $checkData,
                 "results" => $results,
                 "solutions" => $solutions,
@@ -2205,18 +2244,6 @@ class ProjectController extends Controller {
                 $model->port = null;
             }
 
-            if ($model->result == "") {
-                $model->result = null;
-            }
-
-            if ($model->poc == "") {
-                $model->poc = null;
-            }
-
-            if ($model->links == "") {
-                $model->links = null;
-            }
-
             if ($model->tableResult == "") {
                 $model->tableResult = null;
             }
@@ -2283,8 +2310,6 @@ class ProjectController extends Controller {
             $targetCheck->port = $model->port;
             $targetCheck->status = TargetCheck::STATUS_FINISHED;
             $targetCheck->rating = $model->rating;
-            $targetCheck->poc = $model->poc;
-            $targetCheck->links = $model->links;
 
             if (User::checkRole(User::ROLE_ADMIN) && $model->saveResult) {
                 if (!$model->resultTitle) {
@@ -2327,8 +2352,6 @@ class ProjectController extends Controller {
                         )
                     )
                 ));
-            } else {
-                $targetCheck->result = $model->result;
             }
 
             $targetCheck->table_result = $model->tableResult;
@@ -2442,6 +2465,11 @@ class ProjectController extends Controller {
                     $attachment->title = $decodedTitle->title;
                     $attachment->save();
                 }
+            }
+
+            foreach ($targetCheck->fields as $field) {
+                $value = isset($model->fields[$field->name]) ? $model->fields[$field->name] : null;
+                $field->setValue($value);
             }
 
             // add inputs
@@ -2594,7 +2622,6 @@ class ProjectController extends Controller {
                 throw new Exception($errorText);
             }
 
-            $targetCheck->result = $model->result;
             $targetCheck->save();
 
             if ($project->status == Project::STATUS_OPEN) {
@@ -2715,23 +2742,12 @@ class ProjectController extends Controller {
                 $form->result = null;
             }
 
-            if (!$form->poc) {
-                $form->poc = null;
-            }
-
-            if (!$form->links) {
-                $form->links = null;
-            }
-
-            if (!$form->solution) {
-                $form->solution = null;
-            }
-
             if (!$form->solutionTitle) {
                 $form->solutionTitle = null;
             }
 
             if ($form->createCheck) {
+                $cm = new CheckManager();
                 $reference = Reference::model()->findByAttributes(array("name" => "CUSTOM"));
 
                 if (!$reference) {
@@ -2739,7 +2755,7 @@ class ProjectController extends Controller {
                 }
 
                 if (!$reference) {
-                   throw new CHttpException(500, Yii::t("app", "At least one reference should be created first."));
+                    throw new CHttpException(500, Yii::t("app", "At least one reference should be created first."));
                 }
 
                 $language = Language::model()->findByAttributes(array(
@@ -2756,8 +2772,6 @@ class ProjectController extends Controller {
                 $now = new DateTime();
                 $check->create_time = $now->format(ISO_DATE_TIME);
                 $check->name = $form->name;
-                $check->background_info = $form->backgroundInfo;
-                $check->question = $form->question;
                 $check->check_control_id = $control->id;
                 $check->reference_id = $reference->id;
                 $check->reference_code = "CHECK-" . $customCheck->reference;
@@ -2773,22 +2787,29 @@ class ProjectController extends Controller {
                 $checkL10n = new CheckL10n();
                 $checkL10n->check_id = $check->id;
                 $checkL10n->language_id = $language->id;
-                $checkL10n->background_info = $form->backgroundInfo;
-                $checkL10n->question = $form->question;
                 $checkL10n->name = $form->name;
                 $checkL10n->save();
 
-                $targetCheck = new TargetCheck();
-                $targetCheck->target_id = $target->id;
-                $targetCheck->check_id = $check->id;
-                $targetCheck->user_id = Yii::app()->user->id;
-                $targetCheck->language_id = $language->id;
-                $targetCheck->result = $form->result;
-                $targetCheck->status = TargetCheck::STATUS_FINISHED;
-                $targetCheck->rating = $form->rating;
-                $targetCheck->poc = $form->poc;
-                $targetCheck->links = $form->links;
-                $targetCheck->save();
+                $cm->reindexFields($check);
+
+                foreach ($check->fields as $field) {
+                    $formField = Utils::camelize($field->name);
+
+                    if (in_array($field->name, GlobalCheckField::$system) && isset($form->{$formField})) {
+                        foreach (Language::model()->findAll() as $l) {
+                            $field->setValue($form->{$formField}, $l->id);
+                        }
+                    }
+                }
+
+                $targetCheck = TargetCheckManager::create([
+                    "target_id" => $target->id,
+                    "check_id" => $check->id,
+                    "user_id" => Yii::app()->user->id,
+                    "language_id" => $language->id,
+                    "status" => TargetCheck::STATUS_FINISHED,
+                    "rating" => $form->rating
+                ]);
 
                 if ($form->solutionTitle && $form->solution) {
                     $solution = new CheckSolution();
@@ -2830,8 +2851,6 @@ class ProjectController extends Controller {
                 $customCheck->solution_title = $form->solutionTitle;
                 $customCheck->solution = $form->solution;
                 $customCheck->rating = $form->rating;
-                $customCheck->poc = $form->poc;
-                $customCheck->links = $form->links;
 
                 if (count($form->attachmentTitles)) {
                     foreach ($form->attachmentTitles as $title) {
@@ -3397,7 +3416,6 @@ class ProjectController extends Controller {
                         "target_check_id" => $targetCheck->id,
                     ));
 
-                    $targetCheck->result = null;
                     $targetCheck->target_file = null;
                     $targetCheck->status = TargetCheck::STATUS_OPEN;
                     $targetCheck->result_file = null;
@@ -3415,6 +3433,11 @@ class ProjectController extends Controller {
                     $inputValues = array();
                     $timeoutValues = array();
                     $startScripts = array();
+
+                    // reset fields
+                    foreach ($targetCheck->fields as $field) {
+                        $field->reset();
+                    }
 
                     // get default input values
                     if ($check->automated) {
@@ -3599,9 +3622,6 @@ class ProjectController extends Controller {
 
                 case "reset":
                     $customCheck->name = null;
-                    $customCheck->background_info = null;
-                    $customCheck->question = null;
-                    $customCheck->result = null;
                     $customCheck->solution_title = null;
                     $customCheck->solution = null;
                     $customCheck->rating = TargetCustomCheck::RATING_NONE;

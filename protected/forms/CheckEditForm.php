@@ -11,21 +11,6 @@ class CheckEditForm extends LocalizedFormModel
     public $name;
 
     /**
-     * @var string background info.
-     */
-    public $backgroundInfo;
-
-    /**
-     * @var string hints.
-     */
-    public $hints;
-
-    /**
-     * @var string question.
-     */
-    public $question;
-
-    /**
      * @var integer reference id.
      */
     public $referenceId;
@@ -75,6 +60,16 @@ class CheckEditForm extends LocalizedFormModel
      */
     public $controlId;
 
+    /**
+     * @varv array fields
+     */
+    public $fields;
+
+    /**
+     * @var array hidden
+     */
+    public $hidden;
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
@@ -85,12 +80,13 @@ class CheckEditForm extends LocalizedFormModel
             array( 'name, protocol, referenceCode, referenceUrl', 'length', 'max' => 1000 ),
             array( 'port', 'numerical', 'integerOnly' => true, 'min' => 0, 'max' => 1000 ),
             array( 'automated, multipleSolutions, private', 'boolean' ),
-            array( 'localizedItems, backgroundInfo, hints, question', 'safe' ),
+            array( 'localizedItems, hidden', 'safe' ),
             array( 'referenceUrl', 'url', 'defaultScheme' => 'http' ),
             array( 'referenceId, effort', 'numerical', 'integerOnly' => true ),
             array( 'referenceId', 'checkReference' ),
             array( 'controlId', 'checkControl' ),
             array( 'effort', 'in', 'range' => array( 2, 5, 20, 40, 60, 120 ) ),
+            array( 'fields', 'checkFields' )
 		);
 	}
     
@@ -101,9 +97,6 @@ class CheckEditForm extends LocalizedFormModel
 	{
 		return array(
 			'name'           => Yii::t('app', 'Name'),
-            'backgroundInfo' => Yii::t('app', 'Background Info'),
-            'hints     '     => Yii::t('app', 'Hints'),
-            'question'       => Yii::t('app', 'Question'),
             'automated'      => Yii::t('app', 'Automated'),
             'protocol'       => Yii::t('app', 'Protocol'),
             'port'           => Yii::t('app', 'Port'),
@@ -146,4 +139,65 @@ class CheckEditForm extends LocalizedFormModel
 
         return true;
 	}
+
+    /**
+     * Parse fields
+     * @param Check $check
+     */
+    public function parseFields(Check $check) {
+        foreach ($check->fields as $f) {
+            $l10ns = $f->l10n;
+
+            foreach ($l10ns as $l10n) {
+                if (!isset($this->fields[$l10n->language_id])) {
+                    $this->fields[$l10n->language_id] = [];
+                }
+
+                $this->fields[$l10n->language_id][$f->global->name] = $l10n->value;
+            }
+        }
+    }
+
+    /**
+     * Return field value
+     * @param $fieldName
+     * @param $languageId
+     * @return null
+     */
+    public function getFieldValue($fieldName, $languageId) {
+        if (!$this->fields) {
+            return null;
+        }
+
+        return isset($this->fields[$languageId][$fieldName]) ? $this->fields[$languageId][$fieldName] : null;
+    }
+
+    /**
+     * Check fields
+     * @param $attribute
+     * @param $params
+     */
+    public function checkFields($attribute, $params) {
+        if (!$this->fields) {
+            return true;
+        }
+
+        foreach ($this->fields as $language => $fields) {
+            foreach ($fields as $name => $value) {
+                $field = GlobalCheckField::model()->findByAttributes([
+                    "name" => $name
+                ]);
+
+                if (
+                    $field &&
+                    $field->type == GlobalCheckField::TYPE_RADIO &&
+                    !FieldManager::validateField($field->type, $value)
+                ) {
+                    $this->addError("fields_" . $name, Yii::t("app", "Invalid JSON."));
+                }
+            }
+        }
+
+        return true;
+    }
 }

@@ -43,6 +43,90 @@ function Admin()
                 }
             });
         };
+
+        /**
+         * Save check
+         */
+        this.save = function (formId) {
+            var form = $("#" + formId);
+            var radioFields = form.find(".check-field-radio");
+
+            $.each(radioFields, function (key, value) {
+                var fieldName = $(value).data("field-name");
+                var fieldValues = [];
+
+                $(value).find("li.radio-field-item input[type=text]").each(function (inputKey, inputValue) {
+                    if ($(inputValue).val()) {
+                        fieldValues.push($(inputValue).val());
+                    }
+                });
+
+                $("#" + formId).append(
+                    $("<input>")
+                        .attr("type", "hidden")
+                        .attr("name", fieldName)
+                        .val(JSON.stringify(fieldValues))
+                )
+            });
+
+            form.submit();
+        };
+
+        /**
+         * Append radio field item
+         * @param button
+         */
+        this.appendRadioFieldItem = function (button) {
+            $(button).before(
+                $("<li>")
+                    .addClass("radio-field-item")
+                    .append(
+                        $("<input>")
+                            .attr("type", "text")
+                            .attr("class", "input-xlarge")
+                            .attr("placeholder", "Option Text"),
+                        "&nbsp;",
+                        $("<a>")
+                            .addClass("link")
+                            .append(
+                                $("<i>")
+                                    .addClass("icon")
+                                    .addClass("icon-remove")
+                            )
+                            .click(function () {
+                                _check.removeRadioFieldItem(this);
+
+                                return false;
+                            })
+                    )
+            );
+        };
+
+        /**
+         * Remove radio field item
+         * @param button
+         */
+        this.removeRadioFieldItem = function (button) {
+            if ($(button).parent().siblings().length > 1) {
+                $(button).parent().remove();
+            }
+        };
+
+        /**
+         * Toggle field hide
+         */
+        this.toggleHiddenField = function (checkbox, name) {
+            var field = $(".field-control-" + name),
+                otherCheckboxes = $("input[type=checkbox][name=\"" + checkbox.name + "\"]");
+
+            if (checkbox.checked) {
+                otherCheckboxes.prop("checked", "checked");
+                field.slideUp();
+            } else {
+                otherCheckboxes.prop("checked", null);
+                field.slideDown();
+            }
+        };
     };
 
     /**

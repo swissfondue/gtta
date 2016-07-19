@@ -4,6 +4,39 @@
  */
 class TargetCheckManager {
     /**
+     * Target check create
+     * @param $data
+     * @return TargetCheck
+     * @throws Exception
+     */
+    public static function create($data) {
+        $targetCheck = new TargetCheck();
+
+        try {
+            $targetCheck->target_id = $data["target_id"];
+            $targetCheck->check_id = $data["check_id"];
+            $targetCheck->user_id = $data["user_id"];
+            $targetCheck->language_id = $data["language_id"];
+            $targetCheck->status = isset($data["status"]) ? $data["status"] : TargetCheck::STATUS_OPEN;
+
+            if (isset($data["rating"])) {
+                $targetCheck->rating = $data["rating"];
+            }
+
+            if (isset($data["result"])) {
+                $targetCheck->setResult($data["result"]);
+            }
+
+            $targetCheck->save();
+        } catch (Exception $e) {
+            throw new Exception("Can't create check.");
+        }
+
+
+        return $targetCheck;
+    }
+
+    /**
      * Start check
      * @param $id
      */
@@ -96,6 +129,34 @@ class TargetCheckManager {
     }
 
     /**
+     * Reindex target check fields
+     * @param CheckField $checkField
+     * @throws Exception
+     */
+    public static function reindexFields(CheckField $checkField) {
+        foreach ($checkField->check->targetChecks as $targetCheck) {
+            $targetCheckField = TargetCheckField::model()->findByAttributes([
+                "check_field_id" => $checkField->id,
+                "target_check_id" => $targetCheck->id
+            ]);
+
+            // if empty field -> update value
+            if ($targetCheckField) {
+                if (!$targetCheckField->value) {
+                    $targetCheckField->value = $checkField->getValue();
+                    $targetCheckField->save();
+                }
+            } else {
+                $tcf = new TargetCheckField();
+                $tcf->target_check_id = $targetCheck->id;
+                $tcf->check_field_id = $checkField->id;
+                $tcf->value = $checkField->getValue();
+                $tcf->save();
+            }
+        }
+    }
+
+    /**	
      * Get check human readable data
      * @param TargetCheck $tc
      * @return array

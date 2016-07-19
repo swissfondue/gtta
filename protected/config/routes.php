@@ -314,4 +314,10 @@ return array(
     // history
     "history/logins/<page:\d+>" => "history/logins",
     "history/logins"            => "history/logins",
+
+    "customization"                                 => "customization/index",
+    "customization/checks/fields"                   => "customization/checkfields",
+    "customization/checks/field/<id:\d+>/edit"      => "customization/editcheckfield",
+    "customization/checks/field/new"                => "customization/editcheckfield",
+    "customization/checks/field/<id:\d+>/control"   => "customization/controlcheckfield",
 );

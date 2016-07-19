@@ -25,36 +25,15 @@
                 ?>
             </td>
         </tr>
-        <?php if ($checkData->localizedBackgroundInfo): ?>
-            <tr>
-                <th>
-                    <?php echo Yii::t("app", "Background Info"); ?>
-                </th>
-                <td class="text">
-                    <div class="limiter"><?php echo $checkData->localizedBackgroundInfo; ?></div>
-                </td>
-            </tr>
-        <?php endif; ?>
-        <?php if ($checkData->localizedHints): ?>
-            <tr>
-                <th>
-                    <?php echo Yii::t("app", "Hints"); ?>
-                </th>
-                <td class="text">
-                    <div class="limiter"><?php echo $checkData->localizedHints; ?></div>
-                </td>
-            </tr>
-        <?php endif; ?>
-        <?php if ($checkData->localizedQuestion): ?>
-            <tr>
-                <th>
-                    <?php echo Yii::t("app", "Question"); ?>
-                </th>
-                <td class="text">
-                    <div class="limiter"><?php echo $checkData->localizedQuestion; ?></div>
-                </td>
-            </tr>
-        <?php endif; ?>
+
+        <?php foreach ($fields as $field): ?>
+            <?= $this->renderPartial("partial/check-field",
+                [
+                    "field" => $field,
+                    "targetCheck" => $check
+                ]); ?>
+        <?php endforeach; ?>
+
         <?php if ($checkData->automated): ?>
             <tr>
                 <th>
@@ -256,67 +235,7 @@
                 <?php endforeach; ?>
             <?php endforeach; ?>
         <?php endif; ?>
-        <tr>
-            <th>
-                <?php echo Yii::t("app", "Result"); ?>
-            </th>
-            <td>
-                <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[result]" class="max-width result <?php echo ( Utils::isHtml($check->result) ? 'html_content' : '' ); ?>" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_result" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo $check->result; ?></textarea>
 
-                <?php
-                    $showAuto = false;
-
-                    if ($checkData->automated && $check->isRunning) {
-                        $showAuto = true;
-                    }
-                ?>
-
-                <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
-                    <label class="checkbox">
-                        <input name="TargetCheckEditForm_<?php echo $check->id; ?>[saveResult]" type="checkbox" value="1" <?php if ($check->isRunning) echo "disabled"; ?> onchange="user.check.toggleField('TargetCheckEditForm_<?php echo $check->id; ?>_resultTitle')">
-                        <?php echo Yii::t("app", "Save As Generic"); ?>
-                    </label>
-
-                    <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[resultTitle]" class="max-width" style="display: none" id="TargetCheckEditForm_<?php echo $check->id; ?>_resultTitle" <?php if ($check->isRunning) echo "readonly"; ?> placeholder="<?php echo Yii::t("app", "Result Title"); ?>">
-                <?php endif; ?>
-
-                <div class="automated-info-block <?php if (!$showAuto) echo "hide"; ?>">
-                    <?php
-                        if ($showAuto) {
-                            $started = new DateTime(TargetCheckManager::getStartTime($check->id));
-                            $user = $check->user;
-
-                            echo Yii::t("app", "Started by {user} on {date} at {time}", array(
-                                "{user}" => $user->name ? $user->name : $user->email,
-                                "{date}" => $started->format("d.m.Y"),
-                                "{time}" => $started->format("H:i:s"),
-                            ));
-                        }
-                    ?>
-                </div>
-
-                <?php if (User::checkRole(User::ROLE_USER)): ?>
-                    <br>
-
-                    <span class="help-block pull-right">
-                        <a class="btn btn-default" href="#editor" onclick="user.check.toggleEditor('TargetCheckEditForm_<?php echo $check->id; ?>_result');">
-                            <span class="glyphicon glyphicon-edit"></span>
-                            <?php echo Yii::t("app", "WYSIWYG"); ?>
-                        </a>
-                    </span>
-                <?php endif; ?>
-
-                <div class="table-result">
-                    <?php
-                        if ($check->table_result) {
-                            $table = new ResultTable();
-                            $table->parse($check->table_result);
-                            echo $this->renderPartial("/project/target/check/tableresult", array("table" => $table, "check" => $check));
-                        }
-                    ?>
-                </div>
-            </td>
-        </tr>
         <?php if (User::checkRole(User::ROLE_USER)): ?>
             <tr class="<?php echo $results ? '' : 'hide'; ?>" ">
                 <th>
@@ -341,26 +260,6 @@
                 </td>
             </tr>
         <?php endif; ?>
-        <?php if ($this->_system->checklist_poc): ?>
-            <tr>
-                <th>
-                    <?php echo Yii::t("app", "Technical Details"); ?>
-                </th>
-                <td>
-                    <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[poc]" class="max-width wysiwyg" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_poc" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->poc); ?></textarea>
-                </td>
-            </tr>
-        <?php endif; ?>
-        <?php if ($this->_system->checklist_links): ?>
-            <tr>
-                <th>
-                    <?php echo Yii::t("app", "Links"); ?>
-                </th>
-                <td>
-                    <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[links]" class="max-width wysiwyg" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_links" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->links); ?></textarea>
-                </td>
-            </tr>
-        <?php endif; ?>        
         <tr>
             <th>
                 <?php echo Yii::t("app", "Solution"); ?>

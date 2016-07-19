@@ -20,8 +20,6 @@
  * @property string $table_result
  * @property string $solution
  * @property string $solution_title
- * @property string $poc
- * @property string $links
  * @property User $user
  * @property Check $check
  * @property Target $target
@@ -134,7 +132,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             array("target_file, result_file, protocol, override_target", "length", "max" => 1000),
             array("status", "in", "range" => array(self::STATUS_OPEN, self::STATUS_FINISHED)),
             array("rating", "in", "range" => self::getValidRatings()),
-            array("result, table_result, solution, solution_title, poc, links", "safe"),
+            array("result, table_result, solution, solution_title", "safe"),
 		);
 	}
 
@@ -153,8 +151,45 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "attachments" => array(self::HAS_MANY, "TargetCheckAttachment", "target_check_id"),
             "scripts" => array(self::HAS_MANY, "TargetCheckScript", "target_check_id"),
             "startScripts" => array(self::HAS_MANY, 'CheckScript', array('check_script_id' => 'id'), 'through' => 'scripts', 'condition' => "scripts.start = 't'"),
+            "fields" => array(self::HAS_MANY, "TargetCheckField", "target_check_id"),
 		);
 	}
+
+    /**
+     * Check fields
+     * @return array|CActiveRecord|mixed|null
+     */
+    public function getOrderedFields() {
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
+
+        if (!$language) {
+            $language = Language::model()->findByAttributes(array(
+                "default" => true
+            ));
+        }
+
+        return TargetCheckField::model()->with([
+            "field" => [
+                "joinType" => "LEFT JOIN",
+                "with" => [
+                    "global" => [
+                        "joinType" => "LEFT JOIN",
+                        "order" => "global.sort_order ASC",
+                        "with" => [
+                            "l10n" => [
+                                "on" => "l10n.language_id = :language_id",
+                                "params" => ["language_id" => $language->id],
+                            ],
+                        ],
+                    ],
+                ],
+            ]
+        ])->findAllByAttributes([
+            "target_check_id" => $this->id
+        ]);
+    }
 
     /**
      * Set automation error.
@@ -213,14 +248,9 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
 
         $checkData = array(
             "name" => $check->getLocalizedName(),
-            "background_info" => $check->getLocalizedBackgroundInfo(),
-            "hints" => $check->getLocalizedHints(),
-            "question" => $check->getLocalizedQuestion(),
             "rating" => $abbreviations[$this->rating],
             "rating_name" => $names[$this->rating],
             "target" => $this->override_target ? $this->override_target : $this->target->host,
-            "links" => $this->links,
-            "poc" => $this->poc,
             "result" => $this->result,
             "reference" => $check->_reference->name . ($check->reference_code ? "-" . $check->reference_code : ""),
             "solution" => array(),
@@ -320,11 +350,84 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         }
 
         if (!$this->result) {
-            $this->result = "";
+            $this->setResult("");
         }
 
         if ($data) {
-            $this->result .= $data;
+            $this->setResult($this->_getFieldValue(GlobalCheckField::FIELD_RESULT) . $data);
         }
+    }
+
+    /**
+     * Set result
+     * @param $data
+     * @throws Exception
+     */
+    public function setResult($data) {
+        $criteria = new CDbCriteria();
+        $criteria->join = "LEFT JOIN check_fields cf on cf.id = t.check_field_id";
+        $criteria->join .= " LEFT JOIN global_check_fields gcf on gcf.id = cf.global_check_field_id";
+        $criteria->addColumnCondition([
+            "gcf.name" => GlobalCheckField::FIELD_RESULT,
+            "t.target_check_id" => $this->id
+        ]);
+
+        $targetCheckField = TargetCheckField::model()->find($criteria);
+        $targetCheckField->value = $data;
+        $targetCheckField->save();
+    }
+
+    /**
+     * Returns target check field value
+     * @param $name
+     * @return mixed|null
+     */
+    private function _getFieldValue($name) {
+        $criteria = new CDbCriteria();
+        $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
+        $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
+        $criteria->addColumnCondition([
+            "gcf.name" => $name,
+            "t.target_check_id" => $this->id,
+        ]);
+        $field = TargetCheckField::model()->find($criteria);
+
+        if (!$field) {
+            return null;
+        }
+
+        return $field->value;
+    }
+
+    /**
+     * Return `background_info` field value
+     * @return mixed|null
+     */
+    public function getBackgroundInfo() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_BACKGROUND_INFO);
+    }
+
+    /**
+     * Return `question` field value
+     * @return mixed|null
+     */
+    public function getQuestion() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_QUESTION);
+    }
+
+    /**
+     * Return `hints` field value
+     * @return mixed|null
+     */
+    public function getHints() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_HINTS);
+    }
+
+    /**
+     * Return `result` field value
+     * @return mixed|null
+     */
+    public function getResult() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_RESULT);
     }
 }

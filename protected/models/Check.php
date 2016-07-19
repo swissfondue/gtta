@@ -7,9 +7,6 @@
  * @property integer $id
  * @property integer $check_control_id
  * @property string $name
- * @property string $background_info
- * @property string $hints
- * @property string $question
  * @property boolean $automated
  * @property boolean $multiple_solutions
  * @property string $protocol
@@ -84,8 +81,39 @@ class Check extends ActiveRecord {
             "solutions" => array(self::HAS_MANY, "CheckSolution", "check_id"),
             "scripts" => array(self::HAS_MANY, "CheckScript", "check_id"),
             "riskCategories" => array(self::HAS_MANY, "RiskCategoryCheck", "check_id"),
+            "fields" => array(self::HAS_MANY, "CheckField", "check_id"),
 		);
 	}
+
+    /**
+     * Check fields
+     * @return array|CActiveRecord|mixed|null
+     */
+    public function getOrderedFields() {
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+        
+        return CheckField::model()->with([
+            "global" => [
+                "joinType" => "LEFT JOIN",
+                "order" => "global.sort_order ASC",
+                "with" => [
+                    "l10n" => [
+                        "joinType" => "LEFT JOIN",
+                        "on" => "l10n.language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    ]
+                ]
+            ]
+        ])->findAllByAttributes([
+            "check_id" => $this->id
+        ]);
+    }
 
     /**
      * @return string localized name.
@@ -96,39 +124,6 @@ class Check extends ActiveRecord {
         }
 
         return $this->name;
-    }
-
-    /**
-     * @return string localized background info.
-     */
-    public function getLocalizedBackgroundInfo() {
-        if ($this->l10n && count($this->l10n) > 0) {
-            return $this->l10n[0]->background_info != NULL ? $this->l10n[0]->background_info : $this->background_info;
-        }
-        
-        return $this->background_info;
-    }
-
-    /**
-     * @return string localized hints.
-     */
-    public function getLocalizedHints() {
-        if ($this->l10n && count($this->l10n) > 0) {
-            return $this->l10n[0]->hints != NULL ? $this->l10n[0]->hints : $this->hints;
-        }
-
-        return $this->hints;
-    }
-    
-    /**
-     * @return string localized question.
-     */
-    public function getLocalizedQuestion() {
-        if ($this->l10n && count($this->l10n) > 0) {
-            return $this->l10n[0]->question != NULL ? $this->l10n[0]->question : $this->question;
-        }
-
-        return $this->question;
     }
 
     /**
@@ -147,5 +142,73 @@ class Check extends ActiveRecord {
         }
 
         return $names[$this->status];
+    }
+
+    /**
+     * Get field value
+     * @param $field
+     * @param null $languageId
+     * @return mixed|null
+     * @throws Exception
+     */
+    private function _getFieldValue($field, $languageId = null) {
+        $language = Language::model()->find("\"user_default\" OR \"default\"");
+
+        if ($languageId) {
+            $language = Language::model()->findByPk($languageId);
+
+            if (!$language) {
+                throw new Exception(Yii::t("app", "Language not exists."));
+            }
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
+        $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
+        $criteria->addColumnCondition([
+            "cf.check_id" => $this->id,
+            "gcf.name" => $field,
+            "t.language_id" => $language->id
+        ]);
+
+        $field = CheckFieldL10n::model()->find($criteria);
+
+        if (!$field) {
+            return null;
+        }
+
+        return $field->value;
+    }
+
+    /**
+     * Return `background_info` field value
+     * @return mixed|null
+     */
+    public function getBackgroundInfo() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_BACKGROUND_INFO);
+    }
+
+    /**
+     * Return `question` field value
+     * @return mixed|null
+     */
+    public function getQuestion() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_QUESTION);
+    }
+
+    /**
+     * Return `hints` field value
+     * @return mixed|null
+     */
+    public function getHints() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_HINTS);
+    }
+
+    /**
+     * Return `result` field value
+     * @return mixed|null
+     */
+    public function getResult() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_RESULT);
     }
 }

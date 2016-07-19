@@ -904,62 +904,6 @@ class ReportController extends Controller {
 
                             $row++;
 
-                            if ($check['background']) {
-                                $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 2)->setBorder($this->thinBorder);
-
-                                $table->writeToCell($row, 1, Yii::t('app', 'Background Info'));
-
-                                $cell = $table->getCell($row, 2);
-                                $this->_renderText($cell, $check['background'], false);
-
-                                $row++;
-                            }
-
-                            if ($check['question']) {
-                                $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 2)->setBorder($this->thinBorder);
-
-                                $table->writeToCell($row, 1, Yii::t('app', 'Question'));
-
-                                $cell = $table->getCell($row, 2);
-                                $this->_renderText($cell, $check['question'], false);
-
-                                $row++;
-                            }
-
-                            if ($check['result']) {
-                                $cutPos = mb_strpos($check["result"], "@cut", 0, "UTF-8");
-
-                                if ($cutPos !== false) {
-                                    $check["result"] = str_replace("@cut", "---", $check["result"]);
-                                }
-
-                                $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 2)->setBorder($this->thinBorder);
-                                $table->writeToCell($row, 1, Yii::t('app', 'Result'));
-
-                                if (Utils::isHtml($check["result"])) {
-                                    $this->_renderText($table->getCell($row, 2), $check["result"], false);
-                                } else {
-                                    $table->writeToCell($row, 2, $check["result"]);
-                                }
-
-                                $row++;
-                            }
-
                             if ($check['tableResult']) {
                                 $table->addRow();
                                 $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
@@ -1042,32 +986,25 @@ class ReportController extends Controller {
                                 $row++;
                             }
 
-                            if (isset($check["poc"]) && $check["poc"] && $this->_system->checklist_poc) {
-                                $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 2)->setBorder($this->thinBorder);
+                            if (isset($check["fields"])) {
+                                foreach ($check["fields"] as $field) {
+                                    $table->addRow();
+                                    $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                    $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                                    $table->getCell($row, 1)->setBorder($this->thinBorder);
+                                    $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
+                                    $table->getCell($row, 2)->setBorder($this->thinBorder);
 
-                                $table->writeToCell($row, 1, Yii::t("app", "Technical Details"));
-                                $table->writeToCell($row, 2, $check["poc"]);
+                                    $table->writeToCell($row, 1, $field["title"]);
 
-                                $row++;
-                            }
-                            
-                            if (isset($check["links"]) && $check["links"] && $this->_system->checklist_links) {
-                                $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 2)->setBorder($this->thinBorder);
+                                    if (Utils::isHtml($field["value"])) {
+                                        $this->_renderText($table->getCell($row, 2), $field["value"], false);
+                                    } else {
+                                        $table->writeToCell($row, 2, $field["value"]);
+                                    }
 
-                                $table->writeToCell($row, 1, Yii::t("app", "Links"));
-                                $table->writeToCell($row, 2, $check["links"]);
-
-                                $row++;
+                                    $row++;
+                                }
                             }
 
                             if ($check['solutions']) {
@@ -1305,10 +1242,11 @@ class ReportController extends Controller {
      * @param $targetIds
      * @param $templateCategoryIds
      * @param $project
+     * @param $fields
      * @param $language
      * @return array
      */
-    private function _projectReport($targetIds, $templateCategoryIds, $project, $language) {
+    private function _projectReport($targetIds, $templateCategoryIds, $project, $fields, $language) {
         $criteria = new CDbCriteria();
         $criteria->addInCondition('id', $targetIds);
         $criteria->addColumnCondition(array('project_id' => $project->id));
@@ -1431,8 +1369,6 @@ class ReportController extends Controller {
                             "background" => $this->_prepareProjectReportText($check->background_info),
                             "question" => $this->_prepareProjectReportText($check->question),
                             "result" => $check->result,
-                            "poc" => $check->poc,
-                            "links" => $check->links,
                             "tableResult" => null,
                             "rating" => $check->rating,
                             "ratingName" => $ratings[$check->rating],
@@ -1529,8 +1465,6 @@ class ReportController extends Controller {
                                 "solution" => $checkData["solutions"] ? implode("\n", $checkData["solutions"]) : "",
                                 "rating" => $checkData["rating"],
                                 "result" => $checkData["result"],
-                                "poc" => $checkData["poc"],
-                                "links" => $checkData["links"],
                                 "ratingValue" => $checkData["ratingValue"],
                                 "custom" => true,
                             );
@@ -1591,15 +1525,28 @@ class ReportController extends Controller {
                         $ctr = 0;
 
                         foreach ($check->targetChecks as $tc) {
+                            $checkFields = [];
+
+                            foreach ($tc->getOrderedFields() as $f) {
+                                if (
+                                    !$f->getHidden() && (
+                                        in_array($f->field->global->name, GlobalCheckField::$system) ||
+                                        in_array($f->field->global->name, $fields)
+                                    )
+                                ) {
+                                    $checkFields[] = [
+                                        "name" => $f->field->global->name,
+                                        "title" => $f->field->global->localizedTitle,
+                                        "value" => $f->value
+                                    ];
+                                }
+                            }
+
                             $checkData = array(
                                 "id" => $check->id,
                                 "custom" => false,
                                 "name" => $check->localizedName . ($ctr > 0 ? " " . ($ctr + 1) : ""),
-                                "background" => $this->_prepareProjectReportText($check->localizedBackgroundInfo),
-                                "question" => $this->_prepareProjectReportText($check->localizedQuestion),
-                                "result" => $tc->result,
-                                "poc" => $tc->poc,
-                                "links" => $tc->links,
+                                "fields" => $checkFields,
                                 "tableResult" => $tc->table_result,
                                 "rating" => 0,
                                 "ratingName" => $ratings[$tc->rating],
@@ -1692,6 +1639,19 @@ class ReportController extends Controller {
                             }
 
                             if (in_array($tc->rating, array(TargetCheck::RATING_HIGH_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_LOW_RISK))) {
+                                $question = "";
+                                $result = "";
+
+                                foreach ($checkData["fields"] as $f) {
+                                    if ($f["name"] == GlobalCheckField::FIELD_QUESTION) {
+                                        $question = $f["value"];
+                                    }
+
+                                    if ($f["name"] == GlobalCheckField::FIELD_RESULT) {
+                                        $result = $f["value"];
+                                    }
+                                }
+
                                 $reducedChecks[] = array(
                                     "target" => array(
                                         "id" => $target->id,
@@ -1700,12 +1660,10 @@ class ReportController extends Controller {
                                     ),
                                     "id" => $checkData["id"],
                                     "name" => $checkData["name"],
-                                    "question" => $checkData["question"],
+                                    "question" => $question,
                                     "solution" => $checkData["solutions"] ? implode("\n", $checkData["solutions"]) : "",
                                     "rating" => $checkData["rating"],
-                                    "result" => $checkData["result"],
-                                    "poc" => $checkData["poc"],
-                                    "links" => $checkData["links"],
+                                    "result" => $result,
                                     "ratingValue" => $checkData["ratingValue"],
                                 );
                             }
@@ -1781,6 +1739,11 @@ class ReportController extends Controller {
         $targetIds = $model->targetIds;
         $options = $model->options;
         $templateId = $model->templateId;
+        $fields = $model->fields;
+
+        if (!$fields) {
+            $fields = array();
+        }
 
         if (!$options) {
             $options = array();
@@ -1864,7 +1827,7 @@ class ReportController extends Controller {
 
         FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
 
-        $data = $this->_projectReport($targetIds, $templateCategoryIds, $project, $language);
+        $data = $this->_projectReport($targetIds, $templateCategoryIds, $project, $fields, $language);
 
         if ($template->type == ReportTemplate::TYPE_DOCX) {
             $plugin = ReportPlugin::getPlugin($template, $data);
@@ -2389,13 +2352,13 @@ class ReportController extends Controller {
 
                     $cell = $table->getCell($row, 2);
 
-                    if ($check['question']) {
+                    if ($check["question"]) {
+                        $question = is_array($check["question"]) ? $check["question"]["value"] : $check["question"];
                         $cell->writeText("<br>");
-                        $this->_renderText($cell, "(" . $check['question'] . ')', false);
+                        $this->_renderText($cell, "(" . $question . ')', false);
                     }
 
-                    $problem = $check["result"];
-                    $details = $check["poc"];
+                    $problem = is_array($check["result"]) ? $check["result"]["value"] : $check["result"];
 
                     $cell = $table->getCell($row, 3);
 
@@ -2407,16 +2370,6 @@ class ReportController extends Controller {
                         }
 
                         $cell->writeText("<br><br>");
-                    }
-
-                    if ($details) {
-                        $cell->writeText("Technical Details:<br>");
-
-                        if (Utils::isHtml($details)) {
-                            $this->_renderText($cell, $details, false);
-                        } else {
-                            $cell->writeText($details);
-                        }
                     }
 
 
@@ -2815,26 +2768,25 @@ class ReportController extends Controller {
     /**
      * Show project report form.
      */
-    public function actionProject()
-    {
+    public function actionProject() {
         $model = new ProjectReportForm();
 
-        if (isset($_POST['ProjectReportForm'])) {
-            $model->attributes = $_POST['ProjectReportForm'];
+        if (isset($_POST["ProjectReportForm"])) {
+            $model->attributes = $_POST["ProjectReportForm"];
 
             if ($model->validate()) {
                 $this->_generateProjectReport($model);
             } else {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
         }
 
         $criteria = new CDbCriteria();
-        $criteria->order = 't.name ASC';
+        $criteria->order = "t.name ASC";
 
         if (!User::checkRole(User::ROLE_ADMIN)) {
-            $projects = ProjectUser::model()->with('project')->findAllByAttributes(array(
-                'user_id' => Yii::app()->user->id
+            $projects = ProjectUser::model()->with("project")->findAllByAttributes(array(
+                "user_id" => Yii::app()->user->id
             ));
 
             $clientIds = array();
@@ -2845,13 +2797,13 @@ class ReportController extends Controller {
                 }
             }
 
-            $criteria->addInCondition('id', $clientIds);
+            $criteria->addInCondition("id", $clientIds);
         }
 
         $clients = Client::model()->findAll($criteria);
 
         $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
+            "code" => Yii::app()->language
         ));
 
         if ($language) {
@@ -2859,41 +2811,46 @@ class ReportController extends Controller {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->order = 'COALESCE(l10n.name, t.name) ASC';
+        $criteria->order = "COALESCE(l10n.name, t.name) ASC";
         $criteria->together = true;
 
         $templates = ReportTemplate::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on"       => "language_id = :language_id",
+                "params"   => array( "language_id" => $language )
             )
         ))->findAll($criteria);
+        
+        $lang = [
+            "l10n" => [
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => ["language_id" => $language]
+            ]
+        ];
 
-        $riskTemplates = RiskTemplate::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
-            )
-        ))->findAllByAttributes(
+        $riskTemplates = RiskTemplate::model()->with($lang)->findAllByAttributes(
             array(),
-            array( 'order' => 'COALESCE(l10n.name, t.name) ASC' )
+            array("order" => "COALESCE(l10n.name, t.name) ASC")
         );
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Project Report'), '');
+        $fields = GlobalCheckField::model()->with($lang)->findAll(["order" => "sort_order ASC"]);
+
+        $this->breadcrumbs[] = array(Yii::t("app", "Project Report"), "");
 
         // display the report generation form
-        $this->pageTitle = Yii::t('app', 'Project Report');
-		$this->render('project', array(
-            'model'         => $model,
-            'clients'       => $clients,
-            'templates'     => $templates,
-            'riskTemplates' => $riskTemplates,
-            'infoChecksLocation' => array(
-                ProjectReportForm::INFO_LOCATION_TARGET   => Yii::t('app', 'in the main list'),
-                ProjectReportForm::INFO_LOCATION_TABLE    => Yii::t('app', 'in a separate table'),
-                ProjectReportForm::INFO_LOCATION_APPENDIX => Yii::t('app', 'in the appendix'),
+        $this->pageTitle = Yii::t("app", "Project Report");
+		$this->render("project", array(
+            "model"         => $model,
+            "clients"       => $clients,
+            "templates"     => $templates,
+            "riskTemplates" => $riskTemplates,
+            "fields"        => $fields,
+            "infoChecksLocation" => array(
+                ProjectReportForm::INFO_LOCATION_TARGET   => Yii::t("app", "in the main list"),
+                ProjectReportForm::INFO_LOCATION_TABLE    => Yii::t("app", "in a separate table"),
+                ProjectReportForm::INFO_LOCATION_APPENDIX => Yii::t("app", "in the appendix"),
             ),
         ));
     }
@@ -4389,9 +4346,10 @@ class ReportController extends Controller {
             }
         }
 
+
         if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
             if ($type == TargetCheck::TYPE) {
-                $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($check->check->localizedBackgroundInfo);
+                $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($check->check->backgroundInfo);
             } elseif ($type == TargetCustomCheck::TYPE) {
                 $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $check->background_info;
             }
@@ -4399,7 +4357,7 @@ class ReportController extends Controller {
 
         if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns)) {
             if ($type == TargetCheck::TYPE) {
-                $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareVulnExportText($check->check->localizedQuestion);
+                $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareVulnExportText($check->check->question);
             } elseif ($type == TargetCustomCheck::TYPE) {
                 $row[TargetCheck::COLUMN_QUESTION] = $check->question;
             }
@@ -4408,6 +4366,7 @@ class ReportController extends Controller {
         if (in_array(TargetCheck::COLUMN_RESULT, $model->columns)) {
             $row[TargetCheck::COLUMN_RESULT] = $check->result;
         }
+
 
         if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns)) {
             if ($type == TargetCheck::TYPE) {
@@ -4493,16 +4452,22 @@ class ReportController extends Controller {
                 $header[TargetCheck::COLUMN_REFERENCE] = Yii::t('app', 'Reference');
             }
 
+            $biField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_BACKGROUND_INFO]);
+
             if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $model->columns)) {
-                $header[TargetCheck::COLUMN_BACKGROUND_INFO] = Yii::t('app', 'Background Info');
+                $header[TargetCheck::COLUMN_BACKGROUND_INFO] = $biField->localizedTitle;
             }
+
+            $qField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_QUESTION]);
 
             if (in_array(TargetCheck::COLUMN_QUESTION, $model->columns)) {
-                $header[TargetCheck::COLUMN_QUESTION] = Yii::t('app', 'Question');
+                $header[TargetCheck::COLUMN_QUESTION] = $qField->localizedTitle;
             }
 
+            $rField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_RESULT]);
+
             if (in_array(TargetCheck::COLUMN_RESULT, $model->columns)) {
-                $header[TargetCheck::COLUMN_RESULT] = Yii::t('app', 'Result');
+                $header[TargetCheck::COLUMN_RESULT] = $rField->localizedTitle;
             }
 
             if (in_array(TargetCheck::COLUMN_SOLUTION, $model->columns)) {
@@ -4708,6 +4673,10 @@ class ReportController extends Controller {
 
         $clients = Client::model()->findAll($criteria);
 
+        $bInfoField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_BACKGROUND_INFO]);
+        $questionField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_QUESTION]);
+        $resultField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_RESULT]);
+
         $this->breadcrumbs[] = array(Yii::t('app', 'Vulnerability Export'), '');
 
         // display the report generation form
@@ -4720,9 +4689,9 @@ class ReportController extends Controller {
                 TargetCheck::COLUMN_TARGET => Yii::t('app', 'Target'),
                 TargetCheck::COLUMN_NAME => Yii::t('app', 'Name'),
                 TargetCheck::COLUMN_REFERENCE => Yii::t('app', 'Reference'),
-                TargetCheck::COLUMN_BACKGROUND_INFO => Yii::t('app', 'Background Info'),
-                TargetCheck::COLUMN_QUESTION => Yii::t('app', 'Question'),
-                TargetCheck::COLUMN_RESULT => Yii::t('app', 'Result'),
+                TargetCheck::COLUMN_BACKGROUND_INFO => $bInfoField->localizedTitle,
+                TargetCheck::COLUMN_QUESTION => $questionField->localizedTitle,
+                TargetCheck::COLUMN_RESULT => $resultField->localizedTitle,
                 TargetCheck::COLUMN_SOLUTION => Yii::t('app', 'Solution'),
                 TargetCheck::COLUMN_RATING => Yii::t('app', 'Rating'),
                 TargetCheck::COLUMN_ASSIGNED_USER => Yii::t('app', 'Assigned'),

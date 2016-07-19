@@ -85,8 +85,8 @@ function User()
 
                                 check = data.checks[i];
 
+				$('#TargetCheckEditForm_fields_' + check.id + '_result').val(check.result);
                                 $('#TargetCheckEditForm_' + check.id + '_overrideTarget').val(check.overrideTarget);
-                                $('#TargetCheckEditForm_' + check.id + '_result').val(check.result);
                                 $('div.check-form[data-type=check][data-id="' + check.id + '"] div.table-result').html(check.tableResult);
 
                                 if (check.startedText) {
@@ -121,7 +121,7 @@ function User()
                                                     $("<a>")
                                                         .attr("href", attachment.url)
                                                         .html(attachment.name)
-                                                )
+                                            )
                                         );
 
                                         tr.append(
@@ -135,7 +135,7 @@ function User()
                                                         .click(function () {
                                                             user.check.delAttachment(attachment.path);
                                                         })
-                                                )
+                                            )
                                         );
 
                                         tbody.append(tr);
@@ -374,7 +374,7 @@ function User()
         this.expand = function (id, callback) {
             var header, form, url;
 
-            _check.destroyEditor("TargetCheckEditForm_" + id + "_result");
+            _check.destroyEditor("TargetCheckEditForm_fields_" + id + "_result");
 
             header = $("div.check-header[data-type=check][data-id=" + id + "]");
             form = $("div.check-form[data-type=check][data-id=" + id + "]");
@@ -442,7 +442,7 @@ function User()
          */
         this.collapse = function (id, callback) {
             var selector = $("div.check-form[data-type=check][data-id=" + id + "]");
-            
+
             selector.slideUp("slow", undefined, function () {
                 if (!selector.data("limited")) {
                     $("div.check-form[data-type=check][data-id=" + id + "]").html("");
@@ -592,7 +592,7 @@ function User()
             result = result.replace(/\n<br>/g, '\n').replace(/<br>\n/g, '\n').replace(/\n<br \/>/g, '\n').replace(/<br \/>\n/g, '\n');
             result = result.replace(/<br>/g, '\n').replace(/<br \/>/g, '\n');
 
-            var editor = _check.getEditor("TargetCheckEditForm_" + id + "_result");
+            var editor = _check.getEditor("TargetCheckEditForm_fields_" + id + "_result");
 
             if (editor) {
                 result = original + "<br><br>";
@@ -608,7 +608,7 @@ function User()
                     result = result + "\n\n";
                 }
 
-                var textarea = $('#TargetCheckEditForm_' + id + '_result');
+                var textarea = $('#TargetCheckEditForm_fields_' + id + '_result');
                 textarea.val(result + textarea.val());
                 textarea.trigger('change');
             }
@@ -651,7 +651,7 @@ function User()
          */
         this.getData = function (id) {
             var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, solutions, resultTitle, saveResult,
-                attachments, rating, data, solution, solutionTitle, saveSolution, poc, links, scripts, timeouts;
+                attachments, rating, data, solution, solutionTitle, saveSolution, scripts, timeouts, fields;
 
             row = $('div.check-form[data-type=check][data-id="' + id + '"]');
 
@@ -695,8 +695,8 @@ function User()
             protocol = $('input[name="TargetCheckEditForm_' + id + '[protocol]"]', row).val();
             port     = $('input[name="TargetCheckEditForm_' + id + '[port]"]', row).val();
             resultTitle = $('input[name="TargetCheckEditForm_' + id + '[resultTitle]"]', row).val();
-            result = _check.ckeditors["TargetCheckEditForm_" + id + "_result"] ?
-                _check.ckeditors["TargetCheckEditForm_" + id + "_result"].getData() :
+            result = _check.ckeditors["TargetCheckEditForm_fields_" + id + "_result"] ?
+                _check.ckeditors["TargetCheckEditForm_fields_" + id + "_result"].getData() :
                 $('textarea[name="TargetCheckEditForm_' + id + '[result]"]').val();
 
             scripts = $('input[name^="TargetCheckEditForm_' + id + '[scripts]"]', row).map(
@@ -722,16 +722,8 @@ function User()
                     }
                 }
             );
-                
+
             saveResult = $('input[name="TargetCheckEditForm_' + id + '[saveResult]"]', row).is(":checked");
-
-            if ($('textarea[name="TargetCheckEditForm_' + id + '[poc]"]', row)) {
-                poc = $('textarea[name="TargetCheckEditForm_' + id + '[poc]"]', row).val();
-            }
-
-            if ($('textarea[name="TargetCheckEditForm_' + id + '[links]"]', row)) {
-                links = $('textarea[name="TargetCheckEditForm_' + id + '[links]"]', row).val();
-            }
 
             solutions = $('input[name^="TargetCheckEditForm_' + id + '[solutions]"]:checked', row).map(
                 function () {
@@ -759,6 +751,19 @@ function User()
                 }
             ).get();
 
+            fields = $(".check-form[data-id=" + id +"]").find(".target-check-field").map(
+                function () {
+                    if ($(this).attr("type") == "radio" && !$(this).is(":checked")) {
+                        return;
+                    }
+
+                    return {
+                        name: $(this).attr("name"),
+                        value: _check.fieldValue($(this))
+                    }
+                }
+            );
+
             rating = $('input[name="TargetCheckEditForm_' + id + '[rating]"]:checked', row).val();
 
             if (override == undefined)
@@ -776,14 +781,6 @@ function User()
             if (rating == undefined)
                 rating = '';
 
-            if (poc == undefined) {
-                poc = "";
-            }
-
-            if (links == undefined) {
-                links = "";
-            }
-
             data = [];
 
             data.push({ name : 'TargetCheckEditForm_' + id + '[overrideTarget]', value : override });
@@ -795,8 +792,6 @@ function User()
 
             data.push({name: "TargetCheckEditForm_" + id + "[solution]", value: solution ? solution : ""});
             data.push({name: "TargetCheckEditForm_" + id + "[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
-            data.push({name: "TargetCheckEditForm_" + id + "[poc]", value: poc});
-            data.push({name: "TargetCheckEditForm_" + id + "[links]", value: links});
             data.push({ name: "TargetCheckEditForm_" + id + "[tableResult]", value: _check.buildTableResult(row) });
 
             if (saveSolution) {
@@ -827,6 +822,10 @@ function User()
                 data.push(attachments[i]);
             }
 
+            for (i = 0; i < fields.length; i++) {
+                data.push(fields[i]);
+            }
+
             for (i = 0; i < scripts.length; i++) {
                 data.push(scripts[i]);
             }
@@ -836,6 +835,33 @@ function User()
             }
 
             return data;
+        };
+
+        /**
+         * Get field value
+         * @param el
+         * @returns {*}
+         */
+        this.fieldValue = function (el) {
+            switch ($(el).prop("tagName")) {
+                case "INPUT":
+                    var type = $(el).attr("type");
+
+                    if (type == "text" || type == "radio") {
+                        return $(el).val();
+                    } else if (type == "checkbox") {
+                        return $(el).is(":checked")
+                    }
+
+                    break;
+
+                case "TEXTAREA":
+                    return $(el).val();
+
+                default:
+                    console.error("Invalid field tagname.");
+                    return null;
+            }
         };
 
         /**
@@ -1021,7 +1047,7 @@ function User()
          * @param id
          */
         this.getCustomData = function (id) {
-            var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck, poc, links, attachments;
+            var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck, attachments;
 
             row = $('div.check-form[data-type=custom-check][data-id=' + id + ']');
 
@@ -1033,16 +1059,8 @@ function User()
             solution = $('textarea[name="TargetCustomCheckEditForm_' + id + '[solution]"]', row).val();
             createCheck = $('input[name="TargetCustomCheckEditForm_' + id + '[createCheck]"]', row).is(":checked");
 
-            if ($('textarea[name="TargetCustomCheckEditForm_' + id + '[poc]"]', row)) {
-                poc = $('textarea[name="TargetCustomCheckEditForm_' + id + '[poc]"]', row).val();
-            }
-
-            if ($('textarea[name="TargetCustomCheckEditForm_' + id + '[links]"]', row)) {
-                links = $('textarea[name="TargetCustomCheckEditForm_' + id + '[links]"]', row).val();
-            }
-
-            result = _check.ckeditors["TargetCustomCheckEditForm_" + id + "_result"] ?
-                _check.ckeditors["TargetCustomCheckEditForm_" + id + "_result"].getData() :
+            result = _check.ckeditors["TargetCustomCheckEditForm_fields_" + id + "_result"] ?
+                _check.ckeditors["TargetCustomCheckEditForm_fields_" + id + "_result"].getData() :
                 $('textarea[name="TargetCustomCheckEditForm_' + id + '[result]"]').val();
 
             attachments = $('input[name^="TargetCustomCheckEditForm_' + id + '[attachmentTitles]"]', row).map(
@@ -1074,14 +1092,6 @@ function User()
                 rating = "";
             }
 
-            if (poc == undefined) {
-                poc = "";
-            }
-
-            if (links == undefined) {
-                links = "";
-            }
-
             data = [];
 
             if (createCheck) {
@@ -1096,8 +1106,6 @@ function User()
             data.push({name: "TargetCustomCheckEditForm[rating]", value: rating});
             data.push({name: "TargetCustomCheckEditForm[solution]", value: solution ? solution : ""});
             data.push({name: "TargetCustomCheckEditForm[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
-            data.push({name: "TargetCustomCheckEditForm[poc]", value: poc});
-            data.push({name: "TargetCustomCheckEditForm[links]", value: links});
 
             for (i = 0; i < attachments.length; i++) {
                 data.push(attachments[i]);
@@ -1167,7 +1175,7 @@ function User()
          * @param id
          */
         this.getCustomTemplateData = function (id) {
-            var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck, poc, links;
+            var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck;
 
             row = $('div.check-form[data-type=custom-template][data-id=' + id + ']');
             name = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[name]"]', row).val();
@@ -1177,17 +1185,8 @@ function User()
             solutionTitle = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[solutionTitle]"]', row).val();
             solution = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[solution]"]', row).val();
             createCheck = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[createCheck]"]', row).is(":checked");
-
-            if ($('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[poc]"]', row)) {
-                poc = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[poc]"]', row).val();
-            }
-
-            if ($('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[links]"]', row)) {
-                links = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[links]"]', row).val();
-            }
-
-            result = _check.ckeditors["TargetCustomCheckTemplateEditForm_" + id + "_result"] ?
-                _check.ckeditors["TargetCustomCheckTemplateEditForm_" + id + "_result"].getData() :
+            result = _check.ckeditors["TargetCustomCheckTemplateEditForm_fields_" + id + "_result"] ?
+                _check.ckeditors["TargetCustomCheckTemplateEditForm_fields_" + id + "_result"].getData() :
                 $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[result]"]').val();
 
             if (name == undefined) {
@@ -1210,14 +1209,6 @@ function User()
                 rating = "";
             }
 
-            if (poc == undefined) {
-                poc = "";
-            }
-
-            if (links == undefined) {
-                links = "";
-            }
-
             data = [];
 
             if (createCheck) {
@@ -1232,8 +1223,6 @@ function User()
             data.push({name: "TargetCustomCheckEditForm[rating]", value: rating});
             data.push({name: "TargetCustomCheckEditForm[solution]", value: solution ? solution : ""});
             data.push({name: "TargetCustomCheckEditForm[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
-            data.push({name: "TargetCustomCheckEditForm[poc]", value: poc});
-            data.push({name: "TargetCustomCheckEditForm[links]", value: links});
 
             return data;
         };
@@ -2336,7 +2325,7 @@ function User()
                     data: {
                         "YII_CSRF_TOKEN": system.csrf
                     },
-                    
+
                     "success": function (response) {
                         var status = parseInt(response.data.status);
                         var check = response.data.check;
