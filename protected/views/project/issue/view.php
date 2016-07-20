@@ -119,7 +119,7 @@
                                                         <?php endif; ?>
                                                     </td>
                                                     <td>
-                                                        <a href="<?= $this->createUrl("project/target", ["id" => $project->id, "target" => $tc->id]) ?>"><?= $tc->target->host ?></a>
+                                                        <a href="<?= $this->createUrl("project/target", ["id" => $project->id, "target" => $tc->target_id]) ?>"><?= $tc->target->host ?></a>
                                                     </td>
                                                     <td>
                                                         <?php if (count($tc->attachments)): ?>
