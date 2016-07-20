@@ -4,7 +4,7 @@
 
 <hr>
 
-<div class="container">
+<div class="container" data-add-evidence-url="<?= $this->createUrl("project/addEvidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
     <div class="row">
         <?= $this->renderPartial("partial/left-menu", ["project" => $project]) ?>
         <div class="span8">
@@ -209,7 +209,14 @@
     </div>
 </div>
 
-<div class="modal fade" id="target-select-dialog" tabindex="-1" role="dialog" aria-labelledby="smallModal" aria-hidden="true">
+<div
+    class="modal fade"
+    id="target-select-dialog"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="smallModal"
+    aria-hidden="true"
+    data-search-target-url="<?= $this->createUrl("project/searchTargets", ["id" => $project->id, "issue" => $issue->id]) ?>">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
@@ -237,7 +244,7 @@
         $("#target-select-dialog input.target-search-query").keyup(function (e) {
             // if alpha or backspace
             if (/[a-zA-Z0-9_ -]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8) {
-                admin.issue.loadTargets('<?= $this->createUrl("project/searchtargets", ["id" => $project->id, "issue" => $issue->id]) ?>', $(this).val())
+                admin.issue.searchTargets($(this).val());
             }
         });
 

@@ -83,6 +83,7 @@ return array(
     "project/issue/control" => "project/controlissue",
     "project/<id:\d+>/check/search" => "project/searchchecks",
     "project/<id:\d+>/issue/<issue:\d+>/target/search" => "project/searchtargets",
+    "project/<id:\d+>/issue/<issue:\d+>/evidence/new" => "project/addEvidence",
     "project/<id:\d+>/issue/<issue:\d+>/evidence/<evidence:\d+>" => "project/evidence",
     "project/<id:\d+>/issue/<issue:\d+>/checks/update" => "project/updateissuechecks",
     "project/<id:\d+>/issue/<issue:\d+>/checks/running" => "project/issuerunningchecks",

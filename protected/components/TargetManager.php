@@ -520,24 +520,33 @@ class TargetManager {
     }
 
     /**
-     * Bind target to issue
+     * Add issue evidence
      * @param Target $target
      * @param Issue $issue
      * @throws Exception
      */
-    public function bindToIssue(Target $target, Issue $issue) {
+    public function addEvidence(Target $target, Issue $issue) {
         $check = $issue->check;
-        $targetCheck = TargetCheck::model()->findByAttributes([
+        $targetCheck = null;
+
+        $targetChecks = TargetCheck::model()->with("evidence")->findAllByAttributes([
             "check_id" => $issue->check_id,
             "target_id" => $target->id
         ]);
+
+        foreach ($targetChecks as $tc) {
+            if (!$tc->evidence) {
+                $targetCheck = $tc;
+                break;
+            }
+        }
 
         if (!$targetCheck) {
             if ($target->check_source_type == Target::SOURCE_TYPE_CHECKLIST_TEMPLATES) {
                 $categoryIds = [];
 
                 foreach ($target->targetChecks as $tc) {
-                    $id = $tc->check->control->category_id;
+                    $id = $tc->check->control->check_category_id;
 
                     if (!in_array($id, $categoryIds)) {
                         $categoryIds[] = $id;
@@ -564,12 +573,12 @@ class TargetManager {
 
             $targetCheckCategory = TargetCheckCategory::model()->findByAttributes([
                 "target_id" => $target->id,
-                "check_category_id" => $issue->check->control->category_id
+                "check_category_id" => $issue->check->control->check_category_id
             ]);
 
             if (!$targetCheckCategory) {
                 $targetCheckCategory = new TargetCheckCategory();
-                $targetCheckCategory->check_category_id = $issue->check->control->category_id;
+                $targetCheckCategory->check_category_id = $issue->check->control->check_category_id;
                 $targetCheckCategory->target_id = $target->id;
                 $targetCheckCategory->save();
             }
@@ -628,27 +637,22 @@ class TargetManager {
     /**
      * Filter targets
      * @param $query
-     * @param array $exclude
+     * @param $projectId
      * @return array
      */
-    public function filter($query, $exclude = []) {
+    public function filter($query, $projectId) {
         $escapedQuery = pg_escape_string($query);
 
         $criteria = new CDbCriteria();
-        $criteria->order = "t.ip ASC";
-        $criteria->addNotInCondition("t.id", $exclude);
-        $criteria->order = "ipContains DESC, t.ip ASC";
-        $criteria->select = "t.*, position(lower('$escapedQuery') in lower(t.ip))::boolean AS ipContains";
 
         if ($query) {
-            $criteria->addSearchCondition("t.description", $query, true, "AND", "ILIKE");
-            $criteria->addSearchCondition("t.ip", $query, true, "OR", "ILIKE");
-            $criteria->addSearchCondition("t.host", $query, true, "OR", "ILIKE");
+            $criteria->addCondition("host ILIKE :q OR ip ILIKE :q OR description ILIKE :q");
+            $criteria->params = [":q" => "%$query%"];
         }
 
-        if ($exclude) {
-            $criteria->addNotInCondition("t.id", $exclude);
-        }
+        $criteria->addColumnCondition(["project_id" => $projectId]);
+        $criteria->order = "ipContains DESC, t.ip ASC";
+        $criteria->select = "t.*, position(lower('$escapedQuery') in lower(t.ip))::boolean AS ipContains";
 
         return Target::model()->findAll($criteria);
     }

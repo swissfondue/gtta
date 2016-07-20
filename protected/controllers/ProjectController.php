@@ -4812,7 +4812,6 @@ class ProjectController extends Controller {
             switch ($form->operation) {
                 case "delete":
                     $issue->delete();
-
                     break;
 
                 default:
@@ -4882,17 +4881,12 @@ class ProjectController extends Controller {
                 }
             }
 
-            $targets = $tm->filter($form->query, $exclude);
+            $targets = $tm->filter($form->query, $project->id);
             $data = [];
 
+            /** @var Target $target */
             foreach ($targets as $target) {
-                $targetData = $target->serialize($language->id);
-                $targetData["url"] = $this->createUrl("project/bindtarget", [
-                    "id" => $project->id,
-                    "issue" => $issue->id,
-                    "target" => $target->id
-                ]);
-                $data[] = $targetData;
+                $data[] = $target->serialize();
             }
 
             $response->addData("targets", $data);
@@ -4930,7 +4924,7 @@ class ProjectController extends Controller {
         $evidence = IssueEvidence::model()->findByPk($evidence);
 
         if (!$evidence) {
-            throw new CHttpException(404, Yii::t("app", "Issue evidence not found."));
+            throw new CHttpException(404, Yii::t("app", "Evidence not found."));
         }
 
         $language = Language::model()->findByAttributes([
@@ -4991,116 +4985,75 @@ class ProjectController extends Controller {
     }
 
     /**
-     * Action bind target to issue
+     * Add evidence to issue
      * @param $id
      * @param $issue
-     * @param $target
      * @throws CHttpException
      * @throws Exception
      */
-    public function actionBindTarget($id, $issue, $target) {
-        $id = (int) $id;
-        $issue = (int) $issue;
-        $target = (int) $target;
+    public function actionAddEvidence($id, $issue) {
+        $response = new AjaxResponse();
+        $tm = new TargetManager();
 
-        $project = Project::model()->findByPk($id);
+        try {
+            $id = (int) $id;
+            $issue = (int) $issue;
+            $project = Project::model()->findByPk($id);
 
-        if (!$project) {
-            throw new CHttpException(404, Yii::t("app", "Project not found."));
-        }
-
-        $issue = Issue::model()->findByPk($issue);
-
-        if (!$issue) {
-            throw new CHttpException(404, Yii::t("app", "Issue not found."));
-        }
-
-        $target = Target::model()->findByPk($target);
-
-        if (!$target) {
-            throw new CHttpException(404, Yii::t("app", "Target not found."));
-        }
-
-        $check = $issue->check;
-        $targetCheck = TargetCheck::model()->findByAttributes([
-            "check_id" => $check->id,
-            "target_id" => $target->id
-        ]);
-
-        if (!$targetCheck) {
-            $category = TargetCheckCategory::model()->findByAttributes([
-                "check_category_id" => $check->control->check_category_id,
-                "target_id" => $target->id
-            ]);
-
-            if (!$category) {
-                $category = new TargetCheckCategory();
-                $category->target_id = $target->id;
-                $category->check_category_id = $check->control->check_category_id;
-                $category->save();
+            if (!$project) {
+                throw new Exception(Yii::t("app", "Project not found."));
             }
 
-            $reference = TargetReference::model()->findByAttributes([
-                "target_id" => $target->id,
-                "reference_id" => $check->reference_id
+            /** @var Issue $issue */
+            $issue = Issue::model()->findByAttributes([
+                "id" => $issue,
+                "project_id" => $project->id,
             ]);
 
-            if (!$reference) {
-                $reference = new TargetReference();
-                $reference->target_id = $target->id;
-                $reference->reference_id = $check->reference_id;
-                $reference->save();
+            if (!$issue) {
+                throw new Exception(Yii::t("app", "Issue not found."));
             }
 
-            $admin = $target->project->admin ? $target->project->admin : User::getAdmin();
-            $language = Language::model()->findByAttributes(array("default" => true));
+            $form = new EntryControlForm();
+            $form->attributes = $_POST["EntryControlForm"];
 
-            $targetCheck = TargetCheckManager::create([
-                "target_id" => $target->id,
-                "check_id" => $check->id,
-                "user_id" => $admin->id,
-                "language_id" => $language->id,
-                "status" => TargetCheck::STATUS_OPEN,
-                "rating" => TargetCheck::RATING_NONE
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $id = $form->id;
+
+            /** @var Target $target */
+            $target = Target::model()->findByAttributes([
+                "id" => $id,
+                "project_id" => $project->id,
             ]);
 
-            foreach ($check->scripts as $script) {
-                $targetCheckScript = new TargetCheckScript();
-                $targetCheckScript->check_script_id = $script->id;
-                $targetCheckScript->target_check_id = $targetCheck->id;
-                $targetCheckScript->save();
+            if (!$target) {
+                throw new Exception(Yii::t("app", "Target not found."));
             }
 
-            foreach ($check->fields as $field) {
-                $targetCheckField = new TargetCheckField();
-                $targetCheckField->target_check_id = $targetCheck->id;
-                $targetCheckField->check_field_id = $field->id;
-                $targetCheckField->value = $field->getValue();
-                $targetCheckField->hidden = $field->hidden;
-                $targetCheckField->save();
-            }
+            switch ($form->operation) {
+                case "add":
+                    $tm->addEvidence($target, $issue);
+                    break;
 
-            ReindexJob::enqueue([
-                "target_id" => $target->id
-            ]);
+                default:
+                    throw new Exception(Yii::t("app", "Unknown operation."));
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
         }
 
-        $binded = IssueEvidence::model()->countByAttributes([
-            "target_check_id" => $targetCheck->id,
-            "issue_id" => $issue->id
-        ]);
-
-        if ($binded) {
-            throw new CHttpException(403, Yii::t("app", "Permission denied. Target already binded."));
-        }
-
-        $evidence = new IssueEvidence();
-        $evidence->issue_id = $issue->id;
-        $evidence->target_check_id = $targetCheck->id;
-        $evidence->save();
-        $evidence->refresh();
-
-        $this->redirect(["project/issue", "id" => $project->id, "issue" => $issue->id]);
+        echo $response->serialize();
     }
 
     /**
@@ -5134,7 +5087,6 @@ class ProjectController extends Controller {
             switch ($form->operation) {
                 case "delete":
                     $evidence->delete();
-
                     break;
 
                 default:

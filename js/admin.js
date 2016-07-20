@@ -472,11 +472,10 @@ function Admin()
         };
 
         /**
-         * Load target list
-         * @param url
+         * Search targets
          * @param query
          */
-        this.loadTargets = function (url, query) {
+        this.searchTargets = function (query) {
             var list = $("#target-select-dialog table.target-list");
 
             if (query.length < 3) {
@@ -500,7 +499,7 @@ function Admin()
 
                 $.ajax({
                     dataType : "json",
-                    url      : url,
+                    url      : $("[data-search-target-url]").data("search-target-url"),
                     timeout  : system.ajaxTimeout,
                     type     : "POST",
 
@@ -509,8 +508,7 @@ function Admin()
                     success : function (data, textStatus) {
                         $(".loader-image").hide();
 
-                        if (data.status == "error")
-                        {
+                        if (data.status == "error") {
                             system.addAlert("error", data.errorText);
                             return;
                         }
@@ -525,8 +523,11 @@ function Admin()
 
                             $.each(targets, function (key, value) {
                                 link = $("<a>")
-                                    .attr("href", value.url)
-                                    .text(value.ip + " — " + value.host);
+                                    .attr("href", "#")
+                                    .text(value.ip + " (" + value.host + ")")
+                                    .click(function () {
+                                        _issue.evidence.add(value.id);
+                                    });
 
                                 if (value.ip.toLowerCase().indexOf(query.toLowerCase()) != -1) {
                                     link = $("<b>").append(link);
@@ -878,6 +879,46 @@ function Admin()
                 if (confirm(system.translate("Are you sure that you want to delete this evidence?"))) {
                     _issue.control(url, id, "delete", callback);
                 }
+            };
+
+            /**
+             * Add evidence for current issue and provided target
+             * @param targetId
+             */
+            this.add = function (targetId) {
+                var data = {
+                    "YII_CSRF_TOKEN": system.csrf,
+                    "EntryControlForm[id]": targetId,
+                    "EntryControlForm[operation]": "add"
+                };
+
+                $.ajax({
+                    dataType: "json",
+                    url: $("[data-add-evidence-url]").data("add-evidence-url"),
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+                    data: data,
+
+                    success: function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        location.reload();
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend: function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
             };
         };
     };

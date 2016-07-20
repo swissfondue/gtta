@@ -23,6 +23,7 @@
  * @property integer $vuln_user_id
  * @property date $vuln_deadline
  * @property integer $vuln_status
+ * @property IssueEvidence $evidence
  */
 class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     public $mr;
@@ -149,6 +150,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "scripts" => array(self::HAS_MANY, "TargetCheckScript", "target_check_id"),
             "startScripts" => array(self::HAS_MANY, 'CheckScript', array('check_script_id' => 'id'), 'through' => 'scripts', 'condition' => "scripts.start = 't'"),
             "fields" => array(self::HAS_MANY, "TargetCheckField", "target_check_id"),
+            "evidence" => array(self::HAS_ONE, "IssueEvidence", "target_check_id"),
 		);
 	}
 
