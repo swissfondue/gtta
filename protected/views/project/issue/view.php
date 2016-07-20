@@ -55,41 +55,34 @@
                 <div class="span2">
                     <div class="target-ip-list">
                         <ul class="clear-ul">
-                            <?php foreach ($evidenceGroups as $ip => $targets): ?>
-                                <li><b><a href="#<?= $ip ?>"><?= sprintf("%s (%d)", $ip, count($targets)); ?></a></b></li>
+                            <?php foreach ($evidenceGroups as $ip => $targetChecks): ?>
+                                <li><b><a href="#<?= $ip ?>"><?= sprintf("%s (%d)", $ip, count($targetChecks)); ?></a></b></li>
                             <?php endforeach; ?>
                         </ul>
                     </div>
                 </div>
                 <div class="span6">
-                    <?php foreach ($evidenceGroups as $ip => $targets): ?>
+                    <?php foreach ($evidenceGroups as $ip => $targetChecks): ?>
                         <div id="<?= $ip ?>" class="target-group" style="margin-bottom: 20px;">
-                            <h3><?= Yii::t("app", "Evidence for :ip", [":ip" => $ip]) ?></h3>
+                            <h3><?= Yii::t("app", "Evidence for {ip}", ["{ip}" => $ip]) ?></h3>
 
                             <ul class="nav nav-tabs target-tabs">
-                                <?php $i = 0; ?>
-
-                                <?php foreach ($targets as $target): ?>
+                                <?php for ($i = 0; $i < count($targetChecks); $i++): ?>
                                     <li class="<?= $i == 0 ? 'active' : '' ?>">
-                                        <a href="#evidence_<?= $target->id ?>"><?= "#$i" ?></a>
+                                        <a href="#evidence_<?= $i; ?>">#<?= $i; ?></a>
                                     </li>
-
-                                    <?php $i++; ?>
-                                <?php endforeach; ?>
+                                <?php endfor; ?>
                             </ul>
 
                             <div class="tab-content">
                                 <?php $i = 0; ?>
 
-                                <?php foreach ($targets as $target): ?>
-                                    <?php $tc = $target->getCheck($issue->check_id); ?>
-                                    <?php $evidence = $issue->getEvidence($tc->id); ?>
-
-                                    <div class="tab-pane <?= $i == 0 ? 'active' : '' ?>" id="evidence_<?= $target->id ?>" data-target-check-id="<?= $tc->id ?>">
+                                <?php foreach ($targetChecks as $tc): ?>
+                                    <div class="tab-pane <?= $i == 0 ? "active" : "" ?>" id="evidence_<?= $i; ?>" data-target-check-id="<?= $tc->id ?>">
                                         <div class="control-group">
                                             <span style="font-size: 16px; margin-left: 5px;"><?= Yii::t("app", "Evidence for this instance") ?></span>&nbsp;—&nbsp;
-                                            <a href="<?= $this->createUrl("project/evidence", ["id" => $project->id, "issue" => $issue->id, "evidence" => $evidence->id]) ?>"><?= Yii::t("app", "Edit") ?></a>
-                                            <a class="red" href="#" onclick="admin.issue.evidence.delete('<?= $this->createUrl("project/controlevidence") ?>', <?= $evidence->id ?>, function () { system.redirect('<?= $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id]) ?>') });"><?= Yii::t("app", "Delete") ?></a>
+                                            <a href="<?= $this->createUrl("project/evidence", ["id" => $project->id, "issue" => $issue->id, "evidence" => $tc->evidence->id]) ?>"><?= Yii::t("app", "Edit") ?></a>
+                                            <a class="red" href="#" onclick="admin.issue.evidence.delete('<?= $this->createUrl("project/controlevidence") ?>', <?= $tc->evidence->id ?>, function () { system.redirect('<?= $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id]) ?>') });"><?= Yii::t("app", "Delete") ?></a>
 
                                             <?php if ($tc->check->automated): ?>
                                                 <div style="float:right">
@@ -126,7 +119,7 @@
                                                         <?php endif; ?>
                                                     </td>
                                                     <td>
-                                                        <a href="<?= $this->createUrl("project/target", ["id" => $project->id, "target" => $target->id]) ?>"><?= $target->host ?></a>
+                                                        <a href="<?= $this->createUrl("project/target", ["id" => $project->id, "target" => $tc->id]) ?>"><?= $tc->target->host ?></a>
                                                     </td>
                                                     <td>
                                                         <?php if (count($tc->attachments)): ?>

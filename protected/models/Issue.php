@@ -58,18 +58,6 @@ class Issue extends ActiveRecord
     }
 
     /**
-     * Get issue evidence by target check
-     * @param $targetCheckId
-     * @return CActiveRecord
-     */
-    public function getEvidence($targetCheckId) {
-        return IssueEvidence::model()->findByAttributes([
-            "issue_id" => $this->id,
-            "target_check_id" => $targetCheckId
-        ]);
-    }
-
-    /**
      * Get highest rating value of this issue
      */
     public function getHighestRating() {

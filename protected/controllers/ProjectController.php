@@ -4746,15 +4746,17 @@ class ProjectController extends Controller {
 
         $evidenceGroups = array_count_values($ips);
 
-        foreach ($evidenceGroups as $key => $value) {
+        foreach (array_keys($evidenceGroups) as $host) {
             $criteria = new CDbCriteria();
-            $criteria->join = "INNER JOIN target_checks ON target_checks.target_id = t.id";
-            $criteria->addColumnCondition([
-                "t.ip" => $key
-            ]);
-            $criteria->addInCondition("target_checks.id", $targetChecksIds);
+            $criteria->addInCondition("t.id", $targetChecksIds);
 
-            $evidenceGroups[$key] = Target::model()->findAll($criteria);;
+            $evidenceGroups[$host] = TargetCheck::model()->with([
+                "target" => [
+                    "on" => "target.id = t.target_id AND (target.ip = :h OR target.host = :h)",
+                    "params" => [":h" => $host],
+                ],
+                "evidence",
+            ])->findAll($criteria);;
         }
 
         $title = $issue->check->localizedName;
@@ -4773,9 +4775,9 @@ class ProjectController extends Controller {
             "client" => $client,
             "statuses" => [
                 Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
-                Project::STATUS_OPEN        => Yii::t("app", "Open"),
+                Project::STATUS_OPEN => Yii::t("app", "Open"),
                 Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
-                Project::STATUS_FINISHED    => Yii::t("app", "Finished"),
+                Project::STATUS_FINISHED => Yii::t("app", "Finished"),
             ],
             "evidenceGroups" => $evidenceGroups
         ]);
