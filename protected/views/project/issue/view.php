@@ -243,7 +243,7 @@
 
         setInterval(function () {
             admin.issue.getRunningChecks("<?= $this->createUrl("project/issuerunningchecks", ["id" => $project->id, "issue" => $issue->id]); ?>");
-        }, 1000);
+        }, 10000);
 
         setInterval(function () {
             admin.issue.update("<?php echo $this->createUrl("project/updateissuechecks", ["id" => $project->id, "issue" => $issue->id]); ?>");
