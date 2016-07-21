@@ -4608,10 +4608,41 @@ class ProjectController extends Controller {
             $language = $language->id;
         }
 
-        $issues = Issue::model()->findAllByAttributes(["project_id" => $project->id]);
-        $issueCount = Issue::model()->countByAttributes(["project_id" => $project->id]);
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(["project_id" => $project->id]);
+        $criteria->select = "t.id, c.name, COUNT(DISTINCT tc.target_id) AS affected_targets, MAX(tc.rating) AS top_rating";
+        $criteria->group = "t.id, c.name";
+        $criteria->join =
+            "LEFT JOIN checks c ON c.id = t.check_id " .
+            "LEFT JOIN issue_evidences ie ON ie.issue_id = t.id " .
+            "LEFT JOIN target_checks tc ON tc.id = ie.target_check_id";
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
+        $criteria->order = "top_rating DESC";
 
+        $issues = Issue::model()->findAll($criteria);
+        $issueCount = Issue::model()->count($criteria);
         $paginator = new Paginator($issueCount, $page);
+
+        $affectedAssetCount = [];
+
+        /** @var Issue $issue */
+        foreach ($issues as $issue) {
+            $count = 0;
+            $targetCache = [];
+
+            /** @var IssueEvidence $evidence */
+            foreach ($issue->evidences as $evidence) {
+                $target = $evidence->targetCheck->target_id;
+
+                if (!in_array($target, $targetCache)) {
+                    $targetCache[] = $target;
+                    $count++;
+                }
+            }
+
+            $affectedAssetCount[$issue->id] = $count;
+        }
 
         $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
         $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
@@ -4624,6 +4655,7 @@ class ProjectController extends Controller {
             "issues" => $issues,
             "p" => $paginator,
             "quickTargets" => $this->_getQuickTargets($project->id, $language),
+            "affectedAssetCount" => $affectedAssetCount,
         ));
     }
 
@@ -4668,17 +4700,17 @@ class ProjectController extends Controller {
 
         foreach ($evidences as $evidence) {
             $target = $evidence->targetCheck->target;
-            $ip = $target->ip ? $target->ip : $target->host;
+            $name = $target->ip ? $target->ip : $target->host;
 
-            if ($ip) {
-                $ips[] = $ip;
+            if ($name) {
+                $ips[] = $name;
             }
 
-            if (!isset($evidenceGroups[$ip])) {
-                $evidenceGroups[$ip] = [];
+            if (!isset($evidenceGroups[$name])) {
+                $evidenceGroups[$name] = [];
             }
 
-            $evidenceGroups[$ip][] = $evidence;
+            $evidenceGroups[$name][] = $evidence;
         }
 
         $title = $issue->check->localizedName;

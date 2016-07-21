@@ -313,11 +313,18 @@ class Target extends ActiveRecord implements IVariableScopeObject {
         return [
             "id" => $this->id,
             "project_id" => $this->project_id,
-            "host" => $this->host,
-            "ip" => $this->ip,
+            "name" => $this->getName(),
             "description" => $this->description,
             "port" => $this->port,
             "relation_template_id" => $this->relation_template_id,
         ];
+    }
+
+    /**
+     * Get target name
+     * @return string
+     */
+    public function getName() {
+        return $this->ip ? $this->ip . " (" . $this->host . ")" : $this->host;
     }
 }

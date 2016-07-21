@@ -15,20 +15,23 @@
                 <table class="table issue-list">
                     <tbody>
                         <tr>
-                            <th class="name"><?= Yii::t("app", "Name"); ?></th>
+                            <th><?= Yii::t("app", "Name"); ?></th>
                             <th class="status"><?= Yii::t("app", "Status"); ?></th>
-                            <th><?= Yii::t("app", "Assets"); ?></th>
+                            <th class="status"><?= Yii::t("app", "Affects"); ?></th>
+                            <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
+                                <th class="actions">&nbsp;</th>
+                            <?php endif; ?>
                         </tr>
                         <?php foreach ($issues as $issue): ?>
                             <tr data-id="<?= $issue->id; ?>" data-control-url="<?= $this->createUrl("project/controlissue"); ?>">
                                 <td class="name">
                                     <a href="<?= $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id]); ?>">
-                                        <?= CHtml::encode($issue->check->name); ?>
+                                        <?= CHtml::encode($issue->name); ?>
                                     </a>
                                 </td>
                                 <td>
                                     <?php
-                                        switch ($issue->highestRating) {
+                                        switch ($issue->top_rating) {
                                             case TargetCheck::RATING_HIGH_RISK:
                                                 $label = Yii::t("app", "High");
                                                 $ratingClass = "label-high-risk";
@@ -78,7 +81,7 @@
                                     <span class="label <?= $ratingClass ?>"><?= $label ?></span>
                                 </td>
                                 <td>
-                                    <?= count($issue->evidences); ?>
+                                    <?= $issue->affected_targets; ?>
                                 </td>
                                 <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                     <td class="actions">

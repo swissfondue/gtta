@@ -1371,7 +1371,11 @@ div.time-tracker {
     margin-bottom: 20px;
 }
 
-#left-menu {
-    margin-left: -325px;
-    position: fixed;
+.issue-list .actions {
+    width:5%;
+    text-align:right;
+}
+
+.issue-list .status {
+    width:15%;
 }

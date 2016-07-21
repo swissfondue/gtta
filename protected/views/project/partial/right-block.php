@@ -12,7 +12,7 @@
             <a href="<?= $this->createUrl("project/issues", ["id" => $project->id]); ?>"><?= Yii::t("app", "Summary of Issues"); ?></a>
         </div>
 
-        <?php foreach ($project->issues as $issue): ?>
+        <?php foreach ($project->getIssues() as $issue): ?>
             <div class="project-quick-nav-issue">
                 <div class="issue">
                     <?php
@@ -22,8 +22,8 @@
                             TargetCheck::RATING_HIGH_RISK => "high"
                         ];
                     ?>
-                    <div style="margin-right: 10px;" class="marker label-<?= in_array($issue->highestRating, array_keys($ratingLabels)) ? $ratingLabels[$issue->highestRating] : "no" ?>-risk"></div>
-                    <a href="<?php echo $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id]); ?>"><?php echo CHtml::encode($issue->check->name); ?></a>
+                    <div style="margin-right: 10px;" class="marker label-<?= in_array($issue->top_rating, array_keys($ratingLabels)) ? $ratingLabels[$issue->top_rating] : "no" ?>-risk"></div>
+                    <a href="<?php echo $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id]); ?>"><?php echo CHtml::encode($issue->name); ?></a>
                 </div>
             </div>
         <?php endforeach; ?>

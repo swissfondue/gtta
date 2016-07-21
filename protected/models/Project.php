@@ -385,4 +385,22 @@ class Project extends ActiveRecord implements IVariableScopeObject {
 
         return null;
     }
+
+    /**
+     * Get project issues
+     * @return array
+     */
+    public function getIssues() {
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(["project_id" => $this->id]);
+        $criteria->select = "t.id, c.name, COUNT(DISTINCT tc.target_id) AS affected_targets, MAX(tc.rating) AS top_rating";
+        $criteria->group = "t.id, c.name";
+        $criteria->join =
+            "LEFT JOIN checks c ON c.id = t.check_id " .
+            "LEFT JOIN issue_evidences ie ON ie.issue_id = t.id " .
+            "LEFT JOIN target_checks tc ON tc.id = ie.target_check_id";
+        $criteria->order = "top_rating DESC";
+
+        return Issue::model()->findAll($criteria);
+    }
 }

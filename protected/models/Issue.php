@@ -11,34 +11,42 @@
  * @property Check $check
  * @property IssueEvidence[] $evidences
  */
-class Issue extends ActiveRecord
-{
-    // sql query column aliases
-    public $rating;
+class Issue extends ActiveRecord {
+    /**
+     * @var string issue name (virtual column)
+     */
+    public $name;
+
+    /**
+     * @var int highest rating (virtual column)
+     */
+    public $top_rating;
+
+    /**
+     * @var int number of affected targets (virtual column)
+     */
+    public $affected_targets;
 
     /**
      * Returns the static model of the specified AR class.
      * @param string $className active record class name.
      * @return Check the static model class
      */
-    public static function model($className = __CLASS__)
-    {
+    public static function model($className = __CLASS__) {
         return parent::model($className);
     }
 
     /**
      * @return string the associated database table name
      */
-    public function tableName()
-    {
+    public function tableName() {
         return "issues";
     }
 
     /**
      * @return array validation rules for model attributes.
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             ["project_id, check_id", "required"],
             ["project_id, check_id", "numerical", "integerOnly" => true],
@@ -48,26 +56,11 @@ class Issue extends ActiveRecord
     /**
      * @return array relational rules.
      */
-    public function relations()
-    {
+    public function relations() {
         return [
             "project" => [self::BELONGS_TO, "Project", "project_id"],
             "check" => [self::BELONGS_TO, "Check", "check_id"],
             "evidences" => [self::HAS_MANY, "IssueEvidence", "issue_id"],
         ];
-    }
-
-    /**
-     * Get highest rating value of this issue
-     */
-    public function getHighestRating() {
-        $criteria = new CDbCriteria();
-        $criteria->join = "LEFT JOIN checks AS c ON c.id = t.check_id ";
-        $criteria->join .= "LEFT JOIN issue_evidences AS ie ON ie.issue_id = t.id ";
-        $criteria->join .= "LEFT JOIN target_checks AS tc ON tc.id = ie.target_check_id";
-        $criteria->group = "c.id";
-        $criteria->select = "MAX(tc.rating) AS rating";
-
-        return self::model()->findByPk($this->id, $criteria)->rating;
     }
 }

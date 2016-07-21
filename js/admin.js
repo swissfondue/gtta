@@ -541,7 +541,7 @@ function Admin()
                             $.each(targets, function (key, value) {
                                 link = $("<a>")
                                     .attr("href", "#")
-                                    .text(value.ip ? value.ip + " (" + value.host + ")" : value.host)
+                                    .text(value.name)
                                     .click(function () {
                                         _issue.evidence.add(value.id);
                                     });
