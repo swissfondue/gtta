@@ -148,6 +148,7 @@
                                                     </div>
                                                     <br/>
                                                 </div>
+
                                                 <div class="field-block evidence-field poc">
                                                     <b><?= Yii::t("app", "PoC") ?></b>
                                                     <br/>
@@ -160,6 +161,7 @@
                                                     </div>
                                                     <br/>
                                                 </div>
+
                                                 <div class="field-block">
                                                     <b><?= Yii::t("app", "Solution") ?></b>
                                                     <br/>
@@ -176,6 +178,14 @@
                                                         <br>
                                                         <?= $tc->solution ?>
                                                     <?php endif; ?>
+                                                </div>
+
+                                                <br/>
+
+                                                <div class="field-block">
+                                                    <b><?= Yii::t("app", "Rating") ?></b>
+                                                    <br/>
+                                                    <?php echo $this->renderPartial("partial/check-rating", ["check" => $tc]); ?>
                                                 </div>
                                         </div>
 

@@ -204,29 +204,7 @@
                                                 <?php endif; ?>
                                             </td>
                                             <td class="status">
-                                                <?php
-                                                    switch ($custom->rating) {
-                                                        case TargetCustomCheck::RATING_INFO:
-                                                            echo "<span class=\"label label-info\">" . $ratings[TargetCustomCheck::RATING_INFO] . "</span>";
-                                                            break;
-
-                                                        case TargetCustomCheck::RATING_LOW_RISK:
-                                                            echo "<span class=\"label label-low-risk\">" . $ratings[TargetCustomCheck::RATING_LOW_RISK] . "</span>";
-                                                            break;
-
-                                                        case TargetCustomCheck::RATING_MED_RISK:
-                                                            echo "<span class=\"label label-med-risk\">" . $ratings[TargetCustomCheck::RATING_MED_RISK] . "</span>";
-                                                            break;
-
-                                                        case TargetCustomCheck::RATING_HIGH_RISK:
-                                                            echo "<span class=\"label label-high-risk\">" . $ratings[TargetCustomCheck::RATING_HIGH_RISK] . "</span>";
-                                                            break;
-
-                                                        default:
-                                                            echo "<span class=\"label\">" . $ratings[$custom->rating] . "</span>";
-                                                            break;
-                                                    }
-                                                ?>
+                                                <?php echo $this->renderPartial("partial/check-rating", ["check" => $custom]); ?>
                                             </td>
                                             <?php if (User::checkRole(User::ROLE_USER)): ?>
                                                 <td class="actions">
