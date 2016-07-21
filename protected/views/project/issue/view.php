@@ -47,7 +47,7 @@
                 <div class="span8">
                     <b style="font-size: 20px"><?= Yii::t("app", "Assets affected by this Issue") ?></b>
                     &nbsp;—&nbsp;
-                    <a href="#" onclick="admin.issue.showTargetAddPopup()"><?= Yii::t("app", "Add") ?></a>
+                    <a href="#" onclick="admin.issue.showTargetSelectDialog();"><?= Yii::t("app", "Add") ?></a>
                 </div>
             </div>
             <br>
@@ -218,10 +218,10 @@
             </div>
             <div class="modal-body">
                 <input class="target-search-query"
-                       placeholder="<?= Yii::t("app", "Search String (At Least 3 Symbol)...") ?>"
+                       placeholder="<?= Yii::t("app", "Hostname or IP address") ?>"
                        type="text" />
                 <table class="table target-list"></table>
-                <span class="no-search-result" style="display:none"><?= Yii::t("app", "No Target") ?></span>
+                <span class="no-search-result" style="display:none"><?= Yii::t("app", "No targets found.") ?></span>
             </div>
         </div>
     </div>
@@ -248,5 +248,8 @@
         setInterval(function () {
             admin.issue.update("<?php echo $this->createUrl("project/updateissuechecks", ["id" => $project->id, "issue" => $issue->id]); ?>");
         }, 1000);
+
+
+        admin.issue.initTargetSelectDialog();
     });
 </script>

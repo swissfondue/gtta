@@ -2818,9 +2818,8 @@ class ProjectController extends Controller {
                     }
                 }
 
-                $targetCheck = TargetCheckManager::create([
+                $targetCheck = TargetCheckManager::create($check, [
                     "target_id" => $target->id,
-                    "check_id" => $check->id,
                     "user_id" => Yii::app()->user->id,
                     "language_id" => $language->id,
                     "status" => TargetCheck::STATUS_FINISHED,
@@ -4524,7 +4523,7 @@ class ProjectController extends Controller {
     }
 
     /**
-     * Action search checks for issue bind
+     * Action search checks for binding the issue
      * @param $id
      */
     public function actionSearchChecks($id) {
@@ -4535,11 +4534,11 @@ class ProjectController extends Controller {
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
-                throw new CHttpException(404, Yii::t("app", "Project not found."));
+                throw new Exception(Yii::t("app", "Project not found."));
             }
 
             if (!isset($_POST["SearchForm"])) {
-                throw new CHttpException(400, Yii::t("app", "Invalid search query"));
+                throw new Exception(Yii::t("app", "Invalid search query"));
             }
 
             $form = new SearchForm();
@@ -4573,12 +4572,7 @@ class ProjectController extends Controller {
             $data = [];
 
             foreach ($checks as $check) {
-                $checkData = $check->check->serialize($language->id);
-                $checkData["url"] = $this->createUrl("project/bindissue", [
-                    "id" => $id,
-                    "check" => $check->check->id
-                ]);
-                $data[] = $checkData;
+                $data[] = $check->check->serialize($language->id);
             }
 
             $response->addData("checks", $data);
@@ -4590,52 +4584,68 @@ class ProjectController extends Controller {
     }
 
     /**
-     * Bind issue to project
+     * Add issue to project
      * @param $id
-     * @param $check
      * @throws CHttpException
      * @throws Exception
      */
-    public function actionBindIssue($id, $check) {
-        $id = (int) $id;
-        $check = (int) $check;
+    public function actionAddIssue($id) {
+        $response = new AjaxResponse();
 
-        $project = Project::model()->findByPk($id);
+        try {
+            $id = (int) $id;
 
-        if (!$project) {
-            throw new CHttpException(404, Yii::t("app", "Project not found."));
+            /** @var Project $project */
+            $project = Project::model()->findByPk($id);
+
+            if (!$project) {
+                throw new Exception(Yii::t("app", "Project not found."));
+            }
+
+            $form = new EntryControlForm();
+            $form->attributes = $_POST["EntryControlForm"];
+
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $id = $form->id;
+
+            /** @var Check $check */
+            $check = Check::model()->findByPk($id);
+
+            if (!$check) {
+                throw new CHttpException(404, Yii::t("app", "Check not found."));
+            }
+
+            switch ($form->operation) {
+                case "add":
+                    $pm = new ProjectManager();
+                    $issue = $pm->addIssue($project, $check);
+
+                    $response->addData("url", $this->createUrl("project/issue", [
+                        "id" => $project->id,
+                        "issue" => $issue->id
+                    ]));
+
+                    break;
+
+                default:
+                    throw new Exception(Yii::t("app", "Unknown operation."));
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
         }
 
-        $check = Check::model()->findByPk($check);
-
-        if (!$check) {
-            throw new CHttpException(404, Yii::t("app", "Check not found."));
-        }
-
-        $exists = Issue::model()->findByAttributes([
-            "check_id" => $check->id,
-            "project_id" => $project->id
-        ]);
-
-        if ($exists) {
-            throw new CHttpException(403, Yii::t("app", "Permission denied."));
-        }
-
-        $issue = new Issue();
-        $issue->project_id = $project->id;
-        $issue->check_id = $check->id;
-        $issue->save();
-        $issue->refresh();
-
-        foreach ($check->targetChecks as $tc) {
-            $evidence = new IssueEvidence();
-            $evidence->issue_id = $issue->id;
-            $evidence->target_check_id = $tc->id;
-            $evidence->save();
-            $evidence->refresh();
-        }
-
-        $this->redirect(["project/issue", "id" => $project->id, "issue" => $issue->id]);
+        echo $response->serialize();
     }
 
     /**

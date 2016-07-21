@@ -5,16 +5,17 @@
 class TargetCheckManager {
     /**
      * Target check create
+     * @param Check $check
      * @param $data
      * @return TargetCheck
      * @throws Exception
      */
-    public static function create($data) {
+    public static function create(Check $check, $data) {
         $targetCheck = new TargetCheck();
 
         try {
             $targetCheck->target_id = $data["target_id"];
-            $targetCheck->check_id = $data["check_id"];
+            $targetCheck->check_id = $check->id;
             $targetCheck->user_id = $data["user_id"];
             $targetCheck->language_id = $data["language_id"];
             $targetCheck->status = isset($data["status"]) ? $data["status"] : TargetCheck::STATUS_OPEN;
@@ -32,10 +33,26 @@ class TargetCheckManager {
 
             $targetCheck->save();
             $targetCheck->refresh();
+
+            foreach ($check->scripts as $script) {
+                $targetCheckScript = new TargetCheckScript();
+                $targetCheckScript->check_script_id = $script->id;
+                $targetCheckScript->target_check_id = $targetCheck->id;
+                $targetCheckScript->save();
+            }
+
+            /** @var CheckField $field */
+            foreach ($check->fields as $field) {
+                $targetCheckField = new TargetCheckField();
+                $targetCheckField->target_check_id = $targetCheck->id;
+                $targetCheckField->check_field_id = $field->id;
+                $targetCheckField->value = $field->getValue();
+                $targetCheckField->hidden = $field->hidden;
+                $targetCheckField->save();
+            }
         } catch (Exception $e) {
             throw new Exception("Can't create check.");
         }
-
 
         return $targetCheck;
     }

@@ -15,6 +15,7 @@
  * @property float $hours_allocated
  * @property float $userHoursAllocated
  * @property float $userHoursSpent
+ * @property Target[] $targets
  */
 class Project extends ActiveRecord implements IVariableScopeObject {
     /**

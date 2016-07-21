@@ -209,30 +209,13 @@ class TargetManager {
                 ));
 
                 foreach ($checksToAdd as $check) {
-                    $targetCheck = TargetCheckManager::create([
+                    TargetCheckManager::create($check, [
                         "target_id" => $target->id,
-                        "check_id" => $check->id,
                         "user_id" => $admin->id,
                         "language_id" => $language->id,
                         "status" => TargetCheck::STATUS_OPEN,
                         "rating" => TargetCheck::RATING_NONE
                     ]);
-
-                    foreach ($check->scripts as $script) {
-                        $targetCheckScript = new TargetCheckScript();
-                        $targetCheckScript->check_script_id = $script->id;
-                        $targetCheckScript->target_check_id = $targetCheck->id;
-                        $targetCheckScript->save();
-                    }
-
-                    foreach ($check->fields as $field) {
-                        $targetCheckField = new TargetCheckField();
-                        $targetCheckField->target_check_id = $targetCheck->id;
-                        $targetCheckField->check_field_id = $field->id;
-                        $targetCheckField->value = $field->getValue();
-                        $targetCheckField->hidden = $field->hidden;
-                        $targetCheckField->save();
-                    }
                 }
 
                 break;
@@ -523,11 +506,13 @@ class TargetManager {
      * Add issue evidence
      * @param Target $target
      * @param Issue $issue
+     * @param bool $createTargetCheck
      * @throws Exception
      */
-    public function addEvidence(Target $target, Issue $issue) {
+    public function addEvidence(Target $target, Issue $issue, $createTargetCheck=true) {
         $check = $issue->check;
         $targetCheck = null;
+        $created = false;
 
         $targetChecks = TargetCheck::model()->with("evidence")->findAllByAttributes([
             "check_id" => $issue->check_id,
@@ -541,7 +526,13 @@ class TargetManager {
             }
         }
 
+        if (!$targetCheck && !$createTargetCheck) {
+            return;
+        }
+
         if (!$targetCheck) {
+            $created = true;
+
             if ($target->check_source_type == Target::SOURCE_TYPE_CHECKLIST_TEMPLATES) {
                 $categoryIds = [];
 
@@ -585,7 +576,7 @@ class TargetManager {
 
             $targetReference = TargetReference::model()->findByAttributes([
                 "target_id" => $target->id,
-                 "reference_id" => $check->reference_id
+                "reference_id" => $check->reference_id
             ]);
 
             if (!$targetReference) {
@@ -598,30 +589,13 @@ class TargetManager {
             $admin = $target->project->admin ? $target->project->admin : User::getAdmin();
             $language = System::model()->findByPk(1)->language;
 
-            $targetCheck = TargetCheckManager::create([
+            $targetCheck = TargetCheckManager::create($check, [
                 "target_id" => $target->id,
-                "check_id" => $issue->check->id,
                 "user_id" => $admin->id,
                 "language_id" => $language->id,
                 "status" => TargetCheck::STATUS_OPEN,
                 "rating" => TargetCheck::RATING_NONE
             ]);
-
-            foreach ($check->scripts as $script) {
-                $targetCheckScript = new TargetCheckScript();
-                $targetCheckScript->check_script_id = $script->id;
-                $targetCheckScript->target_check_id = $targetCheck->id;
-                $targetCheckScript->save();
-            }
-
-            foreach ($check->fields as $field) {
-                $targetCheckField = new TargetCheckField();
-                $targetCheckField->target_check_id = $targetCheck->id;
-                $targetCheckField->check_field_id = $field->id;
-                $targetCheckField->value = $field->getValue();
-                $targetCheckField->hidden = $field->hidden;
-                $targetCheckField->save();
-            }
         }
 
         $evidence = new IssueEvidence();
@@ -629,9 +603,11 @@ class TargetManager {
         $evidence->target_check_id = $targetCheck->id;
         $evidence->save();
 
-        ReindexJob::enqueue([
-            "target_id" => $target->id
-        ]);
+        if ($created) {
+            ReindexJob::enqueue([
+                "target_id" => $target->id
+            ]);
+        }
     }
 
     /**

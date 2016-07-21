@@ -92,7 +92,7 @@
 
                 <?= $this->renderPartial("/layouts/partial/pagination", ["p" => $p, "url" => "project/issues", "params" => ["id" => $project->id]]); ?>
             <?php else: ?>
-                <?= Yii::t("app", "No Issues Yet."); ?>
+                <?= Yii::t("app", "No issues yet."); ?>
             <?php endif; ?>
         </div>
     </div>

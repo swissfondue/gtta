@@ -78,7 +78,7 @@ return array(
 
     // project issues
     "project/<id:\d+>/issues" => "project/issues",
-    "project/<id:\d+>/check/<check:\d+>/bind" => "project/bindissue",
+    "project/<id:\d+>/issue/new" => "project/addIssue",
     "project/<id:\d+>/issue/<issue:\d+>" => "project/issue",
     "project/issue/control" => "project/controlissue",
     "project/<id:\d+>/check/search" => "project/searchchecks",

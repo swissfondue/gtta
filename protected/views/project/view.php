@@ -33,7 +33,9 @@
 
 <hr>
 
-<div class="container">
+<div
+    class="container"
+    data-add-issue-url="<?= $this->createUrl("project/addIssue", ["id" => $project->id]); ?>">
     <div class="row">
         <div class="span8">
             <?php if (count($targets) > 0): ?>
@@ -147,7 +149,14 @@
     </div>
 </div>
 
-<div class="modal fade" id="issue-check-select-dialog" tabindex="-1" role="dialog" aria-labelledby="smallModal" aria-hidden="true">
+<div
+    class="modal fade"
+    id="issue-check-select-dialog"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="smallModal"
+    aria-hidden="true"
+    data-search-check-url="<?= $this->createUrl("project/searchchecks", ["id" => $project->id]) ?>">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
@@ -156,10 +165,10 @@
             </div>
             <div class="modal-body">
                 <input class="issue-search-query"
-                       placeholder="<?= Yii::t("app", "Search String (At Least 3 Symbol)...") ?>"
+                       placeholder="<?= Yii::t("app", "Check name") ?>"
                        type="text" />
                 <table class="table check-list"></table>
-                <span class="no-search-result" style="display:none"><?= Yii::t("app", "No Checks") ?></span>
+                <span class="no-search-result" style="display:none"><?= Yii::t("app", "No checks found.") ?></span>
             </div>
         </div>
     </div>
@@ -174,8 +183,10 @@
         $("#issue-check-select-dialog input.issue-search-query").keyup(function (e) {
             // if alpha or backspace
             if (/[a-zA-Z0-9_ -]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8) {
-                admin.issue.loadChecks('<?= $this->createUrl("project/searchchecks", ["id" => $project->id]) ?>', $(this).val())
+                admin.issue.searchChecks($(this).val())
             }
         });
+
+        admin.issue.initCheckSelectDialog();
     });
 </script>

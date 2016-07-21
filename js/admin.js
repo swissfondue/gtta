@@ -364,37 +364,56 @@ function Admin()
             var modal = $("#issue-check-select-dialog");
             var list = modal.find("table.check-list");
             var field = modal.find(".issue-search-query");
+
             field.val("");
             list.empty();
+
             modal.find(".no-search-result").hide();
             modal.modal();
-            field.focus();
         };
 
         /**
-         * Show add issue popup
+         * Init check selection dialog
          */
-        this.showTargetAddPopup = function () {
+        this.initCheckSelectDialog = function () {
+            $("#issue-check-select-dialog").on("shown", function () {
+                $(".issue-search-query").focus();
+            });
+        };
+
+        /**
+         * Init target selection dialog
+         */
+        this.initTargetSelectDialog = function () {
+            $("#target-select-dialog").on("shown", function () {
+                $(".target-search-query").focus();
+            });
+        };
+
+        /**
+         * Show add target popup
+         */
+        this.showTargetSelectDialog = function () {
             var modal = $("#target-select-dialog");
             var list = modal.find("table.target-list");
-            var field = modal.find(".target-search-query").val("");
+            var field = modal.find(".target-search-query");
+
             list.empty();
+            field.val("");
+
             modal.find(".no-search-result").hide();
             modal.modal();
-            field.focus();
         };
 
         /**
          * Load check list
-         * @param url
          * @param query
          */
-        this.loadChecks = function (url, query) {
+        this.searchChecks = function (query) {
             var list = $("#issue-check-select-dialog table.check-list");
 
-            if (query.length < 3) {
+            if (query.length < 1) {
                 list.empty();
-
                 return;
             }
 
@@ -412,18 +431,17 @@ function Admin()
                 }
 
                 $.ajax({
-                    dataType : "json",
-                    url      : url,
-                    timeout  : system.ajaxTimeout,
-                    type     : "POST",
+                    dataType: "json",
+                    url: $("[data-search-check-url]").data("search-check-url"),
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
 
-                    data : data,
+                    data: data,
 
                     success : function (data, textStatus) {
                         $(".loader-image").hide();
 
-                        if (data.status == "error")
-                        {
+                        if (data.status == "error") {
                             system.addAlert("error", data.errorText);
                             return;
                         }
@@ -438,8 +456,11 @@ function Admin()
 
                             $.each(checks, function (key, value) {
                                 link = $("<a>")
-                                    .attr("href", value.url)
-                                    .text(value.name);
+                                    .attr("href", "#")
+                                    .text(value.name)
+                                    .click(function () {
+                                        _issue.add(value.id);
+                                    });
 
                                 if (value.name.toLowerCase().indexOf(query.toLowerCase()) != -1) {
                                     link = $("<b>").append(link);
@@ -478,7 +499,7 @@ function Admin()
         this.searchTargets = function (query) {
             var list = $("#target-select-dialog table.target-list");
 
-            if (query.length < 3) {
+            if (query.length < 1) {
                 list.empty();
 
                 return;
@@ -723,6 +744,46 @@ function Admin()
             if (confirm(system.translate("Are you sure that you want to delete this issue?"))) {
                 _issue.control(url, id, "delete", callback);
             }
+        };
+
+        /**
+         * Add issue for current project and provided check
+         * @param checkId
+         */
+        this.add = function (checkId) {
+            var data = {
+                "YII_CSRF_TOKEN": system.csrf,
+                "EntryControlForm[id]": checkId,
+                "EntryControlForm[operation]": "add"
+            };
+
+            $.ajax({
+                dataType: "json",
+                url: $("[data-add-issue-url]").data("add-issue-url"),
+                timeout: system.ajaxTimeout,
+                type: "POST",
+                data: data,
+
+                success: function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    window.location.href = data.data.url;
+                },
+
+                error: function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend: function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
         };
 
         /**
