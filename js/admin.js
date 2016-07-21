@@ -462,10 +462,6 @@ function Admin()
                                         _issue.add(value.id);
                                     });
 
-                                if (value.name.toLowerCase().indexOf(query.toLowerCase()) != -1) {
-                                    link = $("<b>").append(link);
-                                }
-
                                 list.find("tbody").append(
                                     $("<tr>")
                                         .append(
@@ -545,14 +541,10 @@ function Admin()
                             $.each(targets, function (key, value) {
                                 link = $("<a>")
                                     .attr("href", "#")
-                                    .text(value.ip + " (" + value.host + ")")
+                                    .text(value.ip ? value.ip + " (" + value.host + ")" : value.host)
                                     .click(function () {
                                         _issue.evidence.add(value.id);
                                     });
-
-                                if (value.ip.toLowerCase().indexOf(query.toLowerCase()) != -1) {
-                                    link = $("<b>").append(link);
-                                }
 
                                 list.find("tbody").append(
                                     $("<tr>")

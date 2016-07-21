@@ -4742,31 +4742,27 @@ class ProjectController extends Controller {
         $client = Client::model()->findByPk($project->client_id);
 
         $ips = [];
-        $targetChecksIds = [];
+        $evidences = IssueEvidence::model()->with([
+            "targetCheck" => [
+                "with" => "target"
+            ]
+        ])->findAllByAttributes(["issue_id" => $issue->id]);
 
-        foreach ($issue->evidences as $evidence) {
-            $ip = $evidence->targetCheck->target->ip;
+        $evidenceGroups = [];
+
+        foreach ($evidences as $evidence) {
+            $target = $evidence->targetCheck->target;
+            $ip = $target->ip ? $target->ip : $target->host;
 
             if ($ip) {
-                $ips[] = $evidence->targetCheck->target->ip;
+                $ips[] = $ip;
             }
 
-            $targetChecksIds[] = $evidence->targetCheck->id;
-        }
+            if (!isset($evidenceGroups[$ip])) {
+                $evidenceGroups[$ip] = [];
+            }
 
-        $evidenceGroups = array_count_values($ips);
-
-        foreach (array_keys($evidenceGroups) as $host) {
-            $criteria = new CDbCriteria();
-            $criteria->addInCondition("t.id", $targetChecksIds);
-
-            $evidenceGroups[$host] = TargetCheck::model()->with([
-                "target" => [
-                    "on" => "target.id = t.target_id AND (target.ip = :h OR target.host = :h)",
-                    "params" => [":h" => $host],
-                ],
-                "evidence",
-            ])->findAll($criteria);;
+            $evidenceGroups[$ip][] = $evidence;
         }
 
         $title = $issue->check->localizedName;

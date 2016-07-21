@@ -55,34 +55,38 @@
                 <div class="span2">
                     <div class="target-ip-list">
                         <ul class="clear-ul">
-                            <?php foreach ($evidenceGroups as $ip => $targetChecks): ?>
-                                <li><b><a href="#<?= $ip ?>"><?= sprintf("%s (%d)", $ip, count($targetChecks)); ?></a></b></li>
+                            <?php foreach ($evidenceGroups as $host => $evidences): ?>
+                                <li><b><a href="#<?= $host ?>"><?= sprintf("%s (%d)", $host, count($evidences)); ?></a></b></li>
                             <?php endforeach; ?>
                         </ul>
                     </div>
                 </div>
                 <div class="span6">
-                    <?php foreach ($evidenceGroups as $ip => $targetChecks): ?>
-                        <div id="<?= $ip ?>" class="target-group" style="margin-bottom: 20px;">
-                            <h3><?= Yii::t("app", "Evidence for {ip}", ["{ip}" => $ip]) ?></h3>
+                    <?php foreach ($evidenceGroups as $host => $evidences): ?>
+                        <div id="<?= $host ?>" class="target-group" style="margin-bottom: 20px;">
+                            <h3><?= Yii::t("app", "Evidences for {ip}", ["{ip}" => $host]) ?></h3>
 
                             <ul class="nav nav-tabs target-tabs">
-                                <?php for ($i = 0; $i < count($targetChecks); $i++): ?>
-                                    <li class="<?= $i == 0 ? 'active' : '' ?>">
-                                        <a href="#evidence_<?= $i; ?>">#<?= $i; ?></a>
+                                <?php $i = 0; ?>
+                                <?php foreach ($evidences as $evidence): ?>
+                                    <li class="<?= $i == 0 ? "active" : "" ?>">
+                                        <a href="#evidence_<?= $evidence->id; ?>">#<?= $i; ?></a>
                                     </li>
-                                <?php endfor; ?>
+                                    <?php $i++; ?>
+                                <?php endforeach; ?>
                             </ul>
 
                             <div class="tab-content">
                                 <?php $i = 0; ?>
 
-                                <?php foreach ($targetChecks as $tc): ?>
-                                    <div class="tab-pane <?= $i == 0 ? "active" : "" ?>" id="evidence_<?= $i; ?>" data-target-check-id="<?= $tc->id ?>">
+                                <?php foreach ($evidences as $evidence): ?>
+                                    <?php $tc = $evidence->targetCheck; ?>
+
+                                    <div class="tab-pane <?= $i == 0 ? "active" : "" ?>" id="evidence_<?= $evidence->id; ?>" data-target-check-id="<?= $tc->id ?>">
                                         <div class="control-group">
                                             <span style="font-size: 16px; margin-left: 5px;"><?= Yii::t("app", "Evidence for this instance") ?></span>&nbsp;—&nbsp;
-                                            <a href="<?= $this->createUrl("project/evidence", ["id" => $project->id, "issue" => $issue->id, "evidence" => $tc->evidence->id]) ?>"><?= Yii::t("app", "Edit") ?></a>
-                                            <a class="red" href="#" onclick="admin.issue.evidence.delete('<?= $this->createUrl("project/controlevidence") ?>', <?= $tc->evidence->id ?>, function () { system.redirect('<?= $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id]) ?>') });"><?= Yii::t("app", "Delete") ?></a>
+                                            <a href="<?= $this->createUrl("project/evidence", ["id" => $project->id, "issue" => $issue->id, "evidence" => $evidence->id]) ?>"><?= Yii::t("app", "Edit") ?></a>
+                                            <a class="red" href="#" onclick="admin.issue.evidence.delete('<?= $this->createUrl("project/controlevidence") ?>', <?= $evidence->id ?>, function () { system.redirect('<?= $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id]) ?>') });"><?= Yii::t("app", "Delete") ?></a>
 
                                             <?php if ($tc->check->automated): ?>
                                                 <div style="float:right">
