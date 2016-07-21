@@ -6,7 +6,6 @@
 
 <div class="container" data-add-evidence-url="<?= $this->createUrl("project/addEvidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
     <div class="row">
-        <?= $this->renderPartial("partial/left-menu", ["project" => $project]) ?>
         <div class="span8">
             <div id="issue-information">
                 <span style="font-size: 20px;"><?= Yii::t("app", "Issue Information") ?></span>&nbsp;—&nbsp;
@@ -206,8 +205,6 @@
                 echo $this->renderPartial("partial/right-block", array(
                     "quickTargets" => $quickTargets,
                     "project" => $project,
-                    "client" => $client,
-                    "statuses" => $statuses,
                     "category" => null,
                     "target" => null
                 ));

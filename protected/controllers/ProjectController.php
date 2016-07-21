@@ -21,6 +21,33 @@ class ProjectController extends Controller {
 	}
 
     /**
+     * Get project's quick targets
+     * @param $projectId
+     * @param $languageId
+     * @return array|mixed|null
+     */
+    private function _getQuickTargets($projectId, $languageId) {
+        $criteria = new CDbCriteria();
+        $criteria->order  = "t.host ASC";
+        $criteria->addCondition("t.project_id = :project_id");
+        $criteria->params = array("project_id" => $projectId);
+        $criteria->together = true;
+
+        return Target::model()->with(array(
+            "categories" => array(
+                "with" => array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $languageId)
+                    ),
+                ),
+                "order" => "categories.name",
+            )
+        ))->findAll($criteria);
+    }
+
+    /**
      * Display a list of projects.
      */
 	public function actionIndex($page=1) {
@@ -187,12 +214,6 @@ class ProjectController extends Controller {
             "showStatuses" => $showStatuses,
             "sortBy" => $sortByCookie,
             "sortDirection" => $sortDirectionCookie,
-            "statuses" => array(
-                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
-                Project::STATUS_OPEN => Yii::t("app", "Open"),
-                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
-                Project::STATUS_FINISHED => Yii::t("app", "Finished"),
-            )
         ));
 	}
 
@@ -200,8 +221,6 @@ class ProjectController extends Controller {
      * Display a standard project page
      */
     private function _viewStandard($project, $page) {
-        $client = Client::model()->findByPk($project->client_id);
-
         $language = Language::model()->findByAttributes(array(
             'code' => Yii::app()->language
         ));
@@ -262,19 +281,6 @@ class ProjectController extends Controller {
         $criteria->params = array("project_id" => $project->id);
         $criteria->together = true;
 
-        $quickTargets = Target::model()->with(array(
-            "categories" => array(
-                "with" => array(
-                    "l10n" => array(
-                        "joinType" => "LEFT JOIN",
-                        "on" => "language_id = :language_id",
-                        "params" => array("language_id" => $language)
-                    ),
-                ),
-                "order" => "categories.name",
-            )
-        ))->findAll($criteria);
-
         $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
         $this->breadcrumbs[] = array($project->name, '');
 
@@ -282,15 +288,8 @@ class ProjectController extends Controller {
         $this->pageTitle = $project->name;
 		$this->render('view', array(
             "project"  => $project,
-            "client"   => $client,
             "targets"  => $targets,
             "p"        => $paginator,
-            "statuses" => array(
-                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
-                Project::STATUS_OPEN        => Yii::t("app", "Open"),
-                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
-                Project::STATUS_FINISHED    => Yii::t("app", "Finished"),
-            ),
             "ratings" => TargetCheck::getRatingNames(),
             "columns" => array(
                 TargetCheck::COLUMN_TARGET          => Yii::t("app", "Target"),
@@ -299,7 +298,7 @@ class ProjectController extends Controller {
                 TargetCheck::COLUMN_SOLUTION        => Yii::t("app", "Solution"),
                 TargetCheck::COLUMN_RATING          => Yii::t("app", "Rating"),
             ),
-            "quickTargets" => $quickTargets,
+            "quickTargets" => $this->_getQuickTargets($project->id, $language),
             "checks" => Check::model()->findAll()
         ));
     }
@@ -480,12 +479,6 @@ class ProjectController extends Controller {
             "model" => $model,
             "project" => $project,
             "clients" => $clients,
-            "statuses" => array(
-                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
-                Project::STATUS_OPEN => Yii::t("app", "Open"),
-                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
-                Project::STATUS_FINISHED => Yii::t("app", "Finished"),
-            ),
             "fields" => GlobalCheckField::model()->findAll(["order" => "sort_order ASC"])
         ));
 	}
@@ -814,27 +807,6 @@ class ProjectController extends Controller {
         $categoryCount = TargetCheckCategory::model()->count($criteria);
         $paginator = new Paginator($categoryCount, $page);
 
-        $criteria = new CDbCriteria();
-        $criteria->order = "t.host ASC";
-        $criteria->addCondition("t.project_id = :project_id");
-        $criteria->params = array("project_id" => $project->id);
-        $criteria->together = true;
-
-        $quickTargets = Target::model()->with(array(
-            "categories" => array(
-                "with" => array(
-                    "l10n" => array(
-                        "joinType" => "LEFT JOIN",
-                        "on" => "language_id = :language_id",
-                        "params" => array("language_id" => $language)
-                    ),
-                ),
-                "order" => "categories.name",
-            )
-        ))->findAll($criteria);
-
-        $client = Client::model()->findByPk($project->client_id);
-
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
         $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array( "id" => $project->id )));
         $this->breadcrumbs[] = array($target->hostPort, "");
@@ -844,16 +816,9 @@ class ProjectController extends Controller {
 		$this->render("target/index", array(
             "project" => $project,
             "target" => $target,
-            "client" => $client,
             "categories" => $categories,
             "p" => $paginator,
-            "statuses" => array(
-                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
-                Project::STATUS_OPEN => Yii::t("app", "Open"),
-                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
-                Project::STATUS_FINISHED => Yii::t("app", "Finished"),
-            ),
-            "quickTargets" => $quickTargets,
+            "quickTargets" => $this->_getQuickTargets($project->id, $language),
         ));
 	}
 
@@ -1806,26 +1771,6 @@ class ProjectController extends Controller {
             }
         }
 
-        $criteria = new CDbCriteria();
-        $criteria->order = "t.host ASC";
-        $criteria->addCondition("t.project_id = :project_id");
-        $criteria->params = array("project_id" => $project->id);
-        $criteria->together = true;
-
-        $quickTargets = Target::model()->with(array(
-            "categories" => array(
-                "with" => array(
-                    "l10n" => array(
-                        "joinType" => "LEFT JOIN",
-                        "on" => "language_id = :language_id",
-                        "params" => array("language_id" => $language)
-                    ),
-                ),
-                "order" => "categories.name",
-            )
-        ))->findAll($criteria);
-
-        $client = Client::model()->findByPk($project->client_id);
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
         $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
         $this->breadcrumbs[] = array($target->hostPort, $this->createUrl("project/target", array(
@@ -1839,18 +1784,11 @@ class ProjectController extends Controller {
 		$this->render("target/check/index", array(
             "project" => $project,
             "target" => $target,
-            "client" => $client,
             "category" => $category,
             "controls" => $controls,
-            "statuses" => array(
-                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
-                Project::STATUS_OPEN => Yii::t("app", "Open"),
-                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
-                Project::STATUS_FINISHED => Yii::t("app", "Finished"),
-            ),
             "ratings" => TargetCheck::getRatingNames(),
             "stats" => $stats,
-            "quickTargets" => $quickTargets,
+            "quickTargets" => $this->_getQuickTargets($project->id, $language),
             "controlToOpen" => $controlToOpen,
             "checkToOpen" => $checkToOpen,
             "fields" => GlobalCheckField::model()->findAll()
@@ -3947,12 +3885,6 @@ class ProjectController extends Controller {
             "model"    => $model,
             "projects" => $projects,
             "stats"    => $projectStats,
-            "statuses" => array(
-                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
-                Project::STATUS_OPEN        => Yii::t("app", "Open"),
-                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
-                Project::STATUS_FINISHED    => Yii::t("app", "Finished"),
-            )
         ));
     }
 
@@ -4668,12 +4600,16 @@ class ProjectController extends Controller {
             throw new CHttpException(404, "Project not found.");
         }
 
-        $issues = Issue::model()->findAllByAttributes([
-            "project_id" => $project->id
+        $language = Language::model()->findByAttributes([
+            "code" => Yii::app()->language
         ]);
-        $issueCount = Issue::model()->countByAttributes([
-            "project_id" => $project->id
-        ]);
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        $issues = Issue::model()->findAllByAttributes(["project_id" => $project->id]);
+        $issueCount = Issue::model()->countByAttributes(["project_id" => $project->id]);
 
         $paginator = new Paginator($issueCount, $page);
 
@@ -4687,12 +4623,7 @@ class ProjectController extends Controller {
             "project" => $project,
             "issues" => $issues,
             "p" => $paginator,
-            "statuses" => [
-                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
-                Project::STATUS_OPEN        => Yii::t("app", "Open"),
-                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
-                Project::STATUS_FINISHED    => Yii::t("app", "Finished"),
-            ],
+            "quickTargets" => $this->_getQuickTargets($project->id, $language),
         ));
     }
 
@@ -4719,27 +4650,12 @@ class ProjectController extends Controller {
         }
 
         $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
+            "code" => Yii::app()->language
         ));
-        $criteria = new CDbCriteria();
-        $criteria->order  = "t.host ASC";
-        $criteria->addCondition("t.project_id = :project_id");
-        $criteria->params = array("project_id" => $project->id);
-        $criteria->together = true;
 
-        $quickTargets = Target::model()->with([
-            "categories" => [
-                "with" => [
-                    "l10n" => [
-                        "joinType" => "LEFT JOIN",
-                        "on" => "language_id = :language_id",
-                        "params" => ["language_id" => $language->id]
-                    ],
-                ],
-                "order" => "categories.name",
-            ]
-        ])->findAll($criteria);
-        $client = Client::model()->findByPk($project->client_id);
+        if ($language) {
+            $language = $language->id;
+        }
 
         $ips = [];
         $evidences = IssueEvidence::model()->with([
@@ -4777,14 +4693,7 @@ class ProjectController extends Controller {
             "project" => $project,
             "issue" => $issue,
             "check" => $issue->check,
-            "quickTargets" => $quickTargets,
-            "client" => $client,
-            "statuses" => [
-                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
-                Project::STATUS_OPEN => Yii::t("app", "Open"),
-                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
-                Project::STATUS_FINISHED => Yii::t("app", "Finished"),
-            ],
+            "quickTargets" => $this->_getQuickTargets($project->id, $language),
             "evidenceGroups" => $evidenceGroups
         ]);
     }
@@ -4947,31 +4856,12 @@ class ProjectController extends Controller {
 
         $targetCheck = $evidence->targetCheck;
 
-        $criteria = new CDbCriteria();
-        $criteria->order = "t.host ASC";
-        $criteria->addCondition("t.project_id = :project_id");
-        $criteria->params = array("project_id" => $project->id);
-        $criteria->together = true;
-        $quickTargets = Target::model()->with(array(
-            "categories" => array(
-                "with" => array(
-                    "l10n" => array(
-                        "joinType" => "LEFT JOIN",
-                        "on" => "language_id = :language_id",
-                        "params" => array("language_id" => $language->id)
-                    ),
-                ),
-                "order" => "categories.name",
-            )
-        ))->findAll($criteria);
-        $client = Client::model()->findByPk($project->client_id);
-
         $title = $issue->check->name;
         $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
         $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
         $this->breadcrumbs[] = [Yii::t("app", "Issues"), $this->createUrl("project/issues", ["id" => $project->id])];
         $this->breadcrumbs[] = [$issue->check->name, $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id])];
-        $this->breadcrumbs[] = [$evidence->targetCheck->target->ip, ""];
+        $this->breadcrumbs[] = [$targetCheck->target->ip, ""];
 
         // display the page
         $this->pageTitle = $title;
@@ -4981,14 +4871,7 @@ class ProjectController extends Controller {
             "evidence" => $evidence,
             "targetCheck" => $targetCheck,
             "language" => $language,
-            "quickTargets" => $quickTargets,
-            "client" => $client,
-            "statuses" => [
-                Project::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
-                Project::STATUS_OPEN => Yii::t("app", "Open"),
-                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
-                Project::STATUS_FINISHED => Yii::t("app", "Finished"),
-            ],
+            "quickTargets" => $this->_getQuickTargets($project->id, $language->id),
         ]);
     }
 

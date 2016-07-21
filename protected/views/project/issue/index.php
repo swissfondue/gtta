@@ -95,5 +95,16 @@
                 <?= Yii::t("app", "No issues yet."); ?>
             <?php endif; ?>
         </div>
+
+        <div class="span4">
+            <?php
+                echo $this->renderPartial("partial/right-block", array(
+                    "quickTargets" => $quickTargets,
+                    "project" => $project,
+                    "category" => null,
+                    "target" => null
+                ));
+            ?>
+        </div>
     </div>
 </div>

@@ -1,3 +1,37 @@
+<?php
+    $statuses = Project::getStatusTitles();
+    $client = $project->client;
+?>
+
+<?php if (count($project->issues)): ?>
+    <div id="project-quick-nav-issues-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-quick-nav-issues');"><i class="icon-chevron-up"></i></div>
+    <h3><a href="#toggle" onclick="system.toggleBlock('#project-quick-nav-issues');"><?php echo Yii::t("app", "Issues"); ?></a></h3>
+
+    <div class="info-block" id="project-quick-nav-issues">
+        <div id="summary">
+            <a href="<?= $this->createUrl("project/issues", ["id" => $project->id]); ?>"><?= Yii::t("app", "Summary of Issues"); ?></a>
+        </div>
+
+        <?php foreach ($project->issues as $issue): ?>
+            <div class="project-quick-nav-issue">
+                <div class="issue">
+                    <?php
+                        $ratingLabels = [
+                            TargetCheck::RATING_LOW_RISK => "low",
+                            TargetCheck::RATING_MED_RISK => "med",
+                            TargetCheck::RATING_HIGH_RISK => "high"
+                        ];
+                    ?>
+                    <div style="margin-right: 10px;" class="marker label-<?= in_array($issue->highestRating, array_keys($ratingLabels)) ? $ratingLabels[$issue->highestRating] : "no" ?>-risk"></div>
+                    <a href="<?php echo $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id]); ?>"><?php echo CHtml::encode($issue->check->name); ?></a>
+                </div>
+            </div>
+        <?php endforeach; ?>
+
+        <div class="clearfix"></div>
+    </div>
+<?php endif; ?>
+
 <?php if ((User::checkRole(User::ROLE_USER) || Yii::app()->user->getShowDetails()) && $quickTargets): ?>
     <div id="project-quick-nav-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-quick-nav');"><i class="icon-chevron-up"></i></div>
     <h3><a href="#toggle" onclick="system.toggleBlock('#project-quick-nav');"><?php echo Yii::t('app', 'Quick Navigation'); ?></a></h3>

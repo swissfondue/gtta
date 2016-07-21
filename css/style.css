@@ -288,7 +288,6 @@ fieldset hr {
     content: "";
 }
 
-.project-quick-nav-issue,
 .project-quick-nav {
     border-top:1px dashed #666;
     padding-bottom:5px;
@@ -302,6 +301,10 @@ fieldset hr {
 
 .project-quick-nav:last-child {
     padding-bottom:0;
+}
+
+#project-quick-nav-issues #summary {
+    margin-bottom:10px;
 }
 
 .detail-list .detail .content {

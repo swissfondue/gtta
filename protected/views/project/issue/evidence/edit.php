@@ -10,10 +10,8 @@
 
 <hr>
 
-
 <div class="container">
     <div class="row">
-        <?= $this->renderPartial("partial/left-menu", ["project" => $project]) ?>
         <div class="span8">
             <div class="check-form"
                  data-type="check"
@@ -27,8 +25,6 @@
                 echo $this->renderPartial("partial/right-block", array(
                     "quickTargets" => $quickTargets,
                     "project" => $project,
-                    "client" => $client,
-                    "statuses" => $statuses,
                     "category" => $targetCheck->category,
                     "target" => $targetCheck->target
                 ));

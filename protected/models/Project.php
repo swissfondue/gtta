@@ -66,6 +66,19 @@ class Project extends ActiveRecord implements IVariableScopeObject {
         );
     }
 
+    /**
+     * Get status titles
+     * @return array
+     */
+    public static function getStatusTitles() {
+        return [
+            self::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
+            self::STATUS_OPEN => Yii::t("app", "Open"),
+            self::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
+            self::STATUS_FINISHED => Yii::t("app", "Finished"),
+        ];
+    }
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
