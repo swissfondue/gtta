@@ -134,58 +134,59 @@
                                                 </tr>
                                                 </tbody>
                                             </table>
-                                                <div class="field-block">
-                                                    <b><?= Yii::t("app", "Result") ?></b>
-                                                    <br/>
-                                                    <div class="field-value">
-                                                        <?php if ($tc->result): ?>
-                                                            <?= $tc->result ?>
-                                                            <br/>
-                                                        <?php else: ?>
-                                                            <i class="icon icon-minus"></i>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                    <br/>
-                                                </div>
 
-                                                <div class="field-block evidence-field poc">
-                                                    <b><?= Yii::t("app", "PoC") ?></b>
-                                                    <br/>
-                                                    <div class="field-value">
-                                                        <?php if ($tc->poc): ?>
-                                                            <?= $tc->poc ?>
-                                                        <?php else: ?>
-                                                            <i class="icon icon-minus"></i>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                    <br/>
-                                                </div>
+                                            <div class="field-block">
+                                                <b><?= Yii::t("app", "Result") ?></b>
+                                                <br/>
 
-                                                <div class="field-block">
-                                                    <b><?= Yii::t("app", "Solution") ?></b>
-                                                    <br/>
+                                                <?php if ($tc->result): ?>
+                                                    <div class="field-value issue-pre"><?= Utils::getFirstWords($tc->result, Yii::app()->params["issue.field_length"]); ?></div>
+                                                <?php else: ?>
+                                                    <div class="field-value"><i class="icon icon-minus"></i></div>
+                                                <?php endif; ?>
+                                                <br/>
+                                            </div>
+
+                                            <div class="field-block evidence-field poc">
+                                                <b><?= Yii::t("app", "PoC") ?></b>
+                                                <br/>
+
+                                                <?php if ($tc->poc): ?>
+                                                    <div class="field-value issue-pre"><?= Utils::getFirstWords($tc->poc, Yii::app()->params["issue.field_length"]); ?></div>
+                                                <?php else: ?>
+                                                    <div class="field-value"><i class="icon icon-minus"></i></div>
+                                                <?php endif; ?>
+                                                <br/>
+                                            </div>
+
+                                            <div class="field-block">
+                                                <b><?= Yii::t("app", "Solution") ?></b>
+                                                <br/>
+
+                                                <div class="field-value">
                                                     <?php if (!count($tc->solutions) && !$tc->solution && !$tc->solutionTitle): ?>
                                                         <i class="icon icon-minus"></i>
                                                     <?php elseif (count($tc->solutions)): ?>
                                                         <?php foreach ($tc->solutions as $solution): ?>
-                                                            <?= $solution->solution->title ?>
-                                                            <br>
-                                                            <?= $solution->solution->solution ?>
+                                                            <div>
+                                                                <?= $solution->solution->title ?><br>
+                                                                <?= Utils::getFirstWords($solution->solution->solution, Yii::app()->params["issue.field_length"]); ?>
+                                                            </div>
                                                         <?php endforeach; ?>
                                                     <?php else: ?>
-                                                        <?= $tc->solutionTitle ?>
-                                                        <br>
-                                                        <?= $tc->solution ?>
+                                                        <?= $tc->solutionTitle ?><br>
+                                                        <?= Utils::getFirstWords($tc->solution, Yii::app()->params["issue.field_length"]); ?>
                                                     <?php endif; ?>
                                                 </div>
+                                            </div>
 
+                                            <br/>
+
+                                            <div class="field-block">
+                                                <b><?= Yii::t("app", "Rating") ?></b>
                                                 <br/>
-
-                                                <div class="field-block">
-                                                    <b><?= Yii::t("app", "Rating") ?></b>
-                                                    <br/>
-                                                    <?php echo $this->renderPartial("partial/check-rating", ["check" => $tc]); ?>
-                                                </div>
+                                                <?php echo $this->renderPartial("partial/check-rating", ["check" => $tc]); ?>
+                                            </div>
                                         </div>
 
                                         <hr>

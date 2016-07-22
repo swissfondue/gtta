@@ -1379,3 +1379,12 @@ div.time-tracker {
 .issue-list .status {
     width:15%;
 }
+
+.issue-pre {
+    font-family:monospace;
+    white-space:pre;
+    padding:5px 10px 5px 10px;
+    margin:5px 0 5px 0;
+    background-color:#eee;
+    font-size:90%;
+}
