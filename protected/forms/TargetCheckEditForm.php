@@ -92,8 +92,13 @@ class TargetCheckEditForm extends CFormModel {
      * Validate fields
      * @param $attribute
      * @param $params
+     * @return bool
      */
     public function checkFields($attribute, $params) {
+        if (!$this->{$attribute}) {
+            return true;
+        }
+
         foreach ($this->{$attribute} as $name => $value) {
             if ($name == GlobalCheckField::FIELD_OVERRIDE_TARGET) {
                 $this->{$attribute}[$name] = trim($value);
