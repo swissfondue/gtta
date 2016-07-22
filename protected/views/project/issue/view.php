@@ -99,41 +99,33 @@
                                                 </div>
                                             <?php endif; ?>
                                             <hr>
-                                            <table class="table" style="border-top: none;">
-                                                <thead>
-                                                <tr>
-                                                    <th><?= Yii::t("app", "Protocols") ?></th>
-                                                    <th><?= Yii::t("app", "Port") ?></th>
-                                                    <th><?= Yii::t("app", "Host") ?></th>
-                                                    <th><?= Yii::t("app", "Attachments") ?></th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                <tr>
-                                                    <td>
-                                                        <?= $tc->transportProtocol ?>&nbsp;
-                                                        <?= $tc->applicationProtocol ?>
-                                                    </td>
-                                                    <td>
-                                                        <?php if ($tc->port): ?>
-                                                            <?= $tc->port ?>
-                                                        <?php else: ?>
-                                                            <i class="icon-minus"></i>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td>
-                                                        <a href="<?= $this->createUrl("project/target", ["id" => $project->id, "target" => $tc->target_id]) ?>"><?= $tc->target->host ?></a>
-                                                    </td>
-                                                    <td>
-                                                        <?php if (count($tc->attachments)): ?>
-                                                            <?= count($tc->attachments) ?>
-                                                        <?php else: ?>
-                                                            <i class="icon-minus"></i>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
+                                            <div class="issue-details">
+                                                <?php if ($tc->transportProtocol || $tc->applicationProtocol): ?>
+                                                    <div class="protocols">
+                                                        <?= $tc->transportProtocol; ?>
+
+                                                        <?php if ($tc->transportProtocol && $tc->applicationProtocol): ?>/<?php endif; ?>
+
+                                                        <?= $tc->applicationProtocol; ?>
+                                                    </div>
+                                                <?php endif; ?>
+
+                                                <?php
+                                                    $port = $tc->port ? $tc->port : $tc->target->port;
+
+                                                    if ($port) {
+                                                        $port = ":" . $port;
+                                                    }
+                                                ?>
+                                                <div class="target">
+                                                    <a href="<?= $this->createUrl("project/target", ["id" => $project->id, "target" => $tc->target_id]) ?>"><?= $tc->target->host; ?><?= $port; ?></a>
+                                                </div>
+
+                                                <div class="attachments">
+                                                    <?= Yii::t("app", "Attachments"); ?>:
+                                                    <?= count($tc->attachments) ?>
+                                                </div>
+                                            </div>
 
                                             <div class="field-block">
                                                 <b><?= Yii::t("app", "Result") ?></b>

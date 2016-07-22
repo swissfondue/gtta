@@ -1388,3 +1388,18 @@ div.time-tracker {
     background-color:#eee;
     font-size:90%;
 }
+
+.issue-details {
+    overflow:hidden;
+    margin-bottom:10px;
+}
+
+.issue-details .protocols,
+.issue-details .target {
+    float: left;
+    margin-right:20px;
+}
+
+.issue-details .attachments {
+    float:right;
+}
