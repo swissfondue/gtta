@@ -3,12 +3,25 @@
         <?= $this->renderPartial("partial/submenu", ["page" => "issues", "project" => $project]); ?>
     </div>
 
+    <div class="pull-right buttons">
+        <?php if (User::checkRole(User::ROLE_USER)): ?>
+            <div class="btn-group">
+                <a class="btn" href="#" onclick="admin.issue.showIssueAddPopup();">
+                    <i class="icon icon-plus"></i>
+                    <?php echo Yii::t("app", "New"); ?>
+                </a>
+            </div>
+        <?php endif; ?>
+    </div>
+
     <h1><?= CHtml::encode($this->pageTitle); ?></h1>
 </div>
 
 <hr>
 
-<div class="container">
+<div
+    class="container"
+    data-add-issue-url="<?= $this->createUrl("project/addIssue", ["id" => $project->id]); ?>">
     <div class="row">
         <div class="span8">
             <?php if (count($issues) > 0): ?>
@@ -111,3 +124,5 @@
         </div>
     </div>
 </div>
+
+<?= $this->renderPartial("issue/partial/check-selector", ["project" => $project]); ?>
