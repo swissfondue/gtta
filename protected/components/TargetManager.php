@@ -149,6 +149,7 @@ class TargetManager {
     public static function reindexTargetChecks(Target $target) {
         $admin = $target->project->admin ? $target->project->admin : User::getAdmin();
         $language = Language::model()->findByAttributes(array("default" => true));
+        $tcm = new TargetCheckManager();
 
         switch ($target->check_source_type) {
             case Target::SOURCE_TYPE_CHECK_CATEGORIES:
@@ -209,12 +210,10 @@ class TargetManager {
                 ));
 
                 foreach ($checksToAdd as $check) {
-                    TargetCheckManager::create($check, [
+                    $tcm->create($check, [
                         "target_id" => $target->id,
                         "user_id" => $admin->id,
                         "language_id" => $language->id,
-                        "status" => TargetCheck::STATUS_OPEN,
-                        "rating" => TargetCheck::RATING_NONE
                     ]);
                 }
 
@@ -264,21 +263,11 @@ class TargetManager {
                         continue;
                     }
 
-                    $targetCheck = new TargetCheck();
-                    $targetCheck->target_id = $target->id;
-                    $targetCheck->check_id = $check->check->id;
-                    $targetCheck->user_id = $admin;
-                    $targetCheck->language_id = $language->id;
-                    $targetCheck->status = TargetCheck::STATUS_OPEN;
-                    $targetCheck->rating = TargetCheck::RATING_NONE;
-                    $targetCheck->save();
-
-                    foreach ($check->check->scripts as $script) {
-                        $targetCheckScript = new TargetCheckScript();
-                        $targetCheckScript->check_script_id = $script->id;
-                        $targetCheckScript->target_check_id = $targetCheck->id;
-                        $targetCheckScript->save();
-                    }
+                    $tcm->create($check->check, [
+                        "target_id" => $target->id,
+                        "user_id" => $admin,
+                        "language_id" => $language->id,
+                    ]);
                 }
 
                 break;
@@ -513,6 +502,7 @@ class TargetManager {
         $check = $issue->check;
         $targetCheck = null;
         $created = false;
+        $tcm = new TargetCheckManager();
 
         $targetChecks = TargetCheck::model()->with("evidence")->findAllByAttributes([
             "check_id" => $issue->check_id,
@@ -589,19 +579,14 @@ class TargetManager {
             $admin = $target->project->admin ? $target->project->admin : User::getAdmin();
             $language = System::model()->findByPk(1)->language;
 
-            $targetCheck = TargetCheckManager::create($check, [
+            $targetCheck = $tcm->create($check, [
                 "target_id" => $target->id,
                 "user_id" => $admin->id,
                 "language_id" => $language->id,
-                "status" => TargetCheck::STATUS_OPEN,
-                "rating" => TargetCheck::RATING_NONE
             ]);
         }
 
-        $evidence = new IssueEvidence();
-        $evidence->issue_id = $issue->id;
-        $evidence->target_check_id = $targetCheck->id;
-        $evidence->save();
+        $tcm->addEvidence($targetCheck);
 
         if ($created) {
             ReindexJob::enqueue([

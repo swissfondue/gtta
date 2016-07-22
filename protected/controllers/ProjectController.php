@@ -2756,7 +2756,9 @@ class ProjectController extends Controller {
                     }
                 }
 
-                $targetCheck = TargetCheckManager::create($check, [
+                $tcm = new TargetCheckManager();
+
+                $targetCheck = $tcm->create($check, [
                     "target_id" => $target->id,
                     "user_id" => Yii::app()->user->id,
                     "language_id" => $language->id,
@@ -3447,14 +3449,12 @@ class ProjectController extends Controller {
                     break;
 
                 case "copy":
-                    $copy = new TargetCheck();
-                    $copy->target_id = $targetCheck->target_id;
-                    $copy->check_id = $targetCheck->check_id;
-                    $copy->status = TargetCheck::STATUS_OPEN;
-                    $copy->user_id = Yii::app()->user->id;
-                    $copy->rating = TargetCheck::RATING_NONE;
-                    $copy->language_id = $language->id;
-                    $copy->save();
+                    $tcm = new TargetCheckManager();
+                    $copy = $tcm->create($targetCheck->check, [
+                        "target_id" => $targetCheck->target_id,
+                        "user_id" => Yii::app()->user->id,
+                        "language_id" => $language->id,
+                    ]);
 
                     $response->addData("id", $copy->id);
 

@@ -10,7 +10,7 @@ class TargetCheckManager {
      * @return TargetCheck
      * @throws Exception
      */
-    public static function create(Check $check, $data) {
+    public function create(Check $check, $data) {
         $targetCheck = new TargetCheck();
 
         try {
@@ -19,10 +19,7 @@ class TargetCheckManager {
             $targetCheck->user_id = $data["user_id"];
             $targetCheck->language_id = $data["language_id"];
             $targetCheck->status = isset($data["status"]) ? $data["status"] : TargetCheck::STATUS_OPEN;
-
-            if (isset($data["rating"])) {
-                $targetCheck->rating = $data["rating"];
-            }
+            $targetCheck->rating = isset($data["rating"]) ? $data["rating"] : TargetCheck::RATING_NONE;
 
             if (isset($data["result"])) {
                 $targetCheck->setFieldValue(
@@ -50,6 +47,8 @@ class TargetCheckManager {
                 $targetCheckField->hidden = $field->hidden;
                 $targetCheckField->save();
             }
+
+            $this->addEvidence($targetCheck);
         } catch (Exception $e) {
             throw new Exception("Can't create check.");
         }
@@ -236,5 +235,41 @@ class TargetCheckManager {
             "attachments" => $attachmentList,
             "startedText" => $startedText,
         ];
+    }
+
+    /**
+     * Add target check evidence
+     * @param TargetCheck $targetCheck
+     * @return IssueEvidence
+     * @throws Exception
+     */
+    public function addEvidence(TargetCheck $targetCheck) {
+        $target = $targetCheck->target;
+
+        $issue = Issue::model()->findByAttributes([
+            "project_id" => $target->project_id,
+            "check_id" => $targetCheck->check_id,
+        ]);
+
+        if (!$issue) {
+            $pm = new ProjectManager();
+            $issue = $pm->addIssue($target->project, $targetCheck->check);
+        }
+
+        $evidence = IssueEvidence::model()->findByAttributes([
+            "issue_id" => $issue->id,
+            "target_check_id" => $targetCheck->id
+        ]);
+
+        if ($evidence) {
+            return $evidence;
+        }
+
+        $evidence = new IssueEvidence();
+        $evidence->issue_id = $issue->id;
+        $evidence->target_check_id = $targetCheck->id;
+        $evidence->save();
+
+        return $evidence;
     }
 }

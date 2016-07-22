@@ -16,6 +16,7 @@
  * @property RelationTemplate $relationTemplate
  * @property TargetChecklistTemplate[] $checklistTemplates
  * @property TargetCheck[] $targetChecks
+ * @property Project $project
  */
 class Target extends ActiveRecord implements IVariableScopeObject {
     const CHAIN_STATUS_IDLE = 0;
