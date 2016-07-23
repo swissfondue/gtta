@@ -19,8 +19,11 @@ function User()
         this.update = function (url) {
             var i, k;
 
-            if (this.runningChecks.length > 0)
+            if (this.runningChecks.length > 0) {
                 _check.updateIteration++;
+            } else {
+                _check.updateIteration = 0;
+            }
 
             for (i = 0; i < _check.runningChecks.length; i++) {
                 var check, headingRow, minutes, seconds, time;
@@ -85,8 +88,7 @@ function User()
 
                                 check = data.checks[i];
 
-				$('#TargetCheckEditForm_fields_' + check.id + '_result').val(check.result);
-                                $('#TargetCheckEditForm_' + check.id + '_overrideTarget').val(check.overrideTarget);
+				                $('#TargetCheckEditForm_fields_' + check.id + '_poc').val(check.poc);
                                 $('div.check-form[data-type=check][data-id="' + check.id + '"] div.table-result').html(check.tableResult);
 
                                 if (check.startedText) {
@@ -411,9 +413,6 @@ function User()
                     }
 
                     form.html(data.data.html);
-                    $(".wysiwyg", form).ckeditor();
-                    _check.initTargetCheckAttachmentUploadForms(id);
-                    _check.initAutosave(id);
 
                     form.slideDown("slow", function () {
                         if (callback) {
@@ -691,9 +690,6 @@ function User()
                 }
             ).get();
 
-            override = $('textarea[name="TargetCheckEditForm_' + id + '[overrideTarget]"]', row).val();
-            protocol = $('input[name="TargetCheckEditForm_' + id + '[protocol]"]', row).val();
-            port     = $('input[name="TargetCheckEditForm_' + id + '[port]"]', row).val();
             resultTitle = $('input[name="TargetCheckEditForm_' + id + '[resultTitle]"]', row).val();
             result = _check.ckeditors["TargetCheckEditForm_fields_" + id + "_result"] ?
                 _check.ckeditors["TargetCheckEditForm_fields_" + id + "_result"].getData() :
@@ -783,9 +779,6 @@ function User()
 
             data = [];
 
-            data.push({ name : 'TargetCheckEditForm_' + id + '[overrideTarget]', value : override });
-            data.push({ name : 'TargetCheckEditForm_' + id + '[protocol]',       value : protocol });
-            data.push({ name : 'TargetCheckEditForm_' + id + '[port]',           value : port     });
             data.push({ name : 'TargetCheckEditForm_' + id + '[result]',         value : result   });
             data.push({ name : 'TargetCheckEditForm_' + id + '[resultTitle]',    value : resultTitle   });
             data.push({ name : 'TargetCheckEditForm_' + id + '[rating]',         value : rating   });

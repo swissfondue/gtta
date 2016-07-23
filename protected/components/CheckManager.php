@@ -76,8 +76,6 @@ class CheckManager {
             $c->name = $check->name;
             $c->automated = $check->automated;
             $c->multiple_solutions = $check->multiple_solutions;
-            $c->protocol = $check->protocol;
-            $c->port = $check->port;
             $c->check_control_id = $control;
             $c->reference_id = $reference;
             $c->reference_code = $check->reference_code;
@@ -437,5 +435,41 @@ class CheckManager {
 
             TargetCheckManager::reindexFields($checkField);
         }
+    }
+
+    /**
+     * Filter checks by string
+     * @param $query
+     * @param $language
+     * @param array $exclude
+     * @return array
+     */
+    public function filter($query, $language, $exclude=[]) {
+        $escapedQuery = pg_escape_string($query);
+
+        $criteria = new CDbCriteria();
+        $criteria->order = "t.name ASC";
+        $criteria->addNotInCondition("t.check_id", $exclude);
+        $criteria->order = "nameContains DESC, t.name ASC";
+        $criteria->select = "t.*, position(lower('$escapedQuery') in lower(t.name))::boolean AS nameContains";
+
+        $fieldName = GlobalCheckField::FIELD_BACKGROUND_INFO;
+
+        $criteria->join = "INNER JOIN check_fields cf ON cf.check_id = t.check_id ";
+        $criteria->join .= "INNER JOIN check_fields_l10n cfl10n ON cfl10n.check_field_id = cf.id AND cfl10n.language_id = t.language_id ";
+        $criteria->join .= "INNER JOIN global_check_fields gcf ON gcf.name = '$fieldName' AND gcf.id = cf.global_check_field_id";
+
+        if ($query) {
+            $criteria->addSearchCondition("cfl10n.value", $query, true, "AND", "ILIKE");
+            $criteria->addSearchCondition("t.name", $query, true, "OR", "ILIKE");
+        }
+
+        $criteria->addColumnCondition(["t.language_id" => $language], "OR");
+
+        if ($exclude) {
+            $criteria->addNotInCondition("t.check_id", $exclude);
+        }
+
+        return CheckL10n::model()->findAll($criteria);
     }
 }

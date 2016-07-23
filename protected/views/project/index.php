@@ -1,3 +1,7 @@
+<?php
+    $statuses = Project::getStatusTitles();
+?>
+
 <div class="active-header">
     <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
         <div class="pull-right">

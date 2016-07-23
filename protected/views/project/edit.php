@@ -89,7 +89,7 @@
             <label class="control-label" for="ProjectEditForm_status"><?php echo Yii::t('app', 'Status'); ?></label>
             <div class="controls">
                 <select class="input-xlarge" id="ProjectEditForm_status" name="ProjectEditForm[status]">
-                    <?php foreach ($statuses as $k => $v): ?>
+                    <?php foreach (Project::getStatusTitles() as $k => $v): ?>
                         <option value="<?php echo $k; ?>" <?php if ($k == $model->status) echo 'selected'; ?>><?php echo CHtml::encode($v); ?></option>
                     <?php endforeach; ?>
                 </select>

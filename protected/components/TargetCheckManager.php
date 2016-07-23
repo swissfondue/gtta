@@ -5,33 +5,53 @@
 class TargetCheckManager {
     /**
      * Target check create
+     * @param Check $check
      * @param $data
      * @return TargetCheck
      * @throws Exception
      */
-    public static function create($data) {
+    public function create(Check $check, $data) {
         $targetCheck = new TargetCheck();
 
         try {
             $targetCheck->target_id = $data["target_id"];
-            $targetCheck->check_id = $data["check_id"];
+            $targetCheck->check_id = $check->id;
             $targetCheck->user_id = $data["user_id"];
             $targetCheck->language_id = $data["language_id"];
             $targetCheck->status = isset($data["status"]) ? $data["status"] : TargetCheck::STATUS_OPEN;
-
-            if (isset($data["rating"])) {
-                $targetCheck->rating = $data["rating"];
-            }
+            $targetCheck->rating = isset($data["rating"]) ? $data["rating"] : TargetCheck::RATING_NONE;
 
             if (isset($data["result"])) {
-                $targetCheck->setResult($data["result"]);
+                $targetCheck->setFieldValue(
+                    GlobalCheckField::FIELD_POC,
+                    $data["result"]
+                );
             }
 
             $targetCheck->save();
+            $targetCheck->refresh();
+
+            foreach ($check->scripts as $script) {
+                $targetCheckScript = new TargetCheckScript();
+                $targetCheckScript->check_script_id = $script->id;
+                $targetCheckScript->target_check_id = $targetCheck->id;
+                $targetCheckScript->save();
+            }
+
+            /** @var CheckField $field */
+            foreach ($check->fields as $field) {
+                $targetCheckField = new TargetCheckField();
+                $targetCheckField->target_check_id = $targetCheck->id;
+                $targetCheckField->check_field_id = $field->id;
+                $targetCheckField->value = $field->getValue();
+                $targetCheckField->hidden = $field->hidden;
+                $targetCheckField->save();
+            }
+
+            $this->addEvidence($targetCheck);
         } catch (Exception $e) {
             throw new Exception("Can't create check.");
         }
-
 
         return $targetCheck;
     }
@@ -205,8 +225,9 @@ class TargetCheckManager {
 
         return [
             "id" => $tc->id,
-            "overrideTarget" => $tc->override_target,
+            "overrideTarget" => $tc->overrideTarget,
             "result" => $tc->result,
+            "poc" => $tc->poc,
             "tableResult" => $table ? $renderController->renderPartial("/project/target/check/tableresult", array("table" => $table, "check" => $tc), true) : "",
             "finished" => !$tc->isRunning,
             "time" => $time,
@@ -214,5 +235,41 @@ class TargetCheckManager {
             "attachments" => $attachmentList,
             "startedText" => $startedText,
         ];
+    }
+
+    /**
+     * Add target check evidence
+     * @param TargetCheck $targetCheck
+     * @return IssueEvidence
+     * @throws Exception
+     */
+    public function addEvidence(TargetCheck $targetCheck) {
+        $target = $targetCheck->target;
+
+        $issue = Issue::model()->findByAttributes([
+            "project_id" => $target->project_id,
+            "check_id" => $targetCheck->check_id,
+        ]);
+
+        if (!$issue) {
+            $pm = new ProjectManager();
+            $issue = $pm->addIssue($target->project, $targetCheck->check);
+        }
+
+        $evidence = IssueEvidence::model()->findByAttributes([
+            "issue_id" => $issue->id,
+            "target_check_id" => $targetCheck->id
+        ]);
+
+        if ($evidence) {
+            return $evidence;
+        }
+
+        $evidence = new IssueEvidence();
+        $evidence->issue_id = $issue->id;
+        $evidence->target_check_id = $targetCheck->id;
+        $evidence->save();
+
+        return $evidence;
     }
 }

@@ -14,8 +14,8 @@ class CustomizationController extends Controller
             "https",
             "checkAuth",
             "checkAdmin",
-            "ajaxOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput, controlscript",
-            "postOnly + control, controlcontrol, controlcheck, controlresult, controlsolution, controlinput, controlscript"
+            "ajaxOnly + controlcheckfield",
+            "postOnly + controlcheckfield"
         );
     }
 
@@ -162,7 +162,7 @@ class CustomizationController extends Controller
                 }
 
                 // add new field to checks
-                TargetCheckReindexJob::enqueue([
+                ReindexJob::enqueue([
                     "global_check_field_id" => $field->id
                 ]);
 

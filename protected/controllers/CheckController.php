@@ -197,8 +197,7 @@ class CheckController extends Controller
 		$model = new CheckCategoryEditForm();
         $model->localizedItems = array();
 
-        if (!$newRecord)
-        {
+        if (!$newRecord) {
             $model->name = $category->name;
 
             $categoryL10n = CheckCategoryL10n::model()->findAllByAttributes(array(
@@ -825,6 +824,13 @@ class CheckController extends Controller
 
         $languages = Language::model()->findAll();
 
+        // get fields
+        $criteria = new CDbCriteria();
+        $criteria->addCondition("NOT t.hidden");
+        $criteria->order = "sort_order ASC";
+
+        $fields = GlobalCheckField::model()->findAll($criteria);
+
 		$model = new CheckEditForm();
         $model->localizedItems = array();
         $model->fields = array();
@@ -833,8 +839,6 @@ class CheckController extends Controller
         if (!$newRecord) {
             $model->name = $check->name;
             $model->automated = $check->automated;
-            $model->protocol = $check->protocol;
-            $model->port = $check->port;
             $model->multipleSolutions = $check->multiple_solutions;
             $model->private = $check->private;
             $model->referenceId = $check->reference_id;
@@ -854,14 +858,14 @@ class CheckController extends Controller
 
                 $model->localizedItems[$cl->language_id] = $i;
             }
-
-            $model->parseFields($check);
-
-            foreach ($check->getOrderedFields() as $f) {
-                $model->hidden[$f->name] = $f->getHidden();
-            }
         } else {
             $model->controlId = $control->id;
+        }
+
+        $model->parseFields($check);
+
+        foreach ($check->fields as $f) {
+            $model->hidden[$f->name] = $f->hidden;
         }
 
 		// collect user input data
@@ -885,8 +889,6 @@ class CheckController extends Controller
                 $check->automated = $model->automated;
                 $check->multiple_solutions = $model->multipleSolutions;
                 $check->private = $model->private;
-                $check->protocol = $model->protocol;
-                $check->port = $model->port;
                 $check->check_control_id = $model->controlId;
                 $check->reference_id = $model->referenceId;
                 $check->reference_code = $model->referenceCode;
@@ -935,8 +937,8 @@ class CheckController extends Controller
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check saved.'));
                 $check->refresh();
 
-                TargetCheckReindexJob::enqueue(["check_id" => $check->id]);
-                TargetCheckReindexJob::enqueue(["category_id" => $check->control->check_category_id]);
+                ReindexJob::enqueue(["check_id" => $check->id]);
+                ReindexJob::enqueue(["category_id" => $check->control->check_category_id]);
 
                 if ($redirect) {
                     $this->redirect(array(
@@ -1015,6 +1017,7 @@ class CheckController extends Controller
             'languages' => $languages,
             'references' => $references,
             'categories' => $categories,
+            "fields" => $fields,
             'efforts' => array(2, 5, 20, 40, 60, 120),
         ));
 	}
@@ -1078,8 +1081,6 @@ class CheckController extends Controller
                 $dst->name = $src->name . ' (' . Yii::t('app', 'Copy') . ')';
                 $dst->automated = $src->automated;
                 $dst->multiple_solutions = $src->multiple_solutions;
-                $dst->protocol = $src->protocol;
-                $dst->port = $src->port;
                 $dst->reference_id = $src->reference_id;
                 $dst->reference_code = $src->reference_code;
                 $dst->reference_url = $src->reference_url;
@@ -1201,7 +1202,7 @@ class CheckController extends Controller
                     }
                 }
 
-                TargetCheckReindexJob::enqueue(array("category_id" => $dst->control->check_category_id));
+                ReindexJob::enqueue(array("category_id" => $dst->control->check_category_id));
 
                 Yii::app()->user->setFlash('success', Yii::t('app', 'Check copied.'));
                 $this->redirect(array('check/editcheck', 'id' => $dst->control->check_category_id, 'control' => $dst->check_control_id, 'check' => $dst->id));
@@ -2836,17 +2837,9 @@ class CheckController extends Controller
         {
             $model->attributes = $_POST['SearchForm'];
 
-            if ($model->validate())
-            {
-                $criteria = new CDbCriteria();
-                $criteria->order = 't.name ASC';
-                $criteria->addColumnCondition(array( 'language_id' => $language ));
-
-                $searchCriteria = new CDbCriteria();
-                $searchCriteria->addSearchCondition('t.name', $model->query, true, 'OR', 'ILIKE');
-                $criteria->mergeWith($searchCriteria);
-
-                $checks = CheckL10n::model()->findAll($criteria);
+            if ($model->validate()) {
+                $cm = new CheckManager();
+                $checks = $cm->filter($model->query, $language);
             }
             else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));

@@ -76,6 +76,19 @@ return array(
     "project/target/<target:\d+>/check/<check:\d+>/link" => "project/checklink",
     "project/target/running-checks" => "project/runningchecks",
 
+    // project issues
+    "project/<id:\d+>/issues" => "project/issues",
+    "project/<id:\d+>/issue/new" => "project/addIssue",
+    "project/<id:\d+>/issue/<issue:\d+>" => "project/issue",
+    "project/issue/control" => "project/controlissue",
+    "project/<id:\d+>/check/search" => "project/searchchecks",
+    "project/<id:\d+>/issue/<issue:\d+>/target/search" => "project/searchtargets",
+    "project/<id:\d+>/issue/<issue:\d+>/evidence/new" => "project/addEvidence",
+    "project/<id:\d+>/issue/<issue:\d+>/evidence/<evidence:\d+>" => "project/evidence",
+    "project/<id:\d+>/issue/<issue:\d+>/checks/update" => "project/updateissuechecks",
+    "project/<id:\d+>/issue/<issue:\d+>/checks/running" => "project/issuerunningchecks",
+    "project/evidence/control" => "project/controlevidence",
+
     // custom checks
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/custom-check/save" => "project/savecustomcheck",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/custom-check/control" => "project/controlcustomcheck",
@@ -154,6 +167,7 @@ return array(
     "check/new"                 => "check/edit",
     "check/control"             => "check/control",
     "check/search"              => "check/search",
+    "check/filter"              => "check/filter",
 
     // checklist template categories
     "checklist-templates/<page:\d+>"                                   => "checklisttemplate/index",

@@ -341,11 +341,7 @@ class AppController extends Controller {
                         throw new CHttpException(403, Yii::t("app", "Access denied."));
                     }
 
-                    $categories = TargetCheckCategory::model()->findAllByAttributes(
-                        array("target_id" => $target->id)
-                    );
-
-                    foreach ($categories as $category) {
+                    foreach ($target->_categories as $category) {
                         $objects[] = array(
                             "id" => $category->check_category_id,
                             "name" => $category->category->name,
@@ -405,10 +401,6 @@ class AppController extends Controller {
                         foreach ($references as $reference)
                             $referenceIds[] = $reference->reference_id;
 
-                        $categories = TargetCheckCategory::model()->findAllByAttributes(
-                            array( 'target_id' => $target->id  )
-                        );
-
                         $targetData = array(
                             'id'          => $target->id,
                             'host'        => $target->host,
@@ -416,7 +408,7 @@ class AppController extends Controller {
                             'checks'      => array()
                         );
 
-                        foreach ($categories as $category) {
+                        foreach ($target->_categories as $category) {
                             $controlIds = array();
 
                             $controls = CheckControl::model()->findAllByAttributes(array(

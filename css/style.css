@@ -16,6 +16,10 @@ a[disabled] {
     background:none;
 }
 
+.red {
+    color: red;
+}
+
 .navbar .brand {
     color:#fff;
 }
@@ -37,6 +41,12 @@ a[disabled] {
 
 ul.nav li.dropdown:hover > ul.dropdown-menu {
     display: block;
+}
+
+ul.clear-ul {
+    list-style-type: none;
+    list-style-image: none;
+    margin-left: 0;
 }
 
 .loader-image {
@@ -254,6 +264,7 @@ fieldset hr {
     word-wrap:break-word;
 }
 
+.project-quick-nav-issues > .issue > a,
 .project-quick-nav > .target > a {
     font-weight:bold;
 }
@@ -290,6 +301,10 @@ fieldset hr {
 
 .project-quick-nav:last-child {
     padding-bottom:0;
+}
+
+#project-quick-nav-issues #summary {
+    margin-bottom:10px;
 }
 
 .detail-list .detail .content {
@@ -489,6 +504,31 @@ table.check-form > tbody > tr > td {
     margin-right:5px;
     display:block;
     float:left;
+}
+
+.marker {
+    width: 10px;
+    height: 10px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.marker.med-risk {
+    background-color:#dace2f;
+}
+
+.marker.high-risk {
+    background-color:#d63515;
+}
+
+.marker.low-risk {
+    background-color:#53a254;
+}
+
+.label-no-risk {
+    background-color: rgba(0, 0, 0, 0.31);
 }
 
 .label-high-risk, .label-admin, .label-error {
@@ -1310,4 +1350,71 @@ ul.breadcrumb {
 
 div.time-tracker {
     margin-right:20px;
+}
+
+#issue-check-select-dialog {
+    margin-left: -225px;
+    width: 450px;
+}
+
+#target-select-dialog {
+    margin-left: -200px;
+    width: 400px;
+}
+
+#issue-check-select-dialog .issue-search-query,
+#target-select-dialog .target-search-query {
+    width: 98%;
+}
+
+#issue-information .field-block {
+    margin-bottom: 20px;
+}
+
+.issue-list .actions {
+    width:5%;
+    text-align:right;
+}
+
+.issue-list .status {
+    width:15%;
+}
+
+.issue-pre {
+    font-family:monospace;
+    padding:5px 10px 5px 10px;
+    margin:5px 0 5px 0;
+    background-color:#eee;
+    font-size:90%;
+    white-space: pre-wrap;       /* css-3 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+.issue-details {
+    overflow:hidden;
+    margin-bottom:10px;
+}
+
+.issue-details .protocols,
+.issue-details .target {
+    float: left;
+    margin-right:20px;
+}
+
+.issue-details .attachments {
+    float:right;
+}
+
+ul.check-list,
+ul.target-list {
+    list-style:none;
+    margin-left:0;
+}
+
+ul.check-list li,
+ul.target-list li {
+    padding:5px 0 5px 0;
 }

@@ -15,6 +15,7 @@
  * @property float $hours_allocated
  * @property float $userHoursAllocated
  * @property float $userHoursSpent
+ * @property Target[] $targets
  */
 class Project extends ActiveRecord implements IVariableScopeObject {
     /**
@@ -65,6 +66,19 @@ class Project extends ActiveRecord implements IVariableScopeObject {
         );
     }
 
+    /**
+     * Get status titles
+     * @return array
+     */
+    public static function getStatusTitles() {
+        return [
+            self::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
+            self::STATUS_OPEN => Yii::t("app", "Open"),
+            self::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
+            self::STATUS_FINISHED => Yii::t("app", "Finished"),
+        ];
+    }
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
@@ -91,6 +105,7 @@ class Project extends ActiveRecord implements IVariableScopeObject {
             "userHoursAllocated" => array(self::STAT, "ProjectUser", "project_id", "select" => "SUM(hours_allocated)"),
             "trackedTime" => array(self::STAT, "ProjectTime", "project_id", "select" => "trunc(SUM(time) / 3600)"), // Convert seconds to hours
             "timeRecords" => array(self::HAS_MANY, "ProjectTime", "project_id"),
+            "issues" => array(self::HAS_MANY, "Issue", "project_id"),
 		);
 	}
 
@@ -355,5 +370,37 @@ class Project extends ActiveRecord implements IVariableScopeObject {
         $criteria->condition = "t.hidden IS true";
 
         return TargetCheckField::model()->count($criteria) > 0;
+    }
+
+    /**
+     * Get project admin user
+     * @return null
+     */
+    public function getAdmin() {
+        foreach ($this->projectUsers as $user) {
+            if ($user->admin) {
+                return $user->user;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get project issues
+     * @return array
+     */
+    public function getIssues() {
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(["project_id" => $this->id]);
+        $criteria->select = "t.id, c.name, COUNT(DISTINCT tc.target_id) AS affected_targets, MAX(tc.rating) AS top_rating";
+        $criteria->group = "t.id, c.name";
+        $criteria->join =
+            "LEFT JOIN checks c ON c.id = t.check_id " .
+            "LEFT JOIN issue_evidences ie ON ie.issue_id = t.id " .
+            "LEFT JOIN target_checks tc ON tc.id = ie.target_check_id";
+        $criteria->order = "top_rating DESC";
+
+        return Issue::model()->findAll($criteria);
     }
 }

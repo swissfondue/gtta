@@ -1,8 +1,8 @@
 <?php
 /**
- * Class TargetCheckReindexJob
+ * Class ReindexJob
  */
-class TargetCheckReindexJob extends BackgroundJob {
+class ReindexJob extends BackgroundJob {
     /**
      * Reindex target
      * @param Target $t
@@ -20,15 +20,6 @@ class TargetCheckReindexJob extends BackgroundJob {
      */
     public function perform() {
         try {
-            if (!isset($this->args["category_id"]) &&
-                !isset($this->args["target_id"]) &&
-                !isset($this->args['template_id']) &&
-                !isset($this->args["global_check_field_id"]) &&
-                !isset($this->args["check_id"])
-            ) {
-                throw new Exception("Invalid job params.");
-            }
-
             if (isset($this->args['target_id'])) {
                 $target = Target::model()->findByPk($this->args['target_id']);
 

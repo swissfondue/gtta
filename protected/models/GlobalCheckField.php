@@ -11,6 +11,7 @@
  * @property boolean $hidden
  * @property string $value
  * @property GlobalCheckFieldL10n[] $l10n
+ * @property CheckField[] $checkFields
  */
 class GlobalCheckField extends ActiveRecord {
     /**
@@ -37,12 +38,26 @@ class GlobalCheckField extends ActiveRecord {
     const FIELD_QUESTION = "question";
     const FIELD_HINTS = "hints";
     const FIELD_RESULT = "result";
+    const FIELD_APPLICATION_PROTOCOL = "application_protocol";
+    const FIELD_TRANSPORT_PROTOCOL = "transport_protocol";
+    const FIELD_PORT = "port";
+    const FIELD_OVERRIDE_TARGET = "override_target";
+    const FIELD_SOLUTION = "solution";
+    const FIELD_SOLUTION_TITLE = "solution_title";
+    const FIELD_POC = "poc";
 
     public static $system = [
-        "background_info",
-        "question",
-        "hints",
-        "result",
+        self::FIELD_BACKGROUND_INFO,
+        self::FIELD_QUESTION,
+        self::FIELD_HINTS,
+        self::FIELD_RESULT,
+        self::FIELD_APPLICATION_PROTOCOL,
+        self::FIELD_TRANSPORT_PROTOCOL,
+        self::FIELD_PORT,
+        self::FIELD_OVERRIDE_TARGET,
+        self::FIELD_SOLUTION,
+        self::FIELD_SOLUTION_TITLE,
+        self::FIELD_POC,
     ];
 
     public $nearest_sort_order;
@@ -124,6 +139,7 @@ class GlobalCheckField extends ActiveRecord {
     public function relations() {
         return array(
             "l10n" => array(self::HAS_MANY, "GlobalCheckFieldL10n", "global_check_field_id"),
+            "checkFields" => [self::HAS_MANY, "CheckField", "global_check_field_id"],
         );
     }
 
@@ -139,6 +155,7 @@ class GlobalCheckField extends ActiveRecord {
     }
 
     /**
+     * Get localized value
      * @return string localized name.
      */
     public function getLocalizedValue() {

@@ -7,6 +7,7 @@
  * @property integer $id
  * @property integer $project_id
  * @property string $host
+ * @property boolean $ip
  * @property string $description
  * @property integer $port
  * @property integer $check_source_type
@@ -15,6 +16,7 @@
  * @property RelationTemplate $relationTemplate
  * @property TargetChecklistTemplate[] $checklistTemplates
  * @property TargetCheck[] $targetChecks
+ * @property Project $project
  */
 class Target extends ActiveRecord implements IVariableScopeObject {
     const CHAIN_STATUS_IDLE = 0;
@@ -290,5 +292,40 @@ class Target extends ActiveRecord implements IVariableScopeObject {
         ));
 
         return JobManager::isRunning($job);
+    }
+
+    /**
+     * Get target check by check id
+     * @param $id
+     * @return CActiveRecord
+     */
+    public function getCheck($id) {
+        return TargetCheck::model()->findByAttributes([
+            "target_id" => $this->id,
+            "check_id" => $id
+        ]);
+    }
+
+    /**
+     * Serialize
+     * @return array
+     */
+    public function serialize() {
+        return [
+            "id" => $this->id,
+            "project_id" => $this->project_id,
+            "name" => $this->getName(),
+            "description" => $this->description,
+            "port" => $this->port,
+            "relation_template_id" => $this->relation_template_id,
+        ];
+    }
+
+    /**
+     * Get target name
+     * @return string
+     */
+    public function getName() {
+        return $this->ip ? $this->ip . " (" . $this->host . ")" : $this->host;
     }
 }

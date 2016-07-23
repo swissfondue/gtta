@@ -9,8 +9,6 @@
  * @property string $name
  * @property boolean $automated
  * @property boolean $multiple_solutions
- * @property string $protocol
- * @property integer $port
  * @property integer $reference_id
  * @property string $reference_code
  * @property string $reference_url
@@ -86,41 +84,19 @@ class Check extends ActiveRecord {
 	}
 
     /**
-     * Check fields
-     * @return array|CActiveRecord|mixed|null
-     */
-    public function getOrderedFields() {
-        $language = Language::model()->findByAttributes(array(
-            "code" => Yii::app()->language
-        ));
-
-        if ($language) {
-            $language = $language->id;
-        }
-        
-        return CheckField::model()->with([
-            "global" => [
-                "joinType" => "LEFT JOIN",
-                "order" => "global.sort_order ASC",
-                "with" => [
-                    "l10n" => [
-                        "joinType" => "LEFT JOIN",
-                        "on" => "l10n.language_id = :language_id",
-                        "params" => array("language_id" => $language)
-                    ]
-                ]
-            ]
-        ])->findAllByAttributes([
-            "check_id" => $this->id
-        ]);
-    }
-
-    /**
-     * @return string localized name.
+     * Get localized name
+     * @return mixed|null|string
      */
     public function getLocalizedName() {
-        if ($this->l10n && count($this->l10n) > 0) {
-            return $this->l10n[0]->name != NULL ? $this->l10n[0]->name : $this->name;
+        $language = System::model()->findByPk(1)->language;
+
+        $translate = CheckL10n::model()->findByAttributes([
+            "check_id" => $this->id,
+            "language_id" => $language->id
+        ]);
+
+        if ($translate) {
+            return $translate->name;
         }
 
         return $this->name;
@@ -210,5 +186,92 @@ class Check extends ActiveRecord {
      */
     public function getResult() {
         return $this->_getFieldValue(GlobalCheckField::FIELD_RESULT);
+    }
+
+    /**
+     * Return `application protocol` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getApplicationProtocol() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_APPLICATION_PROTOCOL);
+    }
+
+    /**
+     * Return `transport protocol` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getTransportProtocol() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_TRANSPORT_PROTOCOL);
+    }
+
+    /**
+     * Return `port` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getPort() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_PORT);
+    }
+
+    /**
+     * Return `override target` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getOverrideTarget() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_OVERRIDE_TARGET);
+    }
+
+    /**
+     * Return `solution` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getSolution() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_SOLUTION);
+    }
+
+    /**
+     * Return `solution title` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getSolutionTitle() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE);
+    }
+
+    /**
+     * Serialize check
+     * @param null $language
+     * @return array
+     */
+    public function serialize($language = null) {
+        if ($language) {
+            $translate = CheckL10n::model()->findByPk([
+                "language_id" => $language,
+                "check_id" => $this->id
+            ]);
+        }
+
+        return [
+            "id" => $this->id,
+            "check_control_id" => $this->check_control_id,
+            "name" => $language ? $translate->name : $this->name,
+            "automated" => $this->automated,
+            "multiple_solutions" => $this->multiple_solutions,
+            "protocol" => $this->applicationProtocol,
+            "port" => $this->port,
+            "reference_id" => $this->reference_id,
+            "reference_code" => $this->reference_code,
+            "reference_url" => $this->reference_url,
+            "effort" => $this->effort,
+            "sort_order" => $this->sort_order,
+            "status" => $this->status,
+            "external_id" => $this->external_id,
+            "create_time" => $this->create_time,
+            "private" => $this->private,
+        ];
     }
 }

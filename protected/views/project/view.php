@@ -14,13 +14,15 @@
             <div class="btn-group">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
                     <i class="icon icon-plus"></i>
-                    <?php echo Yii::t('app', 'New Target'); ?>
+                    <?php echo Yii::t("app", "New"); ?>
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id )); ?>">Single Target</a></li>
-                    <li><a href="<?php echo $this->createUrl('project/addtargetlist', array( 'id' => $project->id )); ?>">Target List</a></li>
-                    <li><a href="<?php echo $this->createUrl('project/importtarget', array( 'id' => $project->id )); ?>">Import From File</a></li>
+                    <li><a href="<?= $this->createUrl("project/edittarget", array("id" => $project->id )); ?>"><?= Yii::t("app", "Single Target") ?></a></li>
+                    <li><a href="<?= $this->createUrl("project/addtargetlist", array("id" => $project->id )); ?>"><?= Yii::t("app", "Target List") ?></a></li>
+                    <li><a href="<?= $this->createUrl("project/importtarget", array("id" => $project->id )); ?>"><?= Yii::t("app", "Import Targets From File") ?></a></li>
+                    <hr>
+                    <li><a href="#" onclick="admin.issue.showIssueAddPopup()"><?= Yii::t("app", "Issue") ?></a></li>
                 </ul>
             </div>
         <?php endif; ?>
@@ -31,7 +33,9 @@
 
 <hr>
 
-<div class="container">
+<div
+    class="container"
+    data-add-issue-url="<?= $this->createUrl("project/addIssue", ["id" => $project->id]); ?>">
     <div class="row">
         <div class="span8">
             <?php if (count($targets) > 0): ?>
@@ -135,8 +139,6 @@
                 echo $this->renderPartial("partial/right-block", array(
                     "quickTargets" => $quickTargets,
                     "project" => $project,
-                    "client" => $client,
-                    "statuses" => $statuses,
                     "category" => null,
                     "target" => null
                 ));
@@ -144,6 +146,8 @@
         </div>
     </div>
 </div>
+
+<?= $this->renderPartial("issue/partial/check-selector", ["project" => $project]); ?>
 
 <script>
     $(".shortened").tooltip({

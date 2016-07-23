@@ -1,3 +1,5 @@
+<?php $goToNext = isset($goToNext) ? $goToNext : false ?>
+
 <table class="table check-form">
     <tbody>
         <tr>
@@ -27,43 +29,14 @@
         </tr>
 
         <?php foreach ($fields as $field): ?>
-            <?= $this->renderPartial("partial/check-field",
-                [
+            <?=
+                $this->renderPartial("partial/check-field", [
                     "field" => $field,
                     "targetCheck" => $check
-                ]); ?>
+                ]);
+            ?>
         <?php endforeach; ?>
 
-        <?php if ($checkData->automated): ?>
-            <tr>
-                <th>
-                    <?php echo Yii::t("app", "Override Target"); ?>
-                </th>
-                <td>
-                    <textarea class="max-width" rows="10" name="TargetCheckEditForm_<?php echo $check->id; ?>[overrideTarget]" id="TargetCheckEditForm_<?php echo $check->id; ?>_overrideTarget" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->override_target); ?></textarea>
-                </td>
-            </tr>
-            <?php if ($checkData->protocol): ?>
-                <tr>
-                    <th>
-                        <?php echo Yii::t("app", "Protocol"); ?>
-                    </th>
-                    <td>
-                        <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[protocol]" id="TargetCheckEditForm_<?php echo $check->id; ?>_protocol" value="<?php echo CHtml::encode($check->protocol); ?>" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>>
-                    </td>
-                </tr>
-            <?php endif; ?>
-            <?php if ($checkData->port): ?>
-                <tr>
-                    <th>
-                        <?php echo Yii::t("app", "Port"); ?>
-                    </th>
-                    <td>
-                        <input type="text" class="input-xlarge" name="TargetCheckEditForm_<?php echo $check->id; ?>[port]" id="TargetCheckEditForm_<?php echo $check->id; ?>_port" value="<?php echo $check->port; ?>" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>>
-                    </td>
-                </tr>
-            <?php endif; ?>
-        <?php endif; ?>
         <?php if ($checkData->scripts && $checkData->automated && User::checkRole(User::ROLE_USER)): ?>
             <?php foreach ($check->scripts as $script): ?>
                 <tr class="script-inputs">
@@ -299,7 +272,7 @@
                         </div>
 
                         <div class="solution-content hide" data-id="<?php echo $check->id; ?>-<?php echo TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>">
-                            <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[solutionTitle]" class="max-width" id="TargetCheckEditForm_<?php echo $check->id; ?>_solutionTitle" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?> value="<?php echo CHtml::encode($check->solution_title); ?>">
+                            <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[solutionTitle]" class="max-width" id="TargetCheckEditForm_<?php echo $check->id; ?>_solutionTitle" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?> value="<?php echo CHtml::encode($check->solutionTitle); ?>">
                             <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[solution]" class="solution-edit wysiwyg max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_solution" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->solution); ?></textarea>
 
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
@@ -411,24 +384,34 @@
                 <td>&nbsp;</td>
                 <td>
                     <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, false);" <?php if ($check->isRunning) echo "disabled"; ?>><?php echo Yii::t("app", "Save"); ?></button>&nbsp;
-                    <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, true);" <?php if ($check->isRunning) echo "disabled"; ?>><?php echo Yii::t("app", "Save & Next"); ?></button>
+                    <?php if ($goToNext): ?>
+                        <button class="btn" onclick="user.check.save(<?php echo $check->id; ?>, true);" <?php if ($check->isRunning) echo "disabled"; ?>><?php echo Yii::t("app", "Save & Next"); ?></button>
+                    <?php endif; ?>
                 </td>
             </tr>
         <?php endif; ?>
     </tbody>
 </table>
 <script>
-    $.each($('.html_content'), function () {
-        user.check.enableEditor($(this).attr('id'));
-    });
+    $(function () {
+        $.each($('.html_content'), function () {
+            user.check.enableEditor($(this).attr('id'));
+        });
 
-    $('#TargetCheckEditForm_' + <?php echo $check->id; ?> + '_result').unbind('change input propertychange');
-    $('#TargetCheckEditForm_' + <?php echo $check->id; ?> + '_result').bind('change input propertychange', function () {
-        var val = $(this).val();
-        var id = $(this).attr('id');
+        $('#TargetCheckEditForm_' + <?php echo $check->id; ?> + '_result').unbind('change input propertychange');
+        $('#TargetCheckEditForm_' + <?php echo $check->id; ?> + '_result').bind('change input propertychange', function () {
+            var val = $(this).val();
+            var id = $(this).attr('id');
 
-        if ($(this).val().isHTML()) {
-            user.check.enableEditor(id);
-        }
+            if ($(this).val().isHTML()) {
+                user.check.enableEditor(id);
+            }
+        });
+        var id = <?= $check->id ?>;
+        var form = $("div.check-form[data-type=check][data-id=" + id + "]");
+
+        $(".wysiwyg", form).ckeditor();
+        user.check.initTargetCheckAttachmentUploadForms(id);
+        user.check.initAutosave(id);
     });
 </script>

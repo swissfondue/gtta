@@ -7,19 +7,13 @@
  * @property integer $id
  * @property integer $target_id
  * @property integer $check_id
- * @property string $result
  * @property string $rating
  * @property string $status
  * @property string $target_file
  * @property string $result_file
  * @property integer $language_id
- * @property string $protocol
- * @property integer $port
- * @property string $override_target
  * @property integer $user_id
  * @property string $table_result
- * @property string $solution
- * @property string $solution_title
  * @property User $user
  * @property Check $check
  * @property Target $target
@@ -29,8 +23,11 @@
  * @property integer $vuln_user_id
  * @property date $vuln_deadline
  * @property integer $vuln_status
+ * @property IssueEvidence $evidence
  */
 class TargetCheck extends ActiveRecord implements IVariableScopeObject {
+    public $mr;
+
     /**
      * Target check type
      */
@@ -50,6 +47,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
 
     /**
      * Result ratings.
+     * ordered by gravity (important)
      */
     const RATING_NONE = 0;
     const RATING_NO_VULNERABILITY = 10;
@@ -128,11 +126,11 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
 	public function rules() {
 		return array(
             array("target_id, check_id", "required"),
-            array("target_id, check_id, port, language_id, user_id", "numerical", "integerOnly" => true),
-            array("target_file, result_file, protocol, override_target", "length", "max" => 1000),
+            array("target_id, check_id, language_id, user_id", "numerical", "integerOnly" => true),
+            array("target_file, result_file", "length", "max" => 1000),
             array("status", "in", "range" => array(self::STATUS_OPEN, self::STATUS_FINISHED)),
             array("rating", "in", "range" => self::getValidRatings()),
-            array("result, table_result, solution, solution_title", "safe"),
+            array("table_result", "safe"),
 		);
 	}
 
@@ -152,6 +150,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "scripts" => array(self::HAS_MANY, "TargetCheckScript", "target_check_id"),
             "startScripts" => array(self::HAS_MANY, 'CheckScript', array('check_script_id' => 'id'), 'through' => 'scripts', 'condition' => "scripts.start = 't'"),
             "fields" => array(self::HAS_MANY, "TargetCheckField", "target_check_id"),
+            "evidence" => array(self::HAS_ONE, "IssueEvidence", "target_check_id"),
 		);
 	}
 
@@ -205,10 +204,10 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         ));
 
         if ($this->result) {
-            $this->appendResult($this, "\n");
+            $this->appendPoc("\n");
         }
 
-        $this->appendResult($this, $message);
+        $this->appendPoc($message);
         $this->status = TargetCheck::STATUS_FINISHED;
         $this->save();
     }
@@ -338,43 +337,48 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     }
 
     /**
-     * Append string to result field
+     * Append string to PoC field
      * @param $data
      * @param bool $verbosity
      */
-    public function appendResult($data, $verbosity=true) {
+    public function appendPoc($data, $verbosity=true) {
         $system = System::model()->findByPk(1);
 
         if ($verbosity && !$system->scripts_verbosity) {
             return;
         }
 
-        if (!$this->result) {
-            $this->setResult("");
+        if (!$this->poc) {
+            $this->setFieldValue(GlobalCheckField::FIELD_POC, $data);
         }
 
         if ($data) {
-            $this->setResult($this->_getFieldValue(GlobalCheckField::FIELD_RESULT) . $data);
+            $this->setFieldValue(
+                GlobalCheckField::FIELD_POC,
+                $this->_getFieldValue(GlobalCheckField::FIELD_POC) . $data
+            );
         }
     }
 
     /**
-     * Set result
-     * @param $data
-     * @throws Exception
+     * Set field value
+     * @param $name
+     * @param $value
      */
-    public function setResult($data) {
+    public function setFieldValue($name, $value) {
         $criteria = new CDbCriteria();
-        $criteria->join = "LEFT JOIN check_fields cf on cf.id = t.check_field_id";
-        $criteria->join .= " LEFT JOIN global_check_fields gcf on gcf.id = cf.global_check_field_id";
+        $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
+        $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
         $criteria->addColumnCondition([
-            "gcf.name" => GlobalCheckField::FIELD_RESULT,
-            "t.target_check_id" => $this->id
+            "gcf.name" => $name,
+            "t.target_check_id" => $this->id,
         ]);
+        $field = TargetCheckField::model()->find($criteria);
 
-        $targetCheckField = TargetCheckField::model()->find($criteria);
-        $targetCheckField->value = $data;
-        $targetCheckField->save();
+        if ($field) {
+            $field->value = $value;
+            $field->save();
+        }
     }
 
     /**
@@ -429,5 +433,72 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      */
     public function getResult() {
         return $this->_getFieldValue(GlobalCheckField::FIELD_RESULT);
+    }
+
+    /**
+     * Result `PoC` field value
+     * @return mixed|null
+     */
+    public function getPoc() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_POC);
+    }
+
+    /**
+     * Override target field value
+     * @return mixed|null
+     */
+    public function getOverrideTarget() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_OVERRIDE_TARGET);
+    }
+
+    /**
+     * Solution field value
+     * @return mixed|null
+     */
+    public function getSolution() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_SOLUTION);
+    }
+
+    /**
+     * Solution title field value
+     * @return mixed|null
+     */
+    public function getSolutionTitle() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE);
+    }
+
+    /**
+     * Port field value
+     * @return mixed|null
+     */
+    public function getPort() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_PORT);
+    }
+
+    /**
+     * Transport protocol value
+     * @return mixed|null
+     */
+    public function getTransportProtocol() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_TRANSPORT_PROTOCOL);
+    }
+
+    /**
+     * Application protocol value
+     * @return mixed|null
+     */
+    public function getApplicationProtocol() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_APPLICATION_PROTOCOL);
+    }
+
+    /**
+     * TargetCheckCategory relation
+     * @return array|CActiveRecord|mixed|null
+     */
+    public function getCategory() {
+        return TargetCheckCategory::model()->findByAttributes([
+            "target_id" => $this->target_id,
+            "check_category_id" => $this->check->control->check_category_id
+        ]);
     }
 }

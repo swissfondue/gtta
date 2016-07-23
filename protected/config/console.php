@@ -146,9 +146,9 @@ return array(
                 array(
                     "class"   => "CFileLogRoute",
                     "levels"  => "error",
-                    "categories" => "bg.TargetCheckReindexJob",
+                    "categories" => "bg.ReindexJob",
                     "logPath" => $mainConfig["params"]["bgLogsPath"],
-                    "logFile" => "targetcheckreindex.log",
+                    "logFile" => "reindex.log",
                     'maxLogFiles' => 1,
                 ),
                 array(
@@ -165,6 +165,14 @@ return array(
                     "categories" => "bg.GitJob",
                     "logPath" => $mainConfig["params"]["bgLogsPath"],
                     "logFile" => "git.log",
+                    'maxLogFiles' => 1,
+                ),
+                array(
+                    "class"   => "CFileLogRoute",
+                    "levels"  => "error",
+                    "categories" => "bg.HostResolveJob",
+                    "logPath" => $mainConfig["params"]["bgLogsPath"],
+                    "logFile" => "hostresolve.log",
                     'maxLogFiles' => 1,
                 ),
 			),

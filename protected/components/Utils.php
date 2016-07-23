@@ -42,4 +42,25 @@ class Utils {
     public static function camelize($input, $separator = '_') {
         return str_replace($separator, '', lcfirst(ucwords($input, $separator)));
     }
+
+    /**
+     * Get first words of a string
+     * @param $string
+     * @param $numberOfWords
+     * @return string
+     */
+    public static function getFirstWords($string, $numberOfWords) {
+        $pattern = '/^(?>\S+\s*){1,' . $numberOfWords . '}/';
+        $data = $string;
+
+        if (preg_match($pattern, $string, $match)) {
+            $data = rtrim($match[0]);
+        }
+
+        if (mb_strlen($data) < mb_strlen($string)) {
+            $data .= "...";
+        }
+
+        return $data;
+    }
 }

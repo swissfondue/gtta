@@ -1,9 +1,11 @@
+<?php $issue = isset($issue); ?>
+<?php $formName = $issue ? "IssueEvidenceEditForm" : "TargetCheckEditForm"; ?>
 <?php $hidden = $field->getHidden(); ?>
 
 <?php if (!$hidden): ?>
     <?php
-        $name = sprintf("TargetCheckEditForm_%d[fields][%s]", $targetCheck->id, $field->name);
-        $id = sprintf("TargetCheckEditForm_fields_%d_%s", $targetCheck->id, $field->name);
+        $name = sprintf("%s_%d[fields][%s]", $formName, $targetCheck->id, $field->name);
+        $id = sprintf("%s_fields_%d_%s", $formName, $targetCheck->id, $field->name);
     ?>
 
     <tr>
@@ -46,7 +48,7 @@
                                            value=""
                                            <?php if (!$field->value) echo "checked=\"checked\""; ?>/>&nbsp;<?= Yii::t("app", "N/A"); ?>
                                 </label>
-                            </li><br />
+                            </li>
                             <?php foreach ($values as $value): ?>
                                 <li>
                                     <label>
@@ -55,7 +57,7 @@
                                            name="<?= $name ?>"
                                            value="<?= $value ?>"
                                         <?php if ($value == $field->value) echo "checked=\"checked\""; ?>">&nbsp;<?= $value ?></label>
-                                </li><br />
+                                </li>
                             <?php endforeach; ?>
                         </ul>
                     <?php else: ?>

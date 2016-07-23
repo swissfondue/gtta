@@ -100,6 +100,12 @@ class CheckField extends ActiveRecord {
             "language_id" => $languageId
         ]);
 
+        if (!$l10n) {
+            $l10n = new CheckFieldL10n();
+            $l10n->check_field_id = $this->id;
+            $l10n->language_id = $languageId;
+        }
+
         $l10n->setValue($value);
     }
 

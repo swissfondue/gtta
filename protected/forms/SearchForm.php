@@ -17,7 +17,7 @@ class SearchForm extends CFormModel
 	{
 		return array(
 			array( 'query', 'required' ),
-            array( 'query', 'length', 'min' => 3, 'max' => 1000 ),
+            array( 'query', 'length', 'min' => 1, 'max' => 1000 ),
 		);
 	}
     

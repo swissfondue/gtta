@@ -141,5 +141,7 @@ return array(
 
     "os" => array(
         "type" => BASE_DIR . "/config/type"
-    )
+    ),
+
+    "issue.field_length" => 20,
 );

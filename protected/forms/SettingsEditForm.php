@@ -125,6 +125,11 @@ class SettingsEditForm extends FormModel {
     public $scriptsVerbosity;
 
     /**
+     * @var boolean hostResolve
+     */
+    public $hostResolve;
+
+    /**
      * @return array validation rules for model attributes.
      */
     public function rules() {
@@ -133,7 +138,7 @@ class SettingsEditForm extends FormModel {
             array("timezone", "in", "range" => array_keys(TimeZones::$zones)),
             array("copyright", "length", "max" => 1000),
             array("communityMinRating", "numerical", "min" => 0, "max" => 5),
-            array("communityAllowUnverified, scriptsVerbosity", "boolean"),
+            array("communityAllowUnverified, scriptsVerbosity, hostResolve", "boolean"),
             array("reportLowPedestal, reportMedPedestal, reportHighPedestal, reportMaxRating, reportMedDampingLow, reportHighDampingLow, reportHighDampingMed", "numerical", "min" => 0),
             array("reportLowPedestal", "compare", "compareAttribute" => "reportMedPedestal", "operator" => "<="),
             array("reportMedPedestal", "compare", "compareAttribute" => "reportHighPedestal", "operator" => "<="),

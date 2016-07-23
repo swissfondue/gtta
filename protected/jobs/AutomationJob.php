@@ -63,9 +63,9 @@ class AutomationJob extends BackgroundJob {
         }
 
         if ($fileOutput) {
-            $check->appendResult($fileOutput, false);
+            $check->appendPoc($fileOutput, false);
         } else {
-            $check->appendResult(Yii::t("app", "No output."));
+            $check->appendPoc(Yii::t("app", "No output."));
         }
 
         $check->save();
@@ -159,7 +159,7 @@ class AutomationJob extends BackgroundJob {
         $targetHosts = "";
         $port = "";
 
-        if (!$check->override_target) {
+        if (!$check->overrideTarget) {
             $targetHosts = $target->host;
 
             if ($target->port) {
@@ -170,7 +170,7 @@ class AutomationJob extends BackgroundJob {
                 $port = $check->port;
             }
         } else {
-            $targets = explode("\n", $check->override_target);
+            $targets = explode("\n", $check->overrideTarget);
             $filtered = array();
 
             foreach ($targets as $t) {
@@ -201,7 +201,7 @@ class AutomationJob extends BackgroundJob {
 
         // base data
         fwrite($targetFile, $targetHosts . "\n");
-        fwrite($targetFile, $check->protocol . "\n");
+        fwrite($targetFile, $check->applicationProtocol . "\n");
         fwrite($targetFile, $port . "\n");
         fwrite($targetFile, $check->language->code . "\n");
         fwrite($targetFile, $timeout . "\n");
@@ -397,7 +397,7 @@ class AutomationJob extends BackgroundJob {
 
         foreach ($scripts as $script) {
             if ($check->result) {
-                $check->appendResult("\n");
+                $check->appendPoc("\n");
             }
 
             $now = new DateTime();
@@ -406,12 +406,12 @@ class AutomationJob extends BackgroundJob {
             if (!isset($this->args["chain"])) {
                 $data = Yii::t("app", "The {script} script was used within this check against {target} on {date} at {time}", array(
                     "{script}" => $package->name,
-                    "{target}" => $check->override_target ? $check->override_target : $target->host,
+                    "{target}" => $check->overrideTarget ? $check->overrideTarget : $target->host,
                     "{date}" => $now->format("d.m.Y"),
                     "{time}" => $now->format("H:i:s"),
                 ));
 
-                $check->appendResult("$data\n" . str_repeat("-", 16) . "\n");
+                $check->appendPoc("$data\n" . str_repeat("-", 16) . "\n");
             }
 
             try {
@@ -444,10 +444,10 @@ class AutomationJob extends BackgroundJob {
                     $fileOutput = file_get_contents($vm->virtualizePath($filesPath . '/' . $check->result_file));
                     $data = $fileOutput ? $fileOutput : $output;
 
-                    $check->appendResult($data, false);
+                    $check->appendPoc($data, false);
 
                     if (!$data) {
-                        $check->appendResult(Yii::t('app', 'No output.'));
+                        $check->appendPoc(Yii::t('app', 'No output.'));
                     }
 
                     $this->_getTables($check);
@@ -469,7 +469,7 @@ class AutomationJob extends BackgroundJob {
                     }
                 }
             } catch (VMNotFoundException $e) {
-                $check->appendResult($e->getMessage());
+                $check->appendPoc($e->getMessage());
             } catch (Exception $e) {
                 $check->automationError($e->getMessage());
             }

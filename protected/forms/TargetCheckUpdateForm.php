@@ -3,8 +3,7 @@
 /**
  * This is the model class for target check update form.
  */
-class TargetCheckUpdateForm extends CFormModel
-{
+class TargetCheckUpdateForm extends CFormModel {
     /**
      * @var array checks.
      */
@@ -13,10 +12,9 @@ class TargetCheckUpdateForm extends CFormModel
 	/**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
+	public function rules() {
 		return array(
-            array( 'checks', 'safe' ),
+            array("checks", "safe"),
 		);
 	}
 }
