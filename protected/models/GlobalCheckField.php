@@ -11,6 +11,7 @@
  * @property boolean $hidden
  * @property string $value
  * @property GlobalCheckFieldL10n[] $l10n
+ * @property CheckField[] $checkFields
  */
 class GlobalCheckField extends ActiveRecord {
     /**
@@ -146,6 +147,7 @@ class GlobalCheckField extends ActiveRecord {
     public function relations() {
         return array(
             "l10n" => array(self::HAS_MANY, "GlobalCheckFieldL10n", "global_check_field_id"),
+            "checkFields" => [self::HAS_MANY, "CheckField", "global_check_field_id"],
         );
     }
 

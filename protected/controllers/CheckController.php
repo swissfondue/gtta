@@ -824,6 +824,13 @@ class CheckController extends Controller
 
         $languages = Language::model()->findAll();
 
+        // get fields
+        $criteria = new CDbCriteria();
+        $criteria->addCondition("NOT t.hidden");
+        $criteria->order = "sort_order ASC";
+
+        $fields = GlobalCheckField::model()->findAll($criteria);
+
 		$model = new CheckEditForm();
         $model->localizedItems = array();
         $model->fields = array();
@@ -851,14 +858,14 @@ class CheckController extends Controller
 
                 $model->localizedItems[$cl->language_id] = $i;
             }
-
-            $model->parseFields($check);
-
-            foreach ($check->getOrderedFields() as $f) {
-                $model->hidden[$f->name] = $f->getHidden();
-            }
         } else {
             $model->controlId = $control->id;
+        }
+
+        $model->parseFields($check);
+
+        foreach ($check->fields as $f) {
+            $model->hidden[$f->name] = $f->hidden;
         }
 
 		// collect user input data
@@ -1010,6 +1017,7 @@ class CheckController extends Controller
             'languages' => $languages,
             'references' => $references,
             'categories' => $categories,
+            "fields" => $fields,
             'efforts' => array(2, 5, 20, 40, 60, 120),
         ));
 	}

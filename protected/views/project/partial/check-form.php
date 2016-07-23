@@ -29,15 +29,12 @@
         </tr>
 
         <?php foreach ($fields as $field): ?>
-            <?php if ($field->field->global->automated && !$checkData->automated): ?>
-                <?php continue; ?>
-            <?php endif; ?>
-
-            <?= $this->renderPartial("partial/check-field",
-                [
+            <?=
+                $this->renderPartial("partial/check-field", [
                     "field" => $field,
                     "targetCheck" => $check
-                ]); ?>
+                ]);
+            ?>
         <?php endforeach; ?>
 
         <?php if ($checkData->scripts && $checkData->automated && User::checkRole(User::ROLE_USER)): ?>

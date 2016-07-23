@@ -1,9 +1,10 @@
-<?php if (!$field->getHidden()): ?>
+<?php if (!$field->hidden): ?>
     <?php
-        $name = sprintf("CheckEditForm[fields][%s][%s]", $language->id, $field->global->name);
-        $id = sprintf("CheckEditForm_fields_%s_%s", $language->id, $field->global->name);
-        $value = isset($form->fields[$language->id][$field->global->name]) ? $form->fields[$language->id][$field->global->name] : "";
-        $error = $form->getError("fields_" . $field->global->name);
+        $name = sprintf("CheckEditForm[fields][%s][%s]", $language->id, $field->name);
+        $id = sprintf("CheckEditForm_fields_%s_%s", $language->id, $field->name);
+        $value = isset($form->fields[$language->id]) && isset($form->fields[$language->id][$field->name]) ?
+            $form->fields[$language->id][$field->name] : $field->value;
+        $error = $form->getError("fields_" . $field->name);
 
         $hiddenName = sprintf("CheckEditForm[hidden][%s]", $field->name, $language->id);
         $hiddenId = sprintf("CheckEditForm_hidden_%s_%s", $field->name, $language->id);
@@ -14,17 +15,17 @@
 
         <div class="controls">
             <div class="field-control-<?= $field->name; ?> <?php if (isset($form->hidden[$field->name]) && $form->hidden[$field->name]) echo "hide"; ?>">
-                <?php if (in_array($field->global->type, [GlobalCheckField::TYPE_TEXTAREA, GlobalCheckField::TYPE_WYSIWYG, GlobalCheckField::TYPE_WYSIWYG_READONLY])): ?>
-                    <?php $wysiwyg = in_array($field->global->type, [GlobalCheckField::TYPE_WYSIWYG, GlobalCheckField::TYPE_WYSIWYG_READONLY]); ?>
+                <?php if (in_array($field->type, [GlobalCheckField::TYPE_TEXTAREA, GlobalCheckField::TYPE_WYSIWYG, GlobalCheckField::TYPE_WYSIWYG_READONLY])): ?>
+                    <?php $wysiwyg = in_array($field->type, [GlobalCheckField::TYPE_WYSIWYG, GlobalCheckField::TYPE_WYSIWYG_READONLY]); ?>
                     <textarea
                         class="max-width <?= $wysiwyg ? "wysiwyg" : '' ?>"
                         rows="10"
                         name="<?= $name ?>"
                         id="<?= $id ?>"
-                        <?php if ($field->global->type == GlobalCheckField::TYPE_WYSIWYG_READONLY) echo "readonly"; ?>><?= $value ?></textarea>
-                <?php elseif ($field->global->type == GlobalCheckField::TYPE_TEXT): ?>
+                        <?php if ($field->type == GlobalCheckField::TYPE_WYSIWYG_READONLY) echo "readonly"; ?>><?= $value ?></textarea>
+                <?php elseif ($field->type == GlobalCheckField::TYPE_TEXT): ?>
                     <input type="text" class="input-xlarge" name="<?= $name ?>" value="<?= $value ?>">
-                <?php elseif ($field->global->type == GlobalCheckField::TYPE_RADIO): ?>
+                <?php elseif ($field->type == GlobalCheckField::TYPE_RADIO): ?>
                     <?php $values = @json_decode($value); ?>
 
                     <ul class="check-field-radio span4" data-field-name="<?= $name ?>" style="list-style-type: none; margin-left:0px;">
@@ -47,8 +48,8 @@
                             <?= Yii::t("app", "Add Option") ?>
                         </button>
                     </ul>
-                <?php elseif ($field->global->type == GlobalCheckField::TYPE_CHECKBOX): ?>
-                    <input type="checkbox" class="input-xlarge" name="<?= $name ?>" <?php if (isset($field->value) && $field->value) echo "checked"; ?>>
+                <?php elseif ($field->type == GlobalCheckField::TYPE_CHECKBOX): ?>
+                    <input type="checkbox" class="input-xlarge" name="<?= $name ?>" <?php if ($value) echo "checked"; ?>>
                 <?php endif; ?>
 
                 <div class="clearfix"></div>
@@ -59,7 +60,7 @@
                    id="<?= $hiddenId ?>"
                    name="<?= $hiddenName ?>"
                    value="1"
-                   <?php if (isset($form->hidden[$field->name]) && $form->hidden[$field->name]) echo 'checked="checked"'; ?>
+                   <?php if (isset($form->hidden[$field->name]) && $form->hidden[$field->name]) echo "checked"; ?>
                    onchange="admin.check.toggleHiddenField(this, '<?= $field->name; ?>')"
                 >&nbsp;<?= Yii::t("app", "Hidden"); ?>
             </label>
