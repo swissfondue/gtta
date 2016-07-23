@@ -11,30 +11,31 @@ class m160622_133441_issues extends CDbMigration {
     public function safeUp() {
         // global_check_fields
         $this->execute(
-            "INSERT INTO global_check_fields (type, name, title, hidden)
+            "INSERT INTO global_check_fields (type, name, title, hidden, value)
              VALUES
-             (:text_type, 'application_protocol', 'Application Protocol', 'f'),
-             (:radio_type, 'transport_protocol', 'Transport Protocol', 'f'),
-             (:text_type, 'port', 'Port', 'f'),
-             (:textarea_type, 'override_target', 'Override Target', 'f'),
-             (:text_type, 'solution_title', 'Solution Title', 't'),
-             (:textarea_type, 'solution', 'Solution', 't'),
-             (:textarea_type, 'poc', 'PoC', 'f')",
+             (:text_type, 'application_protocol', 'Application Protocol', 'f', NULL),
+             (:radio_type, 'transport_protocol', 'Transport Protocol', 'f', :tp),
+             (:text_type, 'port', 'Port', 'f', NULL),
+             (:textarea_type, 'override_target', 'Override Target', 'f', NULL),
+             (:text_type, 'solution_title', 'Solution Title', 't', NULL),
+             (:textarea_type, 'solution', 'Solution', 't', NULL),
+             (:textarea_type, 'poc', 'PoC', 'f', NULL)",
             [
                 "textarea_type" => GlobalCheckField::TYPE_TEXTAREA,
                 "text_type" => GlobalCheckField::TYPE_TEXT,
                 "radio_type" => GlobalCheckField::TYPE_RADIO,
+                "tp" => json_encode(["TCP", "UDP"])
             ]
         );
 
         // global_check_fields_l10n
         $this->execute(
-            "INSERT INTO global_check_fields_l10n (global_check_field_id, language_id, title)
+            "INSERT INTO global_check_fields_l10n (global_check_field_id, language_id, title, value)
              (
-                  SELECT global_check_fields.id, languages.id, global_check_fields.title
-                  FROM global_check_fields
+                  SELECT gcf.id, languages.id, gcf.title, gcf.value
+                  FROM global_check_fields gcf
                   LEFT JOIN languages ON languages.code = 'en'
-                  WHERE (global_check_fields.id, languages.id) NOT IN (
+                  WHERE (gcf.id, languages.id) NOT IN (
                       SELECT global_check_field_id, language_id
                       FROM global_check_fields_l10n
                   )
@@ -43,9 +44,9 @@ class m160622_133441_issues extends CDbMigration {
 
         // check_fields
         $this->execute(
-            "INSERT INTO check_fields (global_check_field_id, check_id, value)
+            "INSERT INTO check_fields (global_check_field_id, check_id)
             (
-                SELECT global_check_fields.id, checks.id, ''
+                SELECT global_check_fields.id, checks.id
                 FROM checks
                 LEFT JOIN global_check_fields ON global_check_fields.name = 'application_protocol'
             )"
@@ -53,42 +54,39 @@ class m160622_133441_issues extends CDbMigration {
         $this->execute(
             "INSERT INTO check_fields (global_check_field_id, check_id, value)
             (
-                SELECT global_check_fields.id, checks.id, :values
+                SELECT gcf.id, checks.id, gcf.value
                 FROM checks
-                LEFT JOIN global_check_fields ON global_check_fields.name = 'transport_protocol'
-            )",
-            [
-                "values" => json_encode(["TCP", "UDP"])
-            ]
+                LEFT JOIN global_check_fields gcf ON gcf.name = 'transport_protocol'
+            )"
         );
         $this->execute(
-            "INSERT INTO check_fields (global_check_field_id, check_id, value)
+            "INSERT INTO check_fields (global_check_field_id, check_id)
             (
-                SELECT global_check_fields.id, checks.id, ''
+                SELECT global_check_fields.id, checks.id
                 FROM checks
                 LEFT JOIN global_check_fields ON global_check_fields.name = 'port'
             )"
         );
         $this->execute(
-            "INSERT INTO check_fields (global_check_field_id, check_id, value)
+            "INSERT INTO check_fields (global_check_field_id, check_id)
             (
-                SELECT global_check_fields.id, checks.id, ''
+                SELECT global_check_fields.id, checks.id
                 FROM checks
                 LEFT JOIN global_check_fields ON global_check_fields.name = 'override_target'
             )"
         );
         $this->execute(
-            "INSERT INTO check_fields (global_check_field_id, check_id, value)
+            "INSERT INTO check_fields (global_check_field_id, check_id)
             (
-                SELECT global_check_fields.id, checks.id, ''
+                SELECT global_check_fields.id, checks.id
                 FROM checks
                 LEFT JOIN global_check_fields ON global_check_fields.name = 'solution'
             )"
         );
         $this->execute(
-            "INSERT INTO check_fields (global_check_field_id, check_id, value)
+            "INSERT INTO check_fields (global_check_field_id, check_id)
             (
-                SELECT global_check_fields.id, checks.id, ''
+                SELECT global_check_fields.id, checks.id
                 FROM checks
                 LEFT JOIN global_check_fields ON global_check_fields.name = 'solution_title'
             )"
@@ -96,7 +94,7 @@ class m160622_133441_issues extends CDbMigration {
         $this->execute(
             "INSERT INTO check_fields (global_check_field_id, check_id, value)
             (
-                SELECT global_check_fields.id, checks.id, ''
+                SELECT global_check_fields.id, checks.id, NULL
                 FROM checks
                 LEFT JOIN global_check_fields ON global_check_fields.name = 'poc'
             )"
@@ -106,7 +104,7 @@ class m160622_133441_issues extends CDbMigration {
         $this->execute(
             "INSERT INTO check_fields_l10n (check_field_id, language_id, \"value\")
             (
-              SELECT check_fields.id, checks_l10n.language_id, ''
+              SELECT check_fields.id, checks_l10n.language_id, check_fields.value
               FROM checks_l10n
               LEFT JOIN checks ON checks_l10n.check_id = checks.id
               LEFT JOIN global_check_fields ON global_check_fields.name = 'application_protocol'
@@ -126,7 +124,7 @@ class m160622_133441_issues extends CDbMigration {
         $this->execute(
             "INSERT INTO check_fields_l10n (check_field_id, language_id, \"value\")
             (
-              SELECT check_fields.id, checks_l10n.language_id, ''
+              SELECT check_fields.id, checks_l10n.language_id, check_fields.value
               FROM checks_l10n
               LEFT JOIN checks ON checks_l10n.check_id = checks.id
               LEFT JOIN global_check_fields ON global_check_fields.name = 'port'
@@ -134,9 +132,9 @@ class m160622_133441_issues extends CDbMigration {
             )"
         );
         $this->execute(
-            "INSERT INTO check_fields_l10n (check_field_id, language_id, \"value\")
+            "INSERT INTO check_fields_l10n (check_field_id, language_id)
             (
-              SELECT check_fields.id, checks_l10n.language_id, ''
+              SELECT check_fields.id, checks_l10n.language_id
               FROM checks_l10n
               LEFT JOIN checks ON checks_l10n.check_id = checks.id
               LEFT JOIN global_check_fields ON global_check_fields.name = 'override_target'
@@ -144,9 +142,9 @@ class m160622_133441_issues extends CDbMigration {
             )"
         );
         $this->execute(
-            "INSERT INTO check_fields_l10n (check_field_id, language_id, \"value\")
+            "INSERT INTO check_fields_l10n (check_field_id, language_id)
             (
-              SELECT check_fields.id, checks_l10n.language_id, ''
+              SELECT check_fields.id, checks_l10n.language_id
               FROM checks_l10n
               LEFT JOIN checks ON checks_l10n.check_id = checks.id
               LEFT JOIN global_check_fields ON global_check_fields.name = 'solution'
@@ -154,9 +152,9 @@ class m160622_133441_issues extends CDbMigration {
             )"
         );
         $this->execute(
-            "INSERT INTO check_fields_l10n (check_field_id, language_id, \"value\")
+            "INSERT INTO check_fields_l10n (check_field_id, language_id)
             (
-              SELECT check_fields.id, checks_l10n.language_id, ''
+              SELECT check_fields.id, checks_l10n.language_id
               FROM checks_l10n
               LEFT JOIN checks ON checks_l10n.check_id = checks.id
               LEFT JOIN global_check_fields ON global_check_fields.name = 'solution_title'
@@ -164,9 +162,9 @@ class m160622_133441_issues extends CDbMigration {
             )"
         );
         $this->execute(
-            "INSERT INTO check_fields_l10n (check_field_id, language_id, \"value\")
+            "INSERT INTO check_fields_l10n (check_field_id, language_id)
             (
-              SELECT check_fields.id, checks_l10n.language_id, ''
+              SELECT check_fields.id, checks_l10n.language_id
               FROM checks_l10n
               LEFT JOIN checks ON checks_l10n.check_id = checks.id
               LEFT JOIN global_check_fields ON global_check_fields.name = 'poc'
@@ -236,9 +234,9 @@ class m160622_133441_issues extends CDbMigration {
              )"
         );
         $this->execute(
-            "INSERT INTO target_check_fields (target_check_id, check_field_id, \"value\")
+            "INSERT INTO target_check_fields (target_check_id, check_field_id)
              (
-               SELECT target_checks.id as target_check_id, check_fields.id as check_field_id, ''
+               SELECT target_checks.id as target_check_id, check_fields.id as check_field_id
                FROM target_checks
                LEFT JOIN checks ON checks.id = target_checks.check_id
                LEFT JOIN global_check_fields ON global_check_fields.name = 'poc'
@@ -355,11 +353,11 @@ class m160622_133441_issues extends CDbMigration {
         );
         $this->execute(
             "UPDATE target_checks
-             SET port = target_check_fields.value::INTEGER
-             FROM target_check_fields
-             INNER JOIN check_fields ON check_fields.id = target_check_fields.check_field_id
+             SET port = tcf.value::INTEGER
+             FROM target_check_fields tcf
+             INNER JOIN check_fields ON check_fields.id = tcf.check_field_id
              INNER JOIN global_check_fields ON global_check_fields.id = check_fields.global_check_field_id
-             WHERE global_check_fields.name = 'port' AND target_check_fields.value IS NOT NULL"
+             WHERE global_check_fields.name = 'port' AND tcf.value IS NOT NULL AND tcf.value != ''"
         );
         $this->execute(
             "UPDATE target_checks
