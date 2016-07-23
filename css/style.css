@@ -1403,3 +1403,14 @@ div.time-tracker {
 .issue-details .attachments {
     float:right;
 }
+
+ul.check-list,
+ul.target-list {
+    list-style:none;
+    margin-left:0;
+}
+
+ul.check-list li,
+ul.target-list li {
+    padding:5px 0 5px 0;
+}

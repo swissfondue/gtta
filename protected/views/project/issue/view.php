@@ -224,7 +224,7 @@
                 <input class="target-search-query"
                        placeholder="<?= Yii::t("app", "Hostname or IP address") ?>"
                        type="text" />
-                <table class="table target-list"></table>
+                <ul class="table target-list"></ul>
                 <span class="no-search-result" style="display:none"><?= Yii::t("app", "No targets found.") ?></span>
             </div>
         </div>

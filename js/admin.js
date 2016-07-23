@@ -410,7 +410,7 @@ function Admin()
          * @param query
          */
         this.searchChecks = function (query) {
-            var list = $("#issue-check-select-dialog table.check-list");
+            var list = $("#issue-check-select-dialog ul.check-list");
 
             if (query.length < 1) {
                 list.empty();
@@ -447,12 +447,12 @@ function Admin()
                         }
 
                         var checks = data.data.checks;
+
                         list.empty();
                         list.siblings(".no-search-result").hide();
 
                         if (checks.length) {
                             var link;
-                            list.append($("<tbody>"));
 
                             $.each(checks, function (key, value) {
                                 link = $("<a>")
@@ -462,13 +462,8 @@ function Admin()
                                         _issue.add(value.id);
                                     });
 
-                                list.find("tbody").append(
-                                    $("<tr>")
-                                        .append(
-                                        $("<td>")
-                                            .addClass("name")
-                                            .append(link)
-                                    )
+                                list.append(
+                                    $("<li>").append(link)
                                 )
                             });
                         } else {
@@ -493,7 +488,7 @@ function Admin()
          * @param query
          */
         this.searchTargets = function (query) {
-            var list = $("#target-select-dialog table.target-list");
+            var list = $("#target-select-dialog ul.target-list");
 
             if (query.length < 1) {
                 list.empty();
@@ -531,12 +526,12 @@ function Admin()
                         }
 
                         var targets = data.data.targets;
+
                         list.empty();
                         list.siblings(".no-search-result").hide();
 
                         if (targets.length) {
                             var link;
-                            list.append($("<tbody>"));
 
                             $.each(targets, function (key, value) {
                                 link = $("<a>")
@@ -546,14 +541,9 @@ function Admin()
                                         _issue.evidence.add(value.id);
                                     });
 
-                                list.find("tbody").append(
-                                    $("<tr>")
-                                        .append(
-                                        $("<td>")
-                                            .addClass("name")
-                                            .append(link)
-                                    )
-                                )
+                                list.append(
+                                    $("<li>").append(link)
+                                );
                             });
                         } else {
                             list.siblings(".no-search-result").show();

@@ -16,7 +16,7 @@
                 <input class="issue-search-query"
                        placeholder="<?= Yii::t("app", "Check name") ?>"
                        type="text" />
-                <table class="table check-list"></table>
+                <ul class="check-list"></ul>
                 <span class="no-search-result" style="display:none"><?= Yii::t("app", "No checks found.") ?></span>
             </div>
         </div>
