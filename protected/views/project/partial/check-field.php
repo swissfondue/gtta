@@ -48,7 +48,7 @@
                                            value=""
                                            <?php if (!$field->value) echo "checked=\"checked\""; ?>/>&nbsp;<?= Yii::t("app", "N/A"); ?>
                                 </label>
-                            </li><br />
+                            </li>
                             <?php foreach ($values as $value): ?>
                                 <li>
                                     <label>
@@ -57,7 +57,7 @@
                                            name="<?= $name ?>"
                                            value="<?= $value ?>"
                                         <?php if ($value == $field->value) echo "checked=\"checked\""; ?>">&nbsp;<?= $value ?></label>
-                                </li><br />
+                                </li>
                             <?php endforeach; ?>
                         </ul>
                     <?php else: ?>

@@ -4818,9 +4818,6 @@ class ProjectController extends Controller {
             }
 
             $tm = new TargetManager();
-            $language = Language::model()->findByAttributes([
-                "code" => Yii::app()->language
-            ]);
 
             $exclude = [];
 
@@ -4858,13 +4855,33 @@ class ProjectController extends Controller {
         $issue = (int) $issue;
         $evidence = (int) $evidence;
 
+        $language = Language::model()->findByAttributes([
+            "code" => Yii::app()->language
+        ]);
+
+        if (!$language) {
+            $language = Language::model()->findByAttributes([
+                "default" => true
+            ]);
+        }
+
         $project = Project::model()->findByPk($id);
 
         if (!$project) {
             throw new CHttpException(404, Yii::t("app", "Project not found."));
         }
 
-        $issue = Issue::model()->findByPk($issue);
+        $issue = Issue::model()->with([
+            "check" => [
+                "with" => [
+                    "l10n" => [
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => ["language_id" => $language->id]
+                    ]
+                ]
+            ]
+        ])->findByPk($issue);
 
         if (!$issue) {
             throw new CHttpException(404, Yii::t("app", "Issue not found."));
@@ -4876,24 +4893,17 @@ class ProjectController extends Controller {
             throw new CHttpException(404, Yii::t("app", "Evidence not found."));
         }
 
-        $language = Language::model()->findByAttributes([
-            "code" => Yii::app()->language
-        ]);
-
-        if (!$language) {
-            $language = Language::model()->findByAttributes([
-                "default" => true
-            ]);
-        }
-
         $targetCheck = $evidence->targetCheck;
+        $title = $targetCheck->target->getName();
 
-        $title = $issue->check->name;
         $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
         $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
         $this->breadcrumbs[] = [Yii::t("app", "Issues"), $this->createUrl("project/issues", ["id" => $project->id])];
-        $this->breadcrumbs[] = [$issue->check->name, $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id])];
-        $this->breadcrumbs[] = [$targetCheck->target->ip, ""];
+        $this->breadcrumbs[] = [
+            $issue->check->localizedName,
+            $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id])
+        ];
+        $this->breadcrumbs[] = [$title, ""];
 
         // display the page
         $this->pageTitle = $title;
