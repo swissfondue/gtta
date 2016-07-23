@@ -19,8 +19,11 @@ function User()
         this.update = function (url) {
             var i, k;
 
-            if (this.runningChecks.length > 0)
+            if (this.runningChecks.length > 0) {
                 _check.updateIteration++;
+            } else {
+                _check.updateIteration = 0;
+            }
 
             for (i = 0; i < _check.runningChecks.length; i++) {
                 var check, headingRow, minutes, seconds, time;

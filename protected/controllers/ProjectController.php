@@ -3713,9 +3713,30 @@ class ProjectController extends Controller {
                 $targetCheckIds[] = $e->targetCheck->id;
             }
 
-            $criteria = new CDbCriteria();
-            $criteria->addInCondition("t.id", $targetCheckIds);
+            $form = new TargetCheckUpdateForm();
+            $form->attributes = $_POST["TargetCheckUpdateForm"];
 
+            if (!$form->validate()) {
+                $errorText = '';
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            $checkIds = explode(",", $form->checks);
+
+            foreach ($checkIds as $cid) {
+                if (!in_array($cid, $targetCheckIds)) {
+                    throw new Exception(Yii::t("app", "Evidence not found."));
+                }
+            }
+
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition("t.id", $checkIds);
             $checks = TargetCheck::model()->findAll($criteria);
             $checkData = [];
 

@@ -4,7 +4,11 @@
 
 <hr>
 
-<div class="container" data-add-evidence-url="<?= $this->createUrl("project/addEvidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
+<div
+    class="container"
+    data-get-running-checks-url="<?= $this->createUrl("project/issuerunningchecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
+    data-update-running-checks-url="<?php echo $this->createUrl("project/updateissuechecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
+    data-add-evidence-url="<?= $this->createUrl("project/addEvidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
     <div class="row">
         <div class="span8">
             <div id="issue-information">
@@ -232,9 +236,9 @@
 </div>
 
 <script>
-    $('.target-tabs a').click(function (e) {
+    $(".target-tabs a").click(function (e) {
         e.preventDefault();
-        $(this).tab('show');
+        $(this).tab("show");
     });
 
     $(function () {
@@ -246,13 +250,12 @@
         });
 
         setInterval(function () {
-            admin.issue.getRunningChecks("<?= $this->createUrl("project/issuerunningchecks", ["id" => $project->id, "issue" => $issue->id]); ?>");
-        }, 10000);
+            admin.issue.getRunningChecks();
+        }, 5000);
 
         setInterval(function () {
-            admin.issue.update("<?php echo $this->createUrl("project/updateissuechecks", ["id" => $project->id, "issue" => $issue->id]); ?>");
+            admin.issue.update();
         }, 1000);
-
 
         admin.issue.initTargetSelectDialog();
     });

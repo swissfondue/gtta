@@ -564,13 +564,16 @@ function Admin()
 
         /**
          * Update status of running checks
-         * @param url
          */
-        this.update = function (url) {
-            var i, k;
+        this.update = function () {
+            var i, k, checkIds;
+
+            checkIds = [];
 
             if (_issue.runningChecks.length > 0) {
                 _issue.updateIteration++;
+            } else {
+                _issue.updateIteration = 0;
             }
 
             for (i = 0; i < _issue.runningChecks.length; i++) {
@@ -595,15 +598,19 @@ function Admin()
                 }
 
                 row.find(".run-info .check-time").html(minutes.zeroPad(2) + ":" + seconds.zeroPad(2));
+                checkIds.push(check.id);
             }
 
             if (_issue.updateIteration > 5) {
+                _issue.updateIteration = 0;
+
                 $.ajax({
-                    dataType : "json",
-                    url      : url,
-                    timeout  : system.ajaxTimeout,
-                    type     : "POST",
-                    data     : {
+                    dataType: "json",
+                    url: $("[data-update-running-checks-url]").data("update-running-checks-url"),
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+                    data: {
+                        "TargetCheckUpdateForm[checks]": checkIds.join(","),
                         "YII_CSRF_TOKEN": system.csrf
                     },
 
@@ -625,7 +632,10 @@ function Admin()
                                 var row = $("[data-target-check-id=" + check.id + "]");
 
                                 if (check.poc) {
-                                    row.find(".evidence-field.poc .field-value").text(check.poc);
+                                    var poc = row.find(".evidence-field.poc .field-value");
+
+                                    poc.addClass("issue-pre");
+                                    poc.text(check.poc);
                                 }
 
                                 if (check.finished) {
@@ -656,7 +666,6 @@ function Admin()
                         $(".loader-image").show();
                     }
                 });
-
             }
         };
 
@@ -664,10 +673,10 @@ function Admin()
          * Get running check list
          * @param url
          */
-        this.getRunningChecks = function (url) {
+        this.getRunningChecks = function () {
             $.ajax({
                 dataType: "json",
-                url: url,
+                url: $("[data-get-running-checks-url]").data("get-running-checks-url"),
                 timeout: system.ajaxTimeout,
                 type: "POST",
                 data: {

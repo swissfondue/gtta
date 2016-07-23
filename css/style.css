@@ -1382,11 +1382,15 @@ div.time-tracker {
 
 .issue-pre {
     font-family:monospace;
-    white-space:pre;
     padding:5px 10px 5px 10px;
     margin:5px 0 5px 0;
     background-color:#eee;
     font-size:90%;
+    white-space: pre-wrap;       /* css-3 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
 
 .issue-details {

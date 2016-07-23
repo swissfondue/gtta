@@ -418,7 +418,7 @@
 
         setInterval(function () {
             user.check.getRunningChecks("<?= $this->createUrl("project/runningchecks"); ?>", <?= $target->id ?>);
-        }, 1000);
+        }, 5000);
 
         setInterval(function () {
             user.check.update("<?php echo $this->createUrl("project/updatechecks", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id)); ?>");
