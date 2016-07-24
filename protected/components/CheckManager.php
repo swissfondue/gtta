@@ -279,8 +279,6 @@ class CheckManager {
             "name" => $check->name,
             "automated" => $check->automated,
             "multiple_solutions" => $check->multiple_solutions,
-            "protocol" => $check->protocol,
-            "port" => $check->port,
             "effort" => $check->effort,
             "sort_order" => $check->sort_order,
             "l10n" => array(),

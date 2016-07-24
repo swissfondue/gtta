@@ -21,6 +21,7 @@
  * @property TargetCheck[] $targetChecks
  * @property CheckL10n[] $l10n
  * @property CheckScript[] $scripts
+ * @property CheckField[] $fields
  */
 class Check extends ActiveRecord {
     const STATUS_INSTALLED = 1;
@@ -53,7 +54,7 @@ class Check extends ActiveRecord {
             array("name, check_control_id, sort_order, create_time", "required"),
             array("name, protocol, reference_code, reference_url", "length", "max" => 1000),
             array(
-                "check_control_id, reference_id, port, effort, sort_order, external_id, status",
+                "check_control_id, reference_id, effort, sort_order, external_id, status",
                 "numerical",
                 "integerOnly" => true
             ),
@@ -244,12 +245,14 @@ class Check extends ActiveRecord {
 
     /**
      * Serialize check
-     * @param null $language
+     * @param int|null $language
      * @return array
      */
     public function serialize($language = null) {
+        $l10n = null;
+
         if ($language) {
-            $translate = CheckL10n::model()->findByPk([
+            $l10n = CheckL10n::model()->findByPk([
                 "language_id" => $language,
                 "check_id" => $this->id
             ]);
@@ -258,11 +261,11 @@ class Check extends ActiveRecord {
         return [
             "id" => $this->id,
             "check_control_id" => $this->check_control_id,
-            "name" => $language ? $translate->name : $this->name,
+            "name" => $l10n ? $l10n->name : $this->name,
             "automated" => $this->automated,
             "multiple_solutions" => $this->multiple_solutions,
-            "protocol" => $this->applicationProtocol,
-            "port" => $this->port,
+            "protocol" => $this->getApplicationProtocol(),
+            "port" => $this->getPort(),
             "reference_id" => $this->reference_id,
             "reference_code" => $this->reference_code,
             "reference_url" => $this->reference_url,
