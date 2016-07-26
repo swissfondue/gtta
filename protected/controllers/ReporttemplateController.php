@@ -990,7 +990,7 @@ class ReporttemplateController extends Controller {
         $criteria->order = "t.sort_order ASC";
         $criteria->addColumnCondition(array("report_template_id" => $template->id));
 
-        $sections = ReportTemplateSection::model()->with(array(
+        $sections = ReportTemplateVulnSection::model()->with(array(
             "l10n" => array(
                 "joinType" => "LEFT JOIN",
                 "on" => "language_id = :language_id",
@@ -998,7 +998,7 @@ class ReporttemplateController extends Controller {
             )
         ))->findAll($criteria);
 
-        $blockCount = ReportTemplateSection::model()->count($criteria);
+        $blockCount = ReportTemplateVulnSection::model()->count($criteria);
         $paginator = new Paginator($blockCount, $page);
 
         $this->breadcrumbs[] = array(Yii::t("app", "Report Templates"), $this->createUrl("reporttemplate/index"));
@@ -1043,7 +1043,7 @@ class ReporttemplateController extends Controller {
         }
 
         if ($section) {
-            $section = ReportTemplateSection::model()->with(array(
+            $section = ReportTemplateVulnSection::model()->with(array(
                 "l10n" => array(
                     "joinType" => "LEFT JOIN",
                     "on" => "language_id = :language_id",
@@ -1058,13 +1058,13 @@ class ReporttemplateController extends Controller {
                 throw new CHttpException(404, Yii::t("app", "Section not found."));
             }
         } else {
-            $section = new ReportTemplateSection();
+            $section = new ReportTemplateVulnSection();
             $newRecord = true;
         }
 
         $languages = Language::model()->findAll();
 
-		$model = new ReportTemplateSectionEditForm();
+		$model = new ReportTemplateVulnSectionEditForm();
         $model->localizedItems = array();
 
         if (!$newRecord) {
@@ -1074,8 +1074,8 @@ class ReporttemplateController extends Controller {
             $model->sortOrder = $section->sort_order;
             $model->categoryId = $section->check_category_id;
 
-            $reportTemplateSectionL10n = ReportTemplateSectionL10n::model()->findAllByAttributes(array(
-                "report_template_section_id" => $section->id
+            $reportTemplateSectionL10n = ReportTemplateVulnSectionL10n::model()->findAllByAttributes(array(
+                "report_template_vuln_section_id" => $section->id
             ));
 
             foreach ($reportTemplateSectionL10n as $rtsl) {
@@ -1088,7 +1088,7 @@ class ReporttemplateController extends Controller {
             $criteria->select = "MAX(sort_order) as max_sort_order";
             $criteria->addColumnCondition(array("report_template_id" => $template->id));
 
-            $maxOrder = ReportTemplateSection::model()->find($criteria);
+            $maxOrder = ReportTemplateVulnSection::model()->find($criteria);
 
             if ($maxOrder && $maxOrder->max_sort_order !== NULL) {
                 $model->sortOrder = $maxOrder->max_sort_order + 1;
@@ -1096,13 +1096,13 @@ class ReporttemplateController extends Controller {
         }
 
 		// collect user input data
-		if (isset($_POST["ReportTemplateSectionEditForm"])) {
-			$model->attributes = $_POST["ReportTemplateSectionEditForm"];
+		if (isset($_POST["ReportTemplateVulnSectionEditForm"])) {
+			$model->attributes = $_POST["ReportTemplateVulnSectionEditForm"];
             $model->intro = $model->defaultL10n($languages, "intro");
             $model->title = $model->defaultL10n($languages, "title");
 
 			if ($model->validate()) {
-                $check = ReportTemplateSection::model()->findByAttributes(array(
+                $check = ReportTemplateVulnSection::model()->findByAttributes(array(
                     "report_template_id" => $template->id,
                     "check_category_id" => $model->categoryId
                 ));
@@ -1118,14 +1118,14 @@ class ReporttemplateController extends Controller {
                     $section->save();
 
                     foreach ($model->localizedItems as $languageId => $value) {
-                        $reportTemplateSectionL10n = ReportTemplateSectionL10n::model()->findByAttributes(array(
-                            "report_template_section_id" => $section->id,
+                        $reportTemplateSectionL10n = ReportTemplateVulnSectionL10n::model()->findByAttributes(array(
+                            "report_template_vuln_section_id" => $section->id,
                             "language_id" => $languageId
                         ));
 
                         if (!$reportTemplateSectionL10n) {
-                            $reportTemplateSectionL10n = new ReportTemplateSectionL10n();
-                            $reportTemplateSectionL10n->report_template_section_id = $section->id;
+                            $reportTemplateSectionL10n = new ReportTemplateVulnSectionL10n();
+                            $reportTemplateSectionL10n->report_template_vuln_section_id = $section->id;
                             $reportTemplateSectionL10n->language_id = $languageId;
                         }
 
@@ -1151,7 +1151,7 @@ class ReporttemplateController extends Controller {
                     }
                     
                     // refresh the section
-                     $section = ReportTemplateSection::model()->with(array(
+                     $section = ReportTemplateVulnSection::model()->with(array(
                         "l10n" => array(
                             "joinType" => "LEFT JOIN",
                             "on" => "language_id = :language_id",
@@ -1228,7 +1228,7 @@ class ReporttemplateController extends Controller {
             }
 
             $id = $model->id;
-            $section = ReportTemplateSection::model()->findByPk($id);
+            $section = ReportTemplateVulnSection::model()->findByPk($id);
 
             if ($section === null)
                 throw new CHttpException(404, Yii::t('app', 'Section not found.'));

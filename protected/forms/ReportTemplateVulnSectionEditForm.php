@@ -3,7 +3,7 @@
 /**
  * This is the model class for report template section edit form.
  */
-class ReportTemplateSectionEditForm extends LocalizedFormModel
+class ReportTemplateVulnSectionEditForm extends LocalizedFormModel
 {
     /**
      * @var string intro.

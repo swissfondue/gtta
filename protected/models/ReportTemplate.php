@@ -91,8 +91,8 @@ class ReportTemplate extends ActiveRecord {
 		return array(
             "l10n" => array(self::HAS_MANY, "ReportTemplateL10n", "report_template_id"),
             "summary" => array(self::HAS_MANY, "ReportTemplateSummary", "report_template_id"),
-            "sections" => array(self::HAS_MANY, "ReportTemplateSection", "report_template_id"),
-            "ratingImages" => array(self::HAS_MANY, "ReportTemplateSection", "report_template_id"),
+            "sections" => array(self::HAS_MANY, "ReportTemplateVulnSection", "report_template_id"),
+            "ratingImages" => array(self::HAS_MANY, "ReportTemplateVulnSection", "report_template_id"),
 		);
 	}
 

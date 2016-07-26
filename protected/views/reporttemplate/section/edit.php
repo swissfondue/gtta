@@ -27,9 +27,9 @@
                         <?php foreach ($languages as $language): ?>
                             <div class="tab-pane<?php if ($language->default) echo ' active'; ?>" id="<?php echo CHtml::encode($language->code); ?>">
                                 <div class="control-group <?php if ($model->getError('title')) echo 'error'; ?>">
-                                    <label class="control-label" for="ReportTemplateSectionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_title"><?php echo Yii::t('app', 'Title'); ?></label>
+                                    <label class="control-label" for="ReportTemplateVulnSectionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_title"><?php echo Yii::t('app', 'Title'); ?></label>
                                     <div class="controls">
-                                        <input type="text" class="input-xlarge" id="ReportTemplateSectionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_title" name="ReportTemplateSectionEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][title]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['title']) : ''; ?>">
+                                        <input type="text" class="input-xlarge" id="ReportTemplateVulnSectionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_title" name="ReportTemplateVulnSectionEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][title]" value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['title']) : ''; ?>">
                                         <?php if ($model->getError('title')): ?>
                                             <p class="help-block"><?php echo $model->getError('title'); ?></p>
                                         <?php endif; ?>
@@ -37,9 +37,9 @@
                                 </div>
 
                                 <div class="control-group <?php if ($model->getError('intro')) echo 'error'; ?>">
-                                    <label class="control-label" for="ReportTemplateSectionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_intro"><?php echo Yii::t('app', 'Section'); ?></label>
+                                    <label class="control-label" for="ReportTemplateVulnSectionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_intro"><?php echo Yii::t('app', 'Section'); ?></label>
                                     <div class="controls">
-                                        <textarea class="wysiwyg" style="height:200px;" id="ReportTemplateSectionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_intro" name="ReportTemplateSectionEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][intro]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['intro']) : ''; ?></textarea>
+                                        <textarea class="wysiwyg" style="height:200px;" id="ReportTemplateVulnSectionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_intro" name="ReportTemplateVulnSectionEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][intro]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['intro']) : ''; ?></textarea>
                                         <?php if ($model->getError('intro')): ?>
                                             <p class="help-block"><?php echo $model->getError('intro'); ?></p>
                                         <?php endif; ?>
@@ -54,9 +54,9 @@
                     </div>
                     
                     <div class="control-group <?php if ($model->getError('categoryId')) echo 'error'; ?>">
-                        <label class="control-label" for="ReportTemplateSectionEditForm_categoryId"><?php echo Yii::t('app', 'Check Category'); ?></label>
+                        <label class="control-label" for="ReportTemplateVulnSectionEditForm_categoryId"><?php echo Yii::t('app', 'Check Category'); ?></label>
                         <div class="controls">
-                            <select class="input-xlarge" id="ReportTemplateSectionEditForm_categoryId" name="ReportTemplateSectionEditForm[categoryId]">
+                            <select class="input-xlarge" id="ReportTemplateVulnSectionEditForm_categoryId" name="ReportTemplateVulnSectionEditForm[categoryId]">
                                 <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
                                 <?php foreach ($categories as $cat): ?>
                                     <option value="<?php echo $cat->id; ?>" <?php if ($cat->id == $model->categoryId) echo 'selected'; ?>><?php echo CHtml::encode($cat->localizedName); ?></option>
@@ -69,9 +69,9 @@
                     </div>
 
                     <div class="control-group <?php if ($model->getError('sortOrder')) echo 'error'; ?>">
-                        <label class="control-label" for="ReportTemplateSectionEditForm_sortOrder"><?php echo Yii::t('app', 'Sort Order'); ?></label>
+                        <label class="control-label" for="ReportTemplateVulnSectionEditForm_sortOrder"><?php echo Yii::t('app', 'Sort Order'); ?></label>
                         <div class="controls">
-                            <input type="text" class="input-xlarge" id="ReportTemplateSectionEditForm_sortOrder" name="ReportTemplateSectionEditForm[sortOrder]" value="<?php echo $model->sortOrder ? $model->sortOrder : 0; ?>">
+                            <input type="text" class="input-xlarge" id="ReportTemplateVulnSectionEditForm_sortOrder" name="ReportTemplateVulnSectionEditForm[sortOrder]" value="<?php echo $model->sortOrder ? $model->sortOrder : 0; ?>">
                             <?php if ($model->getError('sortOrder')): ?>
                                 <p class="help-block"><?php echo $model->getError('sortOrder'); ?></p>
                             <?php endif; ?>
