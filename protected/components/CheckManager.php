@@ -80,7 +80,6 @@ class CheckManager {
             $c->reference_id = $reference;
             $c->reference_code = $check->reference_code;
             $c->reference_url = $check->reference_url;
-            $c->effort = $check->effort;
             $c->sort_order = $check->sort_order;
             $c->status = Check::STATUS_INSTALLED;
             $c->save();
@@ -183,12 +182,44 @@ class CheckManager {
                 }
             }
 
-            foreach ($check->field as $field) {
-                $f = new CheckField();
-                $f->check_id = $c->id;
-                $f->global_check_field_id = $field->global_check_field_id;
-                $f->value = $field->value;
-                $f->save();
+            $this->reindexFields($c);
+            $c->refresh();
+
+            /** @var CheckField $field */
+            foreach ($c->fields as $field) {
+                $fieldName = $field->getName();
+
+                if (property_exists($check, $fieldName)) {
+                    $field->value = $check->{$fieldName};
+                    $field->save();
+
+                    /** @var CheckFieldL10n $l10n */
+                    foreach ($this->_languages as $code => $languageId) {
+                        $l10n = CheckFieldL10n::model()->findByAttributes([
+                            "check_field_id" => $field->id,
+                            "language_id" => $languageId,
+                        ]);
+
+                        foreach ($check->l10n as $checkL10n) {
+                            if (!property_exists($checkL10n, $fieldName)) {
+                                continue;
+                            }
+
+                            if ($checkL10n->code != $code) {
+                                continue;
+                            }
+
+                            if (!$l10n) {
+                                $l10n = new CheckFieldL10n();
+                                $l10n->check_field_id = $field->id;
+                                $l10n->language_id = $languageId;
+                            }
+
+                            $l10n->value = $checkL10n->{$fieldName};
+                            $l10n->save();
+                        }
+                    }
+                }
             }
         } catch (Exception $e) {
             if (!$initial) {
