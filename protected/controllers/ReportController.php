@@ -1821,7 +1821,7 @@ class ReportController extends Controller {
 
         $templateCategoryIds = array();
 
-        foreach ($template->sections as $section) {
+        foreach ($template->vulnSections as $section) {
             $templateCategoryIds[] = $section->check_category_id;
         }
 
@@ -2431,7 +2431,7 @@ class ReportController extends Controller {
         $subsectionNumber = 1;
 
         if ($this->project["hasSeparate"]) {
-            foreach ($template->sections as $scn) {
+            foreach ($template->vulnSections as $scn) {
                 // check if section has checks in it
                 $checkCount = 0;
 

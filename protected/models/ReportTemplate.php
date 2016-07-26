@@ -8,22 +8,6 @@
  * @property string $name
  * @property string $header_image_path
  * @property string $header_image_type
- * @property string $intro
- * @property string $appendix
- * @property string $vulns_intro
- * @property string $info_checks_intro
- * @property string $security_level_intro
- * @property string $vuln_distribution_intro
- * @property string $reduced_intro
- * @property string $high_description
- * @property string $low_description
- * @property string $med_description
- * @property string $degree_intro
- * @property string $risk_intro
- * @property string $footer
- * @property string $none_description
- * @property string $no_vuln_description
- * @property string $info_description
  * @property integer $type
  * @property string $file_path
  */
@@ -80,7 +64,7 @@ class ReportTemplate extends ActiveRecord {
             array("name, type", "required"),
             array("name, header_image_path, header_image_type, file_path", "length", "max" => 1000),
             array("type", "in", "range" => self::getValidTypes()),
-            array("intro, appendix, vulns_intro, info_checks_intro, security_level_intro, vuln_distribution_intro, reduced_intro, high_description, med_description, low_description, degree_intro, risk_intro, none_description, no_vuln_description, info_description", "safe"),
+            array("sections", "checkSections")
 		);
 	}
 
@@ -91,8 +75,9 @@ class ReportTemplate extends ActiveRecord {
 		return array(
             "l10n" => array(self::HAS_MANY, "ReportTemplateL10n", "report_template_id"),
             "summary" => array(self::HAS_MANY, "ReportTemplateSummary", "report_template_id"),
-            "sections" => array(self::HAS_MANY, "ReportTemplateVulnSection", "report_template_id"),
+            "vulnSections" => array(self::HAS_MANY, "ReportTemplateVulnSection", "report_template_id"),
             "ratingImages" => array(self::HAS_MANY, "ReportTemplateVulnSection", "report_template_id"),
+            "sections" => array(self::HAS_MANY, "ReportTemplateSection", "report_template_id"),
 		);
 	}
 
@@ -298,5 +283,15 @@ class ReportTemplate extends ActiveRecord {
         );
 
         return ReportTemplateRatingImage::model()->find($criteria);
+    }
+
+    /**
+     * Check report section
+     * @param $attribute
+     * @param $params
+     * @return bool
+     */
+    public function checkSections($attribute, $params) {
+        return false;
     }
 }
