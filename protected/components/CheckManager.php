@@ -462,7 +462,8 @@ class CheckManager {
                 $l10n->save();
             }
 
-            TargetCheckManager::reindexFields($checkField);
+            $tcm = new TargetCheckManager();
+            $tcm->reindexFields($checkField);
         }
     }
 

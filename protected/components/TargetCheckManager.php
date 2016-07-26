@@ -40,12 +40,7 @@ class TargetCheckManager {
 
             /** @var CheckField $field */
             foreach ($check->fields as $field) {
-                $targetCheckField = new TargetCheckField();
-                $targetCheckField->target_check_id = $targetCheck->id;
-                $targetCheckField->check_field_id = $field->id;
-                $targetCheckField->value = $field->getValue();
-                $targetCheckField->hidden = $field->hidden;
-                $targetCheckField->save();
+                $this->createField($targetCheck, $field);
             }
 
             $this->addEvidence($targetCheck);
@@ -57,8 +52,32 @@ class TargetCheckManager {
     }
 
     /**
+     * Create target check field
+     * @param TargetCheck $tc
+     * @param CheckField $field
+     * @throws Exception
+     * @return TargetCheckField
+     */
+    public function createField(TargetCheck $tc, CheckField $field) {
+        $targetCheckField = new TargetCheckField();
+        $targetCheckField->target_check_id = $tc->id;
+        $targetCheckField->check_field_id = $field->id;
+
+        // radio contains JSON
+        if ($field->getType() != GlobalCheckField::TYPE_RADIO) {
+            $targetCheckField->value = $field->getValue();
+        }
+
+        $targetCheckField->hidden = $field->hidden;
+        $targetCheckField->save();
+
+        return $targetCheckField;
+    }
+
+    /**
      * Start check
      * @param $id
+     * @throws Exception
      */
     public static function start($id, $chain=false) {
         $id = (int) $id;
@@ -153,26 +172,23 @@ class TargetCheckManager {
      * @param CheckField $checkField
      * @throws Exception
      */
-    public static function reindexFields(CheckField $checkField) {
+    public function reindexFields(CheckField $checkField) {
         foreach ($checkField->check->targetChecks as $targetCheck) {
-            $targetCheckField = TargetCheckField::model()->findByAttributes([
+            $tcf = TargetCheckField::model()->findByAttributes([
                 "check_field_id" => $checkField->id,
                 "target_check_id" => $targetCheck->id
             ]);
 
             // if empty field -> update value
-            if ($targetCheckField) {
-                if (!$targetCheckField->value) {
-                    $targetCheckField->value = $checkField->getValue();
-                    $targetCheckField->save();
-                }
-            } else {
-                $tcf = new TargetCheckField();
-                $tcf->target_check_id = $targetCheck->id;
-                $tcf->check_field_id = $checkField->id;
-                $tcf->value = $checkField->getValue();
-                $tcf->save();
+            if (!$tcf) {
+                $tcf = $this->createField($targetCheck, $checkField);
             }
+
+            if (!$tcf->value && $checkField->getType() != GlobalCheckField::TYPE_RADIO) {
+                $tcf->value = $checkField->getValue();
+            }
+
+            $tcf->save();
         }
     }
 
