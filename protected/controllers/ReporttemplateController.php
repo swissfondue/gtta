@@ -99,22 +99,6 @@ class ReporttemplateController extends Controller {
         if (!$newRecord) {
             $model->type = $template->type;
             $model->name = $template->name;
-            $model->intro = $template->intro;
-            $model->appendix = $template->appendix;
-            $model->vulnsIntro = $template->vulns_intro;
-            $model->infoChecksIntro = $template->info_checks_intro;
-            $model->securityLevelIntro = $template->security_level_intro;
-            $model->vulnDistributionIntro = $template->vuln_distribution_intro;
-            $model->degreeIntro = $template->degree_intro;
-            $model->reducedIntro = $template->reduced_intro;
-            $model->riskIntro = $template->risk_intro;
-            $model->highDescription = $template->high_description;
-            $model->medDescription = $template->med_description;
-            $model->lowDescription = $template->low_description;
-            $model->noneDescription = $template->none_description;
-            $model->noVulnDescription = $template->no_vuln_description;
-            $model->infoDescription = $template->info_description;
-            $model->footer = $template->footer;
 
             $templateL10n = ReportTemplateL10n::model()->findAllByAttributes(array(
                 "report_template_id" => $template->id
@@ -122,65 +106,22 @@ class ReporttemplateController extends Controller {
 
             foreach ($templateL10n as $tl) {
                 $model->localizedItems[$tl->language_id]["name"] = $tl->name;
-                $model->localizedItems[$tl->language_id]["intro"] = $tl->intro;
-                $model->localizedItems[$tl->language_id]["appendix"] = $tl->appendix;
-                $model->localizedItems[$tl->language_id]["vulnsIntro"] = $tl->vulns_intro;
-                $model->localizedItems[$tl->language_id]["infoChecksIntro"] = $tl->info_checks_intro;
-                $model->localizedItems[$tl->language_id]["securityLevelIntro"] = $tl->security_level_intro;
-                $model->localizedItems[$tl->language_id]["vulnDistributionIntro"] = $tl->vuln_distribution_intro;
-                $model->localizedItems[$tl->language_id]["reducedIntro"] = $tl->reduced_intro;
-                $model->localizedItems[$tl->language_id]["degreeIntro"] = $tl->degree_intro;
-                $model->localizedItems[$tl->language_id]["riskIntro"] = $tl->risk_intro;
-                $model->localizedItems[$tl->language_id]["highDescription"] = $tl->high_description;
-                $model->localizedItems[$tl->language_id]["medDescription"] = $tl->med_description;
-                $model->localizedItems[$tl->language_id]["lowDescription"] = $tl->low_description;
-                $model->localizedItems[$tl->language_id]["noneDescription"] = $tl->none_description;
-                $model->localizedItems[$tl->language_id]["noVulnDescription"] = $tl->no_vuln_description;
-                $model->localizedItems[$tl->language_id]["infoDescription"] = $tl->info_description;
-                $model->localizedItems[$tl->language_id]["footer"] = $tl->footer;
+                $model->localizedItems[$tl->language_id]["name"] = $tl->name;
             }
+
+            /**
+             * TODO: ReportTemplateSections parse
+             */
         }
 
 		// collect user input data
 		if (isset($_POST["ReportTemplateEditForm"])) {
 			$model->attributes = $_POST["ReportTemplateEditForm"];
             $model->name = $model->defaultL10n($languages, "name");
-            $model->intro = $model->defaultL10n($languages, "intro");
-            $model->appendix = $model->defaultL10n($languages, "appendix");
-            $model->vulnsIntro = $model->defaultL10n($languages, "vulnsIntro");
-            $model->infoChecksIntro = $model->defaultL10n($languages, "infoChecksIntro");
-            $model->securityLevelIntro = $model->defaultL10n($languages, "securityLevelIntro");
-            $model->vulnDistributionIntro = $model->defaultL10n($languages, "vulnDistributionIntro");
-            $model->reducedIntro = $model->defaultL10n($languages, "reducedIntro");
-            $model->degreeIntro = $model->defaultL10n($languages, "degreeIntro");
-            $model->riskIntro = $model->defaultL10n($languages, "riskIntro");
-            $model->highDescription = $model->defaultL10n($languages, "highDescription");
-            $model->medDescription = $model->defaultL10n($languages, "medDescription");
-            $model->lowDescription = $model->defaultL10n($languages, "lowDescription");
-            $model->noneDescription = $model->defaultL10n($languages, "noneDescription");
-            $model->noVulnDescription = $model->defaultL10n($languages, "noVulnDescription");
-            $model->infoDescription = $model->defaultL10n($languages, "infoDescription");
-            $model->footer = $model->defaultL10n($languages, "footer");
 
 			if ($model->validate()) {
                 $template->type = $model->type;
                 $template->name = $model->name;
-                $template->intro = $model->intro;
-                $template->appendix = $model->appendix;
-                $template->vulns_intro = $model->vulnsIntro;
-                $template->info_checks_intro = $model->infoChecksIntro;
-                $template->security_level_intro = $model->securityLevelIntro;
-                $template->vuln_distribution_intro = $model->vulnDistributionIntro;
-                $template->degree_intro = $model->degreeIntro;
-                $template->reduced_intro = $model->reducedIntro;
-                $template->risk_intro = $model->riskIntro;
-                $template->high_description = $model->highDescription;
-                $template->med_description = $model->medDescription;
-                $template->low_description = $model->lowDescription;
-                $template->none_description = $model->noneDescription;
-                $template->no_vuln_description = $model->noVulnDescription;
-                $template->info_description = $model->infoDescription;
-                $template->footer = $model->footer;
                 $template->save();
 
                 foreach ($model->localizedItems as $languageId => $value) {
@@ -199,87 +140,7 @@ class ReporttemplateController extends Controller {
                         $value["name"] = NULL;
                     }
 
-                    if ($value["intro"] == "") {
-                        $value["intro"] = NULL;
-                    }
-
-                    if ($value["appendix"] == "") {
-                        $value["appendix"] = NULL;
-                    }
-
-                    if ($value["vulnsIntro"] == "") {
-                        $value["vulnsIntro"] = NULL;
-                    }
-
-                    if ($value["infoChecksIntro"] == "") {
-                        $value["infoChecksIntro"] = NULL;
-                    }
-
-                    if ($value["securityLevelIntro"] == "") {
-                        $value["securityLevelIntro"] = NULL;
-                    }
-
-                    if ($value["vulnDistributionIntro"] == "") {
-                        $value["vulnDistributionIntro"] = NULL;
-                    }
-
-                    if ($value["reducedIntro"] == "") {
-                        $value["reducedIntro"] = NULL;
-                    }
-
-                    if ($value["degreeIntro"] == "") {
-                        $value["degreeIntro"] = NULL;
-                    }
-
-                    if ($value["riskIntro"] == "") {
-                        $value["riskIntro"] = NULL;
-                    }
-
-                    if ($value["highDescription"] == "") {
-                        $value["highDescription"] = NULL;
-                    }
-
-                    if ($value["medDescription"] == "") {
-                        $value["medDescription"] = NULL;
-                    }
-
-                    if ($value["lowDescription"] == "") {
-                        $value["lowDescription"] = NULL;
-                    }
-
-                    if ($value["noneDescription"] == "") {
-                        $value["noneDescription"] = NULL;
-                    }
-
-                    if ($value["noVulnDescription"] == "") {
-                        $value["noVulnDescription"] = NULL;
-                    }
-
-                    if ($value["infoDescription"] == "") {
-                        $value["infoDescription"] = NULL;
-                    }
-
-                    if ($value["footer"] == "") {
-                        $value["footer"] = NULL;
-                    }
-
                     $templateL10n->name = $value["name"];
-                    $templateL10n->intro = $value["intro"];
-                    $templateL10n->appendix = $value["appendix"];
-                    $templateL10n->vulns_intro = $value["vulnsIntro"];
-                    $templateL10n->info_checks_intro = $value["infoChecksIntro"];
-                    $templateL10n->security_level_intro = $value["securityLevelIntro"];
-                    $templateL10n->vuln_distribution_intro = $value["vulnDistributionIntro"];
-                    $templateL10n->reduced_intro = $value["reducedIntro"];
-                    $templateL10n->degree_intro = $value["degreeIntro"];
-                    $templateL10n->risk_intro = $value["riskIntro"];
-                    $templateL10n->high_description = $value["highDescription"];
-                    $templateL10n->med_description = $value["medDescription"];
-                    $templateL10n->low_description = $value["lowDescription"];
-                    $templateL10n->none_description = $value["noneDescription"];
-                    $templateL10n->no_vuln_description = $value["noVulnDescription"];
-                    $templateL10n->info_description = $value["infoDescription"];
-                    $templateL10n->footer = $value["footer"];
                     $templateL10n->save();
                 }
 

@@ -15,84 +15,9 @@ class ReportTemplateEditForm extends LocalizedFormModel {
     public $name;
 
     /**
-     * @var string intro.
+     * @var string sections
      */
-    public $intro;
-
-    /**
-     * @var string appendix.
-     */
-    public $appendix;
-
-    /**
-     * @var string vulns intro.
-     */
-    public $vulnsIntro;
-
-    /**
-     * @var string info checks intro.
-     */
-    public $infoChecksIntro;
-
-    /**
-     * @var string security level intro.
-     */
-    public $securityLevelIntro;
-
-    /**
-     * @var string vuln distribution intro.
-     */
-    public $vulnDistributionIntro;
-
-    /**
-     * @var string reduced intro.
-     */
-    public $reducedIntro;
-
-    /**
-     * @var string risk intro.
-     */
-    public $riskIntro;
-
-    /**
-     * @var string degree intro.
-     */
-    public $degreeIntro;
-
-    /**
-     * @var string high description.
-     */
-    public $highDescription;
-
-    /**
-     * @var string med description.
-     */
-    public $medDescription;
-
-    /**
-     * @var string low description.
-     */
-    public $lowDescription;
-    
-    /**
-     * @var string none description.
-     */
-    public $noneDescription;
-    
-    /**
-     * @var string no vuln description.
-     */
-    public $noVulnDescription;
-    
-    /**
-     * @var string info description.
-     */
-    public $infoDescription;
-
-    /**
-     * @var string footer.
-     */
-    public $footer;
+    public $sections;
 
     /**
 	 * @return array validation rules for model attributes.
@@ -102,7 +27,7 @@ class ReportTemplateEditForm extends LocalizedFormModel {
 			array("type, name", "required"),
             array("type", "in", "range" => ReportTemplate::getValidTypes()),
             array("name", "length", "max" => 1000),
-            array("intro, appendix, localizedItems, vulnsIntro, infoChecksIntro, securityLevelIntro, vulnDistributionIntro, reducedIntro, highDescription, medDescription, lowDescription, noneDescription, noVulnDescription, infoDescription, degreeIntro, riskIntro, footer", "safe"),
+            array("sections", "checkSections")
 		);
 	}
     
@@ -131,4 +56,14 @@ class ReportTemplateEditForm extends LocalizedFormModel {
             "footer" => Yii::t("app", "Footer"),
 		);
 	}
+
+    /**
+     * Check sections
+     * @param $attribute
+     * @param $params
+     * @return bool
+     */
+    public function checkSections($attribute, $params) {
+        return false;
+    }
 }
