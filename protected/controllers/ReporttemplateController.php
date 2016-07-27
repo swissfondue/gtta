@@ -93,12 +93,18 @@ class ReporttemplateController extends Controller {
         }
 
         $languages = Language::model()->findAll();
-		$model = new ReportTemplateEditForm();
+        $model = new ReportTemplateEditForm();
         $model->localizedItems = array();
 
         if (!$newRecord) {
             $model->type = $template->type;
             $model->name = $template->name;
+            $model->highDescription = $template->high_description;
+            $model->medDescription = $template->med_description;
+            $model->lowDescription = $template->low_description;
+            $model->noneDescription = $template->none_description;
+            $model->noVulnDescription = $template->no_vuln_description;
+            $model->infoDescription = $template->info_description;
 
             $templateL10n = ReportTemplateL10n::model()->findAllByAttributes(array(
                 "report_template_id" => $template->id
@@ -106,22 +112,35 @@ class ReporttemplateController extends Controller {
 
             foreach ($templateL10n as $tl) {
                 $model->localizedItems[$tl->language_id]["name"] = $tl->name;
-                $model->localizedItems[$tl->language_id]["name"] = $tl->name;
+                $model->localizedItems[$tl->language_id]["highDescription"] = $tl->high_description;
+                $model->localizedItems[$tl->language_id]["medDescription"] = $tl->med_description;
+                $model->localizedItems[$tl->language_id]["lowDescription"] = $tl->low_description;
+                $model->localizedItems[$tl->language_id]["noneDescription"] = $tl->none_description;
+                $model->localizedItems[$tl->language_id]["noVulnDescription"] = $tl->no_vuln_description;
+                $model->localizedItems[$tl->language_id]["infoDescription"] = $tl->info_description;
             }
-
-            /**
-             * TODO: ReportTemplateSections parse
-             */
         }
 
-		// collect user input data
-		if (isset($_POST["ReportTemplateEditForm"])) {
-			$model->attributes = $_POST["ReportTemplateEditForm"];
+        // collect user input data
+        if (isset($_POST["ReportTemplateEditForm"])) {
+            $model->attributes = $_POST["ReportTemplateEditForm"];
             $model->name = $model->defaultL10n($languages, "name");
+            $model->highDescription = $model->defaultL10n($languages, "highDescription");
+            $model->medDescription = $model->defaultL10n($languages, "medDescription");
+            $model->lowDescription = $model->defaultL10n($languages, "lowDescription");
+            $model->noneDescription = $model->defaultL10n($languages, "noneDescription");
+            $model->noVulnDescription = $model->defaultL10n($languages, "noVulnDescription");
+            $model->infoDescription = $model->defaultL10n($languages, "infoDescription");
 
-			if ($model->validate()) {
+            if ($model->validate()) {
                 $template->type = $model->type;
                 $template->name = $model->name;
+                $template->high_description = $model->highDescription;
+                $template->med_description = $model->medDescription;
+                $template->low_description = $model->lowDescription;
+                $template->none_description = $model->noneDescription;
+                $template->no_vuln_description = $model->noVulnDescription;
+                $template->info_description = $model->infoDescription;
                 $template->save();
 
                 foreach ($model->localizedItems as $languageId => $value) {
@@ -140,7 +159,37 @@ class ReporttemplateController extends Controller {
                         $value["name"] = NULL;
                     }
 
+                    if ($value["highDescription"] == "") {
+                        $value["highDescription"] = NULL;
+                    }
+
+                    if ($value["medDescription"] == "") {
+                        $value["medDescription"] = NULL;
+                    }
+
+                    if ($value["lowDescription"] == "") {
+                        $value["lowDescription"] = NULL;
+                    }
+
+                    if ($value["noneDescription"] == "") {
+                        $value["noneDescription"] = NULL;
+                    }
+
+                    if ($value["noVulnDescription"] == "") {
+                        $value["noVulnDescription"] = NULL;
+                    }
+
+                    if ($value["infoDescription"] == "") {
+                        $value["infoDescription"] = NULL;
+                    }
+
                     $templateL10n->name = $value["name"];
+                    $templateL10n->high_description = $value["highDescription"];
+                    $templateL10n->med_description = $value["medDescription"];
+                    $templateL10n->low_description = $value["lowDescription"];
+                    $templateL10n->none_description = $value["noneDescription"];
+                    $templateL10n->no_vuln_description = $value["noVulnDescription"];
+                    $templateL10n->info_description = $value["infoDescription"];
                     $templateL10n->save();
                 }
 
@@ -151,7 +200,7 @@ class ReporttemplateController extends Controller {
                 if ($newRecord) {
                     $this->redirect(array("reporttemplate/edit", "id" => $template->id));
                 }
-                
+
                 // refresh the template
                 $template = ReportTemplate::model()->with(array(
                     "l10n" => array(
@@ -163,7 +212,7 @@ class ReporttemplateController extends Controller {
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
-		}
+        }
 
         $this->breadcrumbs[] = array(Yii::t("app", "Report Templates"), $this->createUrl("reporttemplate/index"));
 
@@ -173,9 +222,9 @@ class ReporttemplateController extends Controller {
             $this->breadcrumbs[] = array($template->localizedName, "");
         }
 
-		// display the page
+        // display the page
         $this->pageTitle = $newRecord ? Yii::t("app", "New Template") : $template->localizedName;
-		$this->render("edit", array(
+        $this->render("edit", array(
             "model" => $model,
             "template" => $template,
             "languages" => $languages,
@@ -725,7 +774,7 @@ class ReporttemplateController extends Controller {
                 if ($newRecord) {
                     $this->redirect(array("reporttemplate/editsummary", "id" => $template->id, "summary" => $summary->id));
                 }
-                
+
                 // refresh the summary
                 $summary = ReportTemplateSummary::model()->with(array(
                     "l10n" => array(
@@ -817,7 +866,7 @@ class ReporttemplateController extends Controller {
     /**
      * Display a list of vulnerability sections.
      */
-	public function actionSections($id, $page=1) {
+	public function actionVulnSections($id, $page=1) {
         $id = (int) $id;
         $page = (int) $page;
 
@@ -868,7 +917,7 @@ class ReporttemplateController extends Controller {
 
         // display the page
         $this->pageTitle = $template->localizedName;
-		$this->render("section/index", array(
+		$this->render("vulnsection/index", array(
             "sections" => $sections,
             "p" => $paginator,
             "template" => $template,
@@ -878,7 +927,7 @@ class ReporttemplateController extends Controller {
     /**
      * Section edit page.
      */
-	public function actionEditSection($id, $section=0) {
+	public function actionEditVulnSection($id, $section=0) {
         $id = (int) $id;
         $section = (int) $section;
         $newRecord = false;
@@ -1008,9 +1057,9 @@ class ReporttemplateController extends Controller {
                     $section->refresh();
 
                     if ($newRecord) {
-                        $this->redirect(array("reporttemplate/editsection", "id" => $template->id, "section" => $section->id));
+                        $this->redirect(array("reporttemplate/editvulnsection", "id" => $template->id, "section" => $section->id));
                     }
-                    
+
                     // refresh the section
                      $section = ReportTemplateVulnSection::model()->with(array(
                         "l10n" => array(
@@ -1044,7 +1093,7 @@ class ReporttemplateController extends Controller {
 
         $this->breadcrumbs[] = array(Yii::t("app", "Report Templates"), $this->createUrl("reporttemplate/index"));
         $this->breadcrumbs[] = array($template->localizedName, $this->createUrl("reporttemplate/edit", array("id" => $template->id)));
-        $this->breadcrumbs[] = array(Yii::t("app", "Vulnerability Sections"), $this->createUrl("reporttemplate/sections", array("id" => $template->id)));
+        $this->breadcrumbs[] = array(Yii::t("app", "Vulnerability Sections"), $this->createUrl("reporttemplate/vulnsections", array("id" => $template->id)));
 
         if ($newRecord) {
             $this->breadcrumbs[] = array(Yii::t("app", "New Section"), "");
@@ -1054,7 +1103,7 @@ class ReporttemplateController extends Controller {
 
 		// display the page
         $this->pageTitle = $newRecord ? Yii::t("app", "New Section") : $section->localizedTitle;
-		$this->render("section/edit", array(
+		$this->render("vulnsection/edit", array(
             "model" => $model,
             "template" => $template,
             "section" => $section,
@@ -1066,7 +1115,7 @@ class ReporttemplateController extends Controller {
     /**
      * Section control function.
      */
-    public function actionControlSection()
+    public function actionControlVulnSection()
     {
         $response = new AjaxResponse();
 
@@ -1246,5 +1295,31 @@ class ReporttemplateController extends Controller {
         readfile($filePath);
 
         exit();
+    }
+
+    /**
+     * Sections edit page
+     * @param $id
+     * @throws CHttpException
+     */
+    public function actionSections($id) {
+        $id = (int) $id;
+        $template = ReportTemplate::model()->findByPk($id);
+
+        if (!$template) {
+            throw new CHttpException(404, Yii::t("app", "Template not found."));
+        }
+
+        $this->breadcrumbs[] = [Yii::t("app", "Report Templates"), $this->createUrl("reporttemplate/index")];
+        $this->breadcrumbs[] = [$template->localizedName, $this->createUrl("reporttemplate/edit", ["id" => $template->id])];
+        $this->breadcrumbs[] = [Yii::t("app", "Sections"), ""];
+
+        // display the page
+        $this->pageTitle = Yii::t("app", "Sections");
+
+        $this->render("section/index", array(
+            "template" => $template,
+            "languages" => Language::model()->findAll(),
+        ));
     }
 }

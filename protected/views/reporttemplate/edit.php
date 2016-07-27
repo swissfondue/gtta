@@ -9,8 +9,9 @@
         <div class="pull-right">
             <ul class="nav nav-pills">
                 <li class="active"><a href="<?php echo $this->createUrl('reporttemplate/edit', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
+                <li><a href="<?php echo $this->createUrl('reporttemplate/sections', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Sections'); ?></a></li>
                 <li><a href="<?php echo $this->createUrl('reporttemplate/summary', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Summary Blocks'); ?></a></li>
-                <li><a href="<?php echo $this->createUrl('reporttemplate/sections', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Vulnerability Sections'); ?></a></li>
+                <li><a href="<?php echo $this->createUrl('reporttemplate/vulnsections', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Vulnerability Sections'); ?></a></li>
             </ul>
         </div>
     <?php endif; ?>
@@ -65,8 +66,65 @@
                                 </div>
 
                                 <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
-                                    <?php $sections = json_decode($model->sections); ?>
+                                    <div class="control-group <?php if ($model->getError('highDescription')) echo 'error'; ?>">
+                                        <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_highDescription"><?php echo Yii::t('app', 'High Risk Description'); ?></label>
+                                        <div class="controls">
+                                            <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_highDescription" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][highDescription]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['highDescription']) : ''; ?></textarea>
+                                            <?php if ($model->getError('highDescription')): ?>
+                                                <p class="help-block"><?php echo $model->getError('highDescription'); ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
 
+                                    <div class="control-group <?php if ($model->getError('medDescription')) echo 'error'; ?>">
+                                        <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_medDescription"><?php echo Yii::t('app', 'Med Risk Description'); ?></label>
+                                        <div class="controls">
+                                            <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_medDescription" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][medDescription]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['medDescription']) : ''; ?></textarea>
+                                            <?php if ($model->getError('medDescription')): ?>
+                                                <p class="help-block"><?php echo $model->getError('medDescription'); ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-group <?php if ($model->getError('lowDescription')) echo 'error'; ?>">
+                                        <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_lowDescription"><?php echo Yii::t('app', 'Low Risk Description'); ?></label>
+                                        <div class="controls">
+                                            <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_lowDescription" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][lowDescription]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['lowDescription']) : ''; ?></textarea>
+                                            <?php if ($model->getError('lowDescription')): ?>
+                                                <p class="help-block"><?php echo $model->getError('lowDescription'); ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-group <?php if ($model->getError('noneDescription')) echo 'error'; ?>">
+                                        <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_noneDescription"><?php echo Yii::t('app', 'No Test Done Description'); ?></label>
+                                        <div class="controls">
+                                            <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_noneDescription" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][noneDescription]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['noneDescription']) : ''; ?></textarea>
+                                            <?php if ($model->getError('noneDescription')): ?>
+                                                <p class="help-block"><?php echo $model->getError('noneDescription'); ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-group <?php if ($model->getError('noVulnDescription')) echo 'error'; ?>">
+                                        <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_noVulnDescription"><?php echo Yii::t('app', 'No Vulnerability Description'); ?></label>
+                                        <div class="controls">
+                                            <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_noVulnDescription" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][noVulnDescription]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['noVulnDescription']) : ''; ?></textarea>
+                                            <?php if ($model->getError('noVulnDescription')): ?>
+                                                <p class="help-block"><?php echo $model->getError('noVulnDescription'); ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-group <?php if ($model->getError('infoDescription')) echo 'error'; ?>">
+                                        <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_infoDescription"><?php echo Yii::t('app', 'Info Description'); ?></label>
+                                        <div class="controls">
+                                            <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_infoDescription" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][infoDescription]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['infoDescription']) : ''; ?></textarea>
+                                            <?php if ($model->getError('infoDescription')): ?>
+                                                <p class="help-block"><?php echo $model->getError('infoDescription'); ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -100,14 +158,14 @@
                     <?php endif; ?>
 
                     <?php
-                        $ratings = array(
-                            'No Test Done' => TargetCheck::RATING_NONE,
-                            'No Vulnerability' => TargetCheck::RATING_NO_VULNERABILITY,
-                            'Low Risk' => TargetCheck::RATING_LOW_RISK,
-                            'Medium Risk' => TargetCheck::RATING_MED_RISK,
-                            'High Risk' => TargetCheck::RATING_HIGH_RISK,
-                            'Information' => TargetCheck::RATING_INFO,
-                        );
+                    $ratings = array(
+                        'No Test Done' => TargetCheck::RATING_NONE,
+                        'No Vulnerability' => TargetCheck::RATING_NO_VULNERABILITY,
+                        'Low Risk' => TargetCheck::RATING_LOW_RISK,
+                        'Medium Risk' => TargetCheck::RATING_MED_RISK,
+                        'High Risk' => TargetCheck::RATING_HIGH_RISK,
+                        'Information' => TargetCheck::RATING_INFO,
+                    );
                     ?>
 
                     <?php foreach ($ratings as $title => $rating): ?>

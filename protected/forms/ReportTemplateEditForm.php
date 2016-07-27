@@ -15,6 +15,36 @@ class ReportTemplateEditForm extends LocalizedFormModel {
     public $name;
 
     /**
+     * @var string high description.
+     */
+    public $highDescription;
+
+    /**
+     * @var string med description.
+     */
+    public $medDescription;
+
+    /**
+     * @var string low description.
+     */
+    public $lowDescription;
+
+    /**
+     * @var string none description.
+     */
+    public $noneDescription;
+
+    /**
+     * @var string no vuln description.
+     */
+    public $noVulnDescription;
+
+    /**
+     * @var string info description.
+     */
+    public $infoDescription;
+
+    /**
      * @var string sections
      */
     public $sections;
@@ -27,6 +57,7 @@ class ReportTemplateEditForm extends LocalizedFormModel {
 			array("type, name", "required"),
             array("type", "in", "range" => ReportTemplate::getValidTypes()),
             array("name", "length", "max" => 1000),
+            array("highDescription, medDescription, lowDescription, noneDescription, noVulnDescription, infoDescription, localizedItems", "safe"),
             array("sections", "checkSections")
 		);
 	}
@@ -38,22 +69,12 @@ class ReportTemplateEditForm extends LocalizedFormModel {
 		return array(
             "type" => Yii::t("app", "Type"),
 			"name" => Yii::t("app", "Name"),
-            "intro" => Yii::t("app", "Introduction"),
-            "appendix" => Yii::t("app", "Appendix"),
-            "vulnsIntro" => Yii::t("app", "Vulns Introduction"),
-            "infoChecksIntro" => Yii::t("app", "Info Checks Introduction"),
-            "securityLevelIntro" => Yii::t("app", "Security Level Introduction"),
-            "vulnDistributionIntro" => Yii::t("app", "Vuln Distribution Introduction"),
-            "reducedIntro" => Yii::t("app", "Reduced Vuln List Introduction"),
             "highDescription" => Yii::t("app", "High Risk Description"),
             "medDescription" => Yii::t("app", "Med Risk Description"),
             "lowDescription" => Yii::t("app", "Low Risk Description"),
             "noneDescription" => Yii::t("app", "No Test Done Description"),
             "noVulnDescription" => Yii::t("app", "No Vulnerability Description"),
             "infoDescription" => Yii::t("app", "Info Description"),
-            "degreeIntro" => Yii::t("app", "Degree of Fulfillment Introduction"),
-            "riskIntro" => Yii::t("app", "Risk Matrix Introduction"),
-            "footer" => Yii::t("app", "Footer"),
 		);
 	}
 

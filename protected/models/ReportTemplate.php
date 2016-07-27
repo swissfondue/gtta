@@ -18,6 +18,10 @@ class ReportTemplate extends ActiveRecord {
     const TYPE_RTF = 0;
     const TYPE_DOCX = 1;
 
+    const CHART_SECTION_SECURITY_LEVEL = 100;
+    const CHART_SECTION_VULN_DISTRIBUTION = 200;
+    const CHART_SECTION_DEGREE_FULFILLMENT = 200;
+
     /**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -118,20 +122,5 @@ class ReportTemplate extends ActiveRecord {
      */
     public function checkSections($attribute, $params) {
         return false;
-    }
-
-    public function jsonSections($languageId = null) {
-        $result = [];
-
-        if ($languageId) {
-
-        } else {
-            foreach ($this->sections as $section) {
-                $result[] = [
-                    "title" => $section->title,
-                    "content" => $section->content
-                ];
-            }
-        }
     }
 }
