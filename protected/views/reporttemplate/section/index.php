@@ -19,7 +19,7 @@
 
 <hr>
 
-<form class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
+<form class="form-horizontal" action="<?= $this->createUrl("") ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
     <fieldset>
@@ -40,7 +40,13 @@
                     </ul>
                 </div>
 
-                <div class="span8"></div>
+                <div class="span8">
+                    <div class="tab-content">
+                        <?php foreach ($languages as $language): ?>
+                            <div class="tab-pane<?php if ($language->id == $system->language->id) echo ' active'; ?>" id="<?php echo CHtml::encode($language->code); ?>"></div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
             </div>
         </div>
     </fieldset>

@@ -1336,6 +1336,17 @@ function Admin()
                 _reportTemplate._controlTemplate(id, "delete");
             }
         };
+
+        /**
+         * Report Template Sections
+         */
+        this.sections = new function () {
+            var _sections = this;
+
+            this.openSection = function (id) {};
+
+            this.save = function () {};
+        };
     };
 
     /**

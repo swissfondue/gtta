@@ -1320,6 +1320,7 @@ class ReporttemplateController extends Controller {
         $this->render("section/index", array(
             "template" => $template,
             "languages" => Language::model()->findAll(),
+            "system" => System::model()->findByPk(1)
         ));
     }
 }

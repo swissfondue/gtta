@@ -15,16 +15,21 @@ class ReportTemplateSection extends ActiveRecord {
     /**
      * Build-in section Types
      */
-    const TYPE_INTRO = 100;
-    const TYPE_SECTION_SECURITY_LEVEL = 110;
-    const TYPE_SECTION_VULN_DISTR = 120;
-    const TYPE_SECTION_DEGREE = 130;
-    const TYPE_RISK_MATRIX = 140;
-    const TYPE_REDUCED_VULN_LIST = 150;
-    const TYPE_VULNS= 160;
-    const TYPE_INFO_CHECKS_INTRO = 170;
-    const TYPE_APPENDIX = 180;
-    const TYPE_FOOTER = 190;
+    const TYPE_INTRO = 10;
+    const TYPE_SECTION_SECURITY_LEVEL = 20;
+    const TYPE_SECTION_VULN_DISTR = 30;
+    const TYPE_SECTION_DEGREE = 40;
+    const TYPE_RISK_MATRIX = 50;
+    const TYPE_REDUCED_VULN_LIST = 60;
+    const TYPE_VULNS= 70;
+    const TYPE_INFO_CHECKS_INTRO = 80;
+    const TYPE_APPENDIX = 90;
+    const TYPE_FOOTER = 100;
+
+    /**
+     * Custom section types
+     */
+    const TYPE_CUSTOM = 200;
 
     // build-in section titles
     public static $titles = [
@@ -46,11 +51,6 @@ class ReportTemplateSection extends ActiveRecord {
         self::TYPE_SECTION_VULN_DISTR,
         self::TYPE_SECTION_DEGREE,
     ];
-
-    /**
-     * Custom section types
-     */
-    const TYPE_CUSTOM = 190;
 
     /**
      * Returns the static model of the specified AR class.
@@ -86,5 +86,19 @@ class ReportTemplateSection extends ActiveRecord {
         return [
             "template" => [self::BELONGS_TO, "ReportTemplate", "report_template_id"],
         ];
+    }
+
+    /**
+     * Localized title
+     * @return mixed
+     */
+    public function getLocalizedTitle() {
+        $language = System::model()->findByPk(1)->language;
+        $l10n = ReportTemplateSectionL10n::model()->findByAttributes([
+            "report_template_section_id" => $this->id,
+            "language_id" => $language->id
+        ]);
+
+        return $l10n->title ? $l10n->title : $this->title;
     }
 }

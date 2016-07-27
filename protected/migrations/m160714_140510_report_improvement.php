@@ -35,6 +35,7 @@ class m160714_140510_report_improvement extends CDbMigration {
             [
                 "id" => "bigserial NOT NULL",
                 "report_template_id" => "bigint NOT NULL",
+                "type" => "bigint NOT NULL",
                 "title" => "varchar(1000)",
                 "content" => "text",
                 "order" => "bigint NOT NULL DEFAULT 0",
@@ -60,10 +61,11 @@ class m160714_140510_report_improvement extends CDbMigration {
         foreach ($data as $template) {
             foreach (array_keys($this->_columns) as $section) {
                 $this->execute(
-                    "INSERT INTO report_template_sections (report_template_id, title, content, \"order\")
+                    "INSERT INTO report_template_sections (report_template_id, type, title, content, \"order\")
                      (
                          SELECT
                              :id,
+                             :type,
                              :title,
                              (SELECT {$this->_columns[$section]}::TEXT FROM report_templates WHERE id = :id),
                              (SELECT COUNT(*) FROM report_template_sections WHERE report_template_id = :id)
@@ -71,6 +73,7 @@ class m160714_140510_report_improvement extends CDbMigration {
                     ",
                     [
                         "id" => $template["id"],
+                        "type" => $section,
                         "title" => ReportTemplateSection::$titles[$section],
                     ]
                 );
