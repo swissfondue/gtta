@@ -104,8 +104,10 @@ class ReindexJob extends BackgroundJob {
                     throw new Exception("Check not found.", 404);
                 }
 
+                $tcm = new TargetCheckManager();
+
                 foreach ($check->fields as $field) {
-                    TargetCheckManager::reindexFields($field);
+                    $tcm->reindexFields($field);
                 }
             }
 
