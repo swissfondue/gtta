@@ -26,9 +26,12 @@
         <div class="container">
             <div class="row">
                 <div class="span3">
-                    <ul id="section-list" class="info-block nav nav-pills nav-stacked">
+                    <ul id="section-list" class="sortable-section-list">
                         <?php foreach ($template->sections as $section): ?>
-                            <li data-type-id="<?= $section->type ?>"><a href="#"><?= $section->title; ?></a></li>
+                            <li data-type-id="<?= $section->type ?>">
+                                <a href="#"><?= $section->title; ?></a>
+                                <i class="js-remove icon icon-remove"></i>
+                            </li>
                         <?php endforeach; ?>
                     </ul>
                     <hr>
@@ -60,11 +63,18 @@
 
     $(function () {
         $(".wysiwyg").ckeditor();
-        Sortable.create($("#section-list")[0], {
+        var sectionList = Sortable.create($("#section-list")[0], {
             group: {
                 name: "report-sections",
                 put: true,
-                pull: false
+                pull: true
+            },
+            filter: ".js-remove",
+            onFilter: function (evt) {
+                var el = sectionList.closest(evt.item); // get dragged item
+                $(el).slideUp("fast", function () {
+                    $(el).remove();
+                });
             }
         });
         Sortable.create($("#chart-list")[0], {

@@ -1418,3 +1418,24 @@ ul.check-list li,
 ul.target-list li {
     padding:5px 0 5px 0;
 }
+
+.sortable-section-list {
+    list-style:none;
+    margin:0;
+    padding:0;
+}
+
+.sortable-section-list li {
+    background-color:#f0f0f0;
+    margin:0 0 10px 0;
+    padding:10px;
+    border-radius:5px;
+    -webkit-border-radius:5px;
+    -moz-border-radius:5px;
+    border:1px solid #ddd;
+    cursor:pointer;
+}
+
+.sortable-ghost {
+    opacity: 0.2;
+}
