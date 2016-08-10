@@ -28,14 +28,14 @@
                 <div class="span3">
                     <ul id="section-list" class="info-block nav nav-pills nav-stacked">
                         <?php foreach ($template->sections as $section): ?>
-                            <li data-type-id="<?= $section->type ?>"><a href="#"><?= $section->localizedTitle ?></a></li>
+                            <li data-type-id="<?= $section->type ?>"><a href="#"><?= $section->title; ?></a></li>
                         <?php endforeach; ?>
                     </ul>
                     <hr>
                     <h3><?= Yii::t("app", "Available Chart Blocks") ?></h3>
                     <ul id="chart-list" class="info-block nav nav-pills nav-stacked">
-                        <?php foreach (ReportTemplateSection::$chartTypes as $typeId): ?>
-                            <li data-type-id="<?= $typeId ?>"><a href="#"><?= ReportTemplateSection::$titles[$typeId] ?></a></li>
+                        <?php foreach (ReportSection::getChartTypes() as $typeId): ?>
+                            <li data-type-id="<?= $typeId ?>"><a href="#"><?= ReportSection::getTypeTitles()[$typeId] ?></a></li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
