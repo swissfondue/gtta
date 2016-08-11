@@ -8,7 +8,7 @@
  * @property string $report_template_id
  * @property integer $type
  * @property string $title
- * @property integer $content
+ * @property string $content
  * @property integer $order
  *
  * @property ReportTemplate $template

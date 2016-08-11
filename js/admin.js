@@ -1358,18 +1358,23 @@ function Admin()
                     },
 
                     onAdd: function (evt) {
-                        var itemEl = evt.item;
-                        //evt.from;
-                        // + indexes from onEnd
-                    },
+                        var item = $(evt.item);
 
-                    onStart: function (/**Event*/evt) {
-                        console.log(evt.oldIndex);  // element index within parent
-                    },
+                        item.click(function () {
+                            admin.reportTemplate.sections.select(this);
+                        });
 
-                    onFilter: function (/**Event*/evt) {
-                        var itemEl = evt.item;  // HTMLElement receiving the `mousedown|tapstart` event.
-                        console.log("wtf");
+                        item.append(
+                            $("<a>")
+                                .attr("href", "#remove")
+                                .click(function () {
+                                    admin.reportTemplate.sections.del(this);
+                                })
+                                .append(
+                                    $("<i>")
+                                        .addClass("icon icon-remove")
+                                )
+                        );
                     }
                 });
 
@@ -1387,11 +1392,13 @@ function Admin()
              * Show "Add Section" form
              */
             this.showAddForm = function () {
-                if ($(".add-section").is(":visible")) {
+                var addSection = $(".add-section");
+
+                if (addSection.is(":visible")) {
                     this.closeAddForm();
                 } else {
                     $(".edit-section").slideUp("fast");
-                    $(".add-section").slideDown("fast");
+                    addSection.slideDown("fast");
                 }
             };
 
@@ -1413,7 +1420,28 @@ function Admin()
                 $(el).slideUp("fast", function () {
                     $(el).remove();
                 });
-            }
+            };
+
+            /**
+             * Select list item
+             * @param item
+             */
+            this.select = function (item) {
+                item = $(item);
+
+                this.closeAddForm();
+
+                $(".sortable-section-list li")
+                    .removeAttr("data-selected")
+                    .removeClass("selected");
+
+                item
+                    .attr("data-selected", "true")
+                    .addClass("selected");
+
+                $(".section-form").hide();
+                $(".section-form[data-section-id=" + item.data("section-id") + "]").show();
+            };
         };
     };
 
