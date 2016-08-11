@@ -1,11 +1,6 @@
 <div class="active-header">
-    <div class="pull-right">
-        <ul class="nav nav-pills">
-            <li><a href="<?php echo $this->createUrl('reporttemplate/edit', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
-            <li><a href="<?php echo $this->createUrl('reporttemplate/summary', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Summary Blocks'); ?></a></li>
-            <li class="active"><a href="<?php echo $this->createUrl('reporttemplate/vulnsections', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Vulnerability Sections'); ?></a></li>
-        </ul>
-    </div>
+    <?= $this->renderPartial("partial/menu", ["template" => $template]); ?>
+
     <div class="pull-right buttons">
         <a class="btn" href="<?php echo $this->createUrl('reporttemplate/editvulnsection', array( 'id' => $template->id )) ?>"><i class="icon icon-plus"></i> <?php echo Yii::t('app', 'New Section'); ?></a>
     </div>

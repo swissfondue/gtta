@@ -1341,11 +1341,79 @@ function Admin()
          * Report Template Sections
          */
         this.sections = new function () {
-            var _sections = this;
+            var _sections = this,
+                sectionList;
 
-            this.openSection = function (id) {};
+            /**
+             * Init sections editor
+             */
+            this.init = function () {
+                $(".wysiwyg").ckeditor();
 
-            this.save = function () {};
+                sectionList = Sortable.create($(".sortable-section-list")[0], {
+                    group: {
+                        name: "report-sections",
+                        put: true,
+                        pull: true
+                    },
+
+                    onAdd: function (evt) {
+                        var itemEl = evt.item;
+                        //evt.from;
+                        // + indexes from onEnd
+                    },
+
+                    onStart: function (/**Event*/evt) {
+                        console.log(evt.oldIndex);  // element index within parent
+                    },
+
+                    onFilter: function (/**Event*/evt) {
+                        var itemEl = evt.item;  // HTMLElement receiving the `mousedown|tapstart` event.
+                        console.log("wtf");
+                    }
+                });
+
+                var availableSectionList = Sortable.create($(".available-section-list")[0], {
+                    sort: false,
+                    group: {
+                        name: "report-sections",
+                        pull: "clone",
+                        put: false
+                    }
+                });
+            };
+
+            /**
+             * Show "Add Section" form
+             */
+            this.showAddForm = function () {
+                if ($(".add-section").is(":visible")) {
+                    this.closeAddForm();
+                } else {
+                    $(".edit-section").slideUp("fast");
+                    $(".add-section").slideDown("fast");
+                }
+            };
+
+            /**
+             * Close "Add Section" form
+             */
+            this.closeAddForm = function () {
+                $(".edit-section").slideDown("fast");
+                $(".add-section").slideUp("fast");
+            };
+
+            /**
+             * Remove element from the list
+             * @param item
+             */
+            this.del = function (item) {
+                var el = sectionList.closest(item);
+
+                $(el).slideUp("fast", function () {
+                    $(el).remove();
+                });
+            }
         };
     };
 

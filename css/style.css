@@ -1419,7 +1419,7 @@ ul.target-list li {
     padding:5px 0 5px 0;
 }
 
-.sortable-section-list {
+.sortable-section-list, .available-section-list {
     list-style:none;
     margin:0;
     padding:0;
@@ -1438,4 +1438,28 @@ ul.target-list li {
 
 .sortable-ghost {
     opacity: 0.2;
+}
+
+.sortable-chosen {
+    background-color: #c0c0c0;
+}
+
+.add-section h3 {
+    margin-bottom:10px;
+}
+
+.add-section div {
+    overflow: hidden;
+}
+
+.available-section-list li {
+    background-color:#f0f0f0;
+    margin:0 10px 10px 0;
+    padding:10px;
+    border-radius:5px;
+    -webkit-border-radius:5px;
+    -moz-border-radius:5px;
+    border:1px solid #ddd;
+    cursor:pointer;
+    float:left;
 }

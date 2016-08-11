@@ -6,14 +6,7 @@
 
 <div class="active-header">
     <?php if (!$template->isNewRecord && $template->type == ReportTemplate::TYPE_RTF): ?>
-        <div class="pull-right">
-            <ul class="nav nav-pills">
-                <li class="active"><a href="<?php echo $this->createUrl('reporttemplate/edit', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Edit'); ?></a></li>
-                <li><a href="<?php echo $this->createUrl('reporttemplate/sections', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Sections'); ?></a></li>
-                <li><a href="<?php echo $this->createUrl('reporttemplate/summary', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Summary Blocks'); ?></a></li>
-                <li><a href="<?php echo $this->createUrl('reporttemplate/vulnsections', array( 'id' => $template->id )); ?>"><?php echo Yii::t('app', 'Vulnerability Sections'); ?></a></li>
-            </ul>
-        </div>
+        <?= $this->renderPartial("partial/menu", ["template" => $template]); ?>
     <?php endif; ?>
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 </div>
@@ -369,24 +362,6 @@
                                     </th>
                                     <td>
                                         <?php echo Yii::t('app', 'Number of info rating checks'); ?>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="docx-report <?php if ($model->type == ReportTemplate::TYPE_RTF) echo "hide"; ?>">
-                        <div id="docx-var-list-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#docx-var-list');"><i class="icon-chevron-up"></i></div>
-                        <h3><a href="#toggle" onclick="system.toggleBlock('#docx-var-list');"><?php echo Yii::t("app", "Variable List"); ?></a></h3>
-
-                        <div class="info-block" id="docx-var-list">
-                            <table class="table client-details">
-                                <tr>
-                                    <th>
-                                        {client}
-                                    </th>
-                                    <td>
-                                        <?php echo Yii::t("app", "Client name"); ?>
                                     </td>
                                 </tr>
                             </table>
