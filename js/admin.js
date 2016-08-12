@@ -1342,13 +1342,18 @@ function Admin()
          */
         this.sections = new function () {
             var _sections = this,
-                sectionList;
+                sectionList,
+                sectionData,
+                fieldTypes;
 
             /**
              * Init sections editor
+             * @param sections
+             * @param fTypes
              */
-            this.init = function () {
-                $(".wysiwyg").ckeditor();
+            this.init = function (sections, fTypes) {
+                sectionData = sections;
+                fieldTypes = fTypes;
 
                 sectionList = Sortable.create($(".sortable-section-list")[0], {
                     group: {
@@ -1361,20 +1366,25 @@ function Admin()
                         var item = $(evt.item);
 
                         item.click(function () {
-                            admin.reportTemplate.sections.select(this);
+                            _sections.select(this);
                         });
 
                         item.append(
                             $("<a>")
                                 .attr("href", "#remove")
-                                .click(function () {
-                                    admin.reportTemplate.sections.del(this);
+                                .click(function (e) {
+                                    _sections.del(this);
+                                    e.stopPropagation();
                                 })
                                 .append(
                                     $("<i>")
                                         .addClass("icon icon-remove")
                                 )
                         );
+                    },
+
+                    onUpdate: function (evt) {
+                        var itemEl = evt.item;
                     }
                 });
 
@@ -1385,6 +1395,11 @@ function Admin()
                         pull: "clone",
                         put: false
                     }
+                });
+
+                $(".sortable-section-list a.remove").click(function (e) {
+                    _sections.del(this);
+                    e.stopPropagation();
                 });
             };
 
@@ -1417,9 +1432,11 @@ function Admin()
             this.del = function (item) {
                 var el = sectionList.closest(item);
 
-                $(el).slideUp("fast", function () {
-                    $(el).remove();
-                });
+                if (confirm(system.translate("Are you sure that you want to delete this object?"))) {
+                    $(el).slideUp("fast", function () {
+                        $(el).remove();
+                    });
+                }
             };
 
             /**
@@ -1427,8 +1444,22 @@ function Admin()
              * @param item
              */
             this.select = function (item) {
-                item = $(item);
+                var id, template, editSection, title, content, type;
 
+                item = $(item);
+                editSection = $(".edit-section");
+                id = item.data("section-id");
+
+                if (id) {
+                    title = sectionData[id].title;
+                    content = sectionData[id].content;
+                    type = sectionData[id].type;
+                } else {
+                    type = item.data("section-type");
+                    title = fieldTypes[type.toString()];
+                }
+
+                template = $(".section-form-template").clone();
                 this.closeAddForm();
 
                 $(".sortable-section-list li")
@@ -1439,8 +1470,36 @@ function Admin()
                     .attr("data-selected", "true")
                     .addClass("selected");
 
-                $(".section-form").hide();
-                $(".section-form[data-section-id=" + item.data("section-id") + "]").show();
+                template
+                    .removeClass("section-form-template")
+                    .removeClass("hide")
+                    .data("section-id", id);
+
+                template.find("[name=\"ReportTemplateSectionEditForm[title]\"]").val(title);
+                template.find("[name=\"ReportTemplateSectionEditForm[content]\"]").val(content);
+
+                template.find("[data-field-type]")
+                    .data("field-type", type)
+                    .text(fieldTypes[type.toString()]);
+
+                template.find("button")
+                    .click(function () {
+                        _sections.save(this)
+                    });
+
+                template.find(".wysiwyg").ckeditor();
+
+                editSection
+                    .empty()
+                    .append(template);
+            };
+
+            /**
+             * Save section
+             * @param item
+             */
+            this.save = function (item) {
+                console.log("save", item);
             };
         };
     };
