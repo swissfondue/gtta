@@ -1310,6 +1310,11 @@ class ReporttemplateController extends Controller {
             throw new CHttpException(404, Yii::t("app", "Template not found."));
         }
 
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(["report_template_id" => $template->id]);
+        $criteria->order = "t.order ASC";
+        $sections = ReportTemplateSection::model()->findAll($criteria);
+
         $this->breadcrumbs[] = [Yii::t("app", "Report Templates"), $this->createUrl("reporttemplate/index")];
         $this->breadcrumbs[] = [$template->localizedName, $this->createUrl("reporttemplate/edit", ["id" => $template->id])];
         $this->breadcrumbs[] = [Yii::t("app", "Sections"), ""];
@@ -1319,8 +1324,188 @@ class ReporttemplateController extends Controller {
 
         $this->render("section/index", array(
             "template" => $template,
+            "sections" => $sections,
             "languages" => Language::model()->findAll(),
             "system" => System::model()->findByPk(1)
         ));
+    }
+
+    /**
+     * Section save
+     * @param $id
+     */
+    public function actionSaveSection($id) {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $template = ReportTemplate::model()->findByPk($id);
+
+            if (!$template) {
+                throw new Exception(Yii::t("app", "Template not found."));
+            }
+
+            $form = new ReportTemplateSectionEditForm(ReportTemplateSectionEditForm::SCENARIO_SECTION);
+            $form->attributes = $_POST["ReportTemplateSectionEditForm"];
+
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            /** @var ReportTemplateSection $section */
+            $section = null;
+
+            if ($form->id) {
+                $section = ReportTemplateSection::model()->findByAttributes([
+                    "id" => $form->id,
+                    "report_template_id" => $template->id,
+                ]);
+            } else {
+                $form->id = null;
+                $section = new ReportTemplateSection();
+                $section->report_template_id = $template->id;
+                $section->order = 0;
+            }
+
+            if (!$section) {
+                throw new Exception(Yii::t("app", "Section not found."));
+            }
+
+            $section->fromForm($form);
+            $section->order = array_search($section->id ? $section->id : null, $form->order);
+
+            if (!$section->order) {
+                $section->order = 0;
+            }
+
+            $section->save();
+
+            // save orders
+            foreach ($form->order as $order => $s) {
+                ReportTemplateSection::model()->updateAll(
+                    ["order" => $order],
+                    "id = :id AND report_template_id = :rt",
+                    [
+                        ":id" => $s,
+                        ":rt" => $template->id,
+                    ]
+                );
+            }
+
+            $response->addData("id", $section->id);
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Save section order
+     * @param $id
+     */
+    public function actionSaveSectionOrder($id) {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $template = ReportTemplate::model()->findByPk($id);
+
+            if (!$template) {
+                throw new Exception(Yii::t("app", "Template not found."));
+            }
+
+            $form = new ReportTemplateSectionEditForm();
+            $form->attributes = $_POST["ReportTemplateSectionEditForm"];
+
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            // save orders
+            foreach ($form->order as $order => $s) {
+                ReportTemplateSection::model()->updateAll(
+                    ["order" => $order],
+                    "id = :id AND report_template_id = :rt",
+                    [
+                        ":id" => $s,
+                        ":rt" => $template->id,
+                    ]
+                );
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Control report section.
+     * @param $id
+     */
+    public function actionControlSection($id) {
+        $response = new AjaxResponse();
+
+        try {
+            $id = (int) $id;
+            $template = ReportTemplate::model()->findByPk($id);
+
+            if (!$template) {
+                throw new Exception(Yii::t("app", "Template not found."));
+            }
+
+            $form = new EntryControlForm();
+            $form->attributes = $_POST["EntryControlForm"];
+
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            /** @var ReportTemplateSection $section */
+            $section = ReportTemplateSection::model()->findByAttributes([
+                "id" => $form->id,
+                "report_template_id" => $template->id,
+            ]);
+
+            if (!$section) {
+                throw new Exception(Yii::t("app", "Section not found."));
+            }
+
+            switch ($form->operation) {
+                case "delete":
+                    $section->delete();
+                    break;
+
+                default:
+                    throw new Exception(Yii::t("app", "Unknown operation."));
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
     }
 }

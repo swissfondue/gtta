@@ -1,8 +1,7 @@
 /**
  * Admin namespace.
  */
-function Admin()
-{
+function Admin() {
     /**
      * Check object.
      */
@@ -1344,7 +1343,8 @@ function Admin()
             var _sections = this,
                 sectionList,
                 sectionData,
-                fieldTypes;
+                fieldTypes,
+                modified = false;
 
             /**
              * Init sections editor
@@ -1363,28 +1363,36 @@ function Admin()
                     },
 
                     onAdd: function (evt) {
-                        var item = $(evt.item);
+                        var item, type, title;
+
+                        item = $(evt.item);
 
                         item.click(function () {
                             _sections.select(this);
                         });
 
-                        item.append(
-                            $("<a>")
-                                .attr("href", "#remove")
-                                .click(function (e) {
-                                    _sections.del(this);
-                                    e.stopPropagation();
-                                })
-                                .append(
-                                    $("<i>")
-                                        .addClass("icon icon-remove")
-                                )
-                        );
+                        item
+                            .append(
+                                $("<a>")
+                                    .attr("href", "#remove")
+                                    .click(function (e) {
+                                        _sections.del(this);
+                                        e.stopPropagation();
+                                    })
+                                    .append(
+                                        $("<i>")
+                                            .addClass("icon icon-remove")
+                                    )
+                            );
+
+                        type = item.data("section-type");
+                        title = fieldTypes[type.toString()];
+
+                        _sections.saveSection(item, null, type, title, "");
                     },
 
                     onUpdate: function (evt) {
-                        var itemEl = evt.item;
+                        _sections.saveOrder();
                     }
                 });
 
@@ -1401,6 +1409,14 @@ function Admin()
                     _sections.del(this);
                     e.stopPropagation();
                 });
+
+                window.onbeforeunload = function(e) {
+                    if (modified) {
+                        return "Section is unsaved. Do you really want to continue and lose all changes?"
+                    }
+
+                    return null;
+                };
             };
 
             /**
@@ -1430,12 +1446,53 @@ function Admin()
              * @param item
              */
             this.del = function (item) {
-                var el = sectionList.closest(item);
+                var el, id;
+
+                el = $(sectionList.closest(item));
 
                 if (confirm(system.translate("Are you sure that you want to delete this object?"))) {
-                    $(el).slideUp("fast", function () {
-                        $(el).remove();
-                    });
+                    id = el.data("section-id");
+
+                    if (id) {
+                        $.ajax({
+                            dataType: "json",
+                            url: $("[data-control-section-url]").data("control-section-url"),
+                            timeout: system.ajaxTimeout,
+                            type: "POST",
+
+                            data: {
+                                "EntryControlForm[operation]": "delete",
+                                "EntryControlForm[id]": id,
+                                "YII_CSRF_TOKEN": system.csrf
+                            },
+
+                            success: function (data, textStatus) {
+                                $(".loader-image").hide();
+
+                                if (data.status == "error") {
+                                    system.addAlert("error", data.errorText);
+                                    return;
+                                }
+
+                                el.slideUp("fast", function () {
+                                    el.remove();
+                                });
+                            },
+
+                            error: function (jqXHR, textStatus, e) {
+                                $(".loader-image").hide();
+                                system.addAlert("error", system.translate("Request failed, please try again."));
+                            },
+
+                            beforeSend: function (jqXHR, settings) {
+                                $(".loader-image").show();
+                            }
+                        });
+                    } else {
+                        el.slideUp("fast", function () {
+                            el.remove();
+                        });
+                    }
                 }
             };
 
@@ -1444,6 +1501,12 @@ function Admin()
              * @param item
              */
             this.select = function (item) {
+                if (modified && !confirm("Section has unsaved changes. Do you really want to continue and lose all changes?")) {
+                    return;
+                }
+
+                modified = false;
+
                 var id, template, editSection, title, content, type;
 
                 item = $(item);
@@ -1462,32 +1525,39 @@ function Admin()
                 template = $(".section-form-template").clone();
                 this.closeAddForm();
 
-                $(".sortable-section-list li")
-                    .removeAttr("data-selected")
-                    .removeClass("selected");
-
-                item
-                    .attr("data-selected", "true")
-                    .addClass("selected");
+                $(".sortable-section-list li").removeClass("selected");
+                item.addClass("selected");
 
                 template
                     .removeClass("section-form-template")
                     .removeClass("hide")
                     .data("section-id", id);
 
-                template.find("[name=\"ReportTemplateSectionEditForm[title]\"]").val(title);
-                template.find("[name=\"ReportTemplateSectionEditForm[content]\"]").val(content);
+                template.find("[name=\"ReportTemplateSectionEditForm[title]\"]")
+                    .val(title)
+                    .change(function () {
+                        modified = true;
+                    });
+
+                template.find("[name=\"ReportTemplateSectionEditForm[content]\"]")
+                    .val(content);
 
                 template.find("[data-field-type]")
-                    .data("field-type", type)
                     .text(fieldTypes[type.toString()]);
 
                 template.find("button")
                     .click(function () {
-                        _sections.save(this)
+                        _sections.saveSectionForm(item);
+                        return false;
                     });
 
-                template.find(".wysiwyg").ckeditor();
+                template.find(".wysiwyg").ckeditor(function () {
+                    this.on("change", function() {
+                         if (this.checkDirty()) {
+                             modified = true;
+                         }
+                    })
+                });
 
                 editSection
                     .empty()
@@ -1495,11 +1565,137 @@ function Admin()
             };
 
             /**
-             * Save section
-             * @param item
+             * Get sections order
              */
-            this.save = function (item) {
-                console.log("save", item);
+            this.getOrder = function () {
+                var order = [];
+
+                $(".sortable-section-list li").each(function (number, e) {
+                    order[number] = $(e).data("section-id");
+                });
+
+                return order;
+            };
+
+            /**
+             * Save sections order
+             */
+            this.saveOrder = function () {
+                $.ajax({
+                    dataType: "json",
+                    url: $("[data-save-section-order-url]").data("save-section-order-url"),
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+
+                    data: {
+                        "ReportTemplateSectionEditForm[order]": JSON.stringify(_sections.getOrder()),
+                        "YII_CSRF_TOKEN": system.csrf
+                    },
+
+                    success: function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                        }
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend: function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+            };
+
+            /**
+             * Save section
+             * @param listItem
+             * @param id
+             * @param type
+             * @param title
+             * @param content
+             */
+            this.saveSection = function (listItem, id, type, title, content) {
+                var editSection, button;
+
+                editSection = $(".edit-section");
+                button = editSection.find("button");
+
+                $.ajax({
+                    dataType: "json",
+                    url: $("[data-save-section-url]").data("save-section-url"),
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+
+                    data: {
+                        "ReportTemplateSectionEditForm[order]": JSON.stringify(_sections.getOrder()),
+                        "ReportTemplateSectionEditForm[content]": content,
+                        "ReportTemplateSectionEditForm[title]": title,
+                        "ReportTemplateSectionEditForm[type]": type,
+                        "ReportTemplateSectionEditForm[id]": id,
+                        "YII_CSRF_TOKEN": system.csrf
+                    },
+
+                    success: function (data, textStatus) {
+                        $(".loader-image").hide();
+                        button.prop("disabled", false);
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        if (!id) {
+                            id = data.id;
+                        }
+
+                        sectionData[id] = {
+                            type: type,
+                            title: title,
+                            content: content
+                        };
+
+                        listItem.attr("data-section-id", id);
+                        listItem.find("span.title").text(title);
+
+                        system.addAlert("success", system.translate("Section saved."));
+                        modified = false;
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                        button.prop("disabled", false);
+                    },
+
+                    beforeSend: function (jqXHR, settings) {
+                        $(".loader-image").show();
+                        button.prop("disabled", true);
+                    }
+                });
+            };
+
+            /**
+             * Save section form
+             * @param listItem
+             */
+            this.saveSectionForm = function (listItem) {
+                var editSection, title, content, type, id;
+
+                id = listItem.data("section-id") || null;
+                type = listItem.data("section-type");
+
+                editSection = $(".edit-section");
+                title = editSection.find("input").val();
+                content = editSection.find("textarea").val();
+
+                _sections.saveSection(listItem, id, type, title, content);
             };
         };
     };

@@ -274,14 +274,16 @@ return array(
     "report-template/summary-block/control" => "reporttemplate/controlsummary",
 
     // report template vuln sections
-    "report-template/<id:\d+>/sections/<page:\d+>" => "reporttemplate/vulnsections",
-    "report-template/<id:\d+>/sections" => "reporttemplate/vulnsections",
-    "report-template/<id:\d+>/section/<section:\d+>/edit" => "reporttemplate/editvulnsection",
-    "report-template/<id:\d+>/section/new" => "reporttemplate/editvulnsection",
+    "report-template/<id:\d+>/vuln-sections/<page:\d+>" => "reporttemplate/vulnsections",
+    "report-template/<id:\d+>/vuln-sections" => "reporttemplate/vulnsections",
+    "report-template/<id:\d+>/vuln-section/<section:\d+>/edit" => "reporttemplate/editvulnsection",
+    "report-template/<id:\d+>/vuln-section/new" => "reporttemplate/editvulnsection",
     "report-template/section/control" => "reporttemplate/controlvulnsection",
 
     // report template sections
     "report-template/<id:\d+>/sections" => "reporttemplate/sections",
+    "report-template/<id:\d+>/sections/save" => "reporttemplate/saveSection",
+    "report-template/<id:\d+>/sections/save-order" => "reporttemplate/saveSectionOrder",
 
     // risk classification categories (templates)
     "risks/<page:\d+>"         => "risk/index",

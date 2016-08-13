@@ -18,17 +18,22 @@
 
 <hr>
 
-<div class="container">
+<div class="container"
+    data-save-section-url="<?= $this->createUrl("reporttemplate/saveSection", ["id" => $template->id]); ?>"
+    data-save-section-order-url="<?= $this->createUrl("reporttemplate/saveSectionOrder", ["id" => $template->id]); ?>"
+    data-control-section-url="<?= $this->createUrl("reporttemplate/controlSection", ["id" => $template->id]); ?>">
     <div class="row">
         <div class="span3">
             <ul class="sortable-section-list">
-                <?php foreach ($template->sections as $section): ?>
+                <?php foreach ($sections as $section): ?>
                     <li data-section-id="<?= $section->id; ?>" data-section-type="<?= $section->type ?>" onclick="admin.reportTemplate.sections.select(this);">
                         <?php if (ReportSection::isChart($section->type)): ?>
                             <i class="icon icon-picture"></i>
                         <?php endif; ?>
 
-                        <?= CHtml::encode($section->title); ?>
+                        <span class="title">
+                            <?= CHtml::encode($section->title); ?>
+                        </span>
 
                         <a href="#remove" class="remove">
                             <i class="icon icon-remove"></i>
@@ -49,7 +54,9 @@
                                 <i class="icon icon-picture"></i>
                             <?php endif; ?>
 
-                            <?= ReportSection::getTypeTitles()[$section] ?>
+                            <span class="title">
+                                <?= ReportSection::getTypeTitles()[$section] ?>
+                            </span>
                         </li>
                     <?php endforeach; ?>
                 </ul>
@@ -101,10 +108,10 @@
 </div>
 
 <?php
-    $sections = [];
+    $sectionList = [];
 
-    foreach ($template->sections as $section) {
-        $sections[$section->id] = [
+    foreach ($sections as $section) {
+        $sectionList[$section->id] = [
             "type" => $section->type,
             "title" => $section->title,
             "content" => $section->content,
@@ -114,7 +121,7 @@
 
 <script>
     $(function () {
-        var sections = <?= json_encode($sections); ?>,
+        var sections = <?= json_encode($sectionList); ?>,
             fieldTypes = <?= json_encode(ReportSection::getTypeTitles()); ?>;
 
         admin.reportTemplate.sections.init(sections, fieldTypes);
