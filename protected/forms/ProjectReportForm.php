@@ -62,12 +62,12 @@ class ProjectReportForm extends CFormModel {
     public $riskTemplateId;
 
     /**
-     * @var array options (title page, reduced vuln list, risk matrix, degree)
+     * @var array options (title page)
      */
     public $options;
 
     /**
-     * @var type of report file (rtf | zip)
+     * @var string type of report file (rtf | zip)
      */
     public $fileType;
 

@@ -1312,7 +1312,7 @@ class ReporttemplateController extends Controller {
 
         $criteria = new CDbCriteria();
         $criteria->addColumnCondition(["report_template_id" => $template->id]);
-        $criteria->order = "t.order ASC";
+        $criteria->order = "t.sort_order ASC";
         $sections = ReportTemplateSection::model()->findAll($criteria);
 
         $this->breadcrumbs[] = [Yii::t("app", "Report Templates"), $this->createUrl("reporttemplate/index")];
@@ -1371,7 +1371,7 @@ class ReporttemplateController extends Controller {
                 $form->id = null;
                 $section = new ReportTemplateSection();
                 $section->report_template_id = $template->id;
-                $section->order = 0;
+                $section->sort_order = 0;
             }
 
             if (!$section) {
@@ -1379,10 +1379,10 @@ class ReporttemplateController extends Controller {
             }
 
             $section->fromForm($form);
-            $section->order = array_search($section->id ? $section->id : null, $form->order);
+            $section->sort_order = array_search($section->id ? $section->id : null, $form->order);
 
-            if (!$section->order) {
-                $section->order = 0;
+            if (!$section->sort_order) {
+                $section->sort_order = 0;
             }
 
             $section->save();
@@ -1390,7 +1390,7 @@ class ReporttemplateController extends Controller {
             // save orders
             foreach ($form->order as $order => $s) {
                 ReportTemplateSection::model()->updateAll(
-                    ["order" => $order],
+                    ["sort_order" => $order],
                     "id = :id AND report_template_id = :rt",
                     [
                         ":id" => $s,
@@ -1439,7 +1439,7 @@ class ReporttemplateController extends Controller {
             // save orders
             foreach ($form->order as $order => $s) {
                 ReportTemplateSection::model()->updateAll(
-                    ["order" => $order],
+                    ["sort_order" => $order],
                     "id = :id AND report_template_id = :rt",
                     [
                         ":id" => $s,

@@ -78,49 +78,21 @@
             </div>
 
             <div class="control-group" id="options">
-                <label class="control-label"><?php echo Yii::t('app', 'Options'); ?></label>
+                <label class="control-label"><?php echo Yii::t("app", "Options"); ?></label>
                 <div class="controls">
                     <label class="checkbox">
                         <input type="checkbox" id="ProjectReportForm_options_title" name="ProjectReportForm[options][]" value="title" onchange="system.report.projectFormChange(this);" checked>
-                        <?php echo Yii::t('app', 'Title Page'); ?>
-                    </label>
-                    <label class="checkbox">
-                        <input type="checkbox" id="ProjectReportForm_options_intro" name="ProjectReportForm[options][]" value="intro" onchange="system.report.projectFormChange(this);" checked>
-                        <?php echo Yii::t('app', 'Introduction'); ?>
-                    </label>
-                    <label class="checkbox">
-                        <input type="checkbox" id="ProjectReportForm_options_summary" name="ProjectReportForm[options][]" value="summary" onchange="system.report.projectFormChange(this);" checked>
-                        <?php echo Yii::t('app', 'Summary Block'); ?>
-                    </label>
-                    <label class="checkbox">
-                        <input type="checkbox" id="ProjectReportForm_options_fulfillment" name="ProjectReportForm[options][]" value="fulfillment" onchange="system.report.projectFormChange(this);" checked>
-                        <?php echo Yii::t('app', 'Degree of Fulfillment Section'); ?>
-                    </label>
-                    <label class="checkbox">
-                        <input type="checkbox" id="ProjectReportForm_options_matrix" name="ProjectReportForm[options][]" value="matrix" onchange="system.report.projectFormChange(this);" checked>
-                        <?php echo Yii::t('app', 'Risk Matrix Section'); ?>
-                    </label>
-                    <label class="checkbox">
-                        <input type="checkbox" id="ProjectReportForm_options_vulns" name="ProjectReportForm[options][]" value="vulns" onchange="system.report.projectFormChange(this);" checked>
-                        <?php echo Yii::t('app', 'Reduced Vulnerability List'); ?>
-                    </label>
-                    <label class="checkbox">
-                        <input type="checkbox" id="ProjectReportForm_options_appendix" name="ProjectReportForm[options][]" value="appendix" onchange="system.report.projectFormChange(this);" checked>
-                        <?php echo Yii::t('app', 'Appendix Section'); ?>
-                    </label>
-                    <label class="checkbox">
-                        <input type="checkbox" id="ProjectReportForm_options_attachments" name="ProjectReportForm[options][]" value="attachments" onchange="system.report.projectFormChange(this);" checked>
-                        <?php echo Yii::t('app', 'Attachments Section'); ?>
+                        <?php echo Yii::t("app", "Title Page"); ?>
                     </label>
                 </div>
             </div>
 
             <div class="control-group" id="checks-fields">
-                <label class="control-label" for="ProjectReportForm_fields"><?php echo Yii::t('app', 'Check Fields'); ?></label>
+                <label class="control-label" for="ProjectReportForm_fields"><?php echo Yii::t("app", "Check Fields"); ?></label>
                 <div class="controls">
                     <?php foreach ($fields as $field): ?>
                         <label class="checkbox">
-                            <input class="always-disabled" type="checkbox" id="ProjectReportForm_fields" name="ProjectReportForm[fields][]" value="<?= $field->name ?>" checked="checked" <?= in_array($field->name, GlobalCheckField::$system) ? 'disabled="disabled"': "" ?>>
+                            <input class="always-disabled" type="checkbox" id="ProjectReportForm_fields" name="ProjectReportForm[fields][]" value="<?= $field->name ?>" checked="checked" <?= in_array($field->name, GlobalCheckField::$system) ? "disabled": "" ?>>
                             <?= $field->localizedTitle ?>
                         </label>
                     <?php endforeach; ?>

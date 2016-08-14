@@ -41,7 +41,7 @@ abstract class ReportPlugin {
      * @param ReportTemplate $template
      * @param array $data
      */
-    public function __construct(ReportTemplate $template, $data=array()) {
+    public function __construct(ReportTemplate $template=null, $data=array()) {
         $this->_template = $template;
         $this->_data = $data;
     }
@@ -73,6 +73,12 @@ abstract class ReportPlugin {
      */
     abstract public function generate();
 
+    /**
+     * Send report over HTTP
+     * @param bool $unlink
+     * @param bool $exit
+     * @throws Exception
+     */
     public function sendOverHttp($unlink=true, $exit=true) {
         if (!$this->_generated) {
             throw new Exception(Yii::t("app", "Report not generated yet."));

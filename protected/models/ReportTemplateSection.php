@@ -9,7 +9,7 @@
  * @property integer $type
  * @property string $title
  * @property string $content
- * @property integer $order
+ * @property integer $sort_order
  *
  * @property ReportTemplate $template
  */
@@ -37,7 +37,7 @@ class ReportTemplateSection extends ActiveRecord {
         return [
             ["title, report_template_id, title, type", "required"],
             ["title", "length", "max" => 1000],
-            ["report_template_id, order", "numerical", "integerOnly" => true],
+            ["report_template_id, sort_order", "numerical", "integerOnly" => true],
             ["type", "in", "range" => ReportSection::getValidTypes()],
         ];
     }

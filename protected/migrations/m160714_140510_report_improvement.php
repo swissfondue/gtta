@@ -15,7 +15,6 @@ class m160714_140510_report_improvement extends CDbMigration {
         ReportSection::TYPE_VULNS => "vulns_intro",
         ReportSection::TYPE_INFO_CHECKS => "info_checks_intro",
         ReportSection::TYPE_APPENDIX => "appendix",
-        ReportSection::TYPE_FOOTER => "footer",
     ];
 
     /**
@@ -34,7 +33,7 @@ class m160714_140510_report_improvement extends CDbMigration {
             "type" => "int NOT NULL",
             "title" => "varchar(1000)",
             "content" => "text",
-            "order" => "int NOT NULL DEFAULT 0",
+            "sort_order" => "int NOT NULL DEFAULT 0",
             "PRIMARY KEY (id)"
         ]);
 
@@ -44,7 +43,7 @@ class m160714_140510_report_improvement extends CDbMigration {
             "type" => "int NOT NULL",
             "title" => "varchar(1000)",
             "content" => "text",
-            "order" => "int NOT NULL DEFAULT 0",
+            "sort_order" => "int NOT NULL DEFAULT 0",
             "PRIMARY KEY (id)"
         ]);
 
@@ -54,7 +53,7 @@ class m160714_140510_report_improvement extends CDbMigration {
         foreach ($data as $template) {
             foreach (array_keys($this->_columns) as $section) {
                 $this->execute(
-                    "INSERT INTO report_template_sections (report_template_id, type, title, content, \"order\")
+                    "INSERT INTO report_template_sections (report_template_id, type, title, content, sort_order)
                      (
                          SELECT
                              :id,

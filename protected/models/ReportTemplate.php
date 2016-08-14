@@ -10,6 +10,14 @@
  * @property string $header_image_type
  * @property integer $type
  * @property string $file_path
+ * @property string $footer
+ * @property string $high_description
+ * @property string $low_description
+ * @property string $med_description
+ * @property string $none_description
+ * @property string $no_vuln_description
+ * @property string $info_description
+
  */
 class ReportTemplate extends ActiveRecord {
     /**
@@ -64,25 +72,25 @@ class ReportTemplate extends ActiveRecord {
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
-		return array(
-            array("name, type", "required"),
-            array("name, header_image_path, header_image_type, file_path", "length", "max" => 1000),
-            array("type", "in", "range" => self::getValidTypes()),
-            array("sections", "checkSections")
-		);
+		return [
+            ["name, type", "required"],
+            ["name, header_image_path, header_image_type, file_path", "length", "max" => 1000],
+            ["type", "in", "range" => self::getValidTypes()],
+            ["footer, high_description, med_description, low_description, info_description, none_description, no_vuln_description", "safe"],
+		];
 	}
 
     /**
 	 * @return array relational rules.
 	 */
 	public function relations() {
-		return array(
+		return [
             "l10n" => array(self::HAS_MANY, "ReportTemplateL10n", "report_template_id"),
             "summary" => array(self::HAS_MANY, "ReportTemplateSummary", "report_template_id"),
             "vulnSections" => array(self::HAS_MANY, "ReportTemplateVulnSection", "report_template_id"),
             "ratingImages" => array(self::HAS_MANY, "ReportTemplateVulnSection", "report_template_id"),
-            "sections" => array(self::HAS_MANY, "ReportTemplateSection", "report_template_id", "order" => "sections.order ASC"),
-		);
+            "sections" => array(self::HAS_MANY, "ReportTemplateSection", "report_template_id"),
+		];
 	}
 
     /**
@@ -94,6 +102,17 @@ class ReportTemplate extends ActiveRecord {
         }
 
         return $this->name;
+    }
+
+    /**
+     * @return string localized footer.
+     */
+    public function getLocalizedFooter() {
+        if ($this->l10n && count($this->l10n) > 0) {
+            return $this->l10n[0]->footer != NULL ? $this->l10n[0]->footer : $this->footer;
+        }
+
+        return $this->footer;
     }
 
     /**
@@ -112,15 +131,5 @@ class ReportTemplate extends ActiveRecord {
         );
 
         return ReportTemplateRatingImage::model()->find($criteria);
-    }
-
-    /**
-     * Check report section
-     * @param $attribute
-     * @param $params
-     * @return bool
-     */
-    public function checkSections($attribute, $params) {
-        return false;
     }
 }
