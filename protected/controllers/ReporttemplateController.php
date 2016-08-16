@@ -93,57 +93,45 @@ class ReporttemplateController extends Controller {
         }
 
         $languages = Language::model()->findAll();
-        $model = new ReportTemplateEditForm();
-        $model->localizedItems = array();
+        $form = new ReportTemplateEditForm();
+        $form->localizedItems = array();
 
         if (!$newRecord) {
-            $model->type = $template->type;
-            $model->name = $template->name;
-            $model->highDescription = $template->high_description;
-            $model->medDescription = $template->med_description;
-            $model->lowDescription = $template->low_description;
-            $model->noneDescription = $template->none_description;
-            $model->noVulnDescription = $template->no_vuln_description;
-            $model->infoDescription = $template->info_description;
+            $form->fromModel($template);
 
             $templateL10n = ReportTemplateL10n::model()->findAllByAttributes(array(
                 "report_template_id" => $template->id
             ));
 
             foreach ($templateL10n as $tl) {
-                $model->localizedItems[$tl->language_id]["name"] = $tl->name;
-                $model->localizedItems[$tl->language_id]["highDescription"] = $tl->high_description;
-                $model->localizedItems[$tl->language_id]["medDescription"] = $tl->med_description;
-                $model->localizedItems[$tl->language_id]["lowDescription"] = $tl->low_description;
-                $model->localizedItems[$tl->language_id]["noneDescription"] = $tl->none_description;
-                $model->localizedItems[$tl->language_id]["noVulnDescription"] = $tl->no_vuln_description;
-                $model->localizedItems[$tl->language_id]["infoDescription"] = $tl->info_description;
+                $form->localizedItems[$tl->language_id]["name"] = $tl->name;
+                $form->localizedItems[$tl->language_id]["footer"] = $tl->footer;
+                $form->localizedItems[$tl->language_id]["highDescription"] = $tl->high_description;
+                $form->localizedItems[$tl->language_id]["medDescription"] = $tl->med_description;
+                $form->localizedItems[$tl->language_id]["lowDescription"] = $tl->low_description;
+                $form->localizedItems[$tl->language_id]["noneDescription"] = $tl->none_description;
+                $form->localizedItems[$tl->language_id]["noVulnDescription"] = $tl->no_vuln_description;
+                $form->localizedItems[$tl->language_id]["infoDescription"] = $tl->info_description;
             }
         }
 
         // collect user input data
         if (isset($_POST["ReportTemplateEditForm"])) {
-            $model->attributes = $_POST["ReportTemplateEditForm"];
-            $model->name = $model->defaultL10n($languages, "name");
-            $model->highDescription = $model->defaultL10n($languages, "highDescription");
-            $model->medDescription = $model->defaultL10n($languages, "medDescription");
-            $model->lowDescription = $model->defaultL10n($languages, "lowDescription");
-            $model->noneDescription = $model->defaultL10n($languages, "noneDescription");
-            $model->noVulnDescription = $model->defaultL10n($languages, "noVulnDescription");
-            $model->infoDescription = $model->defaultL10n($languages, "infoDescription");
+            $form->attributes = $_POST["ReportTemplateEditForm"];
+            $form->name = $form->defaultL10n($languages, "name");
+            $form->footer = $form->defaultL10n($languages, "footer");
+            $form->highDescription = $form->defaultL10n($languages, "highDescription");
+            $form->medDescription = $form->defaultL10n($languages, "medDescription");
+            $form->lowDescription = $form->defaultL10n($languages, "lowDescription");
+            $form->noneDescription = $form->defaultL10n($languages, "noneDescription");
+            $form->noVulnDescription = $form->defaultL10n($languages, "noVulnDescription");
+            $form->infoDescription = $form->defaultL10n($languages, "infoDescription");
 
-            if ($model->validate()) {
-                $template->type = $model->type;
-                $template->name = $model->name;
-                $template->high_description = $model->highDescription;
-                $template->med_description = $model->medDescription;
-                $template->low_description = $model->lowDescription;
-                $template->none_description = $model->noneDescription;
-                $template->no_vuln_description = $model->noVulnDescription;
-                $template->info_description = $model->infoDescription;
+            if ($form->validate()) {
+                $template->fromForm($form);
                 $template->save();
 
-                foreach ($model->localizedItems as $languageId => $value) {
+                foreach ($form->localizedItems as $languageId => $value) {
                     $templateL10n = ReportTemplateL10n::model()->findByAttributes(array(
                         "report_template_id" => $template->id,
                         "language_id" => $languageId
@@ -183,6 +171,10 @@ class ReporttemplateController extends Controller {
                         $value["infoDescription"] = NULL;
                     }
 
+                    if ($value["footer"] == "") {
+                        $value["footer"] = NULL;
+                    }
+
                     $templateL10n->name = $value["name"];
                     $templateL10n->high_description = $value["highDescription"];
                     $templateL10n->med_description = $value["medDescription"];
@@ -190,6 +182,7 @@ class ReporttemplateController extends Controller {
                     $templateL10n->none_description = $value["noneDescription"];
                     $templateL10n->no_vuln_description = $value["noVulnDescription"];
                     $templateL10n->info_description = $value["infoDescription"];
+                    $templateL10n->footer = $value["footer"];
                     $templateL10n->save();
                 }
 
@@ -225,7 +218,7 @@ class ReporttemplateController extends Controller {
         // display the page
         $this->pageTitle = $newRecord ? Yii::t("app", "New Template") : $template->localizedName;
         $this->render("edit", array(
-            "model" => $model,
+            "model" => $form,
             "template" => $template,
             "languages" => $languages,
         ));

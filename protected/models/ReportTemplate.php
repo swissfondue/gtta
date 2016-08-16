@@ -116,6 +116,72 @@ class ReportTemplate extends ActiveRecord {
     }
 
     /**
+     * @return string localized high description.
+     */
+    public function getLocalizedHighDescription() {
+        if ($this->l10n && count($this->l10n) > 0) {
+            return $this->l10n[0]->high_description != NULL ? $this->l10n[0]->high_description : $this->high_description;
+        }
+
+        return $this->high_description;
+    }
+    
+    /**
+     * @return string localized med description.
+     */
+    public function getLocalizedMedDescription() {
+        if ($this->l10n && count($this->l10n) > 0) {
+            return $this->l10n[0]->med_description != NULL ? $this->l10n[0]->med_description : $this->med_description;
+        }
+
+        return $this->med_description;
+    }
+    
+    /**
+     * @return string localized low description.
+     */
+    public function getLocalizedLowDescription() {
+        if ($this->l10n && count($this->l10n) > 0) {
+            return $this->l10n[0]->low_description != NULL ? $this->l10n[0]->low_description : $this->low_description;
+        }
+
+        return $this->low_description;
+    }
+    
+    /**
+     * @return string localized info description.
+     */
+    public function getLocalizedInfoDescription() {
+        if ($this->l10n && count($this->l10n) > 0) {
+            return $this->l10n[0]->info_description != NULL ? $this->l10n[0]->info_description : $this->info_description;
+        }
+
+        return $this->info_description;
+    }
+    
+    /**
+     * @return string localized none description.
+     */
+    public function getLocalizedNoneDescription() {
+        if ($this->l10n && count($this->l10n) > 0) {
+            return $this->l10n[0]->none_description != NULL ? $this->l10n[0]->none_description : $this->none_description;
+        }
+
+        return $this->none_description;
+    }
+    
+    /**
+     * @return string localized no_vuln description.
+     */
+    public function getLocalizedNoVulnDescription() {
+        if ($this->l10n && count($this->l10n) > 0) {
+            return $this->l10n[0]->no_vuln_description != NULL ? $this->l10n[0]->no_vuln_description : $this->no_vuln_description;
+        }
+
+        return $this->no_vuln_description;
+    }
+
+    /**
      * Returns high rating image if current template
      * @return CActiveRecord
      */

@@ -15,6 +15,11 @@ class ReportTemplateEditForm extends LocalizedFormModel {
     public $name;
 
     /**
+     * @var string footer.
+     */
+    public $footer;
+
+    /**
      * @var string high description.
      */
     public $highDescription;
@@ -57,8 +62,7 @@ class ReportTemplateEditForm extends LocalizedFormModel {
 			array("type, name", "required"),
             array("type", "in", "range" => ReportTemplate::getValidTypes()),
             array("name", "length", "max" => 1000),
-            array("highDescription, medDescription, lowDescription, noneDescription, noVulnDescription, infoDescription, localizedItems", "safe"),
-            array("sections", "checkSections")
+            array("footer, highDescription, medDescription, lowDescription, noneDescription, noVulnDescription, infoDescription, localizedItems", "safe"),
 		);
 	}
     
@@ -69,6 +73,7 @@ class ReportTemplateEditForm extends LocalizedFormModel {
 		return array(
             "type" => Yii::t("app", "Type"),
 			"name" => Yii::t("app", "Name"),
+			"footer" => Yii::t("app", "Footer"),
             "highDescription" => Yii::t("app", "High Risk Description"),
             "medDescription" => Yii::t("app", "Med Risk Description"),
             "lowDescription" => Yii::t("app", "Low Risk Description"),
@@ -77,14 +82,4 @@ class ReportTemplateEditForm extends LocalizedFormModel {
             "infoDescription" => Yii::t("app", "Info Description"),
 		);
 	}
-
-    /**
-     * Check sections
-     * @param $attribute
-     * @param $params
-     * @return bool
-     */
-    public function checkSections($attribute, $params) {
-        return false;
-    }
 }

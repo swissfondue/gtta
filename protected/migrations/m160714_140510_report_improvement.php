@@ -8,11 +8,11 @@ class m160714_140510_report_improvement extends CDbMigration {
     private $_columns = [
         ReportSection::TYPE_INTRO => "intro",
         ReportSection::TYPE_CHART_SECURITY_LEVEL => "security_level_intro",
-        ReportSection::TYPE_CHART_VULN_DISTR => "vuln_distribution_intro",
-        ReportSection::TYPE_CHART_VULN_DEGREE => "degree_intro",
+        ReportSection::TYPE_CHART_VULNERABILITY_DISTRIBUTION => "vuln_distribution_intro",
+        ReportSection::TYPE_CHART_DEGREE_OF_FULFILLMENT => "degree_intro",
         ReportSection::TYPE_RISK_MATRIX => "risk_intro",
-        ReportSection::TYPE_REDUCED_VULN_LIST => "reduced_intro",
-        ReportSection::TYPE_VULNS => "vulns_intro",
+        ReportSection::TYPE_REDUCED_VULNERABILITY_LIST => "reduced_intro",
+        ReportSection::TYPE_VULNERABILITIES => "vulns_intro",
         ReportSection::TYPE_INFO_CHECKS => "info_checks_intro",
         ReportSection::TYPE_APPENDIX => "appendix",
     ];

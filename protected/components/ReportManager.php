@@ -3,7 +3,7 @@
 /**
  * Class ProjectReportManager
  */
-class ProjectReportManager {
+class ReportManager {
     /**
      * Prepare text for project report.
      */
@@ -797,6 +797,234 @@ class ProjectReportManager {
             "reducedChecks" => $reducedChecks,
             "weakestControls" => $this->_getWeakestControls($targets, $language),
         );
+
+        return $data;
+    }
+
+    /**
+     * Get fulfillment report data
+     * @param array $targets
+     * @param $language
+     * @return array
+     */
+    public function getFulfillmentReportData($targets, $language) {
+        $data = array();
+
+        foreach ($targets as $target) {
+            $targetData = array(
+                "id"          => $target->id,
+                "host"        => $target->hostPort,
+                "description" => $target->description,
+                "controls"    => array(),
+            );
+
+            // get all references (they are the same across all target categories)
+            $referenceIds = array();
+
+            $references = TargetReference::model()->findAllByAttributes(array(
+                "target_id" => $target->id
+            ));
+
+            foreach ($references as $reference) {
+                $referenceIds[] = $reference->reference_id;
+            }
+
+            // get all categories
+            $categories = TargetCheckCategory::model()->with(array(
+                "category" => array(
+                    "with" => array(
+                        "l10n" => array(
+                            "joinType" => "LEFT JOIN",
+                            "on" => "language_id = :language_id",
+                            "params" => array("language_id" => $language)
+                        )
+                    )
+                )
+            ))->findAllByAttributes(
+                array("target_id" => $target->id),
+                array("order" => "COALESCE(l10n.name, category.name) ASC")
+            );
+
+            foreach ($categories as $category) {
+                // get all controls
+                $controls = CheckControl::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => array("language_id" => $language)
+                    )
+                ))->findAllByAttributes(
+                    array("check_category_id" => $category->check_category_id),
+                    array("order" => "t.sort_order ASC")
+                );
+
+                if (!$controls) {
+                    continue;
+                }
+
+                foreach ($controls as $control) {
+                    $controlData = array(
+                        "name"  => $category->category->localizedName . " / " . $control->localizedName,
+                        "degree" => 0.0,
+                    );
+
+                    $criteria = new CDbCriteria();
+
+                    $criteria->addInCondition("t.reference_id", $referenceIds);
+                    $criteria->addColumnCondition(array(
+                        "t.check_control_id" => $control->id
+                    ));
+
+                    $checks = Check::model()->with(array(
+                        "targetChecks" => array(
+                            "alias" => "tcs",
+                            "joinType" => "INNER JOIN",
+                            "on" => "tcs.target_id = :target_id AND tcs.status = :status",
+                            "params" => array(
+                                "target_id" => $target->id,
+                                "status" => TargetCheck::STATUS_FINISHED,
+                            ),
+                        ),
+                    ))->findAll($criteria);
+
+                    if (!$checks) {
+                        continue;
+                    }
+
+                    foreach ($checks as $check) {
+                        foreach ($check->targetChecks as $tc) {
+                            switch ($tc->rating) {
+                                case TargetCheck::RATING_HIDDEN:
+                                case TargetCheck::RATING_INFO:
+                                    $controlData["degree"] += 0;
+                                    break;
+
+                                case TargetCheck::RATING_LOW_RISK:
+                                    $controlData["degree"] += 1;
+                                    break;
+
+                                case TargetCheck::RATING_MED_RISK:
+                                    $controlData["degree"] += 2;
+                                    break;
+
+                                case TargetCheck::RATING_HIGH_RISK:
+                                    $controlData["degree"] += 3;
+                                    break;
+                            }
+                        }
+                    }
+
+                    $maxDegree = count($checks) * 3;
+                    $controlData["degree"] = round(100 - $controlData["degree"] / $maxDegree * 100);
+                    $targetData["controls"][] = $controlData;
+                }
+            }
+
+            $data[] = $targetData;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Risk matrix data
+     * @param array $targets
+     * @param array $matrix
+     * @param array $risks
+     * @param int $language
+     * @return array
+     */
+    public function getRiskMatrixData($targets, $matrix, $risks, $language) {
+        $data = array();
+
+        foreach ($targets as $target) {
+            $mtrx = array();
+            $referenceIds = array();
+
+            $references = TargetReference::model()->findAllByAttributes(array(
+                "target_id" => $target->id
+            ));
+
+            foreach ($references as $reference) {
+                $referenceIds[] = $reference->reference_id;
+            }
+
+            foreach ($target->_categories as $category) {
+                $controlIds = array();
+
+                $controls = CheckControl::model()->findAllByAttributes(array(
+                    "check_category_id" => $category->check_category_id
+                ));
+
+                foreach ($controls as $control) {
+                    $controlIds[] = $control->id;
+                }
+
+                $criteria = new CDbCriteria();
+                $criteria->order = "t.sort_order ASC";
+                $criteria->addInCondition("t.reference_id", $referenceIds);
+                $criteria->addInCondition("t.check_control_id", $controlIds);
+                $criteria->together = true;
+
+                $checks = Check::model()->with(array(
+                    "l10n" => array(
+                        "joinType" => "LEFT JOIN",
+                        "on" => "l10n.language_id = :language_id",
+                        "params" => array( "language_id" => $language )
+                    ),
+                    "targetChecks" => array(
+                        "alias" => "tcs",
+                        "joinType" => "INNER JOIN",
+                        "on" => "tcs.target_id = :target_id AND tcs.status = :status AND (tcs.rating = :high OR tcs.rating = :med)",
+                        "params" => array(
+                            "target_id" => $target->id,
+                            "status" => TargetCheck::STATUS_FINISHED,
+                            "high" => TargetCheck::RATING_HIGH_RISK,
+                            "med" => TargetCheck::RATING_MED_RISK,
+                        ),
+                    )
+                ))->findAll($criteria);
+
+                foreach ($checks as $check) {
+                    if (!isset($matrix[$target->id][$check->id])) {
+                        continue;
+                    }
+
+                    $ctr = 0;
+
+                    foreach ($risks as $riskId => $risk) {
+                        $ctr++;
+
+                        if (!isset($matrix[$target->id][$check->id][$risk->id])) {
+                            continue;
+                        }
+
+                        $riskName = "R" . $ctr;
+
+                        $damage = $matrix[$target->id][$check->id][$risk->id]["damage"] - 1;
+                        $likelihood = $matrix[$target->id][$check->id][$risk->id]["likelihood"] - 1;
+
+                        if (!isset($mtrx[$damage])) {
+                            $mtrx[$damage] = array();
+                        }
+
+                        if (!isset($mtrx[$damage][$likelihood])) {
+                            $mtrx[$damage][$likelihood] = array();
+                        }
+
+                        if (!in_array($riskName, $mtrx[$damage][$likelihood])) {
+                            $mtrx[$damage][$likelihood][] = $riskName;
+                        }
+                    }
+                }
+            }
+
+            $data[] = array(
+                "host" => $target->hostPort,
+                "description" => $target->description,
+                "matrix" => $mtrx
+            );
+        }
 
         return $data;
     }

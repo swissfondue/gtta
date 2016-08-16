@@ -59,6 +59,16 @@
                                 </div>
 
                                 <div class="rtf-report <?php if ($model->type == ReportTemplate::TYPE_DOCX) echo "hide"; ?>">
+                                    <div class="control-group <?php if ($model->getError("footer")) echo "error"; ?>">
+                                        <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_footer"><?php echo Yii::t("app", "Footer"); ?></label>
+                                        <div class="controls">
+                                            <textarea class="wysiwyg" id="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_footer" name="ReportTemplateEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][footer]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]["footer"]) : ""; ?></textarea>
+                                            <?php if ($model->getError("footer")): ?>
+                                                <p class="help-block"><?php echo $model->getError("footer"); ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    
                                     <div class="control-group <?php if ($model->getError('highDescription')) echo 'error'; ?>">
                                         <label class="control-label" for="ReportTemplateEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_highDescription"><?php echo Yii::t('app', 'High Risk Description'); ?></label>
                                         <div class="controls">
