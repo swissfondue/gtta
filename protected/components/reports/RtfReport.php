@@ -5,6 +5,13 @@
  */
 class RtfReport extends ReportPlugin {
     /**
+     * Vulnerability list types
+     */
+    const VULNERABILITY_LIST_NORMAL = 0;
+    const VULNERABILITY_LIST_SEPARATE_SECTION = 1;
+    const VULNERABILITY_LIST_SEPARATE_TABLE = 2;
+
+    /**
      * @var PHPRtfLite
      */
     public $rtf;
@@ -1062,8 +1069,15 @@ class RtfReport extends ReportPlugin {
     /**
      * Add vulnerability list
      * @param PHPRtfLite_Container_Section $section
+     * @param int $sectionNumber
+     * @param PHPRtfLite_Container_Section $toc
      */
-    private function _addVulnerabilityList(PHPRtfLite_Container_Section &$section) {
+    private function _addVulnerabilityList(PHPRtfLite_Container_Section &$section, $sectionNumber, $toc=null) {
+        $data = $this->_data;
+        $vulns = $data["data"];
+        $template = $data["template"];
+        $subsectionNumber = 1;
+
         if ($data["hasSeparate"]) {
             foreach ($template->vulnSections as $scn) {
                 // check if section has checks in it
@@ -1111,64 +1125,29 @@ class RtfReport extends ReportPlugin {
                     $this->noPar
                 );
 
-                if ($scn->localizedIntro)
-                    $this->_renderText($section, $scn->localizedIntro . "<br><br>");
+                if ($scn->localizedIntro) {
+                    $this->renderText($section, $scn->localizedIntro . "<br><br>");
+                }
 
                 $this->_generateVulnerabilityList(
-                    $vulns,
                     $section,
                     $sectionNumber . "." . $subsectionNumber,
-                    self::SEPARATE_VULN_LIST,
-                    $ratingImages,
-                    $model->infoChecksLocation,
-                    $scn->check_category_id
+                    self::VULNERABILITY_LIST_SEPARATE_TABLE,
+                    $scn->check_category_id,
+                    $toc
                 );
 
                 $subsectionNumber++;
             }
         }
 
-        $toc->writeHyperLink(
-            "#vulns_section_" . $subsectionNumber,
-            "    " . $sectionNumber . "." . $subsectionNumber . ". " . Yii::t("app", "Found Vulnerabilities") . "\n",
-            $this->textFont
+        $this->_generateVulnerabilityList(
+            $section,
+            $sectionNumber . ($subsectionNumber > 1 ? "." . $subsectionNumber : ""),
+            self::VULNERABILITY_LIST_NORMAL,
+            null,
+            $toc
         );
-
-        $section->writeBookmark(
-            "vulns_section_" . $subsectionNumber,
-            $sectionNumber . "." . $subsectionNumber . ". " . Yii::t("app", "Found Vulnerabilities") . "\n",
-            $this->h3Font,
-            $this->noPar
-        );
-
-        if ($template->localizedVulnsIntro) {
-            $this->_renderText($section, $template->localizedVulnsIntro . "<br><br>");
-        }
-
-        $this->_generateVulnerabilityList($vulns, $section, $sectionNumber . "." . $subsectionNumber, self::NORMAL_VULN_LIST, $ratingImages, $model->infoChecksLocation);
-
-        $subsectionNumber++;
-
-        if ($this->project["hasInfo"] && $model->infoChecksLocation == ProjectReportForm::INFO_LOCATION_APPENDIX) {
-            $toc->writeHyperLink(
-                "#vulns_section_" . $subsectionNumber,
-                "    " . $sectionNumber . "." . $subsectionNumber . ". " . Yii::t("app", "Additional Data") . "\n",
-                $this->textFont
-            );
-
-            $section->writeBookmark(
-                "vulns_section_" . $subsectionNumber,
-                $sectionNumber . "." . $subsectionNumber . ". " . Yii::t("app", "Additional Data") . "\n",
-                $this->h3Font,
-                $this->noPar
-            );
-
-            if ($template->localizedInfoChecksIntro) {
-                $this->_renderText($section, $template->localizedInfoChecksIntro . "<br><br>");
-            }
-
-            $this->_generateVulnerabilityList($vulns, $section, $sectionNumber . "." . $subsectionNumber, self::APPENDIX_VULN_LIST, $ratingImages);
-        }
     }
 
     /**
@@ -1678,115 +1657,130 @@ class RtfReport extends ReportPlugin {
     }
 
     /**
-     * Generate a vulnerability list.
+     * Generate vulnerability list
+     * @param PHPRtfLite_Container_Section $section
+     * @param int $sectionNumber
+     * @param int $type
+     * @param int|null $categoryId
+     * @param PHPRtfLite_Container_Section|null $toc
      */
-    private function _generateVulnerabilityList($data, &$section, $sectionNumber, $type = self::NORMAL_VULN_LIST, $ratingImages, $infoLocation = null, $categoryId = null) {
+    private function _generateVulnerabilityList(&$section, $sectionNumber, $type=self::VULNERABILITY_LIST_NORMAL, $categoryId=null, $toc=null) {
+        $data = $this->_data;
+        $vulns = $data["data"];
+        $infoLocation = $data["infoLocation"];
+        $template = $data["template"];
+        $ratingImages = $this->_getRatingImages($template);
+
         $targetNumber = 1;
 
-        foreach ($data as $target)
-        {
-            if (!$target['checkCount'])
+        foreach ($vulns as $target) {
+            if (!$target["checkCount"]) {
                 continue;
+            }
 
-            if ($type == self::SEPARATE_VULN_LIST &&
-                !in_array($categoryId, $target['separate']) ||
-                $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $target['separateCount'] == $target['info']
-            )
+            if ($type == self::VULNERABILITY_LIST_SEPARATE_TABLE &&
+                !in_array($categoryId, $target["separate"]) ||
+                $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION && $target["separateCount"] == $target["info"]
+            ) {
                 continue;
+            }
 
-            if ($type == self::APPENDIX_VULN_LIST && !$target['info'])
+            if ($type == self::VULNERABILITY_LIST_SEPARATE_SECTION && !$target["info"]) {
                 continue;
+            }
 
             if (
-                $type == self::NORMAL_VULN_LIST &&
-                (
-                    $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $target['checkCount'] == $target['info'] + $target['separateCount'] ||
-                    $target['checkCount'] == $target['separateCount']
+                $type == self::VULNERABILITY_LIST_NORMAL && (
+                    $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION && $target["checkCount"] == $target["info"] + $target["separateCount"] ||
+                    $target["checkCount"] == $target["separateCount"]
                 )
-            )
+            ) {
                 continue;
+            }
 
             $tableCount = 1;
 
-            if ($type != self::APPENDIX_VULN_LIST && $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE && $target['info'])
+            if ($type != self::VULNERABILITY_LIST_SEPARATE_SECTION && $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_TABLE && $target["info"]) {
                 $tableCount = 2;
+            }
 
-            for ($tableNumber = 0; $tableNumber < $tableCount; $tableNumber++)
-            {
-                $subsectionNumber = substr($sectionNumber, strpos($sectionNumber, '.') + 1);
+            for ($tableNumber = 0; $tableNumber < $tableCount; $tableNumber++) {
+                $subsectionNumber = substr($sectionNumber, strpos($sectionNumber, ".") + 1);
 
-                $this->toc->writeHyperLink(
-                    '#vulns_section_' . $subsectionNumber . '_' . $targetNumber,
-                    '        ' . $sectionNumber . '.' . $targetNumber . '. ' . $target['host'],
+                $toc->writeHyperLink(
+                    "#vulns_section_" . $subsectionNumber . "_" . $targetNumber,
+                    "        " . $sectionNumber . "." . $targetNumber . ". " . $target["host"],
                     $this->textFont
                 );
 
                 $section->writeBookmark(
-                    'vulns_section_' . $subsectionNumber . '_' . $targetNumber,
-                    $sectionNumber . '.' . $targetNumber . '. ' . $target['host'],
+                    "vulns_section_" . $subsectionNumber . "_" . $targetNumber,
+                    $sectionNumber . "." . $targetNumber . ". " . $target["host"],
                     $this->boldFont
                 );
 
-                if ($target['description'])
-                {
-                    $font = new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090');
+                if ($target["description"]) {
+                    $font = new PHPRtfLite_Font($this->fontSize, $this->fontFamily, "#909090");
 
-                    $this->toc->writeText(' / ', $this->textFont);
-                    $this->toc->writeHyperLink(
-                        '#vulns_section_' . $subsectionNumber . '_' . $targetNumber,
-                        $target['description'],
+                    $toc->writeText(" / ", $this->textFont);
+                    $toc->writeHyperLink(
+                        "#vulns_section_" . $subsectionNumber . "_" . $targetNumber,
+                        $target["description"],
                         $font
                     );
 
-                    $section->writeText(' / ', $this->textFont);
-                    $section->writeText($target['description'], $font);
+                    $section->writeText(" / ", $this->textFont);
+                    $section->writeText($target["description"], $font);
                 }
 
-                if ($tableNumber == 1)
-                    $section->writeText(' - ' . Yii::t('app', 'Info Checks'), $this->textFont);
+                if ($tableNumber == 1) {
+                    $section->writeText(" - " . Yii::t("app", "Info Checks"), $this->textFont);
+                }
 
                 $section->writeText("\n", $this->textFont);
-                $this->toc->writeText("\n", $this->textFont);
+                $toc->writeText("\n", $this->textFont);
 
                 $targetNumber++;
 
                 $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-                $table->addColumnsList(array( $this->docWidth * 0.17, $this->docWidth * 0.83 ));
+                $table->addColumnsList(array($this->docWidth * 0.17, $this->docWidth * 0.83));
 
                 $row = 1;
 
-                foreach ($target['categories'] as $category)
-                {
+                foreach ($target["categories"] as $category) {
                     if (
-                        $type == self::SEPARATE_VULN_LIST &&
+                        $type == self::VULNERABILITY_LIST_SEPARATE_TABLE &&
                         (
-                            $category['id'] != $categoryId ||
-                            $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $category['info'] == $category['separate'] ||
-                            $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE &&
+                            $category["id"] != $categoryId ||
+                            $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION && $category["info"] == $category["separate"] ||
+                            $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_TABLE &&
                             (
-                                $tableNumber == 0 && $category['separate'] == $category['info'] ||
-                                $tableNumber == 1 && !$category['info']
+                                $tableNumber == 0 && $category["separate"] == $category["info"] ||
+                                $tableNumber == 1 && !$category["info"]
                             )
                         )
-                    )
+                    ) {
                         continue;
+                    }
 
-                    if ($type == self::APPENDIX_VULN_LIST && !$category['info'])
+                    if ($type == self::VULNERABILITY_LIST_SEPARATE_SECTION && !$category["info"]) {
                         continue;
+                    }
 
                     if (
-                        $type == self::NORMAL_VULN_LIST &&
+                        $type == self::VULNERABILITY_LIST_NORMAL &&
                         (
-                            $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $category['checkCount'] == $category['info'] + $category['separate'] ||
-                            $category['checkCount'] == $category['separate'] ||
-                            $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE &&
+                            $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION && $category["checkCount"] == $category["info"] + $category["separate"] ||
+                            $category["checkCount"] == $category["separate"] ||
+                            $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_TABLE &&
                             (
-                                $tableNumber == 0 && $category['checkCount'] == $category['info'] + $category['separate'] ||
-                                $tableNumber == 1 && !$category['info']
+                                $tableNumber == 0 && $category["checkCount"] == $category["info"] + $category["separate"] ||
+                                $tableNumber == 1 && !$category["info"]
                             )
                         )
-                    )
+                    ) {
                         continue;
+                    }
 
                     $table->addRow();
                     $table->mergeCellRange($row, 1, $row, 2);
@@ -1794,43 +1788,45 @@ class RtfReport extends ReportPlugin {
                     $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                     $table->getCell($row, 1)->setBorder($this->thinBorder);
                     $table->setFontForCellRange($this->boldFont, $row, 1, $row, 1);
-                    $table->setBackgroundForCellRange('#B0B0B0', $row, 1, $row, 1);
-                    $table->writeToCell($row, 1, $category['name']);
+                    $table->setBackgroundForCellRange("#B0B0B0", $row, 1, $row, 1);
+                    $table->writeToCell($row, 1, $category["name"]);
 
                     $row++;
 
-                    foreach ($category['controls'] as $control)
-                    {
+                    foreach ($category["controls"] as $control) {
                         if (
-                            $type == self::SEPARATE_VULN_LIST &&
+                            $type == self::VULNERABILITY_LIST_SEPARATE_TABLE &&
                             (
-                                !$control['separate'] ||
-                                $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $control['info'] == $control['separate'] ||
-                                $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE &&
+                                !$control["separate"] ||
+                                $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION && $control["info"] == $control["separate"] ||
+                                $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_TABLE &&
                                 (
-                                    $tableNumber == 0 && $control['separate'] == $control['info'] ||
-                                    $tableNumber == 1 && !$control['info']
+                                    $tableNumber == 0 && $control["separate"] == $control["info"] ||
+                                    $tableNumber == 1 && !$control["info"]
                                 )
                             )
-                        )
+                        ) {
                             continue;
+                        }
 
-                        if ($type == self::APPENDIX_VULN_LIST && !$control['info'])
+                        if ($type == self::VULNERABILITY_LIST_SEPARATE_SECTION && !$control["info"]) {
                             continue;
+                        }
 
                         if (
-                            $type == self::NORMAL_VULN_LIST &&
+                            $type == self::VULNERABILITY_LIST_NORMAL &&
                             (
-                                $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $control['checkCount'] == $control['info'] + $control['separate'] ||
-                                $control['checkCount'] == $control['separate'] ||
-                                $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE &&
+                                $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION && $control["checkCount"] == $control["info"] + $control["separate"] ||
+                                $control["checkCount"] == $control["separate"] ||
+                                $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_TABLE &&
                                 (
-                                    $tableNumber == 0 && $control['checkCount'] == $control['info'] + $control['separate'] ||
-                                    $tableNumber == 1 && !$control['info']
+                                    $tableNumber == 0 && $control["checkCount"] == $control["info"] + $control["separate"] ||
+                                    $tableNumber == 1 && !$control["info"]
                                 )
                             )
-                        )
+                        ) {
                             continue;
+                        }
 
                         $table->addRow();
                         $table->mergeCellRange($row, 1, $row, 2);
@@ -1838,43 +1834,45 @@ class RtfReport extends ReportPlugin {
                         $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                         $table->getCell($row, 1)->setBorder($this->thinBorder);
                         $table->setFontForCellRange($this->boldFont, $row, 1, $row, 1);
-                        $table->setBackgroundForCellRange('#D0D0D0', $row, 1, $row, 1);
-                        $table->writeToCell($row, 1, $control['name']);
+                        $table->setBackgroundForCellRange("#D0D0D0", $row, 1, $row, 1);
+                        $table->writeToCell($row, 1, $control["name"]);
 
                         $row++;
 
-                        foreach ($control['checks'] as $check)
-                        {
+                        foreach ($control["checks"] as $check) {
                             if (
-                                $type == self::SEPARATE_VULN_LIST &&
+                                $type == self::VULNERABILITY_LIST_SEPARATE_TABLE &&
                                 (
-                                    !$check['separate'] ||
-                                    $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $check['info'] ||
-                                    $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE &&
+                                    !$check["separate"] ||
+                                    $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION && $check["info"] ||
+                                    $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_TABLE &&
                                     (
-                                        $tableNumber == 0 && $check['info'] ||
-                                        $tableNumber == 1 && !$check['info']
+                                        $tableNumber == 0 && $check["info"] ||
+                                        $tableNumber == 1 && !$check["info"]
                                     )
                                 )
-                            )
+                            ) {
                                 continue;
+                            }
 
-                            if ($type == self::APPENDIX_VULN_LIST && !$check['info'])
+                            if ($type == self::VULNERABILITY_LIST_SEPARATE_SECTION && !$check["info"]) {
                                 continue;
+                            }
 
                             if (
-                                $type == self::NORMAL_VULN_LIST &&
+                                $type == self::VULNERABILITY_LIST_NORMAL &&
                                 (
-                                    $infoLocation == ProjectReportForm::INFO_LOCATION_APPENDIX && $check['info'] ||
-                                    $check['separate'] ||
-                                    $infoLocation == ProjectReportForm::INFO_LOCATION_TABLE &&
+                                    $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION && $check["info"] ||
+                                    $check["separate"] ||
+                                    $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_TABLE &&
                                     (
-                                        $tableNumber == 0 && $check['info'] ||
-                                        $tableNumber == 1 && !$check['info']
+                                        $tableNumber == 0 && $check["info"] ||
+                                        $tableNumber == 1 && !$check["info"]
                                     )
                                 )
-                            )
+                            ) {
                                 continue;
+                            }
 
                             $table->addRow();
                             $table->mergeCellRange($row, 1, $row, 2);
@@ -1882,11 +1880,11 @@ class RtfReport extends ReportPlugin {
                             $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                             $table->getCell($row, 1)->setBorder($this->thinBorder);
                             $table->setFontForCellRange($this->boldFont, $row, 1, $row, 1);
-                            $table->setBackgroundForCellRange('#F0F0F0', $row, 1, $row, 1);
+                            $table->setBackgroundForCellRange("#F0F0F0", $row, 1, $row, 1);
 
                             $table->getCell($row, 1)->writeBookmark(
-                                'check_' . $target['id'] . '_' . $check['id'],
-                                $check['name']
+                                "check_" . $target["id"] . "_" . $check["id"],
+                                $check["name"]
                             );
 
                             $row++;
@@ -1899,24 +1897,26 @@ class RtfReport extends ReportPlugin {
                             $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                             $table->getCell($row, 2)->setBorder($this->thinBorder);
 
-                            $table->writeToCell($row, 1, Yii::t('app', 'Reference'));
+                            $table->writeToCell($row, 1, Yii::t("app", "Reference"));
 
-                            $reference    = $check['reference'] . ( $check['referenceCode'] ? '-' . $check['referenceCode'] : '' );
-                            $referenceUrl = '';
+                            $reference = $check["reference"] . ($check["referenceCode"] ? "-" . $check["referenceCode"] : "");
+                            $referenceUrl = "";
 
-                            if ($check['referenceCode'] && $check['referenceCodeUrl'])
-                                $referenceUrl = $check['referenceCodeUrl'];
-                            else if ($check['referenceUrl'])
-                                $referenceUrl = $check['referenceUrl'];
+                            if ($check["referenceCode"] && $check["referenceCodeUrl"]) {
+                                $referenceUrl = $check["referenceCodeUrl"];
+                            } else if ($check["referenceUrl"]) {
+                                $referenceUrl = $check["referenceUrl"];
+                            }
 
-                            if ($referenceUrl)
+                            if ($referenceUrl) {
                                 $table->getCell($row, 2)->writeHyperLink($referenceUrl, $reference, $this->linkFont);
-                            else
+                            } else {
                                 $table->writeToCell($row, 2, $reference);
+                            }
 
                             $row++;
 
-                            if ($check['tableResult']) {
+                            if ($check["tableResult"]) {
                                 $table->addRow();
                                 $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                 $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
@@ -1924,14 +1924,14 @@ class RtfReport extends ReportPlugin {
                                 $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                 $table->getCell($row, 2)->setBorder($this->thinBorderBR);
 
-                                if ($check['result']) {
+                                if ($check["result"]) {
                                     $table->mergeCellRange($row - 1, 1, $row, 1);
                                 } else {
-                                    $table->writeToCell($row, 1, Yii::t('app', 'Result'));
+                                    $table->writeToCell($row, 1, Yii::t("app", "Result"));
                                 }
 
                                 $tableResult = new ResultTable();
-                                $tableResult->parse($check['tableResult']);
+                                $tableResult->parse($check["tableResult"]);
 
                                 foreach ($tableResult->getTables() as $tResult) {
                                     $nestedTable = $table->getCell($row, 2)->addTable();
@@ -1941,13 +1941,13 @@ class RtfReport extends ReportPlugin {
                                     $tableWidth = $this->docWidth * 0.83 - $this->cellPadding * 2;
 
                                     foreach ($tResult["columns"] as $column) {
-                                        $columnWidths[] = (float)$column['width'] * $tableWidth;
+                                        $columnWidths[] = (float)$column["width"] * $tableWidth;
                                     }
 
                                     $nestedTable->addColumnsList($columnWidths);
 
                                     $nestedTable->setFontForCellRange($this->boldFont, 1, 1, 1, $tResult["columnCount"]);
-                                    $nestedTable->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, $tResult["columnCount"]);
+                                    $nestedTable->setBackgroundForCellRange("#E0E0E0", 1, 1, 1, $tResult["columnCount"]);
                                     $nestedTable->setFontForCellRange($this->textFont, 2, 1, $tResult["rowCount"] + 1, $tResult["columnCount"]);
                                     $nestedTable->setBorderForCellRange($this->thinBorder, 1, 1, $tResult["rowCount"] + 1, $tResult["columnCount"]);
                                     $nestedTable->setFirstRowAsHeader();
@@ -1967,7 +1967,7 @@ class RtfReport extends ReportPlugin {
                                             PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP
                                         );
 
-                                        $nestedTable->writeToCell($nestedRow, $nestedColumn, $column['name']);
+                                        $nestedTable->writeToCell($nestedRow, $nestedColumn, $column["name"]);
                                         $nestedColumn++;
                                     }
 
@@ -2010,7 +2010,7 @@ class RtfReport extends ReportPlugin {
                                     $table->writeToCell($row, 1, $field["title"]);
 
                                     if (Utils::isHtml($field["value"])) {
-                                        $this->_renderText($table->getCell($row, 2), $field["value"], false);
+                                        $this->renderText($table->getCell($row, 2), $field["value"], false);
                                     } else {
                                         $table->writeToCell($row, 2, $field["value"]);
                                     }
@@ -2019,46 +2019,45 @@ class RtfReport extends ReportPlugin {
                                 }
                             }
 
-                            if ($check['solutions']) {
-                                $table->addRows(count($check['solutions']));
+                            if ($check["solutions"]) {
+                                $table->addRows(count($check["solutions"]));
 
-                                $table->mergeCellRange($row, 1, $row + count($check['solutions']) - 1, 1);
+                                $table->mergeCellRange($row, 1, $row + count($check["solutions"]) - 1, 1);
 
                                 $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                 $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                                 $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                $table->writeToCell($row, 1, Yii::t('app', 'Solutions'));
+                                $table->writeToCell($row, 1, Yii::t("app", "Solutions"));
 
-                                foreach ($check['solutions'] as $solution)
-                                {
+                                foreach ($check["solutions"] as $solution) {
                                     $table->getCell($row, 1)->setBorder($this->thinBorder);
                                     $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                     $table->getCell($row, 2)->setBorder($this->thinBorder);
 
                                     $cell = $table->getCell($row, 2);
-                                    $this->_renderText($cell, $solution, false);
+                                    $this->renderText($cell, $solution, false);
 
                                     $row++;
                                 }
                             }
 
-                            if ($check['images']) {
-                                $table->addRows(count($check['images']));
+                            if ($check["images"]) {
+                                $table->addRows(count($check["images"]));
 
-                                $table->mergeCellRange($row, 1, $row + count($check['images']) - 1, 1);
+                                $table->mergeCellRange($row, 1, $row + count($check["images"]) - 1, 1);
 
                                 $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                 $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
                                 $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                $table->writeToCell($row, 1, Yii::t('app', 'Attachments'));
+                                $table->writeToCell($row, 1, Yii::t("app", "Attachments"));
 
-                                foreach ($check['images'] as $image) {
+                                foreach ($check["images"] as $image) {
                                     $table->getCell($row, 1)->setBorder($this->thinBorder);
                                     $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                     $table->getCell($row, 2)->setBorder($this->thinBorder);
 
-                                    $table->writeToCell($row, 2, $image['title']);
-                                    $table->addImageToCell($row, 2, $image['image'], new PHPRtfLite_ParFormat(), $this->docWidth * 0.78);
+                                    $table->writeToCell($row, 2, $image["title"]);
+                                    $table->addImageToCell($row, 2, $image["image"], new PHPRtfLite_ParFormat(), $this->docWidth * 0.78);
 
                                     $row++;
                                 }
@@ -2110,6 +2109,16 @@ class RtfReport extends ReportPlugin {
                 }
             }
         }
+    }
+
+    /**
+     * Add info check list
+     * @param PHPRtfLite_Container_Section $section
+     * @param int $sectionNumber
+     * @param PHPRtfLite_Container_Section $toc
+     */
+    private function _addInfoCheckList(&$section, $sectionNumber, $toc) {
+        $this->_generateVulnerabilityList($section, $sectionNumber, self::VULNERABILITY_LIST_SEPARATE_SECTION, null, $toc);
     }
 
     /**
@@ -2216,11 +2225,15 @@ class RtfReport extends ReportPlugin {
                     break;
 
                 case ReportSection::TYPE_VULNERABILITIES:
-                    $this->_addVulnerabilityList($section);
+                    $this->_addVulnerabilityList($section, $sectionNumber, $toc);
                     break;
 
                 case ReportSection::TYPE_ATTACHMENTS:
                     $this->_addAttachmentList($section);
+                    break;
+
+                case ReportSection::TYPE_INFO_CHECKS:
+                    $this->_addInfoCheckList($section, $sectionNumber, $toc);
                     break;
             }
 
@@ -2234,7 +2247,7 @@ class RtfReport extends ReportPlugin {
 
         $this->rtf->save($this->_filePath);
 
-        if ($data["attachments"]) {
+        if ($data["fileType"] === ProjectReportForm::FILE_TYPE_ZIP && $data["attachments"]) {
             $this->_compress($data["attachments"]);
         }
 

@@ -5,8 +5,8 @@
  */
 class ProjectReportForm extends CFormModel {
     const INFO_LOCATION_TARGET = "target";
-    const INFO_LOCATION_TABLE = "table";
-    const INFO_LOCATION_APPENDIX = "appendix";
+    const INFO_LOCATION_SEPARATE_TABLE = "table";
+    const INFO_LOCATION_SEPARATE_SECTION = "section";
 
     const FILE_TYPE_RTF = 0;
     const FILE_TYPE_ZIP = 1;
@@ -86,7 +86,7 @@ class ProjectReportForm extends CFormModel {
             array("cellPadding", "numerical", "min" => Yii::app()->params["reports"]["minCellPadding"], "max" => Yii::app()->params["reports"]["maxCellPadding"]),
             array("pageMargin", "numerical", "min" => Yii::app()->params["reports"]["minPageMargin"], "max" => Yii::app()->params["reports"]["maxPageMargin"]),
             array("fontFamily", "in", "range" => Yii::app()->params["reports"]["fonts"]),
-            array("infoChecksLocation", "in", "range" => array(self::INFO_LOCATION_TARGET, self::INFO_LOCATION_TABLE, self::INFO_LOCATION_APPENDIX)),
+            array("infoChecksLocation", "in", "range" => array(self::INFO_LOCATION_TARGET, self::INFO_LOCATION_SEPARATE_TABLE, self::INFO_LOCATION_SEPARATE_SECTION)),
             array("clientId, projectId, targetIds, options, templateId", "safe"),
             array("fields", "checkFields"),
 		);

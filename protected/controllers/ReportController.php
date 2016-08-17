@@ -4,12 +4,6 @@
  * Report controller.
  */
 class ReportController extends Controller {
-    private $project;
-
-    const NORMAL_VULN_LIST = 0;
-    const APPENDIX_VULN_LIST = 1;
-    const SEPARATE_VULN_LIST = 2;
-
     /**
 	 * @return array action filters
 	 */
@@ -154,10 +148,6 @@ class ReportController extends Controller {
             return;
         }
 
-        $this->project = array(
-            "project" => $project
-        );
-
         if (!$targetIds || !count($targetIds)) {
             Yii::app()->user->setFlash("error", Yii::t("app", "Please select at least 1 target."));
             return;
@@ -230,6 +220,7 @@ class ReportController extends Controller {
                 "matrix" => [],
             ],
             "options" => $options,
+            "infoLocation" => $form->infoChecksLocation,
         ]);
 
         $plugin = ReportPlugin::getPlugin($template, $data, $language);
@@ -323,8 +314,8 @@ class ReportController extends Controller {
             "fields" => $fields,
             "infoChecksLocation" => array(
                 ProjectReportForm::INFO_LOCATION_TARGET => Yii::t("app", "in the main list"),
-                ProjectReportForm::INFO_LOCATION_TABLE => Yii::t("app", "in a separate table"),
-                ProjectReportForm::INFO_LOCATION_APPENDIX => Yii::t("app", "in the appendix"),
+                ProjectReportForm::INFO_LOCATION_SEPARATE_TABLE => Yii::t("app", "in a separate table"),
+                ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION => Yii::t("app", "in a separate section"),
             ),
         ));
     }
