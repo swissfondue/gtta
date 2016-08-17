@@ -1347,25 +1347,26 @@ class RtfReport extends ReportPlugin {
 
     /**
      * Generate fulfillment degree report
+     * @param Project $project
      * @param array $targets
      */
-    public function generateFulfillmentDegreeReport($targets) {
+    public function generateFulfillmentDegreeReport(Project $project, $targets) {
         $section = $this->rtf->addSection();
 
         // footer
         $footer = $section->addFooter();
-        $footer->writeText(Yii::t('app', 'Degree of Fulfillment') . ': ' . $project->name . ', ', $this->textFont, $this->noPar);
+        $footer->writeText(Yii::t("app", "Degree of Fulfillment") . ": " . $project->name . ", ", $this->textFont, $this->noPar);
         $footer->writePlainRtfCode(
-            '\fs' . ($this->textFont->getSize() * 2) . ' \f' . $this->textFont->getFontIndex() . ' ' .
-             Yii::t('app', 'page {page} of {numPages}',
+            "\\fs" . ($this->textFont->getSize() * 2) . " \\f" . $this->textFont->getFontIndex() . " " .
+             Yii::t("app", "page {page} of {numPages}",
             array(
-                '{page}'     => '{\field{\*\fldinst {PAGE}}{\fldrslt {1}}}',
-                '{numPages}' => '{\field{\*\fldinst {NUMPAGES}}{\fldrslt {1}}}'
+                "{page}"     => "{\\field{\\*\\fldinst {PAGE}}{\\fldrslt {1}}}",
+                "{numPages}" => "{\\field{\\*\\fldinst {NUMPAGES}}{\\fldrslt {1}}}"
             )
         ));
 
         // title
-        $section->writeText(Yii::t('app', 'Degree of Fulfillment') . ': ' . $project->name, $this->h1Font, $this->titlePar);
+        $section->writeText(Yii::t("app", "Degree of Fulfillment") . ": " . $project->name, $this->h1Font, $this->titlePar);
         $section->writeText("\n\n");
 
         $this->_addFulfillmentDegreeChart($section, null, $targets);
@@ -1375,73 +1376,41 @@ class RtfReport extends ReportPlugin {
         $this->_filePath = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . $hashName;
 
         $this->rtf->save($this->_filePath);
-        $this->sendOverHttp();
+        $this->_generated = true;
     }
 
     /**
      * Generate risk matrix report.
-     * @param RiskMatrixForm $form
+     * @param Project $project
+     * @param array $targets
+     * @param RiskTemplate $template
+     * @param array $matrix
      */
-    public function generateRiskMatrixReport($form, &$section=null, $sectionNumber = null) {
-        $template = RiskTemplate::model()->findByAttributes(array(
-            'id' => $form->templateId
-        ));
-
-        if ($template === null) {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Template not found.'));
-            return;
-        }
-
-        $project = Project::model()->findByAttributes(array(
-            'client_id' => $form->clientId,
-            'id' => $form->projectId
-        ));
-
-        if ($project === null) {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
-            return;
-        }
-
-        if (!$project->checkPermission()) {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
-            return;
-        }
-
-        if (!$form->targetIds || !count($form->targetIds)) {
-            Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
-            return;
-        }
-
-        $this->setup($form->pageMargin, $form->cellPadding, $form->fontSize, $form->fontFamily);
+    public function generateRiskMatrixReport(Project $project, $targets, RiskTemplate $template, $matrix) {
         $section = $this->rtf->addSection();
 
         // footer
         $footer = $section->addFooter();
-        $footer->writeText(Yii::t('app', 'Risk Matrix') . ': ' . $project->name . ', ', $this->textFont, $this->noPar);
+        $footer->writeText(Yii::t("app", "Risk Matrix") . ": " . $project->name . ", ", $this->textFont, $this->noPar);
         $footer->writePlainRtfCode(
-            '\fs' . ($r->textFont->getSize() * 2) . ' \f' . $r->textFont->getFontIndex() . ' ' .
-             Yii::t('app', 'page {page} of {numPages}',
+            "\\fs" . ($this->textFont->getSize() * 2) . " \\f" . $this->textFont->getFontIndex() . " " .
+             Yii::t("app", "page {page} of {numPages}",
             array(
-                '{page}'     => '{\field{\*\fldinst {PAGE}}{\fldrslt {1}}}',
-                '{numPages}' => '{\field{\*\fldinst {NUMPAGES}}{\fldrslt {1}}}'
+                "{page}"     => "{\\field{\\*\\fldinst {PAGE}}{\\fldrslt {1}}}",
+                "{numPages}" => "{\\field{\\*\\fldinst {NUMPAGES}}{\\fldrslt {1}}}"
             )
         ));
 
         // title
-        $section->writeText(Yii::t("app", "Risk Matrix") . ": " . $project->name, $r->h1Font, $r->titlePar);
-        $section->writeText(Yii::t("app", "Risk Categories") . "\n", $r->h3Font, $r->noPar);
-
-        $section->writeText(Yii::t("app", "Targets"), $this->h3Font, $this->h3Par);
-        $section->writeText("\n\n", $this->textFont);
-
-        $this->_addRiskMatrix($section, null, $template);
+        $section->writeText(Yii::t("app", "Risk Matrix") . ": " . $project->name, $this->h1Font, $this->titlePar);
+        $this->_addRiskMatrix($section, null, $targets, $template, $matrix);
 
         $this->_fileName = Yii::t("app", "Risk Matrix") . " - " . $project->name . " (" . $project->year . ").rtf";
         $hashName = hash("sha256", rand() . time() . $this->_fileName);
         $this->_filePath = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . $hashName;
 
-        $r->rtf->save($this->_filePath);
-        $this->sendOverHttp();
+        $this->rtf->save($this->_filePath);
+        $this->_generated = true;
     }
 
     /**
@@ -1449,18 +1418,11 @@ class RtfReport extends ReportPlugin {
      * @param PHPRtfLite_Container_Section $section
      * @param int $sectionNumber
      * @param array $targets
-     * @param int $template
+     * @param RiskTemplate $template
      * @param array $matrix
      * @parma PHPRtfLite_Container_Section $toc
      */
-    private function _addRiskMatrix(PHPRtfLite_Container_Section &$section, $sectionNumber, $targets, $template, $matrix, $toc=null) {
-        $template = RiskTemplate::model()->findByPk($template);
-
-        if (!$template) {
-            $section->writeText(Yii::t("app", "No template.") . "\n\n", $this->textFont);
-            return;
-        }
-
+    private function _addRiskMatrix(PHPRtfLite_Container_Section &$section, $sectionNumber, $targets, RiskTemplate $template, $matrix, $toc=null) {
         $risks = RiskCategory::model()->with([
             "l10n" => [
                 "joinType" => "LEFT JOIN",
@@ -1474,6 +1436,8 @@ class RtfReport extends ReportPlugin {
 
         $rm = new ReportManager();
         $data = $rm->getRiskMatrixData($targets, $matrix, $risks, $this->_language);
+
+        $section->writeText(Yii::t("app", "Risk Categories") . "\n", $this->h3Font, $this->noPar);
         
         $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
         $table->addRows(count($risks) + 1);
@@ -1509,6 +1473,9 @@ class RtfReport extends ReportPlugin {
         }
 
         $targetNumber = 1;
+
+        $section->writeText(Yii::t("app", "Targets"), $this->h3Font, $this->h3Par);
+        $section->writeText("\n\n", $this->textFont);
 
         foreach ($data as $target) {
             if ($toc) {

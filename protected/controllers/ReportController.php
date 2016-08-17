@@ -205,6 +205,11 @@ class ReportController extends Controller {
         }
 
         FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
+        $riskTemplate = null;
+
+        if ($form->riskTemplateId) {
+            $riskTemplate = RiskTemplate::model()->findByPk($form->riskTemplateId);
+        }
 
         $prm = new ReportManager();
         $data = $prm->getProjectReportData($targetIds, $templateCategoryIds, $project, $fields, $language);
@@ -216,7 +221,7 @@ class ReportController extends Controller {
             "fontFamily" => $form->fontFamily,
             "fileType" => $form->fileType,
             "risk" => [
-                "template" => $form->riskTemplateId,
+                "template" => $riskTemplate,
                 "matrix" => [],
             ],
             "options" => $options,
@@ -634,39 +639,37 @@ class ReportController extends Controller {
             $form->attributes = $_POST['FulfillmentDegreeForm'];
 
             if ($form->validate()) {
+                /** @var Project $project */
                 $project = Project::model()->findByAttributes(array(
-                    "client_id" => $data["clientId"],
-                    "id" => $data["projectId"],
+                    "client_id" => $form->clientId,
+                    "id" => $form->projectId,
                 ));
 
-                if ($project === null) {
-                    Yii::app()->user->setFlash('error', Yii::t('app', 'Project not found.'));
+                if (!$project || !$project->checkPermission()) {
+                    Yii::app()->user->setFlash('error', Yii::t("app", "Project not found."));
                     return;
                 }
 
-                if (!$project->checkPermission()) {
-                    Yii::app()->user->setFlash('error', Yii::t('app', 'Access denied.'));
-                    return;
-                }
-
-                if (!$form->targetIds || !count($form->targetIds)) {
-                    Yii::app()->user->setFlash('error', Yii::t('app', 'Please select at least 1 target.'));
-                    return;
-                }
+                $criteria = new CDbCriteria();
+                $criteria->addColumnCondition(["project_id" => $project->id]);
+                $criteria->addInCondition("id", $form->targetIds);
+                $targets = Target::model()->findAll($criteria);
 
                 $r = new RtfReport();
-                $r->generateFulfillmentDegreeReport($form);
+                $r->setup($form->pageMargin, $form->cellPadding, $form->fontSize, $form->fontSize);
+                $r->generateFulfillmentDegreeReport($project, $targets);
+                $r->sendOverHttp();
             } else {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
         }
 
         $criteria = new CDbCriteria();
-        $criteria->order = 't.name ASC';
+        $criteria->order = "t.name ASC";
 
         if (!User::checkRole(User::ROLE_ADMIN)) {
-            $projects = ProjectUser::model()->with('project')->findAllByAttributes(array(
-                'user_id' => Yii::app()->user->id
+            $projects = ProjectUser::model()->with("project")->findAllByAttributes(array(
+                "user_id" => Yii::app()->user->id
             ));
 
             $clientIds = array();
@@ -677,18 +680,18 @@ class ReportController extends Controller {
                 }
             }
 
-            $criteria->addInCondition('id', $clientIds);
+            $criteria->addInCondition("id", $clientIds);
         }
 
         $clients = Client::model()->findAll($criteria);
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Degree of Fulfillment'), '');
+        $this->breadcrumbs[] = array(Yii::t("app", "Degree of Fulfillment"), "");
 
         // display the report generation form
-        $this->pageTitle = Yii::t('app', 'Degree of Fulfillment');
-		$this->render('fulfillment', array(
-            'model'   => $form,
-            'clients' => $clients
+        $this->pageTitle = Yii::t("app", "Degree of Fulfillment");
+		$this->render("fulfillment", array(
+            "model"   => $form,
+            "clients" => $clients
         ));
     }
 
@@ -698,23 +701,51 @@ class ReportController extends Controller {
     public function actionRiskMatrix() {
         $form = new RiskMatrixForm();
 
-        if (isset($_POST['RiskMatrixForm'])) {
-            $form->attributes = $_POST['RiskMatrixForm'];
+        if (isset($_POST["RiskMatrixForm"])) {
+            $form->attributes = $_POST["RiskMatrixForm"];
 
             if ($form->validate()) {
+                /** @var Project $project */
+                $project = Project::model()->findByAttributes(array(
+                    "client_id" => $form->clientId,
+                    "id" => $form->projectId,
+                ));
+
+                if (!$project || !$project->checkPermission()) {
+                    Yii::app()->user->setFlash('error', Yii::t("app", "Project not found."));
+                    return;
+                }
+
+                $criteria = new CDbCriteria();
+                $criteria->addColumnCondition(["project_id" => $project->id]);
+                $criteria->addInCondition("id", $form->targetIds);
+                $targets = Target::model()->findAll($criteria);
+
+                /** @var RiskTemplate $template */
+                $template = RiskTemplate::model()->findByAttributes(array(
+                    "id" => $form->templateId
+                ));
+        
+                if ($template === null) {
+                    Yii::app()->user->setFlash("error", Yii::t("app", "Template not found."));
+                    return;
+                }
+                
                 $r = new RtfReport();
-                $r->generateRiskMatrixReport($form);
+                $r->setup($form->pageMargin, $form->cellPadding, $form->fontSize, $form->fontSize);
+                $r->generateRiskMatrixReport($project, $targets, $template, $form->matrix);
+                $r->sendOverHttp();
             } else {
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
         }
 
         $criteria = new CDbCriteria();
-        $criteria->order = 't.name ASC';
+        $criteria->order = "t.name ASC";
 
         if (!User::checkRole(User::ROLE_ADMIN)) {
-            $projects = ProjectUser::model()->with('project')->findAllByAttributes(array(
-                'user_id' => Yii::app()->user->id
+            $projects = ProjectUser::model()->with("project")->findAllByAttributes(array(
+                "user_id" => Yii::app()->user->id
             ));
 
             $clientIds = array();
@@ -725,15 +756,15 @@ class ReportController extends Controller {
                 }
             }
 
-            $criteria->addInCondition('id', $clientIds);
+            $criteria->addInCondition("id", $clientIds);
         }
 
         $clients = Client::model()->findAll($criteria);
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Risk Matrix'), '');
+        $this->breadcrumbs[] = array(Yii::t("app", "Risk Matrix"), "");
 
         $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
+            "code" => Yii::app()->language
         ));
 
         if ($language) {
@@ -741,22 +772,22 @@ class ReportController extends Controller {
         }
 
         $templates = RiskTemplate::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array('language_id' => $language)
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on"       => "language_id = :language_id",
+                "params"   => array("language_id" => $language)
             )
         ))->findAllByAttributes(
             array(),
-            array('order' => 'COALESCE(l10n.name, t.name) ASC')
+            array("order" => "COALESCE(l10n.name, t.name) ASC")
         );
 
         // display the report generation form
-        $this->pageTitle = Yii::t('app', 'Risk Matrix');
-		$this->render('risk_matrix', array(
-            'model'     => $form,
-            'clients'   => $clients,
-            'templates' => $templates
+        $this->pageTitle = Yii::t("app", "Risk Matrix");
+		$this->render("risk_matrix", array(
+            "model"     => $form,
+            "clients"   => $clients,
+            "templates" => $templates
         ));
     }
 
