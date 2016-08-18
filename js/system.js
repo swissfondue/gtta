@@ -578,7 +578,7 @@ function System() {
                         if (data && data.objects.length) {
                             _report._riskMatrixCategories = data.objects;
 
-                            if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0) {
+                            if ($('#RiskMatrixForm_templateId').val() > 0) {
                                 _report._refreshChecks(true);
                             }
 

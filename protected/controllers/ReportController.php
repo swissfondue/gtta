@@ -318,9 +318,9 @@ class ReportController extends Controller {
             "riskTemplates" => $riskTemplates,
             "fields" => $fields,
             "infoChecksLocation" => array(
-                ProjectReportForm::INFO_LOCATION_TARGET => Yii::t("app", "in the main list"),
-                ProjectReportForm::INFO_LOCATION_SEPARATE_TABLE => Yii::t("app", "in a separate table"),
-                ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION => Yii::t("app", "in a separate section"),
+                ProjectReportForm::INFO_LOCATION_TARGET => Yii::t("app", "Vulnerability List Section"),
+                ProjectReportForm::INFO_LOCATION_SEPARATE_TABLE => Yii::t("app", "Vulnerability List Section (separate table)"),
+                ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION => Yii::t("app", "Info Checks Section"),
             ),
         ));
     }

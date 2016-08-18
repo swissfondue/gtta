@@ -1095,11 +1095,11 @@ class DocxReport extends ReportPlugin {
             $templatePath = Yii::app()->params["reports"]["file"]["path"] . "/" . $this->_template->file_path;
             $zip = new ZipArchive();
 
-            if (!$zip->open($templatePath)) {
+            if ($zip->open($templatePath) !== true) {
                 throw new Exception("Error opening ZIP archive: " . $templatePath);
             }
 
-            if (!$zip->extractTo($this->_templateDir)) {
+            if ($zip->extractTo($this->_templateDir) !== true) {
                 throw new Exception("Error extracting files to " . $this->_templateDir);
             }
 
