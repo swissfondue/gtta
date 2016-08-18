@@ -25,16 +25,6 @@ class FulfillmentDegreeForm extends CFormModel {
     public $cellPadding;
 
     /**
-     * @var integer client id.
-     */
-    public $clientId;
-
-    /**
-     * @var integer project id.
-     */
-    public $projectId;
-
-    /**
      * @var array target ids.
      */
     public $targetIds;
@@ -49,7 +39,7 @@ class FulfillmentDegreeForm extends CFormModel {
             ["cellPadding", "numerical", "min" => Yii::app()->params["reports"]["minCellPadding"], "max" => Yii::app()->params["reports"]["maxCellPadding"]],
             ["pageMargin", "numerical", "min" => Yii::app()->params["reports"]["minPageMargin"], "max" => Yii::app()->params["reports"]["maxPageMargin"]],
             ["fontFamily", "in", "range" => Yii::app()->params["reports"]["fonts"]],
-            ["clientId, projectId, targetIds", "safe"],
+            ["targetIds", "safe"],
 		];
 	}
 
@@ -62,8 +52,6 @@ class FulfillmentDegreeForm extends CFormModel {
             "fontFamily" => Yii::t("app", "Font Family"),
             "pageMargin" => Yii::t("app", "Page Margin"),
             "cellPadding" => Yii::t("app", "Cell Padding"),
-            "clientId" => Yii::t("app", "Client"),
-			"projectId" => Yii::t("app", "Project"),
 			"targetIds" => Yii::t("app", "Targets"),
 		];
 	}

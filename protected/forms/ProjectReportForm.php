@@ -81,7 +81,7 @@ class ProjectReportForm extends CFormModel {
 	 */
 	public function rules() {
 		return array(
-            array("fontSize, fontFamily, pageMargin, cellPadding, fileType", "required"),
+            array("fontSize, fontFamily, pageMargin, cellPadding, fileType, targetIds", "required"),
             array("fontSize", "numerical", "integerOnly" => true, "min" => Yii::app()->params["reports"]["minFontSize"], "max" => Yii::app()->params["reports"]["maxFontSize"]),
             array("cellPadding", "numerical", "min" => Yii::app()->params["reports"]["minCellPadding"], "max" => Yii::app()->params["reports"]["maxCellPadding"]),
             array("pageMargin", "numerical", "min" => Yii::app()->params["reports"]["minPageMargin"], "max" => Yii::app()->params["reports"]["maxPageMargin"]),

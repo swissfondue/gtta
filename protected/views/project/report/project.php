@@ -1,5 +1,9 @@
 <div class="active-header">
-    <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+    <div class="pull-right">
+        <?= $this->renderPartial("//project/partial/submenu", ["page" => "project-report", "project" => $project]); ?>
+    </div>
+
+    <h1><?= CHtml::encode($this->pageTitle); ?></h1>
 </div>
 
 <hr>

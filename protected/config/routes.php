@@ -97,13 +97,13 @@ return array(
     "project/custom-attachment/control" => "project/controlcustomattachment",
 
     // reports
-    "reports/project" => "report/project",
-    "reports/comparison" => "report/comparison",
-    "reports/fulfillment" => "report/fulfillment",
-    "reports/risk-matrix" => "report/riskmatrix",
+    "project/<id:\d+>/report" => "projectReport/project",
+    "project/<id:\d+>/report/comparison" => "projectReport/comparison",
+    "project/<id:\d+>/report/fulfillment" => "projectReport/fulfillment",
+    "project/<id:\d+>/report/risk-matrix" => "projectReport/riskmatrix",
+    "project/<id:\d+>/report/vuln-export" => "projectReport/vulnexport",
+    "project/<id:\d+>/report/tracked-time" => "projectReport/trackedtime",
     "reports/effort" => "report/effort",
-    "reports/vuln-export" => "report/vulnexport",
-    "reports/<id:\d+>/tracked-time" => "report/trackedtime",
 
     // project planner
     "project-planner" => "planner/index",

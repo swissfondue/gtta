@@ -1,4 +1,8 @@
 <div class="active-header">
+    <div class="pull-right">
+        <?php echo $this->renderPartial("//project/partial/submenu", ["page" => "risk-matrix", "project" => $project]); ?>
+    </div>
+    
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
 </div>
 
@@ -13,6 +17,29 @@
         <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
         <fieldset>
+            <div class="control-group" id="target-list">
+                <label class="control-label"><?php echo Yii::t("app", "Targets"); ?></label>
+                <div class="controls">
+                    <ul class="report-target-list">
+                        <?php foreach ($project->targets as $target): ?>
+                            <li>
+                                <label>
+                                    <input
+                                        checked
+                                        type="checkbox"
+                                        id="RiskMatrixForm_targetIds_<?= $target->id; ?>"
+                                        name="RiskMatrixForm[targetIds][]"
+                                        value="<?= $target->id; ?>"
+                                        onclick="system.report.riskMatrixFormChange(this);">
+
+                                    <?= $target->host; ?>
+                                </label>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
+
             <div class="control-group <?php if ($model->getError('fontSize')) echo 'error'; ?>">
                 <label class="control-label" for="RiskMatrixForm_fontSize"><?php echo Yii::t('app', 'Font Size'); ?></label>
                 <div class="controls">
@@ -67,37 +94,6 @@
                         <?php endforeach; ?>
                     </select>
                     <p class="help-block hide"><?php echo Yii::t('app', 'This template has no categories.'); ?></p>
-                </div>
-            </div>
-
-            <div class="control-group hide" id="client-list">
-                <label class="control-label" for="RiskMatrixForm_clientId"><?php echo Yii::t('app', 'Client'); ?></label>
-                <div class="controls">
-                    <select class="input-xlarge" id="RiskMatrixForm_clientId" name="RiskMatrixForm[clientId]" onchange="system.report.riskMatrixFormChange(this);">
-                        <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
-                        <?php foreach ($clients as $client): ?>
-                            <option value="<?php echo $client->id; ?>"><?php echo CHtml::encode($client->name); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <p class="help-block hide"><?php echo Yii::t('app', 'This client has no projects.'); ?></p>
-                </div>
-            </div>
-
-            <div class="hide control-group" id="project-list">
-                <label class="control-label" for="RiskMatrixForm_projectId"><?php echo Yii::t('app', 'Project'); ?></label>
-                <div class="controls">
-                    <select class="input-xlarge" id="RiskMatrixForm_projectId" name="RiskMatrixForm[projectId]" onchange="system.report.riskMatrixFormChange(this);">
-                        <option value="0"><?php echo Yii::t('app', 'Please select...'); ?></option>
-                    </select>
-                    <p class="help-block hide"><?php echo Yii::t('app', 'This project has no targets.'); ?></p>
-                </div>
-            </div>
-
-            <div class="hide control-group" id="target-list">
-                <label class="control-label"><?php echo Yii::t('app', 'Targets'); ?></label>
-                <div class="controls">
-                    <ul class="report-target-list">
-                    </ul>
                 </div>
             </div>
 

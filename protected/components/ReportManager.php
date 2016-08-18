@@ -1028,4 +1028,850 @@ class ReportManager {
 
         return $data;
     }
+
+    /**
+     * Sort checks by ratings
+     */
+    public static function sortChecksByRating($a, $b) {
+        if ($a["ratingValue"] == $b["ratingValue"]) {
+            return 0;
+        }
+
+        return $a["ratingValue"] < $b["ratingValue"] ? 1 : -1;
+    }
+
+    /**
+     * Sort controls.
+     */
+    public static function sortControls($a, $b) {
+        return $a["degree"] > $b["degree"];
+    }
+
+     /**
+     * Get rating for the given check distribution
+     * @param $totalChecks
+     * @param $lowRisk
+     * @param $medRisk
+     * @param $highRisk
+     * @return float rating
+     */
+    public function getRating($totalChecks, $lowRisk, $medRisk, $highRisk) {
+        $medDamping = 1;
+        $lowDamping = 1;
+        $pedestal = 0;
+        $range = 0;
+
+        if ($totalChecks == 0) {
+            return 0.0;
+        }
+
+        /** @var System $system */
+        $system = System::model()->findByPk(1);
+
+        if ($highRisk > 0) {
+            $pedestal = $system->report_high_pedestal;
+            $medDamping = $system->report_high_damping_med;
+            $lowDamping = $system->report_high_damping_low;
+            $range = $system->report_max_rating - $system->report_high_pedestal;
+        } elseif ($medRisk > 0) {
+            $pedestal = $system->report_med_pedestal;
+            $lowDamping = $system->report_med_damping_low;
+            $range = $system->report_high_pedestal - $system->report_med_pedestal;
+        } elseif ($lowRisk > 0) {
+            $pedestal = $system->report_low_pedestal;
+            $range = $system->report_med_pedestal - $system->report_low_pedestal;
+        }
+
+        $highRisk = $highRisk / $totalChecks * $range;
+        $medRisk = $medRisk / $totalChecks * ($range - $highRisk) * $medDamping;
+        $lowRisk = $lowRisk / $totalChecks * ($range - $highRisk - $medRisk) * $lowDamping;
+        $rating = $highRisk + $medRisk + $lowRisk + $pedestal;
+
+        return $rating;
+    }
+
+    /**
+     * Get rating for checks array
+     * @param array $checks
+     * @return float rating
+     */
+    public function getChecksRating($checks) {
+        $totalChecks = 0;
+        $lowRisk = 0;
+        $medRisk = 0;
+        $highRisk = 0;
+
+        foreach ($checks as $check) {
+            $totalChecks++;
+
+            switch ($check["rating"]) {
+                case TargetCheck::RATING_NONE:
+                case TargetCheck::RATING_HIDDEN:
+                case TargetCheck::RATING_INFO:
+                    break;
+
+                case TargetCheck::RATING_LOW_RISK:
+                    $lowRisk++;
+                    break;
+
+                case TargetCheck::RATING_MED_RISK:
+                    $medRisk++;
+                    break;
+
+                case TargetChecK::RATING_HIGH_RISK:
+                    $highRisk++;
+                    break;
+            }
+        }
+
+        return $this->getRating($totalChecks, $lowRisk, $medRisk, $highRisk);
+    }
+
+    /**
+     * Generate project function.
+     * @param ProjectReportForm $form
+     */
+    public function generateProjectReport($form) {
+        $clientId = $form->clientId;
+        $projectId = $form->projectId;
+        $targetIds = $form->targetIds;
+        $options = $form->options;
+        $templateId = $form->templateId;
+        $fields = $form->fields;
+
+        if (!$fields) {
+            $fields = array();
+        }
+
+        if (!$options) {
+            $options = array();
+        }
+
+        $project = Project::model()->with(array(
+            "projectUsers" => array(
+                "with" => "user"
+            ),
+            "client",
+            "targets",
+        ))->findByAttributes(array(
+            "client_id" => $clientId,
+            "id" => $projectId
+        ));
+
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        $template = ReportTemplate::model()->with(array(
+            "l10n" => [
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => ["language_id" => $language],
+            ],
+            "summary" => [
+                "with" => [
+                    "l10n" => [
+                        "alias" => "summary_l10n",
+                        "on" => "summary_l10n.language_id = :language_id",
+                        "params" => ["language_id" => $language],
+                    ]
+                ]
+            ],
+            "vulnSections" => [
+                "alias" => "vs",
+                "order" => "vs.sort_order ASC",
+                "with" => [
+                    "l10n" => [
+                        "alias" => "section_l10n",
+                        "on" => "section_l10n.language_id = :language_id",
+                        "params" => ["language_id" => $language]
+                    ]
+                ]
+            ],
+            "sections" => [
+                "alias" => "s",
+                "order" => "s.sort_order ASC",
+            ]
+        ))->findByPk($templateId);
+
+        if ($template === null) {
+            Yii::app()->user->setFlash("error", Yii::t("app", "Template not found."));
+            return;
+        }
+
+        $templateCategoryIds = array();
+
+        foreach ($template->vulnSections as $section) {
+            $templateCategoryIds[] = $section->check_category_id;
+        }
+
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
+        $riskTemplate = null;
+
+        if ($form->riskTemplateId) {
+            $riskTemplate = RiskTemplate::model()->findByPk($form->riskTemplateId);
+        }
+
+        $prm = new ReportManager();
+        $data = $prm->getProjectReportData($targetIds, $templateCategoryIds, $project, $fields, $language);
+        $data = array_merge($data, [
+            "template" => $template,
+            "pageMargin" => $form->pageMargin,
+            "cellPadding" => $form->cellPadding,
+            "fontSize" => $form->fontSize,
+            "fontFamily" => $form->fontFamily,
+            "fileType" => $form->fileType,
+            "risk" => [
+                "template" => $riskTemplate,
+                "matrix" => [],
+            ],
+            "options" => $options,
+            "infoLocation" => $form->infoChecksLocation,
+        ]);
+
+        $plugin = ReportPlugin::getPlugin($template, $data, $language);
+        $plugin->generate();
+        $plugin->sendOverHttp();
+
+        exit();
+    }
+
+    /**
+     * Comparison report
+     * @param Project $project1
+     * @param Project $project2
+     * @return array
+     */
+    public function getComparisonReportData($project1, $project2) {
+        $targets1 = Target::model()->findAllByAttributes(
+            array("project_id" => $project1->id),
+            array("order" => "t.host ASC")
+        );
+
+        $targets2 = Target::model()->findAllByAttributes(
+            array("project_id" => $project2->id),
+            array("order" => "t.host ASC")
+        );
+
+        // find corresponding targets
+        $data = array();
+
+        foreach ($targets1 as $target1) {
+            foreach ($targets2 as $target2) {
+                if ($target2->hostPort == $target1->hostPort) {
+                    $data[] = array(
+                        $target1,
+                        $target2
+                    );
+
+                    break;
+                }
+            }
+        }
+
+        if (!$data) {
+            return [];
+        }
+
+        $targetsData = [];
+
+        foreach ($data as $targets) {
+            $targetData = array(
+                'host' => $targets[0]->hostPort,
+                'ratings' => array()
+            );
+
+            foreach ($targets as $target) {
+                $rating = 0;
+                $checkCount = 0;
+
+                // get all references (they are the same across all target categories)
+                $referenceIds = array();
+
+                $references = TargetReference::model()->findAllByAttributes(array(
+                    'target_id' => $target->id
+                ));
+
+                foreach ($references as $reference) {
+                    $referenceIds[] = $reference->reference_id;
+                }
+
+                $checksData = array();
+
+                foreach ($target->_categories as $category) {
+                    $controls = CheckControl::model()->with(array(
+                        "customChecks" => array(
+                            "alias" => "custom",
+                            "on" => "custom.target_id = :target_id",
+                            "params" => array("target_id" => $target->id)
+                        ),
+                    ))->findAllByAttributes(array(
+                        "check_category_id" => $category->check_category_id
+                    ));
+
+                    $controlIds = array();
+
+                    foreach ($controls as $control) {
+                        $controlIds[] = $control->id;
+
+                        foreach ($control->customChecks as $custom) {
+                            $checksData[] = array("rating" => $custom->rating);
+                        }
+                    }
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addInCondition("reference_id", $referenceIds);
+                    $criteria->addInCondition("check_control_id", $controlIds);
+
+                    $checks = Check::model()->with(array(
+                        "targetChecks" => array(
+                            "alias" => "tcs",
+                            "joinType" => "INNER JOIN",
+                            "on" => "tcs.target_id = :target_id AND tcs.status = :status AND tcs.rating != :hidden",
+                            "params" => array(
+                                "target_id" => $target->id,
+                                "status" => TargetCheck::STATUS_FINISHED,
+                                "hidden" => TargetCheck::RATING_HIDDEN,
+                            ),
+                        ),
+                    ))->findAll($criteria);
+
+                    if (!$checks) {
+                        continue;
+                    }
+
+                    foreach ($checks as $check) {
+                        foreach ($check->targetChecks as $tc) {
+                            $checksData[] = array(
+                                "rating" => $tc->rating
+                            );
+                        }
+                    }
+                }
+
+                $targetData["ratings"][] = $this->_getChecksRating($checksData);
+            }
+
+            $targetsData[] = $targetData;
+        }
+
+        return $targetsData;
+    }
+
+    /**
+     * Prepare text for vulnerabilities report.
+     */
+    private function _prepareVulnExportText($text) {
+        $text = str_replace(array("\r", "\n"), '', $text);
+        $text = str_replace(array("<br>", "<br/>", "<br />"), "\n", $text);
+        $text = strip_tags($text);
+        $text = html_entity_decode($text, ENT_COMPAT, 'UTF-8');
+
+        return $text;
+    }
+
+    /**
+     * Vulnerability export
+     * @param Target[] $targets
+     * @param int $language
+     * @param array $columns
+     * @param array $ratings
+     * @return array
+     */
+    private function _getVulnExportData($targets, $language, $columns, $ratings) {
+        if (!$targets) {
+            return [];
+        }
+
+        $data = array();
+
+        $statuses = array(
+            TargetCheck::STATUS_VULN_OPEN => Yii::t("app", "Open"),
+            TargetCheck::STATUS_VULN_RESOLVED => Yii::t("app", "Resolved"),
+        );
+
+        foreach ($targets as $target) {
+            // get all references (they are the same across all target categories)
+            $referenceIds = [];
+
+            $references = TargetReference::model()->findAllByAttributes(array(
+                "target_id" => $target->id
+            ));
+
+            if (!$references) {
+                continue;
+            }
+
+            foreach ($references as $reference) {
+                $referenceIds[] = $reference->reference_id;
+            }
+
+            // get all categories
+            $categories = TargetCheckCategory::model()->with("category")->findAllByAttributes(
+                ["target_id" => $target->id],
+                ["order" => "category.name ASC"]
+            );
+
+            if (!$categories) {
+                continue;
+            }
+
+            foreach ($categories as $category) {
+                // get all controls
+                $controls = CheckControl::model()->findAllByAttributes(
+                    ["check_category_id" => $category->check_category_id],
+                    ["order" => "t.sort_order ASC"]
+                );
+
+                if (!$controls) {
+                    continue;
+                }
+
+                foreach ($controls as $control) {
+                    $criteria = new CDbCriteria();
+                    $criteria->order = "t.sort_order ASC, tcs.id ASC";
+                    $criteria->addInCondition("t.reference_id", $referenceIds);
+                    $criteria->addColumnCondition(array(
+                        "t.check_control_id" => $control->id
+                    ));
+                    $criteria->together = true;
+
+                    $checks = Check::model()->with([
+                        "l10n" => [
+                            "joinType" => "LEFT JOIN",
+                            "on" => "l10n.language_id = :language_id",
+                            "params" => ["language_id" => $language]
+                        ],
+                        "targetChecks" => [
+                            "alias" => "tcs",
+                            "joinType" => "INNER JOIN",
+                            "on" => "tcs.target_id = :target_id AND tcs.status = :status AND tcs.rating != :hidden",
+                            "params" => [
+                                "target_id" => $target->id,
+                                "status" => TargetCheck::STATUS_FINISHED,
+                                "hidden" => TargetCheck::RATING_HIDDEN,
+                            ],
+                            "with" => [
+                                "solutions" => [
+                                    "alias" => "tss",
+                                    "joinType" => "LEFT JOIN",
+                                    "with" => [
+                                        "solution" => [
+                                            "alias" => "tss_s",
+                                            "joinType" => "LEFT JOIN",
+                                            "with" => [
+                                                "l10n" => [
+                                                    "alias" => "tss_s_l10n",
+                                                    "on" => "tss_s_l10n.language_id = :language_id",
+                                                    "params" => ["language_id" => $language]
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        "_reference"
+                    ])->findAll($criteria);
+
+                    $criteria = new CDbCriteria();
+                    $criteria->addCondition("target_id = :target_id");
+                    $criteria->addCondition("rating != :hidden");
+                    $criteria->addCondition("check_control_id = :check_control_id");
+                    $criteria->params = [
+                        "target_id" => $target->id,
+                        "hidden" => TargetCustomCheck::RATING_HIDDEN,
+                        "check_control_id" => $control->id
+                    ];
+
+                    $customChecks = TargetCustomCheck::model()->findAll($criteria);
+
+                    if (!$checks && !$customChecks) {
+                        continue;
+                    }
+
+                    foreach ($checks as $check) {
+                        $ctr = 0;
+
+                        foreach ($check->targetChecks as $tc) {
+                            $row = $this->_getVulnExportRow([
+                                "type" => "check",
+                                "check" => $tc,
+                                "target" => $target,
+                                "ctr" => $ctr,
+                                "columns" => $columns,
+                                "ratings" => $ratings,
+                                "statuses" => $statuses,
+                            ]);
+
+                            if (!$row) {
+                                continue;
+                            }
+
+                            $data[] = $row;
+                            $ctr++;
+                        }
+                    }
+
+                    foreach ($customChecks as $cc) {
+                        $row = $this->_getVulnExportRow([
+                            "type" => "custom",
+                            "check" => $cc,
+                            "target" => $target,
+                            "columns" => $columns,
+                            "ratings" => $ratings,
+                            "statuses" => $statuses,
+                        ]);
+
+                        if (!$row) {
+                            continue;
+                        }
+
+                        $data[] = $row;
+                    }
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Returns vuln export row data
+     * @param $data
+     * @return null
+     */
+    private function _getVulnExportRow($data) {
+        $type = $data["type"];
+        $check = $data["check"];
+        $target = $data["target"];
+        $ratings = $data["ratings"];
+        $statuses = $data["statuses"];
+        $columns = $data["columns"];
+        $ctr = null;
+
+        $ratingNames = TargetCheck::getRatingNames();;
+
+        if ($type == TargetCheck::TYPE) {
+            $ctr = $data['ctr'];
+        }
+
+        if (!in_array($check->rating, $ratings)) {
+            return null;
+        }
+
+        $row = array();
+
+        if (in_array(TargetCheck::COLUMN_TARGET, $columns)) {
+            $row[TargetCheck::COLUMN_TARGET] = $target->hostPort;
+        }
+
+        if (in_array(TargetCheck::COLUMN_NAME, $columns)) {
+            if ($type == TargetCheck::TYPE) {
+                $row[TargetCheck::COLUMN_NAME] = $check->check->localizedName . ($ctr > 0 ? " " . ($ctr + 1) : "");
+            } elseif ($type == TargetCustomCheck::TYPE) {
+                $row[TargetCheck::COLUMN_NAME] = $check->name ? $check->name : 'CUSTOM-CHECK-' . $check->reference;
+            }
+        }
+
+        if (in_array(TargetCheck::COLUMN_REFERENCE, $columns)) {
+            if ($type == TargetCheck::TYPE) {
+                $row[TargetCheck::COLUMN_REFERENCE] = $check->check->_reference->name .
+                    ($check->check->reference_code ? '-' . $check->check->reference_code : '');
+            } elseif ($type == TargetCustomCheck::TYPE) {
+                $row[TargetCheck::COLUMN_REFERENCE] = "CUSTOM-CHECK-" . $check->reference;
+            }
+        }
+
+
+        if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $columns)) {
+            if ($type == TargetCheck::TYPE) {
+                $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $this->_prepareVulnExportText($check->check->backgroundInfo);
+            } elseif ($type == TargetCustomCheck::TYPE) {
+                $row[TargetCheck::COLUMN_BACKGROUND_INFO] = $check->background_info;
+            }
+        }
+
+        if (in_array(TargetCheck::COLUMN_QUESTION, $columns)) {
+            if ($type == TargetCheck::TYPE) {
+                $row[TargetCheck::COLUMN_QUESTION] = $this->_prepareVulnExportText($check->check->question);
+            } elseif ($type == TargetCustomCheck::TYPE) {
+                $row[TargetCheck::COLUMN_QUESTION] = $check->question;
+            }
+        }
+
+        if (in_array(TargetCheck::COLUMN_RESULT, $columns)) {
+            $row[TargetCheck::COLUMN_RESULT] = $check->result;
+        }
+        
+        if (in_array(TargetCheck::COLUMN_SOLUTION, $columns)) {
+            if ($type == TargetCheck::TYPE) {
+                $solutions = array();
+
+                foreach ($check->solutions as $solution) {
+                    $solutions[] = $this->_prepareVulnExportText($solution->solution->localizedSolution);
+                }
+
+                if ($check->solution) {
+                    $solutions[] = $this->_prepareVulnExportText($check->solution);
+                }
+
+                $row[TargetCheck::COLUMN_SOLUTION] = implode("\n", $solutions);
+            } elseif ($type == TargetCustomCheck::TYPE) {
+                $row[TargetCheck::COLUMN_SOLUTION] = $check->solution;
+            }
+        }
+
+        if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $columns)) {
+            $user = $check->vulnUser ? $check->vulnUser : null;
+
+            if ($user) {
+                $row[TargetCheck::COLUMN_ASSIGNED_USER] = $user->name ? $user->name : $user->email;
+            } else {
+                $row[TargetCheck::COLUMN_ASSIGNED_USER] = '';
+            }
+        }
+
+        if (in_array(TargetCheck::COLUMN_RATING, $columns)) {
+            $row[TargetCheck::COLUMN_RATING] = $ratingNames[$check->rating];
+        }
+
+        if (in_array(TargetCheck::COLUMN_STATUS, $columns)) {
+            $row[TargetCheck::COLUMN_STATUS] =
+                $statuses[$check->vuln_status ? $check->vuln_status : TargetCheck::STATUS_VULN_OPEN];
+        }
+
+        return $row;
+    }
+
+    /**
+     * Generate vulnerability export report
+     * @param Project $project
+     * @param $targets
+     * @param $language
+     * @param $hdr
+     * @param $columns
+     * @param $ratings
+     * @throws CException
+     * @throws Exception
+     */
+    public function generateVulnExportReport(Project $project, $targets, $language, $hdr, $columns, $ratings) {
+        $data = $this->_getVulnExportData($targets, $language, $columns, $ratings);
+
+        if (!$data) {
+            return;
+        }
+
+        $header = array();
+
+        if ($hdr) {
+            if (in_array(TargetCheck::COLUMN_TARGET, $columns)) {
+                $header[TargetCheck::COLUMN_TARGET] = Yii::t("app", "Target");
+            }
+
+            if (in_array(TargetCheck::COLUMN_NAME, $columns)) {
+                $header[TargetCheck::COLUMN_NAME] = Yii::t("app", "Name");
+            }
+
+            if (in_array(TargetCheck::COLUMN_REFERENCE, $columns)) {
+                $header[TargetCheck::COLUMN_REFERENCE] = Yii::t("app", "Reference");
+            }
+
+            $biField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_BACKGROUND_INFO]);
+
+            if (in_array(TargetCheck::COLUMN_BACKGROUND_INFO, $columns)) {
+                $header[TargetCheck::COLUMN_BACKGROUND_INFO] = $biField->localizedTitle;
+            }
+
+            $qField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_QUESTION]);
+
+            if (in_array(TargetCheck::COLUMN_QUESTION, $columns)) {
+                $header[TargetCheck::COLUMN_QUESTION] = $qField->localizedTitle;
+            }
+
+            $rField = GlobalCheckField::model()->findByAttributes(["name" => GlobalCheckField::FIELD_RESULT]);
+
+            if (in_array(TargetCheck::COLUMN_RESULT, $columns)) {
+                $header[TargetCheck::COLUMN_RESULT] = $rField->localizedTitle;
+            }
+
+            if (in_array(TargetCheck::COLUMN_SOLUTION, $columns)) {
+                $header[TargetCheck::COLUMN_SOLUTION] = Yii::t("app", "Solution");
+            }
+
+            if (in_array(TargetCheck::COLUMN_ASSIGNED_USER, $columns)) {
+                $header[TargetCheck::COLUMN_ASSIGNED_USER] = Yii::t("app", "Assigned");
+            }
+
+            if (in_array(TargetCheck::COLUMN_RATING, $columns)) {
+                $header[TargetCheck::COLUMN_RATING] = Yii::t("app", "Rating");
+            }
+
+            if (in_array(TargetCheck::COLUMN_STATUS, $columns)) {
+                $header[TargetCheck::COLUMN_STATUS] = Yii::t("app", "Status");
+            }
+        }
+
+        // include all PHPExcel libraries
+        Yii::setPathOfAlias("xls", Yii::app()->basePath . "/extensions/PHPExcel");
+        Yii::import("xls.PHPExcel.Shared.ZipStreamWrapper", true);
+        Yii::import("xls.PHPExcel.Shared.String", true);
+        Yii::import("xls.PHPExcel", true);
+        Yii::registerAutoloader(["PHPExcel_Autoloader", "Load"], true);
+
+        $title = Yii::t("app", "{project} Vulnerability Export", [
+            "{project}" => $project->name . " (" . $project->year . ")"
+        ]) . " - " . date("Y-m-d");
+
+        $xl = new PHPExcel();
+
+        $xl->getDefaultStyle()->getFont()->setName("Helvetica");
+        $xl->getDefaultStyle()->getFont()->setSize(12);
+        $xl->getProperties()->setTitle($title);
+        $xl->setActiveSheetIndex(0);
+
+        $sheet = $xl->getActiveSheet();
+        $sheet->getDefaultRowDimension()->setRowHeight(30);
+
+        $row  = 1;
+        $cols = range("A", "Z");
+
+        if ($header) {
+            $col = 0;
+
+            foreach ($header as $type => $value) {
+                $sheet->getCell($cols[$col] . $row)->setValue($value);
+                $width = 0;
+
+                switch ($type) {
+                    case TargetCheck::COLUMN_BACKGROUND_INFO:
+                    case TargetCheck::COLUMN_QUESTION:
+                    case TargetCheck::COLUMN_RESULT:
+                    case TargetCheck::COLUMN_SOLUTION:
+                        $width = 30;
+                        break;
+
+                    default:
+                        $width = 20;
+                }
+
+                $sheet
+                    ->getStyle($cols[$col] . $row)
+                    ->getBorders()
+                    ->getBottom()
+                    ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+
+                $sheet
+                    ->getStyle($cols[$col] . $row)
+                    ->getBorders()
+                    ->getRight()
+                    ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+
+                $sheet->getColumnDimension($cols[$col])->setWidth($width);
+                $col++;
+            }
+
+            $row++;
+        }
+
+        $lastCol = $cols[count($header) - 1];
+        $range = "A1:" . $lastCol . "1";
+
+        $sheet
+            ->getStyle($range)
+            ->getFill()
+            ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+            ->getStartColor()->setARGB("FFE0E0E0");
+
+        $sheet
+            ->getStyle($range)
+            ->getAlignment()
+            ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER)
+            ->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+
+        $sheet
+            ->getStyle($range)
+            ->getFont()
+            ->setBold(true);
+
+        $sheet->getRowDimension(1)->setRowHeight(40);
+
+        foreach ($data as $dataRow) {
+            $col = 0;
+
+            foreach ($dataRow as $type => $value) {
+                $sheet->getCell($cols[$col] . $row)->setValue("\n" . $value . "\n");
+
+                $sheet
+                    ->getStyle($cols[$col] . $row)
+                    ->getBorders()
+                    ->getBottom()
+                    ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+
+                $sheet
+                    ->getStyle($cols[$col] . $row)
+                    ->getBorders()
+                    ->getRight()
+                    ->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+
+                $col++;
+            }
+
+            $range = 'A' . $row . ':' . $lastCol . $row;
+
+            $sheet
+                ->getStyle($range)
+                ->getAlignment()
+                ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT)
+                ->setVertical(PHPExcel_Style_Alignment::VERTICAL_TOP);
+
+            $sheet
+                ->getStyle($range)
+                ->getAlignment()
+                ->setWrapText(true);
+
+            $sheet
+                ->getStyle($range)
+                ->getAlignment()
+                ->setIndent(1);
+
+            $sheet->getRowDimension($row)->setRowHeight(-1);
+
+            $row++;
+        }
+
+        $fileName = $title . ".xlsx";
+
+        // give user a file
+        header("Content-Description: File Transfer");
+        header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        header("Content-Disposition: attachment; filename=\"" . $fileName . "\"");
+        header("Content-Transfer-Encoding: binary");
+        header("Expires: 0");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Pragma: public");
+
+        ob_clean();
+        flush();
+
+        $writer = PHPExcel_IOFactory::createWriter($xl, "Excel2007");
+        $writer->save("php://output");
+
+        exit();
+    }
+
+    /**
+     * Generates project tracked time report
+     * @param Project $project
+     */
+    public function generateTrackedTimeReport(Project $project) {
+        $r = new RtfReport();
+        $r->setup();
+        $r->generateTimeTrackingReport($project);
+        $r->sendOverHttp();
+    }
 }
