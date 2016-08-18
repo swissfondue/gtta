@@ -66,7 +66,7 @@ class TargetCheckAttachment extends ActiveRecord implements IVariableScopeObject
         );
 
         if (!in_array($name, array_keys($data))) {
-            throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+            return "";
         }
 
         return $data[$name];
@@ -81,6 +81,6 @@ class TargetCheckAttachment extends ActiveRecord implements IVariableScopeObject
      * @throws Exception
      */
     public function getList($name, $filters, VariableScope $scope) {
-        throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+        return [];
     }
 }

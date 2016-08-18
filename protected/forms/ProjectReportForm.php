@@ -37,16 +37,6 @@ class ProjectReportForm extends CFormModel {
     public $infoChecksLocation;
 
     /**
-     * @var integer client id.
-     */
-    public $clientId;
-
-    /**
-     * @var integer project id.
-     */
-    public $projectId;
-
-    /**
      * @var array target ids.
      */
     public $targetIds;
@@ -87,7 +77,7 @@ class ProjectReportForm extends CFormModel {
             array("pageMargin", "numerical", "min" => Yii::app()->params["reports"]["minPageMargin"], "max" => Yii::app()->params["reports"]["maxPageMargin"]),
             array("fontFamily", "in", "range" => Yii::app()->params["reports"]["fonts"]),
             array("infoChecksLocation", "in", "range" => array(self::INFO_LOCATION_TARGET, self::INFO_LOCATION_SEPARATE_TABLE, self::INFO_LOCATION_SEPARATE_SECTION)),
-            array("clientId, projectId, targetIds, options, templateId", "safe"),
+            array("targetIds, options, templateId", "safe"),
             array("fields", "checkFields"),
 		);
 	}
@@ -101,8 +91,6 @@ class ProjectReportForm extends CFormModel {
             "fontFamily" => Yii::t("app", "Font Family"),
             "pageMargin" => Yii::t("app", "Page Margin"),
             "cellPadding" => Yii::t("app", "Cell Padding"),
-            "clientId" => Yii::t("app", "Client"),
-			"projectId" => Yii::t("app", "Project"),
 			"targetIds" => Yii::t("app", "Targets"),
 		);
 	}

@@ -159,7 +159,7 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
         );
 
         if (!in_array($name, array_keys($checkData))) {
-            throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+            return "";
         }
 
         return $checkData[$name];
@@ -179,7 +179,7 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
         );
 
         if (!in_array($name, $lists)) {
-            throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+            return [];
         }
 
         $data = array();

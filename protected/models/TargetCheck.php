@@ -249,14 +249,19 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "name" => $check->getLocalizedName(),
             "rating" => $abbreviations[$this->rating],
             "rating_name" => $names[$this->rating],
-            "target" => $this->override_target ? $this->override_target : $this->target->host,
-            "result" => $this->result,
+            "target" => $this->getOverrideTarget() ? $this->getOverrideTarget() : $this->target->host,
+            "result" => $this->getResult(),
             "reference" => $check->_reference->name . ($check->reference_code ? "-" . $check->reference_code : ""),
             "solution" => array(),
+            "question" => $this->getQuestion(),
+            "background_info" => $this->getBackgroundInfo(),
+            "hints" => $this->getHints(),
+            "links" => "",
+            "poc" => $this->getPoc(),
         );
 
-        if ($this->solution) {
-            $checkData["solution"][] = $this->solution;
+        if ($this->getSolution()) {
+            $checkData["solution"][] = $this->getSolution();
         }
 
         foreach ($this->solutions as $solution) {
@@ -266,7 +271,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         $checkData["solution"] = implode("<br><br>", $checkData["solution"]);
 
         if (!in_array($name, array_keys($checkData))) {
-            throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+            return "";
         }
 
         return $checkData[$name];
@@ -286,10 +291,10 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         );
 
         if (!in_array($name, $lists)) {
-            throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+            return [];
         }
 
-        $data = array();
+        $data = [];
 
         switch ($name) {
             case "attachment":

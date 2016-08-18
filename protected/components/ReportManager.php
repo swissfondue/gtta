@@ -1132,112 +1132,7 @@ class ReportManager {
      * @param ProjectReportForm $form
      */
     public function generateProjectReport($form) {
-        $clientId = $form->clientId;
-        $projectId = $form->projectId;
-        $targetIds = $form->targetIds;
-        $options = $form->options;
-        $templateId = $form->templateId;
-        $fields = $form->fields;
 
-        if (!$fields) {
-            $fields = array();
-        }
-
-        if (!$options) {
-            $options = array();
-        }
-
-        $project = Project::model()->with(array(
-            "projectUsers" => array(
-                "with" => "user"
-            ),
-            "client",
-            "targets",
-        ))->findByAttributes(array(
-            "client_id" => $clientId,
-            "id" => $projectId
-        ));
-
-        $language = Language::model()->findByAttributes(array(
-            "code" => Yii::app()->language
-        ));
-
-        if ($language) {
-            $language = $language->id;
-        }
-
-        $template = ReportTemplate::model()->with(array(
-            "l10n" => [
-                "joinType" => "LEFT JOIN",
-                "on" => "language_id = :language_id",
-                "params" => ["language_id" => $language],
-            ],
-            "summary" => [
-                "with" => [
-                    "l10n" => [
-                        "alias" => "summary_l10n",
-                        "on" => "summary_l10n.language_id = :language_id",
-                        "params" => ["language_id" => $language],
-                    ]
-                ]
-            ],
-            "vulnSections" => [
-                "alias" => "vs",
-                "order" => "vs.sort_order ASC",
-                "with" => [
-                    "l10n" => [
-                        "alias" => "section_l10n",
-                        "on" => "section_l10n.language_id = :language_id",
-                        "params" => ["language_id" => $language]
-                    ]
-                ]
-            ],
-            "sections" => [
-                "alias" => "s",
-                "order" => "s.sort_order ASC",
-            ]
-        ))->findByPk($templateId);
-
-        if ($template === null) {
-            Yii::app()->user->setFlash("error", Yii::t("app", "Template not found."));
-            return;
-        }
-
-        $templateCategoryIds = array();
-
-        foreach ($template->vulnSections as $section) {
-            $templateCategoryIds[] = $section->check_category_id;
-        }
-
-        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
-        $riskTemplate = null;
-
-        if ($form->riskTemplateId) {
-            $riskTemplate = RiskTemplate::model()->findByPk($form->riskTemplateId);
-        }
-
-        $prm = new ReportManager();
-        $data = $prm->getProjectReportData($targetIds, $templateCategoryIds, $project, $fields, $language);
-        $data = array_merge($data, [
-            "template" => $template,
-            "pageMargin" => $form->pageMargin,
-            "cellPadding" => $form->cellPadding,
-            "fontSize" => $form->fontSize,
-            "fontFamily" => $form->fontFamily,
-            "fileType" => $form->fileType,
-            "risk" => [
-                "template" => $riskTemplate,
-                "matrix" => [],
-            ],
-            "options" => $options,
-            "infoLocation" => $form->infoChecksLocation,
-        ]);
-
-        $plugin = ReportPlugin::getPlugin($template, $data, $language);
-        $plugin->generate();
-        $plugin->sendOverHttp();
-
-        exit();
     }
 
     /**
@@ -1862,16 +1757,5 @@ class ReportManager {
         $writer->save("php://output");
 
         exit();
-    }
-
-    /**
-     * Generates project tracked time report
-     * @param Project $project
-     */
-    public function generateTrackedTimeReport(Project $project) {
-        $r = new RtfReport();
-        $r->setup();
-        $r->generateTimeTrackingReport($project);
-        $r->sendOverHttp();
     }
 }

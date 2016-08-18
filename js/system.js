@@ -433,102 +433,13 @@ function System() {
         this.projectFormChange = function (e) {
             var val;
 
-            $('#client-list').removeClass('error');
-            $('#project-list').removeClass('error');
-            $('#project-list > div > .help-block').hide();
-            $('#client-list > div > .help-block').hide();
-
-            if (e.id == 'ProjectReportForm_clientId') {
-                val = $('#ProjectReportForm_clientId').val();
-
-                _report._riskMatrixTargets = [];
-
-                $('.report-target-header').remove();
-                $('.report-target-content').remove();
-                $('#check-list').hide();
-                $('#project-list').hide();
-                $('#target-list').hide();
-                $('.form-actions > button[type="submit"]').prop('disabled', true);
-
-                if (val != 0) {
-                    _system.control.loadObjects(val, 'project-list', function (data) {
-                        $('#ProjectReportForm_clientId').prop('disabled', false);
-                        $('#ProjectReportForm_projectId > option:not(:first)').remove();
-
-                        if (data && data.objects.length) {
-                            for (var i = 0; i < data.objects.length; i++) {
-                                $('<option>')
-                                    .val(data.objects[i].id)
-                                    .html(data.objects[i].name)
-                                    .appendTo('#ProjectReportForm_projectId');
-                            }
-
-                            $('#project-list').show();
-                        } else {
-                            $('#client-list').addClass('error');
-                            $('#client-list > div > .help-block').show();
-                        }
-                    });
-                }
-            } else if (e.id == 'ProjectReportForm_projectId') {
-                val = $('#ProjectReportForm_projectId').val();
-
-                _report._riskMatrixTargets = [];
-
-                $('.report-target-header').remove();
-                $('.report-target-content').remove();
-                $('#check-list').hide();
-                $('#target-list').hide();
-                $('.form-actions > button[type="submit"]').prop('disabled', true);
-
-                if (val != 0) {
-                    _system.control.loadObjects(val, 'target-list', function (data) {
-                        $('#target-list > .controls > .report-target-list > li').remove();
-
-                        if (data && data.objects.length) {
-                            for (var i = 0; i < data.objects.length; i++) {
-                                var li = $('<li>'),
-                                    label = $('<label>'),
-                                    input = $('<input>');
-
-                                input
-                                    .attr('type', 'checkbox')
-                                    .prop('checked', true)
-                                    .attr('name', 'ProjectReportForm[targetIds][]')
-                                    .attr('id', 'ProjectReportForm_targetIds_' + data.objects[i].id)
-                                    .val(data.objects[i].id)
-                                    .click(function () {
-                                        system.report.projectFormChange(this);
-                                    })
-                                    .appendTo(label);
-
-                                label
-                                    .append(' ' + data.objects[i].host)
-                                    .appendTo(li);
-
-                                $('#target-list > .controls > .report-target-list').append(li);
-                            }
-
-                            $('#target-list').show();
-
-                            if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0) {
-                                _report._refreshRiskMatrix(true);
-                            }
-
-                            _report._projectFormSwitchButton();
-                        } else {
-                            $('#project-list').addClass('error');
-                            $('#project-list > div > .help-block').show();
-                        }
-                    });
-                }
-            } else if (e.id.match(/^ProjectReportForm_targetIds_/i)) {
-                if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0) {
+            if (e.id.match(/^ProjectReportForm_targetIds_/i)) {
+                if ($("#RiskMatrixForm_templateId").val() > 0) {
                     _report._refreshRiskMatrix(true);
                 }
 
                 _report._projectFormSwitchButton();
-            } else if (e.id == 'ProjectReportForm_templateId') {
+            } else if (e.id == "ProjectReportForm_templateId") {
                 var type = $("#ProjectReportForm_templateId option:selected").data("type");
 
                 if (type != undefined) {
@@ -540,57 +451,39 @@ function System() {
                 }
 
                 _report._projectFormSwitchButton();
-            } else if (e.id == 'ProjectReportForm_options_matrix') {
-                _report._riskMatrixTargets = [];
-                _report._riskMatrixCategories = [];
+            } else if (e.id == "RiskMatrixForm_templateId") {
+                val = $("#RiskMatrixForm_templateId").val();
 
-                if ($('#ProjectReportForm_options_matrix').is(':checked')) {
-                    $('#risk-template-list').show();
-                    $('.form-actions > button[type="submit"]').prop('disabled', true);
-                } else {
-                    $('#risk-template-list').hide();
-                    $('#check-list').hide();
-                    $('.report-target-header').remove();
-                    $('.report-target-content').remove();
-                    $('#RiskMatrixForm_templateId').val(0);
-                    $('#risk-template-list').removeClass('error');
-                    $('#risk-template-list > div > .help-block').hide();
-
-                    _report._projectFormSwitchButton();
-                }
-            } else if (e.id == 'RiskMatrixForm_templateId') {
-                var val = $('#RiskMatrixForm_templateId').val();
-
-                $('#check-list').hide();
+                $("#check-list").hide();
 
                 _report._riskMatrixTargets = [];
                 _report._riskMatrixCategories = [];
 
-                $('#risk-template-list').removeClass('error');
-                $('#risk-template-list > div > .help-block').hide();
+                $("#risk-template-list").removeClass("error");
+                $("#risk-template-list > div > .help-block").hide();
 
                 // remove checklist content
-                $('.report-target-header').remove();
-                $('.report-target-content').remove();
+                $(".report-target-header").remove();
+                $(".report-target-content").remove();
 
                 if (val != 0) {
-                    _system.control.loadObjects(val, 'category-list', function (data) {
+                    _system.control.loadObjects(val, "category-list", function (data) {
                         if (data && data.objects.length) {
                             _report._riskMatrixCategories = data.objects;
 
-                            if ($('#RiskMatrixForm_templateId').val() > 0) {
+                            if ($("#RiskMatrixForm_templateId").val() > 0) {
                                 _report._refreshRiskMatrix(true);
                             }
 
                             _report._projectFormSwitchButton();
                         } else {
-                            $('#risk-template-list').addClass('error');
-                            $('#risk-template-list > div > .help-block').show();
-                            $('.form-actions > button[type="submit"]').prop('disabled', true);
+                            $("#risk-template-list").addClass("error");
+                            $("#risk-template-list > div > .help-block").show();
+                            $(".form-actions > button[type=submit]").prop("disabled", true);
                         }
                     });
                 } else {
-                    $('.form-actions > button[type="submit"]').prop('disabled', true);
+                    $(".form-actions > button[type=submit]").prop("disabled", true);
                 }
             }
         };

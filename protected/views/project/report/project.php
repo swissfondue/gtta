@@ -13,33 +13,25 @@
     <?php $typeNames = ReportTemplate::getValidTypeNames(); ?>
 
     <fieldset>
-        <div class="control-group" id="client-list">
-            <label class="control-label" for="ProjectReportForm_clientId"><?php echo Yii::t("app", "Client"); ?></label>
-            <div class="controls">
-                <select class="input-xlarge" id="ProjectReportForm_clientId" name="ProjectReportForm[clientId]" onchange="system.report.projectFormChange(this);">
-                    <option value="0"><?php echo Yii::t("app", "Please select..."); ?></option>
-                    <?php foreach ($clients as $client): ?>
-                        <option value="<?php echo $client->id; ?>"><?php echo CHtml::encode($client->name); ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <p class="help-block hide"><?php echo Yii::t("app", "This client has no projects."); ?></p>
-            </div>
-        </div>
-
-        <div class="hide control-group" id="project-list">
-            <label class="control-label" for="ProjectReportForm_projectId"><?php echo Yii::t("app", "Project"); ?></label>
-            <div class="controls">
-                <select class="input-xlarge" id="ProjectReportForm_projectId" name="ProjectReportForm[projectId]" onchange="system.report.projectFormChange(this);">
-                    <option value="0"><?php echo Yii::t("app", "Please select..."); ?></option>
-                </select>
-                <p class="help-block hide"><?php echo Yii::t("app", "This project has no targets."); ?></p>
-            </div>
-        </div>
-
-        <div class="hide control-group" id="target-list">
+        <div class="control-group" id="target-list">
             <label class="control-label"><?php echo Yii::t("app", "Targets"); ?></label>
             <div class="controls">
                 <ul class="report-target-list">
+                    <?php foreach ($project->targets as $target): ?>
+                        <li>
+                            <label>
+                                <input
+                                    checked
+                                    type="checkbox"
+                                    id="ProjectReportForm_targetIds_<?= $target->id; ?>"
+                                    name="ProjectReportForm[targetIds][]"
+                                    value="<?= $target->id; ?>"
+                                    onclick="system.report.projectFormChange(this);">
+
+                                <?= $target->host; ?>
+                            </label>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
             </div>
         </div>

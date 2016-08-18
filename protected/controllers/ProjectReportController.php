@@ -44,8 +44,97 @@ class ProjectReportController extends Controller {
             $form->attributes = $_POST["ProjectReportForm"];
 
             if ($form->validate()) {
-                $rm = new ReportManager();
-                $rm->generateProjectReport($form);
+                if (!$form->fields) {
+                    $form->fields = [];
+                }
+
+                if (!$form->options) {
+                    $form->options = [];
+                }
+
+                $language = Language::model()->findByAttributes(array(
+                    "code" => Yii::app()->language
+                ));
+
+                if ($language) {
+                    $language = $language->id;
+                }
+
+                $template = ReportTemplate::model()->with(array(
+                    "l10n" => [
+                        "joinType" => "LEFT JOIN",
+                        "on" => "language_id = :language_id",
+                        "params" => ["language_id" => $language],
+                    ],
+                    "summary" => [
+                        "with" => [
+                            "l10n" => [
+                                "alias" => "summary_l10n",
+                                "on" => "summary_l10n.language_id = :language_id",
+                                "params" => ["language_id" => $language],
+                            ]
+                        ]
+                    ],
+                    "vulnSections" => [
+                        "alias" => "vs",
+                        "order" => "vs.sort_order ASC",
+                        "with" => [
+                            "l10n" => [
+                                "alias" => "section_l10n",
+                                "on" => "section_l10n.language_id = :language_id",
+                                "params" => ["language_id" => $language]
+                            ]
+                        ]
+                    ],
+                    "sections" => [
+                        "alias" => "s",
+                        "order" => "s.sort_order ASC",
+                    ]
+                ))->findByPk($form->templateId);
+
+                if ($template === null) {
+                    Yii::app()->user->setFlash("error", Yii::t("app", "Template not found."));
+                    return;
+                }
+
+                $templateCategoryIds = array();
+
+                foreach ($template->vulnSections as $section) {
+                    $templateCategoryIds[] = $section->check_category_id;
+                }
+
+                $riskTemplate = null;
+
+                if ($form->riskTemplateId) {
+                    $riskTemplate = RiskTemplate::model()->findByPk($form->riskTemplateId);
+                }
+
+                $prm = new ReportManager();
+                $data = $prm->getProjectReportData($form->targetIds, $templateCategoryIds, $project, $form->fields, $language);
+                $data = array_merge($data, [
+                    "template" => $template,
+                    "pageMargin" => $form->pageMargin,
+                    "cellPadding" => $form->cellPadding,
+                    "fontSize" => $form->fontSize,
+                    "fontFamily" => $form->fontFamily,
+                    "fileType" => $form->fileType,
+                    "risk" => [
+                        "template" => $riskTemplate,
+                        "matrix" => [],
+                    ],
+                    "options" => $form->options,
+                    "infoLocation" => $form->infoChecksLocation,
+                ]);
+
+                $plugin = ReportPlugin::getPlugin($template, $data, $language);
+
+                try {
+                    $plugin->generate();
+                    $plugin->sendOverHttp();
+                } catch (Exception $e) {
+                    Yii::log($e->getMessage() . "\n" . $e->getTraceAsString(), CLogger::LEVEL_ERROR);
+                    Yii::app()->user->setFlash("error", Yii::t("app", "Error generating report."));
+                }
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
@@ -427,7 +516,9 @@ class ProjectReportController extends Controller {
     public function actionTrackedTime($id) {
         $project = $this->_getProject($id);
 
-        $rm = new ReportManager();
-        $rm->generateTrackedTimeReport($project);
+        $r = new RtfReport();
+        $r->setup();
+        $r->generateTimeTrackingReport($project);
+        $r->sendOverHttp();
     }
 }
