@@ -424,6 +424,24 @@ function System() {
         };
 
         /**
+         * Project template form has been changed.
+         */
+        this.projectTemplateFormChange = function (e) {
+            var val;
+
+            if (e.id == "ProjectReportTemplateForm_templateId") {
+                var type = $("#ProjectReportTemplateForm_templateId option:selected").data("type"),
+                    customReport = $(".custom-report");
+
+                if (type != undefined && type == 0) {
+                    customReport.slideDown("slow");
+                } else {
+                    customReport.slideUp("slow");
+                }
+            }
+        };
+
+        /**
          * Project form has been changed.
          */
         this.projectFormChange = function (e) {

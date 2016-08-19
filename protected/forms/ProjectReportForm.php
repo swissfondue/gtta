@@ -3,7 +3,7 @@
 /**
  * This is the model class for project report form.
  */
-class ProjectReportForm extends CFormModel {
+class ProjectReportForm extends FormModel {
     /**
      * Scenarios
      */

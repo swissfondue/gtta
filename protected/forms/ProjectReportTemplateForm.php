@@ -3,19 +3,25 @@
 /**
  * This is the model class for project report template form.
  */
-class ProjectReportTemplateForm extends CFormModel {
+class ProjectReportTemplateForm extends FormModel {
     /**
      * @var integer template id.
      */
-    public $templateId;
+    public $reportTemplateId;
+
+    /**
+     * @var bool custom report
+     */
+    public $customReport;
 
     /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
 		return [
-            ["templateId", "required"],
-            ["templateId", "checkTemplate"],
+            ["reportTemplateId", "required"],
+            ["reportTemplateId", "checkTemplate"],
+            ["customReport", "boolean"],
 		];
 	}
 
@@ -24,7 +30,8 @@ class ProjectReportTemplateForm extends CFormModel {
 	 */
 	public function attributeLabels() {
 		return [
-			"templateId" => Yii::t("app", "Template"),
+			"reportTemplateId" => Yii::t("app", "Template"),
+			"customReport" => Yii::t("app", "Custom Report"),
 		];
 	}
 
@@ -35,10 +42,10 @@ class ProjectReportTemplateForm extends CFormModel {
      * @return bool
      */
     public function checkTemplate($attribute, $params) {
-        $template = ReportTemplate::model()->findByPk($this->templateId);
+        $template = ReportTemplate::model()->findByPk($this->reportTemplateId);
 
         if (!$template) {
-            $this->addError("templateId", Yii::t("app", "Template not found."));
+            $this->addError("reportTemplateId", Yii::t("app", "Template not found."));
             return false;
         }
 

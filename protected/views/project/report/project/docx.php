@@ -32,7 +32,7 @@
 
             <div class="controls">
                 <ul class="report-target-list">
-                    <?php foreach ($project->targets as $target): ?>
+                    <?php foreach ($targets as $target): ?>
                         <li>
                             <label>
                                 <input

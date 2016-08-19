@@ -32,4 +32,29 @@ class FormModel extends CFormModel {
             }
         }
     }
+
+    /**
+     * Form to JSON
+     */
+    public function toJSON() {
+        return @json_encode($this->getAttributes());
+    }
+
+    /**
+     * Form from JSON
+     * @param $json
+     */
+    public function fromJSON($json) {
+        if (!$json) {
+            return;
+        }
+
+        $data = @json_decode($json, true);
+
+        if (!$data || !is_array($data)) {
+            return;
+        }
+
+        $this->setAttributes($data);
+    }
 }

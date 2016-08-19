@@ -29,11 +29,11 @@
             <label class="control-label"><?php echo Yii::t("app", "Targets"); ?></label>
             <div class="controls">
                 <ul class="report-target-list">
-                    <?php foreach ($project->targets as $target): ?>
+                    <?php foreach ($targets as $target): ?>
                         <li>
                             <label>
                                 <input
-                                    checked
+                                    <?php if (!$form->targetIds || in_array($target->id, $form->targetIds)) echo "checked"; ?>
                                     type="checkbox"
                                     id="ProjectReportForm_targetIds_<?= $target->id; ?>"
                                     name="ProjectReportForm[targetIds][]"
@@ -70,7 +70,7 @@
                 <div class="controls">
                     <select class="input-xlarge" id="ProjectReportForm_fontFamily" name="ProjectReportForm[fontFamily]">
                         <?php foreach (Yii::app()->params["reports"]["fonts"] as $font): ?>
-                            <option value="<?php echo $font; ?>"<?php if ($font == Yii::app()->params["reports"]["font"]) echo "selected"; ?>><?php echo $font; ?></option>
+                            <option value="<?php echo $font; ?>"<?php if ($font == $form->fontFamily) echo "selected"; ?>><?php echo $font; ?></option>
                         <?php endforeach; ?>
                     </select>
                     <?php if ($form->getError("fontFamily")): ?>
@@ -106,7 +106,7 @@
                         <select class="input-xlarge" id="ProjectReportForm_riskTemplateId" name="ProjectReportForm[riskTemplateId]" onchange="system.report.projectFormChange(this);">
                             <option value="0"><?php echo Yii::t("app", "Please select..."); ?></option>
                             <?php foreach ($riskTemplates as $t): ?>
-                                <option value="<?php echo $t->id; ?>"><?php echo CHtml::encode($t->localizedName); ?></option>
+                                <option value="<?php echo $t->id; ?>" <?php if ($t->id == $form->riskTemplateId) echo "selected"; ?>><?php echo CHtml::encode($t->localizedName); ?></option>
                             <?php endforeach; ?>
                         </select>
                         <?php if ($form->getError("riskTemplateId")): ?>
@@ -130,7 +130,7 @@
             <div class="control-group">
                 <label class="control-label"><?php echo Yii::t("app", "Title Page"); ?></label>
                 <div class="controls">
-                    <input type="checkbox" id="ProjectReportForm_title" name="ProjectReportForm[title]" value="1" checked>
+                    <input type="checkbox" id="ProjectReportForm_title" name="ProjectReportForm[title]" value="1" <?php if ($form->title) echo "checked"; ?>>
                 </div>
             </div>
 
@@ -140,7 +140,7 @@
                     <div class="controls">
                         <?php foreach ($fields as $field): ?>
                             <label class="checkbox">
-                                <input type="checkbox" id="ProjectReportForm_fields" name="ProjectReportForm[fields][]" value="<?= $field->name ?>" checked="checked">
+                                <input type="checkbox" id="ProjectReportForm_fields" name="ProjectReportForm[fields][]" value="<?= $field->name ?>" <?php if (!$form->fields || in_array($field->name, $form->fields)) echo "checked"; ?>>
                                 <?= $field->localizedTitle ?>
                             </label>
                         <?php endforeach; ?>
@@ -154,7 +154,7 @@
                     <div class="controls">
                         <select class="input-xlarge" id="ProjectReportForm_infoChecksLocation" name="ProjectReportForm[infoChecksLocation]" onchange="system.report.projectFormChange(this);">
                             <?php foreach ($infoChecksLocation as $id => $loc): ?>
-                                <option value="<?php echo $id; ?>"><?php echo $loc; ?></option>
+                                <option value="<?php echo $id; ?>" <?php if ($id == $form->infoChecksLocation) echo "selected"; ?>><?php echo $loc; ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -164,14 +164,12 @@
             <div class="control-group" id="file-type">
                 <label class="control-label" for="ProjectReportForm_fileType"><?php echo Yii::t("app", "Download File Type"); ?></label>
                 <div class="controls">
-                    <label class="radio">
-                        <input type="radio" name="ProjectReportForm[fileType]" value="<?php echo ProjectReportForm::FILE_TYPE_RTF; ?>" checked="checked" >
-                        <?php echo Yii::t("app", "RTF"); ?>
-                    </label>
-                    <label class="radio">
-                        <input type="radio" name="ProjectReportForm[fileType]" value="<?php echo ProjectReportForm::FILE_TYPE_ZIP; ?>" >
-                        <?php echo Yii::t("app", "RTF + Attachments"); ?>
-                    </label>
+                    <?php foreach ($fileTypes as $v => $n): ?>
+                        <label class="radio">
+                            <input type="radio" name="ProjectReportForm[fileType]" value="<?= $v; ?>" <?php if ($form->fileType == $v) echo "checked"; ?>>
+                            <?= $n; ?>
+                        </label>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>

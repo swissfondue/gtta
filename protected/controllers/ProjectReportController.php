@@ -118,6 +118,11 @@ class ProjectReportController extends Controller {
             }
         }
 
+        $targets = Target::model()->findAllByAttributes(
+            ["project_id" => $project->id],
+            ["order" => "host"]
+        );
+
         $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
         $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
         $this->breadcrumbs[] = [Yii::t("app", "Report"), ""];
@@ -128,6 +133,7 @@ class ProjectReportController extends Controller {
             "project" => $project,
             "form" => $form,
             "template" => $template,
+            "targets" => $targets,
         ]);
     }
 
@@ -183,6 +189,11 @@ class ProjectReportController extends Controller {
         }
 
         $form = new ProjectReportForm();
+        $form->fromJSON($project->report_options);
+
+        if (!$project->report_options) {
+            $form->title = true;
+        }
 
         if (isset($_POST["ProjectReportForm"])) {
             $form->attributes = $_POST["ProjectReportForm"];
@@ -219,6 +230,9 @@ class ProjectReportController extends Controller {
                     $form->addError("riskTemplateId", Yii::t("app", "Risk Matrix Template is required."));
                     throw new Exception();
                 }
+
+                $project->report_options = $form->toJSON();
+                $project->save();
 
                 $prm = new ReportManager();
                 $data = $prm->getProjectReportData($form->targetIds, $templateCategoryIds, $project, $form->fields, $language);
@@ -266,6 +280,10 @@ class ProjectReportController extends Controller {
         );
 
         $fields = GlobalCheckField::model()->with($lang)->findAll(["order" => "sort_order ASC"]);
+        $targets = Target::model()->findAllByAttributes(
+            ["project_id" => $project->id],
+            ["order" => "host"]
+        );
 
         $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
         $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
@@ -284,6 +302,11 @@ class ProjectReportController extends Controller {
                 ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION => Yii::t("app", "Info Checks Section"),
             ],
             "template" => $template,
+            "targets" => $targets,
+            "fileTypes" => [
+                ProjectReportForm::FILE_TYPE_RTF => Yii::t("app", "RTF"),
+                ProjectReportForm::FILE_TYPE_ZIP => Yii::t("app", "RTF + Attachments"),
+            ]
         ]);
     }
 
@@ -324,7 +347,10 @@ class ProjectReportController extends Controller {
      */
     public function actionTemplate($id) {
         $project = $this->_getProject($id);
+        $template = ReportTemplate::model()->findByPk($project->report_template_id);
+
         $form = new ProjectReportTemplateForm();
+        $form->fromModel($project);
 
         if (isset($_POST["ProjectReportTemplateForm"])) {
             $form->attributes = $_POST["ProjectReportTemplateForm"];
@@ -334,7 +360,14 @@ class ProjectReportController extends Controller {
                     throw new Exception();
                 }
 
-                $project->report_template_id = $form->templateId;
+                $form->customReport = isset($_POST["ProjectReportTemplateForm"]["customReport"]);
+                $project->fromForm($form);
+                $template = ReportTemplate::model()->findByPk($project->report_template_id);
+
+                if ($template->type != ReportTemplate::TYPE_RTF) {
+                    $project->custom_report = false;
+                }
+
                 $project->save();
 
                 $this->redirect(["projectReport/project", "id" => $project->id]);
@@ -350,6 +383,7 @@ class ProjectReportController extends Controller {
         if ($language) {
             $language = $language->id;
         }
+
 
         $criteria = new CDbCriteria();
         $criteria->order = "COALESCE(l10n.name, t.name) ASC";
@@ -373,6 +407,7 @@ class ProjectReportController extends Controller {
             "project" => $project,
             "form" => $form,
             "templates" => $templates,
+            "template" => $template,
         ]);
     }
 
