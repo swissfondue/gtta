@@ -97,7 +97,11 @@ return array(
     "project/custom-attachment/control" => "project/controlcustomattachment",
 
     // reports
+    "project/<id:\d+>/report/template" => "projectReport/template",
     "project/<id:\d+>/report" => "projectReport/project",
+    "project/<id:\d+>/report/rtf" => "projectReport/projectRtf",
+    "project/<id:\d+>/report/docx" => "projectReport/projectDocx",
+    "project/<id:\d+>/report/rtf/customize-sections" => "projectReport/customizeSections",
     "project/<id:\d+>/report/comparison" => "projectReport/comparison",
     "project/<id:\d+>/report/fulfillment" => "projectReport/fulfillment",
     "project/<id:\d+>/report/risk-matrix" => "projectReport/riskmatrix",

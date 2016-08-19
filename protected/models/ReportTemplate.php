@@ -17,7 +17,7 @@
  * @property string $none_description
  * @property string $no_vuln_description
  * @property string $info_description
-
+ * @property ReportTemplateSection[] $sections
  */
 class ReportTemplate extends ActiveRecord {
     /**
@@ -197,5 +197,20 @@ class ReportTemplate extends ActiveRecord {
         );
 
         return ReportTemplateRatingImage::model()->find($criteria);
+    }
+
+    /**
+     * Check if template has section specified
+     * @param int $section
+     * @return bool
+     */
+    public function hasSection($section) {
+        foreach ($this->sections as $scn) {
+            if ($scn->type == $section) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

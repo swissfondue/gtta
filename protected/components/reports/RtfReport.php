@@ -1427,7 +1427,11 @@ class RtfReport extends ReportPlugin {
      * @param array $matrix
      * @parma PHPRtfLite_Container_Section $toc
      */
-    private function _addRiskMatrix(PHPRtfLite_Container_Section &$section, $sectionNumber, $targets, RiskTemplate $template, $matrix, $toc=null) {
+    private function _addRiskMatrix(PHPRtfLite_Container_Section &$section, $sectionNumber, $targets, $template, $matrix, $toc=null) {
+        if (!$template) {
+            return;
+        }
+
         $risks = RiskCategory::model()->with([
             "l10n" => [
                 "joinType" => "LEFT JOIN",
@@ -1641,6 +1645,7 @@ class RtfReport extends ReportPlugin {
         $vulns = $data["data"];
         $infoLocation = $data["infoLocation"];
         $template = $data["template"];
+        $fields = $data["fields"];
         $ratingImages = $this->_getRatingImages($template);
 
         $targetNumber = 1;
@@ -1972,6 +1977,10 @@ class RtfReport extends ReportPlugin {
 
                             if (isset($check["fields"])) {
                                 foreach ($check["fields"] as $field) {
+                                    if (!in_array($field["name"], $fields)) {
+                                        continue;
+                                    }
+
                                     $table->addRow();
                                     $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                                     $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
@@ -2099,7 +2108,6 @@ class RtfReport extends ReportPlugin {
     public function generate() {
         $data = $this->_data;
         $project = $data["project"];
-        $options = $data["options"];
 
         $template = $this->_template;
         $this->setup($data["pageMargin"], $data["cellPadding"], $data["fontSize"], $data["fontFamily"]);
@@ -2119,7 +2127,7 @@ class RtfReport extends ReportPlugin {
         ));
 
         // title
-        if (in_array("title", $options)) {
+        if ($data["title"]) {
             $this->_addTitlePage($section, $template, $project);
         } else {
             $section->writeText(Yii::t("app", "Penetration Test Report") . ": " . $project->name, $this->h2Font, $this->titlePar);

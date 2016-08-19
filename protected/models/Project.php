@@ -13,6 +13,9 @@
  * @property string $vuln_overdue
  * @property string $start_date
  * @property float $hours_allocated
+ * @property int $report_template_id
+ * @property bool $custom_report
+ * @property string $report_options
  * @property float $userHoursAllocated
  * @property float $userHoursSpent
  * @property Target[] $targets

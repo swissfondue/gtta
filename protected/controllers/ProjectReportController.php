@@ -33,68 +33,171 @@ class ProjectReportController extends Controller {
     }
 
     /**
-     * Show project report form.
-     * @param int $id
+     * Docx project form
+     * @param $id
      */
-    public function actionProject($id) {
+    public function actionProjectDocx($id) {
         $project = $this->_getProject($id);
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        /** @var ReportTemplate $template */
+        $template = ReportTemplate::model()->with(array(
+            "l10n" => [
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => ["language_id" => $language],
+            ],
+            "summary" => [
+                "with" => [
+                    "l10n" => [
+                        "alias" => "summary_l10n",
+                        "on" => "summary_l10n.language_id = :language_id",
+                        "params" => ["language_id" => $language],
+                    ]
+                ]
+            ],
+            "vulnSections" => [
+                "alias" => "vs",
+                "order" => "vs.sort_order ASC",
+                "with" => [
+                    "l10n" => [
+                        "alias" => "section_l10n",
+                        "on" => "section_l10n.language_id = :language_id",
+                        "params" => ["language_id" => $language]
+                    ]
+                ]
+            ],
+        ))->findByPk($project->report_template_id);
+
+        if (!$template || $template->type != ReportTemplate::TYPE_DOCX) {
+            $this->redirect(["projectReport/template", "id" => $project->id]);
+        }
+
+        $form = new ProjectReportForm(ProjectReportForm::SCENARIO_DOCX);
+
+        if (isset($_POST["ProjectReportForm"])) {
+            $form->attributes = $_POST["ProjectReportForm"];
+
+            try {
+                if (!$form->validate()) {
+                    throw new Exception();
+                }
+
+                $templateCategoryIds = array();
+
+                foreach ($template->vulnSections as $section) {
+                    $templateCategoryIds[] = $section->check_category_id;
+                }
+
+                $fields = [];
+
+                /** @var GlobalCheckField $f */
+                foreach (GlobalCheckField::model()->findAll() as $f) {
+                    $fields[] = $f->name;
+                }
+
+                $prm = new ReportManager();
+                $data = $prm->getProjectReportData($form->targetIds, $templateCategoryIds, $project, $fields, $language);
+                $plugin = ReportPlugin::getPlugin($template, $data, $language);
+
+                try {
+                    $plugin->generate();
+                    $plugin->sendOverHttp();
+                } catch (Exception $e) {
+                    Yii::log($e->getMessage() . "\n" . $e->getTraceAsString(), CLogger::LEVEL_ERROR);
+                    Yii::app()->user->setFlash("error", Yii::t("app", "Error generating report."));
+                }
+            } catch (Exception $e) {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+        }
+
+        $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
+        $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
+        $this->breadcrumbs[] = [Yii::t("app", "Report"), ""];
+
+        // display the report generation form
+        $this->pageTitle = $project->name;
+		$this->render("//project/report/project/docx", [
+            "project" => $project,
+            "form" => $form,
+            "template" => $template,
+        ]);
+    }
+
+    /**
+     * Rtf project form
+     * @param $id
+     */
+    public function actionProjectRtf($id) {
+        $project = $this->_getProject($id);
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        /** @var ReportTemplate $template */
+        $template = ReportTemplate::model()->with(array(
+            "l10n" => [
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => ["language_id" => $language],
+            ],
+            "summary" => [
+                "with" => [
+                    "l10n" => [
+                        "alias" => "summary_l10n",
+                        "on" => "summary_l10n.language_id = :language_id",
+                        "params" => ["language_id" => $language],
+                    ]
+                ]
+            ],
+            "vulnSections" => [
+                "alias" => "vs",
+                "order" => "vs.sort_order ASC",
+                "with" => [
+                    "l10n" => [
+                        "alias" => "section_l10n",
+                        "on" => "section_l10n.language_id = :language_id",
+                        "params" => ["language_id" => $language]
+                    ]
+                ]
+            ],
+            "sections" => [
+                "alias" => "s",
+                "order" => "s.sort_order ASC",
+            ]
+        ))->findByPk($project->report_template_id);
+
+        if (!$template || $template->type != ReportTemplate::TYPE_RTF) {
+            $this->redirect(["projectReport/template", "id" => $project->id]);
+        }
+
         $form = new ProjectReportForm();
 
         if (isset($_POST["ProjectReportForm"])) {
             $form->attributes = $_POST["ProjectReportForm"];
 
-            if ($form->validate()) {
+            try {
+                if (!$form->validate()) {
+                    throw new Exception();
+                }
+
                 if (!$form->fields) {
                     $form->fields = [];
                 }
 
-                if (!$form->options) {
-                    $form->options = [];
-                }
-
-                $language = Language::model()->findByAttributes(array(
-                    "code" => Yii::app()->language
-                ));
-
-                if ($language) {
-                    $language = $language->id;
-                }
-
-                $template = ReportTemplate::model()->with(array(
-                    "l10n" => [
-                        "joinType" => "LEFT JOIN",
-                        "on" => "language_id = :language_id",
-                        "params" => ["language_id" => $language],
-                    ],
-                    "summary" => [
-                        "with" => [
-                            "l10n" => [
-                                "alias" => "summary_l10n",
-                                "on" => "summary_l10n.language_id = :language_id",
-                                "params" => ["language_id" => $language],
-                            ]
-                        ]
-                    ],
-                    "vulnSections" => [
-                        "alias" => "vs",
-                        "order" => "vs.sort_order ASC",
-                        "with" => [
-                            "l10n" => [
-                                "alias" => "section_l10n",
-                                "on" => "section_l10n.language_id = :language_id",
-                                "params" => ["language_id" => $language]
-                            ]
-                        ]
-                    ],
-                    "sections" => [
-                        "alias" => "s",
-                        "order" => "s.sort_order ASC",
-                    ]
-                ))->findByPk($form->templateId);
-
-                if ($template === null) {
-                    Yii::app()->user->setFlash("error", Yii::t("app", "Template not found."));
-                    return;
+                if (!$form->title) {
+                    $form->title = [];
                 }
 
                 $templateCategoryIds = array();
@@ -109,6 +212,14 @@ class ProjectReportController extends Controller {
                     $riskTemplate = RiskTemplate::model()->findByPk($form->riskTemplateId);
                 }
 
+                if (
+                    $template->hasSection(ReportSection::TYPE_RISK_MATRIX) &&
+                    !$riskTemplate
+                ) {
+                    $form->addError("riskTemplateId", Yii::t("app", "Risk Matrix Template is required."));
+                    throw new Exception();
+                }
+
                 $prm = new ReportManager();
                 $data = $prm->getProjectReportData($form->targetIds, $templateCategoryIds, $project, $form->fields, $language);
                 $data = array_merge($data, [
@@ -120,10 +231,11 @@ class ProjectReportController extends Controller {
                     "fileType" => $form->fileType,
                     "risk" => [
                         "template" => $riskTemplate,
-                        "matrix" => [],
+                        "matrix" => $form->riskMatrix,
                     ],
-                    "options" => $form->options,
+                    "title" => $form->title,
                     "infoLocation" => $form->infoChecksLocation,
+                    "fields" => $form->fields,
                 ]);
 
                 $plugin = ReportPlugin::getPlugin($template, $data, $language);
@@ -135,51 +247,10 @@ class ProjectReportController extends Controller {
                     Yii::log($e->getMessage() . "\n" . $e->getTraceAsString(), CLogger::LEVEL_ERROR);
                     Yii::app()->user->setFlash("error", Yii::t("app", "Error generating report."));
                 }
-            } else {
+            } catch (Exception $e) {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
         }
-
-        $criteria = new CDbCriteria();
-        $criteria->order = "t.name ASC";
-
-        if (!User::checkRole(User::ROLE_ADMIN)) {
-            $projects = ProjectUser::model()->with("project")->findAllByAttributes(array(
-                "user_id" => Yii::app()->user->id
-            ));
-
-            $clientIds = array();
-
-            foreach ($projects as $project) {
-                if (!in_array($project->project->client_id, $clientIds)) {
-                    $clientIds[] = $project->project->client_id;
-                }
-            }
-
-            $criteria->addInCondition("id", $clientIds);
-        }
-
-        $clients = Client::model()->findAll($criteria);
-
-        $language = Language::model()->findByAttributes(array(
-            "code" => Yii::app()->language
-        ));
-
-        if ($language) {
-            $language = $language->id;
-        }
-
-        $criteria = new CDbCriteria();
-        $criteria->order = "COALESCE(l10n.name, t.name) ASC";
-        $criteria->together = true;
-
-        $templates = ReportTemplate::model()->with(array(
-            "l10n" => array(
-                "joinType" => "LEFT JOIN",
-                "on"       => "language_id = :language_id",
-                "params"   => array( "language_id" => $language )
-            )
-        ))->findAll($criteria);
 
         $lang = [
             "l10n" => [
@@ -202,11 +273,9 @@ class ProjectReportController extends Controller {
 
         // display the report generation form
         $this->pageTitle = $project->name;
-		$this->render("//project/report/project", [
+		$this->render("//project/report/project/rtf", [
             "project" => $project,
-            "model" => $form,
-            "clients" => $clients,
-            "templates" => $templates,
+            "form" => $form,
             "riskTemplates" => $riskTemplates,
             "fields" => $fields,
             "infoChecksLocation" => [
@@ -214,7 +283,105 @@ class ProjectReportController extends Controller {
                 ProjectReportForm::INFO_LOCATION_SEPARATE_TABLE => Yii::t("app", "Vulnerability List Section (separate table)"),
                 ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION => Yii::t("app", "Info Checks Section"),
             ],
+            "template" => $template,
         ]);
+    }
+
+    /**
+     * Show project report form.
+     * @param int $id
+     */
+    public function actionProject($id) {
+        $project = $this->_getProject($id);
+
+        if (!$project->report_template_id) {
+            $this->redirect(["projectReport/template", "id" => $project->id]);
+        }
+
+        /** @var ReportTemplate $template */
+        $template = ReportTemplate::model()->findByPk($project->report_template_id);
+
+        if (!$template) {
+            $this->redirect(["projectReport/template", "id" => $project->id]);
+        }
+
+        switch ($template->type) {
+            case ReportTemplate::TYPE_DOCX:
+                $this->redirect(["projectReport/projectDocx", "id" => $project->id]);
+                break;
+
+            case ReportTemplate::TYPE_RTF:
+                $this->redirect(["projectReport/projectRtf", "id" => $project->id]);
+                break;
+        }
+
+        $this->redirect(["projectReport/template", "id" => $project->id]);
+    }
+
+    /**
+     * Report template selection
+     * @param $id
+     */
+    public function actionTemplate($id) {
+        $project = $this->_getProject($id);
+        $form = new ProjectReportTemplateForm();
+
+        if (isset($_POST["ProjectReportTemplateForm"])) {
+            $form->attributes = $_POST["ProjectReportTemplateForm"];
+
+            try {
+                if (!$form->validate()) {
+                    throw new Exception();
+                }
+
+                $project->report_template_id = $form->templateId;
+                $project->save();
+
+                $this->redirect(["projectReport/project", "id" => $project->id]);
+            } catch (Exception $e) {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+        }
+
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
+
+        if ($language) {
+            $language = $language->id;
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->order = "COALESCE(l10n.name, t.name) ASC";
+        $criteria->together = true;
+
+        $templates = ReportTemplate::model()->with([
+            "sections",
+            "l10n" => [
+                "joinType" => "LEFT JOIN",
+                "on" => "language_id = :language_id",
+                "params" => ["language_id" => $language]
+            ]
+        ])->findAll($criteria);
+
+        $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
+        $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
+        $this->breadcrumbs[] = [Yii::t("app", "Report"), ""];
+
+        $this->pageTitle = $project->name;
+		$this->render("//project/report/project/template", [
+            "project" => $project,
+            "form" => $form,
+            "templates" => $templates,
+        ]);
+    }
+
+    /**
+     * Customize sections action
+     * @param $id
+     */
+    public function actionCustomizeSections($id) {
+        $project = $this->_getProject($id);
     }
 
     /**

@@ -417,14 +417,10 @@ function System() {
          * Switch save button state for the project report form
          */
         this._projectFormSwitchButton = function () {
-            if (($('.report-target-list input:checked').length == 0) ||
-                $('#ProjectReportForm_templateId').val() == 0 ||
-                ($("#ProjectReportForm_templateId option:selected").data("type") == 0 && $('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() == 0)
-            ) {
-                $('.form-actions > button[type="submit"]').prop('disabled', true);
-            } else {
-                $('.form-actions > button[type="submit"]').prop('disabled', false);
-            }
+            $(".form-actions > button[type=submit]").prop("disabled",
+                $(".report-target-list input:checked").length == 0 ||
+                $("#ProjectReportForm_templateId").val() == 0
+            );
         };
 
         /**
@@ -434,7 +430,7 @@ function System() {
             var val;
 
             if (e.id.match(/^ProjectReportForm_targetIds_/i)) {
-                if ($("#RiskMatrixForm_templateId").val() > 0) {
+                if ($("#ProjectReportForm_riskTemplateId").val() > 0) {
                     _report._refreshRiskMatrix(true);
                 }
 
@@ -451,8 +447,8 @@ function System() {
                 }
 
                 _report._projectFormSwitchButton();
-            } else if (e.id == "RiskMatrixForm_templateId") {
-                val = $("#RiskMatrixForm_templateId").val();
+            } else if (e.id == "ProjectReportForm_riskTemplateId") {
+                val = $("#ProjectReportForm_riskTemplateId").val();
 
                 $("#check-list").hide();
 
@@ -471,7 +467,7 @@ function System() {
                         if (data && data.objects.length) {
                             _report._riskMatrixCategories = data.objects;
 
-                            if ($("#RiskMatrixForm_templateId").val() > 0) {
+                            if ($("#ProjectReportForm_riskTemplateId").val() > 0) {
                                 _report._refreshRiskMatrix(true);
                             }
 
@@ -479,11 +475,8 @@ function System() {
                         } else {
                             $("#risk-template-list").addClass("error");
                             $("#risk-template-list > div > .help-block").show();
-                            $(".form-actions > button[type=submit]").prop("disabled", true);
                         }
                     });
-                } else {
-                    $(".form-actions > button[type=submit]").prop("disabled", true);
                 }
             }
         };
@@ -538,7 +531,9 @@ function System() {
          * @param bool projectReport
          */
         this._refreshRiskMatrix = function (projectReport) {
-            var targets, delTargets, addTargets, i, k, id, target;
+            var targets, delTargets, addTargets, i, k, id, target, matrixVar;
+
+            matrixVar = projectReport ? "ProjectReportForm[riskMatrix]" : "RiskMatrixForm[matrix]";
 
             $(".form-actions > button[type=submit]").prop("disabled", true);
 
@@ -654,10 +649,10 @@ function System() {
                                             .html(
                                                 '<label class="control-label">' + _system.translate('Damage') + '</label>' +
                                                 '<div class="controls">' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="1"' + ( damage == 1 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="2"' + ( damage == 2 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="3"' + ( damage == 3 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="4"' + ( damage == 4 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="1"' + ( damage == 1 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="2"' + ( damage == 2 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="3"' + ( damage == 3 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="4"' + ( damage == 4 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
                                                 '</div>'
                                             )
                                             .appendTo(checkDiv);
@@ -667,10 +662,10 @@ function System() {
                                             .html(
                                                 '<label class="control-label">' + _system.translate('Likelihood') + '</label>' +
                                                 '<div class="controls">' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="1"' + ( likelihood == 1 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="2"' + ( likelihood == 2 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="3"' + ( likelihood == 3 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="4"' + ( likelihood == 4 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="1"' + ( likelihood == 1 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="2"' + ( likelihood == 2 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="3"' + ( likelihood == 3 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="4"' + ( likelihood == 4 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
                                                 '</div>'
                                             )
                                             .appendTo(checkDiv);
