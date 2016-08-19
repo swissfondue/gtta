@@ -302,16 +302,17 @@ class ReportManager {
 
         foreach ($data as $target) {
             $degree = 100.0;
-            $weakest = null;
+            $w = null;
 
             foreach ($target["controls"] as $control) {
                 if ($control["degree"] < $degree) {
-                    $weakest = $control;
+                    $w = $control;
                     $degree = $control["degree"];
                 }
             }
 
-            $weakest[$target["id"]] = $weakest;
+
+            $weakest[$target["id"]] = $w;
         }
 
         return $weakest;

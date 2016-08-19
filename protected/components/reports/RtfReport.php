@@ -323,6 +323,9 @@ class RtfReport extends ReportPlugin {
      * @return boolean
      */
     private function _renderTables(&$container, $table, $text, $substitute=true) {
+        $data = $this->_data;
+        $targets = $data["targets"];
+
         if (strpos($text, $table) === false) {
             return false;
         }
@@ -337,32 +340,32 @@ class RtfReport extends ReportPlugin {
             }
 
             switch ($table) {
-                case '{target.list}':
+                case "{target.list}":
                     $list = new PHPRtfLite_List_Enumeration($this->rtf, PHPRtfLite_List_Enumeration::TYPE_CIRCLE);
 
-                    foreach ($this->project['targets'] as $target) {
+                    foreach ($targets as $target) {
                         $list->addItem($target->hostPort, $this->textFont, $this->noPar);
                     }
 
-                    $container->writeRtfCode('\par ');
+                    $container->writeRtfCode("\\par ");
                     $container->addList($list);
-                    $container->writeRtfCode('\par ');
+                    $container->writeRtfCode("\\par ");
 
                     break;
 
-                case '{target.stats}':
+                case "{target.stats}":
                     $table = $container->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-                    $table->addRows(count($this->project['targets']) + 1);
-                    $table->addColumnsList(array( $this->docWidth * 0.4, $this->docWidth * 0.2, $this->docWidth * 0.2, $this->docWidth * 0.2 ));
+                    $table->addRows(count($targets) + 1);
+                    $table->addColumnsList([$this->docWidth * 0.4, $this->docWidth * 0.2, $this->docWidth * 0.2, $this->docWidth * 0.2]);
 
-                    $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 4);
+                    $table->setBackgroundForCellRange("#E0E0E0", 1, 1, 1, 4);
                     $table->setFontForCellRange($this->boldFont, 1, 1, 1, 4);
-                    $table->setFontForCellRange($this->textFont, 2, 1, count($this->project['targets']) + 1, 4);
-                    $table->setBorderForCellRange($this->thinBorder, 1, 1, count($this->project['targets']) + 1, 4);
+                    $table->setFontForCellRange($this->textFont, 2, 1, count($targets) + 1, 4);
+                    $table->setBorderForCellRange($this->thinBorder, 1, 1, count($targets) + 1, 4);
                     $table->setFirstRowAsHeader();
 
                     // set paddings
-                    for ($row = 1; $row <= count($this->project['targets']) + 1; $row++) {
+                    for ($row = 1; $row <= count($targets) + 1; $row++) {
                         for ($col = 1; $col <= 4; $col++) {
                             $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                             $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
@@ -371,46 +374,46 @@ class RtfReport extends ReportPlugin {
 
                     $row = 1;
 
-                    $table->getCell($row, 1)->writeText(Yii::t('app', 'Target'));
-                    $table->getCell($row, 2)->writeText(Yii::t('app', 'Risk Stats'));
-                    $table->getCell($row, 3)->writeText(Yii::t('app', 'Completed'));
-                    $table->getCell($row, 4)->writeText(Yii::t('app', 'Checks'));
+                    $table->getCell($row, 1)->writeText(Yii::t("app", "Target"));
+                    $table->getCell($row, 2)->writeText(Yii::t("app", "Risk Stats"));
+                    $table->getCell($row, 3)->writeText(Yii::t("app", "Completed"));
+                    $table->getCell($row, 4)->writeText(Yii::t("app", "Checks"));
 
                     $row++;
 
-                    foreach ($this->project['targets'] as $target) {
+                    foreach ($targets as $target) {
                         $table->getCell($row, 1)->writeText($target->hostPort, $this->textFont, $this->noPar);
 
                         if ($target->description) {
-                            $table->getCell($row, 1)->writeText(' / ', $this->textFont);
-                            $table->getCell($row, 1)->writeText($target->description, new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+                            $table->getCell($row, 1)->writeText(" / ", $this->textFont);
+                            $table->getCell($row, 1)->writeText($target->description, new PHPRtfLite_Font($this->fontSize, $this->fontFamily, "#909090"));
                         }
 
                         $table->getCell($row, 2)->writeText(
                             $target->highRiskCount,
-                            new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#d63515')
+                            new PHPRtfLite_Font($this->fontSize, $this->fontFamily, "#d63515")
                         );
 
-                        $table->getCell($row, 2)->writeText(' / ', $this->textFont);
+                        $table->getCell($row, 2)->writeText(" / ", $this->textFont);
                         $table->getCell($row, 2)->writeText(
                             $target->medRiskCount,
-                            new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#dace2f')
+                            new PHPRtfLite_Font($this->fontSize, $this->fontFamily, "#dace2f")
                         );
 
-                        $table->getCell($row, 2)->writeText(' / ', $this->textFont);
+                        $table->getCell($row, 2)->writeText(" / ", $this->textFont);
                         $table->getCell($row, 2)->writeText(
                             $target->lowRiskCount,
-                            new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#53a254')
+                            new PHPRtfLite_Font($this->fontSize, $this->fontFamily, "#53a254")
                         );
 
-                        $table->getCell($row, 2)->writeText(' / ', $this->textFont);
+                        $table->getCell($row, 2)->writeText(" / ", $this->textFont);
                         $table->getCell($row, 2)->writeText($target->infoCount, $this->textFont);
 
                         $count = $target->checkCount;
                         $finished = $target->finishedCount;
 
                         $table->getCell($row, 3)->writeText(
-                            ($count ? sprintf('%.2f%%', $finished / $count * 100) : '0.00%') . ' / ' . $finished,
+                            ($count ? sprintf("%.2f%%", $finished / $count * 100) : "0.00%") . " / " . $finished,
                             $this->textFont
                         );
 
@@ -421,20 +424,20 @@ class RtfReport extends ReportPlugin {
 
                     break;
 
-                case '{target.weakest}':
+                case "{target.weakest}":
                     $table = $container->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-                    $table->addRows(count($this->project['targets']) + 1);
-                    $table->addColumnsList(array( $this->docWidth * 0.4, $this->docWidth * 0.4, $this->docWidth * 0.2 ));
+                    $table->addRows(count($targets) + 1);
+                    $table->addColumnsList([$this->docWidth * 0.4, $this->docWidth * 0.4, $this->docWidth * 0.2]);
 
-                    $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
+                    $table->setBackgroundForCellRange("#E0E0E0", 1, 1, 1, 3);
                     $table->setFontForCellRange($this->boldFont, 1, 1, 1, 3);
-                    $table->setFontForCellRange($this->textFont, 2, 1, count($this->project['targets']) + 1, 3);
-                    $table->setBorderForCellRange($this->thinBorder, 1, 1, count($this->project['targets']) + 1, 3);
+                    $table->setFontForCellRange($this->textFont, 2, 1, count($targets) + 1, 3);
+                    $table->setBorderForCellRange($this->thinBorder, 1, 1, count($targets) + 1, 3);
                     $table->mergeCellRange(1, 2, 1, 3);
                     $table->setFirstRowAsHeader();
 
                     // set paddings
-                    for ($row = 1; $row <= count($this->project['targets']) + 1; $row++) {
+                    for ($row = 1; $row <= count($targets) + 1; $row++) {
                         for ($col = 1; $col <= 3; $col++) {
                             $table->getCell($row, $col)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
                             $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
@@ -443,36 +446,38 @@ class RtfReport extends ReportPlugin {
 
                     $row = 1;
 
-                    $table->getCell($row, 1)->writeText(Yii::t('app', 'Target'));
-                    $table->getCell($row, 2)->writeText(Yii::t('app', 'Weakest Control'));
+                    $table->getCell($row, 1)->writeText(Yii::t("app", "Target"));
+                    $table->getCell($row, 2)->writeText(Yii::t("app", "Weakest Control"));
 
                     $row++;
 
-                    foreach ($this->project['targets'] as $target) {
+                    foreach ($targets as $target) {
                         $table->getCell($row, 1)->writeText($target->hostPort, $this->textFont, $this->noPar);
 
                         if ($target->description) {
-                            $table->getCell($row, 1)->writeText(' / ', $this->textFont);
-                            $table->getCell($row, 1)->writeText($target->description, new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+                            $table->getCell($row, 1)->writeText(" / ", $this->textFont);
+                            $table->getCell($row, 1)->writeText($target->description, new PHPRtfLite_Font($this->fontSize, $this->fontFamily, "#909090"));
                         }
 
-                        $control = $this->project['weakestControls'][$target->id];
+                        $control = isset($data["weakestControls"][$target->id]) ? $data["weakestControls"][$target->id] : null;
 
-                        $table->getCell($row, 2)->writeText($control ? $control['name'] : Yii::t('app', 'N/A'));
-                        $table->getCell($row, 3)->writeText($control ? $control['degree'] . '%' : Yii::t('app', 'N/A'));
+                        if ($control && is_array($control) && isset($control["name"]) && isset($control["degree"])) {
+                            $table->getCell($row, 2)->writeText($control ? $control["name"] : Yii::t("app", "N/A"));
+                            $table->getCell($row, 3)->writeText($control ? $control["degree"] . "%" : Yii::t("app", "N/A"));
+                        }
 
                         $row++;
                     }
 
                     break;
 
-                case '{vuln.list}':
+                case "{vuln.list}":
                     $table = $container->addTable(PHPRtfLite_Table::ALIGN_LEFT);
-                    $rowCount = count($this->project['reducedChecks']) > 5 ? 6 : count($this->project['reducedChecks']) + 1;
+                    $rowCount = count($data["reducedChecks"]) > 5 ? 6 : count($data["reducedChecks"]) + 1;
                     $table->addRows($rowCount);
-                    $table->addColumnsList(array( $this->docWidth * 0.4, $this->docWidth * 0.3, $this->docWidth * 0.3 ));
+                    $table->addColumnsList([$this->docWidth * 0.4, $this->docWidth * 0.3, $this->docWidth * 0.3]);
 
-                    $table->setBackgroundForCellRange('#E0E0E0', 1, 1, 1, 3);
+                    $table->setBackgroundForCellRange("#E0E0E0", 1, 1, 1, 3);
                     $table->setFontForCellRange($this->boldFont, 1, 1, 1, 3);
                     $table->setFontForCellRange($this->textFont, 2, 1, $rowCount, 3);
                     $table->setBorderForCellRange($this->thinBorder, 1, 1, $rowCount, 3);
@@ -488,25 +493,25 @@ class RtfReport extends ReportPlugin {
 
                     $row = 1;
 
-                    $table->getCell($row, 1)->writeText(Yii::t('app', 'Target'));
-                    $table->getCell($row, 2)->writeText(Yii::t('app', 'Check'));
-                    $table->getCell($row, 3)->writeText(Yii::t('app', 'Question'));
+                    $table->getCell($row, 1)->writeText(Yii::t("app", "Target"));
+                    $table->getCell($row, 2)->writeText(Yii::t("app", "Check"));
+                    $table->getCell($row, 3)->writeText(Yii::t("app", "Question"));
 
                     $row++;
 
-                    $reducedChecks = $this->project['reducedChecks'];
-                    usort($reducedChecks, array('ReportManager', 'sortChecksByRating'));
+                    $reducedChecks = $data["reducedChecks"];
+                    usort($reducedChecks, ["ReportManager", "sortChecksByRating"]);
 
                     foreach ($reducedChecks as $check) {
-                        $table->getCell($row, 1)->writeText($check['target']['host'], $this->textFont, $this->noPar);
+                        $table->getCell($row, 1)->writeText($check["target"]["host"], $this->textFont, $this->noPar);
 
-                        if ($check['target']['description']) {
-                            $table->getCell($row, 1)->writeText(' / ', $this->textFont);
-                            $table->getCell($row, 1)->writeText($check['target']['description'], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, '#909090'));
+                        if ($check["target"]["description"]) {
+                            $table->getCell($row, 1)->writeText(" / ", $this->textFont);
+                            $table->getCell($row, 1)->writeText($check["target"]["description"], new PHPRtfLite_Font($this->fontSize, $this->fontFamily, "#909090"));
                         }
 
-                        $table->getCell($row, 2)->writeText($check['name']);
-                        $table->getCell($row, 3)->writeText($check['question'] ? $check['question'] : Yii::t('app', 'N/A'));
+                        $table->getCell($row, 2)->writeText($check["name"]);
+                        $table->getCell($row, 3)->writeText($check["question"] ? $check["question"] : Yii::t("app", "N/A"));
 
                         $row++;
 
@@ -533,7 +538,7 @@ class RtfReport extends ReportPlugin {
      * @return string
      */
     private function _renderLists(&$container, $text, $substitute=true) {
-        $listTypes = array("ul", "ol");
+        $listTypes = ["ul", "ol"];
         $rendered = false;
 
         foreach ($listTypes as $listType) {
@@ -561,13 +566,13 @@ class RtfReport extends ReportPlugin {
 
             $listBlock = substr($text, $openTagPosition + strlen($openTag), $closeTagPosition - $openTagPosition - strlen($openTag));
             $listBlock = trim($listBlock);
-            $listElements = explode('<li>', $listBlock);
+            $listElements = explode("<li>", $listBlock);
 
             $listObject = null;
 
-            if ($listType == 'ol') {
+            if ($listType == "ol") {
                 $listObject = new PHPRtfLite_List_Numbering($this->rtf);
-            } elseif ($listType == 'ul') {
+            } elseif ($listType == "ul") {
                 $listObject = new PHPRtfLite_List_Enumeration($this->rtf, PHPRtfLite_List_Enumeration::TYPE_CIRCLE);
             }
 
@@ -578,7 +583,7 @@ class RtfReport extends ReportPlugin {
                     continue;
                 }
 
-                $listElement = str_replace('</li>', '', $listElement);
+                $listElement = str_replace("</li>", "", $listElement);
 
                 if ($substitute) {
                     $listElement = $this->_substituteScalarVars($listElement);
@@ -587,9 +592,9 @@ class RtfReport extends ReportPlugin {
                 $listObject->addItem($listElement, $this->textFont, $this->noPar);
             }
 
-            $container->writeRtfCode('\par ');
+            $container->writeRtfCode("\\par ");
             $container->addList($listObject);
-            $container->writeRtfCode('\par ');
+            $container->writeRtfCode("\\par ");
 
             $textBlock = substr($text, $closeTagPosition + strlen($closeTag));
             $this->renderText($container, $textBlock, $substitute);

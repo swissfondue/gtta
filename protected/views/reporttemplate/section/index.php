@@ -23,7 +23,7 @@
     data-save-section-order-url="<?= $this->createUrl("reporttemplate/saveSectionOrder", ["id" => $template->id]); ?>"
     data-control-section-url="<?= $this->createUrl("reporttemplate/controlSection", ["id" => $template->id]); ?>">
     <div class="row">
-        <div class="span3">
+        <div class="span4">
             <ul class="sortable-section-list">
                 <?php foreach ($sections as $section): ?>
                     <li data-section-id="<?= $section->id; ?>" data-section-type="<?= $section->type ?>" onclick="admin.reportTemplate.sections.select(this);">
@@ -41,9 +41,11 @@
                     </li>
                 <?php endforeach; ?>
             </ul>
+
+            <?= $this->renderPartial("partial/variables"); ?>
         </div>
 
-        <div class="span9 add-section hide">
+        <div class="span8 add-section hide">
             <h3><?= Yii::t("app", "Available Sections") ?></h3>
 
             <div>
@@ -67,7 +69,7 @@
             <a class="btn" href="#add" onclick="admin.reportTemplate.sections.closeAddForm();"><?= Yii::t("app", "Cancel"); ?></a>
         </div>
 
-        <div class="span9 edit-section">
+        <div class="span8 edit-section">
         </div>
     </div>
 </div>
