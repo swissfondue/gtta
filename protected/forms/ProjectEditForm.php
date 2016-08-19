@@ -56,6 +56,11 @@ class ProjectEditForm extends CFormModel {
     public $hiddenFields;
 
     /**
+     * @var language id
+     */
+    public $languageId;
+
+    /**
      * Constructor
      * @param string $scenario
      * @param null $projectId
@@ -80,6 +85,7 @@ class ProjectEditForm extends CFormModel {
             array("clientId", "checkClient"),
             array("status", "in", "range" => Project::getValidStatuses()),
             array("hoursAllocated", "numerical", "min" => 0),
+            array("languageId", "numerical", "integerOnly" => true),
             array("hoursAllocated", "checkHours"),
             array("hiddenFields", "safe"),
 		);

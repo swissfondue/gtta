@@ -165,7 +165,9 @@ class System extends ActiveRecord {
      * @throws Exception
      */
     public function getLanguage() {
-        if (isset(Yii::app()->language)) {
+        $language = null;
+
+        if (!$language && isset(Yii::app()->language)) {
             $language = Language::model()->findByAttributes(["code" => Yii::app()->language]);
         }
 

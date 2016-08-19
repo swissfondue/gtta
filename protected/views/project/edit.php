@@ -99,6 +99,23 @@
             </div>
         </div>
 
+        <div class="control-group <?php if ($model->getError('languageId')) echo 'error'; ?>">
+            <label class="control-label" for="ProjectEditForm_languageId"><?php echo Yii::t("app", "Language"); ?></label>
+            <div class="controls">
+                <select class="input-xlarge" id="ProjectEditForm_languageId" name="ProjectEditForm[languageId]">
+                    <option value="0"><?= Yii::t("app", "N/A"); ?></option>
+                    <?php foreach ($languages as $language): ?>
+                        <option value="<?php echo $language->id; ?>" <?= $model->languageId == $language->id ? "selected" : ''; ?>>
+                            <?php echo CHtml::encode($language->name); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if ($model->getError('languageId')): ?>
+                    <p class="help-block"><?php echo $model->getError('languageId'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <div class="control-group <?php if ($model->getError("hiddenFields")) echo 'error'; ?>">
             <label class="control-label" for="ProjectEditForm_hiddenFields"><?php echo Yii::t("app", "Hide Fields"); ?></label>
             <div class="controls">

@@ -40,6 +40,12 @@ class Controller extends CController {
     public $entriesPerPage = null;
 
     /**
+     * Language switcher visibility
+     * @var bool
+     */
+    public $languageSwitcher = true;
+
+    /**
      * Controller initialization.
      */
     function init() {
@@ -56,6 +62,19 @@ class Controller extends CController {
 
         if (isset($app->request->cookies["language"])) {
             $lang = $app->request->cookies["language"]->value;
+        }
+
+        if ($this->id == "project") {
+            $projectId = Yii::app()->request->getQuery("id");
+
+            if ($projectId) {
+                $project = Project::model()->findByPk($projectId);
+
+                if ($project && $project->language) {
+                    $lang = $project->language->code;
+                    $this->languageSwitcher = false;
+                }
+            }
         }
 
         if (!in_array($lang, array("en", "de"))) {

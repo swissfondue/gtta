@@ -15,6 +15,7 @@
  * @property float $hours_allocated
  * @property float $userHoursAllocated
  * @property float $userHoursSpent
+ * @property integer $language_id
  * @property Target[] $targets
  */
 class Project extends ActiveRecord implements IVariableScopeObject {
@@ -106,6 +107,7 @@ class Project extends ActiveRecord implements IVariableScopeObject {
             "trackedTime" => array(self::STAT, "ProjectTime", "project_id", "select" => "trunc(SUM(time) / 3600)"), // Convert seconds to hours
             "timeRecords" => array(self::HAS_MANY, "ProjectTime", "project_id"),
             "issues" => array(self::HAS_MANY, "Issue", "project_id"),
+            "language" => array(self::BELONGS_TO, "Language", "language_id"),
 		);
 	}
 
