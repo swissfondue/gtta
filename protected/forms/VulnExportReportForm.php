@@ -3,18 +3,7 @@
 /**
  * This is the model class for project vulnerabilities export form.
  */
-class VulnExportReportForm extends CFormModel
-{
-    /**
-     * @var integer client id.
-     */
-    public $clientId;
-
-    /**
-     * @var integer project id.
-     */
-    public $projectId;
-
+class VulnExportReportForm extends FormModel {
     /**
      * @var array target ids.
      */
@@ -38,26 +27,22 @@ class VulnExportReportForm extends CFormModel
 	/**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
-		return array(
-            array( 'ratings, columns', 'required' ),
-            array( 'header', 'boolean' ),
-            array( 'clientId, projectId, targetIds, ratings, columns', 'safe' ),
-		);
+	public function rules() {
+		return [
+            ["ratings, columns", "required"],
+            ["header", "boolean"],
+            ["targetIds, ratings, columns", "safe"],
+		];
 	}
 
     /**
 	 * @return array customized attribute labels (name=>label)
 	 */
-	public function attributeLabels()
-	{
-		return array(
-            'clientId'  => Yii::t('app', 'Client'),
-			'projectId' => Yii::t('app', 'Project'),
-			'targetIds' => Yii::t('app', 'Targets'),
-            'ratings'   => Yii::t('app', 'Ratings'),
-			'columns'   => Yii::t('app', 'Columns'),
-		);
+	public function attributeLabels() {
+		return [
+			"targetIds" => Yii::t("app", "Targets"),
+            "ratings" => Yii::t("app", "Ratings"),
+			"columns" => Yii::t("app", "Columns"),
+		];
 	}
 }

@@ -13,9 +13,13 @@
  * @property string $vuln_overdue
  * @property string $start_date
  * @property float $hours_allocated
+ * @property int $report_template_id
+ * @property bool $custom_report
+ * @property string $report_options
  * @property float $userHoursAllocated
  * @property float $userHoursSpent
  * @property Target[] $targets
+ * @property ProjectReportSection[] $sections
  */
 class Project extends ActiveRecord implements IVariableScopeObject {
     /**
@@ -106,6 +110,7 @@ class Project extends ActiveRecord implements IVariableScopeObject {
             "trackedTime" => array(self::STAT, "ProjectTime", "project_id", "select" => "trunc(SUM(time) / 3600)"), // Convert seconds to hours
             "timeRecords" => array(self::HAS_MANY, "ProjectTime", "project_id"),
             "issues" => array(self::HAS_MANY, "Issue", "project_id"),
+            "sections" => array(self::HAS_MANY, "ProjectReportSection", "project_id"),
 		);
 	}
 
@@ -170,7 +175,7 @@ class Project extends ActiveRecord implements IVariableScopeObject {
         );
 
         if (!in_array($name, $vars)) {
-            throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+            return "";
         }
 
         if ($name == "rating") {
@@ -196,7 +201,7 @@ class Project extends ActiveRecord implements IVariableScopeObject {
         );
 
         if (!in_array($name, $lists)) {
-            throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+            return [];
         }
 
         $data = array();
@@ -402,5 +407,20 @@ class Project extends ActiveRecord implements IVariableScopeObject {
         $criteria->order = "top_rating DESC";
 
         return Issue::model()->findAll($criteria);
+    }
+
+    /**
+     * Check if project has custom section specified
+     * @param int $section
+     * @return bool
+     */
+    public function hasSection($section) {
+        foreach ($this->sections as $scn) {
+            if ($scn->type == $section) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

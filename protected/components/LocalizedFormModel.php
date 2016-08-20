@@ -3,8 +3,7 @@
 /**
  * Base class for localized form model.
  */
-class LocalizedFormModel extends CFormModel
-{
+class LocalizedFormModel extends FormModel {
     /**
      * @var array localized items.
      */
@@ -13,8 +12,7 @@ class LocalizedFormModel extends CFormModel
     /**
      * Get default value for localized item.
      */
-    public function defaultL10n($languages, $itemName, $field = false)
-    {
+    public function defaultL10n($languages, $itemName, $field = false) {
         $values = $this->localizedItems;
 
         if ($field) {

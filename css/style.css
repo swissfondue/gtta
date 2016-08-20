@@ -1418,3 +1418,53 @@ ul.check-list li,
 ul.target-list li {
     padding:5px 0 5px 0;
 }
+
+.sortable-section-list, .available-section-list {
+    list-style:none;
+    margin:0;
+    padding:0;
+}
+
+.sortable-section-list {
+    width:100%;
+    min-height:200px;
+}
+
+.sortable-section-list li {
+    background-color:#f0f0f0;
+    margin:0 0 10px 0;
+    padding:10px;
+    border-radius:5px;
+    -webkit-border-radius:5px;
+    -moz-border-radius:5px;
+    border:1px solid #ddd;
+    cursor:pointer;
+}
+
+.sortable-section-list li.selected {
+    background-color:#fff;
+}
+
+.sortable-ghost {
+    opacity: 0.2;
+}
+
+.add-section h3 {
+    margin-bottom:10px;
+}
+
+.add-section div {
+    overflow: hidden;
+}
+
+.available-section-list li {
+    background-color:#f0f0f0;
+    margin:0 10px 10px 0;
+    padding:10px;
+    border-radius:5px;
+    -webkit-border-radius:5px;
+    -moz-border-radius:5px;
+    border:1px solid #ddd;
+    cursor:pointer;
+    float:left;
+}

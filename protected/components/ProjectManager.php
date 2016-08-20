@@ -34,4 +34,25 @@ class ProjectManager {
 
         return $issue;
     }
+
+    /**
+     * Initialize custom report template
+     * @param Project $project
+     * @param ReportTemplate $template
+     */
+    public function initCustomReportTemplate(Project $project, ReportTemplate $template) {
+        ProjectReportSection::model()->deleteAllByAttributes([
+            "project_id" => $project->id
+        ]);
+
+        foreach ($template->sections as $section) {
+            $scn = new ProjectReportSection();
+            $scn->project_id = $project->id;
+            $scn->type = $section->type;
+            $scn->sort_order = $section->sort_order;
+            $scn->title = $section->title;
+            $scn->content = $section->content;
+            $scn->save();
+        }
+    }
 }

@@ -1,8 +1,7 @@
 /**
  * Admin namespace.
  */
-function Admin()
-{
+function Admin() {
     /**
      * Check object.
      */
@@ -1335,6 +1334,370 @@ function Admin()
             if (confirm(system.translate("Are you sure that you want to delete this object?"))) {
                 _reportTemplate._controlTemplate(id, "delete");
             }
+        };
+
+        /**
+         * Report Template Sections
+         */
+        this.sections = new function () {
+            var _sections = this,
+                sectionList,
+                sectionData,
+                fieldTypes,
+                formId,
+                modified = false;
+
+            /**
+             * Init sections editor
+             * @param sections
+             * @param fTypes
+             */
+            this.init = function (sections, fTypes) {
+                sectionData = sections;
+                fieldTypes = fTypes;
+                formId = $("[data-form-id]").data("form-id");
+
+                sectionList = Sortable.create($(".sortable-section-list")[0], {
+                    group: {
+                        name: "report-sections",
+                        put: true,
+                        pull: true
+                    },
+
+                    onAdd: function (evt) {
+                        var item, type, title;
+
+                        item = $(evt.item);
+
+                        item.click(function () {
+                            _sections.select(this);
+                        });
+
+                        item
+                            .append(
+                                $("<a>")
+                                    .attr("href", "#remove")
+                                    .click(function (e) {
+                                        _sections.del(this);
+                                        e.stopPropagation();
+                                    })
+                                    .append(
+                                        $("<i>")
+                                            .addClass("icon icon-remove")
+                                    )
+                            );
+
+                        type = item.data("section-type");
+                        title = fieldTypes[type.toString()];
+
+                        _sections.saveSection(item, null, type, title, "");
+                    },
+
+                    onUpdate: function (evt) {
+                        _sections.saveOrder();
+                    }
+                });
+
+                var availableSectionList = Sortable.create($(".available-section-list")[0], {
+                    sort: false,
+                    group: {
+                        name: "report-sections",
+                        pull: "clone",
+                        put: false
+                    }
+                });
+
+                $(".sortable-section-list a.remove").click(function (e) {
+                    _sections.del(this);
+                    e.stopPropagation();
+                });
+
+                window.onbeforeunload = function(e) {
+                    if (modified) {
+                        return "Section is unsaved. Do you really want to continue and lose all changes?"
+                    }
+
+                    return null;
+                };
+            };
+
+            /**
+             * Show "Add Section" form
+             */
+            this.showAddForm = function () {
+                var addSection = $(".add-section");
+
+                if (addSection.is(":visible")) {
+                    this.closeAddForm();
+                } else {
+                    $(".edit-section").slideUp("fast");
+                    addSection.slideDown("fast");
+                }
+            };
+
+            /**
+             * Close "Add Section" form
+             */
+            this.closeAddForm = function () {
+                $(".edit-section").slideDown("fast");
+                $(".add-section").slideUp("fast");
+            };
+
+            /**
+             * Remove element from the list
+             * @param item
+             */
+            this.del = function (item) {
+                var el, id;
+
+                el = $(sectionList.closest(item));
+
+                if (confirm(system.translate("Are you sure that you want to delete this object?"))) {
+                    id = el.data("section-id");
+
+                    if (id) {
+                        $.ajax({
+                            dataType: "json",
+                            url: $("[data-control-section-url]").data("control-section-url"),
+                            timeout: system.ajaxTimeout,
+                            type: "POST",
+
+                            data: {
+                                "EntryControlForm[operation]": "delete",
+                                "EntryControlForm[id]": id,
+                                "YII_CSRF_TOKEN": system.csrf
+                            },
+
+                            success: function (data, textStatus) {
+                                $(".loader-image").hide();
+
+                                if (data.status == "error") {
+                                    system.addAlert("error", data.errorText);
+                                    return;
+                                }
+
+                                el.slideUp("fast", function () {
+                                    el.remove();
+                                });
+                            },
+
+                            error: function (jqXHR, textStatus, e) {
+                                $(".loader-image").hide();
+                                system.addAlert("error", system.translate("Request failed, please try again."));
+                            },
+
+                            beforeSend: function (jqXHR, settings) {
+                                $(".loader-image").show();
+                            }
+                        });
+                    } else {
+                        el.slideUp("fast", function () {
+                            el.remove();
+                        });
+                    }
+                }
+            };
+
+            /**
+             * Select list item
+             * @param item
+             */
+            this.select = function (item) {
+                if (modified && !confirm("Section has unsaved changes. Do you really want to continue and lose all changes?")) {
+                    return;
+                }
+
+                modified = false;
+
+                var id, template, editSection, title, content, type;
+
+                item = $(item);
+                editSection = $(".edit-section");
+                id = item.data("section-id");
+
+                if (id) {
+                    title = sectionData[id].title;
+                    content = sectionData[id].content;
+                    type = sectionData[id].type;
+                } else {
+                    type = item.data("section-type");
+                    title = fieldTypes[type.toString()];
+                }
+
+                template = $(".section-form-template").clone();
+                this.closeAddForm();
+
+                $(".sortable-section-list li").removeClass("selected");
+                item.addClass("selected");
+
+                template
+                    .removeClass("section-form-template")
+                    .removeClass("hide")
+                    .data("section-id", id);
+
+                template.find("[name=\"" + formId + "[title]\"]")
+                    .val(title)
+                    .change(function () {
+                        modified = true;
+                    });
+
+                template.find("[name=\"" + formId + "[content]\"]")
+                    .val(content);
+
+                template.find("[data-field-type]")
+                    .text(fieldTypes[type.toString()]);
+
+                template.find("button")
+                    .click(function () {
+                        _sections.saveSectionForm(item);
+                        return false;
+                    });
+
+                template.find(".wysiwyg").ckeditor(function () {
+                    this.on("change", function() {
+                         if (this.checkDirty()) {
+                             modified = true;
+                         }
+                    })
+                });
+
+                editSection
+                    .empty()
+                    .append(template);
+            };
+
+            /**
+             * Get sections order
+             */
+            this.getOrder = function () {
+                var order = [];
+
+                $(".sortable-section-list li").each(function (number, e) {
+                    order[number] = $(e).data("section-id");
+                });
+
+                return order;
+            };
+
+            /**
+             * Save sections order
+             */
+            this.saveOrder = function () {
+                var data = {"YII_CSRF_TOKEN": system.csrf};
+                data[formId + "[order]"] = JSON.stringify(_sections.getOrder());
+
+                $.ajax({
+                    dataType: "json",
+                    url: $("[data-save-section-order-url]").data("save-section-order-url"),
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+                    data: data,
+
+                    success: function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                        }
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend: function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+            };
+
+            /**
+             * Save section
+             * @param listItem
+             * @param id
+             * @param type
+             * @param title
+             * @param content
+             */
+            this.saveSection = function (listItem, id, type, title, content) {
+                var editSection, button, data;
+
+                editSection = $(".edit-section");
+                button = editSection.find("button");
+                data = {"YII_CSRF_TOKEN": system.csrf};
+                
+                data[formId + "[order]"] = JSON.stringify(_sections.getOrder());
+                data[formId + "[content]"] = content;
+                data[formId + "[title]"] = title;
+                data[formId + "[type]"] = type;
+                data[formId + "[id]"] = id;
+
+                $.ajax({
+                    dataType: "json",
+                    url: $("[data-save-section-url]").data("save-section-url"),
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+
+                    data: data,
+
+                    success: function (data, textStatus) {
+                        $(".loader-image").hide();
+                        button.prop("disabled", false);
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        if (!id) {
+                            id = data.id;
+                        }
+
+                        sectionData[id] = {
+                            type: type,
+                            title: title,
+                            content: content
+                        };
+
+                        listItem.attr("data-section-id", id);
+                        listItem.find("span.title").text(title);
+
+                        system.addAlert("success", system.translate("Section saved."));
+                        modified = false;
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                        button.prop("disabled", false);
+                    },
+
+                    beforeSend: function (jqXHR, settings) {
+                        $(".loader-image").show();
+                        button.prop("disabled", true);
+                    }
+                });
+            };
+
+            /**
+             * Save section form
+             * @param listItem
+             */
+            this.saveSectionForm = function (listItem) {
+                var editSection, title, content, type, id;
+
+                id = listItem.data("section-id") || null;
+                type = listItem.data("section-type");
+
+                editSection = $(".edit-section");
+                title = editSection.find("input").val();
+                content = editSection.find("textarea").val();
+
+                _sections.saveSection(listItem, id, type, title, content);
+            };
         };
     };
 

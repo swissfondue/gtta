@@ -3,69 +3,76 @@
 /**
  * This is the model class for report template section edit form.
  */
-class ReportTemplateSectionEditForm extends LocalizedFormModel
-{
+class ReportTemplateSectionEditForm extends FormModel {
     /**
-     * @var string intro.
+     * Scenarios
      */
-    public $intro;
+    const SCENARIO_SECTION = "section";
 
     /**
+     * @var int id.
+     */
+    public $id;
+
+	/**
      * @var string title.
      */
     public $title;
 
     /**
-     * @var integer sort order.
+     * @var string content.
      */
-    public $sortOrder;
+    public $content;
 
     /**
-     * @var integer category id.
+     * @var int type
      */
-    public $categoryId;
+    public $type;
+
+    /**
+     * @var array order
+     */
+    public $order;
 
     /**
 	 * @return array validation rules for model attributes.
 	 */
-	public function rules()
-	{
-		return array(
-			array( 'title, categoryId, sortOrder', 'required' ),
-            array( 'title', 'length', 'max' => 1000 ),
-            array( 'sortOrder', 'numerical', 'integerOnly' => true, 'min' => 0 ),
-            array( 'categoryId', 'numerical', 'integerOnly' => true ),
-            array( 'categoryId', 'checkCategory' ),
-            array( 'localizedItems, intro', 'safe' ),
-		);
+	public function rules() {
+		return [
+			["title, type", "required", "on" => self::SCENARIO_SECTION],
+            ["order", "required"],
+            ["title", "length", "max" => 1000],
+            ["id, type", "numerical", "integerOnly" => true],
+            ["type", "in", "range" => ReportSection::getValidTypes()],
+            ["content", "safe"],
+            ["order", "checkOrder"],
+		];
 	}
     
     /**
 	 * @return array customized attribute labels (name=>label)
 	 */
-	public function attributeLabels()
-	{
-		return array(
-            'title'      => Yii::t('app', 'Title'),
-			'categoryId' => Yii::t('app', 'Category'),
-            'sortOrder'  => Yii::t('app', 'Sort Order'),
-            'intro'      => Yii::t('app', 'Introduction'),
-		);
+	public function attributeLabels() {
+		return [
+			"title" => Yii::t("app", "Title"),
+			"type" => Yii::t("app", "Type"),
+            "content" => Yii::t("app", "Content"),
+		];
 	}
 
     /**
-	 * Checks if check category exists.
-	 */
-	public function checkCategory($attribute, $params)
-	{
-		$category = CheckCategory::model()->findByPk($this->categoryId);
+     * Check order
+     * @param $attribute
+     * @param $params
+     * @return boolean
+     */
+    public function checkOrder($attribute, $params) {
+        $this->order = @json_decode($this->order, true);
 
-        if (!$category)
-        {
-            $this->addError('categoryId', Yii::t('app', 'Category not found.'));
-            return false;
+        if (!$this->order) {
+            $this->order = [];
         }
 
         return true;
-	}
+    }
 }

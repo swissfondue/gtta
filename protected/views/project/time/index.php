@@ -5,7 +5,7 @@
 
     <div class="pull-right buttons">
         <a class="btn" href="<?php echo $this->createUrl("project/tracktime", array("id" => $project->id)); ?>"><i class="icon icon-time"></i> <?php echo Yii::t("app", "Track Time"); ?></a>&nbsp;
-        <a class="btn" <?php if (!count($records)) echo "disabled=\"disabled\""; ?> href="<?php echo $this->createUrl("report/trackedtime", array("id" => $project->id)); ?>"><i class="icon icon-share"></i> <?php echo Yii::t("app", "Export"); ?></a>
+        <a class="btn" <?php if (!count($records)) echo "disabled=\"disabled\""; ?> href="<?php echo $this->createUrl("projectReport/trackedtime", ["id" => $project->id]); ?>"><i class="icon icon-share"></i> <?php echo Yii::t("app", "Export"); ?></a>
     </div>
 
     <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
