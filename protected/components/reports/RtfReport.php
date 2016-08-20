@@ -2108,7 +2108,7 @@ class RtfReport extends ReportPlugin {
     public function generate() {
         $data = $this->_data;
         $project = $data["project"];
-
+        $sections = $data["sections"];
         $template = $this->_template;
         $this->setup($data["pageMargin"], $data["cellPadding"], $data["fontSize"], $data["fontFamily"]);
         $section = $this->rtf->addSection();
@@ -2148,7 +2148,7 @@ class RtfReport extends ReportPlugin {
         }
 
         /** @var ReportTemplateSection $s */
-        foreach ($template->sections as $s) {
+        foreach ($sections as $s) {
             $toc->writeHyperLink(
                 "#section" . $sectionNumber,
                 $sectionNumber . ". " . $s->title . "\n",

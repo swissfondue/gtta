@@ -234,6 +234,15 @@ class ProjectReportController extends Controller {
                 $project->report_options = $form->toJSON();
                 $project->save();
 
+                $sections = $template->sections;
+
+                if ($project->custom_report) {
+                    $sections = ProjectReportSection::model()->findAllByAttributes(
+                        ["project_id" => $project->id],
+                        ["order" => "sort_order ASC"]
+                    );
+                }
+
                 $prm = new ReportManager();
                 $data = $prm->getProjectReportData($form->targetIds, $templateCategoryIds, $project, $form->fields, $language);
                 $data = array_merge($data, [
@@ -250,6 +259,7 @@ class ProjectReportController extends Controller {
                     "title" => $form->title,
                     "infoLocation" => $form->infoChecksLocation,
                     "fields" => $form->fields,
+                    "sections" => $sections,
                 ]);
 
                 $plugin = ReportPlugin::getPlugin($template, $data, $language);
@@ -360,8 +370,13 @@ class ProjectReportController extends Controller {
                     throw new Exception();
                 }
 
+                $previousTemplate = $project->report_template_id;
+                $previousCustom = $project->custom_report;
+
                 $form->customReport = isset($_POST["ProjectReportTemplateForm"]["customReport"]);
                 $project->fromForm($form);
+
+                /** @var ReportTemplate $template */
                 $template = ReportTemplate::model()->findByPk($project->report_template_id);
 
                 if ($template->type != ReportTemplate::TYPE_RTF) {
@@ -369,6 +384,15 @@ class ProjectReportController extends Controller {
                 }
 
                 $project->save();
+
+                // copy sections to project
+                if (
+                    $project->custom_report &&
+                    ($project->custom_report != $previousCustom || $project->report_template_id != $previousTemplate)
+                ) {
+                    $pm = new ProjectManager();
+                    $pm->initCustomReportTemplate($project, $template);
+                }
 
                 $this->redirect(["projectReport/project", "id" => $project->id]);
             } catch (Exception $e) {
@@ -412,11 +436,194 @@ class ProjectReportController extends Controller {
     }
 
     /**
-     * Customize sections action
+     * Custom sections action
+     * @param $id
+     * @throws CHttpException
+     */
+    public function actionSections($id) {
+        $project = $this->_getProject($id);
+
+        $sections = ProjectReportSection::model()->findAllByAttributes(
+            ["project_id" => $project->id],
+            ["order" => "sort_order ASC"]
+        );
+
+        $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
+        $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
+        $this->breadcrumbs[] = [Yii::t("app", "Report"), $this->createUrl("projectReport/projectRtf", ["id" => $project->id])];
+        $this->breadcrumbs[] = [Yii::t("app", "Customization"), ""];
+
+        $this->pageTitle = $project->name;
+        $this->render("//project/report/project/sections", array(
+            "project" => $project,
+            "sections" => $sections,
+            "languages" => Language::model()->findAll(),
+            "system" => System::model()->findByPk(1)
+        ));
+    }
+
+    /**
+     * Section save
      * @param $id
      */
-    public function actionCustomizeSections($id) {
-        $project = $this->_getProject($id);
+    public function actionSaveSection($id) {
+        $response = new AjaxResponse();
+
+        try {
+            $project = $this->_getProject($id);
+
+            $form = new ProjectReportSectionEditForm(ProjectReportSectionEditForm::SCENARIO_SECTION);
+            $form->attributes = $_POST["ProjectReportSectionEditForm"];
+
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            /** @var ProjectReportSection $section */
+            $section = null;
+
+            if ($form->id) {
+                $section = ProjectReportSection::model()->findByAttributes([
+                    "id" => $form->id,
+                    "project_id" => $project->id,
+                ]);
+            } else {
+                $form->id = null;
+                $section = new ProjectReportSection();
+                $section->project_id = $project->id;
+                $section->sort_order = 0;
+            }
+
+            if (!$section) {
+                throw new Exception(Yii::t("app", "Section not found."));
+            }
+
+            $section->fromForm($form);
+            $section->sort_order = array_search($section->id ? $section->id : null, $form->order);
+
+            if (!$section->sort_order) {
+                $section->sort_order = 0;
+            }
+
+            $section->save();
+
+            // save orders
+            foreach ($form->order as $order => $s) {
+                ProjectReportSection::model()->updateAll(
+                    ["sort_order" => $order],
+                    "id = :id AND project_id = :p",
+                    [
+                        ":id" => $s,
+                        ":p" => $project->id,
+                    ]
+                );
+            }
+
+            $response->addData("id", $section->id);
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Save section order
+     * @param $id
+     */
+    public function actionSaveSectionOrder($id) {
+        $response = new AjaxResponse();
+
+        try {
+            $project = $this->_getProject($id);
+
+            $form = new ProjectReportSectionEditForm();
+            $form->attributes = $_POST["ProjectReportSectionEditForm"];
+
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            // save orders
+            foreach ($form->order as $order => $s) {
+                ProjectReportSection::model()->updateAll(
+                    ["sort_order" => $order],
+                    "id = :id AND project_id = :p",
+                    [
+                        ":id" => $s,
+                        ":p" => $project->id,
+                    ]
+                );
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
+    }
+
+    /**
+     * Control report section.
+     * @param $id
+     */
+    public function actionControlSection($id) {
+        $response = new AjaxResponse();
+
+        try {
+            $project = $this->_getProject($id);
+
+            $form = new EntryControlForm();
+            $form->attributes = $_POST["EntryControlForm"];
+
+            if (!$form->validate()) {
+                $errorText = "";
+
+                foreach ($form->getErrors() as $error) {
+                    $errorText = $error[0];
+                    break;
+                }
+
+                throw new Exception($errorText);
+            }
+
+            /** @var ProjectReportSection $section */
+            $section = ProjectReportSection::model()->findByAttributes([
+                "id" => $form->id,
+                "project_id" => $project->id,
+            ]);
+
+            if (!$section) {
+                throw new Exception(Yii::t("app", "Section not found."));
+            }
+
+            switch ($form->operation) {
+                case "delete":
+                    $section->delete();
+                    break;
+
+                default:
+                    throw new Exception(Yii::t("app", "Unknown operation."));
+                    break;
+            }
+        } catch (Exception $e) {
+            $response->setError($e->getMessage());
+        }
+
+        echo $response->serialize();
     }
 
     /**

@@ -19,6 +19,7 @@
  * @property float $userHoursAllocated
  * @property float $userHoursSpent
  * @property Target[] $targets
+ * @property ProjectReportSection[] $sections
  */
 class Project extends ActiveRecord implements IVariableScopeObject {
     /**
@@ -109,6 +110,7 @@ class Project extends ActiveRecord implements IVariableScopeObject {
             "trackedTime" => array(self::STAT, "ProjectTime", "project_id", "select" => "trunc(SUM(time) / 3600)"), // Convert seconds to hours
             "timeRecords" => array(self::HAS_MANY, "ProjectTime", "project_id"),
             "issues" => array(self::HAS_MANY, "Issue", "project_id"),
+            "sections" => array(self::HAS_MANY, "ProjectReportSection", "project_id"),
 		);
 	}
 
@@ -405,5 +407,20 @@ class Project extends ActiveRecord implements IVariableScopeObject {
         $criteria->order = "top_rating DESC";
 
         return Issue::model()->findAll($criteria);
+    }
+
+    /**
+     * Check if project has custom section specified
+     * @param int $section
+     * @return bool
+     */
+    public function hasSection($section) {
+        foreach ($this->sections as $scn) {
+            if ($scn->type == $section) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

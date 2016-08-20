@@ -9,7 +9,7 @@
  * @property integer $type
  * @property string $title
  * @property integer $content
- * @property integer $order
+ * @property integer $sort_order
  *
  * @property Project $project
  */
@@ -37,7 +37,7 @@ class ProjectReportSection extends ActiveRecord {
         return [
             ["title, project_id, title, type", "required"],
             ["title", "length", "max" => 1000],
-            ["project_id, order", "numerical", "integerOnly" => true],
+            ["project_id, sort_order", "numerical", "integerOnly" => true],
             ["type", "in", "range" => ReportSection::getValidTypes()],
         ];
     }

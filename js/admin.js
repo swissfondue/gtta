@@ -1344,6 +1344,7 @@ function Admin() {
                 sectionList,
                 sectionData,
                 fieldTypes,
+                formId,
                 modified = false;
 
             /**
@@ -1354,6 +1355,7 @@ function Admin() {
             this.init = function (sections, fTypes) {
                 sectionData = sections;
                 fieldTypes = fTypes;
+                formId = $("[data-form-id]").data("form-id");
 
                 sectionList = Sortable.create($(".sortable-section-list")[0], {
                     group: {
@@ -1533,13 +1535,13 @@ function Admin() {
                     .removeClass("hide")
                     .data("section-id", id);
 
-                template.find("[name=\"ReportTemplateSectionEditForm[title]\"]")
+                template.find("[name=\"" + formId + "[title]\"]")
                     .val(title)
                     .change(function () {
                         modified = true;
                     });
 
-                template.find("[name=\"ReportTemplateSectionEditForm[content]\"]")
+                template.find("[name=\"" + formId + "[content]\"]")
                     .val(content);
 
                 template.find("[data-field-type]")
@@ -1581,16 +1583,15 @@ function Admin() {
              * Save sections order
              */
             this.saveOrder = function () {
+                var data = {"YII_CSRF_TOKEN": system.csrf};
+                data[formId + "[order]"] = JSON.stringify(_sections.getOrder());
+
                 $.ajax({
                     dataType: "json",
                     url: $("[data-save-section-order-url]").data("save-section-order-url"),
                     timeout: system.ajaxTimeout,
                     type: "POST",
-
-                    data: {
-                        "ReportTemplateSectionEditForm[order]": JSON.stringify(_sections.getOrder()),
-                        "YII_CSRF_TOKEN": system.csrf
-                    },
+                    data: data,
 
                     success: function (data, textStatus) {
                         $(".loader-image").hide();
@@ -1620,10 +1621,17 @@ function Admin() {
              * @param content
              */
             this.saveSection = function (listItem, id, type, title, content) {
-                var editSection, button;
+                var editSection, button, data;
 
                 editSection = $(".edit-section");
                 button = editSection.find("button");
+                data = {"YII_CSRF_TOKEN": system.csrf};
+                
+                data[formId + "[order]"] = JSON.stringify(_sections.getOrder());
+                data[formId + "[content]"] = content;
+                data[formId + "[title]"] = title;
+                data[formId + "[type]"] = type;
+                data[formId + "[id]"] = id;
 
                 $.ajax({
                     dataType: "json",
@@ -1631,14 +1639,7 @@ function Admin() {
                     timeout: system.ajaxTimeout,
                     type: "POST",
 
-                    data: {
-                        "ReportTemplateSectionEditForm[order]": JSON.stringify(_sections.getOrder()),
-                        "ReportTemplateSectionEditForm[content]": content,
-                        "ReportTemplateSectionEditForm[title]": title,
-                        "ReportTemplateSectionEditForm[type]": type,
-                        "ReportTemplateSectionEditForm[id]": id,
-                        "YII_CSRF_TOKEN": system.csrf
-                    },
+                    data: data,
 
                     success: function (data, textStatus) {
                         $(".loader-image").hide();

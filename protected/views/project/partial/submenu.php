@@ -29,7 +29,7 @@
             <li class="divider"></li>
 
             <?php if (!User::checkRole(User::ROLE_CLIENT) || Yii::app()->user->getShowReports()): ?>
-                <li <?php if (Yii::app()->controller->action->id == "project") echo "class=\"active\""; ?>><a href="<?php echo $this->createUrl("projectReport/project", ["id" => $project->id]); ?>"><?php echo Yii::t("app", "Report"); ?></a></li>
+                <li <?php if (in_array(Yii::app()->controller->action->id, ["project", "sections", "projectRtf", "projectDocx"])) echo "class=\"active\""; ?>><a href="<?php echo $this->createUrl("projectReport/project", ["id" => $project->id]); ?>"><?php echo Yii::t("app", "Report"); ?></a></li>
                 <li <?php if (Yii::app()->controller->action->id == "comparison") echo "class=\"active\""; ?>><a href="<?php echo $this->createUrl("projectReport/comparison", ["id" => $project->id]); ?>"><?php echo Yii::t("app", "Comparison"); ?></a></li>
                 <li <?php if (Yii::app()->controller->action->id == "vulnexport") echo "class=\"active\""; ?>><a href="<?php echo $this->createUrl("projectReport/vulnexport", ["id" => $project->id]); ?>"><?php echo Yii::t("app", "Vulnerability Export"); ?></a></li>
                 <li <?php if (Yii::app()->controller->action->id == "fulfillment") echo "class=\"active\""; ?>><a href="<?php echo $this->createUrl("projectReport/fulfillment", ["id" => $project->id]); ?>"><?php echo Yii::t("app", "Degree of Fulfillment"); ?></a></li>

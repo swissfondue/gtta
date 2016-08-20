@@ -22,6 +22,11 @@
                 <?= CHtml::encode($template->name); ?> (RTF)
 
                 <a href="<?= $this->createUrl("projectReport/template", ["id" => $project->id]); ?>"><i class="icon icon-edit"></i></a>
+
+                <?php if ($project->custom_report): ?>
+                    <br><br>
+                    <a href="<?= $this->createUrl("projectReport/sections", ["id" => $project->id]); ?>"><?= Yii::t("app", "Customization"); ?></a>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -99,7 +104,12 @@
                 </div>
             </div>
 
-            <?php if ($template->hasSection(ReportSection::TYPE_RISK_MATRIX)): ?>
+            <?php
+                if (
+                    $project->custom_report && $project->hasSection(ReportSection::TYPE_RISK_MATRIX) ||
+                    !$project->custom_report && $template->hasSection(ReportSection::TYPE_RISK_MATRIX)
+                ):
+            ?>
                 <div class="control-group <?php if ($form->getError("riskTemplateId")) echo "error"; ?>" id="risk-template-list">
                     <label class="control-label" for="ProjectReportForm_riskTemplateId"><?php echo Yii::t("app", "Risk Matrix Template"); ?></label>
                     <div class="controls">
@@ -134,7 +144,12 @@
                 </div>
             </div>
 
-            <?php if ($template->hasSection(ReportSection::TYPE_VULNERABILITIES) || $template->hasSection(ReportSection::TYPE_INFO_CHECKS)): ?>
+            <?php
+                if (
+                    $project->custom_report && ($project->hasSection(ReportSection::TYPE_VULNERABILITIES) || $project->hasSection(ReportSection::TYPE_INFO_CHECKS)) ||
+                    !$project->custom_report && ($template->hasSection(ReportSection::TYPE_VULNERABILITIES) || $template->hasSection(ReportSection::TYPE_INFO_CHECKS))
+                ):
+            ?>
                 <div class="control-group" id="checks-fields">
                     <label class="control-label" for="ProjectReportForm_fields"><?php echo Yii::t("app", "Vulnerability List Check Fields"); ?></label>
                     <div class="controls">
@@ -148,7 +163,12 @@
                 </div>
             <?php endif; ?>
 
-            <?php if ($template->hasSection(ReportSection::TYPE_VULNERABILITIES)): ?>
+            <?php
+                if (
+                    $project->custom_report && $project->hasSection(ReportSection::TYPE_VULNERABILITIES) ||
+                    !$project->custom_report && $template->hasSection(ReportSection::TYPE_VULNERABILITIES)
+                ):
+            ?>
                 <div class="control-group" id="info-checks-location-list">
                     <label class="control-label" for="ProjectReportForm_infoChecksLocation"><?php echo Yii::t("app", "Info Checks Location"); ?></label>
                     <div class="controls">

@@ -4,25 +4,34 @@
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/sortable.js"></script>
 
 <div class="active-header">
-    <?= $this->renderPartial("partial/menu", ["template" => $template]); ?>
+    <div class="pull-right">
+        <?= $this->renderPartial("//project/partial/submenu", ["page" => "project-report", "project" => $project]); ?>
+    </div>
 
     <div class="pull-right buttons">
+        <a class="btn" href="<?= $this->createUrl("projectReport/projectRtf", ["id" => $project->id]); ?>">
+            <i class="icon icon-chevron-left"></i>
+            <?= Yii::t("app", "Back to Report"); ?>
+        </a>
+
+        &nbsp;
+
         <a class="btn" href="#add" onclick="admin.reportTemplate.sections.showAddForm();">
             <i class="icon icon-plus"></i>
             <?php echo Yii::t("app", "Add"); ?>
         </a>
     </div>
 
-    <h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+    <h1><?= CHtml::encode($this->pageTitle); ?></h1>
 </div>
 
 <hr>
 
 <div class="container"
-    data-form-id="ReportTemplateSectionEditForm"
-    data-save-section-url="<?= $this->createUrl("reporttemplate/saveSection", ["id" => $template->id]); ?>"
-    data-save-section-order-url="<?= $this->createUrl("reporttemplate/saveSectionOrder", ["id" => $template->id]); ?>"
-    data-control-section-url="<?= $this->createUrl("reporttemplate/controlSection", ["id" => $template->id]); ?>">
+    data-form-id="ProjectReportSectionEditForm"
+    data-save-section-url="<?= $this->createUrl("projectReport/saveSection", ["id" => $project->id]); ?>"
+    data-save-section-order-url="<?= $this->createUrl("projectReport/saveSectionOrder", ["id" => $project->id]); ?>"
+    data-control-section-url="<?= $this->createUrl("projectReport/controlSection", ["id" => $project->id]); ?>">
     <div class="row">
         <div class="span4">
             <ul class="sortable-section-list">
@@ -43,7 +52,7 @@
                 <?php endforeach; ?>
             </ul>
 
-            <?= $this->renderPartial("partial/variables"); ?>
+            <?= $this->renderPartial("//reporttemplate/partial/variables"); ?>
         </div>
 
         <div class="span8 add-section hide">
@@ -82,7 +91,7 @@
                 <label class="control-label"><?php echo Yii::t("app", "Title"); ?></label>
 
                 <div class="controls">
-                    <input type="text" class="input-xlarge" name="ReportTemplateSectionEditForm[title]" value="">
+                    <input type="text" class="input-xlarge" name="ProjectReportSectionEditForm[title]" value="">
                 </div>
             </div>
 
@@ -95,7 +104,7 @@
                 <label class="control-label"><?php echo Yii::t("app", "Content"); ?></label>
 
                 <div class="controls">
-                    <textarea class="wysiwyg" name="ReportTemplateSectionEditForm[content]"></textarea>
+                    <textarea class="wysiwyg" name="ProjectReportSectionEditForm[content]"></textarea>
                 </div>
             </div>
 
