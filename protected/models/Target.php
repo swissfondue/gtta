@@ -94,7 +94,7 @@ class Target extends ActiveRecord implements IVariableScopeObject {
         );
 
         if (!in_array($name, $vars)) {
-            throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+            return "";
         }
 
         return $this->$name;
@@ -115,7 +115,7 @@ class Target extends ActiveRecord implements IVariableScopeObject {
         );
 
         if (!in_array($name, $lists)) {
-            throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+            return [];
         }
 
         $data = array();

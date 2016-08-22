@@ -97,13 +97,20 @@ return array(
     "project/custom-attachment/control" => "project/controlcustomattachment",
 
     // reports
-    "reports/project" => "report/project",
-    "reports/comparison" => "report/comparison",
-    "reports/fulfillment" => "report/fulfillment",
-    "reports/risk-matrix" => "report/riskmatrix",
+    "project/<id:\d+>/report/template" => "projectReport/template",
+    "project/<id:\d+>/report" => "projectReport/project",
+    "project/<id:\d+>/report/rtf" => "projectReport/projectRtf",
+    "project/<id:\d+>/report/docx" => "projectReport/projectDocx",
+    "project/<id:\d+>/report/rtf/sections" => "projectReport/sections",
+    "project/<id:\d+>/report/rtf/sections/save" => "projectReport/saveSection",
+    "project/<id:\d+>/report/rtf/sections/save-order" => "projectReport/saveSectionOrder",
+    "project/<id:\d+>/report/rtf/sections/control" => "projectReport/controlSection",
+    "project/<id:\d+>/report/comparison" => "projectReport/comparison",
+    "project/<id:\d+>/report/fulfillment" => "projectReport/fulfillment",
+    "project/<id:\d+>/report/risk-matrix" => "projectReport/riskmatrix",
+    "project/<id:\d+>/report/vuln-export" => "projectReport/vulnexport",
+    "project/<id:\d+>/report/tracked-time" => "projectReport/trackedtime",
     "reports/effort" => "report/effort",
-    "reports/vuln-export" => "report/vulnexport",
-    "reports/<id:\d+>/tracked-time" => "report/trackedtime",
 
     // project planner
     "project-planner" => "planner/index",
@@ -273,12 +280,17 @@ return array(
     "report-template/<id:\d+>/summary-block/new" => "reporttemplate/editsummary",
     "report-template/summary-block/control" => "reporttemplate/controlsummary",
 
+    // report template vuln sections
+    "report-template/<id:\d+>/vuln-sections/<page:\d+>" => "reporttemplate/vulnsections",
+    "report-template/<id:\d+>/vuln-sections" => "reporttemplate/vulnsections",
+    "report-template/<id:\d+>/vuln-section/<section:\d+>/edit" => "reporttemplate/editvulnsection",
+    "report-template/<id:\d+>/vuln-section/new" => "reporttemplate/editvulnsection",
+    "report-template/section/control" => "reporttemplate/controlvulnsection",
+
     // report template sections
-    "report-template/<id:\d+>/sections/<page:\d+>" => "reporttemplate/sections",
     "report-template/<id:\d+>/sections" => "reporttemplate/sections",
-    "report-template/<id:\d+>/section/<section:\d+>/edit" => "reporttemplate/editsection",
-    "report-template/<id:\d+>/section/new" => "reporttemplate/editsection",
-    "report-template/section/control" => "reporttemplate/controlsection",
+    "report-template/<id:\d+>/sections/save" => "reporttemplate/saveSection",
+    "report-template/<id:\d+>/sections/save-order" => "reporttemplate/saveSectionOrder",
 
     // risk classification categories (templates)
     "risks/<page:\d+>"         => "risk/index",

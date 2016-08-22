@@ -58,12 +58,6 @@
                                         <b class="caret"></b>
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li <?php if (Yii::app()->controller->action->id == 'project') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/project'); ?>"><?php echo Yii::t('app', 'Project Report'); ?></a></li>
-                                        <li <?php if (Yii::app()->controller->action->id == 'comparison') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/comparison'); ?>"><?php echo Yii::t('app', 'Projects Comparison'); ?></a></li>
-                                        <li <?php if (Yii::app()->controller->id == 'report' && Yii::app()->controller->action->id == 'vulnexport') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/vulnexport'); ?>"><?php echo Yii::t('app', 'Vulnerability Export'); ?></a></li>
-                                        <li <?php if (Yii::app()->controller->action->id == 'fulfillment') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/fulfillment'); ?>"><?php echo Yii::t('app', 'Degree of Fulfillment'); ?></a></li>
-                                        <li <?php if (Yii::app()->controller->action->id == 'riskmatrix') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/riskmatrix'); ?>"><?php echo Yii::t('app', 'Risk Matrix'); ?></a></li>
-                                        <li class="divider"></li>
                                         <li <?php if (Yii::app()->controller->action->id == 'effort') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('report/effort'); ?>"><?php echo Yii::t('app', 'Effort Estimation'); ?></a></li>
                                     </ul>
                                 </li>

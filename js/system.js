@@ -417,13 +417,27 @@ function System() {
          * Switch save button state for the project report form
          */
         this._projectFormSwitchButton = function () {
-            if (($('.report-target-list input:checked').length == 0) ||
-                $('#ProjectReportForm_templateId').val() == 0 ||
-                ($("#ProjectReportForm_templateId option:selected").data("type") == 0 && $('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() == 0)
-            ) {
-                $('.form-actions > button[type="submit"]').prop('disabled', true);
-            } else {
-                $('.form-actions > button[type="submit"]').prop('disabled', false);
+            $(".form-actions > button[type=submit]").prop("disabled",
+                $(".report-target-list input:checked").length == 0 ||
+                $("#ProjectReportForm_templateId").val() == 0
+            );
+        };
+
+        /**
+         * Project template form has been changed.
+         */
+        this.projectTemplateFormChange = function (e) {
+            var val;
+
+            if (e.id == "ProjectReportTemplateForm_templateId") {
+                var type = $("#ProjectReportTemplateForm_templateId option:selected").data("type"),
+                    customReport = $(".custom-report");
+
+                if (type != undefined && type == 0) {
+                    customReport.slideDown("slow");
+                } else {
+                    customReport.slideUp("slow");
+                }
             }
         };
 
@@ -433,102 +447,13 @@ function System() {
         this.projectFormChange = function (e) {
             var val;
 
-            $('#client-list').removeClass('error');
-            $('#project-list').removeClass('error');
-            $('#project-list > div > .help-block').hide();
-            $('#client-list > div > .help-block').hide();
-
-            if (e.id == 'ProjectReportForm_clientId') {
-                val = $('#ProjectReportForm_clientId').val();
-
-                _report._riskMatrixTargets = [];
-
-                $('.report-target-header').remove();
-                $('.report-target-content').remove();
-                $('#check-list').hide();
-                $('#project-list').hide();
-                $('#target-list').hide();
-                $('.form-actions > button[type="submit"]').prop('disabled', true);
-
-                if (val != 0) {
-                    _system.control.loadObjects(val, 'project-list', function (data) {
-                        $('#ProjectReportForm_clientId').prop('disabled', false);
-                        $('#ProjectReportForm_projectId > option:not(:first)').remove();
-
-                        if (data && data.objects.length) {
-                            for (var i = 0; i < data.objects.length; i++) {
-                                $('<option>')
-                                    .val(data.objects[i].id)
-                                    .html(data.objects[i].name)
-                                    .appendTo('#ProjectReportForm_projectId');
-                            }
-
-                            $('#project-list').show();
-                        } else {
-                            $('#client-list').addClass('error');
-                            $('#client-list > div > .help-block').show();
-                        }
-                    });
-                }
-            } else if (e.id == 'ProjectReportForm_projectId') {
-                val = $('#ProjectReportForm_projectId').val();
-
-                _report._riskMatrixTargets = [];
-
-                $('.report-target-header').remove();
-                $('.report-target-content').remove();
-                $('#check-list').hide();
-                $('#target-list').hide();
-                $('.form-actions > button[type="submit"]').prop('disabled', true);
-
-                if (val != 0) {
-                    _system.control.loadObjects(val, 'target-list', function (data) {
-                        $('#target-list > .controls > .report-target-list > li').remove();
-
-                        if (data && data.objects.length) {
-                            for (var i = 0; i < data.objects.length; i++) {
-                                var li = $('<li>'),
-                                    label = $('<label>'),
-                                    input = $('<input>');
-
-                                input
-                                    .attr('type', 'checkbox')
-                                    .prop('checked', true)
-                                    .attr('name', 'ProjectReportForm[targetIds][]')
-                                    .attr('id', 'ProjectReportForm_targetIds_' + data.objects[i].id)
-                                    .val(data.objects[i].id)
-                                    .click(function () {
-                                        system.report.projectFormChange(this);
-                                    })
-                                    .appendTo(label);
-
-                                label
-                                    .append(' ' + data.objects[i].host)
-                                    .appendTo(li);
-
-                                $('#target-list > .controls > .report-target-list').append(li);
-                            }
-
-                            $('#target-list').show();
-
-                            if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0) {
-                                _report._refreshChecks(true, false);
-                            }
-
-                            _report._projectFormSwitchButton();
-                        } else {
-                            $('#project-list').addClass('error');
-                            $('#project-list > div > .help-block').show();
-                        }
-                    });
-                }
-            } else if (e.id.match(/^ProjectReportForm_targetIds_/i)) {
-                if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0) {
-                    _report._refreshChecks(true, false);
+            if (e.id.match(/^ProjectReportForm_targetIds_/i)) {
+                if ($("#ProjectReportForm_riskTemplateId").val() > 0) {
+                    _report._refreshRiskMatrix(true);
                 }
 
                 _report._projectFormSwitchButton();
-            } else if (e.id == 'ProjectReportForm_templateId') {
+            } else if (e.id == "ProjectReportForm_templateId") {
                 var type = $("#ProjectReportForm_templateId option:selected").data("type");
 
                 if (type != undefined) {
@@ -540,57 +465,36 @@ function System() {
                 }
 
                 _report._projectFormSwitchButton();
-            } else if (e.id == 'ProjectReportForm_options_matrix') {
-                _report._riskMatrixTargets = [];
-                _report._riskMatrixCategories = [];
+            } else if (e.id == "ProjectReportForm_riskTemplateId") {
+                val = $("#ProjectReportForm_riskTemplateId").val();
 
-                if ($('#ProjectReportForm_options_matrix').is(':checked')) {
-                    $('#risk-template-list').show();
-                    $('.form-actions > button[type="submit"]').prop('disabled', true);
-                } else {
-                    $('#risk-template-list').hide();
-                    $('#check-list').hide();
-                    $('.report-target-header').remove();
-                    $('.report-target-content').remove();
-                    $('#RiskMatrixForm_templateId').val(0);
-                    $('#risk-template-list').removeClass('error');
-                    $('#risk-template-list > div > .help-block').hide();
-
-                    _report._projectFormSwitchButton();
-                }
-            } else if (e.id == 'RiskMatrixForm_templateId') {
-                var val = $('#RiskMatrixForm_templateId').val();
-
-                $('#check-list').hide();
+                $("#check-list").hide();
 
                 _report._riskMatrixTargets = [];
                 _report._riskMatrixCategories = [];
 
-                $('#risk-template-list').removeClass('error');
-                $('#risk-template-list > div > .help-block').hide();
+                $("#risk-template-list").removeClass("error");
+                $("#risk-template-list > div > .help-block").hide();
 
                 // remove checklist content
-                $('.report-target-header').remove();
-                $('.report-target-content').remove();
+                $(".report-target-header").remove();
+                $(".report-target-content").remove();
 
                 if (val != 0) {
-                    _system.control.loadObjects(val, 'category-list', function (data) {
+                    _system.control.loadObjects(val, "category-list", function (data) {
                         if (data && data.objects.length) {
                             _report._riskMatrixCategories = data.objects;
 
-                            if ($('#ProjectReportForm_options_matrix').is(':checked') && $('#RiskMatrixForm_templateId').val() > 0) {
-                                _report._refreshChecks(true);
+                            if ($("#ProjectReportForm_riskTemplateId").val() > 0) {
+                                _report._refreshRiskMatrix(true);
                             }
 
                             _report._projectFormSwitchButton();
                         } else {
-                            $('#risk-template-list').addClass('error');
-                            $('#risk-template-list > div > .help-block').show();
-                            $('.form-actions > button[type="submit"]').prop('disabled', true);
+                            $("#risk-template-list").addClass("error");
+                            $("#risk-template-list > div > .help-block").show();
                         }
                     });
-                } else {
-                    $('.form-actions > button[type="submit"]').prop('disabled', true);
                 }
             }
         };
@@ -601,153 +505,57 @@ function System() {
         this.comparisonFormChange = function (e) {
             var val;
 
-            $('#client-list').removeClass('error');
-            $('#client-list > div > .help-block').hide();
+            $("#client-list").removeClass("error");
+            $("#client-list > div > .help-block").hide();
 
-            if (e.id == 'ProjectComparisonForm_clientId') {
-                val = $('#ProjectComparisonForm_clientId').val();
+            if (e.id == "ProjectComparisonForm_clientId") {
+                val = $("#ProjectComparisonForm_clientId").val();
 
-                $('#project-list-1').hide();
-                $('#project-list-2').hide();
-                $('.form-actions > button[type="submit"]').prop('disabled', true);
+                $("#project-list").hide();
+                $(".form-actions > button[type=submit]").prop("disabled", true);
 
                 if (val != 0) {
-                    _system.control.loadObjects(val, 'project-list', function (data) {
-                        $('#ProjectComparisonForm_projectId1 > option:not(:first)').remove();
-                        $('#ProjectComparisonForm_projectId2 > option:not(:first)').remove();
+                    _system.control.loadObjects(val, "project-list", function (data) {
+                        $("#ProjectComparisonForm_projectId > option:not(:first)").remove();
 
                         if (data && data.objects.length) {
                             for (var i = 0; i < data.objects.length; i++) {
-                                $('<option>')
+                                $("<option>")
                                     .val(data.objects[i].id)
                                     .html(data.objects[i].name)
-                                    .appendTo('#ProjectComparisonForm_projectId1');
-
-                                $('<option>')
-                                    .val(data.objects[i].id)
-                                    .html(data.objects[i].name)
-                                    .appendTo('#ProjectComparisonForm_projectId2');
+                                    .appendTo("#ProjectComparisonForm_projectId");
                             }
 
-                            $('#project-list-1').show();
-                            $('#project-list-2').show();
+                            $("#project-list").show();
                         } else {
-                            $('#client-list').addClass('error');
-                            $('#client-list > div > .help-block').show();
+                            $("#client-list").addClass("error");
+                            $("#client-list > div > .help-block").show();
                         }
                     });
                 }
-            } else if (e.id == 'ProjectComparisonForm_projectId1' || e.id == 'ProjectComparisonForm_projectId2') {
-                var project1 = $('#ProjectComparisonForm_projectId1'),
-                    project2 = $('#ProjectComparisonForm_projectId2');
+            } else if (e.id == "ProjectComparisonForm_projectId") {
+                var project = $("#ProjectComparisonForm_projectId");
 
-                $('.form-actions > button[type="submit"]').prop('disabled', true);
+                $(".form-actions > button[type=submit]").prop("disabled", true);
 
-                if (project1.val() != 0 &&
-                    project2.val() != 0 &&
-                    project1.val() != project2.val()
-                ) {
-                    $('.form-actions > button[type="submit"]').prop('disabled', false);
+                if (project.val() != 0) {
+                    $(".form-actions > button[type=submit]").prop("disabled", false);
                 }
             }
         };
 
         /**
-         * Degree of Fulfillment form has been changed.
+         * Refresh risk matrix check list.
+         * @param bool projectReport
          */
-        this.fulfillmentFormChange = function (e) {
-            var val;
+        this._refreshRiskMatrix = function (projectReport) {
+            var targets, delTargets, addTargets, i, k, id, target, matrixVar;
 
-            $('#client-list').removeClass('error');
-            $('#project-list').removeClass('error');
-            $('#project-list > div > .help-block').hide();
-            $('#client-list > div > .help-block').hide();
+            matrixVar = projectReport ? "ProjectReportForm[riskMatrix]" : "RiskMatrixForm[matrix]";
 
-            if (e.id == 'FulfillmentDegreeForm_clientId') {
-                val = $('#FulfillmentDegreeForm_clientId').val();
+            $(".form-actions > button[type=submit]").prop("disabled", true);
 
-                $('#project-list').hide();
-                $('#target-list').hide();
-                $('.form-actions > button[type="submit"]').prop('disabled', true);
-
-                if (val != 0) {
-                    _system.control.loadObjects(val, 'project-list', function (data) {
-                        $('#FulfillmentDegreeForm_projectId > option:not(:first)').remove();
-
-                        if (data && data.objects.length) {
-                            for (var i = 0; i < data.objects.length; i++) {
-                                $('<option>')
-                                    .val(data.objects[i].id)
-                                    .html(data.objects[i].name)
-                                    .appendTo('#FulfillmentDegreeForm_projectId');
-                            }
-
-                            $('#project-list').show();
-                        } else {
-                            $('#client-list').addClass('error');
-                            $('#client-list > div > .help-block').show();
-                        }
-                    });
-                }
-            } else if (e.id == 'FulfillmentDegreeForm_projectId') {
-                val = $('#FulfillmentDegreeForm_projectId').val();
-
-                $('#target-list').hide();
-                $('.form-actions > button[type="submit"]').prop('disabled', true);
-
-                if (val != 0) {
-                    _system.control.loadObjects(val, 'target-list', function (data) {
-                        $('#target-list > .controls > .report-target-list > li').remove();
-
-                        if (data && data.objects.length) {
-                            for (var i = 0; i < data.objects.length; i++) {
-                                var li    = $('<li>'),
-                                    label = $('<label>'),
-                                    input = $('<input>');
-
-                                input
-                                    .attr('type', 'checkbox')
-                                    .prop('checked', true)
-                                    .attr('name', 'FulfillmentDegreeForm[targetIds][]')
-                                    .val(data.objects[i].id)
-                                    .click(function () {
-                                        user.report.fulfillmentFormChange(this);
-                                    })
-                                    .appendTo(label);
-
-                                label
-                                    .append(' ' + data.objects[i].host)
-                                    .appendTo(li);
-
-                                $('#target-list > .controls > .report-target-list').append(li);
-                            }
-
-                            $('#target-list').show();
-                            $('.form-actions > button[type="submit"]').prop('disabled', false);
-                        } else {
-                            $('#project-list').addClass('error');
-                            $('#project-list > div > .help-block').show();
-                        }
-                    });
-                }
-            } else {
-                if ($('.report-target-list input:checked').length == 0) {
-                    $('.form-actions > button[type="submit"]').prop('disabled', true);
-                } else {
-                    $('.form-actions > button[type="submit"]').prop('disabled', false);
-                }
-            }
-        };
-
-        /**
-         * Refresh check list.
-         */
-        this._refreshChecks = function (projectReport) {
-            var targets, delTargets, addTargets, i, k, id, target;
-
-            $('.form-actions > button[type="submit"]').prop('disabled', true);
-
-            targets = $('.report-target-list input:checked').map(function () {
+            targets = $(".report-target-list input:checked").map(function () {
                 return parseInt($(this).val());
             }).get();
 
@@ -776,13 +584,13 @@ function System() {
 
                 id = delTargets[i];
 
-                $('.report-target-content[data-id=' + id + ']').slideUp('slow', undefined, function () {
-                    $('.report-target-header[data-id=' + id + ']').slideUp('fast', undefined, function () {
-                        $('.report-target-header[data-id=' + id + ']').remove();
-                        $('.report-target-content[data-id=' + id + ']').remove();
+                $(".report-target-content[data-id=" + id + "]").slideUp("slow", undefined, function () {
+                    $(".report-target-header[data-id=" + id + "]").slideUp("fast", undefined, function () {
+                        $(".report-target-header[data-id=" + id + "]").remove();
+                        $(".report-target-content[data-id=" + id + "]").remove();
 
                         if (_report._riskMatrixTargets.length == 0) {
-                            $('#check-list').slideUp('fast');
+                            $("#check-list").slideUp("fast");
                         }
                     });
                 });
@@ -791,8 +599,8 @@ function System() {
             if (addTargets.length > 0) {
                 var param, cmd;
 
-                param = addTargets.join(',');
-                cmd = 'target-check-list';
+                param = addTargets.join(",");
+                cmd = "target-check-list";
 
                 _system.control.loadObjects(param, cmd, function (data) {
                     var targetHeader, targetDiv, category, categoryDiv, check, checkDiv, i, k, j, rating, risk, field,
@@ -859,10 +667,10 @@ function System() {
                                             .html(
                                                 '<label class="control-label">' + _system.translate('Damage') + '</label>' +
                                                 '<div class="controls">' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="1"' + ( damage == 1 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="2"' + ( damage == 2 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="3"' + ( damage == 3 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="4"' + ( damage == 4 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="1"' + ( damage == 1 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="2"' + ( damage == 2 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="3"' + ( damage == 3 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][damage]" value="4"' + ( damage == 4 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
                                                 '</div>'
                                             )
                                             .appendTo(checkDiv);
@@ -872,10 +680,10 @@ function System() {
                                             .html(
                                                 '<label class="control-label">' + _system.translate('Likelihood') + '</label>' +
                                                 '<div class="controls">' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="1"' + ( likelihood == 1 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="2"' + ( likelihood == 2 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="3"' + ( likelihood == 3 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
-                                                '<input type="radio" name="RiskMatrixForm[matrix][' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="4"' + ( likelihood == 4 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="1"' + ( likelihood == 1 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="2"' + ( likelihood == 2 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="3"' + ( likelihood == 3 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
+                                                '<input type="radio" name="' + matrixVar + '[' + target.id + '][' + check.id + '][' + risk.id + '][likelihood]" value="4"' + ( likelihood == 4 ? ' checked' : '' ) + '>&nbsp;&nbsp;' +
                                                 '</div>'
                                             )
                                             .appendTo(checkDiv);
@@ -919,133 +727,32 @@ function System() {
         this.riskMatrixFormChange = function (e) {
             var val;
 
-            $('.form-actions > button[type="submit"]').prop('disabled', true);
+            $(".form-actions > button[type=submit]").prop("disabled", true);
+            $("#template-list").removeClass("error");
 
-            $('#client-list').removeClass('error');
-            $('#project-list').removeClass('error');
-            $('#template-list').removeClass('error');
-            $('#client-list > div > .help-block').hide();
-            $('#project-list > div > .help-block').hide();
-            $('#template-list > div > .help-block').hide();
+            if (e.id == "RiskMatrixForm_templateId") {
+                val = $("#RiskMatrixForm_templateId").val();
 
-            if (e.id == 'RiskMatrixForm_templateId') {
-                val = $('#RiskMatrixForm_templateId').val();
-
-                $('#client-list').hide();
-                $('#project-list').hide();
-                $('#target-list').hide();
-                $('#check-list').hide();
-
-                // reset clients
-                $('#RiskMatrixForm_clientId').val(0);
-
-                // remove projects
-                $('#RiskMatrixForm_projectId > option:not(:first)').remove();
-
-                // remove targets
-                $('#target-list > .controls > .report-target-list > li').remove();
+                $("#check-list").hide();
                 _report._riskMatrixTargets = [];
 
                 // remove checklist content
-                $('.report-target-header').remove();
-                $('.report-target-content').remove();
+                $(".report-target-header").remove();
+                $(".report-target-content").remove();
 
                 if (val != 0) {
-                    _system.control.loadObjects(val, 'category-list', function (data) {
+                    _system.control.loadObjects(val, "category-list", function (data) {
                         if (data && data.objects.length) {
                             _report._riskMatrixCategories = data.objects;
-                            $('#client-list').show();
+                            _report._refreshRiskMatrix(false);
                         } else {
-                            $('#template-list').addClass('error');
-                            $('#template-list > div > .help-block').show();
-                        }
-                    });
-                }
-            } else if (e.id == 'RiskMatrixForm_clientId') {
-                val = $('#RiskMatrixForm_clientId').val();
-
-                $('#project-list').hide();
-                $('#target-list').hide();
-                $('#check-list').hide();
-
-                // remove projects
-                $('#RiskMatrixForm_projectId > option:not(:first)').remove();
-
-                // remove targets
-                $('#target-list > .controls > .report-target-list > li').remove();
-                _report._riskMatrixTargets = [];
-
-                // remove checklist content
-                $('.report-target-header').remove();
-                $('.report-target-content').remove();
-
-                if (val != 0) {
-                    _system.control.loadObjects(val, 'project-list', function (data) {
-                        if (data && data.objects.length) {
-                            for (var i = 0; i < data.objects.length; i++) {
-                                $('<option>')
-                                    .val(data.objects[i].id)
-                                    .html(data.objects[i].name)
-                                    .appendTo('#RiskMatrixForm_projectId');
-                            }
-
-                            $('#project-list').show();
-                        } else {
-                            $('#client-list').addClass('error');
-                            $('#client-list > div > .help-block').show();
-                        }
-                    });
-                }
-            } else if (e.id == 'RiskMatrixForm_projectId') {
-                val = $('#RiskMatrixForm_projectId').val();
-
-                $('#target-list').hide();
-                $('#check-list').hide();
-
-                // remove targets
-                $('#target-list > .controls > .report-target-list > li').remove();
-                _report._riskMatrixTargets = [];
-
-                // remove checklist content
-                $('.report-target-header').remove();
-                $('.report-target-content').remove();
-
-                if (val != 0) {
-                    _system.control.loadObjects(val, 'target-list', function (data) {
-                        if (data && data.objects.length) {
-                            for (var i = 0; i < data.objects.length; i++) {
-                                var li    = $('<li>'),
-                                    label = $('<label>'),
-                                    input = $('<input>');
-
-                                input
-                                    .attr('type', 'checkbox')
-                                    .prop('checked', true)
-                                    .attr('id', 'RiskMatrixForm_targetIds_' + data.objects[i].id)
-                                    .attr('name', 'RiskMatrixForm[targetIds][]')
-                                    .val(data.objects[i].id)
-                                    .click(function () {
-                                        system.report.riskMatrixFormChange(this);
-                                    })
-                                    .appendTo(label);
-
-                                label
-                                    .append(' ' + data.objects[i].host)
-                                    .appendTo(li);
-
-                                $('#target-list > .controls > .report-target-list').append(li);
-                            }
-
-                            $('#target-list').show();
-                            _report._refreshChecks(false, false);
-                        } else {
-                            $('#project-list').addClass('error');
-                            $('#project-list > div > .help-block').show();
+                            $("#template-list").addClass("error");
+                            $("#template-list > div > .help-block").show();
                         }
                     });
                 }
             } else if (e.id.match(/^RiskMatrixForm_targetIds_/i)) {
-                _report._refreshChecks(false, false);
+                _report._refreshRiskMatrix(false);
             }
         };
 
@@ -1053,20 +760,22 @@ function System() {
          * Toggle risk matrix check.
          */
         this.riskMatrixCheckToggle = function (id) {
-            if ($('div.report-check-content[data-id=' + id + ']').is(':visible'))
-                $('div.report-check-content[data-id=' + id + ']').slideUp('slow');
-            else
-                $('div.report-check-content[data-id=' + id + ']').slideDown('slow');
+            if ($("div.report-check-content[data-id=" + id + "]").is(":visible")) {
+                $("div.report-check-content[data-id=" + id + "]").slideUp("slow");
+            } else {
+                $("div.report-check-content[data-id=" + id + "]").slideDown("slow");
+            }
         };
 
         /**
          * Toggle risk matrix target.
          */
         this.riskMatrixTargetToggle = function (id) {
-            if ($('div.report-target-content[data-id=' + id + ']').is(':visible'))
-                $('div.report-target-content[data-id=' + id + ']').slideUp('slow');
-            else
-                $('div.report-target-content[data-id=' + id + ']').slideDown('slow');
+            if ($("div.report-target-content[data-id=" + id + "]").is(":visible")) {
+                $("div.report-target-content[data-id=" + id + "]").slideUp("slow");
+            } else {
+                $("div.report-target-content[data-id=" + id + "]").slideDown("slow");
+            }
         };
 
         /**
@@ -1075,112 +784,28 @@ function System() {
         this.vulnExportFormChange = function (e) {
             var val;
 
-            $('#client-list').removeClass('error');
-            $('#project-list').removeClass('error');
-            $('#project-list > div > .help-block').hide();
-            $('#client-list > div > .help-block').hide();
-            $('.form-actions > button[type="submit"]').prop('disabled', true);
+            $(".form-actions > button[type=submit]").prop("disabled", true);
 
-            if (e.id == 'VulnExportReportForm_clientId') {
-                val = $('#VulnExportReportForm_clientId').val();
+            if (e.id.match(/^VulnExportReportForm_targetIds_/i)) {
+                $("#report-details").hide();
 
-                $('#project-list').hide();
-                $('#target-list').hide();
-                $('#report-details').hide();
+                if ($(".report-target-list input:checked").length > 0) {
+                    $("#report-details").show();
 
-                // clear columns
-                $('input[name="VulnExportReportForm[header]"]').prop('checked', true);
-                $('input[name="VulnExportReportForm[ratings][]"]').prop('checked', true);
-                $('input[name="VulnExportReportForm[columns][]"]').prop('checked', true);
-
-                if (val != 0) {
-                    _system.control.loadObjects(val, 'project-list', function (data) {
-                        $('#VulnExportReportForm_clientId').prop('disabled', false);
-                        $('#VulnExportReportForm_projectId > option:not(:first)').remove();
-
-                        if (data && data.objects.length) {
-                            for (var i = 0; i < data.objects.length; i++) {
-                                $('<option>')
-                                    .val(data.objects[i].id)
-                                    .html(data.objects[i].name)
-                                    .appendTo('#VulnExportReportForm_projectId');
-                            }
-
-                            $('#project-list').show();
-                        } else {
-                            $('#client-list').addClass('error');
-                            $('#client-list > div > .help-block').show();
-                        }
-                    });
-                }
-            } else if (e.id == 'VulnExportReportForm_projectId') {
-                val = $('#VulnExportReportForm_projectId').val();
-
-                $('#target-list').hide();
-                $('#report-details').hide();
-
-                // clear columns
-                $('input[name="VulnExportReportForm[header]"]').prop('checked', true);
-                $('input[name="VulnExportReportForm[ratings][]"]').prop('checked', true);
-                $('input[name="VulnExportReportForm[columns][]"]').prop('checked', true);
-
-                if (val != 0) {
-                    _system.control.loadObjects(val, 'target-list', function (data) {
-                        $('#target-list > .controls > .report-target-list > li').remove();
-
-                        if (data && data.objects.length) {
-                            for (var i = 0; i < data.objects.length; i++) {
-                                var li    = $('<li>'),
-                                    label = $('<label>'),
-                                    input = $('<input>');
-
-                                input
-                                    .attr('type', 'checkbox')
-                                    .prop('checked', true)
-                                    .attr('id', 'VulnExportReportForm_targetIds_' + data.objects[i].id)
-                                    .attr('name', 'VulnExportReportForm[targetIds][]')
-                                    .val(data.objects[i].id)
-                                    .click(function () {
-                                        system.report.vulnExportFormChange(this);
-                                    })
-                                    .appendTo(label);
-
-                                label
-                                    .append(' ' + data.objects[i].host)
-                                    .appendTo(li);
-
-                                $('#target-list > .controls > .report-target-list').append(li);
-                            }
-
-                            $('#target-list').show();
-                            $('#report-details').show();
-                            $('.form-actions > button[type="submit"]').prop('disabled', false);
-                        } else {
-                            $('#project-list').addClass('error');
-                            $('#project-list > div > .help-block').show();
-                        }
-                    });
-                }
-            } else if (e.id.match(/^VulnExportReportForm_targetIds_/i)) {
-                $('#report-details').hide();
-
-                if ($('.report-target-list input:checked').length > 0) {
-                    $('#report-details').show();
-
-                    if ($('input[name="VulnExportReportForm[ratings][]"]:checked').length > 0 &&
-                        $('input[name="VulnExportReportForm[columns][]"]:checked').length > 0) {
-                        $('.form-actions > button[type="submit"]').prop('disabled', false);
-                        $('#report-details').show();
+                    if ($("input[name=\"VulnExportReportForm[ratings][]\"]:checked").length > 0 &&
+                        $("input[name=\"VulnExportReportForm[columns][]\"]:checked").length > 0) {
+                        $(".form-actions > button[type=submit]").prop("disabled", false);
+                        $("#report-details").show();
                     }
                 } else {
                     // clear columns
-                    $('input[name="VulnExportReportForm[header]"]').prop('checked', true);
-                    $('input[name="VulnExportReportForm[ratings][]"]').prop('checked', true);
-                    $('input[name="VulnExportReportForm[columns][]"]').prop('checked', true);
+                    $("input[name=\"VulnExportReportForm[header]\"]").prop("checked", true);
+                    $("input[name=\"VulnExportReportForm[ratings][]\"]").prop("checked", true);
+                    $("input[name=\"VulnExportReportForm[columns][]\"]").prop("checked", true);
                 }
-            } else if ($('input[name="VulnExportReportForm[ratings][]"]:checked').length > 0 &&
-                $('input[name="VulnExportReportForm[columns][]"]:checked').length > 0) {
-                    $('.form-actions > button[type="submit"]').prop('disabled', false);
+            } else if ($("input[name=\"VulnExportReportForm[ratings][]\"]:checked").length > 0 &&
+                $("input[name=\"VulnExportReportForm[columns][]\"]:checked").length > 0) {
+                    $(".form-actions > button[type=submit]").prop("disabled", false);
             }
         };
 
@@ -1188,7 +813,7 @@ function System() {
          * Show form.
          */
         this.effortForm = function () {
-            $('#effort-modal').modal();
+            $("#effort-modal").modal();
         };
 
         /**
