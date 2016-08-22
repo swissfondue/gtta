@@ -46,6 +46,16 @@
             </div>
         </div>
 
+        <div class="control-group <?php if ($model->getError('sessionDuration')) echo 'error'; ?>">
+            <label class="control-label" for="AccountEditForm_sessionDuration"><?php echo Yii::t('app', 'Session Duration'); ?></label>
+            <div class="controls">
+                <input type="text" class="input-large" id="AccountEditForm_sessionDuration" name="AccountEditForm[sessionDuration]" value="<?= $model->sessionDuration ?>">&nbsp;<?= Yii::t("app", "Hour(s)") ?>
+                <?php if ($model->getError('sessionDuration')): ?>
+                    <p class="help-block"><?php echo $model->getError('sessionDuration'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <?php if (Yii::app()->user->role != User::ROLE_CLIENT): ?>
             <div class="control-group">
                 <label class="control-label" for="AccountEditForm_sendNotifications"><?php echo Yii::t('app', 'Send Notifications'); ?></label>

@@ -58,4 +58,20 @@ class UserIdentity extends CUserIdentity {
 	public function getId() {
 		return $this->_id;
 	}
+
+    /**
+     * Get session duration
+     * @return int|mixed|null
+     */
+    public function getSessionDuration() {
+        $user = User::model()->findByAttributes([
+            "email" => $this->email
+        ]);
+
+        if (!$user) {
+            return 0;
+        }
+
+        return $user->session_duration;
+    }
 }

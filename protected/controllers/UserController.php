@@ -82,6 +82,7 @@ class UserController extends Controller
             $model->showReports = $user->show_reports;
             $model->showDetails = $user->show_details;
             $model->certificateRequired = $user->certificate_required;
+            $model->sessionDuration = $user->session_duration;
         }
 
 		// collect user input data
@@ -115,6 +116,7 @@ class UserController extends Controller
                     $user->role  = $model->role;
                     $user->send_notifications = $model->sendNotifications;
                     $user->certificate_required = $model->certificateRequired;
+                    $user->session_duration = $model->sessionDuration;
 
                     // delete all projects from this client account
                     if (!$newRecord && $user->role == User::ROLE_CLIENT && $model->clientId != $user->client_id)
