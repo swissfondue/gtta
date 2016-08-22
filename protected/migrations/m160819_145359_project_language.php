@@ -10,6 +10,13 @@ class m160819_145359_project_language extends CDbMigration {
      */
     public function safeUp() {
         $this->addColumn("projects", "language_id", "bigint");
+        $this->addForeignKey(
+            "projects_language_id_languages_id_fkey",
+            "projects",
+            "language_id",
+            "languages",
+            "id"
+        );
 
         return true;
 	}
