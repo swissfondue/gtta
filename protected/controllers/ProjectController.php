@@ -27,24 +27,37 @@ class ProjectController extends Controller {
      * @return array|mixed|null
      */
     private function _getQuickTargets($projectId, $languageId) {
-        $criteria = new CDbCriteria();
-        $criteria->order  = "t.host ASC";
-        $criteria->addCondition("t.project_id = :project_id");
-        $criteria->params = array("project_id" => $projectId);
-        $criteria->together = true;
+        $baseCriteria = new CDbCriteria();
+        $baseCriteria->addCondition("t.project_id = :project_id");
+        $baseCriteria->params = ["project_id" => $projectId];
+        $baseCriteria->together = true;
 
-        return Target::model()->with(array(
-            "categories" => array(
-                "with" => array(
-                    "l10n" => array(
+        $domainCriteria = clone $baseCriteria;
+        $ipCriteria = clone $baseCriteria;
+
+        $domainCriteria->addCondition("t.host !~ '(\d{1,3}\.){3}\d{1,3}'");
+        $domainCriteria->order = "t.host ASC";
+
+        $ipCriteria->addCondition("host ~ '(\d{1,3}\.){3}\d{1,3}'");
+        $ipCriteria->order = "t.host::inet";
+
+        $with = [
+            "categories" => [
+                "with" => [
+                    "l10n" => [
                         "joinType" => "LEFT JOIN",
                         "on" => "language_id = :language_id",
-                        "params" => array("language_id" => $languageId)
-                    ),
-                ),
+                        "params" => ["language_id" => $languageId]
+                    ],
+                ],
                 "order" => "categories.name",
-            )
-        ))->findAll($criteria);
+            ]
+        ];
+
+        return array_merge(
+            Target::model()->with($with)->findAll($ipCriteria),
+            Target::model()->with($with)->findAll($domainCriteria)
+        );
     }
 
     /**
@@ -1226,9 +1239,11 @@ class ProjectController extends Controller {
                     $ids = [];
 
                     foreach ($targets as $target) {
+                        $host = trim($target);
+                        
                         $t = new Target();
                         $t->project_id = $project->id;
-                        $t->host = $target;
+                        $t->host = $host;
                         $t->save();
 
                         $t->refresh();

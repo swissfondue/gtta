@@ -33,9 +33,7 @@
 
 <hr>
 
-<div
-    class="container"
-    data-add-issue-url="<?= $this->createUrl("project/addIssue", ["id" => $project->id]); ?>">
+<div class="container" data-add-issue-url="<?= $this->createUrl("project/addIssue", ["id" => $project->id]); ?>">
     <div class="row">
         <div class="span8">
             <?php if (count($targets) > 0): ?>
@@ -134,7 +132,7 @@
                 <?php echo Yii::t('app', 'No targets yet.'); ?>
             <?php endif; ?>
         </div>
-        <div class="span4">
+        <div class="span4 right-block sticky">
             <?php
                 echo $this->renderPartial("partial/right-block", array(
                     "quickTargets" => $quickTargets,
@@ -152,5 +150,9 @@
 <script>
     $(".shortened").tooltip({
         placement:"right"
+    });
+
+    $(function () {
+        $(".right-block").Stickyfill();
     });
 </script>

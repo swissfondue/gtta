@@ -7,7 +7,7 @@
     <div id="project-quick-nav-issues-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-quick-nav-issues');"><i class="icon-chevron-up"></i></div>
     <h3><a href="#toggle" onclick="system.toggleBlock('#project-quick-nav-issues');"><?php echo Yii::t("app", "Issues"); ?></a></h3>
 
-    <div class="info-block" id="project-quick-nav-issues">
+    <div class="info-block right-scrollable-block" id="project-quick-nav-issues">
         <div id="summary">
             <a href="<?= $this->createUrl("project/issues", ["id" => $project->id]); ?>"><?= Yii::t("app", "Summary of Issues"); ?></a>
         </div>
@@ -36,10 +36,11 @@
     <div id="project-quick-nav-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-quick-nav');"><i class="icon-chevron-up"></i></div>
     <h3><a href="#toggle" onclick="system.toggleBlock('#project-quick-nav');"><?php echo Yii::t('app', 'Quick Navigation'); ?></a></h3>
 
-    <div class="info-block" id="project-quick-nav">
+    <div class="info-block right-scrollable-block" id="project-quick-nav">
         <?php foreach ($quickTargets as $qTarget): ?>
             <div class="project-quick-nav">
-                <div class="target">
+                <?php $targetId = Yii::app()->request->getParam("target"); ?>
+                <div class="target <?php if ($targetId && $targetId == $qTarget->id) echo "active"; ?>">
                     <a href="<?php echo $this->createUrl("project/target", array("id" => $project->id, "target" => $qTarget->id)); ?>"><?php echo CHtml::encode($qTarget->hostPort); ?></a>
                 </div>
 
@@ -72,7 +73,7 @@
 <div id="project-info-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-info');"><i class="icon-chevron-up"></i></div>
 <h3><a href="#toggle" onclick="system.toggleBlock('#project-info');"><?php echo Yii::t('app', 'Project Information'); ?></a></h3>
 
-<div class="info-block" id="project-info">
+<div class="info-block right-scrollable-block" id="project-info">
     <table class="table client-details">
         <tbody>
             <?php if (!User::checkRole(User::ROLE_CLIENT)): ?>
@@ -135,7 +136,7 @@
     <div id="project-details-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#project-details');"><i class="icon-chevron-up"></i></div>
     <h3><a href="#toggle" onclick="system.toggleBlock('#project-details');"><?php echo Yii::t('app', 'Project Details'); ?></a></h3>
 
-    <div class="info-block" id="project-details">
+    <div class="info-block right-scrollable-block" id="project-details">
         <?php
             $counter = 0;
             foreach ($project->details as $detail):
@@ -156,7 +157,7 @@
         <div id="client-address-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#client-address');"><i class="icon-chevron-up"></i></div>
         <h3><a href="#toggle" onclick="system.toggleBlock('#client-address');"><?php echo Yii::t('app', 'Client Address'); ?></a></h3>
 
-        <div class="info-block" id="client-address">
+        <div class="info-block right-scrollable-block" id="client-address">
             <table class="table client-details">
                 <tbody>
                     <?php if ($client->country): ?>
@@ -227,7 +228,7 @@
         <div id="client-contact-icon" class="pull-right expand-collapse-icon" onclick="system.toggleBlock('#client-contact');"><i class="icon-chevron-up"></i></div>
         <h3><a href="#toggle" onclick="system.toggleBlock('#client-contact');"><?php echo Yii::t('app', 'Client Contact'); ?></a></h3>
 
-        <div class="info-block" id="client-contact">
+        <div class="info-block right-scrollable-block" id="client-contact">
             <table class="table client-details">
                 <tbody>
                     <?php if ($client->contact_name): ?>
