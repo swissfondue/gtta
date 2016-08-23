@@ -1,6 +1,19 @@
 <ul class="nav nav-pills">
     <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            <?= Yii::t("app", "New"); ?>
+            <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+            <li><a href="<?= $this->createUrl("project/edittarget", array("id" => $project->id )); ?>"><?= Yii::t("app", "Single Target") ?></a></li>
+            <li><a href="<?= $this->createUrl("project/addtargetlist", array("id" => $project->id )); ?>"><?= Yii::t("app", "Target List") ?></a></li>
+            <li><a href="<?= $this->createUrl("project/importtarget", array("id" => $project->id )); ?>"><?= Yii::t("app", "Import Targets From File") ?></a></li>
+            <li class="divider"></li>
+            <li><a href="#" onclick="admin.issue.showIssueAddPopup()"><?= Yii::t("app", "Issue") ?></a></li>
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
             <?= Yii::t("app", "Project"); ?>
             <b class="caret"></b>
         </a>

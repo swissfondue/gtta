@@ -11,20 +11,6 @@
                     <?php echo Yii::t("app", "Track Time"); ?>
                 </a>
             </div>
-            <div class="btn-group">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon icon-plus"></i>
-                    <?php echo Yii::t("app", "New"); ?>
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a href="<?= $this->createUrl("project/edittarget", array("id" => $project->id )); ?>"><?= Yii::t("app", "Single Target") ?></a></li>
-                    <li><a href="<?= $this->createUrl("project/addtargetlist", array("id" => $project->id )); ?>"><?= Yii::t("app", "Target List") ?></a></li>
-                    <li><a href="<?= $this->createUrl("project/importtarget", array("id" => $project->id )); ?>"><?= Yii::t("app", "Import Targets From File") ?></a></li>
-                    <hr>
-                    <li><a href="#" onclick="admin.issue.showIssueAddPopup()"><?= Yii::t("app", "Issue") ?></a></li>
-                </ul>
-            </div>
         <?php endif; ?>
     </div>
 
