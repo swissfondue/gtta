@@ -1226,9 +1226,11 @@ class ProjectController extends Controller {
                     $ids = [];
 
                     foreach ($targets as $target) {
+                        $host = trim($target);
+                        
                         $t = new Target();
                         $t->project_id = $project->id;
-                        $t->host = $target;
+                        $t->host = $host;
                         $t->save();
 
                         $t->refresh();
