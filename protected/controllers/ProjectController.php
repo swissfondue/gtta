@@ -1238,6 +1238,16 @@ class ProjectController extends Controller {
                     throw $e;
                 }
 
+                // by default all references must be binded to target
+                foreach ($ids as $tId) {
+                    foreach (Reference::model()->findAll() as $ref) {
+                        $targetRef = new TargetReference();
+                        $targetRef->target_id = $tId;
+                        $targetRef->reference_id = $ref->id;
+                        $targetRef->save();
+                    }
+                }
+
                 HostResolveJob::enqueue([
                     "targets" => $ids
                 ]);
