@@ -42,8 +42,6 @@ class TargetCheckManager {
             foreach ($check->fields as $field) {
                 $this->createField($targetCheck, $field);
             }
-
-            $this->addEvidence($targetCheck);
         } catch (Exception $e) {
             throw new Exception("Can't create check.");
         }
