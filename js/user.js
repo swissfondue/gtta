@@ -1334,7 +1334,6 @@ function User()
                 $(this).fileupload({
                     dataType: "json",
                     url: url,
-                    forceIframeTransport: true,
                     timeout: 120000,
                     formData: data,
                     dropZone:$('input[name^="TargetCheckAttachmentUploadForm"]'),
@@ -1494,7 +1493,6 @@ function User()
                 $(this).fileupload({
                     dataType: "json",
                     url: url,
-                    forceIframeTransport: true,
                     timeout: 120000,
                     formData: data,
                     dropZone:$('input[name^="TargetCustomCheckAttachmentUploadForm"]'),
