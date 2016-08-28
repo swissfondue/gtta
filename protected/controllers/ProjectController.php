@@ -361,6 +361,10 @@ class ProjectController extends Controller {
             $model->startDate = $project->start_date ? $project->start_date : date("Y-m-d");
             $model->hoursAllocated = $project->hours_allocated;
 
+            if ($project->language) {
+                $model->languageId = $project->language->id;
+            }
+
             $fields = GlobalCheckField::model()->findAll();
 
             foreach ($fields as $f) {
@@ -399,6 +403,18 @@ class ProjectController extends Controller {
                     ));
 
                     ProjectUser::model()->deleteAll($criteria);
+                }
+
+                if ($model->languageId) {
+                    $language = Language::model()->findByPk($model->languageId);
+
+                    if (!$language) {
+                        throw new CHttpException(404, "Language not found.");
+                    }
+
+                    $project->language_id = $language->id;
+                } else {
+                    $project->language_id = null;
                 }
 
                 $project->name = $model->name;
@@ -479,7 +495,8 @@ class ProjectController extends Controller {
             "model" => $model,
             "project" => $project,
             "clients" => $clients,
-            "fields" => GlobalCheckField::model()->findAll(["order" => "sort_order ASC"])
+            "fields" => GlobalCheckField::model()->findAll(["order" => "sort_order ASC"]),
+            "languages" => Language::model()->findAll()
         ));
 	}
 

@@ -130,25 +130,27 @@
                         </ul>
                     <?php endif; ?>
 
-                    <div class="language-selector pull-right">
-                        <ul>
-                            <?php
-                                $languages = array(
-                                    'en' => 'English',
-                                    'de' => 'Deutsch',
-                                );
+                    <?php if ($this->languageSwitcher): ?>
+                        <div class="language-selector pull-right">
+                            <ul>
+                                <?php
+                                    $languages = array(
+                                        'en' => 'English',
+                                        'de' => 'Deutsch',
+                                    );
 
-                                $active = 'en';
+                                    $active = 'en';
 
-                                if (isset(Yii::app()->language))
-                                    $active = Yii::app()->language;
+                                    if (isset(Yii::app()->language))
+                                        $active = Yii::app()->language;
 
-                                foreach ($languages as $code => $name):
-                            ?>
-                                <li <?php if ($active == $code) echo 'class="active"'; ?>><a href="#set-language" onclick="system.setLanguage('<?php echo $code; ?>');" title="<?php echo $name; ?>"><img src="<?php echo Yii::app()->baseUrl; ?>/images/languages/<?php echo $code; ?>.png" alt="<?php echo $name; ?>"></a></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
+                                    foreach ($languages as $code => $name):
+                                ?>
+                                    <li <?php if ($active == $code) echo 'class="active"'; ?>><a href="#set-language" onclick="system.setLanguage('<?php echo $code; ?>');" title="<?php echo $name; ?>"><img src="<?php echo Yii::app()->baseUrl; ?>/images/languages/<?php echo $code; ?>.png" alt="<?php echo $name; ?>"></a></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
 
                     <div class="loader-image pull-right hide">
                         <img src="<?php echo Yii::app()->baseUrl; ?>/images/loading.gif">
