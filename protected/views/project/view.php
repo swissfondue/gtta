@@ -19,9 +19,7 @@
 
 <hr>
 
-<div
-    class="container"
-    data-add-issue-url="<?= $this->createUrl("project/addIssue", ["id" => $project->id]); ?>">
+<div class="container" data-add-issue-url="<?= $this->createUrl("project/addIssue", ["id" => $project->id]); ?>">
     <div class="row">
         <div class="span8">
             <?php if (count($targets) > 0): ?>

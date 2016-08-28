@@ -11,6 +11,7 @@
         <![endif]-->
         <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.js"></script>
         <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.cookie.js"></script>
+        <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/stickyfill.min.js"></script>
         <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap/bootstrap.js"></script>
         <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap/bootstrap.datepicker.js"></script>
         <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/bootstrap/bootstrap.alerts-queue.js"></script>

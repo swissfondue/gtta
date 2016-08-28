@@ -1468,3 +1468,15 @@ ul.target-list li {
     cursor:pointer;
     float:left;
 }
+.sticky {
+     position: -webkit-sticky;
+     position: sticky;
+     top: 0;
+ }
+.right-scrollable-block {
+    max-height: 250px;
+    overflow-y: auto;
+}
+#project-quick-nav .target.active * {
+    color: red;
+}
