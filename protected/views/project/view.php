@@ -132,7 +132,7 @@
                 <?php echo Yii::t('app', 'No targets yet.'); ?>
             <?php endif; ?>
         </div>
-        <div class="span4 right-block sticky">
+        <div class="span4">
             <?php
                 echo $this->renderPartial("partial/right-block", array(
                     "quickTargets" => $quickTargets,
@@ -150,9 +150,5 @@
 <script>
     $(".shortened").tooltip({
         placement:"right"
-    });
-
-    $(function () {
-        $(".right-block").Stickyfill();
     });
 </script>
