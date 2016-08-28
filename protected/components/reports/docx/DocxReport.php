@@ -83,6 +83,7 @@ class DocxReport extends ReportPlugin {
             $project->year
         );
 
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
         $this->_filePath = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . hash("sha256", time() . rand() . $this->_fileName);
         $this->_scope = new VariableScopeStack($this->_data);
         $this->_scope->push(VariableScope::SCOPE_PROJECT, $this->_data["project"]);
@@ -1087,7 +1088,9 @@ class DocxReport extends ReportPlugin {
      * Generate report
      */
     public function generate() {
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
         $this->_templateDir = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . hash("sha256", time() . rand() . $this->_fileName);
+
         FileManager::createDir($this->_templateDir, 0777);
         $exception = null;
 

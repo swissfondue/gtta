@@ -168,6 +168,7 @@ class RtfReport extends ReportPlugin {
             if ($template->header_image_type == "image/png")
                 $extension = "png";
 
+            FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
             $filePath = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . $template->header_image_path . "." . $extension;
 
             if (@copy(
@@ -196,6 +197,7 @@ class RtfReport extends ReportPlugin {
             if ($client->logo_type == "image/png")
                 $extension = "png";
 
+            FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
             $filePath = Yii::app()->params["clientLogos"]["tmpFilesPath"] . "/" . $client->logo_path . "." . $extension;
 
             if (@copy(
@@ -726,6 +728,7 @@ class RtfReport extends ReportPlugin {
         imagefilledpolygon($image, $bottomArrow, count($bottomArrow) / 2, $color);
 
         $hashName = hash('sha256', rand() . time() . rand());
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
         $filePath = Yii::app()->params["reports"]["tmpFilesPath"] . '/' . $hashName . '.png';
 
         imagepng($image, $filePath, 0);
@@ -877,6 +880,7 @@ class RtfReport extends ReportPlugin {
         $this->_centerImageText($image, Yii::t("app", "Low Risk") . " (" . $data["checksLow"] . ")", $font, $lineColor, 10, 390, 290, 180);
 
         $hashName = hash("sha256", rand() . time() . rand());
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
         $filePath = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . $hashName . ".png";
 
         imagepng($image, $filePath, 0);
@@ -1627,6 +1631,7 @@ class RtfReport extends ReportPlugin {
         imagecopyresampled($image, $scale, 0, 0, 0, 0, 301, 30, 301, 30);
 
         $hashName = hash("sha256", rand() . time() . rand());
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
         $filePath = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . $hashName . ".png";
 
         imagepng($image, $filePath, 0);
@@ -1774,6 +1779,7 @@ class RtfReport extends ReportPlugin {
 
         $this->_fileName = Yii::t("app", "Degree of Fulfillment") . " - " . $project->name . " (" . $project->year . ").rtf";
         $hashName = hash("sha256", rand() . time() . $this->_fileName);
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
         $this->_filePath = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . $hashName;
 
         $this->rtf->save($this->_filePath);
@@ -1808,6 +1814,7 @@ class RtfReport extends ReportPlugin {
 
         $this->_fileName = Yii::t("app", "Risk Matrix") . " - " . $project->name . " (" . $project->year . ").rtf";
         $hashName = hash("sha256", rand() . time() . $this->_fileName);
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
         $this->_filePath = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . $hashName;
 
         $this->rtf->save($this->_filePath);
@@ -2004,6 +2011,7 @@ class RtfReport extends ReportPlugin {
         $originalPath = $this->_filePath;
         $this->_fileName = $this->_fileName . ".zip";
         $hashName = hash("sha256", rand() . time() . $this->_fileName);
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
         $this->_filePath = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . $hashName;
 
         $zip = new ZipArchive();
@@ -2482,6 +2490,7 @@ class RtfReport extends ReportPlugin {
 
         $this->_fileName = Yii::t("app", "Penetration Test Report") . " - " . $project->name . " (" . $project->year . ").rtf";
         $hashName = hash("sha256", rand() . time() . $this->_fileName);
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
         $this->_filePath = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . $hashName;
 
         $this->rtf->save($this->_filePath);
@@ -2562,6 +2571,7 @@ class RtfReport extends ReportPlugin {
 
         $this->_fileName = Yii::t("app", "Time Tracking Report") . " - " . $project->name . " (" . $project->year . ").rtf";
         $hashName = hash("sha256", rand() . time() . $this->_fileName);
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
         $this->_filePath = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . $hashName;
 
         $this->rtf->save($this->_filePath);
@@ -2641,6 +2651,7 @@ class RtfReport extends ReportPlugin {
 
         $this->_fileName = Yii::t("app", "Projects Comparison") . ".rtf";
         $hashName = hash("sha256", rand() . time() . $this->_fileName);
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
         $this->_filePath = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . $hashName;
 
         $this->rtf->save($this->_filePath);
