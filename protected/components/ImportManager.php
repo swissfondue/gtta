@@ -274,6 +274,18 @@ class ImportManager {
                 break;
         }
 
+        $references = Reference::model()->findAll();
+
+        // by default all references must be bound to target
+        foreach ($ids as $tId) {
+            foreach ($references as $ref) {
+                $targetRef = new TargetReference();
+                $targetRef->target_id = $tId;
+                $targetRef->reference_id = $ref->id;
+                $targetRef->save();
+            }
+        }
+
         HostResolveJob::enqueue([
             "targets" => $ids
         ]);
