@@ -37,7 +37,7 @@ return array(
             "sessionTableName" => "sessions",
             "connectionID" => "db",
             "autoCreateSessionTable" => true,
-            "timeout" => 60 * 60, // 1 hour
+            "timeout" => 0,
         ),
 
         "request" => array(

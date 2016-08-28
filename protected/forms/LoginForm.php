@@ -55,15 +55,16 @@ class LoginForm extends CFormModel
 	 */
 	public function login()
 	{
-		if ($this->_identity === null)
-		{
+		if ($this->_identity === null) {
 			$this->_identity = new UserIdentity($this->email, $this->password);
 			$this->_identity->authenticate();
 		}
-        
-		if ($this->_identity->errorCode === UserIdentity::ERROR_NONE)
-		{
-			Yii::app()->user->login($this->_identity);
+
+        $duration = $this->_identity->getSessionDuration() * 60 * 60; // hours to seconds
+
+		if ($this->_identity->errorCode === UserIdentity::ERROR_NONE) {
+			Yii::app()->user->login($this->_identity, $duration);
+
 			return true;
 		}
 

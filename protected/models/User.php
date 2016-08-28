@@ -19,6 +19,7 @@
  * @property boolean $certificate_required
  * @property boolean $certificate_serial
  * @property boolean $certificate_issuer
+ * @property integer $session_duration
  * @property ProjectPlanner[] $planner
  */
 class User extends ActiveRecord {
@@ -53,6 +54,7 @@ class User extends ActiveRecord {
             array("email, password, role", "required"),
             array("email, password, name, password_reset_code", "length", "max" => 1000),
             array("role", "in", "range" => array(self::ROLE_ADMIN, self::ROLE_USER, self::ROLE_CLIENT)),
+            array("session_duration", "numerical", "integerOnly" => true),
             array("client_id, last_action_time, send_notifications, show_details, show_reports, password_reset_time, certificate_required, certificate_serial, certificate_issuer", "safe"),
 		);
 	}

@@ -6,6 +6,12 @@
 class WebUser extends CWebUser
 {
     /**
+     * Enable cookie-based login
+     * @var bool
+     */
+    public $allowAutoLogin = true;
+
+    /**
      * @var User model storage.
      */
     private $_model;
