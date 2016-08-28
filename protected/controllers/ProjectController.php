@@ -1220,10 +1220,11 @@ class ProjectController extends Controller {
             $form->attributes = $_POST["TargetListAddForm"];
 
             if ($form->validate()) {
+                $ids = [];
+
                 try {
                     $targets = trim($form->targetList);
                     $targets = explode("\n", $targets);
-                    $ids = [];
 
                     foreach ($targets as $target) {
                         $t = new Target();
@@ -1234,13 +1235,13 @@ class ProjectController extends Controller {
                         $t->refresh();
                         $ids[] = $t->id;
                     }
-                } catch (Exception $e) {
-                    throw $e;
-                }
+                } catch (Exception $e) {}
 
-                // by default all references must be binded to target
+                $references = Reference::model()->findAll();
+
+                // by default all references must be bound to target
                 foreach ($ids as $tId) {
-                    foreach (Reference::model()->findAll() as $ref) {
+                    foreach ($references as $ref) {
                         $targetRef = new TargetReference();
                         $targetRef->target_id = $tId;
                         $targetRef->reference_id = $ref->id;

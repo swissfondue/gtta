@@ -274,9 +274,11 @@ class ImportManager {
                 break;
         }
 
-        // by default all references must be binded to target
+        $references = Reference::model()->findAll();
+
+        // by default all references must be bound to target
         foreach ($ids as $tId) {
-            foreach (Reference::model()->findAll() as $ref) {
+            foreach ($references as $ref) {
                 $targetRef = new TargetReference();
                 $targetRef->target_id = $tId;
                 $targetRef->reference_id = $ref->id;
