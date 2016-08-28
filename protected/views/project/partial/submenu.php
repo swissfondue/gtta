@@ -51,3 +51,5 @@
         </ul>
     </li>
 </ul>
+
+<?= $this->renderPartial("issue/partial/check-selector", ["project" => $project]); ?>

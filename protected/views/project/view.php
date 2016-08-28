@@ -133,8 +133,6 @@
     </div>
 </div>
 
-<?= $this->renderPartial("issue/partial/check-selector", ["project" => $project]); ?>
-
 <script>
     $(".shortened").tooltip({
         placement:"right"
