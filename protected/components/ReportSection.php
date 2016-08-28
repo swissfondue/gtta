@@ -14,7 +14,9 @@ class ReportSection {
     const TYPE_CHART_DEGREE_OF_FULFILLMENT = 40;
     const TYPE_RISK_MATRIX = 50;
     const TYPE_REDUCED_VULNERABILITY_LIST = 60;
+    const TYPE_REDUCED_ISSUE_LIST = 61;
     const TYPE_VULNERABILITIES = 70;
+    const TYPE_ISSUES = 71;
     const TYPE_INFO_CHECKS = 80;
     const TYPE_APPENDIX = 90;
     const TYPE_ATTACHMENTS = 100;
@@ -29,8 +31,10 @@ class ReportSection {
             self::TYPE_INTRO => Yii::t("app", "Introduction"),
             self::TYPE_SUMMARY => Yii::t("app", "Summary"),
             self::TYPE_RISK_MATRIX => Yii::t("app", "Risk Matrix"),
+            self::TYPE_REDUCED_ISSUE_LIST => Yii::t("app", "Reduced Issue List"),
             self::TYPE_REDUCED_VULNERABILITY_LIST => Yii::t("app", "Reduced Vulnerability List"),
             self::TYPE_VULNERABILITIES => Yii::t("app", "Vulnerability List"),
+            self::TYPE_ISSUES => Yii::t("app", "Issue List"),
             self::TYPE_INFO_CHECKS => Yii::t("app", "Info Checks"),
             self::TYPE_APPENDIX => Yii::t("app", "Appendix"),
             self::TYPE_ATTACHMENTS => Yii::t("app", "Attachments"),
@@ -63,8 +67,10 @@ class ReportSection {
             self::TYPE_INTRO,
             self::TYPE_SUMMARY,
             self::TYPE_RISK_MATRIX,
+            self::TYPE_REDUCED_ISSUE_LIST,
             self::TYPE_REDUCED_VULNERABILITY_LIST,
             self::TYPE_VULNERABILITIES,
+            self::TYPE_ISSUES,
             self::TYPE_INFO_CHECKS,
             self::TYPE_APPENDIX,
             self::TYPE_ATTACHMENTS,

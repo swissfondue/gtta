@@ -176,7 +176,7 @@ class ReportManager {
         foreach ($targets as $target) {
             $targetData = [
                 "id" => $target->id,
-                "host" => $target->hostPort,
+                "host" => $target->getHostPort(),
                 "description" => $target->description,
                 "controls" => [],
             ];
@@ -319,6 +319,250 @@ class ReportManager {
     }
 
     /**
+     * Get check data
+     * @param Target $target
+     * @param Check $check
+     * @param TargetCheck $tc
+     * @param array $fields
+     * @return array
+     */
+    private function _getTargetCheckData(Target $target, Check $check, TargetCheck $tc, $fields) {
+        $checkFields = [];
+        $ratings = TargetCheck::getRatingNames();
+
+        /** @var TargetCheckField $f */
+        foreach ($tc->getOrderedFields() as $f) {
+            if (
+                !$f->getHidden() &&
+                in_array($f->field->global->name, GlobalCheckField::$system) &&
+                in_array($f->field->global->name, $fields)
+            ) {
+                $checkFields[] = [
+                    "name" => $f->field->global->name,
+                    "title" => $f->field->global->localizedTitle,
+                    "value" => $f->value
+                ];
+            }
+        }
+
+        $checkData = array(
+            "id" => $check->id,
+            "custom" => false,
+            "name" => $check->localizedName,
+            "fields" => $checkFields,
+            "tableResult" => $tc->table_result,
+            "rating" => 0,
+            "ratingName" => $ratings[$tc->rating],
+            "ratingColor" => "#999999",
+            "solutions" => array(),
+            "images" => array(),
+            "reference" => $check->_reference->name,
+            "referenceUrl" => $check->_reference->url,
+            "referenceCode" => $check->reference_code,
+            "referenceCodeUrl" => $check->reference_url,
+            "info" => $tc->rating == TargetCheck::RATING_INFO,
+        );
+
+        if ($tc->solution) {
+            $checkData["solutions"][] = $this->prepareText($tc->solution);
+        }
+
+        $checkData["rating"] = $tc->rating;
+
+        switch ($tc->rating) {
+            case TargetCheck::RATING_INFO:
+                $checkData["ratingColor"] = "#3A87AD";
+                $checkData["ratingValue"] = 0;
+                break;
+
+            case TargetCheck::RATING_LOW_RISK:
+                $checkData["ratingColor"] = "#53A254";
+                $checkData["ratingValue"] = 1;
+                break;
+
+            case TargetCheck::RATING_MED_RISK:
+                $checkData["ratingColor"] = "#DACE2F";
+                $checkData["ratingValue"] = 2;
+                break;
+
+            case TargetCheck::RATING_HIGH_RISK:
+                $checkData["ratingColor"] = "#D63515";
+                $checkData["ratingValue"] = 3;
+                break;
+        }
+
+        if ($tc->solutions) {
+            foreach ($tc->solutions as $solution) {
+                $checkData["solutions"][] = $this->prepareText($solution->solution->localizedSolution);
+            }
+        }
+
+        if ($tc->attachments) {
+            foreach ($tc->attachments as $attachment) {
+                if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
+                    $checkData["images"][] = array(
+                        "title" => $attachment->title,
+                        "image" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path
+                    );
+                } else {
+                    $reportAttachments[] = array(
+                        "host" => $target->getHostPort(),
+                        "title" => $attachment->title,
+                        "check" => $check->name,
+                        "filename" => $attachment->name,
+                        "path" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path,
+                    );
+                }
+            }
+        }
+
+        return $checkData;
+    }
+
+    /**
+     * Get issue data
+     * @param array $targetIds
+     * @param Project $project
+     * @param array $fields
+     * @param $language
+     * @return array
+     */
+    public function getIssueData($targetIds, $project, $fields, $language) {
+        $data = [];
+        $reducedData = [];
+
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(["t.project_id" => $project->id]);
+        $criteria->addInCondition("tc.target_id", $targetIds);
+        $criteria->together = true;
+
+        $issues = Issue::model()
+            ->with([
+                "check" => [
+                    "with" => [
+                        "l10n" => [
+                            "joinType" => "LEFT JOIN",
+                            "on" => "l10n.language_id = :language_id",
+                            "params" => ["language_id" => $language],
+                        ],
+                        "_reference"
+                    ]
+                ],
+                "evidences" => [
+                    "alias" => "e",
+                    "with" => [
+                        "targetCheck" => [
+                            "alias" => "tc",
+                            "joinType" => "LEFT JOIN",
+                            "on" => "e.target_check_id = tc.id AND tc.status = :status AND tc.rating != :hidden",
+                            "params" => [
+                                "status" => TargetCheck::STATUS_FINISHED,
+                                "hidden" => TargetCheck::RATING_HIDDEN,
+                            ],
+                            "with" => [
+                                "solutions" => [
+                                    "alias" => "tss",
+                                    "joinType" => "LEFT JOIN",
+                                    "with" => [
+                                        "solution" => [
+                                            "alias" => "tss_s",
+                                            "joinType" => "LEFT JOIN",
+                                            "with" => [
+                                                "l10n" => [
+                                                    "alias" => "tss_s_l10n",
+                                                    "on" => "tss_s_l10n.language_id = :language_id",
+                                                    "params" => ["language_id" => $language],
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                                "attachments",
+                                "target",
+                            ]
+                        ]
+                    ]
+                ]
+            ])
+            ->findAll($criteria);
+
+        /** @var Issue $issue */
+        foreach ($issues as $issue) {
+            $check = $issue->check;
+
+            $issueData = [
+                "id" => $issue->id,
+                "name" => $check->getLocalizedName(),
+                "reference" => $check->_reference->name,
+                "referenceUrl" => $check->_reference->url,
+                "referenceCode" => $check->reference_code,
+                "referenceCodeUrl" => $check->reference_url,
+                "backgroundInfo" => $check->getBackgroundInfo(),
+                "question" => $check->getQuestion(),
+                "hints" => $check->getHints(),
+                "evidences" => [],
+                "topRating" => 0,
+            ];
+
+            $evidences = [];
+
+            /** @var IssueEvidence $evidence */
+            foreach ($issue->evidences as $evidence) {
+                $tc = $evidence->targetCheck;
+                $target = $tc->target->getHostPort();
+
+                if (!isset($evidences[$target])) {
+                    $evidences[$target] = [];
+                }
+
+                $evidenceData = $this->_getTargetCheckData($tc->target, $check, $tc, $fields);
+                $evidenceData["target"] = $target;
+                $evidences[$target][] = $evidenceData;
+
+                if (in_array($tc->rating, [
+                    TargetCheck::RATING_HIGH_RISK,
+                    TargetCheck::RATING_MED_RISK,
+                    TargetCheck::RATING_LOW_RISK
+                ])) {
+                    if (!isset($reducedData[$issue->id])) {
+                        $reducedData[$issue->id] = $issueData;
+
+                        if (!isset($reducedData[$issue->id]["evidences"][$target])) {
+                            $reducedData[$issue->id]["evidences"][$target] = [];
+                        }
+                    }
+
+                    $result = null;
+
+                    foreach ($evidenceData["fields"] as $f) {
+                        if ($f["name"] == GlobalCheckField::FIELD_RESULT) {
+                            $result = $f["value"];
+                        }
+                    }
+
+                    $reducedData[$issue->id]["evidences"][$target][] = array_merge($evidenceData, [
+                        "result" => $result,
+                        "solution" => $evidenceData["solutions"] ? implode("\n", $evidenceData["solutions"]) : "",
+                    ]);
+                }
+            }
+
+            $issueData["evidences"] = $evidences;
+
+            if (!$evidences) {
+                continue;
+            }
+
+            $data[] = $issueData;
+        }
+
+        return [
+            "issues" => $data,
+            "reducedIssues" => $reducedData,
+        ];
+    }
+
+    /**
      * Get project report data
      * @param array $targetIds
      * @param array $templateCategoryIds
@@ -359,7 +603,7 @@ class ReportManager {
         foreach ($targets as $target) {
             $targetData = array(
                 "id" => $target->id,
-                "host" => $target->hostPort,
+                "host" => $target->getHostPort(),
                 "description" => $target->description,
                 "rating" => 0.0,
                 "checkCount" => 0,
@@ -425,8 +669,9 @@ class ReportManager {
                     array("order" => "t.sort_order ASC")
                 );
 
-                if (!$controls)
+                if (!$controls) {
                     continue;
+                }
 
                 foreach ($controls as $control) {
                     $controlData = array(
@@ -520,7 +765,7 @@ class ReportManager {
                                     );
                                 } else {
                                     $reportAttachments[] = array(
-                                        "host" => $target->hostPort,
+                                        "host" => $target->getHostPort(),
                                         "title" => $attachment->title,
                                         "check" => $check->name,
                                         "filename" => $attachment->name,
@@ -534,7 +779,7 @@ class ReportManager {
                             $reducedChecks[] = array(
                                 "target" => array(
                                     "id" => $target->id,
-                                    "host" => $target->hostPort,
+                                    "host" => $target->getHostPort(),
                                     "description" => $target->description
                                 ),
                                 "id" => $checkData["id"],
@@ -602,45 +847,28 @@ class ReportManager {
                     foreach ($checks as $check) {
                         $ctr = 0;
 
+                        /** @var TargetCheck $tc */
                         foreach ($check->targetChecks as $tc) {
-                            $checkFields = [];
+                            $checkData = $this->_getTargetCheckData($target, $check, $tc, $fields);
+                            $checkData["name"] .= ($ctr > 0 ? " " . ($ctr + 1) : "");
+                            $checkData["separate"] = in_array($category->check_category_id, $templateCategoryIds);
 
-                            foreach ($tc->getOrderedFields() as $f) {
-                                if (
-                                    !$f->getHidden() && (
-                                        in_array($f->field->global->name, GlobalCheckField::$system) ||
-                                        in_array($f->field->global->name, $fields)
-                                    )
-                                ) {
-                                    $checkFields[] = [
-                                        "name" => $f->field->global->name,
-                                        "title" => $f->field->global->localizedTitle,
-                                        "value" => $f->value
-                                    ];
-                                }
-                            }
+                            switch ($tc->rating) {
+                                case TargetCheck::RATING_INFO:
+                                    $checksInfo++;
+                                    break;
 
-                            $checkData = array(
-                                "id" => $check->id,
-                                "custom" => false,
-                                "name" => $check->localizedName . ($ctr > 0 ? " " . ($ctr + 1) : ""),
-                                "fields" => $checkFields,
-                                "tableResult" => $tc->table_result,
-                                "rating" => 0,
-                                "ratingName" => $ratings[$tc->rating],
-                                "ratingColor" => "#999999",
-                                "solutions" => array(),
-                                "images" => array(),
-                                "reference" => $check->_reference->name,
-                                "referenceUrl" => $check->_reference->url,
-                                "referenceCode" => $check->reference_code,
-                                "referenceCodeUrl" => $check->reference_url,
-                                "info" => $tc->rating == TargetCheck::RATING_INFO,
-                                "separate" => in_array($category->check_category_id, $templateCategoryIds),
-                            );
+                                case TargetCheck::RATING_LOW_RISK:
+                                    $checksLow++;
+                                    break;
 
-                            if ($tc->solution) {
-                                $checkData["solutions"][] = $this->prepareText($tc->solution);
+                                case TargetCheck::RATING_MED_RISK:
+                                    $checksMed++;
+                                    break;
+
+                                case TargetCheck::RATING_HIGH_RISK:
+                                    $checksHigh++;
+                                    break;
                             }
 
                             if ($checkData["info"]) {
@@ -663,59 +891,6 @@ class ReportManager {
                                 $hasSeparate = true;
                             }
 
-                            $checkData["rating"] = $tc->rating;
-
-                            switch ($tc->rating) {
-                                case TargetCheck::RATING_INFO:
-                                    $checkData["ratingColor"] = "#3A87AD";
-                                    $checkData["ratingValue"] = 0;
-                                    $checksInfo++;
-                                    break;
-
-                                case TargetCheck::RATING_LOW_RISK:
-                                    $checkData["ratingColor"] = "#53A254";
-                                    $checkData["ratingValue"] = 1;
-                                    $checksLow++;
-                                    break;
-
-                                case TargetCheck::RATING_MED_RISK:
-                                    $checkData["ratingColor"] = "#DACE2F";
-                                    $checkData["ratingValue"] = 2;
-                                    $checksMed++;
-                                    break;
-
-                                case TargetCheck::RATING_HIGH_RISK:
-                                    $checkData["ratingColor"] = "#D63515";
-                                    $checkData["ratingValue"] = 3;
-                                    $checksHigh++;
-                                    break;
-                            }
-
-                            if ($tc->solutions) {
-                                foreach ($tc->solutions as $solution) {
-                                    $checkData["solutions"][] = $this->prepareText($solution->solution->localizedSolution);
-                                }
-                            }
-
-                            if ($tc->attachments) {
-                                foreach ($tc->attachments as $attachment) {
-                                    if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
-                                        $checkData["images"][] = array(
-                                            "title" => $attachment->title,
-                                            "image" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path
-                                        );
-                                    } else {
-                                        $reportAttachments[] = array(
-                                            "host" => $target->hostPort,
-                                            "title" => $attachment->title,
-                                            "check" => $check->name,
-                                            "filename" => $attachment->name,
-                                            "path" => Yii::app()->params["attachments"]["path"] . "/" . $attachment->path,
-                                        );
-                                    }
-                                }
-                            }
-
                             if (in_array($tc->rating, array(TargetCheck::RATING_HIGH_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_LOW_RISK))) {
                                 $question = "";
                                 $result = "";
@@ -733,7 +908,7 @@ class ReportManager {
                                 $reducedChecks[] = array(
                                     "target" => array(
                                         "id" => $target->id,
-                                        "host" => $target->hostPort,
+                                        "host" => $target->getHostPort(),
                                         "description" => $target->description
                                     ),
                                     "id" => $checkData["id"],
@@ -782,7 +957,7 @@ class ReportManager {
             $totalRating = $this->_getTotalRating($data);
         }
 
-        $data = array(
+        $data = array_merge($this->getIssueData($targetIds, $project, $fields, $language), [
             "data" => $data,
             "targets" => $targets,
             "project" => $project,
@@ -797,7 +972,7 @@ class ReportManager {
             "hasSeparate" => $hasSeparate,
             "reducedChecks" => $reducedChecks,
             "weakestControls" => $this->_getWeakestControls($targets, $language),
-        );
+        ]);
 
         return $data;
     }
@@ -814,7 +989,7 @@ class ReportManager {
         foreach ($targets as $target) {
             $targetData = array(
                 "id"          => $target->id,
-                "host"        => $target->hostPort,
+                "host"        => $target->getHostPort(),
                 "description" => $target->description,
                 "controls"    => array(),
             );
@@ -1021,7 +1196,7 @@ class ReportManager {
             }
 
             $data[] = array(
-                "host" => $target->hostPort,
+                "host" => $target->getHostPort(),
                 "description" => $target->description,
                 "matrix" => $mtrx
             );
@@ -1158,7 +1333,7 @@ class ReportManager {
 
         foreach ($targets1 as $target1) {
             foreach ($targets2 as $target2) {
-                if ($target2->hostPort == $target1->hostPort) {
+                if ($target2->getHostPort() == $target1->getHostPort()) {
                     $data[] = array(
                         $target1,
                         $target2
@@ -1177,7 +1352,7 @@ class ReportManager {
 
         foreach ($data as $targets) {
             $targetData = array(
-                'host' => $targets[0]->hostPort,
+                'host' => $targets[0]->getHostPort(),
                 'ratings' => array()
             );
 
@@ -1463,7 +1638,7 @@ class ReportManager {
         $row = array();
 
         if (in_array(TargetCheck::COLUMN_TARGET, $columns)) {
-            $row[TargetCheck::COLUMN_TARGET] = $target->hostPort;
+            $row[TargetCheck::COLUMN_TARGET] = $target->getHostPort();
         }
 
         if (in_array(TargetCheck::COLUMN_NAME, $columns)) {

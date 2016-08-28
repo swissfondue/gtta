@@ -200,7 +200,7 @@ class ProjectReportController extends Controller {
 
             try {
                 if (!$form->validate()) {
-                    throw new Exception();
+                    throw new FormValidationException();
                 }
 
                 if (!$form->fields) {
@@ -228,7 +228,7 @@ class ProjectReportController extends Controller {
                     !$riskTemplate
                 ) {
                     $form->addError("riskTemplateId", Yii::t("app", "Risk Matrix Template is required."));
-                    throw new Exception();
+                    throw new FormValidationException();
                 }
 
                 $project->report_options = $form->toJSON();
@@ -263,16 +263,13 @@ class ProjectReportController extends Controller {
                 ]);
 
                 $plugin = ReportPlugin::getPlugin($template, $data, $language);
-
-                try {
-                    $plugin->generate();
-                    $plugin->sendOverHttp();
-                } catch (Exception $e) {
-                    Yii::log($e->getMessage() . "\n" . $e->getTraceAsString(), CLogger::LEVEL_ERROR);
-                    Yii::app()->user->setFlash("error", Yii::t("app", "Error generating report."));
-                }
-            } catch (Exception $e) {
+                $plugin->generate();
+                $plugin->sendOverHttp();
+            } catch (FormValidationException $e) {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            } catch (Exception $e) {
+                Yii::log($e->getMessage() . "\n" . $e->getTraceAsString(), CLogger::LEVEL_ERROR);
+                Yii::app()->user->setFlash("error", Yii::t("app", "Error generating report."));
             }
         }
 

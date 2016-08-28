@@ -886,14 +886,11 @@ class RtfReport extends ReportPlugin {
     }
 
     /**
-     * Add reduced vulnerability list
+     * Add rating table
      * @param PHPRtfLite_Container_Section $section
      * @throws PHPRtfLite_Exception
      */
-    private function _addReducedVulnerabilityList(PHPRtfLite_Container_Section &$section) {
-        $data = $this->_data;
-        $template = $data["template"];
-
+    private function _addRatingTable(PHPRtfLite_Container_Section &$section) {
         $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
         $table->addColumnsList([$this->docWidth * 0.15, $this->docWidth * 0.2, $this->docWidth * 0.65]);
         $table->addRows(7);
@@ -917,6 +914,8 @@ class RtfReport extends ReportPlugin {
             }
         }
 
+        $data = $this->_data;
+        $template = $data["template"];
         $ratingImages = $this->_getRatingImages($template);
 
         $table->getCell(1, 1)->writeText(Yii::t("app", "Symbol"));
@@ -943,7 +942,19 @@ class RtfReport extends ReportPlugin {
         $this->renderText($table->getCell(5, 3), $template->localizedNoneDescription, true);
         $this->renderText($table->getCell(6, 3), $template->localizedNoVulnDescription, true);
         $this->renderText($table->getCell(7, 3), $template->localizedInfoDescription, true);
+    }
 
+    /**
+     * Add reduced vulnerability list
+     * @param PHPRtfLite_Container_Section $section
+     * @throws PHPRtfLite_Exception
+     */
+    private function _addReducedVulnerabilityList(PHPRtfLite_Container_Section &$section) {
+        $data = $this->_data;
+        $template = $data["template"];
+        $ratingImages = $this->_getRatingImages($template);
+
+        $this->_addRatingTable($section);
         $section->writeText("\n");
 
         if (!count($data["reducedChecks"])) {
@@ -1036,37 +1047,67 @@ class RtfReport extends ReportPlugin {
                 $cell = $table->getCell($row, 4);
                 $this->renderText($cell, $check["solution"], false);
 
-                $image = null;
-
-                switch ($check["rating"]) {
-                    case TargetCheck::RATING_HIGH_RISK:
-                        $image = $ratingImages[TargetCheck::RATING_HIGH_RISK];
-                        break;
-
-                    case TargetCheck::RATING_MED_RISK:
-                        $image = $ratingImages[TargetCheck::RATING_MED_RISK];
-                        break;
-
-                    case TargetCheck::RATING_LOW_RISK:
-                        $image = $ratingImages[TargetCheck::RATING_LOW_RISK];
-                        break;
-
-                    case TargetCheck::RATING_NONE:
-                        $image = $ratingImages[TargetCheck::RATING_NONE];
-                        break;
-
-                    case TargetCheck::RATING_NO_VULNERABILITY:
-                        $image = $ratingImages[TargetCheck::RATING_NO_VULNERABILITY];
-                        break;
-
-                    case TargetCheck::RATING_INFO:
-                        $image = $ratingImages[TargetCheck::RATING_INFO];
-                        break;
+                if (isset($ratingImages[$check["rating"]])) {
+                    $table->addImageToCell($row, 5, $ratingImages[$check["rating"]]);
                 }
 
-                $table->addImageToCell($row, 5, $image);
-
                 $row++;
+            }
+        }
+    }
+
+    /**
+     * Add reduced issue list
+     * @param PHPRtfLite_Container_Section $section
+     * @throws PHPRtfLite_Exception
+     */
+    private function _addReducedIssueList(PHPRtfLite_Container_Section &$section) {
+        $data = $this->_data;
+        $template = $data["template"];
+        $ratingImages = $this->_getRatingImages($template);
+
+        $this->_addRatingTable($section);
+        $section->writeText("\n");
+
+        if (!$data["reducedIssues"]) {
+            $section->writeText("\n" . Yii::t("app", "No issues found.") . "\n", $this->textFont, $this->noPar);
+            return;
+        }
+
+        $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+        $table->addRows(count($data["reducedIssues"]) * 2);
+        $table->addColumnsList([$this->docWidth * 0.17, $this->docWidth * 0.83]);
+
+        $row = 1;
+        $reducedIssues = $data["reducedIssues"];
+
+        foreach ($reducedIssues as $issue) {
+            $this->_addIssueListTitle($table, $row, $issue["name"], "#B0B0B0");
+            $row++;
+
+            foreach ($issue["evidences"] as $target => $evidences) {
+                $this->_addIssueListTitle($table, $row, $target, "#D0D0D0");
+                $row++;
+                
+                $evidenceNumber = 1;
+
+                foreach ($evidences as $evidence) {
+                    $this->_addIssueListTitle($table, $row, Yii::t("app", "Evidence") . " #" . $evidenceNumber, "#F0F0F0");
+                    $row++;
+
+                    $problem = is_array($evidence["result"]) ? $evidence["result"]["value"] : $evidence["result"];
+                    $this->_addTableRow($table, $row, Yii::t("app", "Problem"), $problem);
+                    $row++;
+                    $this->_addTableRow($table, $row, Yii::t("app", "Solution"), $evidence["solution"]);
+                    $row++;
+                    $this->_addTableRow($table, $row, Yii::t("app", "Rating"), null);
+
+                    if (isset($ratingImages[$evidence["rating"]])) {
+                        $table->addImageToCell($row, 2, $ratingImages[$evidence["rating"]]);
+                    }
+
+                    $row++;
+                }
             }
         }
     }
@@ -1153,6 +1194,361 @@ class RtfReport extends ReportPlugin {
             null,
             $toc
         );
+    }
+
+    /**
+     * Add issue list row
+     * @param PHPRtfLite_Table $table
+     * @param int $row
+     * @param string $title
+     * @param null $content
+     * @throws PHPRtfLite_Exception
+     */
+    private function _addTableRow(PHPRtfLite_Table &$table, $row, $title, $content=null) {
+        $table->addRow();
+
+        foreach ([1, 2] as $col) {
+            $table->getCell($row, $col)->setCellPaddings(
+                $this->cellPadding,
+                $this->cellPadding,
+                $this->cellPadding,
+                $this->cellPadding
+            );
+            $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+            $table->getCell($row, $col)->setBorder($this->thinBorder);
+        }
+
+        $table->writeToCell($row, 1, $title);
+
+        if (!$content) {
+            return;
+        }
+
+        if (Utils::isHtml($content)) {
+            $this->renderText($table->getCell($row, 2), $content, false);
+        } else {
+            $table->writeToCell($row, 2, $content);
+        }
+    }
+
+    /**
+     * Add solutions
+     * @param PHPRtfLite_Table $table
+     * @param $row
+     * @param $solutions
+     * @throws PHPRtfLite_Exception
+     */
+    private function _addSolutions(PHPRtfLite_Table &$table, $row, $solutions) {
+        $table->addRows(count($solutions));
+        $table->mergeCellRange($row, 1, $row + count($solutions) - 1, 1);
+
+        foreach ([1, 2] as $col) {
+            $table->getCell($row, $col)->setCellPaddings(
+                $this->cellPadding,
+                $this->cellPadding,
+                $this->cellPadding,
+                $this->cellPadding
+            );
+
+            $table->getCell($row, $col)->setBorder($this->thinBorder);
+            $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+        }
+
+        $table->writeToCell($row, 1, Yii::t("app", "Solutions"));
+
+        foreach ($solutions as $solution) {
+            $this->renderText($table->getCell($row, 2), $solution, false);
+            $row++;
+        }
+    }
+
+    /**
+     * Add images
+     * @param PHPRtfLite_Table $table
+     * @param $row
+     * @param $images
+     * @throws PHPRtfLite_Exception
+     */
+    private function _addImages(PHPRtfLite_Table &$table, $row, $images) {
+        $table->addRows(count($images));
+        $table->mergeCellRange($row, 1, $row + count($images) - 1, 1);
+
+        foreach ([1, 2] as $col) {
+            $table->getCell($row, $col)->setCellPaddings(
+                $this->cellPadding,
+                $this->cellPadding,
+                $this->cellPadding,
+                $this->cellPadding
+            );
+
+            $table->getCell($row, $col)->setBorder($this->thinBorder);
+            $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+        }
+
+        $table->writeToCell($row, 1, Yii::t("app", "Attachments"));
+
+        foreach ($images as $image) {
+            $table->writeToCell($row, 2, $image["title"]);
+            $table->addImageToCell($row, 2, $image["image"], new PHPRtfLite_ParFormat(), $this->docWidth * 0.78);
+
+            $row++;
+        }
+    }
+
+    /**
+     * Add issue list title
+     * @param PHPRtfLite_Table $table
+     * @param $row
+     * @param $title
+     * @param $color
+     */
+    private function _addIssueListTitle(PHPRtfLite_Table &$table, $row, $title, $color) {
+        $table->addRow();
+        $table->mergeCellRange($row, 1, $row, 2);
+
+        $table->getCell($row, 1)->setCellPaddings(
+            $this->cellPadding,
+            $this->cellPadding,
+            $this->cellPadding,
+            $this->cellPadding
+        );
+
+        $table->getCell($row, 1)->setBorder($this->thinBorder);
+        $table->setFontForCellRange($this->boldFont, $row, 1, $row, 1);
+        $table->setBackgroundForCellRange($color, $row, 1, $row, 1);
+        $table->writeToCell($row, 1, $title);
+    }
+
+    /**
+     * Add table result
+     * @param PHPRtfLite_Table $table
+     * @param int $row
+     * @param array $check
+     * @throws PHPRtfLite_Exception
+     */
+    private function _addTableResult(PHPRtfLite_Table &$table, $row, $check) {
+        $table->addRow();
+
+        foreach ([1, 2] as $col) {
+            $table->getCell($row, $col)->setCellPaddings(
+                $this->cellPadding,
+                $this->cellPadding,
+                $this->cellPadding,
+                $this->cellPadding
+            );
+            $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+            $table->getCell($row, $col)->setBorder($this->thinBorder);
+        }
+
+        $table->writeToCell($row, 1, Yii::t("app", "Result"));
+        $tableResult = new ResultTable();
+        $tableResult->parse($check["tableResult"]);
+
+        foreach ($tableResult->getTables() as $tResult) {
+            $nestedTable = $table->getCell($row, 2)->addTable();
+            $nestedTable->addRows($tResult["rowCount"] + 1);
+
+            $columnWidths = array();
+            $tableWidth = $this->docWidth * 0.83 - $this->cellPadding * 2;
+
+            foreach ($tResult["columns"] as $column) {
+                $columnWidths[] = (float)$column["width"] * $tableWidth;
+            }
+
+            $nestedTable->addColumnsList($columnWidths);
+
+            $nestedTable->setFontForCellRange($this->boldFont, 1, 1, 1, $tResult["columnCount"]);
+            $nestedTable->setBackgroundForCellRange("#E0E0E0", 1, 1, 1, $tResult["columnCount"]);
+            $nestedTable->setFontForCellRange($this->textFont, 2, 1, $tResult["rowCount"] + 1, $tResult["columnCount"]);
+            $nestedTable->setBorderForCellRange($this->thinBorder, 1, 1, $tResult["rowCount"] + 1, $tResult["columnCount"]);
+            $nestedTable->setFirstRowAsHeader();
+
+            $nestedRow = 1;
+            $nestedColumn = 1;
+
+            foreach ($tResult["columns"] as $column) {
+                $nestedTable->getCell($nestedRow, $nestedColumn)->setCellPaddings(
+                    $this->cellPadding,
+                    $this->cellPadding,
+                    $this->cellPadding,
+                    $this->cellPadding
+                );
+
+                $nestedTable->getCell($nestedRow, $nestedColumn)->setVerticalAlignment(
+                    PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP
+                );
+
+                $nestedTable->writeToCell($nestedRow, $nestedColumn, $column["name"]);
+                $nestedColumn++;
+            }
+
+            foreach ($tResult["data"] as $dataRow) {
+                $nestedRow++;
+                $nestedColumn = 1;
+
+                foreach ($dataRow as $dataCell) {
+                    $nestedTable->getCell($nestedRow, $nestedColumn)->setCellPaddings(
+                        $this->cellPadding,
+                        $this->cellPadding,
+                        $this->cellPadding,
+                        $this->cellPadding
+                    );
+
+                    $nestedTable->getCell($nestedRow, $nestedColumn)->setVerticalAlignment(
+                        PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP
+                    );
+
+                    $nestedTable->writeToCell($nestedRow, $nestedColumn, $dataCell);
+                    $nestedColumn++;
+                }
+            }
+
+            $table->writeToCell($row, 2, "\n");
+        }
+    }
+
+    /**
+     * Add issue list
+     * @param PHPRtfLite_Container_Section $section
+     * @param int $sectionNumber
+     * @param PHPRtfLite_Container_Section $toc
+     */
+    private function _addIssueList(PHPRtfLite_Container_Section &$section, $sectionNumber, $toc=null) {
+        $data = $this->_data;
+        $issues = $data["issues"];
+        $template = $data["template"];
+        $fields = $data["fields"];
+        $ratingImages = $this->_getRatingImages($template);
+
+        if (!$issues) {
+            $section->writeText("\n" . Yii::t("app", "No issues found.") . "\n", $this->textFont, $this->noPar);
+            return;
+        }
+
+        $issueNumber = 1;
+
+        foreach ($issues as $issue) {
+            $subsectionNumber = substr($sectionNumber, strpos($sectionNumber, ".") + 1);
+
+            $toc->writeHyperLink(
+                "#issue_" . $subsectionNumber . "_" . $issueNumber,
+                "        " . $sectionNumber . "." . $issueNumber . ". " . $issue["name"],
+                $this->textFont
+            );
+
+            $section->writeBookmark(
+                "issue_" . $subsectionNumber . "_" . $issueNumber,
+                $sectionNumber . "." . $issueNumber . ". " . $issue["name"],
+                $this->boldFont
+            );
+
+            $section->writeText("\n", $this->textFont);
+            $toc->writeText("\n", $this->textFont);
+
+            $table = $section->addTable(PHPRtfLite_Table::ALIGN_LEFT);
+            $table->addColumnsList([$this->docWidth * 0.17, $this->docWidth * 0.83]);
+
+            $row = 1;
+
+            // issue header
+            $this->_addIssueListTitle($table, $row, Yii::t("app", "Description"), "#B0B0B0");
+            $row++;
+            $this->_addTableRow($table, $row, Yii::t("app", "Background Info"), $issue["backgroundInfo"]);
+            $row++;
+            $this->_addTableRow($table, $row, Yii::t("app", "Hints"), $issue["hints"]);
+            $row++;
+            $this->_addTableRow($table, $row, Yii::t("app", "Question"), $issue["question"]);
+            $row++;
+            $this->_addTableRow($table, $row, Yii::t("app", "Reference"));
+
+            $reference = $issue["reference"] . ($issue["referenceCode"] ? "-" . $issue["referenceCode"] : "");
+            $referenceUrl = "";
+
+            if ($issue["referenceCode"] && $issue["referenceCodeUrl"]) {
+                $referenceUrl = $issue["referenceCodeUrl"];
+            } else if ($issue["referenceUrl"]) {
+                $referenceUrl = $issue["referenceUrl"];
+            }
+
+            if ($referenceUrl) {
+                $table->getCell($row, 2)->writeHyperLink($referenceUrl, $reference, $this->linkFont);
+            } else {
+                $table->writeToCell($row, 2, $reference);
+            }
+
+            $row++;
+
+            foreach ($issue["evidences"] as $target => $evidences) {
+                $this->_addIssueListTitle($table, $row, $target, "#B0B0B0");
+                $row++;
+
+                $evidenceNumber = 1;
+
+                foreach ($evidences as $evidence) {
+                    $this->_addIssueListTitle($table, $row, Yii::t("app", "Evidence") . " #" . $evidenceNumber, "#D0D0D0");
+                    $row++;
+
+                    if ($evidence["tableResult"]) {
+                        $this->_addTableResult($table, $row, $evidence);
+                        $row++;
+                    }
+
+                    if (isset($evidence["fields"])) {
+                        foreach ($evidence["fields"] as $field) {
+                            if (!in_array($field["name"], $fields)) {
+                                continue;
+                            }
+
+                            if (in_array($field["name"], [
+                                GlobalCheckField::FIELD_BACKGROUND_INFO,
+                                GlobalCheckField::FIELD_HINTS,
+                                GlobalCheckField::FIELD_QUESTION,
+                            ])) {
+                                continue;
+                            }
+
+                            $this->_addTableRow($table, $row, $field["title"], $field["value"]);
+                            $row++;
+                        }
+                    }
+
+                    if ($evidence["solutions"]) {
+                        $this->_addSolutions($table, $row, $evidence["solutions"]);
+                        $row += count($evidence["solutions"]);
+                    }
+
+                    if ($evidence["images"]) {
+                        $this->_addImages($table, $row, $evidence["images"]);
+                        $row += count($evidence["images"]);
+                    }
+
+                    $table->addRow();
+
+                    // rating
+                    foreach ([1, 2] as $col) {
+                        $table->getCell($row, $col)->setCellPaddings(
+                            $this->cellPadding,
+                            $this->cellPadding,
+                            $this->cellPadding,
+                            $this->cellPadding
+                        );
+                        $table->getCell($row, $col)->setBorder($this->thinBorder);
+                    }
+
+                    $table->writeToCell($row, 1, Yii::t("app", "Rating"));
+
+                    if (isset($ratingImages[$evidence["rating"]])) {
+                        $table->addImageToCell($row, 2, $ratingImages[$evidence["rating"]]);
+                        $table->writeToCell($row, 2, " " . $evidence["ratingName"]);
+                    }
+
+                    $row++;
+                    $evidenceNumber++;
+                }
+            }
+
+            $issueNumber++;
+        }
     }
 
     /**
@@ -1894,84 +2290,7 @@ class RtfReport extends ReportPlugin {
                             $row++;
 
                             if ($check["tableResult"]) {
-                                $table->addRow();
-                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 2)->setBorder($this->thinBorderBR);
-
-                                if ($check["result"]) {
-                                    $table->mergeCellRange($row - 1, 1, $row, 1);
-                                } else {
-                                    $table->writeToCell($row, 1, Yii::t("app", "Result"));
-                                }
-
-                                $tableResult = new ResultTable();
-                                $tableResult->parse($check["tableResult"]);
-
-                                foreach ($tableResult->getTables() as $tResult) {
-                                    $nestedTable = $table->getCell($row, 2)->addTable();
-                                    $nestedTable->addRows($tResult["rowCount"] + 1);
-
-                                    $columnWidths = array();
-                                    $tableWidth = $this->docWidth * 0.83 - $this->cellPadding * 2;
-
-                                    foreach ($tResult["columns"] as $column) {
-                                        $columnWidths[] = (float)$column["width"] * $tableWidth;
-                                    }
-
-                                    $nestedTable->addColumnsList($columnWidths);
-
-                                    $nestedTable->setFontForCellRange($this->boldFont, 1, 1, 1, $tResult["columnCount"]);
-                                    $nestedTable->setBackgroundForCellRange("#E0E0E0", 1, 1, 1, $tResult["columnCount"]);
-                                    $nestedTable->setFontForCellRange($this->textFont, 2, 1, $tResult["rowCount"] + 1, $tResult["columnCount"]);
-                                    $nestedTable->setBorderForCellRange($this->thinBorder, 1, 1, $tResult["rowCount"] + 1, $tResult["columnCount"]);
-                                    $nestedTable->setFirstRowAsHeader();
-
-                                    $nestedRow = 1;
-                                    $nestedColumn = 1;
-
-                                    foreach ($tResult["columns"] as $column) {
-                                        $nestedTable->getCell($nestedRow, $nestedColumn)->setCellPaddings(
-                                            $this->cellPadding,
-                                            $this->cellPadding,
-                                            $this->cellPadding,
-                                            $this->cellPadding
-                                        );
-
-                                        $nestedTable->getCell($nestedRow, $nestedColumn)->setVerticalAlignment(
-                                            PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP
-                                        );
-
-                                        $nestedTable->writeToCell($nestedRow, $nestedColumn, $column["name"]);
-                                        $nestedColumn++;
-                                    }
-
-                                    foreach ($tResult["data"] as $dataRow) {
-                                        $nestedRow++;
-                                        $nestedColumn = 1;
-
-                                        foreach ($dataRow as $dataCell) {
-                                            $nestedTable->getCell($nestedRow, $nestedColumn)->setCellPaddings(
-                                                $this->cellPadding,
-                                                $this->cellPadding,
-                                                $this->cellPadding,
-                                                $this->cellPadding
-                                            );
-
-                                            $nestedTable->getCell($nestedRow, $nestedColumn)->setVerticalAlignment(
-                                                PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP
-                                            );
-
-                                            $nestedTable->writeToCell($nestedRow, $nestedColumn, $dataCell);
-                                            $nestedColumn++;
-                                        }
-                                    }
-
-                                    $table->writeToCell($row, 2, "\n");
-                                }
-
+                                $this->_addTableResult($table, $row, $check);
                                 $row++;
                             }
 
@@ -1981,108 +2300,40 @@ class RtfReport extends ReportPlugin {
                                         continue;
                                     }
 
-                                    $table->addRow();
-                                    $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                    $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                    $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                    $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                    $table->getCell($row, 2)->setBorder($this->thinBorder);
-
-                                    $table->writeToCell($row, 1, $field["title"]);
-
-                                    if (Utils::isHtml($field["value"])) {
-                                        $this->renderText($table->getCell($row, 2), $field["value"], false);
-                                    } else {
-                                        $table->writeToCell($row, 2, $field["value"]);
-                                    }
-
+                                    $this->_addTableRow($table, $row, $field["title"], $field["value"]);
                                     $row++;
                                 }
                             }
 
                             if ($check["solutions"]) {
-                                $table->addRows(count($check["solutions"]));
-
-                                $table->mergeCellRange($row, 1, $row + count($check["solutions"]) - 1, 1);
-
-                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                $table->writeToCell($row, 1, Yii::t("app", "Solutions"));
-
-                                foreach ($check["solutions"] as $solution) {
-                                    $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                    $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                    $table->getCell($row, 2)->setBorder($this->thinBorder);
-
-                                    $cell = $table->getCell($row, 2);
-                                    $this->renderText($cell, $solution, false);
-
-                                    $row++;
-                                }
+                                $this->_addSolutions($table, $row, $check["solutions"]);
+                                $row += count($check["solutions"]);
                             }
 
                             if ($check["images"]) {
-                                $table->addRows(count($check["images"]));
-
-                                $table->mergeCellRange($row, 1, $row + count($check["images"]) - 1, 1);
-
-                                $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                $table->getCell($row, 1)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
-                                $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                $table->writeToCell($row, 1, Yii::t("app", "Attachments"));
-
-                                foreach ($check["images"] as $image) {
-                                    $table->getCell($row, 1)->setBorder($this->thinBorder);
-                                    $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                                    $table->getCell($row, 2)->setBorder($this->thinBorder);
-
-                                    $table->writeToCell($row, 2, $image["title"]);
-                                    $table->addImageToCell($row, 2, $image["image"], new PHPRtfLite_ParFormat(), $this->docWidth * 0.78);
-
-                                    $row++;
-                                }
+                                $this->_addImages($table, $row, $check["images"]);
+                                $row += count($check["images"]);
                             }
 
                             $table->addRow();
 
                             // rating
-                            $table->getCell($row, 1)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                            $table->getCell($row, 1)->setBorder($this->thinBorder);
-                            $table->getCell($row, 2)->setCellPaddings($this->cellPadding, $this->cellPadding, $this->cellPadding, $this->cellPadding);
-                            $table->getCell($row, 2)->setBorder($this->thinBorder);
-
-                            $table->writeToCell($row, 1, Yii::t("app", "Rating"));
-                            $image = null;
-
-                            switch ($check["rating"]) {
-                                case TargetCheck::RATING_HIGH_RISK:
-                                    $image = $ratingImages[TargetCheck::RATING_HIGH_RISK];
-                                    break;
-
-                                case TargetCheck::RATING_MED_RISK:
-                                    $image = $ratingImages[TargetCheck::RATING_MED_RISK];
-                                    break;
-
-                                case TargetCheck::RATING_LOW_RISK:
-                                    $image = $ratingImages[TargetCheck::RATING_LOW_RISK];
-                                    break;
-
-                                case TargetCheck::RATING_NONE:
-                                    $image = $ratingImages[TargetCheck::RATING_NONE];
-                                    break;
-
-                                case TargetCheck::RATING_NO_VULNERABILITY:
-                                    $image = $ratingImages[TargetCheck::RATING_NO_VULNERABILITY];
-                                    break;
-
-                                case TargetCheck::RATING_INFO:
-                                    $image = $ratingImages[TargetCheck::RATING_INFO];
-                                    break;
+                            foreach ([1, 2] as $col) {
+                                $table->getCell($row, $col)->setCellPaddings(
+                                    $this->cellPadding,
+                                    $this->cellPadding,
+                                    $this->cellPadding,
+                                    $this->cellPadding
+                                );
+                                $table->getCell($row, $col)->setBorder($this->thinBorder);
                             }
 
-                            $table->addImageToCell($row, 2, $image);
-                            $table->writeToCell($row, 2, " " . $check["ratingName"]);
+                            $table->writeToCell($row, 1, Yii::t("app", "Rating"));
+
+                            if (isset($ratingImages[$check["rating"]])) {
+                                $table->addImageToCell($row, 2, $ratingImages[$check["rating"]]);
+                                $table->writeToCell($row, 2, " " . $check["ratingName"]);
+                            }
 
                             $row++;
                         }
@@ -2204,8 +2455,16 @@ class RtfReport extends ReportPlugin {
                     $this->_addReducedVulnerabilityList($section);
                     break;
 
+                case ReportSection::TYPE_REDUCED_ISSUE_LIST:
+                    $this->_addReducedIssueList($section);
+                    break;
+
                 case ReportSection::TYPE_VULNERABILITIES:
                     $this->_addVulnerabilityList($section, $sectionNumber, $toc);
+                    break;
+
+                case ReportSection::TYPE_ISSUES:
+                    $this->_addIssueList($section, $sectionNumber, $toc);
                     break;
 
                 case ReportSection::TYPE_ATTACHMENTS:

@@ -146,8 +146,16 @@
 
             <?php
                 if (
-                    $project->custom_report && ($project->hasSection(ReportSection::TYPE_VULNERABILITIES) || $project->hasSection(ReportSection::TYPE_INFO_CHECKS)) ||
-                    !$project->custom_report && ($template->hasSection(ReportSection::TYPE_VULNERABILITIES) || $template->hasSection(ReportSection::TYPE_INFO_CHECKS))
+                    $project->custom_report && (
+                        $project->hasSection(ReportSection::TYPE_VULNERABILITIES) ||
+                        $project->hasSection(ReportSection::TYPE_INFO_CHECKS) ||
+                        $project->hasSection(ReportSection::TYPE_ISSUES)
+                    ) ||
+                    !$project->custom_report && (
+                        $template->hasSection(ReportSection::TYPE_VULNERABILITIES) ||
+                        $template->hasSection(ReportSection::TYPE_INFO_CHECKS) ||
+                        $template->hasSection(ReportSection::TYPE_ISSUES)
+                    )
                 ):
             ?>
                 <div class="control-group" id="checks-fields">
