@@ -35,10 +35,10 @@ class ProjectController extends Controller {
         $domainCriteria = clone $baseCriteria;
         $ipCriteria = clone $baseCriteria;
 
-        $domainCriteria->addCondition("t.host !~ '(\d{1,3}\.){3}\d{1,3}'");
+        $domainCriteria->addCondition("t.host !~ '^(\d{1,3}\.){3}\d{1,3}$'");
         $domainCriteria->order = "t.host ASC";
 
-        $ipCriteria->addCondition("host ~ '(\d{1,3}\.){3}\d{1,3}'");
+        $ipCriteria->addCondition("host ~ '^(\d{1,3}\.){3}\d{1,3}$'");
         $ipCriteria->order = "t.host::inet";
 
         $with = [
