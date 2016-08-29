@@ -344,25 +344,17 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     /**
      * Append string to PoC field
      * @param $data
-     * @param bool $verbosity
+     * @param bool $verbose
      */
-    public function appendPoc($data, $verbosity=true) {
+    public function appendPoc($data, $verbose=true) {
         $system = System::model()->findByPk(1);
 
-        if ($verbosity && !$system->scripts_verbosity) {
+        if ($verbose && !$system->scripts_verbosity) {
             return;
         }
 
-        if (!$this->poc) {
-            $this->setFieldValue(GlobalCheckField::FIELD_POC, $data);
-        }
-
-        if ($data) {
-            $this->setFieldValue(
-                GlobalCheckField::FIELD_POC,
-                $this->_getFieldValue(GlobalCheckField::FIELD_POC) . $data
-            );
-        }
+        $oldValue = $this->_getFieldValue(GlobalCheckField::FIELD_POC);
+        $this->setFieldValue(GlobalCheckField::FIELD_POC, ($oldValue ? $oldValue : "") . $data);
     }
 
     /**

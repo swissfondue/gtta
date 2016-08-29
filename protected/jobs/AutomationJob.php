@@ -311,35 +311,41 @@ class AutomationJob extends BackgroundJob {
 
     /**
      * Get tables from response
+     * @param TargetCheck $check
      */
     private function _getTables(&$check) {
-        $tablePos = strpos($check->result, '<' . ResultTable::TAG_MAIN);
+        $poc = $check->getPoc();
+        $tablePos = strpos($poc, '<' . ResultTable::TAG_MAIN);
 
         if ($tablePos !== false) {
             if (!$check->table_result) {
                 $check->table_result = "";
             }
 
-            $check->table_result .= substr($check->result, $tablePos);
-            $check->setResult(substr($check->result, 0, $tablePos));
+            $check->table_result .= substr($poc, $tablePos);
+            $poc = substr($poc, 0, $tablePos);
+            $check->setFieldValue(GlobalCheckField::FIELD_POC, $poc);
         }
     }
 
     /**
      * Get images from response
+     * @param TargetCheck $check
      */
     private function _getImages(&$check) {
-        $imagePos = strpos($check->result, "<" . AttachedImage::TAG_MAIN);
+        $poc = $check->getPoc();
+        $imagePos = strpos($poc, "<" . AttachedImage::TAG_MAIN);
 
         while ($imagePos !== false) {
-            $imageEndPos = strpos($check->result, ">", $imagePos);
+            $imageEndPos = strpos($poc, ">", $imagePos);
 
             if ($imageEndPos === false) {
                 break;
             }
 
-            $imageTag = substr($check->result, $imagePos, $imageEndPos + 1 - $imagePos);
-            $check->result = substr($check->result, 0, $imagePos) . substr($check->result, $imageEndPos + 1);
+            $imageTag = substr($poc, $imagePos, $imageEndPos + 1 - $imagePos);
+            $poc = substr($poc, 0, $imagePos) . substr($poc, $imageEndPos + 1);
+            $check->setFieldValue(GlobalCheckField::FIELD_POC, $poc);
 
             $image = new AttachedImage();
             $image->parse($imageTag);
@@ -363,14 +369,16 @@ class AutomationJob extends BackgroundJob {
                 @unlink($image->src);
             }
 
-            $imagePos = strpos($check->result, "<" . AttachedImage::TAG_MAIN);
+            $imagePos = strpos($poc, "<" . AttachedImage::TAG_MAIN);
         }
     }
 
     /**
      * Check starter.
+     * @param int $checkId
      */
     private function _startCheck($checkId) {
+        /** @var TargetCheck $check */
         $check = TargetCheck::model()->with("check", "language", "target")->findByPk($checkId);
 
         if (!$check) {
@@ -396,7 +404,7 @@ class AutomationJob extends BackgroundJob {
         }
 
         foreach ($scripts as $script) {
-            if ($check->result) {
+            if ($check->getPoc()) {
                 $check->appendPoc("\n");
             }
 
@@ -443,7 +451,6 @@ class AutomationJob extends BackgroundJob {
                     $output = $vm->runCommand(implode(" ", $command), false);
                     $fileOutput = file_get_contents($vm->virtualizePath($filesPath . '/' . $check->result_file));
                     $data = $fileOutput ? $fileOutput : $output;
-
                     $check->appendPoc($data, false);
 
                     if (!$data) {

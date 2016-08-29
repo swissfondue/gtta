@@ -37,6 +37,21 @@
             ?>
         <?php endforeach; ?>
 
+        <tr>
+            <td>&nbsp;</td>
+            <td>
+                <div class="table-result">
+                    <?php
+                        if ($check->table_result) {
+                            $table = new ResultTable();
+                            $table->parse($check->table_result);
+                            echo $this->renderPartial("/project/target/check/tableresult", ["table" => $table, "check" => $check]);
+                        }
+                    ?>
+                </div>
+            </td>
+        </tr>
+
         <?php if ($checkData->scripts && $checkData->automated && User::checkRole(User::ROLE_USER)): ?>
             <?php foreach ($check->scripts as $script): ?>
                 <tr class="script-inputs">
