@@ -80,7 +80,7 @@ class ChainJob extends BackgroundJob {
                             }
                         }
 
-                        $check->override_target = implode("\n", $filtered);
+                        $check->setFieldValue(GlobalCheckField::FIELD_OVERRIDE_TARGET, implode("\n", $filtered));
                         $check->save();
                     }
 
@@ -96,7 +96,7 @@ class ChainJob extends BackgroundJob {
                     $check->refresh();
                 }
 
-                $cellOutput = $check->result;
+                $cellOutput = $check->getPoc();
 
                 break;
 

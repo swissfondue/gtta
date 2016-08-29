@@ -406,7 +406,7 @@ class AutomationJob extends BackgroundJob {
             if (!isset($this->args["chain"])) {
                 $data = Yii::t("app", "The {script} script was used within this check against {target} on {date} at {time}", array(
                     "{script}" => $package->name,
-                    "{target}" => $check->overrideTarget ? $check->overrideTarget : $target->host,
+                    "{target}" => $check->overrideTarget ? Yii::t("app", "multiple targets") : $target->host,
                     "{date}" => $now->format("d.m.Y"),
                     "{time}" => $now->format("H:i:s"),
                 ));
