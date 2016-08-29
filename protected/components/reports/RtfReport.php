@@ -2059,9 +2059,12 @@ class RtfReport extends ReportPlugin {
                 continue;
             }
 
-            if ($type == self::VULNERABILITY_LIST_SEPARATE_TABLE &&
-                !in_array($categoryId, $target["separate"]) ||
-                $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION && $target["separateCount"] == $target["info"]
+            if (
+                $type == self::VULNERABILITY_LIST_SEPARATE_TABLE && (
+                    !in_array($categoryId, $target["separate"]) ||
+                    $infoLocation == ProjectReportForm::INFO_LOCATION_SEPARATE_SECTION &&
+                    $target["separateCount"] == $target["info"]
+                )
             ) {
                 continue;
             }
