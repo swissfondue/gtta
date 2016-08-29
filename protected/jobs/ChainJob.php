@@ -37,10 +37,6 @@ class ChainJob extends BackgroundJob {
             }
 
             $cell = RelationManager::getCell($relations, $cellId);
-
-            if (!$cell) {
-                throw new Exception("No graph cell with id: $cellId.");
-            }
         } else {
             $cell = RelationManager::getStartCheck($relations);
 

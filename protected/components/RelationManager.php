@@ -63,8 +63,8 @@ class RelationManager {
     public static function getCell($node, $id) {
         $cell = $node->xpath("//*[@type and @id=$id]");
 
-        if (!$cell[0]) {
-            return false;
+        if (!isset($cell[0]) || !$cell[0]) {
+            throw new Exception("Cell not found");
         }
 
         return $cell[0];

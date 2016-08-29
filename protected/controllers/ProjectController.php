@@ -1581,7 +1581,7 @@ class ProjectController extends Controller {
 
             if ($cellId) {
                 $cell = RelationManager::getCell($relations, $cellId);
-                $name = (string) $cell->attributes()->label;
+                $name = (string)$cell->attributes()->label;
             }
         } catch (Exception $e) {}
 
