@@ -51,7 +51,11 @@ class TargetImportForm extends CFormModel {
 
         $extension = end(explode(".", $this->file->name));
 
-        if ($extension != ImportManager::$types[$this->type]["ext"]) {
+        if (
+            isset(ImportManager::$types[$this->type]) &&
+            isset(ImportManager::$types[$this->type]["ext"]) &&
+            $extension != ImportManager::$types[$this->type]["ext"]
+        ) {
             $this->addError("file", Yii::t("app", "Invalid file extension."));
             return false;
         }
