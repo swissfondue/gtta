@@ -211,7 +211,7 @@ class ImportManager {
                 }
 
                 foreach ($targets as $target) {
-                    $targetData = explode(":", $target[0]);
+                    $targetData = array_map(function ($v) {return trim($v);}, explode(":", $target[0]));
                     
                     if (in_array($targetData[0], $targetCache)) {
                         continue;
@@ -246,7 +246,7 @@ class ImportManager {
                 }
 
                 foreach ($targets as $target) {
-                    $targetData = explode(":", $target[0]);
+                    $targetData = array_map(function ($v) {return trim($v);}, explode(":", $target[0]));
                     
                     if (in_array($targetData[0], $targetCache)) {
                         continue;
