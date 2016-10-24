@@ -37,7 +37,10 @@ class NessusReportManager {
                 $name = $this->_xmlObj->Report[0]["name"] . PHP_EOL;
             }
 
-            $data[$name] = $this->_parseHosts($report->ReportHost);
+            $data = [
+                "name" => (string) $name,
+                "hosts" => $this->_parseHosts($report->ReportHost)
+            ];
         } catch (Exception $e) {
             throw new InvalidNessusReportException();
         }
@@ -57,7 +60,7 @@ class NessusReportManager {
             $vulns = $host[0]->ReportItem;
 
             $hosts[] = [
-                "name" => $host["name"],
+                "name" => trim((string) $host["name"]),
                 "properties" => $this->_parseHostProperties($host[0]->HostProperties->children()),
                 "vulnerabilities" => $this->_parseHostVulns($vulns)
             ];
@@ -108,7 +111,8 @@ class NessusReportManager {
             $attributes = $item->attributes();
 
             $vulns[] = [
-                "pluginName" => (string)$attributes["pluginName"],
+                "plugin_id" => (int)$attributes["pluginID"],
+                "plugin_name" => (string)$attributes["pluginName"],
                 "svc_name" => (string)$attributes["svc_name"],
                 "severity" => $cvss,
                 "pluginFamily" => (string)$attributes["pluginFamily"],

@@ -346,4 +346,10 @@ return array(
     "customization/checks/field/<id:\d+>/edit"      => "customization/editcheckfield",
     "customization/checks/field/new"                => "customization/editcheckfield",
     "customization/checks/field/<id:\d+>/control"   => "customization/controlcheckfield",
+
+    "nessus/mappings/<page:\d+>"    => "nessusmapping/index",
+    "nessus/mappings"               => "nessusmapping/index",
+    "nessus/mappings/control"       => "nessusmapping/control",
+    "nessus/mappings/<id:\d+>/edit" => "nessusmapping/edit",
+    "nessus/mapping/<id:\d+>"       => "nessusmapping/view",
 );

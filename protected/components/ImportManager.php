@@ -104,13 +104,14 @@ class ImportManager {
         return $result;
     }
 
-
     /**
      * Create new target(s) by importing from file
      * @param $path
      * @param string $type
-     * @return array
+     * @param $project
      * @throws Exception
+     * @throws ImportFileParsingException
+     * @throws NoValidTargetException
      */
     public static function importTargets($path, $type=self::TYPE_NESSUS_CSV, $project) {
         if (!file_exists($path)) {
@@ -158,43 +159,15 @@ class ImportManager {
                 break;
 
             case self::TYPE_NESSUS:
-                $content = FileManager::getFileContent($path);
+                $nrm = new NessusReportManager();
 
                 try {
-                    $report = new SimpleXMLElement($content, LIBXML_NOERROR);
+                    $parsed = $nrm->parse($path);
+                    $mapping = ImportManager::importMapping();
+
+                    print print_r($parsed, 1);
                 } catch (Exception $e) {
-                    throw new ImportFileParsingException();
-                }
-
-                $reportNodes = $report->xpath("//ReportHost");
-
-                if (!count($reportNodes)) {
-                    throw new NoValidTargetException();
-                }
-
-                foreach ($report->xpath("//ReportHost") as $reportNode) {                    
-                    foreach ($reportNode->HostProperties->tag as $property) {
-                        $attributes = $property->attributes();
-
-                        if ($attributes["name"] != "host-ip") {
-                            continue;
-                        }
-                        
-                        if (in_array($property, $targetCache)) {
-                            continue;
-                        }
-
-                        $t = new Target();
-                        $t->project_id = $project->id;
-                        $t->host = $property;
-                        $t->save();
-                        $t->refresh();
-                        $ids[] = $t->id;
-                        
-                        $targetCache[] = $property;
-
-                        break;
-                    }
+                    throw new Exception("Invalid Nessus report.");
                 }
 
                 break;
@@ -288,6 +261,78 @@ class ImportManager {
 
         HostResolveJob::enqueue([
             "targets" => $ids
+        ]);
+    }
+
+    /**
+     * Import mapping from parsed nessus report
+     * @param $parsedReport
+     * @return NessusMapping
+     * @throws Exception
+     */
+    public static function importMapping($parsedReport) {
+        if (!is_array($parsedReport)) {
+            throw new Exception("Report should be an array.");
+        }
+
+        $name = isset($parsedReport["name"]) ? $parsedReport["name"] : Yii::t("app", "N/A");
+
+        $mapping = new NessusMapping();
+        $mapping->name = $name;
+        $mapping->save();
+        $mapping->refresh();
+
+        try {
+            foreach ($parsedReport["hosts"] as $host) {
+                foreach ($host["vulnerabilities"] as $v) {
+                    $vuln = NessusMappingVuln::model()->findByAttributes([
+                        "nessus_mapping_id" => $mapping->id,
+                        "nessus_plugin_id" => $v["plugin_id"]
+                    ]);
+
+                    if (!$vuln) {
+                        $vuln = new NessusMappingVuln();
+                        $vuln->nessus_mapping_id = $mapping->id;
+                        $vuln->nessus_plugin_id = $v["plugin_id"];
+                        $vuln->nessus_plugin_name = $v["plugin_name"];
+                        $vuln->nessus_rating = $v["risk_factor"];
+
+                        print $v["risk_factor"] . PHP_EOL;
+
+                        $vuln->save();
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            print $e->getMessage();
+
+            $mapping->delete();
+            throw new Exception("Import failed.");
+        }
+
+        return $mapping;
+    }
+
+    /**
+     * Render mapping view
+     * @param $mappingId
+     * @return mixed|string
+     * @throws Exception
+     */
+    public static function renderMapping($mappingId) {
+        $mapping = NessusMapping::model()->findByPk($mappingId);
+
+        if (!$mapping) {
+            throw new Exception("Mapping not found.");
+        }
+
+        $ratings = TargetCheck::getValidRatings();
+
+        $renderer = new CController("RenderController");
+
+        return $renderer->renderPartial("/nessusmapping/partial/mapping", [
+            "mapping" => $mapping,
+            "ratings" => $ratings
         ]);
     }
 }

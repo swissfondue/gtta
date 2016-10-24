@@ -357,21 +357,6 @@ function Admin() {
         this.searchTimeoutHandler = null;
 
         /**
-         * Show add issue popup
-         */
-        this.showIssueAddPopup = function () {
-            var modal = $("#issue-check-select-dialog");
-            var list = modal.find("table.check-list");
-            var field = modal.find(".issue-search-query");
-
-            field.val("");
-            list.empty();
-
-            modal.find(".no-search-result").hide();
-            modal.modal();
-        };
-
-        /**
          * Init check selection dialog
          */
         this.initCheckSelectDialog = function () {
@@ -407,8 +392,9 @@ function Admin() {
         /**
          * Load check list
          * @param query
+         * @param onChooseEvent
          */
-        this.searchChecks = function (query) {
+        this.searchChecks = function (query, onChooseEvent) {
             var list = $("#issue-check-select-dialog ul.check-list");
 
             if (query.length < 1) {
@@ -458,7 +444,7 @@ function Admin() {
                                     .attr("href", "#")
                                     .text(value.name)
                                     .click(function () {
-                                        _issue.add(value.id);
+                                        onChooseEvent(value.id);
                                     });
 
                                 list.append(
@@ -2982,6 +2968,81 @@ function Admin() {
                 $('.btn-submit').prop('disabled', true);
             }
         };
+    };
+
+    /**
+     * Nessus report mapping
+     * @type {nessusMapping}
+     */
+    this.nessusMapping = new function () {
+        var _nessusMapping = this;
+
+        /**
+         * Item id on binding check through search popup
+         * @type {null}
+         */
+        this.currentItemId = null;
+
+        this.selectors = {
+            table: ".nessus-mapping"
+        };
+
+        /**
+         * Show check search popup
+         * @param itemId
+         */
+        this.showCheckSearchPopup = function (itemId) {
+            _nessusMapping.currentItemId = itemId;
+
+            admin.showCheckSearchPopup();
+        };
+
+        /**
+         * Forbid nessus mapping toggle
+         */
+        this.disableMap = function (enable) {
+            var disabled = true;
+
+            if (!enable) {
+                disabled = false;
+            }
+
+            $(self.selectors.table)
+                .find("input, select")
+                .prop("disabled", disabled);
+        };
+
+        this.saveItem = function (id) {};
+
+        this.updateItem = function (rendered) {};
+
+        this.bindCheck = function (checkId) {
+            console.log(checkId);
+            console.log(_nessusMapping.currentItemId);
+        };
+
+        this.bindResult = function (itemId) {};
+
+        this.bindSolution = function (itemId) {};
+
+        this.setRating = function (itemId) {};
+
+        this.filterVulns = function () {};
+    };
+
+    /**
+     * Show add issue popup
+     */
+    this.showCheckSearchPopup = function () {
+        var modal = $("#issue-check-select-dialog");
+        var list = modal.find("ul.check-list");
+        var field = modal.find(".issue-search-query");
+
+        field.val("");
+        list.empty();
+
+        modal.find(".no-search-result").hide();
+        modal.modal();
     };
 }
 

@@ -1,3 +1,10 @@
+<?php
+    if (isset($project)) {
+        $checkSearchUrl = $this->createUrl("project/searchchecks", ["id" => $project->id]);
+    } elseif (isset($mapping)) {
+        $checkSearchUrl = $this->createUrl("nessusmapping/searchchecks", ["id" => $mapping->id]);
+    }
+?>
 <div
     class="modal fade"
     id="issue-check-select-dialog"
@@ -5,7 +12,7 @@
     role="dialog"
     aria-labelledby="smallModal"
     aria-hidden="true"
-    data-search-check-url="<?= $this->createUrl("project/searchchecks", ["id" => $project->id]) ?>">
+    data-search-check-url="<?= $checkSearchUrl ?>">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
@@ -24,11 +31,17 @@
 </div>
 
 <script>
+    var chooseEvent = admin.issue.add;
+
+    <?php if (isset($mapping)): ?>
+        chooseEvent = admin.nessusMapping.bindCheck;
+    <?php endif; ?>
+
     $(function () {
         $("#issue-check-select-dialog input.issue-search-query").keyup(function (e) {
             // if alpha or backspace
             if (/[a-zA-Z0-9_ -]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8) {
-                admin.issue.searchChecks($(this).val())
+                admin.issue.searchChecks($(this).val(), chooseEvent)
             }
         });
 

@@ -16,6 +16,12 @@ a[disabled] {
     background:none;
 }
 
+.shorten-word {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 .red {
     color: red;
 }
@@ -171,6 +177,7 @@ ul.clear-ul {
 .section-list .actions,
 .time-records-list .actions,
 .relation-template-list .actions,
+.mapping-list .actions,
 .field-list .actions {
     width:30px;
     text-align:right;
@@ -1479,4 +1486,36 @@ ul.target-list li {
 }
 #project-quick-nav .target.active * {
     color: red;
+}
+
+/** Nessus Mapping Table */
+.nessus-mapping th.row-check {
+    width: 5%;
+}
+.nessus-mapping th.nessus-issue {
+    width: 20%;
+}
+.nessus-mapping th.nessus-rating {
+    width: 15%;
+}
+.nessus-mapping th.mapped-check {
+    width: 20%;
+}
+.nessus-mapping th.mapped-solution {
+    width: 15%;
+}
+.nessus-mapping th.mapped-result {
+    width: 15%;
+}
+.nessus-mapping th.rating {
+    width: 10%;
+}
+.nessus-mapping td select {
+    width: 100%;
+}
+.nessus-mapping td.mapped a {
+    color: green;
+}
+.nessus-mapping td.not-mapped a {
+    color: orange;
 }

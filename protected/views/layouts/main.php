@@ -96,6 +96,7 @@
                                         <li <?php if (Yii::app()->controller->id == 'reference') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('reference/index'); ?>"><?php echo Yii::t('app', 'References'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'user') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('user/index'); ?>"><?php echo Yii::t('app', 'Users'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'package') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('package/index'); ?>"><?php echo Yii::t('app', 'Packages'); ?></a></li>
+                                        <li <?php if (Yii::app()->controller->id == 'nessusmapping') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('nessusmapping/index'); ?>"><?php echo Yii::t('app', 'Nessus Mappings'); ?></a></li>
                                         <li class="divider"></li>
                                         <li <?php if (Yii::app()->controller->id == 'reporttemplate') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('reporttemplate/index'); ?>"><?php echo Yii::t('app', 'Report Templates'); ?></a></li>
                                         <li <?php if (Yii::app()->controller->id == 'risk') echo 'class="active"'; ?>><a href="<?php echo $this->createUrl('risk/index'); ?>"><?php echo Yii::t('app', 'Risk Matrix Templates'); ?></a></li>
