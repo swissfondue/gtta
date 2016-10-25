@@ -46,4 +46,28 @@ class NessusMapping extends ActiveRecord {
             "vulns" => [self::HAS_MANY, "NessusMappingVuln", "nessus_mapping_id"],
         ];
     }
+
+    /**
+     * Get mapping hosts
+     * @return array
+     */
+    public function getHosts() {
+        $hosts = [];
+
+        $criteria = new CDbCriteria();
+        $criteria->select = "nessus_host";
+        $criteria->group = "nessus_host";
+        $criteria->addColumnCondition([
+            "nessus_mapping_id" => $this->id
+        ]);
+        $criteria->order = "nessus_host ASC";
+
+        $records = NessusMappingVuln::model()->findAll($criteria);
+
+        foreach ($records as $r) {
+            $hosts[] = $r->nessus_host;
+        }
+
+        return $hosts;
+    }
 }

@@ -5,6 +5,7 @@
         $checkSearchUrl = $this->createUrl("nessusmapping/searchchecks", ["id" => $mapping->id]);
     }
 ?>
+
 <div
     class="modal fade"
     id="issue-check-select-dialog"
@@ -12,7 +13,8 @@
     role="dialog"
     aria-labelledby="smallModal"
     aria-hidden="true"
-    data-search-check-url="<?= $checkSearchUrl ?>">
+    data-search-check-url="<?= $checkSearchUrl ?>"
+    style="display: none">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
@@ -34,7 +36,7 @@
     var chooseEvent = admin.issue.add;
 
     <?php if (isset($mapping)): ?>
-        chooseEvent = admin.nessusMapping.bindCheck;
+        chooseEvent = admin.nessusMapping.updateItem;
     <?php endif; ?>
 
     $(function () {

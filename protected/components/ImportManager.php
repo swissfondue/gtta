@@ -287,7 +287,8 @@ class ImportManager {
                 foreach ($host["vulnerabilities"] as $v) {
                     $vuln = NessusMappingVuln::model()->findByAttributes([
                         "nessus_mapping_id" => $mapping->id,
-                        "nessus_plugin_id" => $v["plugin_id"]
+                        "nessus_plugin_id" => $v["plugin_id"],
+                        "nessus_host" => $host["name"]
                     ]);
 
                     if (!$vuln) {
@@ -296,8 +297,7 @@ class ImportManager {
                         $vuln->nessus_plugin_id = $v["plugin_id"];
                         $vuln->nessus_plugin_name = $v["plugin_name"];
                         $vuln->nessus_rating = $v["risk_factor"];
-
-                        print $v["risk_factor"] . PHP_EOL;
+                        $vuln->nessus_host = $host["name"];
 
                         $vuln->save();
                     }

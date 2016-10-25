@@ -64,14 +64,6 @@ class CheckUpdateCommand extends ConsoleCommand {
      * @param array $args
      */
     protected function runLocked($args) {
-        try {
-            $nrm = new NessusReportManager();
-            $report = $nrm->parse("/tmp/report.nessus");
-            $mapping = ImportManager::importMapping($report);
-
-            print $mapping->id;
-        } catch (Exception $e) {
-            print $e->getMessage();
-        }
+        $this->_checkUpdate();
     }
 }

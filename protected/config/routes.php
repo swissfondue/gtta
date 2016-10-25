@@ -352,4 +352,6 @@ return array(
     "nessus/mappings/control"       => "nessusmapping/control",
     "nessus/mappings/<id:\d+>/edit" => "nessusmapping/edit",
     "nessus/mapping/<id:\d+>"       => "nessusmapping/view",
+    "nessus/mapping/vuln/update"    => "nessusmapping/updatevuln",
+    "nessus/mapping/vuln/filter"    => "nessusmapping/filtervulns",
 );

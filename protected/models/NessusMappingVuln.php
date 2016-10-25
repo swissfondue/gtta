@@ -9,12 +9,28 @@
  * @property integer $nessus_plugin_id
  * @property string  $nessus_rating
  * @property string  $nessus_plugin_name
+ * @property string  $nessus_host
  * @property integer $check_id
  * @property integer $check_result_id
  * @property integer $check_solution_id
  * @property integer $rating
  */
 class NessusMappingVuln extends ActiveRecord {
+    /**
+     * Scopes
+     * @return array
+     */
+    public function scopes() {
+        return [
+            "orderByPluginName" => [
+                "order" => "nessus_plugin_name ASC"
+            ],
+            "active" => [
+                "condition" => "active IS TRUE"
+            ]
+        ];
+    }
+
     /**
      * Returns the static model of the specified AR class.
      * @param string $className active record class name.
@@ -36,7 +52,7 @@ class NessusMappingVuln extends ActiveRecord {
      */
     public function rules() {
         return [
-            ["nessus_mapping_id, nessus_plugin_id, nessus_rating, nessus_plugin_name", "required"],
+            ["nessus_mapping_id, nessus_plugin_id, nessus_rating, nessus_plugin_name, nessus_host", "required"],
             ["nessus_mapping_id, nessus_plugin_id, check_id, rating, check_result_id", "numerical", "integerOnly" => true],
             ["nessus_rating", "length", "max" => 10],
         ];

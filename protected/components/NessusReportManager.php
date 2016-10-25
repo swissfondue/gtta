@@ -16,6 +16,18 @@ class NessusReportManager {
     private $_xmlObj = null;
 
     /**
+     * @var array $ratings
+     */
+    public static $ratings = [
+        "Critical",
+        "High",
+        "Medium",
+        "Low",
+        "Information",
+        "None"
+    ];
+
+    /**
      * Parse nessus report
      * @param $filepath
      * @throws Exception
@@ -56,8 +68,8 @@ class NessusReportManager {
     private function _parseHosts($reportHost) {
         $hosts = [];
 
-        foreach ($reportHost as $num => $host) {
-            $vulns = $host[0]->ReportItem;
+        foreach ($reportHost as $host) {
+            $vulns = $host->ReportItem;
 
             $hosts[] = [
                 "name" => trim((string) $host["name"]),
