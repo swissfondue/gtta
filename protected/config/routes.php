@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
     // account
     "<action:(login|logout|verify)>"  => "app/<action>",
     "account"                         => "account/edit",
@@ -354,4 +354,4 @@ return array(
     "nessus/mapping/<id:\d+>"       => "nessusmapping/view",
     "nessus/mapping/vuln/update"    => "nessusmapping/updatevuln",
     "nessus/mapping/vuln/filter"    => "nessusmapping/filtervulns",
-);
+];

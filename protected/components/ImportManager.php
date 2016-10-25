@@ -109,11 +109,12 @@ class ImportManager {
      * @param $path
      * @param string $type
      * @param $project
+     * @param null $mappingId
      * @throws Exception
      * @throws ImportFileParsingException
      * @throws NoValidTargetException
      */
-    public static function importTargets($path, $type=self::TYPE_NESSUS_CSV, $project) {
+    public static function importTargets($path, $type=self::TYPE_NESSUS_CSV, $project, $mappingId = null) {
         if (!file_exists($path)) {
             throw new Exception("File not found.");
         }                
@@ -162,12 +163,15 @@ class ImportManager {
                 $nrm = new NessusReportManager();
 
                 try {
-                    $parsed = $nrm->parse($path);
-                    $mapping = ImportManager::importMapping();
+                    $mapping = NessusMapping::model()->findByPk($mappingId);
 
-                    print print_r($parsed, 1);
+                    if (!$mapping) {
+                        throw new Exception();
+                    }
+
+
                 } catch (Exception $e) {
-                    throw new Exception("Invalid Nessus report.");
+                    throw new Exception("Import failed.");
                 }
 
                 break;
@@ -304,35 +308,12 @@ class ImportManager {
                 }
             }
         } catch (Exception $e) {
-            print $e->getMessage();
-
             $mapping->delete();
             throw new Exception("Import failed.");
         }
 
+        $mapping->refresh();
+
         return $mapping;
-    }
-
-    /**
-     * Render mapping view
-     * @param $mappingId
-     * @return mixed|string
-     * @throws Exception
-     */
-    public static function renderMapping($mappingId) {
-        $mapping = NessusMapping::model()->findByPk($mappingId);
-
-        if (!$mapping) {
-            throw new Exception("Mapping not found.");
-        }
-
-        $ratings = TargetCheck::getValidRatings();
-
-        $renderer = new CController("RenderController");
-
-        return $renderer->renderPartial("/nessusmapping/partial/mapping", [
-            "mapping" => $mapping,
-            "ratings" => $ratings
-        ]);
     }
 }

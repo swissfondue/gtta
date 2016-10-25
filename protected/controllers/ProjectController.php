@@ -1322,7 +1322,20 @@ class ProjectController extends Controller {
 
             if ($form->validate()) {
                 try {
-                    ImportManager::importTargets($form->file->tempName, $form->type, $project);
+                    if ($form->type == ImportManager::TYPE_NESSUS) {
+                        if ($form->mappingId) {
+                            $mapping = NessusMapping::model()->findByPk($form->mappingId);
+
+                            if (!$mapping) {
+                                throw new CHttpException(404, "Mapping not found.");
+                            }
+
+                            $pm = new ProjectManager();
+                            $pm->importNessusReport($project, $mapping);
+                        }
+                    } else {
+                        ImportManager::importTargets($form->file->tempName, $form->type, $project);
+                    }
                 } catch (ImportFileParsingException $e) {
                     $form->addError("file", Yii::t("app", "File parsing error."));
                     $success = false;
@@ -1352,6 +1365,8 @@ class ProjectController extends Controller {
             "types" => ImportManager::$types,
         ));
     }
+    
+    public function actionEditMapping($id) {}
 
     /**
      * Target check chain edit page

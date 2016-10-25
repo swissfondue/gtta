@@ -21,6 +21,7 @@
  * @property integer $language_id
  * @property Target[] $targets
  * @property ProjectReportSection[] $sections
+ * @property string $import_filename
  */
 class Project extends ActiveRecord implements IVariableScopeObject {
     /**
@@ -88,13 +89,14 @@ class Project extends ActiveRecord implements IVariableScopeObject {
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
-		return array(
-            array("name, year", "required"),
-            array("name", "length", "max" => 1000),
-            array("year", "length", "max" => 4),
-            array("status", "in", "range" => self::getValidStatuses()),
-            array("hours_allocated", "numerical", "min" => 0),
-		);
+		return [
+            ["name, year", "required"],
+            ["name", "length", "max" => 1000],
+            ["year", "length", "max" => 4],
+            ["status", "in", "range" => self::getValidStatuses()],
+            ["hours_allocated", "numerical", "min" => 0],
+            ["import_filename", "safe"],
+		];
 	}
 
     /**

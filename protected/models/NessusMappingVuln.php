@@ -14,6 +14,10 @@
  * @property integer $check_result_id
  * @property integer $check_solution_id
  * @property integer $rating
+ * @property CheckResult $result
+ * @property CheckSolution $solution
+ * @property NessusMapping $mapping
+ * @property Check $check
  */
 class NessusMappingVuln extends ActiveRecord {
     /**

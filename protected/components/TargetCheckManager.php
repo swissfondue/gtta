@@ -21,6 +21,9 @@ class TargetCheckManager {
             $targetCheck->status = isset($data["status"]) ? $data["status"] : TargetCheck::STATUS_OPEN;
             $targetCheck->rating = isset($data["rating"]) ? $data["rating"] : TargetCheck::RATING_NONE;
 
+            $targetCheck->save();
+            $targetCheck->refresh();
+
             if (isset($data["result"])) {
                 $targetCheck->setFieldValue(
                     GlobalCheckField::FIELD_POC,
@@ -28,8 +31,22 @@ class TargetCheckManager {
                 );
             }
 
-            $targetCheck->save();
-            $targetCheck->refresh();
+            if (isset($data["solutions"]) && is_array($data["solutions"])) {
+                $ids = $data["solutions"];
+
+                if (!$check->multiple_solutions) {
+                    $ids = array_slice($ids, 0, 1);
+                }
+
+                $solutions = CheckSolution::model()->findAllByPk($ids);
+
+                foreach ($solutions as $solution) {
+                    $targetCheckSolution = new TargetCheckSolution();
+                    $targetCheckSolution->check_solution_id = $solution->id;
+                    $targetCheckSolution->target_check_id = $targetCheck->id;
+                    $targetCheckSolution->save();
+                }
+            }
 
             foreach ($check->scripts as $script) {
                 $targetCheckScript = new TargetCheckScript();
@@ -41,6 +58,25 @@ class TargetCheckManager {
             /** @var CheckField $field */
             foreach ($check->fields as $field) {
                 $this->createField($targetCheck, $field);
+            }
+
+            if (!$targetCheck->getCategory()) {
+                $targetCheckCategory = new TargetCheckCategory();
+                $targetCheckCategory->target_id = $targetCheck->target_id;
+                $targetCheckCategory->check_category_id = $check->control->check_category_id;
+                $targetCheckCategory->save();
+            }
+
+            $reference = TargetReference::model()->findByAttributes([
+                "target_id" => $targetCheck->target_id,
+                "reference_id" => $check->reference_id
+            ]);
+
+            if (!$reference) {
+                $reference = new TargetReference();
+                $reference->reference_id = $check->reference_id;
+                $reference->target_id = $targetCheck->target_id;
+                $reference->save();
             }
         } catch (Exception $e) {
             throw new Exception("Can't create check.");
