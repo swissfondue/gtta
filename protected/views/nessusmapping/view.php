@@ -11,12 +11,8 @@
 
 <hr>
 
-<?= $this->renderPartial("partial/mapping-filters", ["mapping" => $mapping, "nessusRatings" => $nessusRatings]); ?>
-
-<div class="control-group nessus-vulns">
-    <div class="controls">
-        <?= $this->renderPartial("partial/mapping-table", ["vulns" => $mapping->vulns("vulns:orderByPluginName"), "ratings" => $ratings]); ?>
-    </div>
-</div>
-
-<?= $this->renderPartial("/layouts/partial/check-selector", ["mapping" => $mapping]); ?>
+<?= $this->renderPartial("/layouts/partial/mapping/mapping", [
+    "mapping" => $mapping,
+    "nessusRatings" => $nessusRatings,
+    "ratings" => $ratings
+]); ?>

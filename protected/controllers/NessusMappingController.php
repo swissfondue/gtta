@@ -340,7 +340,7 @@ class NessusmappingController extends Controller {
             }
 
             $renderController = new CController("RenderController");
-            $renderedVuln = $renderController->renderPartial("/nessusmapping/partial/mapping-item", [
+            $renderedVuln = $renderController->renderPartial("/layouts/partial/mapping/mapping-item", [
                 "vuln" => $vuln,
                 "ratings" => TargetCheck::getValidRatings()
             ], true);
@@ -385,7 +385,7 @@ class NessusmappingController extends Controller {
             ]);
 
             $ratings = TargetCheck::getValidRatings();
-            $table = $this->renderPartial("partial/mapping-table", [
+            $table = $this->renderPartial("/layouts/partial/mapping/mapping-table", [
                 "vulns" => $vulns,
                 "ratings" => $ratings
             ], 1);
@@ -401,16 +401,16 @@ class NessusmappingController extends Controller {
     /**
      * Activate vulns
      */
-    public function actionActivateVulns() {
+    public function actionActivate() {
         $response = new AjaxResponse();
 
         try {
-            if (!isset($_POST["NessusMappingVulnFilterForm"])) {
+            if (!isset($_POST["NessusMappingVulnActivateForm"])) {
                 throw new Exception(Yii::t("app", "No mapping vulns found."), 400);
             }
 
-            $form = new NessusMappingVulnFilterForm();
-            $form->attributes = $_POST["NessusMappingVulnFilterForm"];
+            $form = new NessusMappingVulnActivateForm();
+            $form->attributes = $_POST["NessusMappingVulnActivateForm"];
 
             if (!$form->validate()) {
                 $errorText = '';
@@ -422,6 +422,13 @@ class NessusmappingController extends Controller {
 
                 throw new Exception($errorText);
             }
+
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition("id", $form->mappingIds);
+
+            NessusMappingVuln::model()->updateAll([
+                "active" => $form->activate
+            ], $criteria);
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }

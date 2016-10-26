@@ -26,8 +26,15 @@ class TargetCheckManager {
 
             if (isset($data["result"])) {
                 $targetCheck->setFieldValue(
-                    GlobalCheckField::FIELD_POC,
+                    GlobalCheckField::FIELD_RESULT,
                     $data["result"]
+                );
+            }
+
+            if (isset($data["poc"])) {
+                $targetCheck->setFieldValue(
+                    GlobalCheckField::FIELD_POC,
+                    $data["poc"]
                 );
             }
 
@@ -79,6 +86,7 @@ class TargetCheckManager {
                 $reference->save();
             }
         } catch (Exception $e) {
+            print $e->getMessage();
             throw new Exception("Can't create check.");
         }
 
@@ -93,6 +101,15 @@ class TargetCheckManager {
      * @return TargetCheckField
      */
     public function createField(TargetCheck $tc, CheckField $field) {
+        $exists = TargetCheckField::model()->findByAttributes([
+            "target_check_id" => $tc->id,
+            "check_field_id" => $field->id
+        ]);
+
+        if ($exists) {
+            return $exists;
+        }
+
         $targetCheckField = new TargetCheckField();
         $targetCheckField->target_check_id = $tc->id;
         $targetCheckField->check_field_id = $field->id;

@@ -372,10 +372,27 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         ]);
         $field = TargetCheckField::model()->find($criteria);
 
-        if ($field) {
-            $field->value = $value;
-            $field->save();
+        if (!$field) {
+            $criteria = new CDbCriteria();
+            $criteria->join .= "LEFT JOIN global_check_fields gcf ON gcf.id = t.global_check_field_id";
+            $criteria->addColumnCondition([
+                "gcf.name" => $name,
+                "t.check_id" => $this->check_id,
+            ]);
+
+            $checkField = CheckField::model()->find($criteria);
+
+            if (!$checkField) {
+                throw new Exception("Check field not found.");
+            }
+
+            $tcm = new TargetCheckManager();
+            $field = $tcm->createField($this, $checkField);
+            $field->refresh();
         }
+
+        $field->value = $value;
+        $field->save();
     }
 
     /**

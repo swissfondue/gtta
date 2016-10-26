@@ -1323,16 +1323,18 @@ class ProjectController extends Controller {
             if ($form->validate()) {
                 try {
                     if ($form->type == ImportManager::TYPE_NESSUS) {
-                        if ($form->mappingId) {
-                            $mapping = NessusMapping::model()->findByPk($form->mappingId);
+                        $nrm = new NessusReportManager();
+                        $parsed = $nrm->parse($form->file->tempName);
 
-                            if (!$mapping) {
-                                throw new CHttpException(404, "Mapping not found.");
-                            }
+                        $mapping = ImportManager::importMapping($parsed);
+                        $filename = md5($project->id . time() . rand());
+                        $filepath = Yii::app()->params["tmpPath"] . DS . $filename;
 
-                            $pm = new ProjectManager();
-                            $pm->importNessusReport($project, $mapping);
-                        }
+                        $form->file->saveAs($filepath);
+                        $project->import_filename = $filename;
+                        $project->save();
+
+                        $this->redirect($this->createUrl("project/editmapping", ["id" => $project->id, "mId" => $mapping->id]));
                     } else {
                         ImportManager::importTargets($form->file->tempName, $form->type, $project);
                     }
@@ -1365,8 +1367,104 @@ class ProjectController extends Controller {
             "types" => ImportManager::$types,
         ));
     }
-    
-    public function actionEditMapping($id) {}
+
+    /**
+     * Edit created mapping before imports
+     * @param $id
+     * @param $mId
+     * @throws CHttpException
+     * @throws Exception
+     */
+    public function actionEditMapping($id, $mId) {
+        $id = (int) $id;
+        $mId = (int) $mId;
+
+        $project = Project::model()->findByPk($id);
+
+        if (!$project) {
+            throw new Exception("Project not found.");
+        }
+
+        $mapping = NessusMapping::model()->findByPk($mId);
+
+        if (!$mapping) {
+            throw new Exception("Mapping not found.");
+        }
+
+        $ratings = TargetCheck::getValidRatings();
+        $nessusRatings = NessusReportManager::$ratings;
+
+        $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
+        $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
+        $this->breadcrumbs[] = [Yii::t("app", "Mapping"), ""];
+
+        // display the page
+        $this->pageTitle = Yii::t("app", "Configure Mapping");
+
+        $this->render("target/edit-mapping", [
+            "project" => $project,
+            "mapping" => $mapping,
+            "ratings" => $ratings,
+            "nessusRatings" => $nessusRatings
+        ]);
+    }
+
+    /**
+     * Apply mapping to project
+     * @throws CHttpException
+     */
+    public function actionApplyMapping() {
+        $form = new ProjectApplyMappingForm();
+
+        if (isset($_POST["ProjectApplyMappingForm"])) {
+            $form->attributes = $_POST["ProjectApplyMappingForm"];
+            $success = true;
+
+            if ($form->validate()) {
+                try {
+                    $project = Project::model()->findByPk($form->projectId);
+
+                    if (!$project) {
+                        throw new CHttpException(404, "Project not found.");
+                    }
+
+                    $mapping = NessusMapping::model()->findByPk($form->mappingId);
+
+                    if (!$mapping) {
+                        throw new CHttpException(404, "Mapping not found");
+                    }
+
+                    $pm = new ProjectManager();
+                    $pm->importNessusReport($project, $mapping);
+
+                    $project->import_filename = null;
+                    $project->save();
+
+                    if ($success) {
+                        Yii::app()->user->setFlash("success", Yii::t("app", "Import completed."));
+                    } else {
+                        Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+                    }
+
+                    $form = new TargetImportForm();
+
+                    $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
+                    $this->breadcrumbs[] = [Yii::t("app", "Import"), ""];
+
+                    // display the page
+                    $this->pageTitle = Yii::t("app", "Import From File");
+                    $this->render("target/import", [
+                        "model" => $form,
+                        "types" => ImportManager::$types,
+                    ]);
+                } catch (Exception $e) {
+                    throw $e;
+                }
+            }
+        }
+
+        //$this->redirect(["project/index"]);
+    }
 
     /**
      * Target check chain edit page

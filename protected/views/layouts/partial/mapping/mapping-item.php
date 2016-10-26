@@ -1,4 +1,5 @@
-<tr data-item-id="<?= $vuln->id ?>"
+<tr class="nessus-mapping-vuln"
+    data-item-id="<?= $vuln->id ?>"
     data-update-url="<?= $this->createUrl("nessusmapping/updatevuln"); ?>"
     data-check-id="<?= $vuln->check ? $vuln->check->id : null ?>"
     data-result-id="<?= $vuln->result ? $vuln->result->id : null?>"

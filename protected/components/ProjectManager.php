@@ -66,17 +66,28 @@ class ProjectManager {
         $nrm = new NessusReportManager();
         $tcm = new TargetCheckManager();
 
+        if (!is_file(Yii::app()->params["tmpPath"] . DS . $project->import_filename)) {
+            throw new Exception("Import file not found.");
+        }
+
         try {
             $parsed = $nrm->parse(Yii::app()->params["tmpPath"] . DS . $project->import_filename);
             $language = System::model()->findByPk(1)->language;
 
             try {
                 foreach ($parsed["hosts"] as $host) {
-                    $target = new Target();
-                    $target->project_id = $project->id;
-                    $target->host = trim($host["name"]);
-                    $target->save();
-                    $target->refresh();
+                    $target = Target::model()->findByAttributes([
+                        "project_id" => $project->id,
+                        "host" => $host["name"]
+                    ]);
+
+                    if (!$target) {
+                        $target = new Target();
+                        $target->project_id = $project->id;
+                        $target->host = trim($host["name"]);
+                        $target->save();
+                        $target->refresh();
+                    }
 
                     $admin = $target->project->admin ? $target->project->admin : User::getAdmin();
 
@@ -103,6 +114,10 @@ class ProjectManager {
                                 $data["solutions"] = [$vuln->solution->id];
                             }
 
+                            if ($v["plugin_output"]) {
+                                $data["poc"] = $v["plugin_output"];
+                            }
+
                             $tcm->create($vuln->check, $data);
                         }
                     }
@@ -111,6 +126,7 @@ class ProjectManager {
                     StatsJob::enqueue(["target_id" => $target->id]);
                 }
             } catch (Exception $e) {
+                print $e->getMessage();
                 throw new Exception("Import failed.");
             }
         } catch (Exception $e) {

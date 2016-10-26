@@ -55,6 +55,8 @@ return [
     "project/<id:\d+>/target/new" => "project/edittarget",
     "project/<id:\d+>/target/addlist" => "project/addtargetlist",
     "project/<id:\d+>/target/import" => "project/importtarget",
+    "project/<id:\d+>/target/import/mapping/<mId:\d+>" => "project/editmapping",
+    "project/mapping/apply" => "project/applymapping",
     "project/<id:\d+>/target/<target:\d+>/chain/edit" => "project/editchain",
     "project/<id:\d+>/target/<target:\d+>/chain/control" => "project/controlchain",
     "project/<id:\d+>/target/<target:\d+>/chain/messages" => "project/chainmessages",
@@ -354,4 +356,5 @@ return [
     "nessus/mapping/<id:\d+>"       => "nessusmapping/view",
     "nessus/mapping/vuln/update"    => "nessusmapping/updatevuln",
     "nessus/mapping/vuln/filter"    => "nessusmapping/filtervulns",
+    "nessus/mapping/activate"       => "nessusmapping/activate",
 ];

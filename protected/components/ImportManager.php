@@ -168,8 +168,6 @@ class ImportManager {
                     if (!$mapping) {
                         throw new Exception();
                     }
-
-
                 } catch (Exception $e) {
                     throw new Exception("Import failed.");
                 }
