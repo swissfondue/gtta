@@ -1344,6 +1344,9 @@ class ProjectController extends Controller {
                 } catch (NoValidTargetException $e) {
                     $form->addError("file", Yii::t("app", "File doesn't contain any valid targets."));
                     $success = false;
+                } catch (InvalidNessusReportException $e) {
+                    $form->addError("file", $e->getMessage());
+                    $success = false;
                 }
             } else {
                 $success = false;

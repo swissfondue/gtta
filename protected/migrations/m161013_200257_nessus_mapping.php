@@ -27,7 +27,7 @@ class m161013_200257_nessus_mapping extends CDbMigration {
                 "check_result_id" => "bigint",
                 "check_solution_id" => "bigint",
                 "rating" => "integer",
-                "active" => "boolean NOT NULL DEFAULT 't'",
+                "active" => "boolean NOT NULL DEFAULT 'f'",
                 "PRIMARY KEY (id)",
                 "UNIQUE(check_id, nessus_plugin_id)"
             ]

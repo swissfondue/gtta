@@ -35,13 +35,18 @@ class NessusReportManager {
      */
     public function parse($filepath) {
         if (!file_exists($filepath)) {
-            throw new Exception("File doesn't exists.");
+            throw new InvalidNessusReportException("File doesn't exists.");
         }
 
         $data = [];
 
         try {
-            $this->_xmlObj = simplexml_load_file($filepath);
+            $this->_xmlObj = @simplexml_load_file($filepath);
+
+            if (!$this->_xmlObj) {
+                throw new Exception("Can't parse xml file.");
+            }
+
             $report = $this->_xmlObj->Report[0];
             $name = Yii::t("app", "N/A");
 
@@ -54,7 +59,8 @@ class NessusReportManager {
                 "hosts" => $this->_parseHosts($report->ReportHost)
             ];
         } catch (Exception $e) {
-            throw new InvalidNessusReportException();
+            FileManager::updateFile("/tmp/errors.log", "parse error");
+            throw new InvalidNessusReportException("Invalid Nessus report.");
         }
 
         return $data;
