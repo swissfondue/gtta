@@ -86,7 +86,6 @@ class TargetCheckManager {
                 $reference->save();
             }
         } catch (Exception $e) {
-            print $e->getMessage();
             throw new Exception("Can't create check.");
         }
 

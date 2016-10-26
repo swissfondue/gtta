@@ -1507,10 +1507,13 @@ ul.target-list li {
     width: 20%;
 }
 .nessus-mapping th.nessus-rating {
-    width: 15%;
+    width: 10%;
 }
 .nessus-mapping th.mapped-check {
     width: 20%;
+}
+.nessus-mapping th.insert-nessus-title {
+    width: 5%;
 }
 .nessus-mapping th.mapped-solution {
     width: 15%;

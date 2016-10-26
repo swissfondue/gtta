@@ -9,7 +9,6 @@
     <td class="active">
         <input type="checkbox"
                id="NessusMappingVulns_<?= $vuln->id; ?>"
-               name="NessusMappingEditVulnsForm[vulns][]"
                value="<?= $vuln->id; ?>" <?= $vuln->active ? "checked" : "" ?>
                onchange="admin.nessusMapping.saveItem(<?= $vuln->id ?>)">
     </td>
@@ -28,6 +27,12 @@
         <a href="#" onclick="admin.nessusMapping.showCheckSearchPopup(<?= $vuln->id ?>)">
             <?= CHtml::encode($vuln->check ? $vuln->check->name :  Yii::t("app", "Not Mapped")); ?>
         </a>
+    </td>
+
+    <td class="insert-nessus-title">
+        <input type="checkbox"
+               value="<?= $vuln->id; ?>" <?= $vuln->insert_nessus_title ? "checked" : "" ?>
+               onchange="admin.nessusMapping.saveItem(<?= $vuln->id ?>)">
     </td>
 
     <td class="mapped-result">

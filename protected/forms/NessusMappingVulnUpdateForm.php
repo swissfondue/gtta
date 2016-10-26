@@ -15,6 +15,11 @@ class NessusMappingVulnUpdateForm extends FormModel  {
     public $checkId;
 
     /**
+     * @var boolean $insertTitle
+     */
+    public $insertTitle;
+
+    /**
      * @var integer $resultId
      */
     public $resultId;
@@ -43,8 +48,8 @@ class NessusMappingVulnUpdateForm extends FormModel  {
             ["vulnId, active", "required"],
             ["vulnId, checkId, resultId, solutionId", "numerical", "integerOnly" => true],
             ["rating", "in", "range" => TargetCheck::getValidRatings()],
-            ["active", "boolean"],
-            ["active", "default", "value" => 1],
+            ["active, insertTitle", "boolean"],
+            ["active, insertTitle", "default", "value" => 0],
         ];
     }
 }

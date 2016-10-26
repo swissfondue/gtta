@@ -159,21 +159,6 @@ class ImportManager {
 
                 break;
 
-            case self::TYPE_NESSUS:
-                $nrm = new NessusReportManager();
-
-                try {
-                    $mapping = NessusMapping::model()->findByPk($mappingId);
-
-                    if (!$mapping) {
-                        throw new Exception();
-                    }
-                } catch (Exception $e) {
-                    throw new Exception("Import failed.");
-                }
-
-                break;
-
             case self::TYPE_CSV:
                 try {
                     $targets = self::parseCSV($path);

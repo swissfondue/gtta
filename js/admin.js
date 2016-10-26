@@ -3027,11 +3027,12 @@ function Admin() {
         this.saveItem = function (vulnId) {
             var item = $("[data-item-id=" + vulnId + "]");
 
+            var active = +item.find(".active > input").is(":checked");
             var checkId = item.data("check-id");
             var resultId = parseInt(item.find(".mapped-result > select").val()) || null;
             var solutionId = parseInt(item.find(".mapped-solution > select").val()) || null;
+            var insertTitle = +item.find(".insert-nessus-title > input").is(":checked");
             var rating = parseInt(item.find(".rating > select").val()) || null;
-            var active = +item.find(".active > input").is(":checked");
 
             var data = {
                 "YII_CSRF_TOKEN": system.csrf,
@@ -3041,6 +3042,10 @@ function Admin() {
 
             if (checkId) {
                 data["NessusMappingVulnUpdateForm[checkId]"] = checkId;
+            }
+
+            if (insertTitle) {
+                data["NessusMappingVulnUpdateForm[insertTitle]"] = insertTitle;
             }
 
             if (resultId) {
@@ -3194,8 +3199,6 @@ function Admin() {
                         return;
                     }
 
-                    console.log(enable);
-
                     $(_nessusMapping.selectors.items).find("td.active input[type=checkbox]").prop("checked", enable);
                 },
 
@@ -3231,7 +3234,6 @@ function Admin() {
      */
     this.hideCheckSearchPopup = function () {
         var modal = $("#issue-check-select-dialog");
-
 
         if (modal.is(":visible")) {
             modal.modal("toggle");

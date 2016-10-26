@@ -114,8 +114,12 @@ class ProjectManager {
                                 $data["solutions"] = [$vuln->solution->id];
                             }
 
+                            if ($vuln->insert_nessus_title) {
+                                $data["poc"] = $vuln->nessus_plugin_name;
+                            }
+
                             if ($v["plugin_output"]) {
-                                $data["poc"] = $v["plugin_output"];
+                                $data["poc"] .= PHP_EOL . $v["plugin_output"];
                             }
 
                             $tcm->create($vuln->check, $data);

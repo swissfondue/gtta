@@ -1466,7 +1466,7 @@ class ProjectController extends Controller {
             }
         }
 
-        //$this->redirect(["project/index"]);
+        $this->redirect(["project/index"]);
     }
 
     /**

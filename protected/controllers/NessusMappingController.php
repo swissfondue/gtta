@@ -331,6 +331,7 @@ class NessusmappingController extends Controller {
                 }
 
                 $vuln->active = $form->active;
+                $vuln->insert_nessus_title = (bool) $form->insertTitle;
                 $vuln->save();
 
                 $transaction->commit();

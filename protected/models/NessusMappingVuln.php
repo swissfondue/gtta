@@ -10,6 +10,7 @@
  * @property string  $nessus_rating
  * @property string  $nessus_plugin_name
  * @property string  $nessus_host
+ * @property boolean $insert_nessus_title
  * @property integer $check_id
  * @property integer $check_result_id
  * @property integer $check_solution_id
@@ -59,6 +60,8 @@ class NessusMappingVuln extends ActiveRecord {
             ["nessus_mapping_id, nessus_plugin_id, nessus_rating, nessus_plugin_name, nessus_host", "required"],
             ["nessus_mapping_id, nessus_plugin_id, check_id, rating, check_result_id", "numerical", "integerOnly" => true],
             ["nessus_rating", "length", "max" => 10],
+            ["insert_nessus_title", "boolean"],
+            ["insert_nessus_title", "default", "value" => 0],
         ];
     }
 

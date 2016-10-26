@@ -23,13 +23,14 @@ class m161013_200257_nessus_mapping extends CDbMigration {
                 "nessus_plugin_name" => "varchar NOT NULL",
                 "nessus_rating" => "varchar NOT NULL",
                 "nessus_host" => "string NOT NULL",
+                "insert_nessus_title" => "boolean NOT NULL default 'f'",
                 "check_id" => "bigint",
                 "check_result_id" => "bigint",
                 "check_solution_id" => "bigint",
                 "rating" => "integer",
                 "active" => "boolean NOT NULL DEFAULT 'f'",
                 "PRIMARY KEY (id)",
-                "UNIQUE(check_id, nessus_plugin_id)"
+                "UNIQUE(id, check_id, nessus_plugin_id)"
             ]
         );
         $this->addForeignKey(
