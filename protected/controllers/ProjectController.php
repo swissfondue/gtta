@@ -4672,20 +4672,10 @@ class ProjectController extends Controller {
             $language = $language->id;
         }
 
-        $criteria = new CDbCriteria();
-        $criteria->addColumnCondition(["project_id" => $project->id]);
-        $criteria->select = "t.id, c.name, COUNT(DISTINCT tc.target_id) AS affected_targets, MAX(tc.rating) AS top_rating";
-        $criteria->group = "t.id, c.name";
-        $criteria->join =
-            "LEFT JOIN checks c ON c.id = t.check_id " .
-            "LEFT JOIN issue_evidences ie ON ie.issue_id = t.id " .
-            "LEFT JOIN target_checks tc ON tc.id = ie.target_check_id";
-        $criteria->limit  = $this->entriesPerPage;
-        $criteria->offset = ($page - 1) * $this->entriesPerPage;
-        $criteria->order = "top_rating DESC";
+        $offset = ($page - 1) * $this->entriesPerPage;
+        $issues = $project->getIssues($offset);
+        $issueCount = count($issues);
 
-        $issues = Issue::model()->findAll($criteria);
-        $issueCount = Issue::model()->count($criteria);
         $paginator = new Paginator($issueCount, $page);
 
         $affectedAssetCount = [];
