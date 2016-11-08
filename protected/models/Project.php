@@ -396,18 +396,30 @@ class Project extends ActiveRecord implements IVariableScopeObject {
     }
 
     /**
-     * Get project issues
-     * @return array
+     * Returns project issues
+     * @param int $offset
+     * @return array|mixed|null
      */
-    public function getIssues() {
+    public function getIssues($offset = 0) {
+        $language = System::model()->findByPk(1)->language;
+
         $criteria = new CDbCriteria();
         $criteria->addColumnCondition(["project_id" => $this->id]);
-        $criteria->select = "t.id, c.name, COUNT(DISTINCT tc.target_id) AS affected_targets, MAX(tc.rating) AS top_rating";
-        $criteria->group = "t.id, c.name";
+        $criteria->select = "t.id, cl10n.name, COUNT(DISTINCT tc.target_id) AS affected_targets, MAX(tc.rating) AS top_rating";
+        $criteria->group = "t.id, cl10n.name";
         $criteria->join =
             "LEFT JOIN checks c ON c.id = t.check_id " .
+            "LEFT JOIN checks_l10n cl10n ON cl10n.check_id = c.id " .
             "LEFT JOIN issue_evidences ie ON ie.issue_id = t.id " .
             "LEFT JOIN target_checks tc ON tc.id = ie.target_check_id";
+        $criteria->addColumnCondition([
+            "cl10n.language_id" => $language->id
+        ]);
+
+        if ($offset) {
+            $criteria->offset = $offset;
+        }
+
         $criteria->order = "top_rating DESC";
 
         return Issue::model()->findAll($criteria);
