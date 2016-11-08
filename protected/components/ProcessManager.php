@@ -54,6 +54,7 @@ class ProcessManager {
     public static function runCommand($cmd, $throwException=true) {
         $output = array();
         $result = null;
+        $cmd = escapeshellcmd($cmd);
 
         exec($cmd, $output, $result);
 
