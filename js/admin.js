@@ -357,21 +357,6 @@ function Admin() {
         this.searchTimeoutHandler = null;
 
         /**
-         * Show add issue popup
-         */
-        this.showIssueAddPopup = function () {
-            var modal = $("#issue-check-select-dialog");
-            var list = modal.find("table.check-list");
-            var field = modal.find(".issue-search-query");
-
-            field.val("");
-            list.empty();
-
-            modal.find(".no-search-result").hide();
-            modal.modal();
-        };
-
-        /**
          * Init check selection dialog
          */
         this.initCheckSelectDialog = function () {
@@ -407,8 +392,9 @@ function Admin() {
         /**
          * Load check list
          * @param query
+         * @param onChooseEvent
          */
-        this.searchChecks = function (query) {
+        this.searchChecks = function (query, onChooseEvent) {
             var list = $("#issue-check-select-dialog ul.check-list");
 
             if (query.length < 1) {
@@ -458,7 +444,7 @@ function Admin() {
                                     .attr("href", "#")
                                     .text(value.name)
                                     .click(function () {
-                                        _issue.add(value.id);
+                                        onChooseEvent(value.id);
                                     });
 
                                 list.append(
@@ -2982,6 +2968,276 @@ function Admin() {
                 $('.btn-submit').prop('disabled', true);
             }
         };
+    };
+
+    /**
+     * Nessus report mapping
+     * @type {nessusMapping}
+     */
+    this.nessusMapping = new function () {
+        var _nessusMapping = this;
+
+        /**
+         * Item id on binding check through search popup
+         * @type {null}
+         */
+        this.currentItemId = null;
+
+        /**
+         * jQuery selectors
+         * @type {{table: string}}
+         */
+        this.selectors = {
+            table: ".nessus-mapping",
+            items: ".nessus-mapping .nessus-mapping-vuln",
+            filters: {
+                hosts: ".filter.nessus-hosts .nessus-host input:checked",
+                ratings: ".filter.nessus-ratings .nessus-rating input:checked",
+                container: ".nessus-mapping-filters"
+            }
+        };
+
+        /**
+         * Show check search popup
+         * @param itemId
+         */
+        this.showCheckSearchPopup = function (itemId) {
+            _nessusMapping.currentItemId = itemId;
+
+            admin.showCheckSearchPopup();
+        };
+
+        /**
+         * Forbid nessus mapping toggle
+         * @param vulnId
+         * @param disabled
+         */
+        this.disableItem = function (vulnId, disabled) {
+            var _disabled = !!disabled;
+
+            $("[data-item-id=" + vulnId + "]")
+                .find("input, select")
+                .prop("disabled", _disabled);
+        };
+
+        /**
+         * Save nessus mapping item
+         * @param vulnId
+         */
+        this.saveItem = function (vulnId) {
+            var item = $("[data-item-id=" + vulnId + "]");
+
+            var active = +item.find(".active > input").is(":checked");
+            var checkId = item.data("check-id");
+            var resultId = parseInt(item.find(".mapped-result > select").val()) || null;
+            var solutionId = parseInt(item.find(".mapped-solution > select").val()) || null;
+            var insertTitle = +item.find(".insert-nessus-title > input").is(":checked");
+            var rating = parseInt(item.find(".rating > select").val()) || null;
+
+            var data = {
+                "YII_CSRF_TOKEN": system.csrf,
+                "NessusMappingVulnUpdateForm[vulnId]": vulnId,
+                "NessusMappingVulnUpdateForm[active]": active
+            };
+
+            if (checkId) {
+                data["NessusMappingVulnUpdateForm[checkId]"] = checkId;
+            }
+
+            if (insertTitle) {
+                data["NessusMappingVulnUpdateForm[insertTitle]"] = insertTitle;
+            }
+
+            if (resultId) {
+                data["NessusMappingVulnUpdateForm[resultId]"] = resultId;
+            }
+
+            if (solutionId) {
+                data["NessusMappingVulnUpdateForm[solutionId]"] = solutionId;
+            }
+
+            if (rating) {
+                data["NessusMappingVulnUpdateForm[rating]"] = rating;
+            }
+
+            $.ajax({
+                dataType: "json",
+                url: $(item).data("update-url"),
+                timeout: system.ajaxTimeout,
+                type: "POST",
+                data: data,
+
+                success: function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    item.replaceWith(data.data.item_rendered);
+                    admin.hideCheckSearchPopup();
+                },
+
+                error: function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend: function (jqXHR, settings) {
+                    _nessusMapping.disableItem(vulnId, true);
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
+         * Update vuln item
+         * @param checkId
+         */
+        this.updateItem = function (checkId) {
+            var item = $("[data-item-id=" + _nessusMapping.currentItemId + "]");
+            item.data("check-id", checkId);
+
+            _nessusMapping.saveItem(_nessusMapping.currentItemId);
+        };
+
+        /**
+         * Get filter data
+         * @param mappingId
+         * @returns {{YII_CSRF_TOKEN: string, NessusMappingVulnFilterForm[mappingId]: *, NessusMappingVulnFilterForm[hosts], NessusMappingVulnFilterForm[ratings]}}
+         */
+        this.getFilterData = function (mappingId) {
+            var hosts = $(_nessusMapping.selectors.filters.hosts);
+            var ratings = $(_nessusMapping.selectors.filters.ratings);
+
+            var hostIds = [];
+            var ratingIds = [];
+
+            $.each(hosts, function (key, value) {
+                hostIds.push($(value).val());
+            });
+
+            $.each(ratings, function (key, value) {
+                ratingIds.push($(value).val());
+            });
+
+            return {
+                "YII_CSRF_TOKEN": system.csrf,
+                "NessusMappingVulnFilterForm[mappingId]": mappingId,
+                "NessusMappingVulnFilterForm[hosts]": JSON.stringify(hostIds),
+                "NessusMappingVulnFilterForm[ratings]": JSON.stringify(ratingIds)
+            };
+        };
+
+        /**
+         * Filter mapping items
+         * @param mappingId
+         */
+        this.filterItems = function (mappingId) {
+            var data = _nessusMapping.getFilterData(mappingId);
+
+            $.ajax({
+                dataType: "json",
+                url: $(_nessusMapping.selectors.filters.container).data("filter-url"),
+                timeout: system.ajaxTimeout,
+                type: "POST",
+                data: data,
+
+                success: function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    $(_nessusMapping.selectors.table).replaceWith(data.data.table_rendered);
+                },
+
+                error: function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend: function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
+         * Select all checkbox changed
+         * @param enable
+         */
+        this.selectAll = function (enable) {
+            var items = $(_nessusMapping.selectors.items);
+            var ids = [];
+
+            $.each(items, function (key, value) {
+                ids.push($(value).data("item-id"));
+            });
+
+            var data = {
+                "YII_CSRF_TOKEN": system.csrf,
+                "NessusMappingVulnActivateForm[mappingIds]": JSON.stringify(ids),
+                "NessusMappingVulnActivateForm[activate]": +enable
+            };
+
+            $.ajax({
+                dataType: "json",
+                url: $(_nessusMapping.selectors.table).data("activate-url"),
+                timeout: system.ajaxTimeout,
+                type: "POST",
+                data: data,
+
+                success: function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    $(_nessusMapping.selectors.items).find("td.active input[type=checkbox]").prop("checked", enable);
+                },
+
+                error: function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend: function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+    };
+
+    /**
+     * Show check search popup
+     */
+    this.showCheckSearchPopup = function () {
+        var modal = $("#issue-check-select-dialog");
+        var list = modal.find("ul.check-list");
+        var field = modal.find(".issue-search-query");
+
+        field.val("");
+        list.empty();
+
+        modal.find(".no-search-result").hide();
+        modal.modal();
+    };
+
+    /**
+     * Hide check search popup
+     */
+    this.hideCheckSearchPopup = function () {
+        var modal = $("#issue-check-select-dialog");
+
+        if (modal.is(":visible")) {
+            modal.modal("toggle");
+        }
     };
 }
 

@@ -16,6 +16,12 @@ a[disabled] {
     background:none;
 }
 
+.shorten-word {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 .red {
     color: red;
 }
@@ -171,6 +177,7 @@ ul.clear-ul {
 .section-list .actions,
 .time-records-list .actions,
 .relation-template-list .actions,
+.mapping-list .actions,
 .field-list .actions {
     width:30px;
     text-align:right;
@@ -1479,4 +1486,82 @@ ul.target-list li {
 }
 #project-quick-nav .target.active * {
     color: red;
+}
+
+/** Nessus Mapping List */
+.mapping-list th.date {
+    width: 25%;
+}
+.mapping-list th.name {
+    width: 70%;
+}
+.mapping-list th.actions {
+    width: 5%;
+}
+
+/** Nessus Mapping Vulns Table */
+.nessus-mapping th.active {
+    width: 5%;
+}
+.nessus-mapping th.nessus-issue {
+    width: 20%;
+}
+.nessus-mapping th.nessus-rating {
+    width: 10%;
+}
+.nessus-mapping th.mapped-check {
+    width: 20%;
+}
+.nessus-mapping th.insert-nessus-title {
+    width: 5%;
+}
+.nessus-mapping th.mapped-solution {
+    width: 15%;
+}
+.nessus-mapping th.mapped-result {
+    width: 15%;
+}
+.nessus-mapping th.rating {
+    width: 10%;
+}
+.nessus-mapping td select {
+    width: 100%;
+}
+.nessus-mapping td.mapped a {
+    color: green;
+}
+.nessus-mapping td.not-mapped a {
+    color: orange;
+}
+
+/** Nessus Mapping Vulns Filters */
+.nessus-mapping-filters {
+    width: 100%;
+}
+.nessus-mapping-filters label {
+    cursor: pointer;
+}
+.nessus-mapping-filters .nessus-hosts-filter-container,
+.nessus-mapping-filters .nessus-ratings-filter-container {
+    padding-left: 10px;
+}
+.nessus-mapping-filters .filter.nessus-ratings {
+    width: 100%;
+}
+.nessus-mapping-filters .filter.nessus-ratings .nessus-rating {
+    padding: 10px 10px 10px 0;
+    display: inline-block;
+}
+.nessus-mapping-filters .filter.nessus-hosts {
+    width: 100%;
+}
+.nessus-mapping-filters .filter.nessus-hosts .nessus-host {
+    padding: 5px 0;
+    display: inline-block;
+    width: 24%;
+}
+.nessus-mapping-filters .nessus-hosts-filter-container {
+    max-height: 300px;
+    overflow-y: scroll;
+    width:100%;
 }

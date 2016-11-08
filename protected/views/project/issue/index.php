@@ -6,7 +6,7 @@
     <div class="pull-right buttons">
         <?php if (User::checkRole(User::ROLE_USER)): ?>
             <div class="btn-group">
-                <a class="btn" href="#" onclick="admin.issue.showIssueAddPopup();">
+                <a class="btn" href="#" onclick="admin.showCheckSearchPopup();">
                     <i class="icon icon-plus"></i>
                     <?php echo Yii::t("app", "New"); ?>
                 </a>
@@ -125,4 +125,4 @@
     </div>
 </div>
 
-<?= $this->renderPartial("issue/partial/check-selector", ["project" => $project]); ?>
+<?= $this->renderPartial("/layouts/partial/check-selector", ["project" => $project]); ?>

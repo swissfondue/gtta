@@ -1,23 +1,23 @@
 <?php
 
 // messages configuration
-return array(
+return [
     'sourcePath'  => dirname(__FILE__).DIRECTORY_SEPARATOR.'..',
     'messagePath' => dirname(__FILE__).DIRECTORY_SEPARATOR.'../messages',
 
-    'languages' => array(
+    'languages' => [
         'en',
         'de',
-    ),
+    ],
 
-    'fileTypes' => array(
+    'fileTypes' => [
         'php',
-    ),
+    ],
 
-    'exclude' => array(
+    'exclude' => [
         '/framework/',
-    ),
+    ],
 
     'overwrite' => true,
     'removeOld' => true,
-);
+];

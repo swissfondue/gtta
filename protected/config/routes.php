@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
     // account
     "<action:(login|logout|verify)>"  => "app/<action>",
     "account"                         => "account/edit",
@@ -55,6 +55,8 @@ return array(
     "project/<id:\d+>/target/new" => "project/edittarget",
     "project/<id:\d+>/target/addlist" => "project/addtargetlist",
     "project/<id:\d+>/target/import" => "project/importtarget",
+    "project/<id:\d+>/target/import/mapping/<mId:\d+>" => "project/editmapping",
+    "project/mapping/apply" => "project/applymapping",
     "project/<id:\d+>/target/<target:\d+>/chain/edit" => "project/editchain",
     "project/<id:\d+>/target/<target:\d+>/chain/control" => "project/controlchain",
     "project/<id:\d+>/target/<target:\d+>/chain/messages" => "project/chainmessages",
@@ -346,4 +348,13 @@ return array(
     "customization/checks/field/<id:\d+>/edit"      => "customization/editcheckfield",
     "customization/checks/field/new"                => "customization/editcheckfield",
     "customization/checks/field/<id:\d+>/control"   => "customization/controlcheckfield",
-);
+
+    "nessus/mappings/<page:\d+>"    => "nessusmapping/index",
+    "nessus/mappings"               => "nessusmapping/index",
+    "nessus/mappings/control"       => "nessusmapping/control",
+    "nessus/mappings/<id:\d+>/edit" => "nessusmapping/edit",
+    "nessus/mapping/<id:\d+>"       => "nessusmapping/view",
+    "nessus/mapping/vuln/update"    => "nessusmapping/updatevuln",
+    "nessus/mapping/vuln/filter"    => "nessusmapping/filtervulns",
+    "nessus/mapping/activate"       => "nessusmapping/activate",
+];
