@@ -103,7 +103,10 @@ class ProjectManager {
                                 "target_id" => $target->id,
                                 "user_id" => $admin->id,
                                 "language_id" => $language->id,
-                                "rating" => $vuln->rating ? $vuln->rating : TargetCheck::RATING_NONE
+                                "rating" => $vuln->rating ? $vuln->rating : TargetCheck::RATING_NONE,
+                                "poc" => "",
+                                "result" => "",
+                                "solutions" => [],
                             ];
 
                             if ($vuln->result) {

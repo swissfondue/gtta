@@ -1399,6 +1399,7 @@ class ProjectController extends Controller {
 
         $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
         $this->breadcrumbs[] = [$project->name, $this->createUrl("project/view", ["id" => $project->id])];
+        $this->breadcrumbs[] = [Yii::t("app", "Import"), $this->createUrl("project/importTarget", ["id" => $project->id])];
         $this->breadcrumbs[] = [Yii::t("app", "Mapping"), ""];
 
         // display the page
@@ -1419,54 +1420,58 @@ class ProjectController extends Controller {
     public function actionApplyMapping() {
         $form = new ProjectApplyMappingForm();
 
-        if (isset($_POST["ProjectApplyMappingForm"])) {
-            $form->attributes = $_POST["ProjectApplyMappingForm"];
-            $success = true;
+        if (!isset($_POST["ProjectApplyMappingForm"])) {
+            $this->redirect(["project/index"]);
+            return;
+        }
+        $form->attributes = $_POST["ProjectApplyMappingForm"];
+        $success = true;
 
-            if ($form->validate()) {
-                try {
-                    $project = Project::model()->findByPk($form->projectId);
-
-                    if (!$project) {
-                        throw new CHttpException(404, "Project not found.");
-                    }
-
-                    $mapping = NessusMapping::model()->findByPk($form->mappingId);
-
-                    if (!$mapping) {
-                        throw new CHttpException(404, "Mapping not found");
-                    }
-
-                    $pm = new ProjectManager();
-                    $pm->importNessusReport($project, $mapping);
-
-                    $project->import_filename = null;
-                    $project->save();
-
-                    if ($success) {
-                        Yii::app()->user->setFlash("success", Yii::t("app", "Import completed."));
-                    } else {
-                        Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
-                    }
-
-                    $form = new TargetImportForm();
-
-                    $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
-                    $this->breadcrumbs[] = [Yii::t("app", "Import"), ""];
-
-                    // display the page
-                    $this->pageTitle = Yii::t("app", "Import From File");
-                    $this->render("target/import", [
-                        "model" => $form,
-                        "types" => ImportManager::$types,
-                    ]);
-                } catch (Exception $e) {
-                    throw $e;
-                }
+        try {
+            if (!$form->validate()) {
+                throw new FormValidationException();
             }
+
+            $project = Project::model()->findByPk($form->projectId);
+
+            if (!$project) {
+                throw new CHttpException(404, "Project not found.");
+            }
+
+            $mapping = NessusMapping::model()->findByPk($form->mappingId);
+
+            if (!$mapping) {
+                throw new CHttpException(404, "Mapping not found");
+            }
+
+            $pm = new ProjectManager();
+            $pm->importNessusReport($project, $mapping);
+
+            $project->import_filename = null;
+            $project->save();
+
+            if ($success) {
+                Yii::app()->user->setFlash("success", Yii::t("app", "Import completed."));
+            } else {
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
+        } catch (FormValidationException $f) {
+            Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+        } catch (Exception $e) {
+            Yii::log($e->getMessage() . "\n" . $e->getTraceAsString());
+            Yii::app()->user->setFlash("error", Yii::t("app", "Mapping error."));
         }
 
-        $this->redirect(["project/index"]);
+        $form = new TargetImportForm();
+        $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
+        $this->breadcrumbs[] = [Yii::t("app", "Import"), ""];
+
+        // display the page
+        $this->pageTitle = Yii::t("app", "Import From File");
+        $this->render("target/import", [
+            "model" => $form,
+            "types" => ImportManager::$types,
+        ]);
     }
 
     /**

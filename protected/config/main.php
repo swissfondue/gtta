@@ -21,6 +21,7 @@ return [
         "application.forms.*",
 		"application.models.*",
 		"application.components.*",
+        "application.components.exceptions.*",
         "application.components.formats.*",
         "application.components.filters.*",
         "application.components.reports.*",

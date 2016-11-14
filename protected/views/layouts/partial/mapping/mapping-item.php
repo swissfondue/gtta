@@ -24,7 +24,7 @@
     </td>
 
     <td class="mapped-check <?= $vuln->check ? "mapped" : "not-mapped" ?>">
-        <a href="#" onclick="admin.nessusMapping.showCheckSearchPopup(<?= $vuln->id ?>)">
+        <a href="#map" onclick="admin.nessusMapping.showCheckSearchPopup(<?= $vuln->id ?>)">
             <?= CHtml::encode($vuln->check ? $vuln->check->name :  Yii::t("app", "Not Mapped")); ?>
         </a>
     </td>
