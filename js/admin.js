@@ -338,6 +338,19 @@ function Admin() {
                 $('#ProjectUserAddForm_admin').prop('disabled', false);
             }
         };
+
+        /**
+         * Target import type changed event
+         */
+        this.importTypeChanged = function () {
+            var val = $("#TargetImportForm_type").val();
+
+            if (val == "nessus") {
+                $(".nessus-import-input").removeClass("hide");
+            } else {
+                $(".nessus-import-input").addClass("hide");
+            }
+        };
     };
 
     /**
@@ -2922,7 +2935,6 @@ function Admin() {
         var _checklisttemplate = this;
         /**
          * Load category checks list
-         * @param url
          * @param id
          */
         this.loadChecks = function (id) {
