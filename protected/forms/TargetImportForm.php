@@ -24,7 +24,7 @@ class TargetImportForm extends CFormModel {
      */
     public function rules() {
         return [
-            ["file, type", "required"],
+            ["type", "required"],
             [
                 "file",
                 "file",
@@ -44,7 +44,8 @@ class TargetImportForm extends CFormModel {
     public function attributeLabels() {
         return [
             "file" => "File",
-            "type" => "Type"
+            "type" => "Type",
+            "mappingId" => "Mapping"
         ];
     }
 

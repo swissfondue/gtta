@@ -107,6 +107,7 @@ class ProjectManager {
                                 "poc" => "",
                                 "result" => "",
                                 "solutions" => [],
+                                "status" => TargetCheck::STATUS_FINISHED
                             ];
 
                             if ($vuln->result) {

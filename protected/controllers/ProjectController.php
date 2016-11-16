@@ -1324,12 +1324,20 @@ class ProjectController extends Controller {
                 try {
                     if ($form->type == ImportManager::TYPE_NESSUS) {
                         $nrm = new NessusReportManager();
-                        $parsed = $nrm->parse($form->file->tempName);
 
-                        $mapping = ImportManager::importMapping($parsed);
+                        if ($form->mappingId) {
+                            $mapping = NessusMapping::model()->findByPk($form->mappingId);
+
+                            if (!$mapping) {
+                                throw new CHttpException(404, "Nessus mapping not found.");
+                            }
+                        } else {
+                            $parsed = $nrm->parse($form->file->tempName);
+                            $mapping = ImportManager::importMapping($parsed);
+                        }
+
                         $filename = md5($project->id . time() . rand());
                         $filepath = Yii::app()->params["tmpPath"] . DS . $filename;
-
                         $form->file->saveAs($filepath);
                         $project->import_filename = $filename;
                         $project->save();
@@ -1347,6 +1355,8 @@ class ProjectController extends Controller {
                 } catch (InvalidNessusReportException $e) {
                     $form->addError("file", $e->getMessage());
                     $success = false;
+                } catch (CHttpException $e) {
+                    throw $e;
                 }
             } else {
                 $success = false;
@@ -1359,6 +1369,8 @@ class ProjectController extends Controller {
             }
         }
 
+        $mappings = NessusMapping::model()->findAll();
+
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
         $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
         $this->breadcrumbs[] = array(Yii::t("app", "Import Target"), "");
@@ -1368,6 +1380,7 @@ class ProjectController extends Controller {
         $this->render("target/import", array(
             "model" => $form,
             "types" => ImportManager::$types,
+            "mappings" => $mappings
         ));
     }
 
@@ -1422,8 +1435,10 @@ class ProjectController extends Controller {
 
         if (!isset($_POST["ProjectApplyMappingForm"])) {
             $this->redirect(["project/index"]);
+
             return;
         }
+
         $form->attributes = $_POST["ProjectApplyMappingForm"];
         $success = true;
 
@@ -1452,6 +1467,8 @@ class ProjectController extends Controller {
 
             if ($success) {
                 Yii::app()->user->setFlash("success", Yii::t("app", "Import completed."));
+
+                $this->redirect($this->createUrl("project/view", ["id" => $project->id]));
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
@@ -1462,6 +1479,8 @@ class ProjectController extends Controller {
             Yii::app()->user->setFlash("error", Yii::t("app", "Mapping error."));
         }
 
+        $mappings = NessusMapping::model()->findAll();
+
         $form = new TargetImportForm();
         $this->breadcrumbs[] = [Yii::t("app", "Projects"), $this->createUrl("project/index")];
         $this->breadcrumbs[] = [Yii::t("app", "Import"), ""];
@@ -1471,6 +1490,7 @@ class ProjectController extends Controller {
         $this->render("target/import", [
             "model" => $form,
             "types" => ImportManager::$types,
+            "mappings" => $mappings
         ]);
     }
 
