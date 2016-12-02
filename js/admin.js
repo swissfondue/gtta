@@ -2067,7 +2067,7 @@ function Admin() {
                             _update.update(url);
                         }, 5000);
                     } else {
-                        location.reload();
+                        system.refreshPage();
                     }
                 },
 
