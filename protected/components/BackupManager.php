@@ -78,7 +78,6 @@ class BackupManager {
         'project_details_id_seq',
         'projects_id_seq',
         'references_id_seq',
-        'report_template_vuln_sections_id_seq',
         'report_template_summary_id_seq',
         'report_templates_id_seq',
         'risk_categories_id_seq',
