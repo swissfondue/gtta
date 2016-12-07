@@ -32,10 +32,9 @@ class m160622_133441_issues extends CDbMigration {
         $this->execute(
             "INSERT INTO global_check_fields_l10n (global_check_field_id, language_id, title, value)
              (
-                  SELECT gcf.id, languages.id, gcf.title, gcf.value
-                  FROM global_check_fields gcf
-                  LEFT JOIN languages ON languages.code = 'en'
-                  WHERE (gcf.id, languages.id) NOT IN (
+                  SELECT gcf.id, l.id, gcf.title, gcf.value
+                  FROM global_check_fields gcf, languages l
+                  WHERE (gcf.id, l.id) NOT IN (
                       SELECT global_check_field_id, language_id
                       FROM global_check_fields_l10n
                   )
