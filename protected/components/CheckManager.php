@@ -201,10 +201,6 @@ class CheckManager {
                         ]);
 
                         foreach ($check->l10n as $checkL10n) {
-                            if (!property_exists($checkL10n, $fieldName)) {
-                                continue;
-                            }
-
                             if ($checkL10n->code != $code) {
                                 continue;
                             }
@@ -215,7 +211,10 @@ class CheckManager {
                                 $l10n->language_id = $languageId;
                             }
 
-                            $l10n->value = $checkL10n->{$fieldName};
+                            if (isset($checkL10n->{$fieldName})) {
+                                $l10n->value = $checkL10n->{$fieldName};
+                            }
+
                             $l10n->save();
                         }
                     }
