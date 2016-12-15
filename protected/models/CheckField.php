@@ -122,6 +122,14 @@ class CheckField extends ActiveRecord {
      * @return bool
      */
     public function getHidden() {
-        return $this->global->hidden || $this->hidden;
+        return $this->global->hidden || $this->hiddenValue;
+    }
+
+    /**
+     * Get hidden value
+     * @return bool
+     */
+    public function getHiddenValue() {
+        return $this->hidden;
     }
 }

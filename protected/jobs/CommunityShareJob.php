@@ -9,8 +9,14 @@ class CommunityShareJob extends BackgroundJob {
     const TYPE_CONTROL    = "control";
     const TYPE_PACKAGE    = "package";
     const TYPE_CHECK      = "check";
+    const TYPE_FIELD      = "field";
 
     const ID_TEMPLATE  = 'gtta.@type@.@obj_id@.share';
+
+    /*
+     * Recursive share
+     */
+    private $_recursive = false;
 
     /**
      * Share reference
@@ -33,7 +39,7 @@ class CommunityShareJob extends BackgroundJob {
         $cm = new CategoryManager();
         $category = CheckCategory::model()->findByPk($id);
 
-        $cm->share($category);
+        $cm->share($category, $this->_recursive);
     }
 
     /**
@@ -47,7 +53,7 @@ class CommunityShareJob extends BackgroundJob {
             throw new Exception("Control not found.");
         }
 
-        $cm->share($control);
+        $cm->share($control, $this->_recursive);
     }
 
     /**
@@ -91,7 +97,26 @@ class CommunityShareJob extends BackgroundJob {
     }
 
     /**
+     * Share field
+     * @param $id
+     * @throws Exception
+     */
+    private function _shareField($id) {
+        $fm = new FieldManager();
+        $field = GlobalCheckField::model()->findByPk($id);
+
+        if (!$field) {
+            throw new Exception("Field not found");
+        }
+
+        $fm->share($field);
+    }
+
+    /**
      * Share check preparations
+     * @param $type
+     * @param $id
+     * @throws Exception
      */
     private function _share($type, $id) {
         try {
@@ -111,6 +136,9 @@ class CommunityShareJob extends BackgroundJob {
                 case self::TYPE_CHECK:
                     $this->_shareCheck($id);
                     break;
+                case self::TYPE_FIELD:
+                    $this->_shareField($id);
+                    break;
                 default:
                     return;
             }
@@ -128,20 +156,22 @@ class CommunityShareJob extends BackgroundJob {
                 throw new Exception('Invalid job params.');
             }
 
-            $type = $this->args['type'];
-            $allowedTypes = array(
+            $this->_recursive = isset($this->args["recursive"]) && $this->args["recursive"];
+            $type = $this->args["type"];
+            $allowedTypes = [
                 self::TYPE_REFERENCE,
                 self::TYPE_CATEGORY,
                 self::TYPE_CONTROL,
                 self::TYPE_PACKAGE,
                 self::TYPE_CHECK,
-            );
+                self::TYPE_FIELD,
+            ];
 
             if (!in_array($type, $allowedTypes)) {
                 throw new Exception("Invalid type.");
             }
 
-            $id = $this->args['obj_id'];
+            $id = $this->args["obj_id"];
 
             $this->_share($type, $id);
         } catch (Exception $e) {

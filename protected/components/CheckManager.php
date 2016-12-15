@@ -4,7 +4,7 @@
  * Check manager class
  */
 class CheckManager {
-    private $_languages = array();
+    private $_languages = [];
 
     /**
      * Constructor
@@ -40,6 +40,19 @@ class CheckManager {
     }
 
     /**
+     * Get global field id
+     * @param $externalId
+     * @param bool $initial
+     * @return int
+     */
+    private function _getFieldId($externalId, $initial=false) {
+        $fm = new FieldManager();
+        $field = $fm->create($externalId, $initial);
+
+        return $field->id;
+    }
+
+    /**
      * Create check
      * @param $check
      * @return Check
@@ -64,7 +77,7 @@ class CheckManager {
                 throw new Exception(Yii::t("app", "Check rating is below the system rating limit."));
             }
 
-            $c = Check::model()->findByAttributes(array("external_id" => $check->id));
+            $c = Check::model()->findByAttributes(["external_id" => $check->id]);
 
             if (!$c) {
                 $c = new Check();
@@ -85,7 +98,7 @@ class CheckManager {
             $c->save();
 
             // l10n
-            CheckL10n::model()->deleteAllByAttributes(array("check_id" => $c->id));
+            CheckL10n::model()->deleteAllByAttributes(["check_id" => $c->id]);
 
             foreach ($check->l10n as $l10n) {
                 $l = new CheckL10n();
@@ -96,7 +109,7 @@ class CheckManager {
             }
 
             // results
-            CheckResult::model()->deleteAllByAttributes(array("check_id" => $c->id));
+            CheckResult::model()->deleteAllByAttributes(["check_id" => $c->id]);
 
             foreach ($check->results as $result) {
                 $r = new CheckResult();
@@ -117,7 +130,7 @@ class CheckManager {
             }
 
             // solutions
-            CheckSolution::model()->deleteAllByAttributes(array("check_id" => $c->id));
+            CheckSolution::model()->deleteAllByAttributes(["check_id" => $c->id]);
 
             foreach ($check->solutions as $solution) {
                 $s = new CheckSolution();
@@ -140,14 +153,14 @@ class CheckManager {
             $pm = new PackageManager();
 
             // scripts
-            CheckScript::model()->deleteAllByAttributes(array("check_id" => $c->id));
+            CheckScript::model()->deleteAllByAttributes(["check_id" => $c->id]);
 
             foreach ($check->scripts as $script) {
                 $criteria = new CDbCriteria();
-                $criteria->addColumnCondition(array(
+                $criteria->addColumnCondition([
                     "external_id" => $script->package_id,
                     "type" => Package::TYPE_SCRIPT,
-                ));
+                ]);
                 $criteria->addInCondition("status", Package::getActiveStatuses());
                 $pkg = Package::model()->find($criteria);
 
@@ -185,48 +198,52 @@ class CheckManager {
             $this->reindexFields($c);
             $c->refresh();
 
-            /** @var CheckField $field */
-            foreach ($c->fields as $field) {
-                $fieldName = $field->getName();
+            foreach ($check->fields as $field) {
+                $global = $this->_getFieldId($field->global_check_field_id, $initial);
 
-                if (property_exists($check, $fieldName)) {
-                    $field->value = $check->{$fieldName};
-                    $field->save();
+                $f = CheckField::model()->findByAttributes([
+                    "check_id" => $c->id,
+                    "global_check_field_id" => $global->id
+                ]);
 
-                    /** @var CheckFieldL10n $l10n */
-                    foreach ($this->_languages as $code => $languageId) {
-                        $l10n = CheckFieldL10n::model()->findByAttributes([
-                            "check_field_id" => $field->id,
-                            "language_id" => $languageId,
-                        ]);
+                if (!$f) {
+                    $f = new CheckField();
+                }
 
-                        foreach ($check->l10n as $checkL10n) {
-                            if ($checkL10n->code != $code) {
-                                continue;
-                            }
+                $f->hidden = $field->hidden;
+                $f->value = $field->value;
+                $f->save();
+                $f->refresh();
 
-                            if (!$l10n) {
-                                $l10n = new CheckFieldL10n();
-                                $l10n->check_field_id = $field->id;
-                                $l10n->language_id = $languageId;
-                            }
+                foreach ($this->_languages as $code => $languageId) {
+                    $l10n = CheckFieldL10n::model()->findByAttributes([
+                        "check_field_id" => $field->id,
+                        "language_id" => $languageId
+                    ]);
 
-                            if (isset($checkL10n->{$fieldName})) {
-                                $l10n->value = $checkL10n->{$fieldName};
-                            }
-
-                            $l10n->save();
+                    foreach ($check->l10n as $checkL10n) {
+                        if ($checkL10n->code != $code) {
+                            continue;
                         }
+
+                        if (!$l10n) {
+                            $l10n = new CheckFieldL10n();
+                            $l10n->check_field_id = $field->id;
+                            $l10n->language_id = $languageId;
+                        }
+
+                        $l10n->value = $checkL10n->value;
+                        $l10n->save();
                     }
                 }
             }
         } catch (Exception $e) {
             if (!$initial) {
-                $api->installError(array(
+                $api->installError([
                     "id" => $check->id,
                     "type" => "check",
                     "text" => $e->getMessage(),
-                ));
+                ]);
             }
 
             throw $e;
@@ -241,10 +258,10 @@ class CheckManager {
      * @return array
      */
     public function getExternalIds() {
-        $checkIds = array();
-        $checks = Check::model()->findAll("external_id IS NOT NULL AND status = :status", array(
+        $checkIds = [];
+        $checks = Check::model()->findAll("external_id IS NOT NULL AND status = :status", [
             "status" => Check::STATUS_INSTALLED
-        ));
+        ]);
 
         foreach ($checks as $check) {
             $checkIds[] = $check->external_id;
@@ -267,28 +284,27 @@ class CheckManager {
 
         if ($check->automated) {
             foreach ($check->scripts as $script) {
-                $pm->prepareSharing($script->package);
+                $pm->share($script->package);
             }
         }
 
         $control = $check->control;
         $reference = $check->_reference;
 
+        $fm = new FieldManager();
+
+        foreach ($check->fields as $field) {
+            $fm->share($field->global);
+        }
+
         if (!$control->external_id) {
             $cm = new ControlManager();
-            $cm->prepareSharing($control);
+            $cm->share($control);
         }
 
         if (!$reference->external_id) {
             $rm = new ReferenceManager();
-            $rm->prepareSharing($reference);
-        }
-
-        if (!$check->external_id) {
-            CommunityShareJob::enqueue(array(
-                "type" => CommunityShareJob::TYPE_CHECK,
-                "obj_id" => $check->id,
-            ));
+            $rm->share($reference);
         }
     }
 
@@ -298,10 +314,10 @@ class CheckManager {
      * @throws Exception
      */
     public function share(Check $check) {
-        /** @var System $system */
+        $this->prepareSharing($check);
         $system = System::model()->findByPk(1);
 
-        $data = array(
+        $data = [
             "control_id" => $check->control->external_id,
             "reference_id" => $check->_reference->external_id,
             "reference_code" => $check->reference_code,
@@ -311,53 +327,53 @@ class CheckManager {
             "multiple_solutions" => $check->multiple_solutions,
             "effort" => $check->effort,
             "sort_order" => $check->sort_order,
-            "l10n" => array(),
-            "results" => array(),
-            "solutions" => array(),
-            "scripts" => array(),
-            "fields" => array(),
-        );
+            "l10n" => [],
+            "results" => [],
+            "solutions" => [],
+            "scripts" => [],
+            "fields" => [],
+        ];
 
         foreach ($check->l10n as $l10n) {
-            $data["l10n"][] = array(
+            $data["l10n"][] = [
                 "code" => $l10n->language->code,
                 "name" => $l10n->name,
-            );
+            ];
         }
 
         foreach ($check->results as $result) {
-            $r = array(
+            $r = [
                 "title" => $result->title,
                 "result" => $result->result,
                 "sort_order" => $result->sort_order,
-                "l10n" => array(),
-            );
+                "l10n" => [],
+            ];
 
             foreach ($result->l10n as $l10n) {
-                $r["l10n"][] = array(
+                $r["l10n"][] = [
                     "code" => $l10n->language->code,
                     "title" => $l10n->title,
                     "result" => $l10n->result,
-                );
+                ];
             }
 
             $data["results"][] = $r;
         }
 
         foreach ($check->solutions as $solution) {
-            $s = array(
+            $s = [
                 "title" => $solution->title,
                 "solution" => $solution->solution,
                 "sort_order" => $solution->sort_order,
-                "l10n" => array(),
-            );
+                "l10n" => [],
+            ];
 
             foreach ($solution->l10n as $l10n) {
-                $s["l10n"][] = array(
+                $s["l10n"][] = [
                     "code" => $l10n->language->code,
                     "title" => $l10n->title,
                     "solution" => $l10n->solution,
-                );
+                ];
             }
 
             $data["solutions"][] = $s;
@@ -368,28 +384,28 @@ class CheckManager {
                 throw new Exception("Invalid package id.");
             }
 
-            $s = array(
+            $s = [
                 "package_id" => $script->package->external_id,
-                "inputs" => array(),
-            );
+                "inputs" => [],
+            ];
 
             foreach ($script->inputs as $input) {
-                $i = array(
+                $i = [
                     "type" => $input->type,
                     "name" => $input->name,
                     "description" => $input->description,
                     "value" => $input->value,
                     "visible" => $input->visible,
                     "sort_order" => $input->sort_order,
-                    "l10n" => array(),
-                );
+                    "l10n" => [],
+                ];
 
                 foreach ($input->l10n as $l10n) {
-                    $i["l10n"][] = array(
+                    $i["l10n"][] = [
                         "code" => $l10n->language->code,
                         "name" => $l10n->name,
                         "description" => $l10n->description,
-                    );
+                    ];
                 }
 
                 $s["inputs"][] = $i;
@@ -400,16 +416,27 @@ class CheckManager {
 
         foreach ($check->fields as $field) {
             $f = [
+                "global_check_field_id" => $field->global->external_id,
                 "name" => $field->name,
-                "value" => $field->value
+                "value" => $field->value,
+                "hidden" => $field->hiddenValue,
+                "l10n" => [],
+                "global" => null
             ];
+
+            foreach ($field->l10n as $l10n) {
+                $f["l10n"][] = [
+                    "code" => $l10n->language->code,
+                    "value" => $l10n->value,
+                ];
+            }
 
             $data["fields"][] = $f;
         }
 
         try {
             $api = new CommunityApiClient($system->integration_key);
-            $check->external_id = $api->shareCheck(array("check" => $data))->id;
+            $check->external_id = $api->shareCheck(["check" => $data])->id;
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
