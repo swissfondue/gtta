@@ -36,7 +36,7 @@
 
     <fieldset>
         <div class="form-actions">
-            <button type="submit" id="submit_button" class="btn" <?php if ($package->external_id || $package->status == Package::STATUS_SHARE) echo "disabled"; ?>><?php echo Yii::t("app", "Share"); ?></button>
+            <button type="submit" id="submit_button" class="btn" <?php if ($package->status == Package::STATUS_SHARE) echo "disabled"; ?>><?php echo Yii::t("app", "Share"); ?></button>
         </div>
     </fieldset>
 </form>
