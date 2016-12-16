@@ -203,11 +203,13 @@ class CheckManager {
 
                 $f = CheckField::model()->findByAttributes([
                     "check_id" => $c->id,
-                    "global_check_field_id" => $global->id
+                    "global_check_field_id" => $global
                 ]);
 
                 if (!$f) {
                     $f = new CheckField();
+                    $f->check_id = $c->id;
+                    $f->global_check_field_id = $global;
                 }
 
                 $f->hidden = $field->hidden;
@@ -217,22 +219,22 @@ class CheckManager {
 
                 foreach ($this->_languages as $code => $languageId) {
                     $l10n = CheckFieldL10n::model()->findByAttributes([
-                        "check_field_id" => $field->id,
+                        "check_field_id" => $f->id,
                         "language_id" => $languageId
                     ]);
 
-                    foreach ($check->l10n as $checkL10n) {
-                        if ($checkL10n->code != $code) {
+                    foreach ($field->l10n as $fieldL10n) {
+                        if ($fieldL10n->code != $code) {
                             continue;
                         }
 
                         if (!$l10n) {
                             $l10n = new CheckFieldL10n();
-                            $l10n->check_field_id = $field->id;
+                            $l10n->check_field_id = $f->id;
                             $l10n->language_id = $languageId;
                         }
 
-                        $l10n->value = $checkL10n->value;
+                        $l10n->value = $fieldL10n->value;
                         $l10n->save();
                     }
                 }
