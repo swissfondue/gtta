@@ -22,7 +22,7 @@
 <hr>
 
 <p>
-    <?php if ($package->external_id || $package->status == Package::STATUS_SHARE): ?>
+    <?php if ($package->status == Package::STATUS_SHARE): ?>
         <?php echo Yii::t("app", "The package is already shared."); ?>
     <?php else: ?>
         <?php echo Yii::t("app", "If you press the button below, the package will be shared with the community and will be available for everyone with a valid GTTA license."); ?>
