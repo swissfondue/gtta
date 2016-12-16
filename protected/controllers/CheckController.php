@@ -2867,15 +2867,9 @@ class CheckController extends Controller
 			$form->attributes = $_POST["ShareForm"];
 
 			if ($form->validate()) {
-                $categories = CheckCategory::model()->findAll();
-
-                foreach ($categories as $category) {
-                    CommunityShareJob::enqueue([
-                        "type" => CommunityShareJob::TYPE_CATEGORY,
-                        "obj_id" => $category->id,
-                        "recursive" => true
-                    ]);
-                }
+                CommunityShareJob::enqueue([
+                    "type" => CommunityShareJob::TYPE_ALL
+                ]);
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "All checks scheduled for sharing."));
             } else {

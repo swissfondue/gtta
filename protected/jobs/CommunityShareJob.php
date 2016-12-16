@@ -4,6 +4,7 @@
  * Class CommunityShareJob
  */
 class CommunityShareJob extends BackgroundJob {
+    const TYPE_ALL        = "all";
     const TYPE_REFERENCE  = "reference";
     const TYPE_CATEGORY   = "category";
     const TYPE_CONTROL    = "control";
@@ -113,6 +114,18 @@ class CommunityShareJob extends BackgroundJob {
     }
 
     /**
+     * Share all
+     * @throws Exception
+     */
+    private function _shareAll() {
+        $categories = CheckCategory::model()->findAll();
+
+        foreach ($categories as $category) {
+            $this->_shareCategory($category->id);
+        }
+    }
+
+    /**
      * Share check preparations
      * @param $type
      * @param $id
@@ -121,6 +134,9 @@ class CommunityShareJob extends BackgroundJob {
     private function _share($type, $id) {
         try {
             switch ($type) {
+                case self::TYPE_ALL:
+                    $this->_shareAll();
+                    break;
                 case self::TYPE_REFERENCE:
                     $this->_shareReference($id);
                     break;
@@ -152,13 +168,15 @@ class CommunityShareJob extends BackgroundJob {
      */
     public function perform() {
         try {
-            if (!isset($this->args['type']) || !isset($this->args['obj_id'])) {
-                throw new Exception('Invalid job params.');
+            if (!isset($this->args["type"]) || ($this->args["type"] != self::TYPE_ALL && !isset($this->args["obj_id"]))) {
+                throw new Exception("Invalid job params.");
             }
 
-            $this->_recursive = isset($this->args["recursive"]) && $this->args["recursive"];
+            $this->_recursive = isset($this->args["recursive"]) && $this->args["recursive"] || $this->args["type"] == self::TYPE_ALL;
+
             $type = $this->args["type"];
             $allowedTypes = [
+                self::TYPE_ALL,
                 self::TYPE_REFERENCE,
                 self::TYPE_CATEGORY,
                 self::TYPE_CONTROL,
@@ -171,7 +189,7 @@ class CommunityShareJob extends BackgroundJob {
                 throw new Exception("Invalid type.");
             }
 
-            $id = $this->args["obj_id"];
+            $id = isset($this->args["obj_id"]) ? $this->args["obj_id"] : null;
 
             $this->_share($type, $id);
         } catch (Exception $e) {
