@@ -4,7 +4,7 @@
  * Control manager class
  */
 class ControlManager {
-    private $_languages = array();
+    private $_languages = [];
 
     /**
      * Constructor
@@ -18,65 +18,58 @@ class ControlManager {
     /**
      * Prepare control sharing
      * @param CheckControl $control
-     * @param bool $recursive
      * @throws Exception
      */
-    public function prepareSharing(CheckControl $control, $recursive=false) {
+    public function prepareSharing(CheckControl $control) {
         $category = $control->category;
 
         if (!$category->external_id) {
             $cm = new CategoryManager();
-            $cm->prepareSharing($category);
-        }
-
-        if (!$control->external_id) {
-            CommunityShareJob::enqueue(array(
-                'type' => CommunityShareJob::TYPE_CONTROL,
-                'obj_id' => $control->id,
-            ));
-        }
-
-        if ($recursive) {
-            $cm = new CheckManager();
-
-            foreach ($control->checks as $check) {
-                $cm->prepareSharing($check);
-            }
+            $cm->share($category);
         }
     }
 
     /**
      * Serialize and share control
      * @param CheckControl $control
+     * @param bool $recursive
      * @throws Exception
      */
-    public function share(CheckControl $control) {
-        /** @var System $system */
+    public function share(CheckControl $control, $recursive=false) {
+        $this->prepareSharing($control);
         $system = System::model()->findByPk(1);
 
-        $data = array(
+        $data = [
             "category_id" => $control->category->external_id,
             "name" => $control->name,
             "sort_order" => $control->sort_order,
-            "l10n" => array(),
-        );
+            "l10n" => [],
+        ];
 
         foreach ($control->l10n as $l10n) {
-            $data["l10n"][] = array(
+            $data["l10n"][] = [
                 "code" => $l10n->language->code,
                 "name" => $l10n->name,
-            );
+            ];
         }
 
         try {
             $api = new CommunityApiClient($system->integration_key);
-            $control->external_id = $api->shareControl(array("control" => $data))->id;
+            $control->external_id = $api->shareControl(["control" => $data])->id;
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
 
         $control->status = CheckControl::STATUS_INSTALLED;
         $control->save();
+
+        if ($recursive) {
+            $cm = new CheckManager();
+
+            foreach ($control->checks as $check) {
+                $cm->share($check);
+            }
+        }
     }
 
     /**
@@ -104,7 +97,7 @@ class ControlManager {
         $api = new CommunityApiClient($initial ? null : $system->integration_key);
         $control = $api->getControl($control)->control;
         $category = $this->_getCategoryId($control->category_id, $initial);
-        $c = CheckControl::model()->findByAttributes(array("external_id" => $control->id));
+        $c = CheckControl::model()->findByAttributes(["external_id" => $control->id]);
 
         if (!$c) {
             $c = new CheckControl();
@@ -118,7 +111,7 @@ class ControlManager {
         $c->save();
 
         // l10n
-        CheckControlL10n::model()->deleteAllByAttributes(array("check_control_id" => $c->id));
+        CheckControlL10n::model()->deleteAllByAttributes(["check_control_id" => $c->id]);
 
         foreach ($control->l10n as $l10n) {
             $l = new CheckControlL10n();

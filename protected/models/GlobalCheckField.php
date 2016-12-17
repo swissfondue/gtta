@@ -10,6 +10,7 @@
  * @property string $title
  * @property boolean $hidden
  * @property string $value
+ * @property integer external_id
  * @property GlobalCheckFieldL10n[] $l10n
  * @property CheckField[] $checkFields
  */

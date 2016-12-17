@@ -17,7 +17,7 @@
 <hr>
 
 <p>
-    <?php if ($check->external_id || $check->status == Package::STATUS_SHARE): ?>
+    <?php if ($check->status == Package::STATUS_SHARE): ?>
         <?php echo Yii::t("app", "The check is already shared."); ?>
     <?php else: ?>
         <?php echo Yii::t("app", "If you press the button below, the check will be shared with the community and will be available for everyone with a valid GTTA license."); ?>
@@ -33,7 +33,7 @@
 
     <fieldset>
         <div class="form-actions">
-            <button type="submit" class="btn" <?php if ($check->external_id || $check->status == Package::STATUS_SHARE) echo "disabled"; ?>><?php echo Yii::t("app", "Share"); ?></button>
+            <button type="submit" class="btn" <?php if ($check->status == Package::STATUS_SHARE) echo "disabled"; ?>><?php echo Yii::t("app", "Share"); ?></button>
         </div>
     </fieldset>
 </form>

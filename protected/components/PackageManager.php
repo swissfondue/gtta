@@ -1285,14 +1285,7 @@ class PackageManager {
         }
 
         foreach ($package->dependencies as $dep) {
-            $this->prepareSharing($dep);
-        }
-
-        if (!$package->external_id) {
-            CommunityShareJob::enqueue(array(
-                "type" => CommunityShareJob::TYPE_PACKAGE,
-                "obj_id" => $package->id,
-            ));
+            $this->share($dep);
         }
     }
 
@@ -1302,6 +1295,8 @@ class PackageManager {
      * @throws Exception
      */
     public function share(Package $package) {
+        $this->prepareSharing($package);
+
         $path = $this->getPath($package);
         $zip = new ZipArchive();
         $zipPath = "/tmp/package-" . $package->id . ".zip";

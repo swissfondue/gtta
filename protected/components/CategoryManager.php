@@ -4,7 +4,7 @@
  * Category manager class
  */
 class CategoryManager {
-    private $_languages = array();
+    private $_languages = [];
 
     /**
      * Constructor
@@ -16,47 +16,24 @@ class CategoryManager {
     }
 
     /**
-     * Prepare category sharing
-     * @param CheckCategory $category
-     * @param bool $recursive
-     * @throws Exception
-     */
-    public function prepareSharing(CheckCategory $category, $recursive=false) {
-        if (!$category->external_id) {
-            CommunityShareJob::enqueue(array(
-                'type' => CommunityShareJob::TYPE_CATEGORY,
-                'obj_id' => $category->id,
-            ));
-        }
-
-        if ($recursive) {
-            $cm = new ControlManager();
-
-            foreach ($category->controls as $control) {
-                $cm->prepareSharing($control, $recursive);
-            }
-        }
-    }
-
-    /**
      * Serialize and share category
      * @param CheckCategory $category
+     * @param $recursive
      * @throws Exception
      */
-    public function share(CheckCategory $category) {
-        /** @var System $system */
+    public function share(CheckCategory $category, $recursive=false) {
         $system = System::model()->findByPk(1);
 
-        $data = array(
+        $data = [
             "name" => $category->name,
-            "l10n" => array(),
-        );
+            "l10n" => [],
+        ];
 
         foreach ($category->l10n as $l10n) {
-            $data["l10n"][] = array(
+            $data["l10n"][] = [
                 "code" => $l10n->language->code,
                 "name" => $l10n->name,
-            );
+            ];
         }
 
         try {
@@ -68,6 +45,14 @@ class CategoryManager {
 
         $category->status = CheckCategory::STATUS_INSTALLED;
         $category->save();
+
+        if ($recursive) {
+            $cm = new ControlManager();
+
+            foreach ($category->controls as $control) {
+                $cm->share($control, $recursive);
+            }
+        }
     }
 
     /**
@@ -82,7 +67,7 @@ class CategoryManager {
 
         $api = new CommunityApiClient($initial ? null : $system->integration_key);
         $category = $api->getCategory($category)->category;
-        $c = CheckCategory::model()->findByAttributes(array("external_id" => $category->id));
+        $c = CheckCategory::model()->findByAttributes(["external_id" => $category->id]);
 
         if (!$c) {
             $c = new CheckCategory();
@@ -94,7 +79,7 @@ class CategoryManager {
         $c->save();
 
         // l10n
-        CheckCategoryL10n::model()->deleteAllByAttributes(array("check_category_id" => $c->id));
+        CheckCategoryL10n::model()->deleteAllByAttributes(["check_category_id" => $c->id]);
 
         foreach ($category->l10n as $l10n) {
             $l = new CheckCategoryL10n();

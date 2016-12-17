@@ -5,38 +5,21 @@
  */
 class ReferenceManager {
     /**
-     * Prepare reference sharing
-     * @param Reference $reference
-     * @throws Exception
-     */
-    public function prepareSharing(Reference $reference) {
-        if (!$reference->external_id) {
-            CommunityShareJob::enqueue(array(
-                'type' => CommunityShareJob::TYPE_REFERENCE,
-                'obj_id' => $reference->id,
-            ));
-        }
-
-
-    }
-
-    /**
      * Serialize and share reference
      * @param Reference $reference
      * @throws Exception
      */
     public function share(Reference $reference) {
-        /** @var System $system */
         $system = System::model()->findByPk(1);
 
-        $data = array(
+        $data = [
             "name" => $reference->name,
             "url" => $reference->url,
-        );
+        ];
 
         try {
             $api = new CommunityApiClient($system->integration_key);
-            $reference->external_id = $api->shareReference(array("reference" => $data))->id;
+            $reference->external_id = $api->shareReference(["reference" => $data])->id;
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
@@ -57,7 +40,7 @@ class ReferenceManager {
 
         $api = new CommunityApiClient($initial ? null : $system->integration_key);
         $reference = $api->getReference($reference)->reference;
-        $r = Reference::model()->findByAttributes(array("external_id" => $reference->id));
+        $r = Reference::model()->findByAttributes(["external_id" => $reference->id]);
 
         if (!$r) {
             $r = new Reference();

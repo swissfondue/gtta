@@ -2867,12 +2867,9 @@ class CheckController extends Controller
 			$form->attributes = $_POST["ShareForm"];
 
 			if ($form->validate()) {
-                $categories = CheckCategory::model()->findAll();
-                $cm = new CategoryManager();
-
-                foreach ($categories as $category) {
-                    $cm->prepareSharing($category, true);
-                }
+                CommunityShareJob::enqueue([
+                    "type" => CommunityShareJob::TYPE_ALL
+                ]);
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "All checks scheduled for sharing."));
             } else {
@@ -2909,8 +2906,11 @@ class CheckController extends Controller
 			$form->attributes = $_POST["ShareForm"];
 
 			if ($form->validate()) {
-                $cm = new CategoryManager();
-                $cm->prepareSharing($category, true);
+			    CommunityShareJob::enqueue([
+			        "type" => CommunityShareJob::TYPE_CATEGORY,
+                    "obj_id" => $category->id,
+                    "recursive" => true
+                ]);
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "Category scheduled for sharing."));
             } else {
@@ -2983,8 +2983,11 @@ class CheckController extends Controller
 			$form->attributes = $_POST["ShareForm"];
 
 			if ($form->validate()) {
-                $cm = new ControlManager();
-                $cm->prepareSharing($control, true);
+			    CommunityShareJob::enqueue([
+			        "type" => CommunityShareJob::TYPE_CONTROL,
+                    "obj_id" => $control->id,
+                    "recursive" => true
+                ]);
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "Control scheduled for sharing."));
             } else {
@@ -3083,8 +3086,10 @@ class CheckController extends Controller
 			$form->attributes = $_POST["ShareForm"];
 
 			if ($form->validate()) {
-                $cm = new CheckManager();
-                $cm->prepareSharing($check);
+			    CommunityShareJob::enqueue([
+			        "type" => CommunityShareJob::TYPE_CHECK,
+                    "obj_id" => $check->id
+                ]);
 
                 Yii::app()->user->setFlash("success", Yii::t("app", "Check scheduled for sharing."));
             } else {

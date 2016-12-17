@@ -79,7 +79,7 @@ class CheckField extends ActiveRecord {
             "language_id" => $language->id
         ]);
 
-        return $l10n->value ? $l10n->value : $this->value;
+        return ($l10n && $l10n->value) ? $l10n->value : $this->value;
     }
 
     /**
@@ -122,6 +122,14 @@ class CheckField extends ActiveRecord {
      * @return bool
      */
     public function getHidden() {
-        return $this->global->hidden || $this->hidden;
+        return $this->global->hidden || $this->hiddenValue;
+    }
+
+    /**
+     * Get hidden value
+     * @return bool
+     */
+    public function getHiddenValue() {
+        return $this->hidden;
     }
 }
