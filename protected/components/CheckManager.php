@@ -223,20 +223,24 @@ class CheckManager {
                         "language_id" => $languageId
                     ]);
 
+                    $value = null;
+
+                    if (!$l10n) {
+                        $l10n = new CheckFieldL10n();
+                        $l10n->check_field_id = $f->id;
+                        $l10n->language_id = $languageId;
+                    }
+
                     foreach ($field->l10n as $fieldL10n) {
                         if ($fieldL10n->code != $code) {
                             continue;
                         }
 
-                        if (!$l10n) {
-                            $l10n = new CheckFieldL10n();
-                            $l10n->check_field_id = $f->id;
-                            $l10n->language_id = $languageId;
-                        }
-
-                        $l10n->value = $fieldL10n->value;
-                        $l10n->save();
+                        $value = $fieldL10n->value;
                     }
+
+                    $l10n->value = $value;
+                    $l10n->save();
                 }
             }
         } catch (Exception $e) {

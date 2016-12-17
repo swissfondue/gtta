@@ -79,7 +79,7 @@ class CheckField extends ActiveRecord {
             "language_id" => $language->id
         ]);
 
-        return $l10n->value ? $l10n->value : $this->value;
+        return ($l10n && $l10n->value) ? $l10n->value : $this->value;
     }
 
     /**

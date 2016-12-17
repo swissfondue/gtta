@@ -18,6 +18,7 @@ class FieldManager {
             $this->_languages[$language->code] = $language->id;
         }
     }
+
     /**
      * Validate field value
      * @param $type
@@ -119,12 +120,24 @@ class FieldManager {
         // l10n
         GlobalCheckFieldL10n::model()->deleteAllByAttributes(["global_check_field_id" => $f->id]);
 
-        foreach ($field->l10n as $l10n) {
+        foreach ($this->_languages as $code => $id) {
             $l = new GlobalCheckFieldL10n();
-            $l->language_id = $this->_languages[$l10n->code];
+            $l->language_id = $id;
             $l->global_check_field_id = $f->id;
-            $l->title = $l10n->title;
-            $l->value = $l10n->value;
+
+            $title = null;
+            $value = null;
+
+            foreach ($field->l10n as $l10n) {
+                if ($l10n->code == $code) {
+                    $title = $l10n->title;
+                    $value = $l10n->value;
+                    break;
+                }
+            }
+
+            $l->title = $title;
+            $l->value = $value;
             $l->save();
         }
 
