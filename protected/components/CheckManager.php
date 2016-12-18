@@ -165,7 +165,11 @@ class CheckManager {
                 $pkg = Package::model()->find($criteria);
 
                 if (!$pkg) {
-                    $pkg = $pm->create($script->package_id, $initial, true);
+                    try {
+                        $pkg = $pm->create($script->package_id, $initial, true);
+                    } catch (Exception $e) {
+                        continue;
+                    }
                 }
 
                 $s = new CheckScript();
