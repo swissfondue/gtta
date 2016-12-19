@@ -105,6 +105,10 @@ class FieldManager {
         $f = GlobalCheckField::model()->findByAttributes(["external_id" => $field->id]);
 
         if (!$f) {
+            $f = GlobalCheckField::model()->findByAttributes(["name" => $field->name]);
+        }
+
+        if (!$f) {
             $f = new GlobalCheckField();
         }
 
