@@ -265,7 +265,7 @@ class TargetManager {
 
                     $tcm->create($check->check, [
                         "target_id" => $target->id,
-                        "user_id" => $admin,
+                        "user_id" => $admin->id,
                         "language_id" => $language->id,
                     ]);
                 }
