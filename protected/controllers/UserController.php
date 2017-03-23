@@ -57,17 +57,17 @@ class UserController extends Controller
 
     /**
      * User edit page.
+     * @param int $id
      */
-	public function actionEdit($id=0)
+	public function actionEdit($id = 0)
 	{
-        $id        = (int) $id;
+        $id = (int) $id;
         $newRecord = false;
 
-        if ($id)
+        if ($id) {
             $user = User::model()->findByPk($id);
-        else
-        {
-            $user      = new User();
+        } else {
+            $user = new User();
             $newRecord = true;
         }
 
@@ -86,12 +86,10 @@ class UserController extends Controller
         }
 
 		// collect user input data
-		if (isset($_POST['UserEditForm']))
-		{
+		if (isset($_POST['UserEditForm'])) {
 			$model->attributes = $_POST['UserEditForm'];
 
-			if ($model->validate())
-            {
+			if ($model->validate()) {
                 $checkEmail = User::model()->findByAttributes(array( 'email' => $model->email ));
 
                 if ($user->role == User::ROLE_CLIENT || !isset($_POST['UserEditForm']['sendNotifications']))
@@ -109,28 +107,33 @@ class UserController extends Controller
                     $model->certificateRequired = false;
                 }
 
-                if (!$checkEmail || $checkEmail->id == $user->id)
-                {
+                if (!$checkEmail || $checkEmail->id == $user->id) {
                     $user->email = $model->email;
                     $user->name  = $model->name;
                     $user->role  = $model->role;
                     $user->send_notifications = $model->sendNotifications;
                     $user->certificate_required = $model->certificateRequired;
-                    $user->session_duration = $model->sessionDuration;
+
+                    if ($model->sessionDuration) {
+                        $user->session_duration = $model->sessionDuration;
+                    }
 
                     // delete all projects from this client account
-                    if (!$newRecord && $user->role == User::ROLE_CLIENT && $model->clientId != $user->client_id)
+                    if (!$newRecord && $user->role == User::ROLE_CLIENT && $model->clientId != $user->client_id) {
                         ProjectUser::model()->deleteAllByAttributes(array(
                             'user_id' => $user->id
                         ));
+                    }
 
-                    if ($user->role == User::ROLE_CLIENT && $model->clientId)
+                    if ($user->role == User::ROLE_CLIENT && $model->clientId) {
                         $user->client_id = $model->clientId;
-                    else
+                    } else {
                         $user->client_id = NULL;
+                    }
 
-                    if ($model->password)
+                    if ($model->password) {
                         $user->password = hash('sha256', $model->password);
+                    }
 
                     if ($user->role == User::ROLE_CLIENT) {
                         $user->show_details = $model->showDetails;
@@ -165,20 +168,20 @@ class UserController extends Controller
             $this->breadcrumbs[] = array($user->name ? $user->name : $user->email, '');
 
         $clients = Client::model()->findAllByAttributes(
-            array(),
-            array( 'order' => 't.name ASC' )
+            [],
+            ["order" => "t.name ASC"]
         );
 
 		// display the page
-        $this->pageTitle = $newRecord ? Yii::t('app', 'New User') : $user->name ? $user->name : $user->email;
-		$this->render('edit', array(
-            'model'   => $model,
-            'user'    => $user,
-            'clients' => $clients,
-            'roles'   => array(
-                User::ROLE_ADMIN  => Yii::t('app', 'Admin'),
-                User::ROLE_USER   => Yii::t('app', 'User'),
-                User::ROLE_CLIENT => Yii::t('app', 'Client'),
+        $this->pageTitle = $newRecord ? Yii::t("app", "New User") : $user->name ? $user->name : $user->email;
+		$this->render("edit", array(
+            "model"   => $model,
+            "user"    => $user,
+            "clients" => $clients,
+            "roles"   => array(
+                User::ROLE_ADMIN  => Yii::t("app", "Admin"),
+                User::ROLE_USER   => Yii::t("app", "User"),
+                User::ROLE_CLIENT => Yii::t("app", "Client"),
             ),
         ));
 	}
@@ -193,11 +196,11 @@ class UserController extends Controller
         try
         {
             $model = new EntryControlForm();
-            $model->attributes = $_POST['EntryControlForm'];
+            $model->attributes = $_POST["EntryControlForm"];
 
             if (!$model->validate())
             {
-                $errorText = '';
+                $errorText = "";
 
                 foreach ($model->getErrors() as $error)
                 {
@@ -212,16 +215,16 @@ class UserController extends Controller
             $user = User::model()->findByPk($id);
 
             if ($user === null)
-                throw new CHttpException(404, Yii::t('app', 'User not found.'));
+                throw new CHttpException(404, Yii::t("app", "User not found."));
 
             switch ($model->operation)
             {
-                case 'delete':
+                case "delete":
                     $user->delete();
                     break;
 
                 default:
-                    throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
+                    throw new CHttpException(403, Yii::t("app", "Unknown operation."));
                     break;
             }
         }
@@ -244,42 +247,42 @@ class UserController extends Controller
         $user = User::model()->findByPk($id);
 
         if ($user === null)
-            throw new CHttpException(404, Yii::t('app', 'User not found.'));
+            throw new CHttpException(404, Yii::t("app", "User not found."));
 
         if ($page < 1)
-            throw new CHttpException(404, Yii::t('app', 'Page not found.'));
+            throw new CHttpException(404, Yii::t("app", "Page not found."));
 
         $criteria = new CDbCriteria();
         $criteria->limit  = $this->entriesPerPage;
         $criteria->offset = ($page - 1) * $this->entriesPerPage;
-        $criteria->order  = 'deadline ASC, project.name ASC';
+        $criteria->order  = "deadline ASC, project.name ASC";
         $criteria->addColumnCondition(array(
-            'user_id' => $user->id
+            "user_id" => $user->id
         ));
 
         $projects = ProjectUser::model()->with(array(
-            'project' => array(
-                'with' => 'client'
+            "project" => array(
+                "with" => "client"
             )
         ))->findAll($criteria);
 
         $projectCount = ProjectUser::model()->count($criteria);
         $paginator    = new Paginator($projectCount, $page);
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Users'), $this->createUrl('user/index'));
-        $this->breadcrumbs[] = array($user->name ? $user->name : $user->email, $this->createUrl('user/edit', array( 'id' => $user->id )));
-        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), '');
+        $this->breadcrumbs[] = array(Yii::t("app", "Users"), $this->createUrl("user/index"));
+        $this->breadcrumbs[] = array($user->name ? $user->name : $user->email, $this->createUrl("user/edit", array( "id" => $user->id )));
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), "");
 
         // display the page
-        $this->pageTitle = Yii::t('app', 'Projects');
-		$this->render('project/index', array(
-            'user'     => $user,
-            'projects' => $projects,
-            'p'        => $paginator,
-            'statuses' => array(
-                Project::STATUS_OPEN        => Yii::t('app', 'Open'),
-                Project::STATUS_IN_PROGRESS => Yii::t('app', 'In Progress'),
-                Project::STATUS_FINISHED    => Yii::t('app', 'Finished'),
+        $this->pageTitle = Yii::t("app", "Projects");
+		$this->render("project/index", array(
+            "user"     => $user,
+            "projects" => $projects,
+            "p"        => $paginator,
+            "statuses" => array(
+                Project::STATUS_OPEN        => Yii::t("app", "Open"),
+                Project::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
+                Project::STATUS_FINISHED    => Yii::t("app", "Finished"),
             )
         ));
 	}
@@ -293,20 +296,20 @@ class UserController extends Controller
         $user = User::model()->findByPk($id);
 
         if (!$user)
-            throw new CHttpException(404, Yii::t('app', 'User not found.'));
+            throw new CHttpException(404, Yii::t("app", "User not found."));
 
 		$model = new UserProjectAddForm();
 
 		// collect user input data
-		if (isset($_POST['UserProjectAddForm']))
+		if (isset($_POST["UserProjectAddForm"]))
 		{
-			$model->attributes = $_POST['UserProjectAddForm'];
+			$model->attributes = $_POST["UserProjectAddForm"];
 
 			if ($model->validate())
             {
                 $check = ProjectUser::model()->findByAttributes(array(
-                    'project_id' => $model->projectId,
-                    'user_id'    => $user->id
+                    "project_id" => $model->projectId,
+                    "user_id"    => $user->id
                 ));
 
                 if (!$check)
@@ -314,7 +317,7 @@ class UserController extends Controller
                     $project = Project::model()->findByPk($model->projectId);
 
                     if ($user->role == User::ROLE_CLIENT && $user->client_id != $project->client_id)
-                        Yii::app()->user->setFlash('error', Yii::t('app', 'Project belongs to another client.'));
+                        Yii::app()->user->setFlash("error", Yii::t("app", "Project belongs to another client."));
                     else
                     {
                         $project = new ProjectUser();
@@ -323,37 +326,37 @@ class UserController extends Controller
                         $project->admin = 0;
                         $project->save();
 
-                        Yii::app()->user->setFlash('success', Yii::t('app', 'Project added.'));
+                        Yii::app()->user->setFlash("success", Yii::t("app", "Project added."));
                     }
                 }
                 else
-                    Yii::app()->user->setFlash('error', Yii::t('app', 'Project is already added for this user.'));
+                    Yii::app()->user->setFlash("error", Yii::t("app", "Project is already added for this user."));
             }
             else
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+                Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
 		}
 
         if ($user->role == User::ROLE_CLIENT)
             $clients = Client::model()->findAllByAttributes(array(
-                'id' => $user->client_id
+                "id" => $user->client_id
             ));
         else
             $clients = Client::model()->findAllByAttributes(
                 array(),
-                array( 'order' => 't.name ASC' )
+                array( "order" => "t.name ASC" )
             );
 
-        $this->breadcrumbs[] = array(Yii::t('app', 'Users'), $this->createUrl('user/index'));
-        $this->breadcrumbs[] = array($user->name ? $user->name : $user->email, $this->createUrl('user/edit', array( 'id' => $user->id )));
-        $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('user/projects', array( 'id' => $user->id )));
-        $this->breadcrumbs[] = array(Yii::t('app', 'Add Project'), '');
+        $this->breadcrumbs[] = array(Yii::t("app", "Users"), $this->createUrl("user/index"));
+        $this->breadcrumbs[] = array($user->name ? $user->name : $user->email, $this->createUrl("user/edit", array( "id" => $user->id )));
+        $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("user/projects", array( "id" => $user->id )));
+        $this->breadcrumbs[] = array(Yii::t("app", "Add Project"), "");
 
 		// display the page
-        $this->pageTitle = Yii::t('app', 'Add Project');
-		$this->render('project/add', array(
-            'model'   => $model,
-            'user'    => $user,
-            'clients' => $clients,
+        $this->pageTitle = Yii::t("app", "Add Project");
+		$this->render("project/add", array(
+            "model"   => $model,
+            "user"    => $user,
+            "clients" => $clients,
         ));
 	}
 
