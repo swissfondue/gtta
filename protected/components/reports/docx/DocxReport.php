@@ -1070,6 +1070,20 @@ class DocxReport extends ReportPlugin {
         );
 
         foreach ($types as $ext => $type) {
+            foreach ($xml->documentElement->childNodes as $oldNode) {
+                $sameExtension = $oldNode->getAttribute("Extension") == $ext;
+                $sameType = $oldNode->getAttribute("ContentType") == $type;
+
+                if ($sameExtension && $sameType) {
+                    // Skip the $type as it already exists on the template.
+                    continue 2;
+                } else if (!$sameExtension && !$sameType) {
+                    continue;
+                } else {
+                   throw new Exception("The template contained unexpected ContentType<->Extension mapping.");
+                }
+            }
+
             $node = $xml->createElement("Default");
             $node->setAttribute("Extension", $ext);
             $node->setAttribute("ContentType", $type);
