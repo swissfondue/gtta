@@ -332,11 +332,7 @@ class ReportManager {
 
         /** @var TargetCheckField $f */
         foreach ($tc->getOrderedFields() as $f) {
-            if (
-                !$f->getHidden() &&
-                in_array($f->field->global->name, GlobalCheckField::$system) &&
-                in_array($f->field->global->name, $fields)
-            ) {
+            if (!$f->getHidden() && in_array($f->field->global->name, $fields)) {
                 $checkFields[] = [
                     "name" => $f->field->global->name,
                     "title" => $f->field->global->localizedTitle,
