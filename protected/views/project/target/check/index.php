@@ -283,7 +283,7 @@
                                                 <textarea name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[solution]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_solution" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($custom->solution); ?></textarea>
                                             </td>
                                         </tr>
-                                        <?php if (User::checkRole(User::ROLE_USER) || $tc->attachments): ?>
+                                        <?php if (User::checkRole(User::ROLE_USER) || $custom->attachments): ?>
                                             <tr>
                                                 <th>
                                                     <?php echo Yii::t("app", "Attachments"); ?>
