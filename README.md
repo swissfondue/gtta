@@ -1,6 +1,7 @@
 # GTTA-AUDITING DOWNLOAD
 GTTA (Guided technical testing assistant)
-http://download.phishing-server.com/dl/gtta-2.2/vmware.zip
+
+DOWNLOAD LATEST VERSION: http://download.phishing-server.com/dl/gtta-2.3/vmware.zip
 
 
 
