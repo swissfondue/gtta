@@ -1,8 +1,8 @@
 <?php
 /**
- * Class TargetCheckReindexJob
+ * Class ReindexJob
  */
-class TargetCheckReindexJob extends BackgroundJob {
+class ReindexJob extends BackgroundJob {
     /**
      * Reindex target
      * @param Target $t
@@ -20,10 +20,6 @@ class TargetCheckReindexJob extends BackgroundJob {
      */
     public function perform() {
         try {
-            if (!isset($this->args["category_id"]) && !isset($this->args["target_id"]) && !isset($this->args['template_id'])) {
-                throw new Exception("Invalid job params.");
-            }
-
             if (isset($this->args['target_id'])) {
                 $target = Target::model()->findByPk($this->args['target_id']);
 
@@ -87,6 +83,31 @@ class TargetCheckReindexJob extends BackgroundJob {
 
                 foreach ($targets as $t) {
                     $this->_reindexTarget($t);
+                }
+            } else if (isset($this->args["global_check_field_id"])) {
+                $field = GlobalCheckField::model()->with("l10n")->findByPk($this->args["global_check_field_id"]);
+
+                if (!$field) {
+                    throw new Exception("Field not found.", 404);
+                }
+
+                $checks = Check::model()->findAll();
+                $cm = new CheckManager();
+
+                foreach ($checks as $check) {
+                    $cm->reindexFields($check, [$field]);
+                }
+            } else if (isset($this->args["check_id"])) {
+                $check = Check::model()->findByPk($this->args["check_id"]);
+
+                if (!$check) {
+                    throw new Exception("Check not found.", 404);
+                }
+
+                $tcm = new TargetCheckManager();
+
+                foreach ($check->fields as $field) {
+                    $tcm->reindexFields($field);
                 }
             }
 

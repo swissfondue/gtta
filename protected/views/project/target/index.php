@@ -68,8 +68,6 @@
                 echo $this->renderPartial("partial/right-block", array(
                     "quickTargets" => $quickTargets,
                     "project" => $project,
-                    "client" => $client,
-                    "statuses" => $statuses,
                     "category" => null,
                     "target" => null
                 ));
@@ -80,6 +78,6 @@
 
 <script>
     setInterval(function () {
-        user.target.chain.messages('<?php print $this->createUrl('project/chainmessages'); ?>');
+        user.target.chain.messages('<?php print $this->createUrl('project/chainmessages', array("id" => $project->id, "target" => $target->id)); ?>');
     }, 5000);
 </script>

@@ -7,21 +7,6 @@ class TargetCheckEditForm extends CFormModel {
     const CUSTOM_SOLUTION_IDENTIFIER = "custom";
 
     /**
-     * @var string override target.
-     */
-    public $overrideTarget;
-
-    /**
-     * @var string protocol.
-     */
-    public $protocol;
-
-    /**
-     * @var integer port.
-     */
-    public $port;
-
-    /**
      * @var array (json) scripts
      */
     public $scripts;
@@ -31,12 +16,12 @@ class TargetCheckEditForm extends CFormModel {
      */
     public $timeouts;
 
-	/**
+    /**
      * @var string resultTitle.
      */
     public $resultTitle;
 
-	/**
+    /**
      * @var string result.
      */
     public $result;
@@ -82,47 +67,55 @@ class TargetCheckEditForm extends CFormModel {
     public $inputs;
 
     /**
-     * @var string poc.
-     */
-    public $poc;
-
-    /**
-     * @var string links.
-     */
-    public $links;
-
-    /**
      * @var string table_result
      */
     public $tableResult;
 
-	/**
-	 * @return array validation rules for model attributes.
-	 */
-	public function rules() {
-		return array(
-            array("rating", "in", "range" => TargetCheck::getValidRatings()),
-            array("port", "numerical", "integerOnly" => true, "min" => 0, "max" => 65536),
-            array("protocol, solutionTitle, resultTitle", "length", "max" => 1000),
-            array("overrideTarget", "checkOverrideTarget"),
-            array("saveSolution, saveResult", "boolean"),
-            array("inputs, result, solutions, solution, poc, links, attachmentTitles, tableResult, scripts, timeouts", "safe"),
-		);
-	}
+    /**
+     * @var array fields
+     */
+    public $fields;
 
     /**
-     * Validate override target
-     * @param $target
+     * @return array validation rules for model attributes.
+     */
+    public function rules() {
+        return array(
+            array("rating", "in", "range" => TargetCheck::getValidRatings()),
+            array("saveSolution, saveResult", "boolean"),
+            array("fields", "checkFields"),
+            array("inputs, result, solutions, solution, solutionTitle, attachmentTitles, tableResult, scripts, timeouts", "safe"),
+        );
+    }
+
+    /**
+     * Validate fields
+     * @param $attribute
+     * @param $params
      * @return bool
      */
-    public function checkOverrideTarget($attribute,$params) {
-        $target  = trim($this->overrideTarget);
-
-        if (!$target) {
+    public function checkFields($attribute, $params) {
+        if (!$this->{$attribute}) {
             return true;
         }
 
-        $this->overrideTarget = $target;
+        foreach ($this->{$attribute} as $name => $value) {
+            if ($name == GlobalCheckField::FIELD_OVERRIDE_TARGET) {
+                $this->{$attribute}[$name] = trim($value);
+            }
+
+            if ($name == GlobalCheckField::FIELD_PORT) {
+                $value = (int) $value;
+
+                if ($value < 0 || $value > 65536) {
+                    $this->addError("fields", "Port must be between 0 and 65536");
+
+                    return false;
+                }
+
+                $this->{$attribute}[$name] = $value;
+            }
+        }
 
         return true;
     }

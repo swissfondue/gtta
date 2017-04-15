@@ -117,6 +117,28 @@
         </div>
         
         <hr>
+
+        <div class="control-group <?php if ($form->getError("scriptsVerbosity")) echo "error"; ?>">
+            <label class="control-label" for="SettingsEditForm_scriptsVerbosity"><?php echo Yii::t("app", "Scripts Verbosity"); ?></label>
+            <div class="controls">
+                <input type="checkbox" id="SettingsEditForm_scriptsVerbosity" name="SettingsEditForm[scriptsVerbosity]" value="1" <?php if ($form->scriptsVerbosity) echo "checked"; ?>>
+                <?php if ($form->getError("scriptsVerbosity")): ?>
+                    <p class="help-block"><?php echo $form->getError("scriptsVerbosity"); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($form->getError("hostResolve")) echo "error"; ?>">
+            <label class="control-label" for="SettingsEditForm_hostResolve"><?php echo Yii::t("app", "Resolve Hosts"); ?></label>
+            <div class="controls">
+                <input type="checkbox" id="SettingsEditForm_hostResolve" name="SettingsEditForm[hostResolve]" value="1" <?php if ($form->hostResolve) echo "checked"; ?>>
+                <?php if ($form->getError("hostResolve")): ?>
+                    <p class="help-block"><?php echo $form->getError("hostResolve"); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <hr>
         
         <h3><?php echo Yii::t("app", "Report Settings"); ?></h3>
 
@@ -195,26 +217,6 @@
                 <?php if ($form->getError('reportHighDampingMed')): ?>
                     <p class="help-block"><?php echo $form->getError('reportHighDampingMed'); ?></p>
                 <?php endif; ?>
-            </div>
-        </div>
-
-        <hr>
-
-        <h3><?php echo Yii::t("app", "Checklist Settings"); ?></h3>
-
-        <br>
-
-        <div class="control-group">
-            <label class="control-label" for="SettingsEditForm_checklistPoc"><?php echo Yii::t("app", "Checklist Technical Details"); ?></label>
-            <div class="controls">
-                <input type="checkbox" id="SettingsEditForm_checklistPoc" name="SettingsEditForm[checklistPoc]" value="1" <?php if ($form->checklistPoc) echo 'checked="checked"'; ?>>
-            </div>
-        </div>
-        
-        <div class="control-group">
-            <label class="control-label" for="SettingsEditForm_checklistLinks"><?php echo Yii::t("app", "Checklist Links"); ?></label>
-            <div class="controls">
-                <input type="checkbox" id="SettingsEditForm_checklistLinks" name="SettingsEditForm[checklistLinks]" value="1" <?php if ($form->checklistLinks) echo 'checked="checked"'; ?>>
             </div>
         </div>
 

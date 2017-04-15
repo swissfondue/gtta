@@ -36,8 +36,8 @@ class RiskController extends Controller
             $language = $language->id;
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order  = 'COALESCE(l10n.name, t.name) ASC';
         $criteria->together = true;
 
@@ -260,8 +260,8 @@ class RiskController extends Controller
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order  = 'COALESCE(l10n.name, t.name) ASC';
         $criteria->addColumnCondition(array( 'risk_template_id' => $template->id ));
         $criteria->together = true;

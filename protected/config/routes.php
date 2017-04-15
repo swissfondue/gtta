@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
     // account
     "<action:(login|logout|verify)>"  => "app/<action>",
     "account"                         => "account/edit",
@@ -55,10 +55,11 @@ return array(
     "project/<id:\d+>/target/new" => "project/edittarget",
     "project/<id:\d+>/target/addlist" => "project/addtargetlist",
     "project/<id:\d+>/target/import" => "project/importtarget",
+    "project/<id:\d+>/target/import/mapping/<mId:\d+>" => "project/editmapping",
+    "project/mapping/apply" => "project/applymapping",
     "project/<id:\d+>/target/<target:\d+>/chain/edit" => "project/editchain",
     "project/<id:\d+>/target/<target:\d+>/chain/control" => "project/controlchain",
     "project/<id:\d+>/target/<target:\d+>/chain/messages" => "project/chainmessages",
-    "project/<id:\d+>/target/<target:\d+>/chain/activecheck" => "project/chainactivecheck",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/control/<controlToOpen:\d+>/check/<checkToOpen:\d+>" => "project/checks",
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>" => "project/checks",
     "project/<id:\d+>/target/<target:\d+>/category/control" => "project/controlcategory",
@@ -75,6 +76,20 @@ return array(
     "project/target/control" => "project/controltarget",
     "project/search" => "project/search",
     "project/target/<target:\d+>/check/<check:\d+>/link" => "project/checklink",
+    "project/target/running-checks" => "project/runningchecks",
+
+    // project issues
+    "project/<id:\d+>/issues" => "project/issues",
+    "project/<id:\d+>/issue/new" => "project/addIssue",
+    "project/<id:\d+>/issue/<issue:\d+>" => "project/issue",
+    "project/issue/control" => "project/controlissue",
+    "project/<id:\d+>/check/search" => "project/searchchecks",
+    "project/<id:\d+>/issue/<issue:\d+>/target/search" => "project/searchtargets",
+    "project/<id:\d+>/issue/<issue:\d+>/evidence/new" => "project/addEvidence",
+    "project/<id:\d+>/issue/<issue:\d+>/evidence/<evidence:\d+>" => "project/evidence",
+    "project/<id:\d+>/issue/<issue:\d+>/checks/update" => "project/updateissuechecks",
+    "project/<id:\d+>/issue/<issue:\d+>/checks/running" => "project/issuerunningchecks",
+    "project/evidence/control" => "project/controlevidence",
 
     // custom checks
     "project/<id:\d+>/target/<target:\d+>/category/<category:\d+>/custom-check/save" => "project/savecustomcheck",
@@ -84,13 +99,20 @@ return array(
     "project/custom-attachment/control" => "project/controlcustomattachment",
 
     // reports
-    "reports/project" => "report/project",
-    "reports/comparison" => "report/comparison",
-    "reports/fulfillment" => "report/fulfillment",
-    "reports/risk-matrix" => "report/riskmatrix",
+    "project/<id:\d+>/report/template" => "projectReport/template",
+    "project/<id:\d+>/report" => "projectReport/project",
+    "project/<id:\d+>/report/rtf" => "projectReport/projectRtf",
+    "project/<id:\d+>/report/docx" => "projectReport/projectDocx",
+    "project/<id:\d+>/report/rtf/sections" => "projectReport/sections",
+    "project/<id:\d+>/report/rtf/sections/save" => "projectReport/saveSection",
+    "project/<id:\d+>/report/rtf/sections/save-order" => "projectReport/saveSectionOrder",
+    "project/<id:\d+>/report/rtf/sections/control" => "projectReport/controlSection",
+    "project/<id:\d+>/report/comparison" => "projectReport/comparison",
+    "project/<id:\d+>/report/fulfillment" => "projectReport/fulfillment",
+    "project/<id:\d+>/report/risk-matrix" => "projectReport/riskmatrix",
+    "project/<id:\d+>/report/vuln-export" => "projectReport/vulnexport",
+    "project/<id:\d+>/report/tracked-time" => "projectReport/trackedtime",
     "reports/effort" => "report/effort",
-    "reports/vuln-export" => "report/vulnexport",
-    "reports/<id:\d+>/tracked-time" => "report/trackedtime",
 
     // project planner
     "project-planner" => "planner/index",
@@ -154,6 +176,7 @@ return array(
     "check/new"                 => "check/edit",
     "check/control"             => "check/control",
     "check/search"              => "check/search",
+    "check/filter"              => "check/filter",
 
     // checklist template categories
     "checklist-templates/<page:\d+>"                                   => "checklisttemplate/index",
@@ -259,12 +282,17 @@ return array(
     "report-template/<id:\d+>/summary-block/new" => "reporttemplate/editsummary",
     "report-template/summary-block/control" => "reporttemplate/controlsummary",
 
+    // report template vuln sections
+    "report-template/<id:\d+>/vuln-sections/<page:\d+>" => "reporttemplate/vulnsections",
+    "report-template/<id:\d+>/vuln-sections" => "reporttemplate/vulnsections",
+    "report-template/<id:\d+>/vuln-section/<section:\d+>/edit" => "reporttemplate/editvulnsection",
+    "report-template/<id:\d+>/vuln-section/new" => "reporttemplate/editvulnsection",
+    "report-template/section/control" => "reporttemplate/controlvulnsection",
+
     // report template sections
-    "report-template/<id:\d+>/sections/<page:\d+>" => "reporttemplate/sections",
     "report-template/<id:\d+>/sections" => "reporttemplate/sections",
-    "report-template/<id:\d+>/section/<section:\d+>/edit" => "reporttemplate/editsection",
-    "report-template/<id:\d+>/section/new" => "reporttemplate/editsection",
-    "report-template/section/control" => "reporttemplate/controlsection",
+    "report-template/<id:\d+>/sections/save" => "reporttemplate/saveSection",
+    "report-template/<id:\d+>/sections/save-order" => "reporttemplate/saveSectionOrder",
 
     // risk classification categories (templates)
     "risks/<page:\d+>"         => "risk/index",
@@ -314,4 +342,20 @@ return array(
     // history
     "history/logins/<page:\d+>" => "history/logins",
     "history/logins"            => "history/logins",
-);
+
+    "customization"                                 => "customization/index",
+    "customization/checks/fields"                   => "customization/checkfields",
+    "customization/checks/field/<id:\d+>/edit"      => "customization/editcheckfield",
+    "customization/checks/field/new"                => "customization/editcheckfield",
+    "customization/checks/field/<id:\d+>/control"   => "customization/controlcheckfield",
+
+    "nessus/mappings/<page:\d+>"      => "nessusmapping/index",
+    "nessus/mappings"                 => "nessusmapping/index",
+    "nessus/mappings/control"         => "nessusmapping/control",
+    "nessus/mappings/<id:\d+>/edit"   => "nessusmapping/edit",
+    "nessus/mappings/<id:\d+>/search" => "nessusmapping/searchchecks",
+    "nessus/mapping/<id:\d+>"         => "nessusmapping/view",
+    "nessus/mapping/vuln/update"      => "nessusmapping/updatevuln",
+    "nessus/mapping/vuln/filter"      => "nessusmapping/filtervulns",
+    "nessus/mapping/activate"         => "nessusmapping/activate",
+];

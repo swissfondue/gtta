@@ -7,21 +7,13 @@
  * @property integer $id
  * @property integer $target_id
  * @property integer $check_id
- * @property string $result
  * @property string $rating
  * @property string $status
  * @property string $target_file
  * @property string $result_file
  * @property integer $language_id
- * @property string $protocol
- * @property integer $port
- * @property string $override_target
  * @property integer $user_id
  * @property string $table_result
- * @property string $solution
- * @property string $solution_title
- * @property string $poc
- * @property string $links
  * @property User $user
  * @property Check $check
  * @property Target $target
@@ -31,8 +23,11 @@
  * @property integer $vuln_user_id
  * @property date $vuln_deadline
  * @property integer $vuln_status
+ * @property IssueEvidence $evidence
  */
 class TargetCheck extends ActiveRecord implements IVariableScopeObject {
+    public $mr;
+
     /**
      * Target check type
      */
@@ -52,6 +47,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
 
     /**
      * Result ratings.
+     * ordered by gravity (important)
      */
     const RATING_NONE = 0;
     const RATING_NO_VULNERABILITY = 10;
@@ -130,11 +126,11 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
 	public function rules() {
 		return array(
             array("target_id, check_id", "required"),
-            array("target_id, check_id, port, language_id, user_id", "numerical", "integerOnly" => true),
-            array("target_file, result_file, protocol, override_target", "length", "max" => 1000),
+            array("target_id, check_id, language_id, user_id", "numerical", "integerOnly" => true),
+            array("target_file, result_file", "length", "max" => 1000),
             array("status", "in", "range" => array(self::STATUS_OPEN, self::STATUS_FINISHED)),
             array("rating", "in", "range" => self::getValidRatings()),
-            array("result, table_result, solution, solution_title, poc, links", "safe"),
+            array("table_result", "safe"),
 		);
 	}
 
@@ -153,8 +149,46 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "attachments" => array(self::HAS_MANY, "TargetCheckAttachment", "target_check_id"),
             "scripts" => array(self::HAS_MANY, "TargetCheckScript", "target_check_id"),
             "startScripts" => array(self::HAS_MANY, 'CheckScript', array('check_script_id' => 'id'), 'through' => 'scripts', 'condition' => "scripts.start = 't'"),
+            "fields" => array(self::HAS_MANY, "TargetCheckField", "target_check_id"),
+            "evidence" => array(self::HAS_ONE, "IssueEvidence", "target_check_id"),
 		);
 	}
+
+    /**
+     * Check fields
+     * @return array|CActiveRecord|mixed|null
+     */
+    public function getOrderedFields() {
+        $language = Language::model()->findByAttributes(array(
+            "code" => Yii::app()->language
+        ));
+
+        if (!$language) {
+            $language = Language::model()->findByAttributes(array(
+                "default" => true
+            ));
+        }
+
+        return TargetCheckField::model()->with([
+            "field" => [
+                "joinType" => "LEFT JOIN",
+                "with" => [
+                    "global" => [
+                        "joinType" => "LEFT JOIN",
+                        "order" => "global.sort_order ASC",
+                        "with" => [
+                            "l10n" => [
+                                "on" => "l10n.language_id = :language_id",
+                                "params" => ["language_id" => $language->id],
+                            ],
+                        ],
+                    ],
+                ],
+            ]
+        ])->findAllByAttributes([
+            "target_check_id" => $this->id
+        ]);
+    }
 
     /**
      * Set automation error.
@@ -169,13 +203,11 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "{code}" => $uniqueHash
         ));
 
-        if (!$this->result) {
-            $this->result = "";
-        } else {
-            $this->result .= "\n";
+        if ($this->result) {
+            $this->appendPoc("\n");
         }
 
-        $this->result .= $message;
+        $this->appendPoc($message);
         $this->status = TargetCheck::STATUS_FINISHED;
         $this->save();
     }
@@ -215,21 +247,21 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
 
         $checkData = array(
             "name" => $check->getLocalizedName(),
-            "background_info" => $check->getLocalizedBackgroundInfo(),
-            "hints" => $check->getLocalizedHints(),
-            "question" => $check->getLocalizedQuestion(),
             "rating" => $abbreviations[$this->rating],
             "rating_name" => $names[$this->rating],
-            "target" => $this->override_target ? $this->override_target : $this->target->host,
-            "links" => $this->links,
-            "poc" => $this->poc,
-            "result" => $this->result,
+            "target" => $this->getOverrideTarget() ? $this->getOverrideTarget() : $this->target->host,
+            "result" => $this->getResult(),
             "reference" => $check->_reference->name . ($check->reference_code ? "-" . $check->reference_code : ""),
             "solution" => array(),
+            "question" => $this->getQuestion(),
+            "background_info" => $this->getBackgroundInfo(),
+            "hints" => $this->getHints(),
+            "links" => "",
+            "poc" => $this->getPoc(),
         );
 
-        if ($this->solution) {
-            $checkData["solution"][] = $this->solution;
+        if ($this->getSolution()) {
+            $checkData["solution"][] = $this->getSolution();
         }
 
         foreach ($this->solutions as $solution) {
@@ -239,7 +271,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         $checkData["solution"] = implode("<br><br>", $checkData["solution"]);
 
         if (!in_array($name, array_keys($checkData))) {
-            throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+            return "";
         }
 
         return $checkData[$name];
@@ -259,10 +291,10 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         );
 
         if (!in_array($name, $lists)) {
-            throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+            return [];
         }
 
-        $data = array();
+        $data = [];
 
         switch ($name) {
             case "attachment":
@@ -307,5 +339,180 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         }
 
         return false;
+    }
+
+    /**
+     * Append string to PoC field
+     * @param $data
+     * @param bool $verbose
+     */
+    public function appendPoc($data, $verbose=true) {
+        $system = System::model()->findByPk(1);
+
+        if ($verbose && !$system->scripts_verbosity) {
+            return;
+        }
+
+        $oldValue = $this->_getFieldValue(GlobalCheckField::FIELD_POC);
+        $this->setFieldValue(GlobalCheckField::FIELD_POC, ($oldValue ? $oldValue : "") . $data);
+    }
+
+    /**
+     * Set field value
+     * @param $name
+     * @param $value
+     */
+    public function setFieldValue($name, $value) {
+        $criteria = new CDbCriteria();
+        $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
+        $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
+        $criteria->addColumnCondition([
+            "gcf.name" => $name,
+            "t.target_check_id" => $this->id,
+        ]);
+        $field = TargetCheckField::model()->find($criteria);
+
+        if (!$field) {
+            $criteria = new CDbCriteria();
+            $criteria->join .= "LEFT JOIN global_check_fields gcf ON gcf.id = t.global_check_field_id";
+            $criteria->addColumnCondition([
+                "gcf.name" => $name,
+                "t.check_id" => $this->check_id,
+            ]);
+
+            $checkField = CheckField::model()->find($criteria);
+
+            if (!$checkField) {
+                throw new Exception("Check field not found.");
+            }
+
+            $tcm = new TargetCheckManager();
+            $field = $tcm->createField($this, $checkField);
+            $field->refresh();
+        }
+
+        $field->value = $value;
+        $field->save();
+    }
+
+    /**
+     * Returns target check field value
+     * @param $name
+     * @return mixed|null
+     */
+    private function _getFieldValue($name) {
+        $criteria = new CDbCriteria();
+        $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
+        $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
+        $criteria->addColumnCondition([
+            "gcf.name" => $name,
+            "t.target_check_id" => $this->id,
+        ]);
+        $field = TargetCheckField::model()->find($criteria);
+
+        if (!$field) {
+            return null;
+        }
+
+        return $field->value;
+    }
+
+    /**
+     * Return `background_info` field value
+     * @return mixed|null
+     */
+    public function getBackgroundInfo() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_BACKGROUND_INFO);
+    }
+
+    /**
+     * Return `question` field value
+     * @return mixed|null
+     */
+    public function getQuestion() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_QUESTION);
+    }
+
+    /**
+     * Return `hints` field value
+     * @return mixed|null
+     */
+    public function getHints() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_HINTS);
+    }
+
+    /**
+     * Return `result` field value
+     * @return mixed|null
+     */
+    public function getResult() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_RESULT);
+    }
+
+    /**
+     * Result `PoC` field value
+     * @return mixed|null
+     */
+    public function getPoc() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_POC);
+    }
+
+    /**
+     * Override target field value
+     * @return mixed|null
+     */
+    public function getOverrideTarget() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_OVERRIDE_TARGET);
+    }
+
+    /**
+     * Solution field value
+     * @return mixed|null
+     */
+    public function getSolution() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_SOLUTION);
+    }
+
+    /**
+     * Solution title field value
+     * @return mixed|null
+     */
+    public function getSolutionTitle() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE);
+    }
+
+    /**
+     * Port field value
+     * @return mixed|null
+     */
+    public function getPort() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_PORT);
+    }
+
+    /**
+     * Transport protocol value
+     * @return mixed|null
+     */
+    public function getTransportProtocol() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_TRANSPORT_PROTOCOL);
+    }
+
+    /**
+     * Application protocol value
+     * @return mixed|null
+     */
+    public function getApplicationProtocol() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_APPLICATION_PROTOCOL);
+    }
+
+    /**
+     * TargetCheckCategory relation
+     * @return array|CActiveRecord|mixed|null
+     */
+    public function getCategory() {
+        return TargetCheckCategory::model()->findByAttributes([
+            "target_id" => $this->target_id,
+            "check_category_id" => $this->check->control->check_category_id
+        ]);
     }
 }

@@ -19,7 +19,7 @@ class TargetCustomCheckEditForm extends CFormModel {
      */
     public $question;
 
-	/**
+    /**
      * @var string result.
      */
     public $result;
@@ -55,30 +55,25 @@ class TargetCustomCheckEditForm extends CFormModel {
     public $controlId;
 
     /**
-     * @var string poc.
-     */
-    public $poc;
-
-    /**
-     * @var string links.
-     */
-    public $links;
-
-    /**
      * @var array attachment titles
      */
     public $attachmentTitles;
 
-	/**
-	 * @return array validation rules for model attributes.
-	 */
-	public function rules() {
-		return array(
+    /**
+     * @var array fields (create new check mode)
+     */
+    public $fields;
+
+    /**
+     * @return array validation rules for model attributes.
+     */
+    public function rules() {
+        return array(
             array("rating", "in", "range" => TargetCheck::getValidRatings()),
             array("name, solutionTitle", "length", "max" => 1000),
             array("id, controlId", "numerical", "integerOnly" => true),
             array("createCheck", "boolean"),
-            array("backgroundInfo, question, result, solution, poc, links, attachmentTitles", "safe"),
-		);
-	}
+            array("backgroundInfo, question, result, solution, attachmentTitles, fields", "safe"),
+        );
+    }
 }

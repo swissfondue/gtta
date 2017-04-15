@@ -34,9 +34,9 @@ class SettingsController extends Controller {
 		if (isset($_POST["SettingsEditForm"])) {
 			$form->attributes = $_POST["SettingsEditForm"];
             $form->communityAllowUnverified = isset($_POST["SettingsEditForm"]["communityAllowUnverified"]);
-            $form->checklistPoc = isset($_POST["SettingsEditForm"]["checklistPoc"]);
-            $form->checklistLinks = isset($_POST["SettingsEditForm"]["checklistLinks"]);
             $form->mailEncryption = isset($_POST["SettingsEditForm"]["mailEncryption"]);
+            $form->scriptsVerbosity = isset($_POST["SettingsEditForm"]["scriptsVerbosity"]);
+            $form->hostResolve = isset($_POST["SettingsEditForm"]["hostResolve"]);
 
 			if ($form->validate()) {
                 $langId = (int) $form->languageId;

@@ -37,23 +37,30 @@ abstract class ReportPlugin {
     protected $_filePath = null;
 
     /**
+     * @var int language id
+     */
+    protected $_language = null;
+
+    /**
      * Constructor
      * @param ReportTemplate $template
      * @param array $data
      */
-    public function __construct(ReportTemplate $template, $data=array()) {
+    public function __construct(ReportTemplate $template=null, $data=array(), $language=null) {
         $this->_template = $template;
         $this->_data = $data;
+        $this->_language = $language;
     }
 
     /**
      * Get plugin for given type
      * @param ReportTemplate $template
      * @param $data
+     * @param $language
      * @return ReportPlugin
      * @throws Exception
      */
-    public static function getPlugin(ReportTemplate $template, $data) {
+    public static function getPlugin(ReportTemplate $template, $data, $language) {
         $plugins = array(
             ReportTemplate::TYPE_RTF => "RtfReport",
             ReportTemplate::TYPE_DOCX => "DocxReport",
@@ -65,7 +72,7 @@ abstract class ReportPlugin {
 
         $plugin = $plugins[$template->type];
 
-        return new $plugin($template, $data);
+        return new $plugin($template, $data, $language);
     }
 
     /**
@@ -73,6 +80,12 @@ abstract class ReportPlugin {
      */
     abstract public function generate();
 
+    /**
+     * Send report over HTTP
+     * @param bool $unlink
+     * @param bool $exit
+     * @throws Exception
+     */
     public function sendOverHttp($unlink=true, $exit=true) {
         if (!$this->_generated) {
             throw new Exception(Yii::t("app", "Report not generated yet."));

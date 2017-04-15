@@ -11,18 +11,6 @@
                     <?php echo Yii::t("app", "Track Time"); ?>
                 </a>
             </div>
-            <div class="btn-group">
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="icon icon-plus"></i>
-                    <?php echo Yii::t('app', 'New Target'); ?>
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a href="<?php echo $this->createUrl('project/edittarget', array( 'id' => $project->id )); ?>">Single Target</a></li>
-                    <li><a href="<?php echo $this->createUrl('project/addtargetlist', array( 'id' => $project->id )); ?>">Target List</a></li>
-                    <li><a href="<?php echo $this->createUrl('project/importtarget', array( 'id' => $project->id )); ?>">Import From File</a></li>
-                </ul>
-            </div>
         <?php endif; ?>
     </div>
 
@@ -31,7 +19,7 @@
 
 <hr>
 
-<div class="container">
+<div class="container" data-add-issue-url="<?= $this->createUrl("project/addIssue", ["id" => $project->id]); ?>">
     <div class="row">
         <div class="span8">
             <?php if (count($targets) > 0): ?>
@@ -135,8 +123,6 @@
                 echo $this->renderPartial("partial/right-block", array(
                     "quickTargets" => $quickTargets,
                     "project" => $project,
-                    "client" => $client,
-                    "statuses" => $statuses,
                     "category" => null,
                     "target" => null
                 ));

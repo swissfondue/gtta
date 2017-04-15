@@ -66,7 +66,7 @@ class TargetCustomCheckAttachment extends ActiveRecord implements IVariableScope
         );
 
         if (!in_array($name, array_keys($data))) {
-            throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+            return "";
         }
 
         return $data[$name];
@@ -81,6 +81,6 @@ class TargetCustomCheckAttachment extends ActiveRecord implements IVariableScope
      * @throws Exception
      */
     public function getList($name, $filters, VariableScope $scope) {
-        throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+        return [];
     }
 }

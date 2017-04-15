@@ -257,10 +257,6 @@ class UpdateJob extends BackgroundJob {
     private function _update() {
         $system = System::model()->findByPk(1);
 
-        if ($system->isUpdating) {
-            return;
-        }
-
         $targetVersion = $system->update_version;
 
         if (!$targetVersion) {

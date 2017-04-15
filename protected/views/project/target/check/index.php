@@ -94,6 +94,7 @@
                                                 CUSTOM-CHECK
                                             </td>
                                         </tr>
+
                                         <tr>
                                             <th>
                                                 <?php echo Yii::t("app", "Name"); ?>
@@ -134,26 +135,6 @@
                                                 </span>
                                             </td>
                                         </tr>
-                                        <?php if ($this->_system->checklist_poc): ?>
-                                            <tr>
-                                                <th>
-                                                    <?php echo Yii::t("app", "Technical Details"); ?>
-                                                </th>
-                                                <td>
-                                                    <textarea name="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>[poc]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>_poc" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>></textarea>
-                                                </td>
-                                            </tr>
-                                        <?php endif; ?>
-                                        <?php if ($this->_system->checklist_links): ?>
-                                            <tr>
-                                                <th>
-                                                    <?php echo Yii::t("app", "Links"); ?>
-                                                </th>
-                                                <td>
-                                                    <textarea name="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>[links]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckTemplateEditForm_<?php echo $control->id; ?>_links" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>></textarea>
-                                                </td>
-                                            </tr>
-                                        <?php endif; ?>
                                         <tr>
                                             <th>
                                                 <?php echo Yii::t("app", "Solution Title"); ?>
@@ -223,29 +204,7 @@
                                                 <?php endif; ?>
                                             </td>
                                             <td class="status">
-                                                <?php
-                                                    switch ($custom->rating) {
-                                                        case TargetCustomCheck::RATING_INFO:
-                                                            echo "<span class=\"label label-info\">" . $ratings[TargetCustomCheck::RATING_INFO] . "</span>";
-                                                            break;
-
-                                                        case TargetCustomCheck::RATING_LOW_RISK:
-                                                            echo "<span class=\"label label-low-risk\">" . $ratings[TargetCustomCheck::RATING_LOW_RISK] . "</span>";
-                                                            break;
-
-                                                        case TargetCustomCheck::RATING_MED_RISK:
-                                                            echo "<span class=\"label label-med-risk\">" . $ratings[TargetCustomCheck::RATING_MED_RISK] . "</span>";
-                                                            break;
-
-                                                        case TargetCustomCheck::RATING_HIGH_RISK:
-                                                            echo "<span class=\"label label-high-risk\">" . $ratings[TargetCustomCheck::RATING_HIGH_RISK] . "</span>";
-                                                            break;
-
-                                                        default:
-                                                            echo "<span class=\"label\">" . $ratings[$custom->rating] . "</span>";
-                                                            break;
-                                                    }
-                                                ?>
+                                                <?php echo $this->renderPartial("partial/check-rating", ["check" => $custom]); ?>
                                             </td>
                                             <?php if (User::checkRole(User::ROLE_USER)): ?>
                                                 <td class="actions">
@@ -308,26 +267,6 @@
                                                 </span>
                                             </td>
                                         </tr>
-                                        <?php if ($this->_system->checklist_poc): ?>
-                                            <tr>
-                                                <th>
-                                                    <?php echo Yii::t("app", "Technical Details"); ?>
-                                                </th>
-                                                <td>
-                                                    <textarea name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[poc]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_poc" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($custom->poc); ?></textarea>
-                                                </td>
-                                            </tr>
-                                        <?php endif; ?>
-                                        <?php if ($this->_system->checklist_links): ?>
-                                            <tr>
-                                                <th>
-                                                    <?php echo Yii::t("app", "Links"); ?>
-                                                </th>
-                                                <td>
-                                                    <textarea name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[links]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_links" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($custom->links); ?></textarea>
-                                                </td>
-                                            </tr>
-                                        <?php endif; ?>
                                         <tr>
                                             <th>
                                                 <?php echo Yii::t("app", "Solution Title"); ?>
@@ -344,7 +283,7 @@
                                                 <textarea name="TargetCustomCheckEditForm_<?php echo $custom->id; ?>[solution]" class="max-width wysiwyg" rows="10" id="TargetCustomCheckEditForm_<?php echo $custom->id; ?>_solution" <?php if (User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($custom->solution); ?></textarea>
                                             </td>
                                         </tr>
-                                        <?php if (User::checkRole(User::ROLE_USER) || $tc->attachments): ?>
+                                        <?php if (User::checkRole(User::ROLE_USER) || $custom->attachments): ?>
                                             <tr>
                                                 <th>
                                                     <?php echo Yii::t("app", "Attachments"); ?>
@@ -429,8 +368,6 @@
                 echo $this->renderPartial("partial/right-block", array(
                     "quickTargets" => $quickTargets,
                     "project" => $project,
-                    "client" => $client,
-                    "statuses" => $statuses,
                     "category" => $category,
                     "target" => $target
                 ));
@@ -478,29 +415,12 @@
 <?php if (User::checkRole(User::ROLE_USER)): ?>
     $(function () {
         user.check.initTargetCustomCheckAttachmentUploadForms();
-        user.check.runningChecks = [
-            <?php
-                $runningChecks = array();
 
-                foreach ($controls as $control) {
-                    foreach ($control->checks as $check) {
-                        foreach ($check->targetChecks as $tc) {
-                            if ($tc->isRunning) {
-                                $started = TargetCheckManager::getStartTime($tc->id);
-                                $runningChecks[] = json_encode(array(
-                                    "id" => $tc->id,
-                                    "time" => $started != NULL ? time() - strtotime($started) : -1,
-                                ));
-                            }
-                        }
-                    }
-                }
+        setInterval(function () {
+            user.check.getRunningChecks("<?= $this->createUrl("project/runningchecks"); ?>", <?= $target->id ?>);
+        }, 5000);
 
-                echo implode(",", $runningChecks);
-            ?>
-        ];
-
-        setTimeout(function () {
+        setInterval(function () {
             user.check.update("<?php echo $this->createUrl("project/updatechecks", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id)); ?>");
         }, 1000);
 

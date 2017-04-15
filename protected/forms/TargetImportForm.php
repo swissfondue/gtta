@@ -10,35 +10,43 @@ class TargetImportForm extends CFormModel {
     public $file;
 
     /**
-     * @var string type
+     * @var string $type
      */
     public $type;
+
+    /**
+     * @var integer $mappingId
+     */
+    public $mappingId;
 
     /**
      * @return array validation rules for model attributes.
      */
     public function rules() {
-        return array(
-            array("file, type", "required"),
-            array(
+        return [
+            ["type", "required"],
+            [
                 "file",
                 "file",
                 "maxFiles" => 1,
-                "types" => array("txt", "csv", "nessus"),
-            ),
-            array("type", "in", "range" => array_keys(ImportManager::$types)),
-            array("type", "checkType"),
-        );
+                "types" => ["txt", "csv", "nessus"],
+            ],
+            ["type", "in", "range" => array_keys(ImportManager::$types)],
+            ["type", "checkType"],
+            ["mappingId", "numerical", "integerOnly" => true],
+            ["mapping", "checkMapping"],
+        ];
     }
 
     /**
      * @return array customized attribute labels (name=>label)
      */
     public function attributeLabels() {
-        return array(
+        return [
             "file" => "File",
-            "type" => "Type"
-        );
+            "type" => "Type",
+            "mappingId" => "Mapping"
+        ];
     }
 
     /**
@@ -51,11 +59,36 @@ class TargetImportForm extends CFormModel {
 
         $extension = end(explode(".", $this->file->name));
 
-        if ($extension != ImportManager::$types[$this->type]["ext"]) {
+        if (
+            isset(ImportManager::$types[$this->type]) &&
+            isset(ImportManager::$types[$this->type]["ext"]) &&
+            $extension != ImportManager::$types[$this->type]["ext"]
+        ) {
             $this->addError("file", Yii::t("app", "Invalid file extension."));
             return false;
         }
 
         return true;
 	}
+
+    /**
+     * Validate mapping id
+     * @param $attribute
+     * @param $params
+     * @return bool
+     */
+	public function checkMapping($attribute, $params) {
+	    if (!isset($this->{$attribute})) {
+	        return true;
+        }
+
+	    $mapping = NessusMapping::model()->findByPk($this->{$attribute});
+
+        if (!$mapping) {
+            $this->addError($attribute, "Mapping not found.");
+            return false;
+        }
+
+        return true;
+    }
 }

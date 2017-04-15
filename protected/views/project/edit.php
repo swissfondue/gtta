@@ -89,12 +89,50 @@
             <label class="control-label" for="ProjectEditForm_status"><?php echo Yii::t('app', 'Status'); ?></label>
             <div class="controls">
                 <select class="input-xlarge" id="ProjectEditForm_status" name="ProjectEditForm[status]">
-                    <?php foreach ($statuses as $k => $v): ?>
+                    <?php foreach (Project::getStatusTitles() as $k => $v): ?>
                         <option value="<?php echo $k; ?>" <?php if ($k == $model->status) echo 'selected'; ?>><?php echo CHtml::encode($v); ?></option>
                     <?php endforeach; ?>
                 </select>
                 <?php if ($model->getError('status')): ?>
                     <p class="help-block"><?php echo $model->getError('status'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($model->getError('languageId')) echo 'error'; ?>">
+            <label class="control-label" for="ProjectEditForm_languageId"><?php echo Yii::t("app", "Language"); ?></label>
+            <div class="controls">
+                <select class="input-xlarge" id="ProjectEditForm_languageId" name="ProjectEditForm[languageId]">
+                    <option value="0"><?= Yii::t("app", "N/A"); ?></option>
+                    <?php foreach ($languages as $language): ?>
+                        <option value="<?php echo $language->id; ?>" <?= $model->languageId == $language->id ? "selected" : ''; ?>>
+                            <?php echo CHtml::encode($language->name); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if ($model->getError('languageId')): ?>
+                    <p class="help-block"><?php echo $model->getError('languageId'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="control-group <?php if ($model->getError("hiddenFields")) echo 'error'; ?>">
+            <label class="control-label" for="ProjectEditForm_hiddenFields"><?php echo Yii::t("app", "Hide Fields"); ?></label>
+            <div class="controls">
+                <ul style="list-style-type: none; margin-left: 0;">
+                    <?php foreach ($fields as $f): ?>
+                        <li>
+                            <label style="padding-left: 15px; text-indent: -15px;">
+                                <input style="margin: 0;" type="checkbox"
+                                   id="ProjectEditForm_hiddenFields_<?= $f->name ?>"
+                                   name="ProjectEditForm[hiddenFields][]"
+                                   value="<?= $f->name ?>"
+                                <?php if (in_array($f->name, $model->hiddenFields)) echo 'checked="checked"'; ?>>&nbsp;<?= CHtml::encode($f->title) ?></label>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+                <?php if ($model->getError("hiddenFields")): ?>
+                    <p class="help-block"><?php echo $model->getError("hiddenFields"); ?></p>
                 <?php endif; ?>
             </div>
         </div>

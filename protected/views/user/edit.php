@@ -86,6 +86,18 @@
             </div>
         </div>
 
+        <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
+            <div class="control-group <?php if ($model->getError('sessionDuration')) echo 'error'; ?>">
+                <label class="control-label" for="UserEditForm_sessionDuration"><?php echo Yii::t('app', 'Session Duration'); ?></label>
+                <div class="controls">
+                    <input type="text" class="input-large" id="UserEditForm_sessionDuration" name="UserEditForm[sessionDuration]" value="<?= $model->sessionDuration ? $model->sessionDuration : '' ?>">&nbsp;<?= Yii::t("app", "Hour(s)") ?>
+                    <?php if ($model->getError('sessionDuration')): ?>
+                        <p class="help-block"><?php echo $model->getError('sessionDuration'); ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <div class="control-group <?php if ($model->role == User::ROLE_CLIENT) echo 'hide'; ?>" id="send-notifications">
             <label class="control-label" for="UserEditForm_sendNotifications"><?php echo Yii::t('app', 'Send Notifications'); ?></label>
             <div class="controls">

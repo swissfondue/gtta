@@ -7,7 +7,7 @@ class JobManager {
      * Jobs list
      * @var array
      */
-    public static $jobs = array(
+    public static $jobs = [
         "AutomationJob",
         "BackupJob",
         "ClearLogJob",
@@ -22,16 +22,16 @@ class JobManager {
         "RegenerateJob",
         "RestoreJob",
         "StatsJob",
-        "TargetCheckReindexJob",
+        "ReindexJob",
         "UpdateJob",
-    );
+    ];
     /**
      * Checks if job is running
      * @param $job
      * @return bool
      */
     public static function isRunning($job) {
-        return in_array(self::getStatus($job), array(Resque_Job_Status::STATUS_RUNNING, Resque_Job_Status::STATUS_WAITING));
+        return in_array(self::getStatus($job), [Resque_Job_Status::STATUS_RUNNING, Resque_Job_Status::STATUS_WAITING]);
     }
 
     /**
@@ -74,9 +74,11 @@ class JobManager {
 
     /**
      * Build job ID
-     * @return string
+     * @param $jobTemplate
+     * @param array $values
+     * @return mixed|null
      */
-    public static function buildId($jobTemplate, $values = array()) {
+    public static function buildId($jobTemplate, $values = []) {
         if (!$jobTemplate) {
             return null;
         }

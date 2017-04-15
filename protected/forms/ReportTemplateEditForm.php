@@ -15,49 +15,9 @@ class ReportTemplateEditForm extends LocalizedFormModel {
     public $name;
 
     /**
-     * @var string intro.
+     * @var string footer.
      */
-    public $intro;
-
-    /**
-     * @var string appendix.
-     */
-    public $appendix;
-
-    /**
-     * @var string vulns intro.
-     */
-    public $vulnsIntro;
-
-    /**
-     * @var string info checks intro.
-     */
-    public $infoChecksIntro;
-
-    /**
-     * @var string security level intro.
-     */
-    public $securityLevelIntro;
-
-    /**
-     * @var string vuln distribution intro.
-     */
-    public $vulnDistributionIntro;
-
-    /**
-     * @var string reduced intro.
-     */
-    public $reducedIntro;
-
-    /**
-     * @var string risk intro.
-     */
-    public $riskIntro;
-
-    /**
-     * @var string degree intro.
-     */
-    public $degreeIntro;
+    public $footer;
 
     /**
      * @var string high description.
@@ -73,26 +33,26 @@ class ReportTemplateEditForm extends LocalizedFormModel {
      * @var string low description.
      */
     public $lowDescription;
-    
+
     /**
      * @var string none description.
      */
     public $noneDescription;
-    
+
     /**
      * @var string no vuln description.
      */
     public $noVulnDescription;
-    
+
     /**
      * @var string info description.
      */
     public $infoDescription;
 
     /**
-     * @var string footer.
+     * @var string sections
      */
-    public $footer;
+    public $sections;
 
     /**
 	 * @return array validation rules for model attributes.
@@ -102,7 +62,7 @@ class ReportTemplateEditForm extends LocalizedFormModel {
 			array("type, name", "required"),
             array("type", "in", "range" => ReportTemplate::getValidTypes()),
             array("name", "length", "max" => 1000),
-            array("intro, appendix, localizedItems, vulnsIntro, infoChecksIntro, securityLevelIntro, vulnDistributionIntro, reducedIntro, highDescription, medDescription, lowDescription, noneDescription, noVulnDescription, infoDescription, degreeIntro, riskIntro, footer", "safe"),
+            array("footer, highDescription, medDescription, lowDescription, noneDescription, noVulnDescription, infoDescription, localizedItems", "safe"),
 		);
 	}
     
@@ -113,22 +73,13 @@ class ReportTemplateEditForm extends LocalizedFormModel {
 		return array(
             "type" => Yii::t("app", "Type"),
 			"name" => Yii::t("app", "Name"),
-            "intro" => Yii::t("app", "Introduction"),
-            "appendix" => Yii::t("app", "Appendix"),
-            "vulnsIntro" => Yii::t("app", "Vulns Introduction"),
-            "infoChecksIntro" => Yii::t("app", "Info Checks Introduction"),
-            "securityLevelIntro" => Yii::t("app", "Security Level Introduction"),
-            "vulnDistributionIntro" => Yii::t("app", "Vuln Distribution Introduction"),
-            "reducedIntro" => Yii::t("app", "Reduced Vuln List Introduction"),
+			"footer" => Yii::t("app", "Footer"),
             "highDescription" => Yii::t("app", "High Risk Description"),
             "medDescription" => Yii::t("app", "Med Risk Description"),
             "lowDescription" => Yii::t("app", "Low Risk Description"),
             "noneDescription" => Yii::t("app", "No Test Done Description"),
             "noVulnDescription" => Yii::t("app", "No Vulnerability Description"),
             "infoDescription" => Yii::t("app", "Info Description"),
-            "degreeIntro" => Yii::t("app", "Degree of Fulfillment Introduction"),
-            "riskIntro" => Yii::t("app", "Risk Matrix Introduction"),
-            "footer" => Yii::t("app", "Footer"),
 		);
 	}
 }

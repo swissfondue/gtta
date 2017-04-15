@@ -7,13 +7,8 @@
  * @property integer $id
  * @property integer $check_control_id
  * @property string $name
- * @property string $background_info
- * @property string $hints
- * @property string $question
  * @property boolean $automated
  * @property boolean $multiple_solutions
- * @property string $protocol
- * @property integer $port
  * @property integer $reference_id
  * @property string $reference_code
  * @property string $reference_url
@@ -26,6 +21,7 @@
  * @property TargetCheck[] $targetChecks
  * @property CheckL10n[] $l10n
  * @property CheckScript[] $scripts
+ * @property CheckField[] $fields
  */
 class Check extends ActiveRecord {
     const STATUS_INSTALLED = 1;
@@ -58,7 +54,7 @@ class Check extends ActiveRecord {
             array("name, check_control_id, sort_order, create_time", "required"),
             array("name, protocol, reference_code, reference_url", "length", "max" => 1000),
             array(
-                "check_control_id, reference_id, port, effort, sort_order, external_id, status",
+                "check_control_id, reference_id, effort, sort_order, external_id, status",
                 "numerical",
                 "integerOnly" => true
             ),
@@ -84,51 +80,27 @@ class Check extends ActiveRecord {
             "solutions" => array(self::HAS_MANY, "CheckSolution", "check_id"),
             "scripts" => array(self::HAS_MANY, "CheckScript", "check_id"),
             "riskCategories" => array(self::HAS_MANY, "RiskCategoryCheck", "check_id"),
+            "fields" => array(self::HAS_MANY, "CheckField", "check_id"),
 		);
 	}
 
     /**
-     * @return string localized name.
+     * Get localized name
+     * @return mixed|null|string
      */
     public function getLocalizedName() {
-        if ($this->l10n && count($this->l10n) > 0) {
-            return $this->l10n[0]->name != NULL ? $this->l10n[0]->name : $this->name;
+        $language = System::model()->findByPk(1)->language;
+
+        $translate = CheckL10n::model()->findByAttributes([
+            "check_id" => $this->id,
+            "language_id" => $language->id
+        ]);
+
+        if ($translate) {
+            return $translate->name;
         }
 
         return $this->name;
-    }
-
-    /**
-     * @return string localized background info.
-     */
-    public function getLocalizedBackgroundInfo() {
-        if ($this->l10n && count($this->l10n) > 0) {
-            return $this->l10n[0]->background_info != NULL ? $this->l10n[0]->background_info : $this->background_info;
-        }
-        
-        return $this->background_info;
-    }
-
-    /**
-     * @return string localized hints.
-     */
-    public function getLocalizedHints() {
-        if ($this->l10n && count($this->l10n) > 0) {
-            return $this->l10n[0]->hints != NULL ? $this->l10n[0]->hints : $this->hints;
-        }
-
-        return $this->hints;
-    }
-    
-    /**
-     * @return string localized question.
-     */
-    public function getLocalizedQuestion() {
-        if ($this->l10n && count($this->l10n) > 0) {
-            return $this->l10n[0]->question != NULL ? $this->l10n[0]->question : $this->question;
-        }
-
-        return $this->question;
     }
 
     /**
@@ -147,5 +119,162 @@ class Check extends ActiveRecord {
         }
 
         return $names[$this->status];
+    }
+
+    /**
+     * Get field value
+     * @param $field
+     * @param null $languageId
+     * @return mixed|null
+     * @throws Exception
+     */
+    private function _getFieldValue($field, $languageId = null) {
+        $language = Language::model()->find("\"user_default\" OR \"default\"");
+
+        if ($languageId) {
+            $language = Language::model()->findByPk($languageId);
+
+            if (!$language) {
+                throw new Exception(Yii::t("app", "Language not exists."));
+            }
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
+        $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
+        $criteria->addColumnCondition([
+            "cf.check_id" => $this->id,
+            "gcf.name" => $field,
+            "t.language_id" => $language->id
+        ]);
+
+        $field = CheckFieldL10n::model()->find($criteria);
+
+        if (!$field) {
+            return null;
+        }
+
+        return $field->value;
+    }
+
+    /**
+     * Return `background_info` field value
+     * @return mixed|null
+     */
+    public function getBackgroundInfo() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_BACKGROUND_INFO);
+    }
+
+    /**
+     * Return `question` field value
+     * @return mixed|null
+     */
+    public function getQuestion() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_QUESTION);
+    }
+
+    /**
+     * Return `hints` field value
+     * @return mixed|null
+     */
+    public function getHints() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_HINTS);
+    }
+
+    /**
+     * Return `result` field value
+     * @return mixed|null
+     */
+    public function getResult() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_RESULT);
+    }
+
+    /**
+     * Return `application protocol` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getApplicationProtocol() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_APPLICATION_PROTOCOL);
+    }
+
+    /**
+     * Return `transport protocol` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getTransportProtocol() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_TRANSPORT_PROTOCOL);
+    }
+
+    /**
+     * Return `port` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getPort() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_PORT);
+    }
+
+    /**
+     * Return `override target` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getOverrideTarget() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_OVERRIDE_TARGET);
+    }
+
+    /**
+     * Return `solution` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getSolution() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_SOLUTION);
+    }
+
+    /**
+     * Return `solution title` field value
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getSolutionTitle() {
+        return $this->_getFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE);
+    }
+
+    /**
+     * Serialize check
+     * @param int|null $language
+     * @return array
+     */
+    public function serialize($language = null) {
+        $l10n = null;
+
+        if ($language) {
+            $l10n = CheckL10n::model()->findByPk([
+                "language_id" => $language,
+                "check_id" => $this->id
+            ]);
+        }
+
+        return [
+            "id" => $this->id,
+            "check_control_id" => $this->check_control_id,
+            "name" => $l10n ? $l10n->name : $this->name,
+            "automated" => $this->automated,
+            "multiple_solutions" => $this->multiple_solutions,
+            "protocol" => $this->getApplicationProtocol(),
+            "port" => $this->getPort(),
+            "reference_id" => $this->reference_id,
+            "reference_code" => $this->reference_code,
+            "reference_url" => $this->reference_url,
+            "effort" => $this->effort,
+            "sort_order" => $this->sort_order,
+            "status" => $this->status,
+            "external_id" => $this->external_id,
+            "create_time" => $this->create_time,
+            "private" => $this->private,
+        ];
     }
 }

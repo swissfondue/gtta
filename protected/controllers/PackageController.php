@@ -29,8 +29,8 @@ class PackageController extends Controller {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->limit = Yii::app()->params["entriesPerPage"];
-        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->limit = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->addInCondition("status", array(
             Package::STATUS_NOT_INSTALLED,
             Package::STATUS_INSTALLED,
@@ -428,8 +428,10 @@ class PackageController extends Controller {
 
 			if ($form->validate()) {
                 try {
-                    $pm = new PackageManager();
-                    $pm->prepareSharing($package);
+                    CommunityShareJob::enqueue([
+                        "type" => CommunityShareJob::TYPE_PACKAGE,
+                        "obj_id" => $package->id
+                    ]);
                 } catch (Exception $e) {
                     throw new CHttpException(403, Yii::t("app", "Access denied."));
                 }

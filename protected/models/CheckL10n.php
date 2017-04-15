@@ -7,12 +7,8 @@
  * @property integer $check_id
  * @property integer $language_id
  * @property string $name
- * @property string $background_info
- * @property string $hints
- * @property string $question
  */
-class CheckL10n extends ActiveRecord
-{   
+class CheckL10n extends ActiveRecord {
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.

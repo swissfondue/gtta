@@ -16,8 +16,6 @@
  * @property string $solution
  * @property integer $reference
  * @property integer $rating
- * @property string $poc
- * @property string $links
  * @property Target $target
  * @property CheckControl $control
  * @property User $user
@@ -111,9 +109,9 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
             array("target_id, check_control_id, user_id", "numerical", "integerOnly" => true),
             array("name, solution_title", "length", "max" => 1000),
             array("rating", "in", "range" => self::getValidRatings()),
-            array("solution, result, question, background_info, poc, links", "safe"),
-		);
-	}
+            array("solution, result, question, background_info", "safe"),
+        );
+    }
 
     /**
 	 * @return array relational rules.
@@ -155,15 +153,13 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
             "rating" => $abbreviations[$this->rating],
             "rating_name" => $names[$this->rating],
             "target" => $this->target->host,
-            "links" => $this->links,
-            "poc" => $this->poc,
             "result" => $this->result,
             "reference" => "CUSTOM-CHECK-" . $this->reference,
             "solution" => $this->solution,
         );
 
         if (!in_array($name, array_keys($checkData))) {
-            throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+            return "";
         }
 
         return $checkData[$name];
@@ -183,7 +179,7 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
         );
 
         if (!in_array($name, $lists)) {
-            throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+            return [];
         }
 
         $data = array();

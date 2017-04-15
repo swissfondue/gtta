@@ -62,11 +62,12 @@ class AutomationJob extends BackgroundJob {
             $fileOutput = file_get_contents($outFileName);
         }
 
-        if (!$check->result) {
-            $check->result = '';
+        if ($fileOutput) {
+            $check->appendPoc($fileOutput, false);
+        } else {
+            $check->appendPoc(Yii::t("app", "No output."));
         }
 
-        $check->result .= $fileOutput ? $fileOutput : 'No output.';
         $check->save();
     }
 
@@ -158,7 +159,7 @@ class AutomationJob extends BackgroundJob {
         $targetHosts = "";
         $port = "";
 
-        if (!$check->override_target) {
+        if (!$check->overrideTarget) {
             $targetHosts = $target->host;
 
             if ($target->port) {
@@ -169,7 +170,7 @@ class AutomationJob extends BackgroundJob {
                 $port = $check->port;
             }
         } else {
-            $targets = explode("\n", $check->override_target);
+            $targets = explode("\n", $check->overrideTarget);
             $filtered = array();
 
             foreach ($targets as $t) {
@@ -200,7 +201,7 @@ class AutomationJob extends BackgroundJob {
 
         // base data
         fwrite($targetFile, $targetHosts . "\n");
-        fwrite($targetFile, $check->protocol . "\n");
+        fwrite($targetFile, $check->applicationProtocol . "\n");
         fwrite($targetFile, $port . "\n");
         fwrite($targetFile, $check->language->code . "\n");
         fwrite($targetFile, $timeout . "\n");
@@ -310,35 +311,41 @@ class AutomationJob extends BackgroundJob {
 
     /**
      * Get tables from response
+     * @param TargetCheck $check
      */
     private function _getTables(&$check) {
-        $tablePos = strpos($check->result, '<' . ResultTable::TAG_MAIN);
+        $poc = $check->getPoc();
+        $tablePos = strpos($poc, '<' . ResultTable::TAG_MAIN);
 
         if ($tablePos !== false) {
             if (!$check->table_result) {
                 $check->table_result = "";
             }
 
-            $check->table_result .= substr($check->result, $tablePos);
-            $check->result = substr($check->result, 0, $tablePos);
+            $check->table_result .= substr($poc, $tablePos);
+            $poc = substr($poc, 0, $tablePos);
+            $check->setFieldValue(GlobalCheckField::FIELD_POC, $poc);
         }
     }
 
     /**
      * Get images from response
+     * @param TargetCheck $check
      */
     private function _getImages(&$check) {
-        $imagePos = strpos($check->result, "<" . AttachedImage::TAG_MAIN);
+        $poc = $check->getPoc();
+        $imagePos = strpos($poc, "<" . AttachedImage::TAG_MAIN);
 
         while ($imagePos !== false) {
-            $imageEndPos = strpos($check->result, ">", $imagePos);
+            $imageEndPos = strpos($poc, ">", $imagePos);
 
             if ($imageEndPos === false) {
                 break;
             }
 
-            $imageTag = substr($check->result, $imagePos, $imageEndPos + 1 - $imagePos);
-            $check->result = substr($check->result, 0, $imagePos) . substr($check->result, $imageEndPos + 1);
+            $imageTag = substr($poc, $imagePos, $imageEndPos + 1 - $imagePos);
+            $poc = substr($poc, 0, $imagePos) . substr($poc, $imageEndPos + 1);
+            $check->setFieldValue(GlobalCheckField::FIELD_POC, $poc);
 
             $image = new AttachedImage();
             $image->parse($imageTag);
@@ -362,14 +369,16 @@ class AutomationJob extends BackgroundJob {
                 @unlink($image->src);
             }
 
-            $imagePos = strpos($check->result, "<" . AttachedImage::TAG_MAIN);
+            $imagePos = strpos($poc, "<" . AttachedImage::TAG_MAIN);
         }
     }
 
     /**
      * Check starter.
+     * @param int $checkId
      */
     private function _startCheck($checkId) {
+        /** @var TargetCheck $check */
         $check = TargetCheck::model()->with("check", "language", "target")->findByPk($checkId);
 
         if (!$check) {
@@ -395,24 +404,22 @@ class AutomationJob extends BackgroundJob {
         }
 
         foreach ($scripts as $script) {
-            if (!$check->result) {
-                $check->result = '';
-            } else {
-                $check->result .= "\n";
+            if ($check->getPoc()) {
+                $check->appendPoc("\n");
             }
 
             $now = new DateTime();
             $package = $script->package;
 
-            if (!isset($this->args['chain'])) {
+            if (!isset($this->args["chain"])) {
                 $data = Yii::t("app", "The {script} script was used within this check against {target} on {date} at {time}", array(
                     "{script}" => $package->name,
-                    "{target}" => $check->override_target ? $check->override_target : $target->host,
+                    "{target}" => $check->overrideTarget ? Yii::t("app", "multiple targets") : $target->host,
                     "{date}" => $now->format("d.m.Y"),
                     "{time}" => $now->format("H:i:s"),
                 ));
 
-                $check->result .= "$data\n" . str_repeat("-", 16) . "\n";
+                $check->appendPoc("$data\n" . str_repeat("-", 16) . "\n");
             }
 
             try {
@@ -444,12 +451,10 @@ class AutomationJob extends BackgroundJob {
                     $output = $vm->runCommand(implode(" ", $command), false);
                     $fileOutput = file_get_contents($vm->virtualizePath($filesPath . '/' . $check->result_file));
                     $data = $fileOutput ? $fileOutput : $output;
-
-                    $check->refresh();
-                    $check->result .= $data;
+                    $check->appendPoc($data, false);
 
                     if (!$data) {
-                        $check->result .= Yii::t('app', 'No output.');
+                        $check->appendPoc(Yii::t('app', 'No output.'));
                     }
 
                     $this->_getTables($check);
@@ -471,8 +476,7 @@ class AutomationJob extends BackgroundJob {
                     }
                 }
             } catch (VMNotFoundException $e) {
-                $check->refresh();
-                $check->result .= $e->getMessage();
+                $check->appendPoc($e->getMessage());
             } catch (Exception $e) {
                 $check->automationError($e->getMessage());
             }

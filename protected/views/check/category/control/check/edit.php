@@ -23,7 +23,7 @@
 
 <hr>
 
-<form class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
+<form id="CheckEditForm" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
     <fieldset>
@@ -40,7 +40,7 @@
 
         <div class="tab-content">
             <?php foreach ($languages as $language): ?>
-                <div class="tab-pane<?php if ($language->default) echo ' active'; ?>" id="<?php echo CHtml::encode($language->code); ?>">
+                <div class="language-tab tab-pane<?php if ($language->default) echo ' active'; ?>" id="<?php echo CHtml::encode($language->code); ?>" data-language-id="<?= $language->id ?>">
                     <div class="control-group <?php if ($model->getError('name')) echo 'error'; ?>">
                         <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_name"><?php echo Yii::t('app', 'Name'); ?></label>
                         <div class="controls">
@@ -51,26 +51,15 @@
                         </div>
                     </div>
 
-                    <div class="control-group">
-                        <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_backgroundInfo"><?php echo Yii::t('app', 'Background Info'); ?></label>
-                        <div class="controls">
-                            <textarea class="wysiwyg" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_backgroundInfo" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][backgroundInfo]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['backgroundInfo']) : ''; ?></textarea>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_hints"><?php echo Yii::t('app', 'Hints'); ?></label>
-                        <div class="controls">
-                            <textarea class="wysiwyg" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_hints" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][hints]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['hints']) : ''; ?></textarea>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label class="control-label" for="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_question"><?php echo Yii::t('app', 'Question'); ?></label>
-                        <div class="controls">
-                            <textarea class="wysiwyg" id="CheckEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_question" name="CheckEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][question]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['question']) : ''; ?></textarea>
-                        </div>
-                    </div>
+                    <?php foreach ($fields as $field): ?>
+                        <?=
+                            $this->renderPartial("partial/check-field", [
+                                "language" => $language,
+                                "field" => $field,
+                                "form" => $model
+                            ]);
+                        ?>
+                    <?php endforeach; ?>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -126,26 +115,6 @@
 
         <hr>
 
-        <div class="control-group <?php if ($model->getError('protocol')) echo 'error'; ?>">
-            <label class="control-label" for="CheckEditForm_protocol"><?php echo Yii::t('app', 'Protocol'); ?></label>
-            <div class="controls">
-                <input type="text" class="input-xlarge" id="CheckEditForm_protocol" name="CheckEditForm[protocol]" value="<?php echo CHtml::encode($model->protocol); ?>">
-                <?php if ($model->getError('protocol')): ?>
-                    <p class="help-block"><?php echo $model->getError('protocol'); ?></p>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <div class="control-group <?php if ($model->getError('port')) echo 'error'; ?>">
-            <label class="control-label" for="CheckEditForm_port"><?php echo Yii::t('app', 'Port'); ?></label>
-            <div class="controls">
-                <input type="text" class="input-xlarge" id="CheckEditForm_port" name="CheckEditForm[port]" value="<?php echo $model->port; ?>">
-                <?php if ($model->getError('port')): ?>
-                    <p class="help-block"><?php echo $model->getError('port'); ?></p>
-                <?php endif; ?>
-            </div>
-        </div>
-
         <div class="control-group">
             <label class="control-label" for="CheckEditForm_automated"><?php echo Yii::t('app', 'Automated'); ?></label>
             <div class="controls">
@@ -183,7 +152,7 @@
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>
+            <button type="submit" class="btn" onclick="admin.check.save('CheckEditForm'); return false;"><?php echo Yii::t('app', 'Save'); ?></button>
         </div>
     </fieldset>
 </form>

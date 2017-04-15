@@ -65,16 +65,6 @@ class SettingsEditForm extends FormModel {
     public $communityAllowUnverified;
 
     /**
-     * @var bool show POC in checklist
-     */
-    public $checklistPoc;
-
-    /**
-     * @var bool show links in checklist
-     */
-    public $checklistLinks;
-
-    /**
      * @var string email
      */
     public $email;
@@ -130,6 +120,16 @@ class SettingsEditForm extends FormModel {
     public $gitKey;
 
     /**
+     * @var boolean scriptsVerbosity
+     */
+    public $scriptsVerbosity;
+
+    /**
+     * @var boolean hostResolve
+     */
+    public $hostResolve;
+
+    /**
      * @return array validation rules for model attributes.
      */
     public function rules() {
@@ -138,7 +138,7 @@ class SettingsEditForm extends FormModel {
             array("timezone", "in", "range" => array_keys(TimeZones::$zones)),
             array("copyright", "length", "max" => 1000),
             array("communityMinRating", "numerical", "min" => 0, "max" => 5),
-            array("communityAllowUnverified, checklistPoc, checklistLinks", "boolean"),
+            array("communityAllowUnverified, scriptsVerbosity, hostResolve", "boolean"),
             array("reportLowPedestal, reportMedPedestal, reportHighPedestal, reportMaxRating, reportMedDampingLow, reportHighDampingLow, reportHighDampingMed", "numerical", "min" => 0),
             array("reportLowPedestal", "compare", "compareAttribute" => "reportMedPedestal", "operator" => "<="),
             array("reportMedPedestal", "compare", "compareAttribute" => "reportHighPedestal", "operator" => "<="),
@@ -169,8 +169,6 @@ class SettingsEditForm extends FormModel {
             "languageId" => Yii::t("app", "Default Language"),
             "communityMinRating" => Yii::t("app", "Community Min Rating"),
             "communityAllowUnverified" => Yii::t("app", "Community Allow Unverified"),
-            "checklistPoc" => Yii::t("app", "Checklist Technical Details"),
-            "checklistLinks" => Yii::t("app", "Checklist Links"),
             "email" => Yii::t("app", "Email"),
             "mailHost" => Yii::t("app", "Host"),
             "mailPort" => Yii::t("app", "Port"),

@@ -37,10 +37,6 @@ class ChainJob extends BackgroundJob {
             }
 
             $cell = RelationManager::getCell($relations, $cellId);
-
-            if (!$cell) {
-                throw new Exception("No graph cell with id: $cellId.");
-            }
         } else {
             $cell = RelationManager::getStartCheck($relations);
 
@@ -80,7 +76,7 @@ class ChainJob extends BackgroundJob {
                             }
                         }
 
-                        $check->override_target = implode("\n", $filtered);
+                        $check->setFieldValue(GlobalCheckField::FIELD_OVERRIDE_TARGET, implode("\n", $filtered));
                         $check->save();
                     }
 
@@ -96,7 +92,7 @@ class ChainJob extends BackgroundJob {
                     $check->refresh();
                 }
 
-                $cellOutput = $check->result;
+                $cellOutput = $check->getPoc();
 
                 break;
 

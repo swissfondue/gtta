@@ -19,8 +19,11 @@ function User()
         this.update = function (url) {
             var i, k;
 
-            if (this.runningChecks.length > 0)
+            if (this.runningChecks.length > 0) {
                 _check.updateIteration++;
+            } else {
+                _check.updateIteration = 0;
+            }
 
             for (i = 0; i < _check.runningChecks.length; i++) {
                 var check, headingRow, minutes, seconds, time;
@@ -50,12 +53,7 @@ function User()
                 $('td.status', headingRow).html(minutes.zeroPad(2) + ':' + seconds.zeroPad(2));
             }
 
-            if (_check.updateIteration < 5)
-                setTimeout(function () {
-                    _check.update(url);
-                }, 1000);
-            else
-            {
+            if (_check.updateIteration > 5) {
                 var checkIds = [];
 
                 _check.updateIteration = 0;
@@ -90,7 +88,7 @@ function User()
 
                                 check = data.checks[i];
 
-                                $('#TargetCheckEditForm_' + check.id + '_result').val(check.result);
+				                $('#TargetCheckEditForm_fields_' + check.id + '_poc').val(check.poc);
                                 $('div.check-form[data-type=check][data-id="' + check.id + '"] div.table-result').html(check.tableResult);
 
                                 if (check.startedText) {
@@ -125,7 +123,7 @@ function User()
                                                     $("<a>")
                                                         .attr("href", attachment.url)
                                                         .html(attachment.name)
-                                                )
+                                            )
                                         );
 
                                         tr.append(
@@ -139,7 +137,7 @@ function User()
                                                         .click(function () {
                                                             user.check.delAttachment(attachment.path);
                                                         })
-                                                )
+                                            )
                                         );
 
                                         tbody.append(tr);
@@ -179,10 +177,6 @@ function User()
                                 }
                             }
                         }
-
-                        setTimeout(function () {
-                            _check.update(url);
-                        }, 1000);
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -196,6 +190,83 @@ function User()
                 });
 
             }
+        };
+
+        /**
+         * Get running check list
+         * @param url
+         * @param targetId
+         */
+        this.getRunningChecks = function (url, targetId) {
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                success : function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    if (data.data.checks) {
+                        $.each(data.data.checks, function (key, value) {
+                            var exists =_check.runningChecks.filter(function (obj) {
+                                return obj.id == value["id"]
+                            });
+
+                            if (!exists.length) {
+                                _check.setLoading(value["id"]);
+                                var actions = $('div.check-header[data-type=check][data-id="' + value["id"] + '"] .actions');
+                                actions.empty();
+
+                                actions.append(
+                                    $("<a>")
+                                        .attr("href", "#stop")
+                                        .attr("title", system.translate('Stop'))
+                                        .click(function () {
+                                            user.check.stop(value["id"])
+                                        })
+                                        .append(
+                                            $("<i>")
+                                                .addClass("icon icon-stop")
+                                        ),
+                                    " &nbsp; ",
+                                    $("<span>")
+                                        .addClass("disabled")
+                                        .append(
+                                            $("<i>")
+                                                .addClass("icon icon-refresh")
+                                                .attr("title", system.translate("Reset"))
+                                        )
+                                );
+
+                                _check.runningChecks.push({
+                                    "id" : value["id"],
+                                    "time" : value["time"]
+                                });
+                            }
+                        });
+                    }
+                },
+
+                data : {
+                    "RunningChecksForm[target_id]": targetId,
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
         };
 
         /**
@@ -305,7 +376,7 @@ function User()
         this.expand = function (id, callback) {
             var header, form, url;
 
-            _check.destroyEditor("TargetCheckEditForm_" + id + "_result");
+            _check.destroyEditor("TargetCheckEditForm_fields_" + id + "_result");
 
             header = $("div.check-header[data-type=check][data-id=" + id + "]");
             form = $("div.check-form[data-type=check][data-id=" + id + "]");
@@ -342,9 +413,6 @@ function User()
                     }
 
                     form.html(data.data.html);
-                    $(".wysiwyg", form).ckeditor();
-                    _check.initTargetCheckAttachmentUploadForms(id);
-                    _check.initAutosave(id);
 
                     form.slideDown("slow", function () {
                         if (callback) {
@@ -373,7 +441,7 @@ function User()
          */
         this.collapse = function (id, callback) {
             var selector = $("div.check-form[data-type=check][data-id=" + id + "]");
-            
+
             selector.slideUp("slow", undefined, function () {
                 if (!selector.data("limited")) {
                     $("div.check-form[data-type=check][data-id=" + id + "]").html("");
@@ -523,7 +591,7 @@ function User()
             result = result.replace(/\n<br>/g, '\n').replace(/<br>\n/g, '\n').replace(/\n<br \/>/g, '\n').replace(/<br \/>\n/g, '\n');
             result = result.replace(/<br>/g, '\n').replace(/<br \/>/g, '\n');
 
-            var editor = _check.getEditor("TargetCheckEditForm_" + id + "_result");
+            var editor = _check.getEditor("TargetCheckEditForm_fields_" + id + "_result");
 
             if (editor) {
                 result = original + "<br><br>";
@@ -539,7 +607,7 @@ function User()
                     result = result + "\n\n";
                 }
 
-                var textarea = $('#TargetCheckEditForm_' + id + '_result');
+                var textarea = $('#TargetCheckEditForm_fields_' + id + '_result');
                 textarea.val(result + textarea.val());
                 textarea.trigger('change');
             }
@@ -582,7 +650,7 @@ function User()
          */
         this.getData = function (id) {
             var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, solutions, resultTitle, saveResult,
-                attachments, rating, data, solution, solutionTitle, saveSolution, poc, links, scripts, timeouts;
+                attachments, rating, data, solution, solutionTitle, saveSolution, scripts, timeouts, fields;
 
             row = $('div.check-form[data-type=check][data-id="' + id + '"]');
 
@@ -622,12 +690,9 @@ function User()
                 }
             ).get();
 
-            override = $('textarea[name="TargetCheckEditForm_' + id + '[overrideTarget]"]', row).val();
-            protocol = $('input[name="TargetCheckEditForm_' + id + '[protocol]"]', row).val();
-            port     = $('input[name="TargetCheckEditForm_' + id + '[port]"]', row).val();
             resultTitle = $('input[name="TargetCheckEditForm_' + id + '[resultTitle]"]', row).val();
-            result = _check.ckeditors["TargetCheckEditForm_" + id + "_result"] ?
-                _check.ckeditors["TargetCheckEditForm_" + id + "_result"].getData() :
+            result = _check.ckeditors["TargetCheckEditForm_fields_" + id + "_result"] ?
+                _check.ckeditors["TargetCheckEditForm_fields_" + id + "_result"].getData() :
                 $('textarea[name="TargetCheckEditForm_' + id + '[result]"]').val();
 
             scripts = $('input[name^="TargetCheckEditForm_' + id + '[scripts]"]', row).map(
@@ -653,16 +718,8 @@ function User()
                     }
                 }
             );
-                
+
             saveResult = $('input[name="TargetCheckEditForm_' + id + '[saveResult]"]', row).is(":checked");
-
-            if ($('textarea[name="TargetCheckEditForm_' + id + '[poc]"]', row)) {
-                poc = $('textarea[name="TargetCheckEditForm_' + id + '[poc]"]', row).val();
-            }
-
-            if ($('textarea[name="TargetCheckEditForm_' + id + '[links]"]', row)) {
-                links = $('textarea[name="TargetCheckEditForm_' + id + '[links]"]', row).val();
-            }
 
             solutions = $('input[name^="TargetCheckEditForm_' + id + '[solutions]"]:checked', row).map(
                 function () {
@@ -690,6 +747,19 @@ function User()
                 }
             ).get();
 
+            fields = $(".check-form[data-id=" + id +"]").find(".target-check-field").map(
+                function () {
+                    if ($(this).attr("type") == "radio" && !$(this).is(":checked")) {
+                        return;
+                    }
+
+                    return {
+                        name: $(this).attr("name"),
+                        value: _check.fieldValue($(this))
+                    }
+                }
+            );
+
             rating = $('input[name="TargetCheckEditForm_' + id + '[rating]"]:checked', row).val();
 
             if (override == undefined)
@@ -707,27 +777,14 @@ function User()
             if (rating == undefined)
                 rating = '';
 
-            if (poc == undefined) {
-                poc = "";
-            }
-
-            if (links == undefined) {
-                links = "";
-            }
-
             data = [];
 
-            data.push({ name : 'TargetCheckEditForm_' + id + '[overrideTarget]', value : override });
-            data.push({ name : 'TargetCheckEditForm_' + id + '[protocol]',       value : protocol });
-            data.push({ name : 'TargetCheckEditForm_' + id + '[port]',           value : port     });
             data.push({ name : 'TargetCheckEditForm_' + id + '[result]',         value : result   });
             data.push({ name : 'TargetCheckEditForm_' + id + '[resultTitle]',    value : resultTitle   });
             data.push({ name : 'TargetCheckEditForm_' + id + '[rating]',         value : rating   });
 
             data.push({name: "TargetCheckEditForm_" + id + "[solution]", value: solution ? solution : ""});
             data.push({name: "TargetCheckEditForm_" + id + "[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
-            data.push({name: "TargetCheckEditForm_" + id + "[poc]", value: poc});
-            data.push({name: "TargetCheckEditForm_" + id + "[links]", value: links});
             data.push({ name: "TargetCheckEditForm_" + id + "[tableResult]", value: _check.buildTableResult(row) });
 
             if (saveSolution) {
@@ -758,6 +815,10 @@ function User()
                 data.push(attachments[i]);
             }
 
+            for (i = 0; i < fields.length; i++) {
+                data.push(fields[i]);
+            }
+
             for (i = 0; i < scripts.length; i++) {
                 data.push(scripts[i]);
             }
@@ -767,6 +828,33 @@ function User()
             }
 
             return data;
+        };
+
+        /**
+         * Get field value
+         * @param el
+         * @returns {*}
+         */
+        this.fieldValue = function (el) {
+            switch ($(el).prop("tagName")) {
+                case "INPUT":
+                    var type = $(el).attr("type");
+
+                    if (type == "text" || type == "radio") {
+                        return $(el).val();
+                    } else if (type == "checkbox") {
+                        return $(el).is(":checked")
+                    }
+
+                    break;
+
+                case "TEXTAREA":
+                    return $(el).val();
+
+                default:
+                    console.error("Invalid field tagname.");
+                    return null;
+            }
         };
 
         /**
@@ -952,7 +1040,7 @@ function User()
          * @param id
          */
         this.getCustomData = function (id) {
-            var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck, poc, links, attachments;
+            var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck, attachments;
 
             row = $('div.check-form[data-type=custom-check][data-id=' + id + ']');
 
@@ -964,16 +1052,8 @@ function User()
             solution = $('textarea[name="TargetCustomCheckEditForm_' + id + '[solution]"]', row).val();
             createCheck = $('input[name="TargetCustomCheckEditForm_' + id + '[createCheck]"]', row).is(":checked");
 
-            if ($('textarea[name="TargetCustomCheckEditForm_' + id + '[poc]"]', row)) {
-                poc = $('textarea[name="TargetCustomCheckEditForm_' + id + '[poc]"]', row).val();
-            }
-
-            if ($('textarea[name="TargetCustomCheckEditForm_' + id + '[links]"]', row)) {
-                links = $('textarea[name="TargetCustomCheckEditForm_' + id + '[links]"]', row).val();
-            }
-
-            result = _check.ckeditors["TargetCustomCheckEditForm_" + id + "_result"] ?
-                _check.ckeditors["TargetCustomCheckEditForm_" + id + "_result"].getData() :
+            result = _check.ckeditors["TargetCustomCheckEditForm_fields_" + id + "_result"] ?
+                _check.ckeditors["TargetCustomCheckEditForm_fields_" + id + "_result"].getData() :
                 $('textarea[name="TargetCustomCheckEditForm_' + id + '[result]"]').val();
 
             attachments = $('input[name^="TargetCustomCheckEditForm_' + id + '[attachmentTitles]"]', row).map(
@@ -1005,14 +1085,6 @@ function User()
                 rating = "";
             }
 
-            if (poc == undefined) {
-                poc = "";
-            }
-
-            if (links == undefined) {
-                links = "";
-            }
-
             data = [];
 
             if (createCheck) {
@@ -1027,8 +1099,6 @@ function User()
             data.push({name: "TargetCustomCheckEditForm[rating]", value: rating});
             data.push({name: "TargetCustomCheckEditForm[solution]", value: solution ? solution : ""});
             data.push({name: "TargetCustomCheckEditForm[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
-            data.push({name: "TargetCustomCheckEditForm[poc]", value: poc});
-            data.push({name: "TargetCustomCheckEditForm[links]", value: links});
 
             for (i = 0; i < attachments.length; i++) {
                 data.push(attachments[i]);
@@ -1098,7 +1168,7 @@ function User()
          * @param id
          */
         this.getCustomTemplateData = function (id) {
-            var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck, poc, links;
+            var i, row, name, background, question, result, rating, data, solution, solutionTitle, createCheck;
 
             row = $('div.check-form[data-type=custom-template][data-id=' + id + ']');
             name = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[name]"]', row).val();
@@ -1108,17 +1178,8 @@ function User()
             solutionTitle = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[solutionTitle]"]', row).val();
             solution = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[solution]"]', row).val();
             createCheck = $('input[name="TargetCustomCheckTemplateEditForm_' + id + '[createCheck]"]', row).is(":checked");
-
-            if ($('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[poc]"]', row)) {
-                poc = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[poc]"]', row).val();
-            }
-
-            if ($('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[links]"]', row)) {
-                links = $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[links]"]', row).val();
-            }
-
-            result = _check.ckeditors["TargetCustomCheckTemplateEditForm_" + id + "_result"] ?
-                _check.ckeditors["TargetCustomCheckTemplateEditForm_" + id + "_result"].getData() :
+            result = _check.ckeditors["TargetCustomCheckTemplateEditForm_fields_" + id + "_result"] ?
+                _check.ckeditors["TargetCustomCheckTemplateEditForm_fields_" + id + "_result"].getData() :
                 $('textarea[name="TargetCustomCheckTemplateEditForm_' + id + '[result]"]').val();
 
             if (name == undefined) {
@@ -1141,14 +1202,6 @@ function User()
                 rating = "";
             }
 
-            if (poc == undefined) {
-                poc = "";
-            }
-
-            if (links == undefined) {
-                links = "";
-            }
-
             data = [];
 
             if (createCheck) {
@@ -1163,8 +1216,6 @@ function User()
             data.push({name: "TargetCustomCheckEditForm[rating]", value: rating});
             data.push({name: "TargetCustomCheckEditForm[solution]", value: solution ? solution : ""});
             data.push({name: "TargetCustomCheckEditForm[solutionTitle]", value: solutionTitle ? solutionTitle : ""});
-            data.push({name: "TargetCustomCheckEditForm[poc]", value: poc});
-            data.push({name: "TargetCustomCheckEditForm[links]", value: links});
 
             return data;
         };
@@ -1283,7 +1334,6 @@ function User()
                 $(this).fileupload({
                     dataType: "json",
                     url: url,
-                    forceIframeTransport: true,
                     timeout: 120000,
                     formData: data,
                     dropZone:$('input[name^="TargetCheckAttachmentUploadForm"]'),
@@ -1443,7 +1493,6 @@ function User()
                 $(this).fileupload({
                     dataType: "json",
                     url: url,
-                    forceIframeTransport: true,
                     timeout: 120000,
                     formData: data,
                     dropZone:$('input[name^="TargetCustomCheckAttachmentUploadForm"]'),
@@ -2086,9 +2135,54 @@ function User()
             var _chain = this;
 
             /**
-             * Start target check chain
+             * Control chain
+             * @param action
+             * @param tId
+             * @param url
              */
-            this.start = function (targetId, url) {
+            this.control = function (action, tId, url) {
+                $(".chain-start-button, .chain-stop-button, .chain-reset-button").prop("disabled", true);
+
+                switch (action) {
+                    case "start":
+                        _chain.start(tId, url, function () {
+                            $('.chain-start-button').addClass('hide');
+                            $('.chain-stop-button').removeClass('hide').prop("disabled", false);
+                            $(".chain-reset-button").prop("disabled", true);
+
+                            setTimeout(function () {
+                                _chain.updateActiveCheck($('#activeChainCheck').data('url'));
+                            }, 5000);
+                        });
+                        break;
+
+                    case "stop":
+                        _chain.stop(tId, url, function () {
+                            $('.chain-start-button').removeClass("hide").prop("disabled", false);
+                            $('.chain-stop-button').addClass("hide");
+                            $(".chain-reset-button").prop("disabled", false);
+                        });
+                        break;
+
+                    case "reset":
+                        _chain.reset(tId, url, function () {
+                            $(".chain-start-button, .chain-stop-button, .chain-reset-button").prop("disabled", false);
+                            $('#activeChainCheck').addClass('hide');
+                        });
+                        break;
+
+                    default:
+                        console.error("Invalid chain control action.");
+                }
+            };
+
+            /**
+             * Start target check chain
+             * @param targetId
+             * @param url
+             * @param successCallback
+             */
+            this.start = function (targetId, url, successCallback) {
                 $('.loader-image').show();
 
                 $.ajax({
@@ -2111,12 +2205,12 @@ function User()
                             return;
                         }
 
-                        $('.chain-start-button').addClass('hide');
-                        $('.chain-stop-button').removeClass('hide');
+                        $(".chain-start-button").addClass("hide");
+                        $(".chain-stop-button").removeClass("hide");
 
-                        setTimeout(function () {
-                            _chain.updateActiveCheck($('#activeChainCheck').data('url'));
-                        }, 5000);
+                        if (successCallback) {
+                            successCallback();
+                        }
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -2130,8 +2224,9 @@ function User()
              * Stop target check chain
              * @param targetId
              * @param url
+             * @param successCallback
              */
-            this.stop = function (targetId, url) {
+            this.stop = function (targetId, url, successCallback) {
                 $('.loader-image').show();
 
                 $.ajax({
@@ -2154,8 +2249,9 @@ function User()
                             return;
                         }
 
-                        $('.chain-stop-button').hide();
-                        $('.chain-start-button').show();
+                        if (successCallback) {
+                            successCallback();
+                        }
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -2169,10 +2265,10 @@ function User()
              * Stop target check chain
              * @param targetId
              * @param url
+             * @param successCallback
              */
-            this.reset = function (targetId, url) {
+            this.reset = function (targetId, url, successCallback) {
                 $('.loader-image').show();
-                $('.chain-reset-button').show();
                 $(".chain-reset-button, .chain-start-button, .chain-stop-button").prop("disabled", true);
 
                 $.ajax({
@@ -2193,7 +2289,9 @@ function User()
                             system.addAlert('error', data.errorText);
                         }
 
-                        $('#activeChainCheck').addClass('hide');
+                        if (successCallback) {
+                            successCallback();
+                        }
                     },
 
                     error : function(jqXHR, textStatus, e) {
@@ -2218,8 +2316,23 @@ function User()
                     data: {
                         "YII_CSRF_TOKEN": system.csrf
                     },
-                    'success' : function (response) {
+
+                    "success": function (response) {
+                        var status = parseInt(response.data.status);
+                        var check = response.data.check;
                         var messages = response.data.messages;
+                        var currentTarget = parseInt($(".relations-graph").data("target-id"));
+
+                        if (status == system.constants.Target.CHAIN_STATUS_ACTIVE && Object.keys(check).length) {
+                            user.mxgraph.setCheckActive(check);
+                        } else {
+                            user.mxgraph.activeCheck = null;
+                            user.mxgraph.refreshChecks();
+
+                            $("#activeChainCheck").addClass("hide");
+                            $(".chain-start-button").removeClass("hide");
+                            $(".chain-stop-button").addClass("hide");
+                        }
 
                         $.each(messages, function (key, value) {
                             var status = parseInt(value.status);
@@ -2238,14 +2351,14 @@ function User()
                                     case system.constants.Target.CHAIN_STATUS_IDLE:
                                     case system.constants.Target.CHAIN_STATUS_STOPPED:
                                     case system.constants.Target.CHAIN_STATUS_INTERRUPTED:
-                                        $('.chain-start-button').removeClass('hide');
-                                        $('.chain-stop-button').addClass('hide');
+                                        $(".chain-start-button").removeClass("hide");
+                                        $(".chain-stop-button").addClass("hide");
 
                                         break;
 
                                     case system.constants.Target.CHAIN_STATUS_ACTIVE:
-                                        $('.chain-start-button').addClass('hide');
-                                        $('.chain-stop-button').removeClass('hide');
+                                        $(".chain-start-button").addClass("hide");
+                                        $(".chain-stop-button").removeClass("hide");
 
                                         break;
 
@@ -2258,59 +2371,12 @@ function User()
                         $(".loader-image").hide();
                     },
 
-                    'error' : function (data) {
+                    "error" : function (data) {
                         $(".loader-image").hide();
-                        system.addAlert('error', system.translate('Request failed, please try again.'));
+                        system.addAlert("error", system.translate("Request failed, please try again."));
                     },
 
-                    'beforeSend' : function () {
-                        $(".loader-image").show();
-                    }
-                });
-            };
-
-            /**
-             * Update active check of running chain
-             * @param url
-             */
-            this.updateActiveCheck = function (url) {
-                $('.loader-image').show();
-
-                $.ajax({
-                    dataType: "json",
-                    url: url,
-                    timeout: system.ajaxTimeout,
-                    type: "POST",
-                    data: {
-                        "YII_CSRF_TOKEN": system.csrf
-                    },
-                    'success' : function (response) {
-                        var status = parseInt(response.data.status);
-                        var check = response.data.check;
-
-                        if (status == system.constants.Target.CHAIN_STATUS_ACTIVE) {
-                            setTimeout(function () {
-                                _chain.updateActiveCheck(url);
-                            }, 5000);
-
-                            $('#activeChainCheck').removeClass('hide');
-                            $('#activeChainCheck .check-name').text(check);
-                        } else {
-                            $('#activeChainCheck').addClass('hide');
-
-                            $('.chain-start-button').removeClass('hide');
-                            $('.chain-stop-button').addClass('hide');
-                        }
-
-                        $(".loader-image").hide();
-                    },
-
-                    'error' : function (data) {
-                        $(".loader-image").hide();
-                        system.addAlert('error', system.translate('Request failed, please try again.'));
-                    },
-
-                    'beforeSend' : function () {
+                    "beforeSend" : function () {
                         $(".loader-image").show();
                     }
                 });
@@ -2483,6 +2549,752 @@ function User()
                 $('.counter').find('.hours').text(("0" + hours).slice(-2));
 
             }, _timesession.counterInterval);
+        };
+    };
+
+    /**
+     * MxGraph object
+     */
+    this.mxgraph = new function () {
+        var _mxgraph = this;
+
+        /**
+         * Cell types
+         * @type {string}
+         */
+        this.CELL_TYPE_CHECK = 'check';
+        this.CELL_TYPE_FILTER = 'filter';
+
+        /**
+         * Check & filter lists
+         * @type {null}
+         */
+        this.checkCategories = [];
+        this.filters         = [];
+
+        /**
+         * MxGraph objects handlers
+         * @type {null}
+         */
+        this.editor     = null;
+        this.properties = null;
+
+        /**
+         * Current target
+         * @type {null}
+         */
+        this.target = null;
+
+        /**
+         * Current running check
+         * @type {null}
+         */
+        this.activeCheck = null;
+
+        /**
+         * Returns all graph cells
+         * @returns {*}
+         */
+        this.getAllCells = function () {
+            return _mxgraph.editor.graph.getChildVertices(_mxgraph.editor.graph.getDefaultParent())
+        };
+
+        /**
+         * Check graph object handler
+         * @param state
+         */
+        this.mxCheckHandler = function (state) {
+            mxVertexHandler.apply(this, arguments);
+
+            _mxgraph.updateCheckStyles(state.cell);
+        };
+
+        /**
+         * Refresh check cell styles
+         * @param cell
+         */
+        this.updateCheckStyles = function (cell) {
+            var checkTied = parseInt(cell.getAttribute('check_id'));
+            var stopper = parseInt(cell.getAttribute('stopped'));
+            var startCheck = parseInt(cell.getAttribute('start_check'));
+
+            cell.delStyle();
+
+            if (!checkTied) {
+                cell.setNoCheck();
+            }
+
+            if (stopper) {
+                cell.setStopped();
+            }
+
+            if (startCheck) {
+                cell.setStart();
+            }
+
+            if (cell.id == _mxgraph.activeCheck) {
+                if (startCheck) {
+                    cell.setActiveStart();
+                } else {
+                    cell.setActive();
+                }
+            }
+
+            _mxgraph.editor.graph.refresh();
+        };
+
+        /**
+         * Filter graph object handler
+         * @param state
+         */
+        this.mxFilterHandler = function (state) {
+            mxVertexHandler.apply(this, arguments);
+        };
+
+        /**
+         * Common cell handler init
+         */
+        this.mxCellHandlerInit = function () {
+            mxVertexHandler.prototype.init.apply(this, arguments);
+
+            this.domNode = document.createElement('div');
+            this.domNode.style.position = 'absolute';
+            this.domNode.style.whiteSpace = 'nowrap';
+            var cell = _mxgraph.editor.graph.getSelectionCell();
+
+            if (cell.getAttribute("type") == _mxgraph.CELL_TYPE_CHECK) {
+                _mxgraph.mxCheckHandlerInit.call(this);
+            } else if (cell.getAttribute("type") == _mxgraph.CELL_TYPE_FILTER) {
+                _mxgraph.mxFilterHandlerInit.call(this);
+            }
+        };
+
+        /**
+         * Init mxCheckHandler
+         */
+        this.mxCheckHandlerInit = function () {
+            var md = (mxClient.IS_TOUCH) ? 'touchstart' : 'mousedown';
+            var graph = _mxgraph.editor.graph;
+            var cell = graph.getSelectionCell();
+
+            // Settings
+            var img = mxUtils.createImage('/js/mxgraph/grapheditor/images/settings.png');
+            img.style.cursor = 'pointer';
+            img.style.width = '16px';
+            img.style.height = '16px';
+            mxEvent.addListener(img, md, mxUtils.bind(this, function(evt) {
+                // Disables dragging the image
+                mxEvent.consume(evt);
+            }));
+
+            mxEvent.addListener(img, 'click', mxUtils.bind(this, function(evt) {
+                var bounds = this.graph.getCellBounds(cell);
+
+                if (_mxgraph.properties) {
+                    _mxgraph.properties.destroy();
+                }
+
+                var graphOffset = mxUtils.getOffset(_mxgraph.editor.graph.container);
+                var x = graphOffset.x + 10;
+                var y = graphOffset.y;
+
+                if (bounds != null)
+                {
+                    x += bounds.x + Math.min(100, bounds.width);
+                    y += bounds.y;
+                }
+
+                var form = $('<div>');
+
+                var checkId = cell.getAttribute("check_id");
+                var controlId = cell.getAttribute("control_id");
+                var categoryId = cell.getAttribute("category_id");
+
+                var $properties, $categoryList, $controlList, $checkList;
+
+                var $categories = $('<select>')
+                    .addClass('category-list')
+                    .addClass('max-width')
+                    .append(
+                    $('<option>')
+                        .attr('value', '0')
+                        .text('Select category...')
+                )
+                    .change(function() {
+                        var category = $(this).val();
+                        $properties = $(_mxgraph.properties.getElement());
+                        $categoryList = $(this);
+                        $controlList = $properties.find('.control-list');
+                        $checkList = $properties.find('.check-list');
+
+                        $categoryList.addClass('disabled');
+                        $controlList
+                            .addClass('disabled')
+                            .find('option[value=0]')
+                            .siblings()
+                            .remove();
+
+                        $checkList
+                            .addClass('disabled')
+                            .find('option[value=0]')
+                            .siblings()
+                            .remove();
+
+                        if (parseInt(category)) {
+                            system.control.loadObjects(category, "category-control-list", function (data) {
+                                var controls = data.objects;
+
+                                $.each(controls, function (key, value) {
+                                    $controlList.append(
+                                        $('<option>')
+                                            .attr("value", value.id)
+                                            .text(value.name)
+                                    );
+                                });
+
+                                $categoryList.removeClass('disabled');
+                                $controlList.removeClass('disabled');
+                            });
+                        } else {
+                            $categoryList.removeClass('disabled');
+                            $controlList.addClass('disabled');
+                        }
+                    });
+
+                var $controls = $('<select>')
+                    .addClass('control-list')
+                    .addClass('max-width')
+                    .addClass('disabled')
+                    .append(
+                    $('<option>')
+                        .attr('value', '0')
+                        .text('Select control...')
+                )
+                    .change(function () {
+                        var control = $(this).val();
+                        $properties = $(_mxgraph.properties.getElement());
+                        $categoryList = $properties.find('.category-list');
+                        $checkList = $properties.find('.check-list');
+                        $controlList = $properties.find('.control-list');
+
+                        $categoryList.addClass('disabled');
+                        $controlList.addClass('disabled');
+                        $checkList
+                            .addClass('disabled')
+                            .find('option[value=0]')
+                            .siblings()
+                            .remove();
+
+                        if (parseInt(control)) {
+                            system.control.loadObjects(control, 'control-check-list', function (data) {
+                                $.each(data.objects, function (key, value) {
+                                    $checkList.append(
+                                        $('<option>')
+                                            .attr('value', value.id)
+                                            .text(value.name)
+                                    );
+                                });
+
+                                $categoryList.removeClass('disabled');
+                                $controlList.removeClass('disabled');
+                                $checkList.removeClass('disabled');
+                            });
+                        } else {
+                            $categoryList.removeClass('disabled');
+                            $controlList.removeClass('disabled');
+                            $checkList.addClass('disabled');
+                        }
+                    });
+
+                var $checks = $('<select>')
+                    .addClass('check-list')
+                    .addClass('max-width')
+                    .addClass('disabled')
+                    .append(
+                    $('<option>')
+                        .attr('value', '0')
+                        .text('Select check...')
+                );
+
+                var $okButton = $('<button>')
+                    .text('OK')
+                    .click(function () {
+                        $properties = $(_mxgraph.properties.getElement());
+                        $categoryList = $properties.find('.category-list');
+                        $controlList = $properties.find('.control-list');
+                        $checkList = $properties.find('.check-list');
+
+                        var category = $categoryList.val();
+                        var control = $controlList.val();
+                        var check = $checkList.val();
+                        var checkName;
+
+                        if (parseInt(category) && parseInt(control) && parseInt(check)) {
+                            checkName = $checkList.find('option[value=' + check + ']').text();
+
+                            cell.setAttribute("category_id", category);
+                            cell.setAttribute("control_id", control);
+                            cell.setAttribute("check_id", check);
+                            cell.setAttribute("label", checkName);
+
+                            cell.delStyle();
+
+                            _mxgraph.editor.graph.refresh();
+                            _mxgraph.properties.destroy();
+                            user.relationTemplate.updateRelations();
+                        }
+                    });
+
+                var $cancelButton = $('<button>')
+                    .text('Cancel')
+                    .click(function () {
+                        _mxgraph.properties.destroy();
+                    });
+
+                form.append($categories, $controls, $checks, $okButton, $cancelButton);
+
+                _mxgraph.properties = new mxWindow("Check Properties", form[0], x, y, 250, 170, false);
+                _mxgraph.properties.setVisible(true);
+
+                $properties = $(_mxgraph.properties.getElement());
+                $categoryList = $properties.find('.category-list');
+                $checkList = $properties.find('.check-list');
+                $controlList = $properties.find('.control-list');
+
+                $.each(_mxgraph.checkCategories, function (key, value) {
+                    var option = $('<option>')
+                        .attr('value', value.id)
+                        .text(value.name);
+
+                    if (parseInt(categoryId) && parseInt(controlId) && parseInt(checkId) && value.id == categoryId) {
+                        option.attr('selected', 'selected');
+
+                        system.control.loadObjects(categoryId, "category-control-list", function (data) {
+                            var controls = data.objects;
+
+                            $.each(controls, function (key, value) {
+                                var option = $('<option>')
+                                    .attr("value", value.id)
+                                    .text(value.name);
+
+                                if (value.id == controlId) {
+                                    option.attr('selected', 'selected');
+                                }
+
+                                $controlList.append(option);
+                            });
+
+                            system.control.loadObjects(controlId, 'control-check-list', function (data) {
+                                $.each(data.objects, function (key, value) {
+                                    var option = $('<option>')
+                                        .attr('value', value.id)
+                                        .text(value.name);
+
+                                    if (value.id == checkId) {
+                                        option.attr('selected', 'selected');
+                                    }
+
+                                    $checkList.append(option);
+                                });
+
+                                $categoryList.removeClass('disabled');
+                                $controlList.removeClass('disabled');
+                                $checkList.removeClass('disabled');
+                            });
+                        });
+                    }
+
+                    $categories.append(option);
+                });
+            }));
+
+            // set first check as start_check
+            if (_mxgraph.getAllCells().length == 1) {
+                if (parseInt(cell.getAttribute("start_check")) != 1) {
+                    cell.setAttribute("start_check", "1");
+                }
+            }
+
+            this.domNode.appendChild(img);
+
+            // Delete button
+            img = mxUtils.createImage('/js/mxgraph/grapheditor/images/delete.gif');
+            img.style.cursor = 'pointer';
+            img.style.width = '16px';
+            img.style.height = '16px';
+            mxEvent.addListener(img, md,
+                mxUtils.bind(this, function(evt)
+                {
+                    // Disables dragging the image
+                    mxEvent.consume(evt);
+                })
+            );
+
+            mxEvent.addListener(img, 'click', mxUtils.bind(this, function(evt)
+            {
+                _mxgraph.editor.graph.removeCells([this.state.cell]);
+                mxEvent.consume(evt);
+            }));
+
+            this.domNode.appendChild(img);
+            _mxgraph.editor.graph.container.appendChild(this.domNode);
+            this.redrawTools();
+        };
+
+        /**
+         * Init mxFilterHandler
+         */
+        this.mxFilterHandlerInit = function () {
+            var md = (mxClient.IS_TOUCH) ? 'touchstart' : 'mousedown';
+
+            // Settings
+            var img = mxUtils.createImage('/js/mxgraph/grapheditor/images/settings.png');
+            img.style.cursor = 'pointer';
+            img.style.width = '16px';
+            img.style.height = '16px';
+            mxEvent.addListener(img, md, mxUtils.bind(this, function(evt) {
+                // Disables dragging the image
+                mxEvent.consume(evt);
+            }));
+
+            mxEvent.addListener(img, 'click', mxUtils.bind(this, function(evt) {
+                var graph = _mxgraph.editor.graph;
+                var cell = graph.getSelectionCell();
+                var bounds = this.graph.getCellBounds(cell);
+                var model = graph.getModel();
+
+                if (_mxgraph.properties) {
+                    _mxgraph.properties.destroy();
+                }
+
+                var graphOffset = mxUtils.getOffset(_mxgraph.editor.graph.container);
+                var x = graphOffset.x + 10;
+                var y = graphOffset.y;
+
+                if (bounds != null)
+                {
+                    x += bounds.x + Math.min(100, bounds.width);
+                    y += bounds.y;
+                }
+
+                var form = $('<div>');
+                var current = cell.getAttribute("filter_name");
+
+                var filters = $('<select>')
+                    .addClass('filter_name')
+                    .addClass('max-width')
+                    .append(
+                    $('<option>')
+                        .attr('value', '0')
+                        .text('Select filter...')
+                );
+
+                $.each(_mxgraph.filters, function (key, value) {
+                    var option = $('<option>')
+                        .attr('value', value.name)
+                        .text(value.title);
+
+                    if (value.name == current) {
+                        option.attr('selected', 'selected');
+                    }
+
+                    filters.append(option);
+                });
+
+                var values = $('<input>')
+                    .addClass('filter_values')
+                    .addClass('max-width')
+                    .attr("placeholder", "Enter filter values here...")
+                    .val(cell.getAttribute("filter_values"));
+
+                var okFunction = function (cell) {
+                    var name = $('.mxWindow .filter_name' ).val();
+                    var title = $('.mxWindow .filter_name option:selected' ).text();
+                    var values = $('.mxWindow .filter_values').val();
+
+                    if (name != '0' && values) {
+                        cell.setAttribute('filter_name', name);
+                        cell.setAttribute('label', title);
+                        cell.setAttribute("filter_values", values);
+
+                        graph.refresh();
+                        _mxgraph.properties.destroy();
+                        user.relationTemplate.updateRelations();
+                    }
+                };
+
+                var cancelFunction = function () {
+                    _mxgraph.properties.destroy();
+                };
+
+                var buttons = $('<div>')
+                    .append(
+                    $('<button>')
+                        .text('OK')
+                        .click(function () {
+                            okFunction(cell);
+                        }),
+                    $('<button>')
+                        .text('Cancel')
+                        .click(cancelFunction)
+                );
+
+                form.append(filters, values, buttons);
+
+                _mxgraph.properties = new mxWindow("Filter Properties", form[0], x, y, 230, 120, false);
+                _mxgraph.properties.setVisible(true);
+            }));
+
+            this.domNode.appendChild(img);
+
+            // Delete button
+            img = mxUtils.createImage('/js/mxgraph/grapheditor/images/delete.gif');
+            img.style.cursor = 'pointer';
+            img.style.width = '16px';
+            img.style.height = '16px';
+            mxEvent.addListener(img, md,
+                mxUtils.bind(this, function(evt)
+                {
+                    // Disables dragging the image
+                    mxEvent.consume(evt);
+                })
+            );
+
+            mxEvent.addListener(img, 'click', mxUtils.bind(this, function(evt)
+                {
+                    _mxgraph.editor.graph.removeCells([this.state.cell]);
+                    mxEvent.consume(evt);
+                })
+            );
+
+            this.domNode.appendChild(img);
+            _mxgraph.editor.graph.container.appendChild(this.domNode);
+            this.redrawTools();
+        };
+
+        /**
+         * Init
+         * @param editor
+         */
+        this.init = function (editor) {
+            _mxgraph.editor = editor;
+            _mxgraph.editor.graph.setConnectable(true);
+            _mxgraph.editor.graph.connectionHandler.createTarget = true;
+            _mxgraph.editor.graph.createHandler = function (state) {
+                if (state != null && this.model.isVertex(state.cell)) {
+                    if (state.cell.isCheck()) {
+                        return new _mxgraph.mxCheckHandler(state);
+                    } else if (state.cell.isFilter()) {
+                        return new _mxgraph.mxFilterHandler(state);
+                    }
+                }
+
+                return mxGraph.prototype.createHandler.apply(this, arguments);
+            };
+
+            _mxgraph.mxCheckHandler.prototype = new mxVertexHandler();
+            _mxgraph.mxCheckHandler.prototype.constructor = _mxgraph.mxCheckHandler;
+            _mxgraph.mxCheckHandler.prototype.domNode = null;
+            _mxgraph.mxCheckHandler.prototype.init = _mxgraph.mxCellHandlerInit;
+
+            _mxgraph.mxCheckHandler.prototype.redraw = function() {
+                mxVertexHandler.prototype.redraw.apply(this);
+                this.redrawTools();
+            };
+
+            _mxgraph.mxCheckHandler.prototype.redrawTools = function () {
+                if (this.state != null && this.domNode != null) {
+                    var dy = (mxClient.IS_VML && document.compatMode == 'CSS1Compat') ? 20 : 4;
+                    this.domNode.style.left = (this.state.x + this.state.width - 30) + 'px';
+                    this.domNode.style.top = (this.state.y - 20 - dy) + 'px';
+                }
+            };
+
+            _mxgraph.mxCheckHandler.prototype.destroy = function (sender, me) {
+                mxVertexHandler.prototype.destroy.apply(this, arguments);
+
+                if (this.domNode != null) {
+                    this.domNode.parentNode.removeChild(this.domNode);
+                    this.domNode = null;
+                }
+            };
+
+            _mxgraph.mxFilterHandler.prototype = new mxVertexHandler();
+            _mxgraph.mxFilterHandler.prototype.constructor = _mxgraph.mxFilterHandler;
+            _mxgraph.mxFilterHandler.prototype.domNode = null;
+            _mxgraph.mxFilterHandler.prototype.init = _mxgraph.mxCellHandlerInit;
+
+            _mxgraph.mxFilterHandler.prototype.redraw = function() {
+                mxVertexHandler.prototype.redraw.apply(this);
+                this.redrawTools();
+            };
+
+            _mxgraph.mxFilterHandler.prototype.redrawTools = function () {
+                if (this.state != null && this.domNode != null) {
+                    var dy = (mxClient.IS_VML && document.compatMode == 'CSS1Compat') ? 20 : 4;
+                    this.domNode.style.left = (this.state.x + this.state.width - 30) + 'px';
+                    this.domNode.style.top = (this.state.y - 20 - dy) + 'px';
+                }
+            };
+
+            _mxgraph.mxFilterHandler.prototype.destroy = function (sender, me) {
+                mxVertexHandler.prototype.destroy.apply(this, arguments);
+
+                if (this.domNode != null) {
+                    this.domNode.parentNode.removeChild(this.domNode);
+                    this.domNode = null;
+                }
+            };
+
+            // Crisp rendering in SVG except for connectors, actors, cylinder, ellipses
+            mxShape.prototype.crisp = true;
+            mxActor.prototype.crisp = false;
+            mxCylinder.prototype.crisp = false;
+            mxEllipse.prototype.crisp = false;
+            mxDoubleEllipse.prototype.crisp = false;
+            mxConnector.prototype.crisp = false;
+
+            // Enables guides
+            mxGraphHandler.prototype.guidesEnabled = true;
+
+            // Alt disables guides
+            mxGuide.prototype.isEnabledForEvent = function(evt)
+            {
+                return !mxEvent.isAltDown(evt);
+            };
+
+            // Enables snapping waypoints to terminals
+            mxEdgeHandler.prototype.snapToTerminals = true;
+
+            // Defines an icon for creating new connections in the connection handler.
+            // This will automatically disable the highlighting of the source vertex.
+            mxConnectionHandler.prototype.connectImage = new mxImage('/js/mxgraph/grapheditor/images/connector.gif', 16, 16);
+
+            // Enables connections in the graph and disables
+            // reset of zoom and translate on root change
+            // (ie. switch between XML and graphical mode).
+            _mxgraph.editor.graph.setConnectable(true);
+
+            _mxgraph.editor.graph.getModel().addListener(mxEvent.CHANGE, function () {
+                user.relationTemplate.updateRelations();
+            });
+
+            // Create select actions in page
+            var node = document.getElementById('zoomActions');
+            mxUtils.write(node, 'Zoom: ');
+            mxUtils.linkAction(node, 'In', _mxgraph.editor, 'zoomIn');
+            mxUtils.write(node, ', ');
+            mxUtils.linkAction(node, 'Out', _mxgraph.editor, 'zoomOut');
+            mxUtils.write(node, ', ');
+            mxUtils.linkAction(node, 'Actual', _mxgraph.editor, 'actualSize');
+            mxUtils.write(node, ', ');
+            mxUtils.linkAction(node, 'Fit', _mxgraph.editor, 'fit');
+        };
+
+        /**
+         * Build graph by XML
+         * @param xml
+         */
+        this.buildByXML = function (xml) {
+            var doc = mxUtils.parseXml(xml);
+            var dec = new mxCodec(doc);
+            dec.decode(doc.documentElement, _mxgraph.editor.graph.getModel());
+
+            _mxgraph.refreshChecks();
+        };
+
+        /**
+         * Refresh graph
+         */
+        this.refreshChecks = function () {
+            $.each(_mxgraph.getAllCells(), function (key, cell) {
+                if (cell.getAttribute('type') == _mxgraph.CELL_TYPE_CHECK) {
+                    _mxgraph.updateCheckStyles(cell);
+                }
+            });
+        };
+
+        /**
+         * Returns target check url
+         * @param url
+         * @param target
+         * @param check
+         * @param callback
+         */
+        this.getCheckLink = function (url, target, check, callback) {
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data: {
+                    YII_CSRF_TOKEN: system.csrf,
+                    'TargetCheckLinkForm[target]' : target,
+                    'TargetCheckLinkForm[check]'  : check
+                },
+
+                success: function (data, textStatus) {
+                    $('.loader-image').hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    url = data.data.url;
+
+                    window.location.replace(url);
+
+                    if (callback) {
+                        callback(url);
+                    }
+                },
+
+                error: function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend: function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
+         * Set cell as active check
+         * @param check
+         */
+        this.setCheckActive = function (check) {
+            var activeChainCheck = $("#activeChainCheck");
+            activeChainCheck.removeClass("hide");
+            activeChainCheck.find(".check-name").text(check["name"]);
+            _mxgraph.activeCheck = check.id;
+            _mxgraph.refreshChecks();
+        };
+    };
+
+    /**
+     * Relation Template object
+     */
+    this.relationTemplate = new function () {
+        /**
+         * Set XML node of mxGraph to form input field
+         * @returns {boolean}
+         */
+        this.updateRelations = function () {
+            var editor = user.mxgraph.editor;
+
+            if (!editor) {
+                return false;
+            }
+
+            var enc = new mxCodec();
+            var node = enc.encode(editor.graph.getModel());
+
+            $('.relations-form-input').val(new XMLSerializer().serializeToString(node));
         };
     };
 }

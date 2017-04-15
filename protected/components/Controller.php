@@ -35,6 +35,17 @@ class Controller extends CController {
     public $projects = null;
 
     /**
+     * @var integer list entriesPerPage
+     */
+    public $entriesPerPage = null;
+
+    /**
+     * Language switcher visibility
+     * @var bool
+     */
+    public $languageSwitcher = true;
+
+    /**
      * Controller initialization.
      */
     function init() {
@@ -53,6 +64,19 @@ class Controller extends CController {
             $lang = $app->request->cookies["language"]->value;
         }
 
+        if ($this->id == "project") {
+            $projectId = Yii::app()->request->getQuery("id");
+
+            if ($projectId) {
+                $project = Project::model()->findByPk($projectId);
+
+                if ($project && $project->language) {
+                    $lang = $project->language->code;
+                    $this->languageSwitcher = false;
+                }
+            }
+        }
+
         if (!in_array($lang, array("en", "de"))) {
             $lang = "en";
         }
@@ -68,6 +92,12 @@ class Controller extends CController {
 
         date_default_timezone_set($system->timezone);
         $this->_system = $system;
+
+        $this->entriesPerPage = $app->params["entriesPerPage"];
+
+        if (isset($app->request->cookies["per_page_item_limit"])) {
+            $this->entriesPerPage = (int) $app->request->cookies["per_page_item_limit"]->value;
+        }
 
         if (!Yii::app()->user->isGuest) {
             $criteria = new CDbCriteria();

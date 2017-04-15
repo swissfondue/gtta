@@ -137,6 +137,16 @@ class CommunityApiClient {
     }
 
     /**
+     * Get field info
+     * @param $field
+     * @return mixed
+     */
+    public function getField($field) {
+        $response = $this->_sendRequest("field/$field");
+        return $this->_parseResponse($response);
+    }
+
+    /**
      * Get reference info
      * @param $reference
      * @return mixed response
@@ -230,6 +240,16 @@ class CommunityApiClient {
             "multipart/form-data"
         );
 
+        return $this->_parseResponse($response);
+    }
+
+    /**
+     * Share field
+     * @param $field
+     * @return mixed
+     */
+    public function shareField($field) {
+        $response = $this->_sendRequest("field", json_encode($field));
         return $this->_parseResponse($response);
     }
 

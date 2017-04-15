@@ -30,6 +30,7 @@ class AccountController extends Controller
         $model->name = $user->name;
         $model->sendNotifications = $user->send_notifications;
         $model->certificateRequired = $user->certificate_required;
+        $model->sessionDuration = $user->session_duration;
 
         // collect user input data
 		if (isset($_POST['AccountEditForm']))
@@ -53,6 +54,7 @@ class AccountController extends Controller
                     $user->name = $model->name;
                     $user->send_notifications = $model->sendNotifications;
                     $user->certificate_required = $model->certificateRequired;
+                    $user->session_duration = $model->sessionDuration;
 
                     if ($model->password)
                         $user->password = hash('sha256', $model->password);
@@ -195,8 +197,8 @@ class AccountController extends Controller
             "user_id" => Yii::app()->user->id
         ));
         $criteria->addCondition("time IS NOT NULL");
-        $criteria->limit  = Yii::app()->params["entriesPerPage"];
-        $criteria->offset = ($page - 1) * Yii::app()->params["entriesPerPage"];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order = "create_time DESC";
         $criteria->together = true;
 

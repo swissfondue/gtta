@@ -104,20 +104,23 @@ class ImportManager {
         return $result;
     }
 
-
     /**
      * Create new target(s) by importing from file
      * @param $path
      * @param string $type
-     * @return array
+     * @param $project
+     * @param null $mappingId
      * @throws Exception
+     * @throws ImportFileParsingException
+     * @throws NoValidTargetException
      */
-    public static function importTargets($path, $type=self::TYPE_NESSUS_CSV, $project) {
+    public static function importTargets($path, $type=self::TYPE_NESSUS_CSV, $project, $mappingId = null) {
         if (!file_exists($path)) {
             throw new Exception("File not found.");
         }                
         
         $targetCache = [];
+        $ids = [];
 
         switch ($type) {
             case self::TYPE_NESSUS_CSV:
@@ -130,6 +133,8 @@ class ImportManager {
                 if (!count($targets)) {
                     throw new NoValidTargetException();
                 }
+
+                $ids = [];
 
                 foreach ($targets as $target) {
                     if (!isset($target["Host"])) {
@@ -146,48 +151,10 @@ class ImportManager {
                     $t->project_id = $project->id;
                     $t->host = $host;
                     $t->save();
+                    $t->refresh();
+                    $ids[] = $t->id;
                     
                     $targetCache[] = $host;
-                }
-
-                break;
-
-            case self::TYPE_NESSUS:
-                $content = FileManager::getFileContent($path);
-
-                try {
-                    $report = new SimpleXMLElement($content, LIBXML_NOERROR);
-                } catch (Exception $e) {
-                    throw new ImportFileParsingException();
-                }
-
-                $reportNodes = $report->xpath("//ReportHost");
-
-                if (!count($reportNodes)) {
-                    throw new NoValidTargetException();
-                }
-
-                foreach ($report->xpath("//ReportHost") as $reportNode) {                    
-                    foreach ($reportNode->HostProperties->tag as $property) {
-                        $attributes = $property->attributes();
-
-                        if ($attributes["name"] != "host-ip") {
-                            continue;
-                        }
-                        
-                        if (in_array($property, $targetCache)) {
-                            continue;
-                        }
-
-                        $t = new Target();
-                        $t->project_id = $project->id;
-                        $t->host = $property;
-                        $t->save();
-                        
-                        $targetCache[] = $property;
-
-                        break;
-                    }
                 }
 
                 break;
@@ -204,7 +171,7 @@ class ImportManager {
                 }
 
                 foreach ($targets as $target) {
-                    $targetData = explode(":", $target[0]);
+                    $targetData = array_map(function ($v) {return trim($v);}, explode(":", $target[0]));
                     
                     if (in_array($targetData[0], $targetCache)) {
                         continue;
@@ -219,6 +186,8 @@ class ImportManager {
                     }
 
                     $t->save();
+                    $t->refresh();
+                    $ids[] = $t->id;
                     
                     $targetCache[] = $targetData[0];
                 }
@@ -237,7 +206,7 @@ class ImportManager {
                 }
 
                 foreach ($targets as $target) {
-                    $targetData = explode(":", $target[0]);
+                    $targetData = array_map(function ($v) {return trim($v);}, explode(":", $target[0]));
                     
                     if (in_array($targetData[0], $targetCache)) {
                         continue;
@@ -252,6 +221,8 @@ class ImportManager {
                     }
 
                     $t->save();
+                    $t->refresh();
+                    $ids[] = $t->id;
                     
                     $targetCache[] = $targetData[0];
                 }
@@ -262,5 +233,70 @@ class ImportManager {
                 throw new Exception("Unknown file type.");
                 break;
         }
+
+        $references = Reference::model()->findAll();
+
+        // by default all references must be bound to target
+        foreach ($ids as $tId) {
+            foreach ($references as $ref) {
+                $targetRef = new TargetReference();
+                $targetRef->target_id = $tId;
+                $targetRef->reference_id = $ref->id;
+                $targetRef->save();
+            }
+        }
+
+        HostResolveJob::enqueue([
+            "targets" => $ids
+        ]);
+    }
+
+    /**
+     * Import mapping from parsed nessus report
+     * @param $parsedReport
+     * @return NessusMapping
+     * @throws Exception
+     */
+    public static function importMapping($parsedReport) {
+        if (!is_array($parsedReport)) {
+            throw new Exception("Report should be an array.");
+        }
+
+        $name = isset($parsedReport["name"]) ? $parsedReport["name"] : Yii::t("app", "N/A");
+
+        $mapping = new NessusMapping();
+        $mapping->name = $name;
+        $mapping->save();
+        $mapping->refresh();
+
+        try {
+            foreach ($parsedReport["hosts"] as $host) {
+                foreach ($host["vulnerabilities"] as $v) {
+                    $vuln = NessusMappingVuln::model()->findByAttributes([
+                        "nessus_mapping_id" => $mapping->id,
+                        "nessus_plugin_id" => $v["plugin_id"],
+                        "nessus_host" => $host["name"]
+                    ]);
+
+                    if (!$vuln) {
+                        $vuln = new NessusMappingVuln();
+                        $vuln->nessus_mapping_id = $mapping->id;
+                        $vuln->nessus_plugin_id = $v["plugin_id"];
+                        $vuln->nessus_plugin_name = $v["plugin_name"];
+                        $vuln->nessus_rating = $v["risk_factor"];
+                        $vuln->nessus_host = $host["name"];
+
+                        $vuln->save();
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            $mapping->delete();
+            throw new Exception("Import failed.");
+        }
+
+        $mapping->refresh();
+
+        return $mapping;
     }
 }

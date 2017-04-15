@@ -55,8 +55,8 @@ class BackupManager {
         'report_templates_l10n',
         'report_template_summary',
         'report_template_summary_l10n',
-        'report_template_sections',
-        'report_template_sections_l10n',
+        'report_template_vuln_sections',
+        'report_template_vuln_sections_l10n',
     );
 
     /**
@@ -78,7 +78,6 @@ class BackupManager {
         'project_details_id_seq',
         'projects_id_seq',
         'references_id_seq',
-        'report_template_sections_id_seq',
         'report_template_summary_id_seq',
         'report_templates_id_seq',
         'risk_categories_id_seq',
@@ -304,7 +303,7 @@ class BackupManager {
         $version = str_replace("<version>", "", $version);
         $version = str_replace("</version>", "", $version);
 
-        return $version == $system->version;
+        return $version <= $system->version;
     }
 
     /**

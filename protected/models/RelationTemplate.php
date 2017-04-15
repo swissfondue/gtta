@@ -43,6 +43,7 @@ class RelationTemplate extends ActiveRecord {
     public function relations() {
         return array(
             "l10n" => array(self::HAS_MANY, "RelationTemplateL10n", "relation_template_id"),
+            "sections" => array(self::HAS_MANY, "RelationTemplateSection", "relation_template_id")
         );
     }
 

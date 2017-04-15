@@ -1,8 +1,7 @@
 /**
  * Admin namespace.
  */
-function Admin()
-{
+function Admin() {
     /**
      * Check object.
      */
@@ -42,6 +41,90 @@ function Admin()
                     }
                 }
             });
+        };
+
+        /**
+         * Save check
+         */
+        this.save = function (formId) {
+            var form = $("#" + formId);
+            var radioFields = form.find(".check-field-radio");
+
+            $.each(radioFields, function (key, value) {
+                var fieldName = $(value).data("field-name");
+                var fieldValues = [];
+
+                $(value).find("li.radio-field-item input[type=text]").each(function (inputKey, inputValue) {
+                    if ($(inputValue).val()) {
+                        fieldValues.push($(inputValue).val());
+                    }
+                });
+
+                $("#" + formId).append(
+                    $("<input>")
+                        .attr("type", "hidden")
+                        .attr("name", fieldName)
+                        .val(JSON.stringify(fieldValues))
+                )
+            });
+
+            form.submit();
+        };
+
+        /**
+         * Append radio field item
+         * @param button
+         */
+        this.appendRadioFieldItem = function (button) {
+            $(button).before(
+                $("<li>")
+                    .addClass("radio-field-item")
+                    .append(
+                        $("<input>")
+                            .attr("type", "text")
+                            .attr("class", "input-xlarge")
+                            .attr("placeholder", "Option Text"),
+                        "&nbsp;",
+                        $("<a>")
+                            .addClass("link")
+                            .append(
+                                $("<i>")
+                                    .addClass("icon")
+                                    .addClass("icon-remove")
+                            )
+                            .click(function () {
+                                _check.removeRadioFieldItem(this);
+
+                                return false;
+                            })
+                    )
+            );
+        };
+
+        /**
+         * Remove radio field item
+         * @param button
+         */
+        this.removeRadioFieldItem = function (button) {
+            if ($(button).parent().siblings().length > 1) {
+                $(button).parent().remove();
+            }
+        };
+
+        /**
+         * Toggle field hide
+         */
+        this.toggleHiddenField = function (checkbox, name) {
+            var field = $(".field-control-" + name),
+                otherCheckboxes = $("input[type=checkbox][name=\"" + checkbox.name + "\"]");
+
+            if (checkbox.checked) {
+                otherCheckboxes.prop("checked", "checked");
+                field.slideUp();
+            } else {
+                otherCheckboxes.prop("checked", null);
+                field.slideDown();
+            }
         };
     };
 
@@ -254,6 +337,639 @@ function Admin()
                 $('#ProjectUserAddForm_admin').prop('checked', false);
                 $('#ProjectUserAddForm_admin').prop('disabled', false);
             }
+        };
+
+        /**
+         * Target import type changed event
+         */
+        this.importTypeChanged = function () {
+            var val = $("#TargetImportForm_type").val();
+
+            if (val == "nessus") {
+                $(".nessus-import-input").removeClass("hide");
+            } else {
+                $(".nessus-import-input").addClass("hide");
+            }
+        };
+    };
+
+    /**
+     * Issue object
+     */
+    this.issue = new function () {
+        var _issue = this;
+
+        this.runningChecks = [];
+        this.updateIteration = 0;
+
+        /**
+         * Timeout before keypress & search
+         * @type {number}
+         */
+        this.searchTimeout = 500;
+        this.searchTimeoutHandler = null;
+
+        /**
+         * Init check selection dialog
+         */
+        this.initCheckSelectDialog = function () {
+            $("#issue-check-select-dialog").on("shown", function () {
+                $(".issue-search-query").focus();
+            });
+        };
+
+        /**
+         * Init target selection dialog
+         */
+        this.initTargetSelectDialog = function () {
+            $("#target-select-dialog").on("shown", function () {
+                $(".target-search-query").focus();
+            });
+        };
+
+        /**
+         * Show add target popup
+         */
+        this.showTargetSelectDialog = function () {
+            var modal = $("#target-select-dialog");
+            var list = modal.find("table.target-list");
+            var field = modal.find(".target-search-query");
+
+            list.empty();
+            field.val("");
+
+            modal.find(".no-search-result").hide();
+            modal.modal();
+        };
+
+        /**
+         * Load check list
+         * @param query
+         * @param onChooseEvent
+         */
+        this.searchChecks = function (query, onChooseEvent) {
+            var list = $("#issue-check-select-dialog ul.check-list");
+
+            if (query.length < 1) {
+                list.empty();
+                return;
+            }
+
+            if (_issue.searchTimeoutHandler) {
+                clearTimeout(_issue.searchTimeoutHandler);
+            }
+
+            _issue.searchTimeoutHandler = setTimeout(function () {
+                var data = {
+                    "YII_CSRF_TOKEN": system.csrf
+                };
+
+                if (query) {
+                    data["SearchForm[query]"] = query;
+                }
+
+                $.ajax({
+                    dataType: "json",
+                    url: $("[data-search-check-url]").data("search-check-url"),
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+
+                    data: data,
+
+                    success : function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        var checks = data.data.checks;
+
+                        list.empty();
+                        list.siblings(".no-search-result").hide();
+
+                        if (checks.length) {
+                            var link;
+
+                            $.each(checks, function (key, value) {
+                                link = $("<a>")
+                                    .attr("href", "#")
+                                    .text(value.name)
+                                    .click(function () {
+                                        onChooseEvent(value.id);
+                                    });
+
+                                list.append(
+                                    $("<li>").append(link)
+                                )
+                            });
+                        } else {
+                            list.siblings(".no-search-result").show();
+                        }
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend : function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+            }, _issue.searchTimeout);
+        };
+
+        /**
+         * Search targets
+         * @param query
+         */
+        this.searchTargets = function (query) {
+            var list = $("#target-select-dialog ul.target-list");
+
+            if (query.length < 1) {
+                list.empty();
+
+                return;
+            }
+
+            if (_issue.searchTimeoutHandler) {
+                clearTimeout(_issue.searchTimeoutHandler);
+            }
+
+            _issue.searchTimeoutHandler = setTimeout(function () {
+                var data = {
+                    "YII_CSRF_TOKEN": system.csrf
+                };
+
+                if (query) {
+                    data["SearchForm[query]"] = query;
+                }
+
+                $.ajax({
+                    dataType : "json",
+                    url      : $("[data-search-target-url]").data("search-target-url"),
+                    timeout  : system.ajaxTimeout,
+                    type     : "POST",
+
+                    data : data,
+
+                    success : function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        var targets = data.data.targets;
+
+                        list.empty();
+                        list.siblings(".no-search-result").hide();
+
+                        if (targets.length) {
+                            var link;
+
+                            $.each(targets, function (key, value) {
+                                link = $("<a>")
+                                    .attr("href", "#")
+                                    .text(value.name)
+                                    .click(function () {
+                                        _issue.evidence.add(value.id);
+                                    });
+
+                                list.append(
+                                    $("<li>").append(link)
+                                );
+                            });
+                        } else {
+                            list.siblings(".no-search-result").show();
+                        }
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend : function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+            }, _issue.searchTimeout);
+        };
+
+        /**
+         * Update status of running checks
+         */
+        this.update = function () {
+            var i, k, checkIds;
+
+            checkIds = [];
+
+            if (_issue.runningChecks.length > 0) {
+                _issue.updateIteration++;
+            } else {
+                _issue.updateIteration = 0;
+            }
+
+            for (i = 0; i < _issue.runningChecks.length; i++) {
+                var minutes, seconds, time;
+
+                var check = _issue.runningChecks[i];
+                var row = $("[data-target-check-id=" + check.id + "]");
+
+                if (check.time > -1) {
+                    check.time++;
+
+                    minutes = 0;
+                    seconds = check.time;
+                } else {
+                    minutes = 0;
+                    seconds = 0;
+                }
+
+                if (seconds > 59) {
+                    minutes = Math.floor(seconds / 60);
+                    seconds = seconds - (minutes * 60);
+                }
+
+                row.find(".run-info .check-time").html(minutes.zeroPad(2) + ":" + seconds.zeroPad(2));
+                checkIds.push(check.id);
+            }
+
+            if (_issue.updateIteration > 5) {
+                _issue.updateIteration = 0;
+
+                $.ajax({
+                    dataType: "json",
+                    url: $("[data-update-running-checks-url]").data("update-running-checks-url"),
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+                    data: {
+                        "TargetCheckUpdateForm[checks]": checkIds.join(","),
+                        "YII_CSRF_TOKEN": system.csrf
+                    },
+
+                    success : function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        if (data.checks) {
+                            for (i = 0; i < data.checks.length; i++) {
+                                var check;
+
+                                check = data.checks[i];
+                                var row = $("[data-target-check-id=" + check.id + "]");
+
+                                if (check.poc) {
+                                    var poc = row.find(".evidence-field.poc .field-value");
+
+                                    poc.addClass("issue-pre");
+                                    poc.text(check.poc);
+                                }
+
+                                if (check.finished) {
+                                    var innerCheck = _issue.runningChecks.filter(function (obj) {
+                                        return obj.id == check.id
+                                    });
+
+                                    if (innerCheck.length) {
+                                        _issue.runningChecks.splice(_issue.runningChecks.indexOf(innerCheck), 1);
+                                    }
+
+                                    row.find(".start-button").removeClass("hide");
+                                    row.find(".stop-button").addClass("hide");
+                                    row.find(".start-button", ".stop-button").prop("disabled", true);
+
+                                    row.find(".run-info .check-time").empty();
+                                }
+                            }
+                        }
+                    },
+
+                    error : function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend : function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+            }
+        };
+
+        /**
+         * Get running check list
+         * @param url
+         */
+        this.getRunningChecks = function () {
+            $.ajax({
+                dataType: "json",
+                url: $("[data-get-running-checks-url]").data("get-running-checks-url"),
+                timeout: system.ajaxTimeout,
+                type: "POST",
+                data: {
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    if (data.data.checks) {
+                        $.each(data.data.checks, function (key, value) {
+                            var exists = _issue.runningChecks.filter(function (obj) {
+                                return obj.id == value.id
+                            });
+
+                            if (!exists.length) {
+                                var row = $("[data-target-check-id=" + value["id"] + "]");
+
+                                row.find(".start-button").addClass("hide");
+                                row.find(".stop-button").removeClass("hide");
+
+                                _issue.runningChecks.push({
+                                    "id" : value.id,
+                                    "time" : value.time
+                                });
+                            } else {
+                                exists[0].time = value.time;
+                            }
+                        });
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
+         * Delete issue
+         * @param url
+         * @param id
+         * @param callback
+         */
+        this.delete = function (url, id, callback) {
+            if (confirm(system.translate("Are you sure that you want to delete this issue?"))) {
+                _issue.control(url, id, "delete", callback);
+            }
+        };
+
+        /**
+         * Add issue for current project and provided check
+         * @param checkId
+         */
+        this.add = function (checkId) {
+            var data = {
+                "YII_CSRF_TOKEN": system.csrf,
+                "EntryControlForm[id]": checkId,
+                "EntryControlForm[operation]": "add"
+            };
+
+            $.ajax({
+                dataType: "json",
+                url: $("[data-add-issue-url]").data("add-issue-url"),
+                timeout: system.ajaxTimeout,
+                type: "POST",
+                data: data,
+
+                success: function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    window.location.href = data.data.url;
+                },
+
+                error: function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend: function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
+         * Control issue
+         * @param url
+         * @param id
+         * @param operation
+         * @param callback
+         */
+        this.control = function (url, id, operation, callback) {
+            $.ajax({
+                dataType: "json",
+                url: url,
+                timeout: system.ajaxTimeout,
+                type: "POST",
+
+                data: {
+                    "EntryControlForm[operation]": operation,
+                    "EntryControlForm[id]": id,
+                    "YII_CSRF_TOKEN": system.csrf
+                },
+
+                success : function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    data = data.data;
+
+                    if (operation == "delete") {
+                        if (callback) {
+                            callback();
+                        }
+                    }
+                },
+
+                error : function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend : function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
+         * Evidence object
+         */
+        this.evidence = new function () {
+            var _evidence = this;
+
+            /**
+             * Start evidence
+             * @param url
+             * @param id
+             */
+            this.start = function (url, id) {
+                $.ajax({
+                    dataType: "json",
+                    url: url,
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+
+                    data: {
+                        "EntryControlForm[operation]": "start",
+                        "EntryControlForm[id]": id,
+                        "YII_CSRF_TOKEN": system.csrf
+                    },
+
+                    success: function (data, textStatus) {
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        var row = $("[data-target-check-id=" + id + "]");
+
+                        row.find(".run-info .check-time").html("00:00");
+                        row.find(".start-button").addClass("hide");
+                        row.find(".stop-button").removeClass("hide");
+                        row.find(".start-button", ".stop-button").prop("disabled", true);
+
+
+                        $(".loader-image").hide();
+
+                        _issue.runningChecks.push({
+                            id: id,
+                            time: -1,
+                            result: ""
+                        });
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    }
+                });
+            };
+
+            /**
+             * Stop evidence
+             * @param url
+             * @param id
+             */
+            this.stop = function (url, id) {
+                $.ajax({
+                    dataType: "json",
+                    url: url,
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+
+                    data: {
+                        "EntryControlForm[operation]": "stop",
+                        "EntryControlForm[id]": id,
+                        "YII_CSRF_TOKEN": system.csrf
+                    },
+
+                    success: function (data, textStatus) {
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        var row = $("[data-target-check-id=" + id + "]");
+
+                        row.find(".start-button").addClass("hide");
+                        row.find(".stop-button").removeClass("hide").prop("disabled", true);
+
+                        $(".loader-image").hide();
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        _evidence.setLoaded(id, custom);
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    }
+                });
+            };
+
+            /**
+             * Delete evidence
+             * @param url
+             * @param id
+             * @param callback
+             */
+            this.delete = function (url, id, callback) {
+                if (confirm(system.translate("Are you sure that you want to delete this evidence?"))) {
+                    _issue.control(url, id, "delete", callback);
+                }
+            };
+
+            /**
+             * Add evidence for current issue and provided target
+             * @param targetId
+             */
+            this.add = function (targetId) {
+                var data = {
+                    "YII_CSRF_TOKEN": system.csrf,
+                    "EntryControlForm[id]": targetId,
+                    "EntryControlForm[operation]": "add"
+                };
+
+                $.ajax({
+                    dataType: "json",
+                    url: $("[data-add-evidence-url]").data("add-evidence-url"),
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+                    data: data,
+
+                    success: function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        location.reload();
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend: function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+            };
         };
     };
 
@@ -617,6 +1333,370 @@ function Admin()
             if (confirm(system.translate("Are you sure that you want to delete this object?"))) {
                 _reportTemplate._controlTemplate(id, "delete");
             }
+        };
+
+        /**
+         * Report Template Sections
+         */
+        this.sections = new function () {
+            var _sections = this,
+                sectionList,
+                sectionData,
+                fieldTypes,
+                formId,
+                modified = false;
+
+            /**
+             * Init sections editor
+             * @param sections
+             * @param fTypes
+             */
+            this.init = function (sections, fTypes) {
+                sectionData = sections;
+                fieldTypes = fTypes;
+                formId = $("[data-form-id]").data("form-id");
+
+                sectionList = Sortable.create($(".sortable-section-list")[0], {
+                    group: {
+                        name: "report-sections",
+                        put: true,
+                        pull: true
+                    },
+
+                    onAdd: function (evt) {
+                        var item, type, title;
+
+                        item = $(evt.item);
+
+                        item.click(function () {
+                            _sections.select(this);
+                        });
+
+                        item
+                            .append(
+                                $("<a>")
+                                    .attr("href", "#remove")
+                                    .click(function (e) {
+                                        _sections.del(this);
+                                        e.stopPropagation();
+                                    })
+                                    .append(
+                                        $("<i>")
+                                            .addClass("icon icon-remove")
+                                    )
+                            );
+
+                        type = item.data("section-type");
+                        title = fieldTypes[type.toString()];
+
+                        _sections.saveSection(item, null, type, title, "");
+                    },
+
+                    onUpdate: function (evt) {
+                        _sections.saveOrder();
+                    }
+                });
+
+                var availableSectionList = Sortable.create($(".available-section-list")[0], {
+                    sort: false,
+                    group: {
+                        name: "report-sections",
+                        pull: "clone",
+                        put: false
+                    }
+                });
+
+                $(".sortable-section-list a.remove").click(function (e) {
+                    _sections.del(this);
+                    e.stopPropagation();
+                });
+
+                window.onbeforeunload = function(e) {
+                    if (modified) {
+                        return "Section is unsaved. Do you really want to continue and lose all changes?"
+                    }
+
+                    return null;
+                };
+            };
+
+            /**
+             * Show "Add Section" form
+             */
+            this.showAddForm = function () {
+                var addSection = $(".add-section");
+
+                if (addSection.is(":visible")) {
+                    this.closeAddForm();
+                } else {
+                    $(".edit-section").slideUp("fast");
+                    addSection.slideDown("fast");
+                }
+            };
+
+            /**
+             * Close "Add Section" form
+             */
+            this.closeAddForm = function () {
+                $(".edit-section").slideDown("fast");
+                $(".add-section").slideUp("fast");
+            };
+
+            /**
+             * Remove element from the list
+             * @param item
+             */
+            this.del = function (item) {
+                var el, id;
+
+                el = $(sectionList.closest(item));
+
+                if (confirm(system.translate("Are you sure that you want to delete this object?"))) {
+                    id = el.data("section-id");
+
+                    if (id) {
+                        $.ajax({
+                            dataType: "json",
+                            url: $("[data-control-section-url]").data("control-section-url"),
+                            timeout: system.ajaxTimeout,
+                            type: "POST",
+
+                            data: {
+                                "EntryControlForm[operation]": "delete",
+                                "EntryControlForm[id]": id,
+                                "YII_CSRF_TOKEN": system.csrf
+                            },
+
+                            success: function (data, textStatus) {
+                                $(".loader-image").hide();
+
+                                if (data.status == "error") {
+                                    system.addAlert("error", data.errorText);
+                                    return;
+                                }
+
+                                el.slideUp("fast", function () {
+                                    el.remove();
+                                });
+                            },
+
+                            error: function (jqXHR, textStatus, e) {
+                                $(".loader-image").hide();
+                                system.addAlert("error", system.translate("Request failed, please try again."));
+                            },
+
+                            beforeSend: function (jqXHR, settings) {
+                                $(".loader-image").show();
+                            }
+                        });
+                    } else {
+                        el.slideUp("fast", function () {
+                            el.remove();
+                        });
+                    }
+                }
+            };
+
+            /**
+             * Select list item
+             * @param item
+             */
+            this.select = function (item) {
+                if (modified && !confirm("Section has unsaved changes. Do you really want to continue and lose all changes?")) {
+                    return;
+                }
+
+                modified = false;
+
+                var id, template, editSection, title, content, type;
+
+                item = $(item);
+                editSection = $(".edit-section");
+                id = item.data("section-id");
+
+                if (id) {
+                    title = sectionData[id].title;
+                    content = sectionData[id].content;
+                    type = sectionData[id].type;
+                } else {
+                    type = item.data("section-type");
+                    title = fieldTypes[type.toString()];
+                }
+
+                template = $(".section-form-template").clone();
+                this.closeAddForm();
+
+                $(".sortable-section-list li").removeClass("selected");
+                item.addClass("selected");
+
+                template
+                    .removeClass("section-form-template")
+                    .removeClass("hide")
+                    .data("section-id", id);
+
+                template.find("[name=\"" + formId + "[title]\"]")
+                    .val(title)
+                    .change(function () {
+                        modified = true;
+                    });
+
+                template.find("[name=\"" + formId + "[content]\"]")
+                    .val(content);
+
+                template.find("[data-field-type]")
+                    .text(fieldTypes[type.toString()]);
+
+                template.find("button")
+                    .click(function () {
+                        _sections.saveSectionForm(item);
+                        return false;
+                    });
+
+                template.find(".wysiwyg").ckeditor(function () {
+                    this.on("change", function() {
+                         if (this.checkDirty()) {
+                             modified = true;
+                         }
+                    })
+                });
+
+                editSection
+                    .empty()
+                    .append(template);
+            };
+
+            /**
+             * Get sections order
+             */
+            this.getOrder = function () {
+                var order = [];
+
+                $(".sortable-section-list li").each(function (number, e) {
+                    order[number] = $(e).data("section-id");
+                });
+
+                return order;
+            };
+
+            /**
+             * Save sections order
+             */
+            this.saveOrder = function () {
+                var data = {"YII_CSRF_TOKEN": system.csrf};
+                data[formId + "[order]"] = JSON.stringify(_sections.getOrder());
+
+                $.ajax({
+                    dataType: "json",
+                    url: $("[data-save-section-order-url]").data("save-section-order-url"),
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+                    data: data,
+
+                    success: function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                        }
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend: function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+            };
+
+            /**
+             * Save section
+             * @param listItem
+             * @param id
+             * @param type
+             * @param title
+             * @param content
+             */
+            this.saveSection = function (listItem, id, type, title, content) {
+                var editSection, button, data;
+
+                editSection = $(".edit-section");
+                button = editSection.find("button");
+                data = {"YII_CSRF_TOKEN": system.csrf};
+                
+                data[formId + "[order]"] = JSON.stringify(_sections.getOrder());
+                data[formId + "[content]"] = content;
+                data[formId + "[title]"] = title;
+                data[formId + "[type]"] = type;
+                data[formId + "[id]"] = id;
+
+                $.ajax({
+                    dataType: "json",
+                    url: $("[data-save-section-url]").data("save-section-url"),
+                    timeout: system.ajaxTimeout,
+                    type: "POST",
+
+                    data: data,
+
+                    success: function (data, textStatus) {
+                        $(".loader-image").hide();
+                        button.prop("disabled", false);
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        data = data.data;
+
+                        if (!id) {
+                            id = data.id;
+                        }
+
+                        sectionData[id] = {
+                            type: type,
+                            title: title,
+                            content: content
+                        };
+
+                        listItem.attr("data-section-id", id);
+                        listItem.find("span.title").text(title);
+
+                        system.addAlert("success", system.translate("Section saved."));
+                        modified = false;
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                        button.prop("disabled", false);
+                    },
+
+                    beforeSend: function (jqXHR, settings) {
+                        $(".loader-image").show();
+                        button.prop("disabled", true);
+                    }
+                });
+            };
+
+            /**
+             * Save section form
+             * @param listItem
+             */
+            this.saveSectionForm = function (listItem) {
+                var editSection, title, content, type, id;
+
+                id = listItem.data("section-id") || null;
+                type = listItem.data("section-type");
+
+                editSection = $(".edit-section");
+                title = editSection.find("input").val();
+                content = editSection.find("textarea").val();
+
+                _sections.saveSection(listItem, id, type, title, content);
+            };
         };
     };
 
@@ -987,7 +2067,7 @@ function Admin()
                             _update.update(url);
                         }, 5000);
                     } else {
-                        location.reload();
+                        system.refreshPage();
                     }
                 },
 
@@ -1855,7 +2935,6 @@ function Admin()
         var _checklisttemplate = this;
         /**
          * Load category checks list
-         * @param url
          * @param id
          */
         this.loadChecks = function (id) {
@@ -1904,709 +2983,192 @@ function Admin()
     };
 
     /**
-     * Relation Template object
+     * Nessus report mapping
+     * @type {nessusMapping}
      */
-    this.relationTemplate = new function () {
-        /**
-         * Set XML node of mxGraph to form input field
-         * @returns {boolean}
-         */
-        this.updateRelations = function () {
-            var editor = admin.mxgraph.editor;
-
-            if (!editor) {
-                return false;
-            }
-
-            var enc = new mxCodec();
-            var node = enc.encode(editor.graph.getModel());
-
-            $('.relations-form-input').val(new XMLSerializer().serializeToString(node));
-        };
-    };
-
-    /**
-     * MxGraph object
-     */
-    this.mxgraph = new function () {
-        var _mxgraph = this;
+    this.nessusMapping = new function () {
+        var _nessusMapping = this;
 
         /**
-         * Cell types
-         * @type {string}
-         */
-        this.CELL_TYPE_CHECK = 'check';
-        this.CELL_TYPE_FILTER = 'filter';
-
-        /**
-         * Check & filter lists
+         * Item id on binding check through search popup
          * @type {null}
          */
-        this.checkCategories = [];
-        this.filters         = [];
+        this.currentItemId = null;
 
         /**
-         * MxGraph objects handlers
-         * @type {null}
+         * jQuery selectors
+         * @type {{table: string}}
          */
-        this.editor     = null;
-        this.properties = null;
-
-        /**
-         * Current target
-         * @type {null}
-         */
-        this.target = null;
-
-        /**
-         * Returns all graph cells
-         * @returns {*}
-         */
-        this.getAllCells = function () {
-            return _mxgraph.editor.graph.getChildVertices(_mxgraph.editor.graph.getDefaultParent())
-        };
-
-        /**
-         * Check graph object handler
-         * @param state
-         */
-        this.mxCheckHandler = function (state) {
-            mxVertexHandler.apply(this, arguments);
-
-            _mxgraph.updateCheckStyles(state.cell);
-        };
-
-        /**
-         * Refresh check cell styles
-         * @param cell
-         */
-        this.updateCheckStyles = function (cell) {
-            var checkTied = parseInt(cell.getAttribute('check_id'));
-            var stopper = parseInt(cell.getAttribute('stopped'));
-
-            cell.delStyle();
-
-            if (!checkTied) {
-                cell.setStyle("noCheckSelectedStyle");
-            }
-
-            if (stopper) {
-                cell.setStyle("stoppedCellStyle");
-            }
-
-            _mxgraph.editor.graph.refresh();
-        };
-
-        /**
-         * Filter graph object handler
-         * @param state
-         */
-        this.mxFilterHandler = function (state) {
-            mxVertexHandler.apply(this, arguments);
-        };
-
-        /**
-         * Common cell handler init
-         */
-        this.mxCellHandlerInit = function () {
-            mxVertexHandler.prototype.init.apply(this, arguments);
-
-            this.domNode = document.createElement('div');
-            this.domNode.style.position = 'absolute';
-            this.domNode.style.whiteSpace = 'nowrap';
-            var cell = _mxgraph.editor.graph.getSelectionCell();
-
-            if (cell.getAttribute("type") == _mxgraph.CELL_TYPE_CHECK) {
-                _mxgraph.mxCheckHandlerInit.call(this);
-            } else if (cell.getAttribute("type") == _mxgraph.CELL_TYPE_FILTER) {
-                _mxgraph.mxFilterHandlerInit.call(this);
+        this.selectors = {
+            table: ".nessus-mapping",
+            items: ".nessus-mapping .nessus-mapping-vuln",
+            filters: {
+                hosts: ".filter.nessus-hosts .nessus-host input:checked",
+                ratings: ".filter.nessus-ratings .nessus-rating input:checked",
+                container: ".nessus-mapping-filters"
             }
         };
 
         /**
-         * Init mxCheckHandler
+         * Show check search popup
+         * @param itemId
          */
-        this.mxCheckHandlerInit = function () {
-            var md = (mxClient.IS_TOUCH) ? 'touchstart' : 'mousedown';
+        this.showCheckSearchPopup = function (itemId) {
+            _nessusMapping.currentItemId = itemId;
 
-            // Started check icon
-            if (this.state.cell.isStartCheck()) {
-                img = mxUtils.createImage('/js/mxgraph/grapheditor/images/play.png');
-                img.style.width = '16px';
-                img.style.height = '16px';
+            admin.showCheckSearchPopup();
+        };
 
-                this.domNode.appendChild(img);
+        /**
+         * Forbid nessus mapping toggle
+         * @param vulnId
+         * @param disabled
+         */
+        this.disableItem = function (vulnId, disabled) {
+            var _disabled = !!disabled;
+
+            $("[data-item-id=" + vulnId + "]")
+                .find("input, select")
+                .prop("disabled", _disabled);
+        };
+
+        /**
+         * Save nessus mapping item
+         * @param vulnId
+         */
+        this.saveItem = function (vulnId) {
+            var item = $("[data-item-id=" + vulnId + "]");
+
+            var active = +item.find(".active > input").is(":checked");
+            var checkId = item.data("check-id");
+            var resultId = parseInt(item.find(".mapped-result > select").val()) || null;
+            var solutionId = parseInt(item.find(".mapped-solution > select").val()) || null;
+            var insertTitle = +item.find(".insert-nessus-title > input").is(":checked");
+            var rating = parseInt(item.find(".rating > select").val()) || null;
+
+            var data = {
+                "YII_CSRF_TOKEN": system.csrf,
+                "NessusMappingVulnUpdateForm[vulnId]": vulnId,
+                "NessusMappingVulnUpdateForm[active]": active
+            };
+
+            if (checkId) {
+                data["NessusMappingVulnUpdateForm[checkId]"] = checkId;
             }
 
-            // Settings
-            var img = mxUtils.createImage('/js/mxgraph/grapheditor/images/settings.png');
-            img.style.cursor = 'pointer';
-            img.style.width = '16px';
-            img.style.height = '16px';
-            mxEvent.addListener(img, md, mxUtils.bind(this, function(evt) {
-                // Disables dragging the image
-                mxEvent.consume(evt);
-            }));
+            if (insertTitle) {
+                data["NessusMappingVulnUpdateForm[insertTitle]"] = insertTitle;
+            }
 
-            mxEvent.addListener(img, 'click', mxUtils.bind(this, function(evt) {
-                var graph = _mxgraph.editor.graph;
-                var cell = graph.getSelectionCell();
-                var bounds = this.graph.getCellBounds(cell);
+            if (resultId) {
+                data["NessusMappingVulnUpdateForm[resultId]"] = resultId;
+            }
 
-                if (_mxgraph.properties) {
-                    _mxgraph.properties.destroy();
-                }
+            if (solutionId) {
+                data["NessusMappingVulnUpdateForm[solutionId]"] = solutionId;
+            }
 
-                var graphOffset = mxUtils.getOffset(_mxgraph.editor.graph.container);
-                var x = graphOffset.x + 10;
-                var y = graphOffset.y;
+            if (rating) {
+                data["NessusMappingVulnUpdateForm[rating]"] = rating;
+            }
 
-                if (bounds != null)
-                {
-                    x += bounds.x + Math.min(100, bounds.width);
-                    y += bounds.y;
-                }
-
-                var form = $('<div>');
-
-                var checkId = cell.getAttribute("check_id");
-                var controlId = cell.getAttribute("control_id");
-                var categoryId = cell.getAttribute("category_id");
-
-                var $properties, $categoryList, $controlList, $checkList;
-
-                var $categories = $('<select>')
-                    .addClass('category-list')
-                    .addClass('max-width')
-                    .append(
-                        $('<option>')
-                            .attr('value', '0')
-                            .text('Select category...')
-                    )
-                    .change(function() {
-                        var category = $(this).val();
-                        $properties = $(_mxgraph.properties.getElement());
-                        $categoryList = $(this);
-                        $controlList = $properties.find('.control-list');
-                        $checkList = $properties.find('.check-list');
-
-                        $categoryList.addClass('disabled');
-                        $controlList
-                            .addClass('disabled')
-                            .find('option[value=0]')
-                            .siblings()
-                            .remove();
-
-                        $checkList
-                            .addClass('disabled')
-                            .find('option[value=0]')
-                            .siblings()
-                            .remove();
-
-                        if (parseInt(category)) {
-                            system.control.loadObjects(category, "category-control-list", function (data) {
-                                var controls = data.objects;
-
-                                $.each(controls, function (key, value) {
-                                    $controlList.append(
-                                        $('<option>')
-                                            .attr("value", value.id)
-                                            .text(value.name)
-                                    );
-                                });
-
-                                $categoryList.removeClass('disabled');
-                                $controlList.removeClass('disabled');
-                            });
-                        } else {
-                            $categoryList.removeClass('disabled');
-                            $controlList.addClass('disabled');
-                        }
-                    });
-
-                var $controls = $('<select>')
-                    .addClass('control-list')
-                    .addClass('max-width')
-                    .addClass('disabled')
-                    .append(
-                        $('<option>')
-                            .attr('value', '0')
-                            .text('Select control...')
-                    )
-                    .change(function () {
-                        var control = $(this).val();
-                        $properties = $(_mxgraph.properties.getElement());
-                        $categoryList = $properties.find('.category-list');
-                        $checkList = $properties.find('.check-list');
-                        $controlList = $properties.find('.control-list');
-
-                        $categoryList.addClass('disabled');
-                        $controlList.addClass('disabled');
-                        $checkList
-                            .addClass('disabled')
-                            .find('option[value=0]')
-                            .siblings()
-                            .remove();
-
-                        if (parseInt(control)) {
-                            system.control.loadObjects(control, 'control-check-list', function (data) {
-                                $.each(data.objects, function (key, value) {
-                                    $checkList.append(
-                                        $('<option>')
-                                            .attr('value', value.id)
-                                            .text(value.name)
-                                    );
-                                });
-
-                                $categoryList.removeClass('disabled');
-                                $controlList.removeClass('disabled');
-                                $checkList.removeClass('disabled');
-                            });
-                        } else {
-                            $categoryList.removeClass('disabled');
-                            $controlList.removeClass('disabled');
-                            $checkList.addClass('disabled');
-                        }
-                    });
-
-                var $checks = $('<select>')
-                    .addClass('check-list')
-                    .addClass('max-width')
-                    .addClass('disabled')
-                    .append(
-                        $('<option>')
-                            .attr('value', '0')
-                            .text('Select check...')
-                    );
-
-                var $okButton = $('<button>')
-                    .text('OK')
-                    .click(function () {
-                        $properties = $(_mxgraph.properties.getElement());
-                        $categoryList = $properties.find('.category-list');
-                        $controlList = $properties.find('.control-list');
-                        $checkList = $properties.find('.check-list');
-
-                        var category = $categoryList.val();
-                        var control = $controlList.val();
-                        var check = $checkList.val();
-                        var checkName;
-
-                        if (parseInt(category) && parseInt(control) && parseInt(check)) {
-                            checkName = $checkList.find('option[value=' + check + ']').text();
-
-                            cell.setAttribute("category_id", category);
-                            cell.setAttribute("control_id", control);
-                            cell.setAttribute("check_id", check);
-                            cell.setAttribute("label", checkName);
-
-                            cell.delStyle();
-
-                            _mxgraph.editor.graph.refresh();
-                            _mxgraph.properties.destroy();
-                            admin.relationTemplate.updateRelations();
-                        }
-                    });
-
-                var $cancelButton = $('<button>')
-                    .text('Cancel')
-                    .click(function () {
-                        _mxgraph.properties.destroy();
-                    });
-
-                form.append($categories, $controls, $checks, $okButton, $cancelButton);
-
-                _mxgraph.properties = new mxWindow("Check Properties", form[0], x, y, 250, 170, false);
-                _mxgraph.properties.setVisible(true);
-
-                $properties = $(_mxgraph.properties.getElement());
-                $categoryList = $properties.find('.category-list');
-                $checkList = $properties.find('.check-list');
-                $controlList = $properties.find('.control-list');
-
-                $.each(_mxgraph.checkCategories, function (key, value) {
-                    var option = $('<option>')
-                        .attr('value', value.id)
-                        .text(value.name);
-
-                    if (parseInt(categoryId) && parseInt(controlId) && parseInt(checkId) && value.id == categoryId) {
-                        option.attr('selected', 'selected');
-
-                        system.control.loadObjects(categoryId, "category-control-list", function (data) {
-                            var controls = data.objects;
-
-                            $.each(controls, function (key, value) {
-                                var option = $('<option>')
-                                    .attr("value", value.id)
-                                    .text(value.name);
-
-                                if (value.id == controlId) {
-                                    option.attr('selected', 'selected');
-                                }
-
-                                $controlList.append(option);
-                            });
-
-                            system.control.loadObjects(controlId, 'control-check-list', function (data) {
-                                $.each(data.objects, function (key, value) {
-                                    var option = $('<option>')
-                                        .attr('value', value.id)
-                                        .text(value.name);
-
-                                    if (value.id == checkId) {
-                                        option.attr('selected', 'selected');
-                                    }
-
-                                    $checkList.append(option);
-                                });
-
-                                $categoryList.removeClass('disabled');
-                                $controlList.removeClass('disabled');
-                                $checkList.removeClass('disabled');
-                            });
-                        });
-                    }
-
-                    $categories.append(option);
-                });
-            }));
-
-            this.domNode.appendChild(img);
-
-            // Delete button
-            img = mxUtils.createImage('/js/mxgraph/grapheditor/images/delete.gif');
-            img.style.cursor = 'pointer';
-            img.style.width = '16px';
-            img.style.height = '16px';
-            mxEvent.addListener(img, md,
-                mxUtils.bind(this, function(evt)
-                {
-                    // Disables dragging the image
-                    mxEvent.consume(evt);
-                })
-            );
-
-            mxEvent.addListener(img, 'click', mxUtils.bind(this, function(evt)
-            {
-                _mxgraph.editor.graph.removeCells([this.state.cell]);
-                mxEvent.consume(evt);
-            }));
-
-            this.domNode.appendChild(img);
-            _mxgraph.editor.graph.container.appendChild(this.domNode);
-            this.redrawTools();
-        };
-
-        /**
-         * Init mxFilterHandler
-         */
-        this.mxFilterHandlerInit = function () {
-            var md = (mxClient.IS_TOUCH) ? 'touchstart' : 'mousedown';
-
-            // Settings
-            var img = mxUtils.createImage('/js/mxgraph/grapheditor/images/settings.png');
-            img.style.cursor = 'pointer';
-            img.style.width = '16px';
-            img.style.height = '16px';
-            mxEvent.addListener(img, md, mxUtils.bind(this, function(evt) {
-                // Disables dragging the image
-                mxEvent.consume(evt);
-            }));
-
-            mxEvent.addListener(img, 'click', mxUtils.bind(this, function(evt) {
-                var graph = _mxgraph.editor.graph;
-                var cell = graph.getSelectionCell();
-                var bounds = this.graph.getCellBounds(cell);
-                var model = graph.getModel();
-
-                if (_mxgraph.properties) {
-                    _mxgraph.properties.destroy();
-                }
-
-                var graphOffset = mxUtils.getOffset(_mxgraph.editor.graph.container);
-                var x = graphOffset.x + 10;
-                var y = graphOffset.y;
-
-                if (bounds != null)
-                {
-                    x += bounds.x + Math.min(100, bounds.width);
-                    y += bounds.y;
-                }
-
-                var form = $('<div>');
-                var current = cell.getAttribute("filter_name");
-
-                var filters = $('<select>')
-                    .addClass('filter_name')
-                    .addClass('max-width')
-                    .append(
-                        $('<option>')
-                            .attr('value', '0')
-                            .text('Select filter...')
-                    );
-
-                $.each(_mxgraph.filters, function (key, value) {
-                    var option = $('<option>')
-                        .attr('value', value.name)
-                        .text(value.title);
-
-                    if (value.name == current) {
-                        option.attr('selected', 'selected');
-                    }
-
-                    filters.append(option);
-                });
-
-                var values = $('<input>')
-                    .addClass('filter_values')
-                    .addClass('max-width')
-                    .attr("placeholder", "Enter filter values here...")
-                    .val(cell.getAttribute("filter_values"));
-
-                var okFunction = function (cell) {
-                    var name = $('.mxWindow .filter_name' ).val();
-                    var title = $('.mxWindow .filter_name option:selected' ).text();
-                    var values = $('.mxWindow .filter_values').val();
-
-                    if (name != '0' && values) {
-                        cell.setAttribute('filter_name', name);
-                        cell.setAttribute('label', title);
-                        cell.setAttribute("filter_values", values);
-
-                        graph.refresh();
-                        _mxgraph.properties.destroy();
-                        admin.relationTemplate.updateRelations();
-                    }
-                };
-
-                var cancelFunction = function () {
-                    _mxgraph.properties.destroy();
-                };
-
-                var buttons = $('<div>')
-                    .append(
-                        $('<button>')
-                            .text('OK')
-                            .click(function () {
-                                okFunction(cell);
-                            }),
-                        $('<button>')
-                            .text('Cancel')
-                            .click(cancelFunction)
-                    );
-
-                form.append(filters, values, buttons);
-
-                _mxgraph.properties = new mxWindow("Filter Properties", form[0], x, y, 230, 120, false);
-                _mxgraph.properties.setVisible(true);
-            }));
-
-            this.domNode.appendChild(img);
-
-            // Delete button
-            img = mxUtils.createImage('/js/mxgraph/grapheditor/images/delete.gif');
-            img.style.cursor = 'pointer';
-            img.style.width = '16px';
-            img.style.height = '16px';
-            mxEvent.addListener(img, md,
-                mxUtils.bind(this, function(evt)
-                {
-                    // Disables dragging the image
-                    mxEvent.consume(evt);
-                })
-            );
-
-            mxEvent.addListener(img, 'click', mxUtils.bind(this, function(evt)
-            {
-                _mxgraph.editor.graph.removeCells([this.state.cell]);
-                mxEvent.consume(evt);
-            })
-            );
-
-            this.domNode.appendChild(img);
-            _mxgraph.editor.graph.container.appendChild(this.domNode);
-            this.redrawTools();
-        };
-
-        /**
-         * Init
-         * @param editor
-         */
-        this.init = function (editor) {
-            _mxgraph.editor = editor;
-            _mxgraph.editor.graph.setConnectable(true);
-            _mxgraph.editor.graph.connectionHandler.createTarget = true;
-
-            // Check cell styles
-            _mxgraph.editor.graph.getStylesheet().putCellStyle('stoppedCellStyle', stoppedCellStyle);
-            _mxgraph.editor.graph.getStylesheet().putCellStyle('noCheckSelectedStyle', noCheckSelectedStyle);
-
-            _mxgraph.editor.graph.createHandler = function (state) {
-                if (state != null && this.model.isVertex(state.cell)) {
-                    if (state.cell.isCheck()) {
-                        return new _mxgraph.mxCheckHandler(state);
-                    } else if (state.cell.isFilter()) {
-                        return new _mxgraph.mxFilterHandler(state);
-                    }
-                }
-
-                return mxGraph.prototype.createHandler.apply(this, arguments);
-            };
-
-            _mxgraph.mxCheckHandler.prototype = new mxVertexHandler();
-            _mxgraph.mxCheckHandler.prototype.constructor = _mxgraph.mxCheckHandler;
-            _mxgraph.mxCheckHandler.prototype.domNode = null;
-            _mxgraph.mxCheckHandler.prototype.init = _mxgraph.mxCellHandlerInit;
-
-            _mxgraph.mxCheckHandler.prototype.redraw = function() {
-                mxVertexHandler.prototype.redraw.apply(this);
-                this.redrawTools();
-            };
-
-            _mxgraph.mxCheckHandler.prototype.redrawTools = function () {
-                if (this.state != null && this.domNode != null) {
-                    var dy = (mxClient.IS_VML && document.compatMode == 'CSS1Compat') ? 20 : 4;
-                    this.domNode.style.left = (this.state.x + this.state.width - 30) + 'px';
-                    this.domNode.style.top = (this.state.y - 20 - dy) + 'px';
-                }
-            };
-
-            _mxgraph.mxCheckHandler.prototype.destroy = function (sender, me) {
-                mxVertexHandler.prototype.destroy.apply(this, arguments);
-
-                if (this.domNode != null) {
-                    this.domNode.parentNode.removeChild(this.domNode);
-                    this.domNode = null;
-                }
-            };
-
-            _mxgraph.mxFilterHandler.prototype = new mxVertexHandler();
-            _mxgraph.mxFilterHandler.prototype.constructor = _mxgraph.mxFilterHandler;
-            _mxgraph.mxFilterHandler.prototype.domNode = null;
-            _mxgraph.mxFilterHandler.prototype.init = _mxgraph.mxCellHandlerInit;
-
-            _mxgraph.mxFilterHandler.prototype.redraw = function() {
-                mxVertexHandler.prototype.redraw.apply(this);
-                this.redrawTools();
-            };
-
-            _mxgraph.mxFilterHandler.prototype.redrawTools = function () {
-                if (this.state != null && this.domNode != null) {
-                    var dy = (mxClient.IS_VML && document.compatMode == 'CSS1Compat') ? 20 : 4;
-                    this.domNode.style.left = (this.state.x + this.state.width - 30) + 'px';
-                    this.domNode.style.top = (this.state.y - 20 - dy) + 'px';
-                }
-            };
-
-            _mxgraph.mxFilterHandler.prototype.destroy = function (sender, me) {
-                mxVertexHandler.prototype.destroy.apply(this, arguments);
-
-                if (this.domNode != null) {
-                    this.domNode.parentNode.removeChild(this.domNode);
-                    this.domNode = null;
-                }
-            };
-
-            // Crisp rendering in SVG except for connectors, actors, cylinder, ellipses
-            mxShape.prototype.crisp = true;
-            mxActor.prototype.crisp = false;
-            mxCylinder.prototype.crisp = false;
-            mxEllipse.prototype.crisp = false;
-            mxDoubleEllipse.prototype.crisp = false;
-            mxConnector.prototype.crisp = false;
-
-            // Enables guides
-            mxGraphHandler.prototype.guidesEnabled = true;
-
-            // Alt disables guides
-            mxGuide.prototype.isEnabledForEvent = function(evt)
-            {
-                return !mxEvent.isAltDown(evt);
-            };
-
-            // Enables snapping waypoints to terminals
-            mxEdgeHandler.prototype.snapToTerminals = true;
-
-            // Defines an icon for creating new connections in the connection handler.
-            // This will automatically disable the highlighting of the source vertex.
-            mxConnectionHandler.prototype.connectImage = new mxImage('/js/mxgraph/grapheditor/images/connector.gif', 16, 16);
-
-            // Enables connections in the graph and disables
-            // reset of zoom and translate on root change
-            // (ie. switch between XML and graphical mode).
-            _mxgraph.editor.graph.setConnectable(true);
-
-            _mxgraph.editor.graph.getModel().addListener(mxEvent.CHANGE, function () {
-                admin.relationTemplate.updateRelations();
-            });
-
-            // Create select actions in page
-            var node = document.getElementById('zoomActions');
-            mxUtils.write(node, 'Zoom: ');
-            mxUtils.linkAction(node, 'In', _mxgraph.editor, 'zoomIn');
-            mxUtils.write(node, ', ');
-            mxUtils.linkAction(node, 'Out', _mxgraph.editor, 'zoomOut');
-            mxUtils.write(node, ', ');
-            mxUtils.linkAction(node, 'Actual', _mxgraph.editor, 'actualSize');
-            mxUtils.write(node, ', ');
-            mxUtils.linkAction(node, 'Fit', _mxgraph.editor, 'fit');
-        };
-
-        /**
-         * Build graph by XML
-         * @param xml
-         */
-        this.buildByXML = function (xml) {
-            var doc = mxUtils.parseXml(xml);
-            var dec = new mxCodec(doc);
-            dec.decode(doc.documentElement, _mxgraph.editor.graph.getModel());
-
-            $.each(_mxgraph.getAllCells(), function (key, cell) {
-                if (cell.getAttribute('type') == _mxgraph.CELL_TYPE_CHECK) {
-                    _mxgraph.updateCheckStyles(cell);
-                }
-            });
-        };
-
-        /**
-         * Returns target check url
-         * @param url
-         * @param target
-         * @param check
-         */
-        this.getCheckLink = function (url, target, check, callback) {
             $.ajax({
                 dataType: "json",
-                url: url,
+                url: $(item).data("update-url"),
                 timeout: system.ajaxTimeout,
                 type: "POST",
-
-                data: {
-                    YII_CSRF_TOKEN: system.csrf,
-                    'TargetCheckLinkForm[target]' : target,
-                    'TargetCheckLinkForm[check]'  : check
-                },
+                data: data,
 
                 success: function (data, textStatus) {
-                    $('.loader-image').hide();
+                    $(".loader-image").hide();
 
                     if (data.status == "error") {
                         system.addAlert("error", data.errorText);
                         return;
                     }
 
-                    url = data.data.url;
-
-                    window.location.replace(url);
-
-                    if (callback) {
-                        callback(url);
-                    }
+                    item.replaceWith(data.data.item_rendered);
+                    admin.hideCheckSearchPopup();
                 },
 
                 error: function(jqXHR, textStatus, e) {
                     $(".loader-image").hide();
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
 
+                beforeSend: function (jqXHR, settings) {
+                    _nessusMapping.disableItem(vulnId, true);
+                    $(".loader-image").show();
+                }
+            });
+        };
+
+        /**
+         * Update vuln item
+         * @param checkId
+         */
+        this.updateItem = function (checkId) {
+            var item = $("[data-item-id=" + _nessusMapping.currentItemId + "]");
+            item.data("check-id", checkId);
+
+            _nessusMapping.saveItem(_nessusMapping.currentItemId);
+        };
+
+        /**
+         * Get filter data
+         * @param mappingId
+         * @returns {{YII_CSRF_TOKEN: string, NessusMappingVulnFilterForm[mappingId]: *, NessusMappingVulnFilterForm[hosts], NessusMappingVulnFilterForm[ratings]}}
+         */
+        this.getFilterData = function (mappingId) {
+            var hosts = $(_nessusMapping.selectors.filters.hosts);
+            var ratings = $(_nessusMapping.selectors.filters.ratings);
+
+            var hostIds = [];
+            var ratingIds = [];
+
+            $.each(hosts, function (key, value) {
+                hostIds.push($(value).val());
+            });
+
+            $.each(ratings, function (key, value) {
+                ratingIds.push($(value).val());
+            });
+
+            return {
+                "YII_CSRF_TOKEN": system.csrf,
+                "NessusMappingVulnFilterForm[mappingId]": mappingId,
+                "NessusMappingVulnFilterForm[hosts]": JSON.stringify(hostIds),
+                "NessusMappingVulnFilterForm[ratings]": JSON.stringify(ratingIds)
+            };
+        };
+
+        /**
+         * Filter mapping items
+         * @param mappingId
+         */
+        this.filterItems = function (mappingId) {
+            var data = _nessusMapping.getFilterData(mappingId);
+
+            $.ajax({
+                dataType: "json",
+                url: $(_nessusMapping.selectors.filters.container).data("filter-url"),
+                timeout: system.ajaxTimeout,
+                type: "POST",
+                data: data,
+
+                success: function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    $(_nessusMapping.selectors.table).replaceWith(data.data.table_rendered);
+                },
+
+                error: function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
                     system.addAlert("error", system.translate("Request failed, please try again."));
                 },
 
@@ -2615,6 +3177,79 @@ function Admin()
                 }
             });
         };
+
+        /**
+         * Select all checkbox changed
+         * @param enable
+         */
+        this.selectAll = function (enable) {
+            var items = $(_nessusMapping.selectors.items);
+            var ids = [];
+
+            $.each(items, function (key, value) {
+                ids.push($(value).data("item-id"));
+            });
+
+            var data = {
+                "YII_CSRF_TOKEN": system.csrf,
+                "NessusMappingVulnActivateForm[mappingIds]": JSON.stringify(ids),
+                "NessusMappingVulnActivateForm[activate]": +enable
+            };
+
+            $.ajax({
+                dataType: "json",
+                url: $(_nessusMapping.selectors.table).data("activate-url"),
+                timeout: system.ajaxTimeout,
+                type: "POST",
+                data: data,
+
+                success: function (data, textStatus) {
+                    $(".loader-image").hide();
+
+                    if (data.status == "error") {
+                        system.addAlert("error", data.errorText);
+                        return;
+                    }
+
+                    $(_nessusMapping.selectors.items).find("td.active input[type=checkbox]").prop("checked", enable);
+                },
+
+                error: function(jqXHR, textStatus, e) {
+                    $(".loader-image").hide();
+                    system.addAlert("error", system.translate("Request failed, please try again."));
+                },
+
+                beforeSend: function (jqXHR, settings) {
+                    $(".loader-image").show();
+                }
+            });
+        };
+    };
+
+    /**
+     * Show check search popup
+     */
+    this.showCheckSearchPopup = function () {
+        var modal = $("#issue-check-select-dialog");
+        var list = modal.find("ul.check-list");
+        var field = modal.find(".issue-search-query");
+
+        field.val("");
+        list.empty();
+
+        modal.find(".no-search-result").hide();
+        modal.modal();
+    };
+
+    /**
+     * Hide check search popup
+     */
+    this.hideCheckSearchPopup = function () {
+        var modal = $("#issue-check-select-dialog");
+
+        if (modal.is(":visible")) {
+            modal.modal("toggle");
+        }
     };
 }
 

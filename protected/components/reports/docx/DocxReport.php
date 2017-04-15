@@ -83,6 +83,7 @@ class DocxReport extends ReportPlugin {
             $project->year
         );
 
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
         $this->_filePath = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . hash("sha256", time() . rand() . $this->_fileName);
         $this->_scope = new VariableScopeStack($this->_data);
         $this->_scope->push(VariableScope::SCOPE_PROJECT, $this->_data["project"]);
@@ -1069,6 +1070,20 @@ class DocxReport extends ReportPlugin {
         );
 
         foreach ($types as $ext => $type) {
+            foreach ($xml->documentElement->childNodes as $oldNode) {
+                $sameExtension = $oldNode->getAttribute("Extension") == $ext;
+                $sameType = $oldNode->getAttribute("ContentType") == $type;
+
+                if ($sameExtension && $sameType) {
+                    // Skip the $type as it already exists on the template.
+                    continue 2;
+                } else if (!$sameExtension && !$sameType) {
+                    continue;
+                } else {
+                   throw new Exception("The template contained unexpected ContentType<->Extension mapping.");
+                }
+            }
+
             $node = $xml->createElement("Default");
             $node->setAttribute("Extension", $ext);
             $node->setAttribute("ContentType", $type);
@@ -1087,7 +1102,9 @@ class DocxReport extends ReportPlugin {
      * Generate report
      */
     public function generate() {
+        FileManager::createDir(Yii::app()->params["reports"]["tmpFilesPath"], 0777);
         $this->_templateDir = Yii::app()->params["reports"]["tmpFilesPath"] . "/" . hash("sha256", time() . rand() . $this->_fileName);
+
         FileManager::createDir($this->_templateDir, 0777);
         $exception = null;
 
@@ -1095,11 +1112,11 @@ class DocxReport extends ReportPlugin {
             $templatePath = Yii::app()->params["reports"]["file"]["path"] . "/" . $this->_template->file_path;
             $zip = new ZipArchive();
 
-            if (!$zip->open($templatePath)) {
+            if ($zip->open($templatePath) !== true) {
                 throw new Exception("Error opening ZIP archive: " . $templatePath);
             }
 
-            if (!$zip->extractTo($this->_templateDir)) {
+            if ($zip->extractTo($this->_templateDir) !== true) {
                 throw new Exception("Error extracting files to " . $this->_templateDir);
             }
 

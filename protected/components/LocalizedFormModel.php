@@ -3,8 +3,7 @@
 /**
  * Base class for localized form model.
  */
-class LocalizedFormModel extends CFormModel
-{
+class LocalizedFormModel extends FormModel {
     /**
      * @var array localized items.
      */
@@ -13,8 +12,13 @@ class LocalizedFormModel extends CFormModel
     /**
      * Get default value for localized item.
      */
-    public function defaultL10n($languages, $itemName)
-    {
+    public function defaultL10n($languages, $itemName, $field = false) {
+        $values = $this->localizedItems;
+
+        if ($field) {
+            $values = $this->fields;
+        }
+
         $value   = '';
         $default = null;
 
@@ -25,15 +29,15 @@ class LocalizedFormModel extends CFormModel
                 break;
             }
 
-        if ($default && isset($this->localizedItems[$default->id][$itemName]))
-            $value = $this->localizedItems[$default->id][$itemName];
+        if ($default && isset($values[$default->id][$itemName]))
+            $value = $values[$default->id][$itemName];
 
         if ($value === '')
             foreach ($languages as $lang)
             {
-                if (isset($this->localizedItems[$lang->id][$itemName]))
+                if (isset($values[$lang->id][$itemName]))
                 {
-                    $value = $this->localizedItems[$lang->id][$itemName];
+                    $value = $values[$lang->id][$itemName];
 
                     if ($value !== '')
                         break;

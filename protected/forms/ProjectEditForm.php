@@ -51,6 +51,16 @@ class ProjectEditForm extends CFormModel {
     private $_projectId;
 
     /**
+     * @var array hidden fields
+     */
+    public $hiddenFields;
+
+    /**
+     * @var language id
+     */
+    public $languageId;
+
+    /**
      * Constructor
      * @param string $scenario
      * @param null $projectId
@@ -75,7 +85,10 @@ class ProjectEditForm extends CFormModel {
             array("clientId", "checkClient"),
             array("status", "in", "range" => Project::getValidStatuses()),
             array("hoursAllocated", "numerical", "min" => 0),
+            array("languageId", "numerical", "integerOnly" => true),
+            array("languageId", "checkLanguage"),
             array("hoursAllocated", "checkHours"),
+            array("hiddenFields", "safe"),
 		);
 	}
     
@@ -135,4 +148,26 @@ class ProjectEditForm extends CFormModel {
 
         return true;
 	}
+
+    /**
+     * Check if language with such id exists in database
+     * @param $attribute
+     * @param $params
+     * @return bool
+     */
+    public function checkLanguage($attribute, $params) {
+        if (!$this->languageId) {
+            $this->languageId = null;
+            return true;
+        }
+
+        $language = Language::model()->findByPk($this->languageId);
+
+        if (!$language) {
+            $this->addError("languageId", "Language not exists.");
+            return false;
+        }
+
+        return true;
+    }
 }

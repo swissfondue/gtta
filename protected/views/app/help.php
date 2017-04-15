@@ -544,8 +544,6 @@ set threads 3</pre>
                                 </li>
                                 <li>rating_name - check rating name (like "High Risk" for high risk, etc.)</li>
                                 <li>target - check target host</li>
-                                <li>links - check links</li>
-                                <li>poc - check proof of concept</li>
                                 <li>result - check result</li>
                                 <li>reference - check reference name</li>
                                 <li>

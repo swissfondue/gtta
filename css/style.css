@@ -16,6 +16,16 @@ a[disabled] {
     background:none;
 }
 
+.shorten-word {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.red {
+    color: red;
+}
+
 .navbar .brand {
     color:#fff;
 }
@@ -37,6 +47,12 @@ a[disabled] {
 
 ul.nav li.dropdown:hover > ul.dropdown-menu {
     display: block;
+}
+
+ul.clear-ul {
+    list-style-type: none;
+    list-style-image: none;
+    margin-left: 0;
 }
 
 .loader-image {
@@ -86,6 +102,7 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 
 .category-list .percent,
 .category-list .stats,
+.field-list .visible,
 .target-list .stats,
 .control-header .stats,
 .control-header .percent,
@@ -94,6 +111,10 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 .project-list .stats,
 .project-list .percent {
     width:70px;
+}
+
+.field-list .type {
+    width: 200px;
 }
 
 .category-list td.stats,
@@ -155,11 +176,14 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 .summary-list .actions,
 .section-list .actions,
 .time-records-list .actions,
-.relation-template-list .actions {
+.relation-template-list .actions,
+.mapping-list .actions,
+.field-list .actions {
     width:30px;
     text-align:right;
 }
 
+.field-list .actions,
 .check-list .actions,
 .suggested-target-list .actions,
 .backups-list .actions {
@@ -247,6 +271,7 @@ fieldset hr {
     word-wrap:break-word;
 }
 
+.project-quick-nav-issues > .issue > a,
 .project-quick-nav > .target > a {
     font-weight:bold;
 }
@@ -283,6 +308,10 @@ fieldset hr {
 
 .project-quick-nav:last-child {
     padding-bottom:0;
+}
+
+#project-quick-nav-issues #summary {
+    margin-bottom:10px;
 }
 
 .detail-list .detail .content {
@@ -482,6 +511,31 @@ table.check-form > tbody > tr > td {
     margin-right:5px;
     display:block;
     float:left;
+}
+
+.marker {
+    width: 10px;
+    height: 10px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.marker.med-risk {
+    background-color:#dace2f;
+}
+
+.marker.high-risk {
+    background-color:#d63515;
+}
+
+.marker.low-risk {
+    background-color:#53a254;
+}
+
+.label-no-risk {
+    background-color: rgba(0, 0, 0, 0.31);
 }
 
 .label-high-risk, .label-admin, .label-error {
@@ -1215,11 +1269,6 @@ ul.breadcrumb {
     padding: 2px 5px;
 }
 
-.time-records-list {
-    left: auto;
-    right: 0;
-}
-
 .time-record-row table td {
     text-align: left;
 }
@@ -1290,4 +1339,229 @@ ul.breadcrumb {
     float: right;
     padding-top: 4px;
     margin-right: 90px;
+}
+
+.pagination-item-count {
+    display: inline-block;
+    float: right;
+    vertical-align: middle;
+}
+
+.radio-field-item {
+    margin-bottom: 10px;
+}
+
+.link {
+    cursor: pointer;
+}
+
+div.time-tracker {
+    margin-right:20px;
+}
+
+#issue-check-select-dialog {
+    margin-left: -225px;
+    width: 450px;
+}
+
+#target-select-dialog {
+    margin-left: -200px;
+    width: 400px;
+}
+
+#issue-check-select-dialog .issue-search-query,
+#target-select-dialog .target-search-query {
+    width: 98%;
+}
+
+#issue-information .field-block {
+    margin-bottom: 20px;
+}
+
+.issue-list .actions {
+    width:5%;
+    text-align:right;
+}
+
+.issue-list .status {
+    width:15%;
+}
+
+.issue-pre {
+    font-family:monospace;
+    padding:5px 10px 5px 10px;
+    margin:5px 0 5px 0;
+    background-color:#eee;
+    font-size:90%;
+    white-space: pre-wrap;       /* css-3 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+.issue-details {
+    overflow:hidden;
+    margin-bottom:10px;
+}
+
+.issue-details .protocols,
+.issue-details .target {
+    float: left;
+    margin-right:20px;
+}
+
+.issue-details .attachments {
+    float:right;
+}
+
+ul.check-list,
+ul.target-list {
+    list-style:none;
+    margin-left:0;
+}
+
+ul.check-list li,
+ul.target-list li {
+    padding:5px 0 5px 0;
+}
+
+.sortable-section-list, .available-section-list {
+    list-style:none;
+    margin:0;
+    padding:0;
+}
+
+.sortable-section-list {
+    width:100%;
+    min-height:200px;
+}
+
+.sortable-section-list li {
+    background-color:#f0f0f0;
+    margin:0 0 10px 0;
+    padding:10px;
+    border-radius:5px;
+    -webkit-border-radius:5px;
+    -moz-border-radius:5px;
+    border:1px solid #ddd;
+    cursor:pointer;
+}
+
+.sortable-section-list li.selected {
+    background-color:#fff;
+}
+
+.sortable-ghost {
+    opacity: 0.2;
+}
+
+.add-section h3 {
+    margin-bottom:10px;
+}
+
+.add-section div {
+    overflow: hidden;
+}
+
+.available-section-list li {
+    background-color:#f0f0f0;
+    margin:0 10px 10px 0;
+    padding:10px;
+    border-radius:5px;
+    -webkit-border-radius:5px;
+    -moz-border-radius:5px;
+    border:1px solid #ddd;
+    cursor:pointer;
+    float:left;
+}
+.sticky {
+     position: -webkit-sticky;
+     position: sticky;
+     top: 0;
+ }
+.right-scrollable-block {
+    max-height: 250px;
+    overflow-y: auto;
+}
+#project-quick-nav .target.active * {
+    color: red;
+}
+
+/** Nessus Mapping List */
+.mapping-list th.date {
+    width: 25%;
+}
+.mapping-list th.name {
+    width: 70%;
+}
+.mapping-list th.actions {
+    width: 5%;
+}
+
+/** Nessus Mapping Vulns Table */
+.nessus-mapping th.active {
+    width: 5%;
+}
+.nessus-mapping th.nessus-issue {
+    width: 20%;
+}
+.nessus-mapping th.nessus-rating {
+    width: 10%;
+}
+.nessus-mapping th.mapped-check {
+    width: 20%;
+}
+.nessus-mapping th.insert-nessus-title {
+    width: 5%;
+}
+.nessus-mapping th.mapped-solution {
+    width: 15%;
+}
+.nessus-mapping th.mapped-result {
+    width: 15%;
+}
+.nessus-mapping th.rating {
+    width: 10%;
+}
+.nessus-mapping td select {
+    width: 100%;
+}
+.nessus-mapping td.mapped a {
+    color: green;
+}
+.nessus-mapping td.not-mapped a {
+    color: orange;
+}
+
+/** Nessus Mapping Vulns Filters */
+.nessus-mapping-filters {
+    width: 100%;
+}
+.nessus-mapping-filters label {
+    cursor: pointer;
+}
+.nessus-mapping-filters .nessus-hosts-filter-container,
+.nessus-mapping-filters .nessus-ratings-filter-container {
+    padding-left: 10px;
+}
+.nessus-mapping-filters .filter.nessus-ratings {
+    width: 100%;
+}
+.nessus-mapping-filters .filter.nessus-ratings .nessus-rating {
+    padding: 10px 10px 10px 0;
+    display: inline-block;
+}
+.nessus-mapping-filters .filter.nessus-hosts {
+    width: 100%;
+}
+.nessus-mapping-filters .filter.nessus-hosts .nessus-host {
+    padding: 5px 0;
+    display: inline-block;
+    width: 24%;
+}
+.nessus-mapping-filters .nessus-hosts-filter-container {
+    max-height: 300px;
+    overflow-y: scroll;
+    width:100%;
 }

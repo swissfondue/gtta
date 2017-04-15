@@ -13,8 +13,15 @@
  * @property string $vuln_overdue
  * @property string $start_date
  * @property float $hours_allocated
+ * @property int $report_template_id
+ * @property bool $custom_report
+ * @property string $report_options
  * @property float $userHoursAllocated
  * @property float $userHoursSpent
+ * @property integer $language_id
+ * @property Target[] $targets
+ * @property ProjectReportSection[] $sections
+ * @property string $import_filename
  */
 class Project extends ActiveRecord implements IVariableScopeObject {
     /**
@@ -65,17 +72,31 @@ class Project extends ActiveRecord implements IVariableScopeObject {
         );
     }
 
+    /**
+     * Get status titles
+     * @return array
+     */
+    public static function getStatusTitles() {
+        return [
+            self::STATUS_ON_HOLD => Yii::t("app", "On Hold"),
+            self::STATUS_OPEN => Yii::t("app", "Open"),
+            self::STATUS_IN_PROGRESS => Yii::t("app", "In Progress"),
+            self::STATUS_FINISHED => Yii::t("app", "Finished"),
+        ];
+    }
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
-		return array(
-            array("name, year", "required"),
-            array("name", "length", "max" => 1000),
-            array("year", "length", "max" => 4),
-            array("status", "in", "range" => self::getValidStatuses()),
-            array("hours_allocated", "numerical", "min" => 0),
-		);
+		return [
+            ["name, year", "required"],
+            ["name", "length", "max" => 1000],
+            ["year", "length", "max" => 4],
+            ["status", "in", "range" => self::getValidStatuses()],
+            ["hours_allocated", "numerical", "min" => 0],
+            ["import_filename", "safe"],
+		];
 	}
 
     /**
@@ -91,6 +112,9 @@ class Project extends ActiveRecord implements IVariableScopeObject {
             "userHoursAllocated" => array(self::STAT, "ProjectUser", "project_id", "select" => "SUM(hours_allocated)"),
             "trackedTime" => array(self::STAT, "ProjectTime", "project_id", "select" => "trunc(SUM(time) / 3600)"), // Convert seconds to hours
             "timeRecords" => array(self::HAS_MANY, "ProjectTime", "project_id"),
+            "issues" => array(self::HAS_MANY, "Issue", "project_id"),
+            "language" => array(self::BELONGS_TO, "Language", "language_id"),
+            "sections" => array(self::HAS_MANY, "ProjectReportSection", "project_id"),
 		);
 	}
 
@@ -155,7 +179,7 @@ class Project extends ActiveRecord implements IVariableScopeObject {
         );
 
         if (!in_array($name, $vars)) {
-            throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+            return "";
         }
 
         if ($name == "rating") {
@@ -181,7 +205,7 @@ class Project extends ActiveRecord implements IVariableScopeObject {
         );
 
         if (!in_array($name, $lists)) {
-            throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+            return [];
         }
 
         $data = array();
@@ -338,5 +362,81 @@ class Project extends ActiveRecord implements IVariableScopeObject {
         }
 
         return $hours;
+    }
+
+    /**
+     * Check if field is hidden in project scope
+     * @param $name
+     */
+    public function isFieldHidden($name) {
+        $criteria = new CDbCriteria();
+        $criteria->select = "g.name";
+        $criteria->group = "g.name";
+        $criteria->join = "INNER JOIN target_checks tc ON tc.id = t.target_check_id";
+        $criteria->join .= sprintf(" INNER JOIN targets tr ON tr.id = tc.target_id AND tr.project_id = %d", $this->id);
+        $criteria->join .= " INNER JOIN check_fields cf ON cf.id = t.check_field_id";
+        $criteria->join .= sprintf(" INNER JOIN global_check_fields g ON g.id = cf.global_check_field_id AND g.name = '%s'", $name);
+        $criteria->condition = "t.hidden IS true";
+
+        return TargetCheckField::model()->count($criteria) > 0;
+    }
+
+    /**
+     * Get project admin user
+     * @return null
+     */
+    public function getAdmin() {
+        foreach ($this->projectUsers as $user) {
+            if ($user->admin) {
+                return $user->user;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns project issues
+     * @param int $offset
+     * @return array|mixed|null
+     */
+    public function getIssues($offset = 0) {
+        $language = System::model()->findByPk(1)->language;
+
+        $criteria = new CDbCriteria();
+        $criteria->addColumnCondition(["project_id" => $this->id]);
+        $criteria->select = "t.id, cl10n.name, COUNT(DISTINCT tc.target_id) AS affected_targets, MAX(tc.rating) AS top_rating";
+        $criteria->group = "t.id, cl10n.name";
+        $criteria->join =
+            "LEFT JOIN checks c ON c.id = t.check_id " .
+            "LEFT JOIN checks_l10n cl10n ON cl10n.check_id = c.id " .
+            "LEFT JOIN issue_evidences ie ON ie.issue_id = t.id " .
+            "LEFT JOIN target_checks tc ON tc.id = ie.target_check_id";
+        $criteria->addColumnCondition([
+            "cl10n.language_id" => $language->id
+        ]);
+
+        if ($offset) {
+            $criteria->offset = $offset;
+        }
+
+        $criteria->order = "top_rating DESC";
+
+        return Issue::model()->findAll($criteria);
+    }
+
+    /**
+     * Check if project has custom section specified
+     * @param int $section
+     * @return bool
+     */
+    public function hasSection($section) {
+        foreach ($this->sections as $scn) {
+            if ($scn->type == $section) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

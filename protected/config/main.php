@@ -7,20 +7,21 @@ defined("BASE_DIR") || define("BASE_DIR", "/opt/gtta");
 $params = loadConfig(dirname(__FILE__), "params");
 
 // main Web application configuration
-return array(
+return [
 	"basePath" => dirname(__FILE__) . "/..",
 	"name"  => "GTTA",
     "charset" => "utf-8",
     "runtimePath" => BASE_DIR . "/runtime",
 
 	// preloading components
-	"preload" => array("log"),
+	"preload" => ["log"],
 
 	// autoloading model and component classes
-	"import" => array(
+	"import" => [
         "application.forms.*",
 		"application.models.*",
 		"application.components.*",
+        "application.components.exceptions.*",
         "application.components.formats.*",
         "application.components.filters.*",
         "application.components.reports.*",
@@ -28,50 +29,50 @@ return array(
         "application.extensions.PHPRtfLite.*",
         "application.extensions.PHPRtfLite.PHPRtfLite.*",
         "application.jobs.*",
-	),
+	],
 
 	// application components
-	"components" => array(
-        "session" => array(
+	"components" => [
+        "session" => [
             "class" => "CDbHttpSession",
             "sessionTableName" => "sessions",
             "connectionID" => "db",
             "autoCreateSessionTable" => true,
-            "timeout" => 60 * 60, // 1 hour
-        ),
+            "timeout" => 0,
+        ],
 
-        "request" => array(
+        "request" => [
             "enableCsrfValidation" => true,
-        ),
+        ],
 
-		"user" => array(
+		"user" => [
             "class" => "WebUser",
             "autoUpdateFlash" => true,
-		),
+		],
 
-		"urlManager" => array(
+		"urlManager" => [
             "baseUrl" => $params["baseUrl"],
 			"urlFormat" => "path",
             "showScriptName" => false,
             "rules" => loadConfig(dirname(__FILE__), "routes"),
-		),
+		],
 
         "db" => loadConfig(dirname(__FILE__), "db"),
 
-		"errorHandler" => array(
+		"errorHandler" => [
             "errorAction" => "app/error",
-        ),
+        ],
 
-		"log" => array(
+		"log" => [
 			"class"  => "CLogRouter",
-			"routes" => array(
-				array(
+			"routes" => [
+				[
 					"class" => "CFileLogRoute",
 					"levels" => "error, warning",
-				),
-			),
-		),
-	),
+				],
+			],
+		],
+	],
 
     // parameters
 	"params" => $params,
@@ -82,6 +83,4 @@ return array(
     // language settings
     "sourceLanguage" => "en",
     "language"       => "en",
-);
-
-?>
+];

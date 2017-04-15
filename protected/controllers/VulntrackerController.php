@@ -90,8 +90,8 @@ class VulntrackerController extends Controller {
         $criteria->addInCondition('t.target_id', $targetIds);
         $criteria->addInCondition('t.rating', $this->_allowedRiskValues);
         $criteria->order = 'target.host ASC, COALESCE(l10n.name, "check".name) ASC';
-        $criteria->limit  = Yii::app()->params['entriesPerPage'];
-        $criteria->offset = ($page - 1) * Yii::app()->params['entriesPerPage'];
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->together = true;
 
         $targetCheckRelations = array(
@@ -119,20 +119,29 @@ class VulntrackerController extends Controller {
 
         $totalCheckCount += (int) TargetCustomCheck::model()->count($criteria);
 
-        if ($tCheckCount == Yii::app()->params['entriesPerPage']) {
-            return array($targetChecks, array(), $totalCheckCount);
-        } elseif ($tCheckCount < Yii::app()->params['entriesPerPage'] && $tCheckCount > 0) {
-            $limit = Yii::app()->params['entriesPerPage'] - $tCheckCount;
-            $offset = 0;
-        } elseif ($tCheckCount == 0) {
-            $limit = Yii::app()->params['entriesPerPage'];
-            $offset = ($page - 1) * Yii::app()->params['entriesPerPage'] - TargetCheck::model()->count($criteria);
-        } else {
-            throw new CHttpException(500, Yii::t("app", "Invalid target checks count!"));
+        $epp = $this->entriesPerPage;
+
+        if ($epp <= 0) {
+            $epp = 1000000000;
         }
 
-        $criteria->limit = $limit;
-        $criteria->offset = $offset;
+        $limit = 0;
+        $offset = 0;
+
+        if ($tCheckCount == $epp) {
+            return array($targetChecks, array(), $totalCheckCount);
+        } elseif ($tCheckCount < $epp && $tCheckCount > 0) {
+            $limit = $epp - $tCheckCount;
+            $offset = 0;
+        } elseif ($tCheckCount == 0) {
+            $limit = $epp;
+            $offset = ($page - 1) * $epp - $totalCheckCount;
+        }
+
+        if ($limit && $offset) {
+            $criteria->limit = $limit;
+            $criteria->offset = $offset;
+        }
 
         $customChecks = TargetCustomCheck::model()->with(array(
             'target',

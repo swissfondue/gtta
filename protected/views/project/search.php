@@ -1,3 +1,7 @@
+<?php
+    $statuses = Project::getStatusTitles();
+?>
+
 <div class="active-header">
     <div class="pull-right buttons">
         <div class="search-form">
@@ -51,8 +55,7 @@
                                 </td>
                                 <td class="status">
                                     <?php
-                                        switch ($project->status)
-                                        {
+                                        switch ($project->status) {
                                             case Project::STATUS_OPEN:
                                                 echo '<span class="label">' . $statuses[$project->status] . '</span>';
                                                 break;
