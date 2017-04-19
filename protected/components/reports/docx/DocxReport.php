@@ -743,6 +743,8 @@ class DocxReport extends ReportPlugin {
             if ($this->_scope->get()->getName() == VariableScope::SCOPE_ATTACHMENT && $name == "image") {
                 $this->_insertImage($xml, $parent, $value);
             } else {
+                // Decode HTML-entities back to normal characters.
+                $value = html_entity_decode($value, ENT_QUOTES);
                 $this->_insertText($xml, $parent, $value, $replaceLineFeeds);
             }
         }
