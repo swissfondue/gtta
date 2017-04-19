@@ -246,12 +246,19 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         );
 
         $checkData = array(
+            // Id of the vulnerability.
+            "id" => $this->id,
+            // Id of the check that the vulnerability is based on.
+            "check_id" => $check->id,
             "name" => $check->getLocalizedName(),
             "rating" => $abbreviations[$this->rating],
             "rating_name" => $names[$this->rating],
             "target" => $this->getOverrideTarget() ? $this->getOverrideTarget() : $this->target->host,
+            "target_description" => $this->target->description,
             "result" => $this->getResult(),
             "reference" => $check->_reference->name . ($check->reference_code ? "-" . $check->reference_code : ""),
+            "reference_short" => ($check->reference_code ? $check->reference_code : ""),
+            "control" => $check->control->name,
             "solution" => array(),
             "question" => $this->getQuestion(),
             "background_info" => $this->getBackgroundInfo(),
