@@ -357,7 +357,7 @@
                 <td class="text">
                     <div class="file-input" id="upload-link-<?php echo $check->id; ?>">
                         <a href="#attachment"><?php echo Yii::t("app", "New Attachment"); ?></a>
-                        <input type="file" name="TargetCheckAttachmentUploadForm[attachment]" data-id="<?php echo $check->id; ?>" data-upload-url="<?php echo $this->createUrl("project/uploadattachment", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $check->id)); ?>">
+                        <input type="file" name="TargetCheckAttachmentUploadForm[attachment]" accept="image/*,.txt" data-id="<?php echo $check->id; ?>" data-upload-url="<?php echo $this->createUrl("project/uploadattachment", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $check->id)); ?>">
                     </div>
 
                     <div class="upload-message hide" id="upload-message-<?php echo $check->id; ?>"><?php echo Yii::t("app", "Uploading..."); ?></div>

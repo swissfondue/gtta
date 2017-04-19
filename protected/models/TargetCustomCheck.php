@@ -190,7 +190,7 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
         switch ($name) {
             case "attachment":
                 foreach ($this->attachments as $attachment) {
-                    if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
+                    if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg", "text/plain"))) {
                         $data[] = $attachment;
                     }
                 }
