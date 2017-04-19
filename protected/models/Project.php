@@ -200,6 +200,7 @@ class Project extends ActiveRecord implements IVariableScopeObject {
     public function getList($name, $filters, VariableScope $scope) {
         $lists = array(
             "target",
+            "detail",
             "category",
             "check",
         );
@@ -213,6 +214,10 @@ class Project extends ActiveRecord implements IVariableScopeObject {
         switch ($name) {
             case "target":
                 $data = $this->targets;
+                break;
+
+            case "detail":
+                $data = $this->details;
                 break;
 
             case "category":
