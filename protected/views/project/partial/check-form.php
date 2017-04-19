@@ -4,6 +4,14 @@
     <tbody>
         <tr>
             <th>
+                <?php echo Yii::t("app", "Id"); ?>
+            </th>
+            <td class="text">
+                <?php echo CHtml::encode($check->id); ?>
+            </td>
+            </tr>
+            <tr>
+            <th>
                 <?php echo Yii::t("app", "Reference"); ?>
             </th>
             <td class="text">

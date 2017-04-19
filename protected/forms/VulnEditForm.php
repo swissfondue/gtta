@@ -20,6 +20,11 @@ class VulnEditForm extends CFormModel
      */
     public $status;
 
+    /**
+     * @var check.
+     */
+    public $check;
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
