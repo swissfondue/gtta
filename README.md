@@ -66,3 +66,6 @@ Bigger security providers need to coordinate multiple tests and auditors at the 
 GTTA offers a feature where the project progress can be monitored by the client or the project manager: the moment a single check is finished the project status page gets updated. Additionally the resources can be allocated for each test module with a separate project management module. 
 
 
+License
+-------
+See LICENSE file in the root repository directory.
