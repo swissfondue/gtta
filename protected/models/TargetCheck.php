@@ -263,7 +263,6 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "question" => $this->getQuestion(),
             "background_info" => $this->getBackgroundInfo(),
             "hints" => $this->getHints(),
-            "links" => "",
             "poc" => $this->getPoc(),
         );
 
@@ -278,7 +277,8 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         $checkData["solution"] = implode("<br><br>", $checkData["solution"]);
 
         if (!in_array($name, array_keys($checkData))) {
-            return "";
+            $customFieldValue = $this->getCustomField($name);
+            return (isset($customFieldValue) ? $customFieldValue : "");
         }
 
         return $checkData[$name];
@@ -511,6 +511,15 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     public function getApplicationProtocol() {
         return $this->_getFieldValue(GlobalCheckField::FIELD_APPLICATION_PROTOCOL);
     }
+
+    /**
+     * Get custom field value.
+     * @param $name
+     * @return mixed|null
+     */
+     public function getCustomField($name) {
+         return $this->_getFieldValue($name);
+     }
 
     /**
      * TargetCheckCategory relation
