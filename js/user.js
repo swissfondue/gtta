@@ -649,7 +649,7 @@ function User()
          * Get check data in array.
          */
         this.getData = function (id) {
-            var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, solutions, resultTitle, saveResult,
+            var i, row, textareas, texts, checkboxes, radios, override, protocol, port, result, solutions, saveResult,
                 attachments, rating, data, solution, solutionTitle, saveSolution, scripts, timeouts, fields;
 
             row = $('div.check-form[data-type=check][data-id="' + id + '"]');
@@ -690,7 +690,6 @@ function User()
                 }
             ).get();
 
-            resultTitle = $('input[name="TargetCheckEditForm_' + id + '[resultTitle]"]', row).val();
             result = _check.ckeditors["TargetCheckEditForm_fields_" + id + "_result"] ?
                 _check.ckeditors["TargetCheckEditForm_fields_" + id + "_result"].getData() :
                 $('textarea[name="TargetCheckEditForm_' + id + '[result]"]').val();
@@ -780,7 +779,6 @@ function User()
             data = [];
 
             data.push({ name : 'TargetCheckEditForm_' + id + '[result]',         value : result   });
-            data.push({ name : 'TargetCheckEditForm_' + id + '[resultTitle]',    value : resultTitle   });
             data.push({ name : 'TargetCheckEditForm_' + id + '[rating]',         value : rating   });
 
             data.push({name: "TargetCheckEditForm_" + id + "[solution]", value: solution ? solution : ""});
@@ -1001,7 +999,6 @@ function User()
                         );
 
                         $('input[name="TargetCheckEditForm_' + id + '[saveResult]"]').prop("checked", false);
-                        $('input[name="TargetCheckEditForm_' + id + '[resultTitle]"]').val("").hide();
 
                         if (resultsList.parents('tr').hasClass('hide')) {
                             resultsList.parents('tr').removeClass('hide');

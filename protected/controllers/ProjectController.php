@@ -2449,10 +2449,6 @@ class ProjectController extends Controller {
             $targetCheck->rating = $model->rating;
 
             if (User::checkRole(User::ROLE_ADMIN) && $model->saveResult) {
-                if (!$model->resultTitle) {
-                    throw new CHttpException(403, Yii::t("app", "Please specify the result title."));
-                }
-
                 $criteria = new CDbCriteria();
                 $criteria->select = "MAX(sort_order) as max_sort_order";
                 $criteria->addColumnCondition(array("check_id" => $check->id));
@@ -2466,7 +2462,6 @@ class ProjectController extends Controller {
 
                 $result = new CheckResult();
                 $result->check_id = $check->id;
-                $result->title = $model->resultTitle;
                 $result->result = $model->result;
                 $result->sort_order = $sortOrder;
                 $result->save();
@@ -2474,7 +2469,6 @@ class ProjectController extends Controller {
                 $resultL10n = new CheckResultL10n();
                 $resultL10n->check_result_id = $result->id;
                 $resultL10n->language_id = $language->id;
-                $resultL10n->title = $model->resultTitle;
                 $resultL10n->result = $model->result;
                 $resultL10n->save();
 
