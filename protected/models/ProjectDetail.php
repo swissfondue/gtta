@@ -41,7 +41,7 @@ class ProjectDetail extends ActiveRecord implements IVariableScopeObject
 		);
 	}
 
-        /**
+    /**
 	 * @return array relational rules.
 	 */
 	public function relations()
@@ -51,22 +51,34 @@ class ProjectDetail extends ActiveRecord implements IVariableScopeObject
 		);
 	}
 
-        public function getVariable($name, VariableScope $scope) {
-            $vars = array(
-                "subject",
-                "content",
-            );
+    /**
+     * Get scalar variable
+     * @param $name
+     * @param VariableScope $scope
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getVariable($name, VariableScope $scope) {
+        $vars = array(
+            "subject",
+            "content",
+        );
 
-            if (!in_array($name, $vars)) {
-                 throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
-            }
-
-            return $this->$name;
-
+        if (!in_array($name, $vars)) {
+             throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
         }
 
-        public function getList($name, $filters, VariableScope $scope) {
-            throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
-        }
+        return $this->$name;
+    }
 
+    /**
+     * Get list
+     * @param $name
+     * @param $filters
+     * @param VariableScope $scope
+     * @throws Exception
+     */
+    public function getList($name, $filters, VariableScope $scope) {
+        throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+    }
 }

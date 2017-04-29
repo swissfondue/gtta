@@ -1,0 +1,177 @@
+#cvssReference {
+    font-size: 50%;
+}
+
+fieldset {
+    position: relative;
+    background-color: #f2f2f2;
+    margin-top: 5px;
+    border: 0;
+    padding: 2px 0;
+}
+
+fieldset legend {
+    background-color: #666666;
+    color: #ffffff;
+    margin: 0;
+    width: 100%;
+    padding: 1px 0px;
+    text-indent: 15px;
+}
+
+fieldset div.metric {
+    padding: 0;
+    margin: 5px 0;
+}
+
+fieldset div.col {
+    width: 45%;
+    margin: 0 0 0 15px;
+}
+
+fieldset h3 {
+    font-size: 12px;
+    margin: 0.03em;
+    padding-left: 0.1em;
+}
+
+fieldset input {
+    display: none;
+}
+
+fieldset label {
+    background: #cccccc;
+    display: inline-block;
+    margin: 3px;
+    padding: 2px 5px;
+    border: 0;
+    cursor: pointer;
+    font-size: 60%;
+    border-radius: 5px;
+    color: #666666;
+    border: 1px solid #999999;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: -moz-none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+fieldset label:hover {
+    background: #666666;
+    color: #ffffff;
+    border: 1px solid #666666
+}
+
+fieldset input:checked + label {
+    background: green;
+    border: 1px solid green;
+    color: #ffffff;
+}
+
+#vector {
+    margin: 0 15px;
+}
+
+#vectorString {
+    display: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background-color: #090;
+    color: #ffffff;
+    font-weight: bold;
+    width: 70%;
+}
+
+.scoreRating {
+    position: absolute;
+    top: 0px;
+    right: 0;
+    padding: 0 0.4em;
+    margin: 0 15px;
+    border: 2px solid #666666;
+    background: #dddddd;
+    font-size: 6px;
+    border-radius: 10px;
+    width: 100px;
+    height: auto;
+    line-height: 150%;
+    text-align: center;
+}
+
+.scoreRating.none,
+.scoreRating.low,
+.scoreRating.medium,
+.scoreRating.high,
+.scoreRating.critical {
+    color: #ffffff;
+}
+
+.scoreRating.none {
+    background: #53aa33;
+    border: 2px solid #53aa33;
+}
+
+.scoreRating.low {
+    background: #ffcb0d;
+    border: 2px solid #ffcb0d;
+}
+
+.scoreRating.medium {
+    background: #f9a009;
+    border: 2px solid #f9a009;
+}
+
+.scoreRating.high {
+    background: #df3d03;
+    border: 2px solid #df3d03;
+}
+
+.scoreRating.critical {
+    background: #cc0500;
+    border: 2px solid #cc0500;
+}
+
+.scoreRating span {
+    font-size: 75%;
+    font-weight: bold;
+    width: 100%;
+}
+
+.needBaseMetrics {
+    text-align: center;
+    line-height: 100%;
+    padding-top: 5px;
+    font-size: 12px;
+}
+
+#baseMetricScore,
+#temporalMetricScore,
+#environmentalMetricScore {
+    display: block;
+    font-size: 16px;
+    line-height: 16px;
+    font-weight: normal;
+    margin-top: 4px;
+}
+
+#baseSeverity,
+#temporalSeverity,
+#environmentalSeverity {
+    font-size: 8px;
+    font-weight: normal;
+    margin-bottom: 5px;
+    display: block;
+}
+
+div#scriptWarning {
+    border: solid red 2px;
+    background: #f5dddd;
+    padding: 1em 1em 1em 1em;
+    margin: 0.4em 0;
+}
+
+.modal-cvss {
+    width:640px !important;
+}

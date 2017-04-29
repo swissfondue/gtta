@@ -388,9 +388,10 @@
         <tr>
             <th>
                 <?php echo Yii::t("app", "Result Rating"); ?>
-                <button class="opener" onclick="$('#dialog1').data('currentVulnId', '<?php echo $check->id; ?>').dialog('open');">Set CVSS 3.0 Vector</button>
             </th>
             <td class="text">
+                <button class="btn" onclick="user.check.cvss(<?php echo $check->id; ?>);">Set CVSS 3.0 Vector</button>
+                <br><br>
                 <ul class="rating">
                     <?php foreach (TargetCheck::getValidRatings() as $rating): ?>
                         <li>

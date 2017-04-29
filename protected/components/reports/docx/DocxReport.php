@@ -586,6 +586,13 @@ class DocxReport extends ReportPlugin {
         }
     }
 
+    /**
+     * Insert text attachment
+     * @param DOMDocument $xml
+     * @param DOMNode $parentNode
+     * @param $attachment
+     * @param $replaceLineFeeds
+     */
     private function _insertTextAttachment(DOMDocument $xml, DOMNode $parentNode, $attachment, $replaceLineFeeds) {
         $text = FileManager::getFileContent($attachment["file"]);
         if (!$text) {

@@ -14,6 +14,85 @@ function User()
         this.ckeditors = [];
 
         /**
+         * CVSS form handler
+         * @param checkId
+         */
+        this.cvss = function (checkId) {
+            clearCVSScalc();
+            var currentVulnId = checkId;
+
+            if (currentVulnId == null) {
+                alert("Could not get id of current check or tried to set vector for custom check!");
+                return;
+            }
+
+            var cvss3vector = $("#TargetCheckEditForm_fields_" + currentVulnId + "_cvss30vector");
+
+            if (cvss3vector.length == 0) {
+                alert("Text-field with name \"cvss30vector\" not found. Make sure that you've created it through System->Customization->Check Fields.");
+                return;
+            }
+
+            var vectorStringRegex_30 = /^CVSS:3.0\/((AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]|E:[XUPFH]|RL:[XOTWU]|RC:[XURC]|[CIA]R:[XLMH]|MAV:[XNALP]|MAC:[XLH]|MPR:[XUNLH]|MUI:[XNR]|MS:[XUC]|M[CIA]:[XNLH])\/)*(AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]|E:[XUPFH]|RL:[XOTWU]|RC:[XURC]|[CIA]R:[XLMH]|MAV:[XNALP]|MAC:[XLH]|MPR:[XUNLH]|MUI:[XNR]|MS:[XUC]|M[CIA]:[XNLH])$/;
+            var currentVulnVectorString = cvss3vector.val().match(vectorStringRegex_30);
+
+            if (currentVulnVectorString && (currentVulnVectorString || []).length != 0) {
+                setMetricsFromVector(currentVulnVectorString[0]);
+            }
+
+            $("#cvss-dialog").data("currentVulnId", checkId).modal();
+        };
+
+        /**
+         * Set CVSS vector
+         */
+        this.cvssSet = function () {
+            var currentVulnId = $("#cvss-dialog").data("currentVulnId");
+            var vulnRadioNames = "TargetCheckEditForm_" + currentVulnId + "[rating]";
+            var vulnRadioSelector = ":radio[name='" + vulnRadioNames + "']";
+            var severity = $("#environmentalSeverity").text();
+
+            // Clear selections
+            $.each($(vulnRadioSelector), function (index, element) {
+                element.checked = false;
+            });
+
+            if (severity.indexOf("None") > -1) {
+                $(vulnRadioSelector + "[value=50]").prop('checked', true); // Info result.
+            }
+            else if (severity.indexOf("Low") > -1) {
+                $(vulnRadioSelector + "[value=100]").prop('checked', true); // Low Risk result.
+            }
+            else if (severity.indexOf("Medium") > -1) {
+                $(vulnRadioSelector + "[value=200]").prop('checked', true); // Med Risk result.
+            }
+            else if (severity.indexOf("High") > -1) {
+                $(vulnRadioSelector + "[value=500]").prop('checked', true); // High Risk result.
+            }
+            else if (severity.indexOf("Critical") > -1) {
+                // Critical not implemented on GTTA so let's set this to high.
+                $(vulnRadioSelector + "[value=500]").prop('checked', true); // Critical Risk result.
+            }
+            else {
+                alert("Select all values for all base metrics to generate score!");
+                return;
+            }
+
+            // Remove the old CVSS string and add a new one.
+            var vectorStringRegex_30 = /[\r\n]*CVSS:3.0\/((AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]|E:[XUPFH]|RL:[XOTWU]|RC:[XURC]|[CIA]R:[XLMH]|MAV:[XNALP]|MAC:[XLH]|MPR:[XUNLH]|MUI:[XNR]|MS:[XUC]|M[CIA]:[XNLH])\/)*(AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]|E:[XUPFH]|RL:[XOTWU]|RC:[XURC]|[CIA]R:[XLMH]|MAV:[XNALP]|MAC:[XLH]|MPR:[XUNLH]|MUI:[XNR]|MS:[XUC]|M[CIA]:[XNLH])/mg;
+            var cvss3vector = $("#TargetCheckEditForm_fields_" + currentVulnId + "_cvss30vector");
+
+            if (cvss3vector.length == 0) {
+                return;
+            }
+
+            cvss3vector.val(cvss3vector.val().replace(vectorStringRegex_30, ""));
+            cvss3vector.val(cvss3vector.val() + $("#vectorString").val());
+
+            $("#cvss-dialog").modal("hide");
+        };
+
+        /**
          * Update status of running checks.
          */
         this.update = function (url) {
