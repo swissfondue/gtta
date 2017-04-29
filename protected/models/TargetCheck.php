@@ -246,17 +246,23 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         );
 
         $checkData = array(
+            // Id of the vulnerability.
+            "id" => $this->id,
+            // Id of the check that the vulnerability is based on.
+            "check_id" => $check->id,
             "name" => $check->getLocalizedName(),
             "rating" => $abbreviations[$this->rating],
             "rating_name" => $names[$this->rating],
             "target" => $this->getOverrideTarget() ? $this->getOverrideTarget() : $this->target->host,
+            "target_description" => $this->target->description,
             "result" => $this->getResult(),
             "reference" => $check->_reference->name . ($check->reference_code ? "-" . $check->reference_code : ""),
+            "reference_short" => ($check->reference_code ? $check->reference_code : ""),
+            "control" => $check->control->name,
             "solution" => array(),
             "question" => $this->getQuestion(),
             "background_info" => $this->getBackgroundInfo(),
             "hints" => $this->getHints(),
-            "links" => "",
             "poc" => $this->getPoc(),
         );
 
@@ -271,7 +277,8 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         $checkData["solution"] = implode("<br><br>", $checkData["solution"]);
 
         if (!in_array($name, array_keys($checkData))) {
-            return "";
+            $customFieldValue = $this->getCustomField($name);
+            return (isset($customFieldValue) ? $customFieldValue : "");
         }
 
         return $checkData[$name];
@@ -299,7 +306,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         switch ($name) {
             case "attachment":
                 foreach ($this->attachments as $attachment) {
-                    if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
+                    if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg", "text/plain"))) {
                         $data[] = $attachment;
                     }
                 }
@@ -504,6 +511,15 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     public function getApplicationProtocol() {
         return $this->_getFieldValue(GlobalCheckField::FIELD_APPLICATION_PROTOCOL);
     }
+
+    /**
+     * Get custom field value.
+     * @param $name
+     * @return mixed|null
+     */
+     public function getCustomField($name) {
+         return $this->_getFieldValue($name);
+     }
 
     /**
      * TargetCheckCategory relation

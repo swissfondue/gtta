@@ -17,11 +17,6 @@ class TargetCheckEditForm extends CFormModel {
     public $timeouts;
 
     /**
-     * @var string resultTitle.
-     */
-    public $resultTitle;
-
-    /**
      * @var string result.
      */
     public $result;

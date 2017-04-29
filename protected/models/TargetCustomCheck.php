@@ -153,8 +153,11 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
             "rating" => $abbreviations[$this->rating],
             "rating_name" => $names[$this->rating],
             "target" => $this->target->host,
+            "target_description" => $this->target->description,
             "result" => $this->result,
             "reference" => "CUSTOM-CHECK-" . $this->reference,
+            "reference_short" => "CC-" . $this->reference,
+            "control" => $control->name,
             "solution" => $this->solution,
         );
 
@@ -187,7 +190,7 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
         switch ($name) {
             case "attachment":
                 foreach ($this->attachments as $attachment) {
-                    if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg"))) {
+                    if (in_array($attachment->type, array("image/jpeg", "image/png", "image/gif", "image/pjpeg", "text/plain"))) {
                         $data[] = $attachment;
                     }
                 }

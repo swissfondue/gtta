@@ -1,8 +1,90 @@
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.ui.js"></script>
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.iframe-transport.js"></script>
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.fileupload.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/cvsscalc30_helptext.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/cvsscalc30.js"></script>
 <script src="/ckeditor/ckeditor.js"></script>
 <script src="/ckeditor/adapters/jquery.js"></script>
+
+<script>
+$( document ).ready(function() {
+  $(function () {
+    $( "#dialog1" ).dialog({
+      autoOpen: false,
+      maxWidth: 675,
+      width: 675,
+      position: { my: "center top", at: "center top", of: top },
+      open: function() {
+        clearCVSScalc();
+        var currentVulnId = $(this).data('currentVulnId');
+        if (currentVulnId == null) {
+          alert("Could not get id of current check or tried to set vector for custom check!");
+          $(this).dialog( "close" );
+        }
+        var cvss3vector = $("#TargetCheckEditForm_fields_" + currentVulnId + "_cvss30vector");
+        if (cvss3vector == null) {
+          alert("Text-field with name \"cvss30vector\" not found. Make sure that you've created it through System->Customization->Check Fields.");
+          $(this).dialog( "close" );
+        }
+        var vectorStringRegex_30 = /^CVSS:3.0\/((AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]|E:[XUPFH]|RL:[XOTWU]|RC:[XURC]|[CIA]R:[XLMH]|MAV:[XNALP]|MAC:[XLH]|MPR:[XUNLH]|MUI:[XNR]|MS:[XUC]|M[CIA]:[XNLH])\/)*(AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]|E:[XUPFH]|RL:[XOTWU]|RC:[XURC]|[CIA]R:[XLMH]|MAV:[XNALP]|MAC:[XLH]|MPR:[XUNLH]|MUI:[XNR]|MS:[XUC]|M[CIA]:[XNLH])$/;
+        var currentVulnVectorString = cvss3vector.val().match(vectorStringRegex_30);
+        if (currentVulnVectorString && (currentVulnVectorString||[]).length != 0) {
+            setMetricsFromVector(currentVulnVectorString[0]);
+        }
+      },
+      buttons: {
+        "Set CVSS 3.0 Vector": function() {
+          var currentVulnId = $(this).data('currentVulnId');
+          var vulnRadioNames = "TargetCheckEditForm_" + currentVulnId + "[rating]";
+          var vulnRadioSelector = ":radio[name='" + vulnRadioNames + "']";
+          var severity = $("#environmentalSeverity").text();
+
+          // Clear selections
+          $.each($(vulnRadioSelector), function(index, element) {
+            element.checked = false;
+          });
+
+          if (severity.indexOf("None") > -1) {
+            $(vulnRadioSelector + "[value=50]").prop('checked',true); // Info result.
+          }
+          else if (severity.indexOf("Low") > -1) {
+            $(vulnRadioSelector + "[value=100]").prop('checked',true); // Low Risk result.
+          }
+          else if (severity.indexOf("Medium") > -1) {
+            $(vulnRadioSelector + "[value=200]").prop('checked',true); // Med Risk result.
+          }
+          else if (severity.indexOf("High") > -1) {
+            $(vulnRadioSelector + "[value=500]").prop('checked',true); // High Risk result.
+          }
+          else if (severity.indexOf("Critical") > -1) {
+            // Critical not implemented on GTTA so let's set this to high.
+            $(vulnRadioSelector + "[value=500]").prop('checked',true); // Critical Risk result.
+          }
+          else {
+            alert("Select all values for all base metrics to generate score!");
+            return;
+          }
+
+          // Remove the old CVSS string and add a new one.
+          var vectorStringRegex_30 = /[\r\n]*CVSS:3.0\/((AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]|E:[XUPFH]|RL:[XOTWU]|RC:[XURC]|[CIA]R:[XLMH]|MAV:[XNALP]|MAC:[XLH]|MPR:[XUNLH]|MUI:[XNR]|MS:[XUC]|M[CIA]:[XNLH])\/)*(AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]|E:[XUPFH]|RL:[XOTWU]|RC:[XURC]|[CIA]R:[XLMH]|MAV:[XNALP]|MAC:[XLH]|MPR:[XUNLH]|MUI:[XNR]|MS:[XUC]|M[CIA]:[XNLH])/mg;
+          var cvss3vector = $("#TargetCheckEditForm_fields_" + currentVulnId + "_cvss30vector");
+          cvss3vector.val(cvss3vector.val().replace(vectorStringRegex_30, ''));
+          cvss3vector.val(cvss3vector.val() + $("#vectorString").val());
+
+          $(this).dialog( "close" );
+        },
+        Cancel: function() {
+          $(this).dialog( "close" );
+        }
+      }
+    });
+
+    $(".opener").click(function() {
+      $("#dialog1").dialog('open');
+    });
+  });
+});
+</script>
 
 <?php if (User::checkRole(User::ROLE_USER)): ?>
     <div class="active-header">
@@ -154,6 +236,9 @@
                                         <tr>
                                             <th>
                                                 <?php echo Yii::t("app", "Result Rating"); ?>
+                                                <?php if (isset($check)): ?>
+                                                  <button class="opener" onclick="$('#dialog1').data('currentVulnId', '<?php echo $check->id; ?>').dialog('open');">Set CVSS 3.0 Vector</button>
+                                                <?php endif; ?>
                                             </th>
                                             <td class="text">
                                                 <ul class="rating">
@@ -291,7 +376,7 @@
                                                 <td class="text">
                                                     <div class="file-input" id="upload-custom-link-<?php echo $custom->id; ?>">
                                                         <a href="#attachment"><?php echo Yii::t("app", "New Attachment"); ?></a>
-                                                        <input type="file" name="TargetCustomCheckAttachmentUploadForm[attachment]" data-id="<?php echo $custom->id; ?>" data-upload-url="<?php echo $this->createUrl("project/uploadcustomattachment", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $custom->id)); ?>">
+                                                        <input type="file" name="TargetCustomCheckAttachmentUploadForm[attachment]" accept="image/*,.txt" data-id="<?php echo $custom->id; ?>" data-upload-url="<?php echo $this->createUrl("project/uploadcustomattachment", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $custom->id)); ?>">
                                                     </div>
 
                                                     <div class="upload-message hide" id="upload-custom-message-<?php echo $custom->id; ?>"><?php echo Yii::t("app", "Uploading..."); ?></div>
@@ -322,6 +407,9 @@
                                         <tr>
                                             <th>
                                                 <?php echo Yii::t("app", "Result Rating"); ?>
+                                                <?php if (isset($check)): ?>
+                                                  <button class="opener" onclick="$('#dialog1').data('currentVulnId', '<?php echo $check->id; ?>').dialog('open');">Set CVSS 3.0 Vector</button>
+                                                <?php endif; ?>
                                             </th>
                                             <td class="text">
                                                 <ul class="rating">
@@ -436,3 +524,514 @@
     });
 <?php endif; ?>
 </script>
+
+<div id="dialog1" hidden="hidden" title="Common Vulnerability Scoring System Version 3.0 Calculator">
+<!-- CVSS Calculator content start -- add a <base href="http://www.first.org" /> to the head for offline editing -->
+
+<!--
+  Copyright (c) 2015, FIRST.ORG, INC.
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+  following conditions are met:
+  1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+     disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+     following disclaimer in the documentation and/or other materials provided with the distribution.
+  3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+     products derived from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+
+<!-- Window width should be 675px for a good fit. -->
+
+<style type="text/css">
+  #cvssReference { font-size: 50%; }
+  fieldset { position: relative; background-color: #f2f2f2; margin-top: 5px; border:0; padding: 2px 0; }
+  fieldset legend { background-color: #666666; color: #ffffff; margin: 0; width: 100%; padding: 1px 0px; text-indent: 15px; }
+  fieldset div.metric { padding: 0; margin: 5px 0; }
+  fieldset div.col { width: 45%; margin: 0 0 0 15px; }
+  fieldset h3 { font-size: 12px; margin: 0.03em; padding-left: 0.1em; }
+  fieldset input { display: none; }
+  fieldset label {
+    background: #cccccc; display: inline-block; margin: 3px; padding: 2px 5px; border: 0; cursor: pointer; font-size: 60%;
+    border-radius: 5px; color: #666666; border: 1px solid #999999;
+    user-select: none; -webkit-user-select: none; -moz-user-select: -moz-none; -ms-user-select: none; user-select: none;
+  }
+  fieldset label:hover { background: #666666; color: #ffffff; border: 1px solid #666666 }
+  fieldset input:checked + label { background: green; border: 1px solid green; color: #ffffff; }
+
+  #vector         { margin: 0 15px; }
+  #vectorString   { display: none; border: 0; padding: 0; margin: 0; background-color: #090; color: #ffffff; font-weight: bold; width: 70%; }
+
+  .scoreRating { position: absolute; top:0px; right:0; padding: 0 0.4em; margin: 0 15px; border: 2px solid #666666; background: #dddddd;
+    font-size:6px; border-radius: 10px; width: 100px; height: auto; line-height: 150%; text-align: center; }
+  .scoreRating.none,
+  .scoreRating.low,
+  .scoreRating.medium,
+  .scoreRating.high,
+  .scoreRating.critical { color:#ffffff;}
+
+  .scoreRating.none     { background:#53aa33; border:2px solid #53aa33; }
+  .scoreRating.low      { background:#ffcb0d; border:2px solid #ffcb0d; }
+  .scoreRating.medium   { background:#f9a009; border:2px solid #f9a009; }
+  .scoreRating.high     { background:#df3d03; border:2px solid #df3d03; }
+  .scoreRating.critical { background:#cc0500; border:2px solid #cc0500; }
+  .scoreRating span     { font-size: 75%; font-weight: bold; width: 100%; }
+  .needBaseMetrics      { text-align:center; line-height:100%; padding-top:5px; font-size:12px; }
+
+  #baseMetricScore,
+  #temporalMetricScore,
+  #environmentalMetricScore { display: block; font-size: 16px; line-height: 16px; font-weight: normal; margin-top: 4px; }
+
+  #baseSeverity,
+  #temporalSeverity,
+  #environmentalSeverity { font-size: 8px; font-weight: normal; margin-bottom: 5px; display: block; }
+
+  div#scriptWarning { border: solid red 2px; background: #f5dddd; padding: 1em 1em 1em 1em; margin: 0.4em 0; }
+
+</style>
+
+<noscript><div id="scriptWarning">This page requires JavaScript. If you have disabled scripting, please enable it.</div></noscript>
+<form action="#">
+
+<fieldset style="background:#090; color:#ffffff; border-radius:10px">
+  <p id="vector">Vector String -
+    <span class="needBaseMetrics">select values for all base metrics to generate a vector</span>
+    <input id="vectorString" type="text" readonly></input>
+  </p>
+</fieldset>
+
+<fieldset id="baseMetricGroup">
+  <legend id="baseMetricGroup_Legend">Base Score</legend>
+
+  <div class="col" style="float: left; height: auto;">
+
+    <div class="metric">
+      <h3 id="AV_Heading">Attack Vector (AV)</h3>
+      <input type="radio" name="AV" value="N" id="AV_N" /><label for="AV_N" id="AV_N_Label">Network (N)</label>
+      <input type="radio" name="AV" value="A" id="AV_A" /><label for="AV_A" id="AV_A_Label">Adjacent (A)</label>
+      <input type="radio" name="AV" value="L" id="AV_L" /><label for="AV_L" id="AV_L_Label">Local (L)</label>
+      <input type="radio" name="AV" value="P" id="AV_P" /><label for="AV_P" id="AV_P_Label">Physical (P)</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="AC_Heading">Attack Complexity (AC)</h3>
+      <input type="radio" name="AC" value="L" id="AC_L" /><label for="AC_L" id="AC_L_Label">Low (L)</label>
+      <input type="radio" name="AC" value="H" id="AC_H" /><label for="AC_H" id="AC_H_Label">High (H)</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="PR_Heading">Privileges Required (PR)</h3>
+      <input type="radio" name="PR" value="N" id="PR_N" /><label for="PR_N" id="PR_N_Label">None (N)</label>
+      <input type="radio" name="PR" value="L" id="PR_L" /><label for="PR_L" id="PR_L_Label">Low (L)</label>
+      <input type="radio" name="PR" value="H" id="PR_H" /><label for="PR_H" id="PR_H_Label">High (H)</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="UI_Heading">User Interaction (UI)</h3>
+      <input type="radio" name="UI" value="N" id="UI_N" /><label for="UI_N" id="UI_N_Label">None (N)</label>
+      <input type="radio" name="UI" value="R" id="UI_R" /><label for="UI_R" id="UI_R_Label">Required (R)</label>
+    </div>
+
+  </div>
+
+
+  <div class="col" style="float: right; height: auto;">
+
+    <div class="metric">
+      <h3 id="S_Heading">Scope (S)</h3>
+      <input type="radio" name="S" value="U" id="S_U" /><label for="S_U" id="S_U_Label">Unchanged (U)</label>
+      <input type="radio" name="S" value="C" id="S_C" /><label for="S_C" id="S_C_Label">Changed (C)</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="C_Heading">Confidentiality (C)</h3>
+      <input type="radio" name="C" value="N" id="C_N" /><label for="C_N" id="C_N_Label">None (N)</label>
+      <input type="radio" name="C" value="L" id="C_L" /><label for="C_L" id="C_L_Label">Low (L)</label>
+      <input type="radio" name="C" value="H" id="C_H" /><label for="C_H" id="C_H_Label">High (H)</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="I_Heading">Integrity (I)</h3>
+      <input type="radio" name="I" value="N" id="I_N" /><label for="I_N" id="I_N_Label">None (N)</label>
+      <input type="radio" name="I" value="L" id="I_L" /><label for="I_L" id="I_L_Label">Low (L)</label>
+      <input type="radio" name="I" value="H" id="I_H" /><label for="I_H" id="I_H_Label">High (H)</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="A_Heading">Availability (A)</h3>
+      <input type="radio" name="A" value="N" id="A_N" /><label for="A_N" id="A_N_Label">None (N)</label>
+      <input type="radio" name="A" value="L" id="A_L" /><label for="A_L" id="A_L_Label">Low (L)</label>
+      <input type="radio" name="A" value="H" id="A_H" /><label for="A_H" id="A_H_Label">High (H)</label>
+    </div>
+
+  </div>
+
+
+  <div class="scoreRating">
+    <p class="needBaseMetrics">Select values for all base metrics to generate score</p>
+    <span id="baseMetricScore"></span>
+    <span id="baseSeverity"></span>
+  </div>
+</fieldset>
+<div class="end"></div>
+
+<fieldset id="temporalMetricGroup">
+  <legend id="temporalMetricGroup_Legend">Temporal Score</legend>
+
+  <div class="col" style="float: left; height: auto;">
+
+    <div class="metric">
+      <h3 id="E_Heading">Exploit Code Maturity (E)</h3>
+      <input type="radio" name="E" value="X" id="E_X" checked /><label for="E_X" id="E_X_Label">Not Defined (X)</label>
+      <input type="radio" name="E" value="U" id="E_U" /><label for="E_U" id="E_U_Label">Unproven (U)</label>
+      <input type="radio" name="E" value="P" id="E_P" /><label for="E_P" id="E_P_Label">Proof-of-Concept (P)</label>
+      <input type="radio" name="E" value="F" id="E_F" /><label for="E_F" id="E_F_Label">Functional (F)</label>
+      <input type="radio" name="E" value="H" id="E_H" /><label for="E_H" id="E_H_Label">High (H)</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="RL_Heading">Remediation Level (RL)</h3>
+      <input type="radio" name="RL" value="X" id="RL_X" checked /><label for="RL_X" id="RL_X_Label">Not Defined (X)</label>
+      <input type="radio" name="RL" value="O" id="RL_O" /><label for="RL_O" id="RL_O_Label">Official Fix (O)</label>
+      <input type="radio" name="RL" value="T" id="RL_T" /><label for="RL_T" id="RL_T_Label">Temporary Fix (T)</label>
+      <input type="radio" name="RL" value="W" id="RL_W" /><label for="RL_W" id="RL_W_Label">Workaround (W)</label>
+      <input type="radio" name="RL" value="U" id="RL_U" /><label for="RL_U" id="RL_U_Label">Unavailable (U)</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="RC_Heading">Report Confidence (RC)</h3>
+      <input type="radio" name="RC" value="X" id="RC_X" checked /><label for="RC_X" id="RC_X_Label">Not Defined (X)</label>
+      <input type="radio" name="RC" value="U" id="RC_U" /><label for="RC_U" id="RC_U_Label">Unknown (U)</label>
+      <input type="radio" name="RC" value="R" id="RC_R" /><label for="RC_R" id="RC_R_Label">Reasonable (R)</label>
+      <input type="radio" name="RC" value="C" id="RC_C" /><label for="RC_C" id="RC_C_Label">Confirmed (C)</label>
+    </div>
+
+  </div>
+
+  <div class="scoreRating">
+    <p class="needBaseMetrics">Select values for all base metrics to generate score</p>
+    <span id="temporalMetricScore"></span>
+    <span id="temporalSeverity"></span>
+  </div>
+</fieldset>
+<div class="end"></div>
+
+
+
+<fieldset id="environmentalMetricGroup">
+  <legend id="environmentalMetricGroup_Legend">Environmental Score</legend>
+
+  <div class="col" style="float: left; height: auto;">
+
+    <div class="metric">
+      <h3 id="CR_Heading">Confidentiality Requirement (CR)</h3>
+      <input type="radio" name="CR" value="X" id="CR_X" checked /><label for="CR_X" id="CR_X_Label">Not Defined (X)</label>
+      <input type="radio" name="CR" value="L" id="CR_L" /><label for="CR_L" id="CR_L_Label">Low (L)</label>
+      <input type="radio" name="CR" value="M" id="CR_M" /><label for="CR_M" id="CR_M_Label">Medium (M)</label>
+      <input type="radio" name="CR" value="H" id="CR_H" /><label for="CR_H" id="CR_H_Label">High (H)</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="IR_Heading">Integrity Requirement (IR)</h3>
+      <input type="radio" name="IR" value="X" id="IR_X" checked /><label for="IR_X" id="IR_X_Label">Not Defined (X)</label>
+      <input type="radio" name="IR" value="L" id="IR_L" /><label for="IR_L" id="IR_L_Label">Low (L)</label>
+      <input type="radio" name="IR" value="M" id="IR_M" /><label for="IR_M" id="IR_M_Label">Medium (M)</label>
+      <input type="radio" name="IR" value="H" id="IR_H" /><label for="IR_H" id="IR_H_Label">High (H)</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="AR_Heading">Availability Requirement (AR)</h3>
+      <input type="radio" name="AR" value="X" id="AR_X" checked /><label for="AR_X" id="AR_X_Label">Not Defined (X)</label>
+      <input type="radio" name="AR" value="L" id="AR_L" /><label for="AR_L" id="AR_L_Label">Low (L)</label>
+      <input type="radio" name="AR" value="M" id="AR_M" /><label for="AR_M" id="AR_M_Label">Medium (M)</label>
+      <input type="radio" name="AR" value="H" id="AR_H" /><label for="AR_H" id="AR_H_Label">High (H)</label>
+    </div>
+  </div>
+
+  <div class="col" style="float: right; height: auto;">
+    <div class="metric">
+      <h3 id="MAV_Heading">Modified Attack Vector (MAV)</h3>
+      <input type="radio" name="MAV" value="X" id="MAV_X" checked /><label for="MAV_X" id="MAV_X_Label">Not Defined (X)</label>
+      <input type="radio" name="MAV" value="N" id="MAV_N" /><label for="MAV_N" id="MAV_N_Label">Network</label>
+      <input type="radio" name="MAV" value="A" id="MAV_A" /><label for="MAV_A" id="MAV_A_Label">Adjacent Network</label>
+      <input type="radio" name="MAV" value="L" id="MAV_L" /><label for="MAV_L" id="MAV_L_Label">Local</label>
+      <input type="radio" name="MAV" value="P" id="MAV_P" /><label for="MAV_P" id="MAV_P_Label">Physical</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="MAC_Heading">Modified Attack Complexity (MAC)</h3>
+      <input type="radio" name="MAC" value="X" id="MAC_X" checked /><label for="MAC_X" id="MAC_X_Label">Not Defined (X)</label>
+      <input type="radio" name="MAC" value="L" id="MAC_L" /><label for="MAC_L" id="MAC_L_Label">Low</label>
+      <input type="radio" name="MAC" value="H" id="MAC_H" /><label for="MAC_H" id="MAC_H_Label">High</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="MPR_Heading">Modified Privileges Required (MPR)</h3>
+      <input type="radio" name="MPR" value="X" id="MPR_X" checked /><label for="MPR_X" id="MPR_X_Label">Not Defined (X)</label>
+      <input type="radio" name="MPR" value="N" id="MPR_N" /><label for="MPR_N" id="MPR_N_Label">None</label>
+      <input type="radio" name="MPR" value="L" id="MPR_L" /><label for="MPR_L" id="MPR_L_Label">Low</label>
+      <input type="radio" name="MPR" value="H" id="MPR_H" /><label for="MPR_H" id="MPR_H_Label">High</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="MUI_Heading">Modified User Interaction (MUI)</h3>
+      <input type="radio" name="MUI" value="X" id="MUI_X" checked /><label for="MUI_X" id="MUI_X_Label">Not Defined (X)</label>
+      <input type="radio" name="MUI" value="N" id="MUI_N" /><label for="MUI_N" id="MUI_N_Label">None</label>
+      <input type="radio" name="MUI" value="R" id="MUI_R" /><label for="MUI_R" id="MUI_R_Label">Required</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="MS_Heading">Modified Scope (MS)</h3>
+      <input type="radio" name="MS" value="X" id="MS_X" checked /><label for="MS_X" id="MS_X_Label">Not Defined (X)</label>
+      <input type="radio" name="MS" value="U" id="MS_U" /><label for="MS_U" id="MS_U_Label">Unchanged</label>
+      <input type="radio" name="MS" value="C" id="MS_C" /><label for="MS_C" id="MS_C_Label">Changed</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="MC_Heading">Modified Confidentiality (MC)</h3>
+      <input type="radio" name="MC" value="X" id="MC_X" checked /><label for="MC_X" id="MC_X_Label">Not Defined (X)</label>
+      <input type="radio" name="MC" value="N" id="MC_N" /><label for="MC_N" id="MC_N_Label">None</label>
+      <input type="radio" name="MC" value="L" id="MC_L" /><label for="MC_L" id="MC_L_Label">Low</label>
+      <input type="radio" name="MC" value="H" id="MC_H" /><label for="MC_H" id="MC_H_Label">High</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="MI_Heading">Modified Integrity (MI)</h3>
+      <input type="radio" name="MI" value="X" id="MI_X" checked /><label for="MI_X" id="MI_X_Label">Not Defined (X)</label>
+      <input type="radio" name="MI" value="N" id="MI_N" /><label for="MI_N" id="MI_N_Label">None</label>
+      <input type="radio" name="MI" value="L" id="MI_L" /><label for="MI_L" id="MI_L_Label">Low</label>
+      <input type="radio" name="MI" value="H" id="MI_H" /><label for="MI_H" id="MI_H_Label">High</label>
+    </div>
+
+    <div class="metric">
+      <h3 id="MA_Heading">Modified Availability (MA)</h3>
+      <input type="radio" name="MA" value="X" id="MA_X" checked /><label for="MA_X" id="MA_X_Label">Not Defined (X)</label>
+      <input type="radio" name="MA" value="N" id="MA_N" /><label for="MA_N" id="MA_N_Label">None</label>
+      <input type="radio" name="MA" value="L" id="MA_L" /><label for="MA_L" id="MA_L_Label">Low</label>
+      <input type="radio" name="MA" value="H" id="MA_H" /><label for="MA_H" id="MA_H_Label">High</label>
+    </div>
+  </div>
+
+  <div class="scoreRating">
+    <p class="needBaseMetrics">Select values for all base metrics to generate score</p>
+    <span id="environmentalMetricScore"></span>
+    <span id="environmentalSeverity"></span>
+  </div>
+</fieldset>
+<div class="end"></div>
+
+
+
+
+<script type="text/javascript">
+  /* ** clearCVSScalc **
+   *
+   * Clears all checkboxes and scores from the dialog.
+   */
+  function clearCVSScalc() {
+    $("#baseMetricScore").text('');
+    $("#baseSeverity").text('');
+    $("#temporalMetricScore").text('');
+    $("#temporalSeverity").text('');
+    $("#environmentalMetricScore").text('');
+    $("#environmentalSeverity").text('');
+    $("#vectorString").hide();
+    $("#dialog1 input").removeAttr('checked');
+    $(".needBaseMetrics").show();
+
+    $("#temporalMetricGroup_Legend").nextAll().hide();
+    $("#environmentalMetricGroup_Legend").nextAll().hide();
+  }
+
+  /* ** updateScores **
+   *
+   * Updates Base, Temporal and Environmental Scores, and the Vector String (both in the web page and
+   * in the fragment of the URL - the part after the "#").
+   * If scores and vectors cannot be generated because the user has not yet selected values for all the Base Score
+   * metrics, messages are displayed explaining this.
+   */
+  function updateScores() {
+
+    result = CVSS.calculateCVSSFromMetrics (
+      $( "input:radio[name=AV]:checked"  ).val(),
+      $( "input:radio[name=AC]:checked"  ).val(),
+      $( "input:radio[name=PR]:checked"  ).val(),
+      $( "input:radio[name=UI]:checked"  ).val(),
+      $( "input:radio[name=S]:checked"   ).val(),
+
+      $( "input:radio[name=C]:checked"   ).val(),
+      $( "input:radio[name=I]:checked"   ).val(),
+      $( "input:radio[name=A]:checked"   ).val(),
+
+      $( "input:radio[name=E]:checked"   ).val(),
+      $( "input:radio[name=RL]:checked"  ).val(),
+      $( "input:radio[name=RC]:checked"  ).val(),
+
+      $( "input:radio[name=CR]:checked"  ).val(),
+      $( "input:radio[name=IR]:checked"  ).val(),
+      $( "input:radio[name=AR]:checked"  ).val(),
+      $( "input:radio[name=MAV]:checked" ).val(),
+      $( "input:radio[name=MAC]:checked" ).val(),
+      $( "input:radio[name=MPR]:checked" ).val(),
+      $( "input:radio[name=MUI]:checked" ).val(),
+      $( "input:radio[name=MS]:checked"  ).val(),
+      $( "input:radio[name=MC]:checked"  ).val(),
+      $( "input:radio[name=MI]:checked"  ).val(),
+      $( "input:radio[name=MA]:checked"  ).val());
+
+    if (result.success === true) {
+
+      // Hide text warning that scores, etc., cannot be calculated until user has selected a value for every Base Metric.
+      $(".needBaseMetrics").hide();
+
+      $("#baseMetricScore").text( result.baseMetricScore ).parents('.scoreRating').attr('class', 'scoreRating '+result.baseSeverity.toLowerCase());
+      $("#baseSeverity").text( "(" + result.baseSeverity + ")" );
+
+      $("#temporalMetricScore").text( result.temporalMetricScore ).parents('.scoreRating').attr('class', 'scoreRating '+result.temporalSeverity.toLowerCase());
+      $("#temporalSeverity").text( "(" + result.temporalSeverity + ")" );
+
+      $("#environmentalMetricScore").text( result.environmentalMetricScore ).parents('.scoreRating').attr('class', 'scoreRating '+result.environmentalSeverity.toLowerCase());
+      $("#environmentalSeverity").text( "(" + result.environmentalSeverity + ")" );
+
+      $("#vectorString").val( result.vectorString );
+      $("#vectorString").show().css('display', 'inline-block');
+
+    } else if (result.error === "Not all base metrics were given - cannot calculate scores.") {
+
+      // Show text warning that scores, etc., cannot be calculated until user has selected a value for every Base Metric.
+      $(".needBaseMetrics").show();
+
+    }
+  }
+
+
+  /* ** setMetricsFromVector **
+   *
+   * Takes a Vector String and sets the metrics on the web page according to the values passed. The string passed
+   * is fully validated, so it is okay to pass untrusted user input to this function. If validation fails, the
+   * string "VectorMalformed" is returned and no changes are made to form field values.
+   *
+   * All base metrics must be specified. If they are not, the string "NotAllBaseMetricsProvided" is returned and no
+   * changes are made to form field values. Temporal and Environmental metrics are optional and default to the value
+   * "X" if not specified.
+   *
+   * If validation succeeds and all base metrics are provided, the form fields are set and "true" is returned.
+   *
+   * The standard prohibits a metric value being specified more than once, but this function does not prevent this
+   * and uses the value of the last occurrence.
+   */
+  function setMetricsFromVector ( vectorString ) {
+
+    var result = true;
+    var urlMetric;
+
+    var metricValuesToSet = {
+      AV: undefined, AC: undefined, PR: undefined, UI: undefined, S: undefined, C: undefined, I: undefined, A: undefined,
+      E: "X", RL: "X", RC: "X",
+      CR: "X", IR: "X", AR: "X", MAV: "X", MAC: "X", MPR: "X", MUI: "X", MS: "X", MC: "X", MI: "X", MA: "X"
+    }
+
+    // A regular expression to validate that a CVSS 3.0 vector string is well formed. It checks metrics and metric values, but
+    // does not check that all base metrics have been supplied. That check is done later.
+    var vectorStringRegex_30 = /^CVSS:3.0\/((AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]|E:[XUPFH]|RL:[XOTWU]|RC:[XURC]|[CIA]R:[XLMH]|MAV:[XNALP]|MAC:[XLH]|MPR:[XUNLH]|MUI:[XNR]|MS:[XUC]|M[CIA]:[XNLH])\/)*(AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]|E:[XUPFH]|RL:[XOTWU]|RC:[XURC]|[CIA]R:[XLMH]|MAV:[XNALP]|MAC:[XLH]|MPR:[XUNLH]|MUI:[XNR]|MS:[XUC]|M[CIA]:[XNLH])$/;
+
+    if (vectorStringRegex_30.test(vectorString)) {
+
+      var urlMetrics = vectorString.substring("CVSS:3.0/".length).split("/");
+
+      for (var p in urlMetrics) {
+        var urlMetric = urlMetrics[p].split(":");
+
+        metricValuesToSet[urlMetric[0]] = urlMetric[1];
+      }
+
+      // Only if *all* base metrics have been provided, directly set form fields to the required values.
+      if (metricValuesToSet.AV !== undefined &&
+          metricValuesToSet.AC !== undefined &&
+          metricValuesToSet.PR !== undefined &&
+          metricValuesToSet.UI !== undefined &&
+          metricValuesToSet.S  !== undefined &&
+          metricValuesToSet.C  !== undefined &&
+          metricValuesToSet.I  !== undefined &&
+          metricValuesToSet.A  !== undefined) {
+
+        // The correct form field to set can be worked out from the metric acronym and value due to the naming
+        // convention used on the web page. For example, setting Access Vector (AV) to Physical (P) requires
+        // the form field with the id "AV_P" to be checked.
+
+        for (var p in metricValuesToSet) {
+          document.getElementById(p + "_" + metricValuesToSet[p]).checked = true;
+        }
+      } else {
+        result = "NotAllBaseMetricsProvided";
+      }
+
+    } else {
+      result = "MalformedVectorString";
+    }
+
+    // Field values have been set directly, rather than by the user clicking form fields, so the triggers to
+    // recalculate scores have not fired. Therefore, explicitly update the scores now.
+
+    updateScores();
+
+    return result;
+  }
+
+
+  // Used to store the current CVSS Vector from the URL so that we can detect if the user changes it.
+  var CVSSVectorInURL;
+
+
+  /* When the page has fully loaded and is ready, perform the initial setup. This includes creating event handlers to
+   * recalculate the score as the user changes metric values
+   */
+  $(document).ready(function () {
+
+    // Update the CVSS scores and Vector String whenever an input field is clicked
+    $("input").bind("click", function() {
+      updateScores();
+    });
+
+    // Add a handler to toggle the display of everything in a metric group when the metric group title is clicked.
+    $("fieldset legend").bind("click", function( event ) {
+      $(event.target).nextAll().slideToggle();
+    });
+
+    $("#temporalMetricGroup_Legend").nextAll().hide();
+    $("#environmentalMetricGroup_Legend").nextAll().hide();
+
+    // Add titles to every metric element containing help text. This is displayed when the user hovers over the
+    // element.
+    $.each( CVSS_Help.helpText_en, function( helpID, helpText ) {
+      $( "#" + helpID ).attr( "title", helpText );
+    });
+
+    /* Create anonymous functions that are called when the Vector String displayed on the page is clicked. Both
+     * select the entire Vector String to make it quicker to copy to the operating system's clipboard.
+     */
+    $("#vectorString")
+      .bind("click", function() {
+        $("#vectorString").select();
+      })
+      .bind("contextmenu", function() {
+        $("#vectorString").select();
+      });
+
+  });  /* End of code called when page has fully loaded. */
+
+
+</script>
+
+</form>
+<!-- CVSS Calculator end -->
+</div>

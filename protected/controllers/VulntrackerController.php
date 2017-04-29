@@ -242,6 +242,7 @@ class VulntrackerController extends Controller {
         $model->status = $check->vuln_status;
         $model->userId = $check->vuln_user_id;
         $model->deadline = $check->vuln_deadline ? $check->vuln_deadline : date('Y-m-d');
+        $model->check = $check;
 
 		// collect user input data
 		if (isset($_POST['VulnEditForm'])) {

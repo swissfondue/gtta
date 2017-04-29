@@ -4,6 +4,14 @@
     <tbody>
         <tr>
             <th>
+                <?php echo Yii::t("app", "Id"); ?>
+            </th>
+            <td class="text">
+                <?php echo CHtml::encode($check->id); ?>
+            </td>
+            </tr>
+            <tr>
+            <th>
                 <?php echo Yii::t("app", "Reference"); ?>
             </th>
             <td class="text">
@@ -349,7 +357,7 @@
                 <td class="text">
                     <div class="file-input" id="upload-link-<?php echo $check->id; ?>">
                         <a href="#attachment"><?php echo Yii::t("app", "New Attachment"); ?></a>
-                        <input type="file" name="TargetCheckAttachmentUploadForm[attachment]" data-id="<?php echo $check->id; ?>" data-upload-url="<?php echo $this->createUrl("project/uploadattachment", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $check->id)); ?>">
+                        <input type="file" name="TargetCheckAttachmentUploadForm[attachment]" accept="image/*,.txt" data-id="<?php echo $check->id; ?>" data-upload-url="<?php echo $this->createUrl("project/uploadattachment", array("id" => $project->id, "target" => $target->id, "category" => $category->check_category_id, "check" => $check->id)); ?>">
                     </div>
 
                     <div class="upload-message hide" id="upload-message-<?php echo $check->id; ?>"><?php echo Yii::t("app", "Uploading..."); ?></div>
@@ -380,6 +388,7 @@
         <tr>
             <th>
                 <?php echo Yii::t("app", "Result Rating"); ?>
+                <button class="opener" onclick="$('#dialog1').data('currentVulnId', '<?php echo $check->id; ?>').dialog('open');">Set CVSS 3.0 Vector</button>
             </th>
             <td class="text">
                 <ul class="rating">

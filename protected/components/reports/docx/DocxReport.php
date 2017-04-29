@@ -586,6 +586,15 @@ class DocxReport extends ReportPlugin {
         }
     }
 
+    private function _insertTextAttachment(DOMDocument $xml, DOMNode $parentNode, $attachment, $replaceLineFeeds) {
+        $text = FileManager::getFileContent($attachment["file"]);
+        if (!$text) {
+            return;
+        }
+
+        $this->_insertText($xml, $parentNode, $text, $replaceLineFeeds);
+    }
+
     /**
      * Insert attached image
      * @param DOMDocument $xml
@@ -741,8 +750,16 @@ class DocxReport extends ReportPlugin {
             }
 
             if ($this->_scope->get()->getName() == VariableScope::SCOPE_ATTACHMENT && $name == "image") {
-                $this->_insertImage($xml, $parent, $value);
+                // If the attachment is not an image but text-based file, attach it as text.
+                if ($value["type"] == "text/plain") {
+                    $replaceLineFeeds = true;
+                    $this->_insertTextAttachment($xml, $parent, $value, $replaceLineFeeds);
+                } else {
+                    $this->_insertImage($xml, $parent, $value);
+               }
             } else {
+                // Decode HTML-entities back to normal characters.
+                $value = html_entity_decode($value, ENT_QUOTES);
                 $this->_insertText($xml, $parent, $value, $replaceLineFeeds);
             }
         }

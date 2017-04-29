@@ -9,7 +9,7 @@
  * @property string $subject
  * @property string $content
  */
-class ProjectDetail extends ActiveRecord
+class ProjectDetail extends ActiveRecord implements IVariableScopeObject
 {
 	/**
 	 * Returns the static model of the specified AR class.
@@ -41,7 +41,7 @@ class ProjectDetail extends ActiveRecord
 		);
 	}
 
-    /**
+        /**
 	 * @return array relational rules.
 	 */
 	public function relations()
@@ -50,4 +50,23 @@ class ProjectDetail extends ActiveRecord
 			'project' => array( self::BELONGS_TO, 'Project', 'project_id' ),
 		);
 	}
+
+        public function getVariable($name, VariableScope $scope) {
+            $vars = array(
+                "subject",
+                "content",
+            );
+
+            if (!in_array($name, $vars)) {
+                 throw new Exception(Yii::t("app", "Invalid variable: {var}.", array("{var}" => $name)));
+            }
+
+            return $this->$name;
+
+        }
+
+        public function getList($name, $filters, VariableScope $scope) {
+            throw new Exception(Yii::t("app", "Invalid list: {list}.", array("{list}" => $name)));
+        }
+
 }
