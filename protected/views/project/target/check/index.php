@@ -284,6 +284,7 @@
                                         </th>
                                         <td class="text">
                                             <?php echo "CUSTOM-CHECK-" . $custom->reference; ?>
+                                            <input type="hidden" name="TargetCustomCheckEditForm_<?php echo $custom->id ?>[last_modified]" id="TargetCustomCheckEditForm_<?php echo $custom->id ?>[last_modified]" value="<?php echo $custom->last_modified; ?>">
                                         </td>
                                     </tr>
                                     <tr>
