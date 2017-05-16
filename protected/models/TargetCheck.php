@@ -24,6 +24,7 @@
  * @property date $vuln_deadline
  * @property integer $vuln_status
  * @property IssueEvidence $evidence
+ * @property timestamp $last_modified
  */
 class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     public $mr;
@@ -153,6 +154,23 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "evidence" => array(self::HAS_ONE, "IssueEvidence", "target_check_id"),
 		);
 	}
+
+    /**
+     * @param bool $runValidation
+     * @param null $attributes
+     * @throws CHttpException
+     */
+    public function save($runValidation=true, $attributes=null) {
+	    $db_target_check = TargetCheck::model()->findByPk($this->id);
+	    $targetCheckIsNew = is_null($db_target_check) || is_null($db_target_check->last_modified);
+
+        if (!$targetCheckIsNew && $this->last_modified < $db_target_check->last_modified) {
+            throw new CHttpException(403, Yii::t("app", "Could not modify the target check as there is newer version available. Please reload the page and try again!"));
+        }
+
+	    $this->last_modified = time();;
+	    parent::save($runValidation, $attributes);
+    }
 
     /**
      * Check fields
