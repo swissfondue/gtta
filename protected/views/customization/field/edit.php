@@ -39,7 +39,7 @@
                     <?php if (!$field->isNewRecord): ?>
                         <?php
                             $name = "GlobalCheckFieldEditForm[localizedItems][" . $language->id . "][value]";
-                            $value = isset($form->localizedItems[$language->id]) ? $form->localizedItems[$language->id]["value"] : "";
+                            $value = isset($form->localizedItems[$language->id]) && array_key_exists("value", $form->localizedItems[$language->id]) ? $form->localizedItems[$language->id]["value"] : "";
                         ?>
 
                         <div class="control-group">
