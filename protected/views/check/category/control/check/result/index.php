@@ -32,7 +32,13 @@
                         <?php foreach ($results as $result): ?>
                             <tr data-id="<?php echo $result->id; ?>" data-control-url="<?php echo $this->createUrl('check/controlresult'); ?>">
                                 <td class="result">
-                                    <a href="<?php echo $this->createUrl('check/editresult', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'result' => $result->id )); ?>"><?php echo CHtml::encode($result->localizedTitle); ?></a>
+<!--                                    <a href="--><?php //echo $this->createUrl('check/editresult', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'result' => $result->id )); ?><!--">--><?php //echo CHtml::encode($result->localizedTitle); ?><!--</a>-->
+                                    <?php echo CHtml::ajaxLink(CHtml::encode($result->localizedTitle), CController::createUrl('check/editresult', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'result' => $result->id )),
+                                    array('update' => '#simple-div-'.$result->id),
+                                    array('id' => 'simple-link-'.$result->id, 'class' => 'result-link')
+                                    );?>
+
+                                    <div class="result-form" id="simple-div-<?php echo $result->id;?>"></div>
                                 </td>
                                 <td class="actions">
                                     <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $result->id; ?>);"><i class="icon icon-remove"></i></a>
@@ -49,3 +55,27 @@
         </div>
     </div>
 </div>
+<script>
+
+
+    $(document).ready(function () {
+        var previousTarget=null;
+        /**
+         * Show result-form if it was submitted
+         *
+         */
+        $('.solution-link').click(function (event) {
+            console.log('click');
+            var elem = $(this).next(".result-form");
+            if(this===previousTarget) {
+
+                elem.toggle('show');
+
+            }
+            $((".result-form")).not(elem).empty();
+
+            previousTarget=this;
+
+        });
+    });
+</script>
