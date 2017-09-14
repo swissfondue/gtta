@@ -1,3 +1,4 @@
+
 <div class="active-header">
     <div class="pull-right">
         <ul class="nav nav-pills">
@@ -32,7 +33,11 @@
                         <?php foreach ($solutions as $solution): ?>
                             <tr data-id="<?php echo $solution->id; ?>" data-control-url="<?php echo $this->createUrl('check/controlsolution'); ?>">
                                 <td class="solution">
-                                    <a href="<?php echo $this->createUrl('check/editsolution', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'solution' => $solution->id )); ?>"><?php echo CHtml::encode($solution->localizedTitle); ?></a>
+                                    <?php echo CHtml::ajaxLink(CHtml::encode($solution->localizedTitle), CController::createUrl('check/editsolution', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'solution' => $solution->id )),
+                                        array('update' => '#simple-div-'.$solution->id),
+                                        array('id' => 'simple-link-'.uniqid(), 'class' => 'solution-link')
+                                    );?>
+                                    <div class="solution-form" id="simple-div-<?php echo $solution->id;?>"></div>
                                 </td>
                                 <td class="actions">
                                     <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $solution->id; ?>);"><i class="icon icon-remove"></i></a>
@@ -49,3 +54,26 @@
         </div>
     </div>
 </div>
+<script>
+
+    $(document).ready(function () {
+        var previousTarget=null;
+        /**
+         * Show solution-form if it was submitted
+         *
+         */
+        $('.solution-link').click(function (event) {
+            console.log('click');
+            var elem = $(this).next(".solution-form");
+            if(this===previousTarget) {
+
+                elem.toggle('show');
+
+            }
+            $((".solution-form")).not(elem).empty();
+
+            previousTarget=this;
+
+        });
+    });
+</script>

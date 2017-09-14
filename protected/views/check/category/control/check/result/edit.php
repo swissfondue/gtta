@@ -1,11 +1,11 @@
 <script src="/ckeditor/ckeditor.js"></script>
 <script src="/ckeditor/adapters/jquery.js"></script>
 
-<h1><?php echo CHtml::encode($this->pageTitle); ?></h1>
+<!--<h1>--><?php //echo CHtml::encode($this->pageTitle); ?><!--</h1>-->
 
 <hr>
 
-<form class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
+<form id="form" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
 
     <fieldset>
@@ -77,6 +77,24 @@
 </form>
 
 <script>
+    /**
+     *Submit form without redirect
+     */
+    $(function() {
+        var res_id=<?php echo json_encode($result->id)?>;
+        $("#form").on("submit", function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: $(this).attr("action"),
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(data) {
+
+                    $("#simple-div-"+res_id).hide();
+                }
+            });
+        });
+    });
     $('#languages-tab a').click(function (e) {
         e.preventDefault();
         $(this).tab('show');
