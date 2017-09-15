@@ -219,18 +219,7 @@ class NessusmappingController extends Controller {
             $language = Language::model()->findByAttributes([
                 "code" => Yii::app()->language
             ]);
-            $mappingVulns = NessusMappingVuln::model()->findAllByAttributes([
-                "nessus_mapping_id" => $mapping->id
-            ]);
-            $exclude = [];
-
-            foreach ($mappingVulns as $mv) {
-                if (isset($mv->check)) {
-                    $exclude[] = $mv->check->id;
-                }
-            }
-
-            $checks = $cm->filter($form->query, $language->id, $exclude);
+            $checks = $cm->filter($form->query, $language->id);
             $data = [];
 
             foreach ($checks as $check) {
@@ -290,21 +279,6 @@ class NessusmappingController extends Controller {
 
                     if (!$check) {
                         throw new Exception("Check not found.", 404);
-                    }
-
-                    $exists = NessusMappingVuln::model()->findByAttributes(
-                        [
-                            "check_id" => $check->id,
-                            "nessus_mapping_id" => $vuln->mapping->id
-                        ],
-                        "id <> :id",
-                        [
-                            "id" => $vuln->id
-                        ]
-                    );
-
-                    if ($exists) {
-                        throw new Exception("Check couldn't be mounted.");
                     }
 
                     $vuln->check_id = $check->id;
