@@ -246,4 +246,29 @@
     </div>
 </div>
 <?= $this->renderPartial("/layouts/partial/check-selector", ["project" => $project]); ?>
+<script>
+    $(".target-tabs a").click(function (e) {
+        e.preventDefault();
+        $(this).tab("show");
+    });
+
+    $(function () {
+        $("#target-select-dialog input.target-search-query").keyup(function (e) {
+            // if alpha or backspace
+            if (/[a-zA-Z0-9_ -]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8) {
+                admin.issue.searchTargets($(this).val());
+            }
+        });
+
+        setInterval(function () {
+            admin.issue.getRunningChecks();
+        }, 5000);
+
+        setInterval(function () {
+            admin.issue.update();
+        }, 1000);
+
+        admin.issue.initTargetSelectDialog();
+    });
+</script>
 
