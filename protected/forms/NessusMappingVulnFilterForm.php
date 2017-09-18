@@ -20,11 +20,26 @@ class NessusMappingVulnFilterForm extends FormModel  {
     public $ratings;
 
     /**
+     * sort variable
+     *
+     * @var $sortBy
+     */
+    public $sortBy;
+
+    /**
+     * sort direction
+     *
+     * @var $sortDirection
+     */
+    public $sortDirection;
+
+    /**
      * Nessus mapping vulns form rules
      * @return array
      */
     public function rules() {
         return [
+            [["sortBy", "sortDirection"],'safe'],
             ["mappingId", "required"],
             ["mappingId", "numerical", "integerOnly" => true],
             ["mappingId", "checkMapping"],

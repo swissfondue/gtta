@@ -178,7 +178,7 @@ class NessusmappingController extends Controller {
         $this->render("view", [
             "mapping" => $mapping,
             "ratings" => $ratings,
-            "nessusRatings" => $nessusRatings
+            "nessusRatings" => $nessusRatings,
         ]);
     }
 
@@ -378,12 +378,41 @@ class NessusmappingController extends Controller {
 
                 throw new Exception($errorText);
             }
+            $sortBy = null;
+            $sortDirection = null;
 
-            $vulns = NessusMappingVuln::model()->orderByPluginName()->findAllByAttributes([
-                "nessus_host" => $form->hosts,
-                "nessus_rating" => $form->ratings,
-                "nessus_mapping_id" => $form->mappingId
-            ]);
+            switch ($form->sortDirection) {
+                case NessusMapping::FILTER_SORT_ASCENDING:
+                    $sortDirection = "ASC";
+                    break;
+
+                case NessusMapping::FILTER_SORT_DESCENDING:
+                    $sortDirection = "DESC";
+                    break;
+            }
+
+            switch ($form->sortBy) {
+                case NessusMapping::FILTER_SORT_ISSUE:
+                    $sortBy = "nessus_plugin_name";
+                    break;
+
+                case NessusMapping::FILTER_SORT_RATING:
+                    $sortBy = "rating";
+                    break;
+
+                case NessusMapping::FILTER_SORT_CHECK:
+                    $sortBy = "checks.name";
+                    break;
+            }
+
+            $criteria = new CDbCriteria();
+            $criteria->addCondition("nessus_mapping_id = :mapping_id");
+            $criteria->params = ["mapping_id" => $form->mappingId];
+            $criteria->addInCondition('nessus_host', $form->hosts);
+            $criteria->addInCondition('nessus_rating', $form->ratings);
+            $criteria->join = 'LEFT JOIN checks ON checks.id = check_id';
+            $criteria->order = $sortBy." ".$sortDirection;
+            $vulns = NessusMappingVuln::model()->findAll($criteria);
 
             $ratings = TargetCheck::getValidRatings();
             $table = $this->renderPartial("/layouts/partial/mapping/mapping-table", [
