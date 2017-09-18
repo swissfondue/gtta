@@ -14,7 +14,5 @@
 <?= $this->renderPartial("/layouts/partial/mapping/mapping", [
     "mapping" => $mapping,
     "nessusRatings" => $nessusRatings,
-    "ratings" => $ratings,
-    "sortBy" => $sortBy,
-    "sortDirection" => $sortDirection
+    "ratings" => $ratings
 ]); ?>
