@@ -63,14 +63,14 @@
 
                                 <li><b><?php echo CHtml::ajaxLink(sprintf("%s (%d)", $host, count($evidences)), CController::createUrl('project/evidenceview', array('host' => $host, 'issue' => $issue->id, 'project' => $project->id)),
                                                                                 array('update' => '#simple-div'),
-                                         array('id' => 'simple-link-'.uniqid(), 'class' => 'solution-link', 'name' => $host)
+                                         array('id' => 'simple-link-'.uniqid(), 'class' => 'evidence-link', 'name' => $host)
                                                                         );?></b></li>
                             <?php endforeach; ?>
                         </ul>
                     </div>
                 </div>
                 <div class="span6">
-                    <div class="solution-form" id="simple-div"></div>
+                    <div id="simple-div"></div>
 
                 </div>
             </div>
