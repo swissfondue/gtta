@@ -1,7 +1,7 @@
 <?php $issue = isset($issue); ?>
 <?php $formName = $issue ? "IssueEvidenceEditForm" : "TargetCheckEditForm"; ?>
 <?php $hidden = $field->getHidden(); ?>
-
+<?php $checkValue =$field->field->getValue(); ?>
 <?php if (!$hidden): ?>
     <?php
         $name = sprintf("%s_%d[fields][%s]", $formName, $targetCheck->id, $field->name);
@@ -25,7 +25,7 @@
                 <?php endif; ?>
 
                 <?php if ($field->type == GlobalCheckField::TYPE_WYSIWYG_READONLY): ?>
-                    <?= $field->value ? $field->value : Yii::t("app", "N/A");; ?>
+                    <?= $checkValue ? $checkValue : Yii::t("app", "N/A");; ?>
                 <?php endif ?>
 
                 <?php if ($field->type == GlobalCheckField::TYPE_TEXT): ?>
