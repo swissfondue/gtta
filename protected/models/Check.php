@@ -30,6 +30,12 @@ class Check extends ActiveRecord {
     // nearest sort order
     public $nearest_sort_order;
 
+    /**
+     * check edit view constants
+     */
+    const VIEW_TABBED = 0;
+    const VIEW_SHARED = 1;
+
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
