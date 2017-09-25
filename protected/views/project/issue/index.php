@@ -31,6 +31,9 @@
                             <th><?= Yii::t("app", "Name"); ?></th>
                             <th class="status"><?= Yii::t("app", "Status"); ?></th>
                             <th class="status"><?= Yii::t("app", "Affects"); ?></th>
+                            <?php if (User::checkRole(User::ROLE_USER)): ?>
+                                <th>&nbsp;</th>
+                            <?php endif; ?>
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                 <th class="actions">&nbsp;</th>
                             <?php endif; ?>
@@ -95,6 +98,13 @@
                                 </td>
                                 <td>
                                     <?= $issue->affected_targets; ?>
+                                </td>
+                                <td>
+                                    <?php if(isset($issue->not_filled_ev)): ?>
+                                        <a style="color:red;" href="<?= $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id, "evidence" => $issue->not_filled_ev]); ?>">
+                                            !
+                                        </a>
+                                    <?php endif; ?>
                                 </td>
                                 <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                     <td class="actions">

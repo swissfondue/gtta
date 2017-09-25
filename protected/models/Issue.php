@@ -12,6 +12,12 @@
  * @property IssueEvidence[] $evidences
  */
 class Issue extends ActiveRecord {
+
+    /**
+     * @var int index of not fully filled issue evidence with high high/medium/low risk rating (fake property)
+     */
+    public $not_filled_ev;
+
     /**
      * @var string issue name (virtual column)
      */

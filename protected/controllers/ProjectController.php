@@ -2303,8 +2303,10 @@ class ProjectController extends Controller
     }
 
     /**
+     * @param $project
      * @param $host
      * @param $issue
+     * @throws CHttpException
      */
     public function actionEvidenceView($project, $host, $issue)
     {
@@ -4846,6 +4848,20 @@ class ProjectController extends Controller
 
         $offset = ($page - 1) * $this->entriesPerPage;
         $issues = $project->getIssues($offset);
+        $riskArray = [TargetCheck::RATING_HIGH_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_LOW_RISK];
+        $lightRiskArray = [TargetCheck::RATING_HIDDEN, TargetCheck::RATING_INFO, TargetCheck::RATING_NO_VULNERABILITY, TargetCheck::RATING_NONE];
+        foreach ($issues as $issue) {
+                if (!in_array($issue->top_rating,$lightRiskArray)) {
+                    $evidences = $issue->evidences;
+                    foreach ($evidences as $index => $evidence) {
+                        $tc = $evidence->targetCheck;
+                        if (!$tc->solution && !$tc->result && in_array($tc->rating, $riskArray)) {
+                            $issue->not_filled_ev = $index;
+                            break;
+                        }
+                    }
+                }
+        }
         $issueCount = count($issues);
 
         $paginator = new Paginator($issueCount, $page);
