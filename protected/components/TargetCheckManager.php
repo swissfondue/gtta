@@ -61,10 +61,24 @@ class TargetCheckManager {
                 $targetCheckScript->target_check_id = $targetCheck->id;
                 $targetCheckScript->save();
             }
+            if ($data["language_id"]){
+                $language = System::model()->findByPk($data["language_id"])->language;
+            }
+            else {
+                $language = Language::model()->findByAttributes(array(
+                    'code' => Yii::app()->language
+                ));
+
+                if (!$language) {
+                    $language = Language::model()->findByAttributes(array(
+                        "default" => true
+                    ));
+                }
+            }
 
             /** @var CheckField $field */
             foreach ($check->fields as $field) {
-                $this->createField($targetCheck, $field);
+                $this->createField($targetCheck, $field, $language);
             }
 
             if (!$targetCheck->getCategory()) {
@@ -96,10 +110,11 @@ class TargetCheckManager {
      * Create target check field
      * @param TargetCheck $tc
      * @param CheckField $field
-     * @throws Exception
+     * @param Language|null $language
      * @return TargetCheckField
      */
-    public function createField(TargetCheck $tc, CheckField $field) {
+    public function createField(TargetCheck $tc, CheckField $field, Language $language = null) {
+
         $exists = TargetCheckField::model()->findByAttributes([
             "target_check_id" => $tc->id,
             "check_field_id" => $field->id
@@ -115,7 +130,7 @@ class TargetCheckManager {
 
         // radio contains JSON
         if ($field->getType() != GlobalCheckField::TYPE_RADIO) {
-            $targetCheckField->value = $field->getValue();
+            $targetCheckField->value = $field->getValue($language);
         }
 
         $targetCheckField->hidden = $field->hidden;
