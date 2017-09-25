@@ -2486,6 +2486,7 @@ class ProjectController extends Controller {
             }
 
             $targetCheck->table_result = $model->tableResult;
+            $targetCheck->last_modified = $model->lastModified;
             $targetCheck->save();
 
             // delete old solutions
@@ -2577,10 +2578,12 @@ class ProjectController extends Controller {
 
                         $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION, null);
                         $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE, null);
+                        $targetCheck->last_modified = $model->lastModified;
                         $targetCheck->save();
                     } else {
                         $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION, $model->solution);
                         $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE, $model->solutionTitle);
+                        $targetCheck->last_modified = $model->lastModified;
                         $targetCheck->save();
                     }
                 }
@@ -2656,6 +2659,7 @@ class ProjectController extends Controller {
             ));
 
             $response->addData("rating", $targetCheck->rating);
+            $response->addData("lastModified", $targetCheck->last_modified);
 
             if ($project->status == Project::STATUS_OPEN) {
                 $project->status = Project::STATUS_IN_PROGRESS;
@@ -2728,6 +2732,7 @@ class ProjectController extends Controller {
                 throw new CHttpException(404, Yii::t("app", "Check not found."));
             }
 
+
             $criteria = new CDbCriteria();
             $criteria->addInCondition("check_control_id", $controlIds);
             $criteria->addColumnCondition(array(
@@ -2754,6 +2759,7 @@ class ProjectController extends Controller {
                 throw new Exception($errorText);
             }
 
+            $targetCheck->last_modified = $model->lastModified;
             $targetCheck->save();
 
             if ($project->status == Project::STATUS_OPEN) {
@@ -3003,9 +3009,11 @@ class ProjectController extends Controller {
                     }
                 }
 
+                $customCheck->last_modified = $form->lastModified;
                 $customCheck->save();
 
                 $response->addData("rating", $customCheck->rating);
+                $response->addData("lastModified", $customCheck->last_modified);
 
                 StatsJob::enqueue(array(
                     "category_id" => $customCheck->control->check_category_id,
