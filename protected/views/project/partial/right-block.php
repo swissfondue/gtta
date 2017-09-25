@@ -18,12 +18,13 @@
                     <div class="issue">
                         <?php
                             $ratingLabels = [
-                                TargetCheck::RATING_LOW_RISK => "low",
-                                TargetCheck::RATING_MED_RISK => "med",
-                                TargetCheck::RATING_HIGH_RISK => "high"
+                                TargetCheck::RATING_LOW_RISK => "low-risk",
+                                TargetCheck::RATING_MED_RISK => "med-risk",
+                                TargetCheck::RATING_HIGH_RISK => "high-risk",
+                                TargetCheck::RATING_INFO => "info"
                             ];
                         ?>
-                        <div style="margin-right: 10px;" class="marker label-<?= in_array($issue->top_rating, array_keys($ratingLabels)) ? $ratingLabels[$issue->top_rating] : "no" ?>-risk"></div>
+                        <div style="margin-right: 10px;" class="marker label-<?= in_array($issue->top_rating, array_keys($ratingLabels)) ? $ratingLabels[$issue->top_rating] : "no-risk" ?>"></div>
                         <a href="<?php echo $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id]); ?>"><?php echo CHtml::encode($issue->name); ?></a>
                     </div>
                 </div>
