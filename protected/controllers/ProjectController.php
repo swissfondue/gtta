@@ -2446,6 +2446,16 @@ class ProjectController extends Controller {
             $targetCheck->user_id = Yii::app()->user->id;
             $targetCheck->language_id = $language->id;
             $targetCheck->status = TargetCheck::STATUS_FINISHED;
+            if ($targetCheck->rating!=$model->rating){
+                $issue = Issue::model()->findByAttributes(array(
+                    "check_id" => $check->id,
+                    "project_id" => $project->id
+                ));
+                if (!$issue) {
+                    $pm = new ProjectManager();
+                    $pm->addIssue($project, $check);
+                }
+            }
             $targetCheck->rating = $model->rating;
 
             if (User::checkRole(User::ROLE_ADMIN) && $model->saveResult) {
