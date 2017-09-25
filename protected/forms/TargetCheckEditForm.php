@@ -78,14 +78,14 @@ class TargetCheckEditForm extends CFormModel {
     /**
      * @var timestamp last modification timestamp.
      */
-    public $last_modified;
+    public $lastModified;
 
     public function rules() {
         return array(
             array("rating", "in", "range" => TargetCheck::getValidRatings()),
             array("saveSolution, saveResult", "boolean"),
             array("fields", "checkFields"),
-            array("last_modified", "numerical", "integerOnly" => true),
+            array("lastModified", "numerical", "integerOnly" => true),
             array("inputs, result, solutions, solution, solutionTitle, attachmentTitles, tableResult, scripts, timeouts", "safe"),
         );
     }

@@ -133,14 +133,15 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
      * @throws CHttpException
      */
     public function save($runValidation=true, $attributes=null) {
-        $db_target_check = TargetCustomCheck::model()->findByPk($this->id);
-        $targetCheckIsNew = is_null($db_target_check) || is_null($db_target_check->last_modified);
+        $dbTargetCheck = TargetCustomCheck::model()->findByPk($this->id);
+        $targetCheckIsNew = is_null($dbTargetCheck) || is_null($dbTargetCheck->last_modified);
 
-        if (!$targetCheckIsNew && $this->last_modified < $db_target_check->last_modified) {
+        if (!$targetCheckIsNew && $this->last_modified < $dbTargetCheck->last_modified) {
             throw new CHttpException(403, Yii::t("app", "Could not modify the target check as there is newer version available. Please reload the page and try again!"));
         }
 
         $this->last_modified = time();
+
         parent::save($runValidation, $attributes);
     }
 
