@@ -157,7 +157,7 @@ class TargetManager {
                 "default" => true
             ));
         }
-//        $language = Language::model()->findByAttributes(array("default" => true));
+
         $tcm = new TargetCheckManager();
 
         switch ($target->check_source_type) {
