@@ -18,7 +18,7 @@
                 <br/><br/>
                 <div class="field-block">
                     <h3><?= Yii::t("app", "Title") ?></h3>
-                    <?= $check->name ? $check->name : Yii::t("app", "N/A") ?>
+                    <?= $check->getLocalizedName() ? $check->getLocalizedName() : Yii::t("app", "N/A") ?>
                 </div>
                 <div class="field-block">
                     <h3><?= Yii::t("app", "Background Info") ?></h3>
