@@ -11,7 +11,6 @@ function System() {
         this.csrf = null;
         this.ajaxTimeout = 60000;
         this.messageTimeout = 5000;
-        this.l10nMessages = {};
         this.constants = {};
 
         $("select.show-hide-toggle").change(function () {
