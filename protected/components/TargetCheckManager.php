@@ -64,6 +64,7 @@ class TargetCheckManager
                 $targetCheckScript->target_check_id = $targetCheck->id;
                 $targetCheckScript->save();
             }
+
             $language = Language::model()->findByAttributes(array(
                 'code' => Yii::app()->language
             ));
