@@ -96,7 +96,7 @@ class Check extends ActiveRecord {
             "language_id" => $language->id
         ]);
 
-        if ($translate) {
+        if ($translate && $translate->name) {
             return $translate->name;
         }
 
