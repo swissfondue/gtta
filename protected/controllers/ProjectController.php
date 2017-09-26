@@ -2938,6 +2938,18 @@ class ProjectController extends Controller {
                 $check->sort_order = $check->id;
                 $check->save();
 
+                if ($target->check_source_type == Target::SOURCE_TYPE_CHECKLIST_TEMPLATES) {
+                    $targetTemplate = TargetChecklistTemplate::model()->findByAttributes(["target_id" => $target->id]);
+                    $template = ChecklistTemplate::model()->with($language)->findByPk($targetTemplate->checklist_template_id);
+
+                    if ($template) {
+                        $tc = new ChecklistTemplateCheck();
+                        $tc->checklist_template_id = $template->id;
+                        $tc->check_id = $check->id;
+                        $tc->save();
+                    }
+                }
+
                 $checkL10n = new CheckL10n();
                 $checkL10n->check_id = $check->id;
                 $checkL10n->language_id = $language->id;
