@@ -124,28 +124,11 @@ class Check extends ActiveRecord {
     /**
      * Get field value
      * @param $field
-     * @param null $languageId
      * @return mixed|null
      * @throws Exception
      */
-    private function _getFieldValue($field, $languageId = null) {
-
-        $language = Language::model()->findByAttributes(array(
-            'code' => Yii::app()->language
-        ));
-        if (!$language) {
-            $language = Language::model()->findByAttributes(array(
-                "default" => true
-            ));
-        }
-
-        if ($languageId) {
-            $language = Language::model()->findByPk($languageId);
-
-            if (!$language) {
-                throw new Exception(Yii::t("app", "Language not exists."));
-            }
-        }
+    private function _getFieldValue($field) {
+        $language = System::model()->findByPk(1)->language;
 
         $criteria = new CDbCriteria();
         $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
