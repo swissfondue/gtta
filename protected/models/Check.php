@@ -129,7 +129,15 @@ class Check extends ActiveRecord {
      * @throws Exception
      */
     private function _getFieldValue($field, $languageId = null) {
-        $language = Language::model()->find("\"user_default\" OR \"default\"");
+
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+        if (!$language) {
+            $language = Language::model()->findByAttributes(array(
+                "default" => true
+            ));
+        }
 
         if ($languageId) {
             $language = Language::model()->findByPk($languageId);
