@@ -57,23 +57,13 @@
 <script>
 
     $(document).ready(function () {
-        var previousTarget=null;
         /**
-         * Show solution-form if it was submitted
-         *
+         * Show solution-form
          */
         $('.solution-link').click(function (event) {
-            console.log('click');
             var elem = $(this).next(".solution-form");
-            if(this===previousTarget) {
-
-                elem.toggle('show');
-
-            }
+            elem.show();
             $((".solution-form")).not(elem).empty();
-
-            previousTarget=this;
-
         });
     });
 </script>

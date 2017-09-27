@@ -59,22 +59,15 @@
 
 
     $(document).ready(function () {
-        var previousTarget=null;
+
         /**
-         * Show result-form if it was already clicked
+         * Show result-form
          *
          */
         $('.result-link').click(function (event) {
             var elem = $(this).next(".result-form");
-            if(this===previousTarget) {
-
-                elem.toggle('show');
-
-            }
+            elem.show();
             $((".result-form")).not(elem).empty();
-
-            previousTarget=this;
-
         });
     });
 </script>
