@@ -2303,13 +2303,13 @@ class ProjectController extends Controller
     }
 
     /**
+     * @param $project
      * @param $host
      * @param $issue
+     * @throws CHttpException
      */
     public function actionEvidenceView($project, $host, $issue)
     {
-
-
         $project = Project::model()->findByPk($project);
         if (!$project) {
             throw new CHttpException(404, Yii::t("app", "Project not found."));
@@ -2325,8 +2325,6 @@ class ProjectController extends Controller
         $evidences = IssueEvidence::model()->findAll($criteria);
 
         $this->renderPartial("partial/issue/evidence-view", ['host' => $host, 'evidences' => $evidences, 'project' => $project, 'issue' => $issue], false, true);
-
-
     }
 
     /**

@@ -5,16 +5,17 @@
 <hr>
 
 <div
-    class="container"
-    data-get-running-checks-url="<?= $this->createUrl("project/issuerunningchecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
-    data-update-running-checks-url="<?php echo $this->createUrl("project/updateissuechecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
-    data-add-evidence-url="<?= $this->createUrl("project/addEvidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
+        class="container"
+        data-get-running-checks-url="<?= $this->createUrl("project/issuerunningchecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
+        data-update-running-checks-url="<?php echo $this->createUrl("project/updateissuechecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
+        data-add-evidence-url="<?= $this->createUrl("project/addEvidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
     <div class="row">
         <div class="span8">
             <div id="issue-information">
                 <span style="font-size: 20px;"><?= Yii::t("app", "Issue Information") ?></span>&nbsp;—&nbsp;
                 <a href="<?= $this->createUrl("check/editcheck", ["id" => $check->control->check_category_id, "control" => $check->check_control_id, "check" => $check->id]) ?>"><?= Yii::t("app", "Edit") ?></a>
-                <a class="red" href="#" onclick="admin.issue.delete('<?= $this->createUrl("project/controlissue") ?>', <?= $issue->id ?>, function () { system.redirect('<?= $this->createUrl("project/issues", ["id" => $project->id]) ?>') })"><?= Yii::t("app", "Delete") ?></a>
+                <a class="red" href="#"
+                   onclick="admin.issue.delete('<?= $this->createUrl("project/controlissue") ?>', <?= $issue->id ?>, function () { system.redirect('<?= $this->createUrl("project/issues", ["id" => $project->id]) ?>') })"><?= Yii::t("app", "Delete") ?></a>
                 <br/><br/>
                 <div class="field-block">
                     <h3><?= Yii::t("app", "Title") ?></h3>
@@ -59,12 +60,12 @@
                     <div class="target-ip-list">
                         <ul class="clear-ul">
                             <?php foreach ($evidenceGroups as $host => $evidences): ?>
-<!--                                                                <li><b><a href="--><?php //echo CController::createUrl('project/evidenceview', array('host' => $host, 'issue' => $issue->id, 'project' => $project->id)) ?><!--">--><?php //echo sprintf("%s (%d)", $host, count($evidences)) ?><!--</a></b></li>-->
-
-                                <li><b><?php echo CHtml::ajaxLink(sprintf("%s (%d)", $host, count($evidences)), CController::createUrl('project/evidenceview', array('host' => $host, 'issue' => $issue->id, 'project' => $project->id)),
-                                                                                array('update' => '#simple-div'),
-                                         array('id' => 'simple-link-'.uniqid(), 'class' => 'evidence-link', 'name' => $host)
-                                                                        );?></b></li>
+                                <li>
+                                    <b><?php echo CHtml::ajaxLink(sprintf("%s (%d)", $host, count($evidences)), CController::createUrl('project/evidenceview', ['host' => $host, 'issue' => $issue->id, 'project' => $project->id]),
+                                            ['update' => '#simple-div'],
+                                            ['id' => 'simple-link-' . uniqid(), 'class' => 'evidence-link', 'name' => $host]); ?>
+                                    </b>
+                                </li>
                             <?php endforeach; ?>
                         </ul>
                     </div>
@@ -78,25 +79,25 @@
 
         <div class="span4">
             <?php
-                echo $this->renderPartial("partial/right-block", array(
-                    "quickTargets" => $quickTargets,
-                    "project" => $project,
-                    "category" => null,
-                    "target" => null
-                ));
+            echo $this->renderPartial("partial/right-block", array(
+                "quickTargets" => $quickTargets,
+                "project" => $project,
+                "category" => null,
+                "target" => null
+            ));
             ?>
         </div>
     </div>
 </div>
 
 <div
-    class="modal fade"
-    id="target-select-dialog"
-    tabindex="-1"
-    role="dialog"
-    aria-labelledby="smallModal"
-    aria-hidden="true"
-    data-search-target-url="<?= $this->createUrl("project/searchTargets", ["id" => $project->id, "issue" => $issue->id]) ?>">
+        class="modal fade"
+        id="target-select-dialog"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="smallModal"
+        aria-hidden="true"
+        data-search-target-url="<?= $this->createUrl("project/searchTargets", ["id" => $project->id, "issue" => $issue->id]) ?>">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
@@ -106,7 +107,7 @@
             <div class="modal-body">
                 <input class="target-search-query"
                        placeholder="<?= Yii::t("app", "Hostname or IP address") ?>"
-                       type="text" />
+                       type="text"/>
                 <ul class="table target-list"></ul>
                 <span class="no-search-result" style="display:none"><?= Yii::t("app", "No targets found.") ?></span>
             </div>
