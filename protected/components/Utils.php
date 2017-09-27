@@ -69,8 +69,7 @@ class Utils {
      * @param $string
      * @return bool
      */
-    public static function containsSpecificHtmlSymbols($string)
-    {
+    public static function containsSpecificHtmlSymbols($string){
         return preg_match("/<[^<]+>/",$string,$m) != 0;
     }
 
