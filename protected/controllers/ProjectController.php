@@ -2486,6 +2486,22 @@ class ProjectController extends Controller
             $targetCheck->user_id = Yii::app()->user->id;
             $targetCheck->language_id = $language->id;
             $targetCheck->status = TargetCheck::STATUS_FINISHED;
+
+            if ($targetCheck->rating != $model->rating) {
+                $issue = Issue::model()->findByAttributes(array(
+                    "check_id" => $check->id,
+                    "project_id" => $project->id
+                ));
+
+                if (!$issue) {
+                    $pm = new ProjectManager();
+                    $pm->addIssue($project, $check);
+                } else {
+                    $tm = new TargetManager();
+                    $tm->addEvidence($target, $issue, false);
+                }
+            }
+
             $targetCheck->rating = $model->rating;
 
             if (User::checkRole(User::ROLE_ADMIN) && $model->saveResult) {
@@ -2526,6 +2542,7 @@ class ProjectController extends Controller
             }
 
             $targetCheck->table_result = $model->tableResult;
+            $targetCheck->last_modified = $model->lastModified;
             $targetCheck->save();
 
             // delete old solutions
@@ -2617,10 +2634,12 @@ class ProjectController extends Controller
 
                         $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION, null);
                         $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE, null);
+                        $targetCheck->last_modified = $model->lastModified;
                         $targetCheck->save();
                     } else {
                         $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION, $model->solution);
                         $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE, $model->solutionTitle);
+                        $targetCheck->last_modified = $model->lastModified;
                         $targetCheck->save();
                     }
                 }
@@ -2696,6 +2715,7 @@ class ProjectController extends Controller
             ));
 
             $response->addData("rating", $targetCheck->rating);
+            $response->addData("lastModified", $targetCheck->last_modified);
 
             if ($project->status == Project::STATUS_OPEN) {
                 $project->status = Project::STATUS_IN_PROGRESS;
@@ -2769,6 +2789,7 @@ class ProjectController extends Controller
                 throw new CHttpException(404, Yii::t("app", "Check not found."));
             }
 
+
             $criteria = new CDbCriteria();
             $criteria->addInCondition("check_control_id", $controlIds);
             $criteria->addColumnCondition(array(
@@ -2795,6 +2816,7 @@ class ProjectController extends Controller
                 throw new Exception($errorText);
             }
 
+            $targetCheck->last_modified = $model->lastModified;
             $targetCheck->save();
 
             if ($project->status == Project::STATUS_OPEN) {
@@ -2958,6 +2980,18 @@ class ProjectController extends Controller
                 $check->sort_order = $check->id;
                 $check->save();
 
+                if ($target->check_source_type == Target::SOURCE_TYPE_CHECKLIST_TEMPLATES) {
+                    $targetTemplate = TargetChecklistTemplate::model()->findByAttributes(["target_id" => $target->id]);
+                    $template = ChecklistTemplate::model()->with($language)->findByPk($targetTemplate->checklist_template_id);
+
+                    if ($template) {
+                        $tc = new ChecklistTemplateCheck();
+                        $tc->checklist_template_id = $template->id;
+                        $tc->check_id = $check->id;
+                        $tc->save();
+                    }
+                }
+
                 $checkL10n = new CheckL10n();
                 $checkL10n->check_id = $check->id;
                 $checkL10n->language_id = $language->id;
@@ -3045,9 +3079,11 @@ class ProjectController extends Controller
                     }
                 }
 
+                $customCheck->last_modified = $form->lastModified;
                 $customCheck->save();
 
                 $response->addData("rating", $customCheck->rating);
+                $response->addData("lastModified", $customCheck->last_modified);
 
                 StatsJob::enqueue(array(
                     "category_id" => $customCheck->control->check_category_id,

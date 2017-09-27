@@ -65,13 +65,18 @@ class TargetCustomCheckEditForm extends CFormModel {
     public $fields;
 
     /**
+     * @var timestamp last modification timestamp.
+     */
+    public $lastModified;
+
+    /**
      * @return array validation rules for model attributes.
      */
     public function rules() {
         return array(
             array("rating", "in", "range" => TargetCheck::getValidRatings()),
             array("name, solutionTitle", "length", "max" => 1000),
-            array("id, controlId", "numerical", "integerOnly" => true),
+            array("id, controlId, lastModified", "numerical", "integerOnly" => true),
             array("createCheck", "boolean"),
             array("backgroundInfo, question, result, solution, attachmentTitles, fields", "safe"),
         );
