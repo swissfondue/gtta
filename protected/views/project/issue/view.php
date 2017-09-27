@@ -1,3 +1,13 @@
+<div class="pull-right buttons">
+    <?php if (User::checkRole(User::ROLE_USER)): ?>
+        <div class="btn-group">
+            <a class="btn" href="#" onclick="admin.showCheckSearchPopup();">
+                <i class="icon icon-plus"></i>
+                <?php echo Yii::t("app", "New"); ?>
+            </a>
+        </div>
+    <?php endif; ?>
+</div>
 <div class="active-header">
     <h1><?= CHtml::encode($this->pageTitle); ?></h1>
 </div>
@@ -6,6 +16,7 @@
 
 <div
     class="container"
+    data-add-issue-url="<?= $this->createUrl("project/addIssue", ["id" => $project->id]); ?>"
     data-get-running-checks-url="<?= $this->createUrl("project/issuerunningchecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
     data-update-running-checks-url="<?php echo $this->createUrl("project/updateissuechecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
     data-add-evidence-url="<?= $this->createUrl("project/addEvidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
@@ -234,7 +245,7 @@
         </div>
     </div>
 </div>
-
+<?= $this->renderPartial("/layouts/partial/check-selector", ["project" => $project]); ?>
 <script>
     $(".target-tabs a").click(function (e) {
         e.preventDefault();
@@ -260,3 +271,4 @@
         admin.issue.initTargetSelectDialog();
     });
 </script>
+
