@@ -17,11 +17,11 @@
                 <?php if (in_array($field->type, [GlobalCheckField::TYPE_TEXTAREA, GlobalCheckField::TYPE_WYSIWYG])): ?>
                     <?php $wysiwyg = in_array($field->type, [GlobalCheckField::TYPE_WYSIWYG, GlobalCheckField::TYPE_WYSIWYG_READONLY]); ?>
 
-                    <textarea class="max-width target-check-field <?= ($wysiwyg || Utils::isHtml($field->value)) ? "wysiwyg" : "" ?>"
+                    <textarea class="max-width target-check-field <?= ($wysiwyg || $field->value) ? "wysiwyg" : "" ?>"
                               rows="10"
                               id="<?= $id ?>"
                               name="<?= $name ?>"
-                        <?php if ($field->type == GlobalCheckField::TYPE_WYSIWYG_READONLY) echo "readonly"; ?>><?php echo CHtml::encode($field->value); ?></textarea>
+                        <?php if ($field->type == GlobalCheckField::TYPE_WYSIWYG_READONLY) echo "readonly"; ?>><?php echo Utils::containsSpecificHtmlSymbols($field->value); ?></textarea>
                 <?php endif; ?>
 
                 <?php if ($field->type == GlobalCheckField::TYPE_WYSIWYG_READONLY): ?>
