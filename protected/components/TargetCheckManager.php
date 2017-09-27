@@ -1,10 +1,8 @@
 <?php
-
 /**
  * Class TargetCheckManager
  */
-class TargetCheckManager
-{
+class TargetCheckManager {
     /**
      * Target check create
      * @param Check $check
@@ -12,8 +10,7 @@ class TargetCheckManager
      * @return TargetCheck
      * @throws Exception
      */
-    public function create(Check $check, $data)
-    {
+    public function create(Check $check, $data) {
         $targetCheck = new TargetCheck();
 
         try {
@@ -75,6 +72,7 @@ class TargetCheckManager
                 ));
             }
 
+
             /** @var CheckField $field */
             foreach ($check->fields as $field) {
                 $this->createField($targetCheck, $field, $language);
@@ -112,8 +110,7 @@ class TargetCheckManager
      * @param Language|null $language
      * @return TargetCheckField
      */
-    public function createField(TargetCheck $tc, CheckField $field, Language $language = null)
-    {
+    public function createField(TargetCheck $tc, CheckField $field, Language $language = null) {
 
         $exists = TargetCheckField::model()->findByAttributes([
             "target_check_id" => $tc->id,
@@ -144,9 +141,8 @@ class TargetCheckManager
      * @param $id
      * @throws Exception
      */
-    public static function start($id, $chain = false)
-    {
-        $id = (int)$id;
+    public static function start($id, $chain=false) {
+        $id = (int) $id;
         $targetCheck = TargetCheck::model()->findByPk($id);
 
         if (!$targetCheck) {
@@ -173,9 +169,8 @@ class TargetCheckManager
      * @param $id
      * @throws Exception
      */
-    public static function stop($id)
-    {
-        $id = (int)$id;
+    public static function stop($id) {
+        $id = (int) $id;
         $targetCheck = TargetCheck::model()->findByPk($id);
 
         if (!$targetCheck) {
@@ -196,8 +191,7 @@ class TargetCheckManager
      * @return array
      * @throws Exception
      */
-    public static function getRunning()
-    {
+    public static function getRunning() {
         $mask = JobManager::buildId(AutomationJob::ID_TEMPLATE, array(
             "operation" => "*",
             "obj_id" => "*",
@@ -226,8 +220,7 @@ class TargetCheckManager
      * @param $id
      * @return mixed
      */
-    public static function getStartTime($id)
-    {
+    public static function getStartTime($id) {
         $job = JobManager::buildId(AutomationJob::ID_TEMPLATE, array(
             "operation" => AutomationJob::OPERATION_START,
             "obj_id" => $id,
@@ -241,8 +234,7 @@ class TargetCheckManager
      * @param CheckField $checkField
      * @throws Exception
      */
-    public function reindexFields(CheckField $checkField)
-    {
+    public function reindexFields(CheckField $checkField) {
         foreach ($checkField->check->targetChecks as $targetCheck) {
             $tcf = TargetCheckField::model()->findByAttributes([
                 "check_field_id" => $checkField->id,
@@ -262,13 +254,12 @@ class TargetCheckManager
         }
     }
 
-    /**
+    /**	
      * Get check human readable data
      * @param TargetCheck $tc
      * @return array
      */
-    public static function getData(TargetCheck $tc)
-    {
+    public static function getData(TargetCheck $tc) {
         $renderController = new CController("RenderController");
 
         $attachmentList = array();
@@ -330,8 +321,7 @@ class TargetCheckManager
      * @return IssueEvidence
      * @throws Exception
      */
-    public function addEvidence(TargetCheck $targetCheck)
-    {
+    public function addEvidence(TargetCheck $targetCheck) {
         $target = $targetCheck->target;
 
         $issue = Issue::model()->findByAttributes([
