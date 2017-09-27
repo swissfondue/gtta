@@ -1,5 +1,4 @@
 <?php
-defined('YII_DEBUG') or define('YII_DEBUG',true);
 $common = dirname(__FILE__) . "/protected/common.php";
 $config = dirname(__FILE__) . "/protected/config/main.php";
 $yii = dirname(__FILE__) . "/protected/framework/yii.php";
