@@ -61,11 +61,10 @@
     $(document).ready(function () {
         var previousTarget=null;
         /**
-         * Show result-form if it was submitted
+         * Show result-form if it was already clicked
          *
          */
-        $('.solution-link').click(function (event) {
-            console.log('click');
+        $('.result-link').click(function (event) {
             var elem = $(this).next(".result-form");
             if(this===previousTarget) {
 
