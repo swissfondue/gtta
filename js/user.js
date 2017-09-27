@@ -3373,6 +3373,18 @@ function User()
             $('.relations-form-input').val(new XMLSerializer().serializeToString(node));
         };
     };
+
+    /**
+     * Issue object
+     */
+    this.issue = new function () {
+        var _issue = this;
+
+        this.updateEvidencesResult = function (id) {
+
+           var result = $( "#myselect option:selected" ).text();
+        };
+    };
 }
 
 var user = new User();

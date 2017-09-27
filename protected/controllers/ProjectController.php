@@ -4962,6 +4962,19 @@ class ProjectController extends Controller
         $this->breadcrumbs[] = [Yii::t("app", "Issues"), $this->createUrl("project/issues", ["id" => $project->id])];
         $this->breadcrumbs[] = [$title, ""];
 
+        $criteria = new CDbCriteria();
+        $criteria->limit  = $this->entriesPerPage;
+        $criteria->order  = 't.sort_order ASC';
+        $criteria->addColumnCondition(array( 'check_id' => $issue->check ));
+
+        $solutions = CheckSolution::model()->with(array(
+            'l10n' => array(
+                'joinType' => 'LEFT JOIN',
+                'on'       => 'language_id = :language_id',
+                'params'   => array( 'language_id' => $language )
+            )
+        ))->findAll($criteria);
+
         // display the page
         $this->pageTitle = $title;
         $this->render("issue/view", [
@@ -4969,7 +4982,8 @@ class ProjectController extends Controller
             "issue" => $issue,
             "check" => $issue->check,
             "quickTargets" => $this->_getQuickTargets($project->id, $language),
-            "evidenceGroups" => $evidenceGroups
+            "evidenceGroups" => $evidenceGroups,
+            "solutions" => $solutions
         ]);
     }
 
