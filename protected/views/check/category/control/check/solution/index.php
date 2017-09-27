@@ -54,13 +54,13 @@
         </div>
     </div>
 </div>
-<script>
 
+<script>
     $(document).ready(function () {
         /**
          * Show solution-form
          */
-        $('.solution-link').click(function (event) {
+        $(".solution-link").click(function (event) {
             var elem = $(this).next(".solution-form");
             elem.show();
             $((".solution-form")).not(elem).empty();

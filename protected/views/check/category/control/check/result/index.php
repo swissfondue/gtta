@@ -32,10 +32,9 @@
                         <?php foreach ($results as $result): ?>
                             <tr data-id="<?php echo $result->id; ?>" data-control-url="<?php echo $this->createUrl('check/controlresult'); ?>">
                                 <td class="result">
-<!--                                    <a href="--><?php //echo $this->createUrl('check/editresult', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'result' => $result->id )); ?><!--">--><?php //echo CHtml::encode($result->localizedTitle); ?><!--</a>-->
                                     <?php echo CHtml::ajaxLink(CHtml::encode($result->localizedTitle), CController::createUrl('check/editresult', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'result' => $result->id )),
-                                    array('update' => '#simple-div-'.$result->id),
-                                    array('id' => 'simple-link-'.$result->id, 'class' => 'result-link')
+                                        array('update' => '#simple-div-'.$result->id),
+                                        array('id' => 'simple-link-'.$result->id, 'class' => 'result-link')
                                     );?>
 
                                     <div class="result-form" id="simple-div-<?php echo $result->id;?>"></div>
@@ -55,16 +54,14 @@
         </div>
     </div>
 </div>
+
 <script>
-
-
     $(document).ready(function () {
-
         /**
          * Show result-form
          *
          */
-        $('.result-link').click(function (event) {
+        $(".result-link").click(function (event) {
             var elem = $(this).next(".result-form");
             elem.show();
             $((".result-form")).not(elem).empty();
