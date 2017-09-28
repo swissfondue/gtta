@@ -210,8 +210,8 @@ function System() {
         this.del = function (id, message) {
             $('tr[data-id=' + id + ']').addClass('delete-row');
 
-            if  (confirm(_system.translate('Are you sure that you want to delete this object?') + '\n\n' +
-                    (message?message+' ':'') + _system.translate('PROCEED AT YOUR OWN RISK!'))) {
+            if  (confirm(_system.translate('Are you sure that you want to delete this object?') +
+                    (message?'\n\n' + message + _system.translate(' PROCEED AT YOUR OWN RISK!'):''))) {
                 _system_control._control(id, 'delete');
             } else {
                 $('tr[data-id=' + id + ']').removeClass('delete-row');
