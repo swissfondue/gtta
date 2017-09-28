@@ -1657,6 +1657,7 @@ table .span5 {
 }
 
 table .span6 {
+  float: none;
   width: 444px;
   margin-left: 0;
 }

@@ -6,6 +6,10 @@
             width: 270px;
             height: 200px;
         }
+
+        table .span6 {
+            float: left;
+        }
     </style>
 <?php endif; ?>
 <hr>
