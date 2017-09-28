@@ -1,10 +1,8 @@
 <script src="/ckeditor/ckeditor.js"></script>
 <script src="/ckeditor/adapters/jquery.js"></script>
 <hr>
-
 <form id="form" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
-
     <fieldset>
         <?php if ($view == Check::VIEW_TABBED): ?>
             <ul class="nav nav-tabs" id="languages-tab">
@@ -18,7 +16,6 @@
                 <?php endforeach; ?>
             </ul>
         <?php endif; ?>
-
         <div class=<?= ($view == Check::VIEW_TABBED) ? "tab-content" : "row" ?>>
             <?php foreach ($languages as $language): ?>
                 <div class="<?= (($view == Check::VIEW_SHARED) ? "span6" : ("tab-pane" . $language->default ? " active" : "")) ?>" id="<?php echo CHtml::encode($language->code); ?>">
@@ -28,7 +25,6 @@
                             <?php echo CHtml::encode($language->name); ?>
                         </a>
                     <?php endif; ?>
-
                     <div class="control-group <?php if ($model->getError('title')) echo 'error'; ?>">
                         <label class="control-label" for="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_title"><?php echo Yii::t('app', 'Title'); ?></label>
                         <div class="controls">
@@ -38,7 +34,6 @@
                             <?php endif; ?>
                         </div>
                     </div>
-                    
                     <div class="control-group <?php if ($model->getError('solution')) echo 'error'; ?>">
                         <label class="control-label" for="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_solution"><?php echo Yii::t('app', 'Solution'); ?></label>
                         <div class="controls">
@@ -51,11 +46,7 @@
                 </div>
             <?php endforeach; ?>
         </div>
-
-        <div>
-            <hr>
-        </div>
-
+        <hr><hr>
         <div class="control-group <?php if ($model->getError('sortOrder')) echo 'error'; ?>">
             <label class="control-label" for="CheckSolutionEditForm_sortOrder"><?php echo Yii::t('app', 'Sort Order'); ?></label>
             <div class="controls">
@@ -71,7 +62,6 @@
         </div>
     </fieldset>
 </form>
-
 <script>
     /**
      *Submit form without redirect
@@ -91,6 +81,7 @@
             });
         });
     });
+
     $('#languages-tab a').click(function (e) {
         e.preventDefault();
         $(this).tab('show');

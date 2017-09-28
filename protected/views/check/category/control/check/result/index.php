@@ -21,7 +21,7 @@
 
 <div class="container">
     <div class="row">
-        <div class="span8">
+        <div class="span12">
             <?php if (count($results) > 0): ?>
                 <table class="table result-list">
                     <tbody>
