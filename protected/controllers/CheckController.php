@@ -785,7 +785,6 @@ class CheckController extends Controller
                 "id" => $check,
                 "check_control_id" => $control->id
             ));
-
             $check = Check::model()->with(array(
                 "l10n" => array(
                     "joinType" => "LEFT JOIN",
@@ -797,6 +796,29 @@ class CheckController extends Controller
             if (!$check) {
                 throw new CHttpException(404, Yii::t("app", "Check not found."));
             }
+
+            $criteria = new CDbCriteria();
+            $criteria->order = 't.sort_order ASC';
+            $criteria->addColumnCondition(array('check_id' => $check->id));
+            $check_solutions = CheckSolution::model()->with(array(
+                'l10n' => array(
+                    'joinType' => 'LEFT JOIN',
+                    'on' => 'language_id = :language_id',
+                    'params' => array('language_id' => $language)
+                )
+            ))->findAll($criteria);
+
+            $criteria = new CDbCriteria();
+            $criteria->order = 't.sort_order ASC';
+            $criteria->addColumnCondition(array('check_id' => $check->id));
+            $criteria->together = true;
+            $check_results = CheckResult::model()->with(array(
+                'l10n' => array(
+                    'joinType' => 'LEFT JOIN',
+                    'on' => 'language_id = :language_id',
+                    'params' => array('language_id' => $language)
+                )
+            ))->findAll($criteria);
         } else {
             $check = new Check();
             $now = new DateTime();
@@ -999,9 +1021,11 @@ class CheckController extends Controller
             'languages' => $languages,
             'references' => $references,
             'categories' => $categories,
-            "fields" => $fields,
+            'fields' => $fields,
             'efforts' => array(2, 5, 20, 40, 60, 120),
-            'view' => Check::VIEW_SHARED
+            'view' => Check::VIEW_SHARED,
+            'check_results' => $check_results,
+            'check_solutions' => $check_solutions
         ));
     }
 
@@ -1454,13 +1478,13 @@ class CheckController extends Controller
 
         // display the page
         $this->pageTitle = $check->localizedName;
-        $this->render('category/control/check/result/index', array(
+        $this->renderPartial('category/control/check/result/index', array(
             'results' => $check_results,
             'p' => $paginator,
             'check' => $check,
             'category' => $category,
             'control' => $control,
-        ));
+        ),false,false);
     }
 
     /**
@@ -1626,7 +1650,7 @@ class CheckController extends Controller
                     "check_id" => $check->id
                 ));
             } else
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+                throw new CHttpException(404, Yii::t('app', 'Result model validation error.'));
         }
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
@@ -1642,29 +1666,16 @@ class CheckController extends Controller
 
         // display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Result') : $result->localizedTitle;
-        if ($newRecord){
-            $this->render('category/control/check/result/edit', array(
-                'model' => $model,
-                'category' => $category,
-                'control' => $control,
-                'check' => $check,
-                'result' => $result,
-                'languages' => $languages,
-                'view' => Check::VIEW_SHARED
-            ));
-
-        }
-        else {
-            $this->renderPartial('category/control/check/result/edit', array(
-                'model' => $model,
-                'category' => $category,
-                'control' => $control,
-                'check' => $check,
-                'result' => $result,
-                'languages' => $languages,
-                'view' => Check::VIEW_SHARED
-            ), false, true);
-        }
+        $this->renderPartial(
+            'category/control/check/result/edit', [
+            'model' => $model,
+            'category' => $category,
+            'control' => $control,
+            'check' => $check,
+            'result' => $result,
+            'languages' => $languages,
+            'view' => Check::VIEW_SHARED
+        ], false, false);
     }
 
     /**
@@ -1966,7 +1977,7 @@ class CheckController extends Controller
                     "check_id" => $check->id
                 ));
             } else
-                Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
+                throw new CHttpException(404, Yii::t('app', 'Solution model validation error.'));
         }
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Checks'), $this->createUrl('check/index'));
@@ -1982,19 +1993,7 @@ class CheckController extends Controller
 
         // display the page
         $this->pageTitle = $newRecord ? Yii::t('app', 'New Solution') : $solution->localizedTitle;
-        if ($newRecord) {
-            $this->render('category/control/check/solution/edit', array(
-                'model' => $model,
-                'category' => $category,
-                'control' => $control,
-                'check' => $check,
-                'solution' => $solution,
-                'languages' => $languages,
-                'view' => Check::VIEW_SHARED
-            ));
-
-        } else {
-            $this->renderPartial('category/control/check/solution/edit', array(
+        $this->renderPartial('category/control/check/solution/edit', array(
                 'model' => $model,
                 'category' => $category,
                 'control' => $control,
@@ -2003,7 +2002,7 @@ class CheckController extends Controller
                 'languages' => $languages,
                 'view' => Check::VIEW_SHARED
             ), false, false);
-        }
+
     }
 
     /**

@@ -8,7 +8,10 @@
     </style>
 <?php endif; ?>
 <hr>
-<form id="form" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
+<?php if ($solution->isNewRecord) {
+    echo "<h2>" . Yii::t('app', 'New Solution') . "</h2><br>";
+} ?>
+<form id="solution-form-<?=$solution->id?>" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
     <fieldset>
         <?php if ($view == Check::VIEW_TABBED): ?>
@@ -78,6 +81,9 @@
         </div>
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>
+            <?php if ($solution->isNewRecord): ?>
+                <button type="button" class="btn" onclick="$('#solution-div-new').hide();"><?php echo Yii::t('app', 'Close'); ?></button>
+            <?php endif; ?>
         </div>
     </fieldset>
 </form>
@@ -86,15 +92,23 @@
      *Submit form without redirect
      */
     $(function () {
-        var sol_id =<?php echo json_encode($solution->id)?>;
-        $("#form").on("submit", function (e) {
+        var solId = <?php echo json_encode($solution->id)?>;
+        $("#solution-form-" + (solId?solId:'')).on("submit", function (e) {
             e.preventDefault();
             $.ajax({
                 url: $(this).attr("action"),
                 type: 'POST',
                 data: $(this).serialize(),
                 success: function (data) {
-                    $("#simple-div-" + sol_id).hide();
+                    <?php if ($solution->isNewRecord):  ?>
+                    $("#solution-div-new").hide();
+                    window.location.reload();
+                    <?php else: ?>
+                    $("#solution-div-" + solId).hide();
+                    <?php endif; ?>
+                },
+                error: function (data) {
+                    system.addAlert('error', "Fill all required fields.");
                 }
             });
         });
