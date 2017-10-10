@@ -100,8 +100,8 @@
                                     <?= $issue->affected_targets; ?>
                                 </td>
                                 <td>
-                                    <?php if(isset($issue->not_filled_ev)): ?>
-                                        <a style="color:red;" href="<?= $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id, "evidence" => $issue->not_filled_ev]); ?>">
+                                    <?php if(isset($notFilledEv)): ?>
+                                        <a style="color:red;" href="<?= $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id, "notFilledHost" => $notFilledHost, "notFilledEv" => $notFilledEv]); ?>">
                                             !
                                         </a>
                                     <?php endif; ?>

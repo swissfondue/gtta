@@ -970,6 +970,110 @@ function Admin() {
                     }
                 });
             };
+
+            this.updateAll = function (rating, solution) {
+                var data = {
+                    "YII_CSRF_TOKEN": system.csrf,
+                };
+                var selectRatingVal, selectSolutionVal;
+
+                if (rating) {
+                    selectRatingVal = $('#ratingAll').val();
+                    if (!selectRatingVal){
+                        system.addAlert('error', "Select rating option.");
+                        return;
+                    }
+                    data["rating"] = selectRatingVal;
+                }
+
+                if (solution) {
+                    selectSolutionVal = $('#solutionAll').val();
+                    if (!selectSolutionVal) {
+                        system.addAlert('error', "Select solution option.");
+                        return;
+                    }
+                    data["solution"] = selectSolutionVal;
+                }
+
+                $.ajax({
+                    dataType: "json",
+                    url: $("[data-update-evidence-url]").data("update-evidence-url"),
+                    type: "POST",
+                    data: data,
+                    success: function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        location.reload();
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend: function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+            };
+
+            this.update = function (targetCheckId) {
+                var data = {
+                    "YII_CSRF_TOKEN": system.csrf,
+                };
+
+                var rating = $('#rating-'+targetCheckId).val();
+                var solution = $('#solution-'+targetCheckId).val();
+                var result = $('#result-'+targetCheckId).val();
+                var poc = $('#poc-'+targetCheckId).val();
+
+                if (rating) {
+                    data["rating"] = rating;
+                }
+
+                if (solution) {
+                    data["solution"] = solution;
+                }
+
+                if (result) {
+                    data["result"] = result;
+                }
+
+                if (poc) {
+                    data["poc"] = poc;
+                }
+
+                $.ajax({
+                    dataType: "json",
+                    url: $("[data-update-evidence-url-"+targetCheckId+"]").data("update-evidence-url-"+targetCheckId),
+                    type: "POST",
+                    data: data,
+                    success: function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        location.reload();
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend: function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+            };
         };
     };
 

@@ -45,11 +45,14 @@ class Utils {
 
     /**
      * Get first words of a string
+     *
      * @param $string
      * @param $numberOfWords
+     * @param bool $only
+     *
      * @return string
      */
-    public static function getFirstWords($string, $numberOfWords) {
+    public static function getFirstWords($string, $numberOfWords, $only = false) {
         $pattern = '/^(?>\S+\s*){1,' . $numberOfWords . '}/';
         $data = $string;
 
@@ -57,8 +60,12 @@ class Utils {
             $data = rtrim($match[0]);
         }
 
-        if (mb_strlen($data) < mb_strlen($string)) {
-            $data .= "...";
+        if (!$only) {
+
+            if (mb_strlen($data) < mb_strlen($string)) {
+                $data .= "...";
+            }
+
         }
 
         return $data;

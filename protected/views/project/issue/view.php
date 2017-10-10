@@ -1,20 +1,37 @@
+<?php if ($notFilledHost):  ?>
+    <script>
+        $(window).load(function(){
+           var notFilledHost =  <?php echo json_encode(Utils::getFirstWords($notFilledHost,1,true))?>;
+           var evId =  <?php echo json_encode($notFilledEv)?>;
+           $('#simple-link-'+notFilledHost).click();
+            var checkExist = setInterval(function() {
+                if ($('#evidence_tab_'+evId).length) {
+                    clearInterval(checkExist);
+                    $('li').removeClass('active');
+                    $('#evidence_tab_'+evId).addClass ('active');
+                    $('html, body').animate({
+                        scrollTop: $('#evidence_tab_'+evId).offset().top
+                    }, 1000);
+                }
+            }, 100); // check every 100ms
+        });
+    </script>
+<?php endif; ?>
 <style>
     .elem-style {
         width: 80%;
     }
-
     .button-group-padding {
         padding-bottom: 20px;
     }
 </style>
-<?php $ratings = TargetCheck::getRatingNames(); ?>
 <div class="active-header">
     <h1><?= CHtml::encode($this->pageTitle); ?></h1>
 </div>
 <hr>
-
 <div
         class="container"
+        id=""
         data-get-running-checks-url="<?= $this->createUrl("project/issuerunningchecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
         data-update-running-checks-url="<?php echo $this->createUrl("project/updateissuechecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
         data-add-evidence-url="<?= $this->createUrl("project/addEvidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
@@ -55,91 +72,94 @@
             </div>
 
             <?php if (User::checkRole(User::ROLE_USER)): ?>
-                <div data-type="issue"
-                     data-save-url="<?php echo $this->createUrl("project/updateevidences", array("id" => $issue->id)); ?>">
+            <div data-type="evidence"
+                 data-update-evidence-url="<?php echo $this->createUrl("project/updateevidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
                 <div class="span8 button-group-padding">
                     <div class="row">
                         <div class="span4">
-                            <select class="elem-style pull-right">
+                            <select id="ratingAll" class="elem-style pull-right">
                                 <option selected="selected" value="" disabled>Select Rating</option>
                                 <?php foreach ($ratings as $rating): ?>
-                                    <option><?= $rating ?></option>
+                                    <option value="<?= $rating ?>"><?= TargetCheck::getRatingNames()[$rating] ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="span4 ">
                             <button class="btn elem-style"
-                                    onclick=""><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
+                                    onclick="admin.issue.evidence.updateAll(true)"><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
                         </div>
                     </div>
                 </div>
                 <div class="span8 button-group-padding">
                     <div class="row">
                         <div class="span4">
-                            <select class="elem-style pull-right">
+                            <select id="solutionAll" class="elem-style pull-right">
                                 <option selected="selected" value="" disabled>Select Solution</option>
                                 <?php foreach ($solutions as $solution): ?>
-                                    <option><?= $solution->localizedTitle ?></option>
+                                    <option value="<?= $solution->id ?>"><?= $solution->localizedTitle ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="span4">
                             <button class="btn elem-style"
-                                    onclick=""><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
+                                    onclick="admin.issue.evidence.updateAll(false,true)"><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
                         </div>
                     </div>
                 </div>
-            <?php endif; ?>
-            <br>
-            <br>
-            <hr>
-
-            <div class="row">
-                <div class="span8">
-                    <b style="font-size: 20px"><?= Yii::t("app", "Assets affected by this Issue") ?></b>
-                    &nbsp;—&nbsp;
-                    <a href="#" onclick="admin.issue.showTargetSelectDialog();"><?= Yii::t("app", "Add") ?></a>
-                </div>
-            </div>
-            <br>
-            <div class="row">
-                <div class="span2">
-                    <div class="target-ip-list">
-                        <ul class="clear-ul">
-                            <?php foreach ($evidenceGroups as $host => $evidences): ?>
-                                <!--                                                                <li><b><a href="--><?php //echo CController::createUrl('project/evidenceview', array('host' => $host, 'issue' => $issue->id, 'project' => $project->id)) ?><!--">--><?php //echo sprintf("%s (%d)", $host, count($evidences)) ?><!--</a></b></li>-->
-
-                                <li>
-                                    <b><?php echo CHtml::ajaxLink(sprintf("%s (%d)", $host, count($evidences)), CController::createUrl('project/evidenceview', array('host' => $host, 'issue' => $issue->id, 'project' => $project->id)),
-                                            array('update' => '#simple-div'),
-                                            array('id' => 'simple-link-' . uniqid(), 'class' => 'evidence-link', 'name' => $host)
-                                        ); ?></b></li>
-                            <?php endforeach; ?>
-                        </ul>
+                <?php endif; ?>
+                <br>
+                <br>
+                <hr>
+                <div class="row">
+                    <div class="span8">
+                        <b style="font-size: 20px"><?= Yii::t("app", "Assets affected by this Issue") ?></b>
+                        &nbsp;—&nbsp;
+                        <a href="#" onclick="admin.issue.showTargetSelectDialog();"><?= Yii::t("app", "Add") ?></a>
                     </div>
                 </div>
-                <div class="span6">
-                    <div id="simple-div"></div>
+                <br>
+                <div class="row">
+                    <div class="span2">
+                        <div class="target-ip-list">
+                            <ul class="clear-ul">
+                                <?php foreach ($evidenceGroups as $host => $evidences): ?>
+                                    <!--                                                                <li><b><a href="--><?php //echo CController::createUrl('project/evidenceview', array('host' => $host, 'issue' => $issue->id, 'project' => $project->id)) ?><!--">--><?php //echo sprintf("%s (%d)", $host, count($evidences)) ?><!--</a></b></li>-->
 
+                                    <li>
+                                        <b><?php echo CHtml::ajaxLink(
+                                                sprintf("%s (%d)", $host, count($evidences)), CController::createUrl('project/evidenceview', ['host' => $host, 'issue' => $issue->id, 'project' => $project->id]),
+                                                ['update' => '#simple-div'],
+                                                ['id' => 'simple-link-' . Utils::getFirstWords($host,1, true), 'class' => 'evidence-link', 'name' => $host]
+                                            ); ?></b></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="span6">
+                        <div id="simple-div"></div>
+
+                    </div>
                 </div>
             </div>
+
         </div>
 
         <div class="span4">
             <?php
-            echo $this->renderPartial("partial/right-block", array(
+            echo $this->renderPartial(
+                "partial/right-block", [
                 "quickTargets" => $quickTargets,
                 "project" => $project,
                 "category" => null,
                 "target" => null
-            ));
+            ]
+            );
             ?>
         </div>
     </div>
-</div>
 
-<div
-        class="modal fade"
+    <div
+            class="modal fade"
         id="target-select-dialog"
         tabindex="-1"
         role="dialog"
