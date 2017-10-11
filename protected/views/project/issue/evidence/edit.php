@@ -1,6 +1,10 @@
+<link rel="stylesheet" type="text/css" href="/css/cvss.css">
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.ui.js"></script>
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.iframe-transport.js"></script>
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/jquery/jquery.fileupload.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/cvss/cvsscalc30_helptext.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/cvss/cvsscalc30.js"></script>
+<script src="<?php echo Yii::app()->request->baseUrl; ?>/js/cvss/cvss.js"></script>
 <script src="/ckeditor/ckeditor.js"></script>
 <script src="/ckeditor/adapters/jquery.js"></script>
 
