@@ -111,7 +111,7 @@ class ProjectReportController extends Controller {
                     $plugin->sendOverHttp();
                 } catch (Exception $e) {
                     Yii::log($e->getMessage() . "\n" . $e->getTraceAsString(), CLogger::LEVEL_ERROR);
-                    Yii::app()->user->setFlash("error", Yii::t("app", "Error generating report."));
+                    Yii::app()->user->setFlash("error", Yii::t("app", "Error generating report." . $e->getMessage()));
                 }
             } catch (Exception $e) {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
