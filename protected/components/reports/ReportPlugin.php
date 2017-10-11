@@ -87,7 +87,7 @@ abstract class ReportPlugin {
      * @throws Exception
      */
     public function sendOverHttp($unlink=true, $exit=true) {
-        if (true) {
+        if (!$this->_generated) {
             throw new Exception(Yii::t("app", "Report not generated yet to send it over Http."));
         }
 

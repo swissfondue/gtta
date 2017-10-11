@@ -270,7 +270,7 @@ class ProjectReportController extends Controller {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             } catch (Exception $e) {
                 Yii::log($e->getMessage() . "\n" . $e->getTraceAsString(), CLogger::LEVEL_ERROR);
-                Yii::app()->user->setFlash("error", Yii::t("app", "Error generating report. ".$e->getMessage()));
+                Yii::app()->user->setFlash("error", Yii::t("app", "Error generating report. " . $e->getMessage()));
             }
         }
 
