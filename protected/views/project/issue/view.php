@@ -9,6 +9,8 @@
                     clearInterval(checkExist);
                     $('li').removeClass('active');
                     $('#evidence_tab_'+evId).addClass ('active');
+                    $(".tab-pane").removeClass('active');
+                    $('#evidence_'+evId).addClass ('active');
                     $('html, body').animate({
                         scrollTop: $('#evidence_tab_'+evId).offset().top
                     }, 1000);
