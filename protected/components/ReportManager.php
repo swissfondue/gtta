@@ -343,6 +343,7 @@ class ReportManager {
 
         $checkData = array(
             "id" => $check->id,
+            "targetCheckId" => $tc->id,
             "custom" => false,
             "name" => $check->localizedName,
             "fields" => $checkFields,
@@ -684,6 +685,7 @@ class ReportManager {
                         $checkData = array(
                             "id" => $check->target_id . "-" . $check->check_control_id,
                             "custom" => true,
+                            "targetCheckId" => $check->id,
                             "name" => $check->name,
                             "background" => $this->prepareText($check->background_info),
                             "question" => $this->prepareText($check->question),
@@ -786,6 +788,7 @@ class ReportManager {
                                 "result" => $checkData["result"],
                                 "ratingValue" => $checkData["ratingValue"],
                                 "custom" => true,
+                                "targetCheckId" => $checkData["targetCheckId"],
                             );
                         }
 
@@ -914,6 +917,7 @@ class ReportManager {
                                     "rating" => $checkData["rating"],
                                     "result" => $result,
                                     "ratingValue" => $checkData["ratingValue"],
+                                    "targetCheckId" => $checkData["targetCheckId"],
                                 );
                             }
 

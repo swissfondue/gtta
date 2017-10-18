@@ -200,7 +200,15 @@
                     <?php endforeach; ?>
                 </div>
             </div>
+
+            <div class="control-group">
+                <label class="control-label"><?php echo Yii::t("app", "Unique Id for Reduced Vulnerability List items"); ?></label>
+                <div class="controls">
+                    <input type="checkbox" id="ProjectReportForm_uniqueId" name="ProjectReportForm[uniqueId]" value="1" <?php if ($form->uniqueId) echo "checked"; ?>>
+                </div>
+            </div>
         </div>
+
 
         <div class="form-actions">
             <button type="submit" class="btn">

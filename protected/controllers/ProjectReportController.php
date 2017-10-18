@@ -193,6 +193,7 @@ class ProjectReportController extends Controller {
 
         if (!$project->report_options) {
             $form->title = true;
+            $form->uniqueId = 1;
         }
 
         if (isset($_POST["ProjectReportForm"])) {
@@ -260,6 +261,7 @@ class ProjectReportController extends Controller {
                     "infoLocation" => $form->infoChecksLocation,
                     "fields" => $form->fields,
                     "sections" => $sections,
+                    "uniqueId" => $form->uniqueId
                 ]);
 
                 $plugin = ReportPlugin::getPlugin($template, $data, $language);
