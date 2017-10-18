@@ -3179,6 +3179,14 @@ function Admin() {
         };
 
         /**
+         *  Toggle hosts checked state
+         */
+        this.toggleHostCheckedState = function (mappingId) {
+            $(".filter.nessus-hosts .nessus-host input").prop('checked', $('#allHosts').prop("checked"));
+            this.filterItems(mappingId);
+        };
+
+        /**
          * Select all checkbox changed
          * @param enable
          */

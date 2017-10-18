@@ -20,9 +20,8 @@
 
     <div class="filter nessus-hosts">
         <h3><?= Yii::t("app", "Hosts") ?></h3>
-
+        <input id="allHosts" type="checkbox" onchange="admin.nessusMapping.toggleHostCheckedState(<?= $mapping->id ?>)"> Select all</input>
         <hr />
-
         <div class="nessus-hosts-filter-container">
             <?php foreach ($mapping->hosts as $host): ?>
                 <div class="nessus-host">
@@ -37,3 +36,5 @@
         <hr />
     </div>
 </div>
+
+
