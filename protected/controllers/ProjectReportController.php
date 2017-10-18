@@ -193,7 +193,7 @@ class ProjectReportController extends Controller {
 
         if (!$project->report_options) {
             $form->title = true;
-            $form->uniqueId = 1;
+            $form->uniqueId = 0;
         }
 
         if (isset($_POST["ProjectReportForm"])) {
@@ -210,6 +210,10 @@ class ProjectReportController extends Controller {
 
                 if (!$form->title) {
                     $form->title = [];
+                }
+
+                if (!$form->uniqueId) {
+                    $form->uniqueId = 0;
                 }
 
                 $templateCategoryIds = array();
@@ -245,7 +249,7 @@ class ProjectReportController extends Controller {
                 }
 
                 $prm = new ReportManager();
-                $data = $prm->getProjectReportData($form->targetIds, $templateCategoryIds, $project, $form->fields, $language);
+                $data = $prm->getProjectReportData($form->targetIds, $templateCategoryIds, $project, $form->fields, $language, $form->uniqueId);
                 $data = array_merge($data, [
                     "template" => $template,
                     "pageMargin" => $form->pageMargin,

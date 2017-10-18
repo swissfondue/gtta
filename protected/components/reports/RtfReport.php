@@ -1009,7 +1009,7 @@ class RtfReport extends ReportPlugin {
             foreach ($reducedChecks as $check) {
                 $table->getCell($row, 1)->writeHyperLink(
                     "#check_" . $check["target"]["id"] . "_" . $check["id"],
-                    $check["targetCheckId"] . " " . $check["target"]["host"],
+                    ($check["targetCheckId"] ? ($check["targetCheckId"] . " ") : '') . $check["target"]["host"],
                     $this->textFont
                 );
 

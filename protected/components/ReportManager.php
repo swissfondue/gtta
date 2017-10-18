@@ -568,7 +568,7 @@ class ReportManager {
      * @param $language
      * @return array
      */
-    public function getProjectReportData($targetIds, $templateCategoryIds, $project, $fields, $language) {
+    public function getProjectReportData($targetIds, $templateCategoryIds, $project, $fields, $language, $uniqueId) {
         $criteria = new CDbCriteria();
         $criteria->addInCondition("id", $targetIds);
         $criteria->addColumnCondition(array("project_id" => $project->id));
@@ -788,7 +788,7 @@ class ReportManager {
                                 "result" => $checkData["result"],
                                 "ratingValue" => $checkData["ratingValue"],
                                 "custom" => true,
-                                "targetCheckId" => $checkData["targetCheckId"],
+                                "targetCheckId" => $uniqueId ? $checkData["targetCheckId"]: null,
                             );
                         }
 
@@ -917,7 +917,7 @@ class ReportManager {
                                     "rating" => $checkData["rating"],
                                     "result" => $result,
                                     "ratingValue" => $checkData["ratingValue"],
-                                    "targetCheckId" => $checkData["targetCheckId"],
+                                    "targetCheckId" => $uniqueId ? $checkData["targetCheckId"]: null,
                                 );
                             }
 
