@@ -41,7 +41,8 @@
             <?=
                 $this->renderPartial("partial/check-field", [
                     "field" => $field,
-                    "targetCheck" => $check
+                    "targetCheck" => $check,
+                    "hidden" => true
                 ]);
             ?>
         <?php endforeach; ?>
@@ -294,7 +295,6 @@
                                 </span>
                             </label>
                         </div>
-
                         <div class="solution-content hide" data-id="<?php echo $check->id; ?>-<?php echo TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>">
                             <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[solutionTitle]" class="max-width" id="TargetCheckEditForm_<?php echo $check->id; ?>_solutionTitle" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?> value="<?php echo CHtml::encode($check->solutionTitle); ?>">
                             <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[solution]" class="solution-edit wysiwyg max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_solution" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->solution); ?></textarea>
@@ -347,9 +347,25 @@
                             </div>
                         </li>
                     <?php endforeach; ?>
+                    <br>
+                    <a id="additionalSolutions" href="#additionalSolutionFields"><?php echo Yii::t("app", "Additional solution fields"); ?><i class="icon-chevron-down pull-right"></i></a>
                 </ul>
             </td>
         </tr>
+        <div id="additionalSolutionFields">
+        <?php $this->renderPartial(
+            "partial/check-field", [
+                "field" => $check->getField(GlobalCheckField::FIELD_TECHNICAL_SOLUTION),
+                "targetCheck" => $check, "hidden" => false
+            ]
+        ); ?>
+        <?php $this->renderPartial(
+            "partial/check-field", [
+                "field" => $check->getField(GlobalCheckField::FIELD_MANAGEMENT_SOLUTION),
+                "targetCheck" => $check, "hidden" => false
+            ]
+        ); ?>
+        </div>
         <?php if (User::checkRole(User::ROLE_USER) || $check->attachments): ?>
             <tr>
                 <th>
@@ -439,5 +455,18 @@
         $(".wysiwyg", form).ckeditor();
         user.check.initTargetCheckAttachmentUploadForms(id);
         user.check.initAutosave(id);
+
+        $('#technical_solution').hide();
+        $('#management_solution').hide();
+
+        $('#additionalSolutions').on("click",function(event){
+            event.preventDefault();
+            console.log('some');
+            $('#technical_solution').toggle();
+            $('#management_solution').toggle();
+            //post code
+        })
     });
+
+
 </script>

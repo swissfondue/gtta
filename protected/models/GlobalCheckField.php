@@ -46,6 +46,10 @@ class GlobalCheckField extends ActiveRecord {
     const FIELD_SOLUTION = "solution";
     const FIELD_SOLUTION_TITLE = "solution_title";
     const FIELD_POC = "poc";
+    const FIELD_TECHNICAL_SOLUTION = "technical_solution";
+    const FIELD_TECHNICAL_RESULT = "technical_result";
+    const FIELD_MANAGEMENT_SOLUTION = "management_solution";
+    const FIELD_MANAGEMENT_RESULT = "management_result";
 
     public static $system = [
         self::FIELD_BACKGROUND_INFO,
@@ -59,6 +63,10 @@ class GlobalCheckField extends ActiveRecord {
         self::FIELD_SOLUTION,
         self::FIELD_SOLUTION_TITLE,
         self::FIELD_POC,
+        self::FIELD_MANAGEMENT_RESULT,
+        self::FIELD_MANAGEMENT_SOLUTION,
+        self::FIELD_TECHNICAL_RESULT,
+        self::FIELD_TECHNICAL_SOLUTION
     ];
 
     public $nearest_sort_order;
