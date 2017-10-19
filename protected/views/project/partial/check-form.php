@@ -461,10 +461,8 @@
 
         $('#additionalSolutions').on("click",function(event){
             event.preventDefault();
-            console.log('some');
             $('#technical_solution').toggle();
             $('#management_solution').toggle();
-            //post code
         })
     });
 
