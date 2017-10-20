@@ -17,7 +17,7 @@
 <div class="container">
     <div class="row">
         <div class="span12">
-            <?php if (count($solutions) > 0): ?>
+            <?php $solutionIds = []; if (count($solutions) > 0): ?>
                 <table class="table solution-list">
                     <tbody>
                         <tr>
