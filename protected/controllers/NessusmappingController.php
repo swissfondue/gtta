@@ -238,6 +238,29 @@ class NessusmappingController extends Controller {
             }
 
             $response->addData("checks", $data);
+            $data = [];
+            $ctm = new CategoryManager();
+
+            /** @var CheckCategoryL10n[] $categories */
+            $categories = $ctm->filter($form->query, $language->id);
+
+            foreach ($categories as $categoryL10) {
+                $controls = $categoryL10->category->controls;
+
+                foreach ($controls as $control) {
+                    $checks = $control->checks;
+
+                    foreach ($checks as $check) {
+                        $checksData[] = $check->serialize($language->id);
+                    }
+                }
+
+                $item['checks'] = $checksData;
+                $item['categoryName'] = $categoryL10->name;
+                $data[] = $item;
+            }
+
+            $response->addData("categories", $data);
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }

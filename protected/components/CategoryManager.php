@@ -91,4 +91,28 @@ class CategoryManager {
 
         return $c;
     }
+
+    /**
+     * Filter categories by string
+     *
+     * @param $query
+     * @param $language
+     *
+     * @return array
+     */
+    public function filter($query, $language) {
+        $escapedQuery = pg_escape_string($query);
+
+        $criteria = new CDbCriteria();
+        $criteria->order = "nameContains DESC, t.name ASC";
+        $criteria->select = "t.*, position(lower('$escapedQuery') in lower(t.name))::boolean AS nameContains";
+
+        if ($query) {
+            $criteria->addSearchCondition("t.name", $query, true, "AND", "ILIKE");
+        }
+
+        $criteria->addColumnCondition(["t.language_id" => $language], "OR");
+
+        return CheckCategoryL10n::model()->findAll($criteria);
+    }
 }
