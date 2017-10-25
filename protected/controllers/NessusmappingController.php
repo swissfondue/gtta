@@ -246,6 +246,7 @@ class NessusmappingController extends Controller {
 
             foreach ($categories as $categoryL10) {
                 $controls = $categoryL10->category->controls;
+                $checksData = [];
 
                 foreach ($controls as $control) {
                     $checks = $control->checks;
