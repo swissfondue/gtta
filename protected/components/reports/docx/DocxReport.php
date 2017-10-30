@@ -540,7 +540,7 @@ class DocxReport extends ReportPlugin {
                 $textRun = $xml->createElementNS($ns, "w:r");
                 $textRunProperties = $xml->createElementNS($ns, "w:rPr");
 
-                if ($parentNode->getElementsByTagName('w:b')) {
+                if (in_array("bold", $run["attributes"])) {
                     $textRunProperties->appendChild($xml->createElementNS($ns, "w:b"));
                 }
 
