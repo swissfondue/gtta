@@ -540,7 +540,7 @@ class DocxReport extends ReportPlugin {
                 $textRun = $xml->createElementNS($ns, "w:r");
                 $textRunProperties = $xml->createElementNS($ns, "w:rPr");
 
-                if (in_array("bold", $run["attributes"])) {
+                if ($parentNode->getElementsByTagName('w:b')) {
                     $textRunProperties->appendChild($xml->createElementNS($ns, "w:b"));
                 }
 
@@ -576,7 +576,7 @@ class DocxReport extends ReportPlugin {
                 if (count($paragraphs) > 1) {
                     $paragraph->appendChild($textRun);
                 } else {
-                    $parentNode->appendChild($textRun);
+                    $parentNode->childNodes->item(1)->replaceChild($textRun->childNodes->item(0),   $parentNode->childNodes->item(1)->childNodes->item(1));
                 }
             }
 
@@ -746,7 +746,7 @@ class DocxReport extends ReportPlugin {
 
             // remove placeholders
             $parent = $textRun->parentNode;
-            $parent->removeChild($textRun);
+//            $parent->removeChild($textRun);
             $blockBody->removeChild($block->parentNode);
 
             // line feeds
