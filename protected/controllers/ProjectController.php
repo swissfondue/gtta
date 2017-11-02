@@ -5196,6 +5196,8 @@ class ProjectController extends Controller
         try {
             $id = (int)$id;
             $issue = (int)$issue;
+
+            /** @var Project $project */
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
@@ -5240,13 +5242,17 @@ class ProjectController extends Controller
 
             switch ($form->operation) {
                 case "add":
-                    $tm->addEvidence($target, $issue);
+                    $evidence = $tm->addEvidence($target, $issue);
+                    $response->addData("evidence", $evidence->id);
                     break;
 
                 default:
                     throw new Exception(Yii::t("app", "Unknown operation."));
                     break;
             }
+
+            $response->addData("project", $project->id);
+            $response->addData("issue", $issue->id);
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }

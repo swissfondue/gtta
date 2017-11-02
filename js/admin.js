@@ -950,6 +950,7 @@ function Admin() {
                     data: data,
 
                     success: function (data, textStatus) {
+                        data = data.data;
                         $(".loader-image").hide();
 
                         if (data.status == "error") {
@@ -957,7 +958,8 @@ function Admin() {
                             return;
                         }
 
-                        location.reload();
+                        document.location.href="/project/" + data.project
+                        + "/issue/" + data.issue + "/evidence/" + data.evidence;
                     },
 
                     error: function(jqXHR, textStatus, e) {
