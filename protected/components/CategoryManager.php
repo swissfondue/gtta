@@ -107,11 +107,22 @@ class CategoryManager {
         $criteria->order = "nameContains DESC, t.name ASC";
         $criteria->select = "t.*, position(lower('$escapedQuery') in lower(t.name))::boolean AS nameContains";
 
-        if ($query) {
-            $criteria->addSearchCondition("t.name", $query, true, "AND", "ILIKE");
+        if (!$query) {
+            return [];
         }
 
-        $criteria->addColumnCondition(["t.language_id" => $language], "OR");
+        if (preg_match('/^(["\']).*\1$/m', $query)) {
+            $query = trim($query, '"');
+            $words = [$query];
+        } else {
+            $words = preg_split("/ +/", $query);
+        }
+
+        foreach ($words as $word) {
+            $criteria->addSearchCondition("t.name", $word, true, "OR", "ILIKE");
+        }
+
+        $criteria->addColumnCondition(["t.language_id" => $language]);
 
         return CheckCategoryL10n::model()->findAll($criteria);
     }

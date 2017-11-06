@@ -215,31 +215,23 @@ class NessusmappingController extends Controller {
                 throw new Exception($errorText);
             }
 
-            $cm = new CheckManager();
+            $data = [];
+            $exclude = [];
+
+            $ctm = new CategoryManager();
             $language = Language::model()->findByAttributes([
                 "code" => Yii::app()->language
             ]);
+
             $mappingVulns = NessusMappingVuln::model()->findAllByAttributes([
                 "nessus_mapping_id" => $mapping->id
             ]);
-            $exclude = [];
 
             foreach ($mappingVulns as $mv) {
                 if (isset($mv->check)) {
                     $exclude[] = $mv->check->id;
                 }
             }
-
-            $checks = $cm->filter($form->query, $language->id, $exclude);
-            $data = [];
-
-            foreach ($checks as $check) {
-                $data[] = $check->check->serialize($language->id);
-            }
-
-            $response->addData("checks", $data);
-            $data = [];
-            $ctm = new CategoryManager();
 
             /** @var CheckCategoryL10n[] $categories */
             $categories = $ctm->filter($form->query, $language->id);
@@ -252,16 +244,31 @@ class NessusmappingController extends Controller {
                     $checks = $control->checks;
 
                     foreach ($checks as $check) {
+                        if (in_array($check->id, $exclude)) {
+                            continue;
+                        }
+
                         $checksData[] = $check->serialize($language->id);
+                        $exclude[] = $check->id;
                     }
                 }
 
-                $item['checks'] = $checksData;
-                $item['categoryName'] = $categoryL10->name;
+                $item["checks"] = $checksData;
+                $item["name"] = $categoryL10->name;
                 $data[] = $item;
             }
 
             $response->addData("categories", $data);
+
+            $cm = new CheckManager();
+            $checks = $cm->filter($form->query, $language->id, $exclude);
+            $data = [];
+
+            foreach ($checks as $check) {
+                $data[] = $check->check->serialize($language->id);
+            }
+
+            $response->addData("checks", $data);
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }

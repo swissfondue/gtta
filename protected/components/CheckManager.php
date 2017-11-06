@@ -514,7 +514,6 @@ class CheckManager {
      * @internal param $languageglobal_check_fields_l10n
      */
     public function filter($query, $language, $exclude=[]) {
-        $escapedQuery = pg_escape_string($query);
         $criteria = new CDbCriteria();
         $fieldName = GlobalCheckField::FIELD_BACKGROUND_INFO;
         $criteria->join = "INNER JOIN check_fields cf ON cf.check_id = t.check_id ";
@@ -525,40 +524,27 @@ class CheckManager {
         $criteria->join .= "INNER JOIN \"references\" ref ON ref.id = c.reference_id ";
         $criteria->join .= "INNER JOIN global_check_fields gcf ON gcf.name = '$fieldName' AND gcf.id = cf.global_check_field_id";
 
-        if ($query) {
-            if (strpos($query, '/') !== false) {
-                $words = explode('/', $query);
-                $control = str_replace(' ', '', $words[0]);
-                $check = str_replace(' ', '', $words[1]);
-                $criteria->addSearchCondition("cc.name", $control, true, "OR", "ILIKE");
-                $criteria->addSearchCondition("ccl10n.name", $control, true, "OR", "ILIKE");
-                $criteria->addSearchCondition("cfl10n.value", $check, true, "AND", "ILIKE");
-                $criteria->addSearchCondition("t.name", $check, true, "OR", "ILIKE");
-            } else {
-                if (strpos($query, "ref:") !== false) {
-                    $reference = explode('ref:', $query);;
-                    $reference = str_replace(' ', '', $reference[1]);
-                    $criteria->addSearchCondition("ref.name", $reference, true, "OR", "ILIKE");
-                } else {
-                    if (preg_match('/^(["\']).*\1$/m', $query)) {
-                        $query = trim($query, '"');
-                        $escapedQuery = pg_escape_string($query);
-                        $criteria->select = "t.*, position(lower('$escapedQuery') in lower(t.name))::boolean AS nameContains";
-                        $criteria->order = "nameContains DESC, t.name ASC";
-                        $criteria->addSearchCondition("cfl10n.value", $query, true, "AND", "ILIKE");
-                        $criteria->addSearchCondition("t.name", $query, true, "OR", "ILIKE");
-                    } else {
-                        $words = preg_split('/ +/', $query);
-                        foreach ($words as $ind => $word) {
-                            $criteria->addSearchCondition("cfl10n.value", $word, true, "OR", "ILIKE");
-                            $criteria->addSearchCondition("t.name", $word, true, "OR", "ILIKE");
-                        }
-                    }
-                }
-            }
+        if (!$query) {
+            return [];
         }
 
-        $criteria->addColumnCondition(["t.language_id" => $language], "OR");
+        if (preg_match('/^(["\']).*\1$/m', $query)) {
+            $query = trim($query, '"');
+            $words = [$query];
+        } else {
+            $words = preg_split("/[ \-\.]+/", $query);
+        }
+
+        foreach ($words as $word) {
+            $criteria->addSearchCondition("cc.name", $query, true, "OR", "ILIKE");
+            $criteria->addSearchCondition("ccl10n.name", $query, true, "OR", "ILIKE");
+            $criteria->addSearchCondition("cfl10n.value", $word, true, "OR", "ILIKE");
+            $criteria->addSearchCondition("t.name", $word, true, "OR", "ILIKE");
+            $criteria->addSearchCondition("c.reference_code", $word, true, "OR", "ILIKE");
+            $criteria->addSearchCondition("ref.name", $word, true, "OR", "ILIKE");
+        }
+
+        $criteria->addColumnCondition(["t.language_id" => $language]);
 
         if ($exclude) {
             $criteria->addNotInCondition("t.check_id", $exclude);
