@@ -11,6 +11,7 @@
  * @property integer $external_id
  * @property integer $status
  * @property TargetCustomCheck[] $customChecks
+ * @property Check[] $checks
  */
 class CheckControl extends ActiveRecord implements IVariableScopeObject {
     const STATUS_INSTALLED = 1;
