@@ -88,7 +88,7 @@ abstract class ReportPlugin {
      */
     public function sendOverHttp($unlink=true, $exit=true) {
         if (!$this->_generated) {
-            throw new Exception(Yii::t("app", "Report not generated yet to send it over Http."));
+            throw new Exception(Yii::t("app", "Report not generated yet to send it over HTTP."));
         }
 
         header("Content-Description: File Transfer");
