@@ -456,13 +456,13 @@
         user.check.initTargetCheckAttachmentUploadForms(id);
         user.check.initAutosave(id);
 
-        $('#technical_solution').hide();
-        $('#management_solution').hide();
+        $("#technical_solution").hide();
+        $("#management_solution").hide();
 
-        $('#additionalSolutions').on("click",function(event){
+        $("#additionalSolutions").on("click",function(event){
             event.preventDefault();
-            $('#technical_solution').toggle();
-            $('#management_solution').toggle();
+            $("#technical_solution").toggle();
+            $("#management_solution").toggle();
         })
     });
 
