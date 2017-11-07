@@ -9,7 +9,9 @@
 <div class="active-header">
     <h1><?= CHtml::encode($this->pageTitle); ?></h1>
 </div>
+
 <hr>
+
 <div
     class="container"
     id=""
@@ -52,9 +54,8 @@
                 </div>
             </div>
 
-            <?php if (User::checkRole(User::ROLE_USER)): ?>
             <div data-type="evidence"
-                 data-update-evidence-url="<?php echo $this->createUrl("project/updateevidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
+                data-update-evidence-url="<?php echo $this->createUrl("project/updateevidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
                 <div class="span8 button-group-padding">
                     <div class="row">
                         <div class="span4">
@@ -67,7 +68,7 @@
                         </div>
                         <div class="span4 ">
                             <button class="btn elem-style"
-                                    onclick="admin.issue.evidence.updateAll(true)"><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
+                                    onclick="admin.issue.evidence.updateRating()"><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
                         </div>
                     </div>
                 </div>
@@ -83,14 +84,15 @@
                         </div>
                         <div class="span4">
                             <button class="btn elem-style"
-                                    onclick="admin.issue.evidence.updateAll(false, true)"><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
+                                    onclick="admin.issue.evidence.updateSolution();"><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
                         </div>
                     </div>
                 </div>
-                <?php endif; ?>
+
                 <br>
                 <br>
                 <hr>
+
                 <div class="row">
                     <div class="span8">
                         <b style="font-size: 20px"><?= Yii::t("app", "Affected Assets") ?></b>
@@ -107,9 +109,10 @@
                                     <li>
                                         <b>
                                             <?php echo CHtml::ajaxLink(
-                                                sprintf("%s (%d)", $host, count($evidences)), CController::createUrl("project/evidenceview", ["host" => $host, "issue" => $issue->id, "project" => $project->id]),
+                                                sprintf("%s (%d)", $host, count($evidences)),
+                                                CController::createUrl("project/evidenceview", ["host" => $host, "issue" => $issue->id, "project" => $project->id]),
                                                 ["update" => "#simple-div"],
-                                                ["id" => "simple-link-" . Utils::getFirstWords($host, 1, true), "class" => "evidence-link", "name" => $host]
+                                                ["class" => "evidence-link"]
                                             ); ?>
                                         </b>
                                     </li>
@@ -122,19 +125,16 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         <div class="span4">
             <?php
-                echo $this->renderPartial(
-                    "partial/right-block", [
+                echo $this->renderPartial("partial/right-block", [
                     "quickTargets" => $quickTargets,
                     "project" => $project,
                     "category" => null,
                     "target" => null
-                ]
-            );
+                ]);
             ?>
         </div>
     </div>
@@ -147,18 +147,19 @@
         aria-labelledby="smallModal"
         aria-hidden="true"
         data-search-target-url="<?= $this->createUrl("project/searchTargets", ["id" => $project->id, "issue" => $issue->id]) ?>">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">×</button>
-                <h3><?= Yii::t("app", "Select Target") ?></h3>
-            </div>
-            <div class="modal-body">
-                <input class="target-search-query"
-                       placeholder="<?= Yii::t("app", "Hostname or IP address") ?>"
-                       type="text"/>
-                <ul class="table target-list"></ul>
-                <span class="no-search-result" style="display:none"><?= Yii::t("app", "No targets found.") ?></span>
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h3><?= Yii::t("app", "Select Target") ?></h3>
+                </div>
+                <div class="modal-body">
+                    <input class="target-search-query"
+                           placeholder="<?= Yii::t("app", "Hostname or IP address") ?>"
+                           type="text"/>
+                    <ul class="table target-list"></ul>
+                    <span class="no-search-result" style="display:none"><?= Yii::t("app", "No targets found.") ?></span>
+                </div>
             </div>
         </div>
     </div>
