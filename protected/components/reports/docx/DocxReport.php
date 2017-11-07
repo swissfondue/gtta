@@ -576,7 +576,7 @@ class DocxReport extends ReportPlugin {
                 if (count($paragraphs) > 1) {
                     $paragraph->appendChild($textRun);
                 } else {
-                    $parentNode->childNodes->item(1)->replaceChild($textRun->childNodes->item(0),   $parentNode->childNodes->item(1)->childNodes->item(1));
+                    $parentNode->childNodes->item(1)->replaceChild($textRun->childNodes->item(0), $parentNode->childNodes->item(1)->childNodes->item(1));
                 }
             }
 
@@ -746,7 +746,6 @@ class DocxReport extends ReportPlugin {
 
             // remove placeholders
             $parent = $textRun->parentNode;
-//            $parent->removeChild($textRun);
             $blockBody->removeChild($block->parentNode);
 
             // line feeds
