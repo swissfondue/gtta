@@ -215,14 +215,17 @@ class NessusmappingController extends Controller {
                 throw new Exception($errorText);
             }
 
-            $cm = new CheckManager();
+            $data = [];
+            $exclude = [];
+
+            $ctm = new CategoryManager();
             $language = Language::model()->findByAttributes([
                 "code" => Yii::app()->language
             ]);
+
             $mappingVulns = NessusMappingVuln::model()->findAllByAttributes([
                 "nessus_mapping_id" => $mapping->id
             ]);
-            $exclude = [];
 
             foreach ($mappingVulns as $mv) {
                 if (isset($mv->check)) {
@@ -230,6 +233,34 @@ class NessusmappingController extends Controller {
                 }
             }
 
+            /** @var CheckCategoryL10n[] $categories */
+            $categories = $ctm->filter($form->query, $language->id);
+
+            foreach ($categories as $categoryL10) {
+                $controls = $categoryL10->category->controls;
+                $checksData = [];
+
+                foreach ($controls as $control) {
+                    $checks = $control->checks;
+
+                    foreach ($checks as $check) {
+                        if (in_array($check->id, $exclude)) {
+                            continue;
+                        }
+
+                        $checksData[] = $check->serialize($language->id);
+                        $exclude[] = $check->id;
+                    }
+                }
+
+                $item["checks"] = $checksData;
+                $item["name"] = $categoryL10->name;
+                $data[] = $item;
+            }
+
+            $response->addData("categories", $data);
+
+            $cm = new CheckManager();
             $checks = $cm->filter($form->query, $language->id, $exclude);
             $data = [];
 
