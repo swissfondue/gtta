@@ -4872,6 +4872,9 @@ class ProjectController extends Controller
         $issues = $project->getIssues($offset);
         $riskArray = [TargetCheck::RATING_HIGH_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_LOW_RISK];
         $lightRiskArray = [TargetCheck::RATING_HIDDEN, TargetCheck::RATING_INFO, TargetCheck::RATING_NO_VULNERABILITY, TargetCheck::RATING_NONE];
+        
+        $notFilledEvidence = [];
+        $notFilledHost = [];
 
         foreach ($issues as $index => $issue) {
             if (!in_array($issue->top_rating, $lightRiskArray)) {

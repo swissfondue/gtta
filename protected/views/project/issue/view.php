@@ -11,11 +11,11 @@
 </div>
 <hr>
 <div
-        class="container"
-        id=""
-        data-get-running-checks-url="<?= $this->createUrl("project/issuerunningchecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
-        data-update-running-checks-url="<?php echo $this->createUrl("project/updateissuechecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
-        data-add-evidence-url="<?= $this->createUrl("project/addEvidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
+    class="container"
+    id=""
+    data-get-running-checks-url="<?= $this->createUrl("project/issuerunningchecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
+    data-update-running-checks-url="<?php echo $this->createUrl("project/updateissuechecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
+    data-add-evidence-url="<?= $this->createUrl("project/addEvidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
     <div class="row">
         <div class="span8">
             <div id="issue-information">
@@ -93,7 +93,7 @@
                 <hr>
                 <div class="row">
                     <div class="span8">
-                        <b style="font-size: 20px"><?= Yii::t("app", "Assets affected by this Issue") ?></b>
+                        <b style="font-size: 20px"><?= Yii::t("app", "Affected Assets") ?></b>
                         &nbsp;—&nbsp;
                         <a href="#" onclick="admin.issue.showTargetSelectDialog();"><?= Yii::t("app", "Add") ?></a>
                     </div>
@@ -105,18 +105,20 @@
                             <ul class="clear-ul">
                                 <?php foreach ($evidenceGroups as $host => $evidences): ?>
                                     <li>
-                                        <b><?php echo CHtml::ajaxLink(
+                                        <b>
+                                            <?php echo CHtml::ajaxLink(
                                                 sprintf("%s (%d)", $host, count($evidences)), CController::createUrl("project/evidenceview", ["host" => $host, "issue" => $issue->id, "project" => $project->id]),
                                                 ["update" => "#simple-div"],
                                                 ["id" => "simple-link-" . Utils::getFirstWords($host, 1, true), "class" => "evidence-link", "name" => $host]
-                                            ); ?></b></li>
+                                            ); ?>
+                                        </b>
+                                    </li>
                                 <?php endforeach; ?>
                             </ul>
                         </div>
                     </div>
                     <div class="span6">
                         <div id="simple-div"></div>
-
                     </div>
                 </div>
             </div>
@@ -125,13 +127,13 @@
 
         <div class="span4">
             <?php
-            echo $this->renderPartial(
-                "partial/right-block", [
-                "quickTargets" => $quickTargets,
-                "project" => $project,
-                "category" => null,
-                "target" => null
-            ]
+                echo $this->renderPartial(
+                    "partial/right-block", [
+                    "quickTargets" => $quickTargets,
+                    "project" => $project,
+                    "category" => null,
+                    "target" => null
+                ]
             );
             ?>
         </div>
@@ -163,11 +165,9 @@
 </div>
 
 <script>
-
-    $(window).load(function(){
-
-        var notFilledHost =  <?= $notFilledHost ? json_encode(Utils::getFirstWords($notFilledHost, 1, true)) : "" ?>;
-        var evId =  <?= $notFilledEvidence ? json_encode($notFilledEvidence): "" ?>;
+    $(window).load(function() {
+        var notFilledHost =  <?= json_encode($notFilledHost ? Utils::getFirstWords($notFilledHost, 1, true) : ""); ?>;
+        var evId =  <?= json_encode($notFilledEvidence ? $notFilledEvidence : ""); ?>;
         admin.issue.openEvidenceTab(evId, notFilledHost);
 
         $("#target-select-dialog input.target-search-query").keyup(function (e) {
