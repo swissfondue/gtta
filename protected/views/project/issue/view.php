@@ -1,11 +1,3 @@
-<style>
-    .elem-style {
-        width: 80%;
-    }
-    .button-group-padding {
-        padding-bottom: 20px;
-    }
-</style>
 <div class="active-header">
     <h1><?= CHtml::encode($this->pageTitle); ?></h1>
 </div>
@@ -56,10 +48,10 @@
 
             <div data-type="evidence"
                 data-update-evidence-url="<?php echo $this->createUrl("project/updateevidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
-                <div class="span8 button-group-padding">
+                <div class="span8 issue-button-group-padding">
                     <div class="row">
                         <div class="span4">
-                            <select id="ratingAll" class="elem-style pull-right">
+                            <select id="ratingAll" class="issue-elem-style pull-right">
                                 <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Rating"); ?></option>
                                 <?php foreach ($ratings as $rating): ?>
                                     <option value="<?= $rating ?>"><?= TargetCheck::getRatingNames()[$rating] ?></option>
@@ -67,15 +59,15 @@
                             </select>
                         </div>
                         <div class="span4 ">
-                            <button class="btn elem-style"
+                            <button class="btn issue-elem-style"
                                     onclick="admin.issue.evidence.updateRating()"><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
                         </div>
                     </div>
                 </div>
-                <div class="span8 button-group-padding">
+                <div class="span8 issue-button-group-padding">
                     <div class="row">
                         <div class="span4">
-                            <select id="solutionAll" class="elem-style pull-right">
+                            <select id="solutionAll" class="issue-elem-style pull-right">
                                 <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Solution"); ?></option>
                                 <?php foreach ($solutions as $solution): ?>
                                     <option value="<?= $solution->id ?>"><?= $solution->localizedTitle ?></option>
@@ -83,7 +75,7 @@
                             </select>
                         </div>
                         <div class="span4">
-                            <button class="btn elem-style"
+                            <button class="btn issue-elem-style"
                                     onclick="admin.issue.evidence.updateSolution();"><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
                         </div>
                     </div>
@@ -110,7 +102,7 @@
                                         <b>
                                             <?php echo CHtml::ajaxLink(
                                                 sprintf("%s (%d)", $host, count($evidences)),
-                                                CController::createUrl("project/evidenceview", ["host" => $host, "issue" => $issue->id, "project" => $project->id]),
+                                                CController::createUrl("project/viewevidence", ["host" => $host, "issue" => $issue->id, "id" => $project->id]),
                                                 ["update" => "#simple-div"],
                                                 ["class" => "evidence-link"]
                                             ); ?>

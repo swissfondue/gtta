@@ -24,6 +24,7 @@ a[disabled] {
 
 .red {
     color: red;
+    font-weight:bold;
 }
 
 .navbar .brand {
@@ -1580,4 +1581,12 @@ ul.target-list li {
 
 .textarea-evidence-view {
     width:450px !important;
+}
+
+.issue-elem-style {
+    width: 80%;
+}
+
+.issue-button-group-padding {
+    padding-bottom: 20px;
 }
