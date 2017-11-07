@@ -23,6 +23,7 @@
  * @property integer $vuln_user_id
  * @property date $vuln_deadline
  * @property integer $vuln_status
+ * @property timestamp $last_modified
  */
 class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
     /**
@@ -125,6 +126,24 @@ class TargetCustomCheck extends ActiveRecord implements IVariableScopeObject {
             "attachments" => array(self::HAS_MANY, "TargetCustomCheckAttachment", "target_custom_check_id"),
 		);
 	}
+
+    /**
+     * @param bool $runValidation
+     * @param null $attributes
+     * @throws CHttpException
+     */
+    public function save($runValidation=true, $attributes=null) {
+        $dbTargetCheck = TargetCustomCheck::model()->findByPk($this->id);
+        $targetCheckIsNew = is_null($dbTargetCheck) || is_null($dbTargetCheck->last_modified);
+
+        if (!$targetCheckIsNew && $this->last_modified < $dbTargetCheck->last_modified) {
+            throw new CHttpException(403, Yii::t("app", "Could not modify the target check as there is newer version available. Please reload the page and try again!"));
+        }
+
+        $this->last_modified = time();
+
+        parent::save($runValidation, $attributes);
+    }
 
     /**
      * Get variable value

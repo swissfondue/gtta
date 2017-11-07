@@ -25,6 +25,9 @@
                 <input class="issue-search-query"
                        placeholder="<?= Yii::t("app", "Check name") ?>"
                        type="text" />
+                <p class="help-block">
+                    <?= Yii::t("app", "You may use quotes to find the exact phrase match."); ?>
+                </p>
                 <ul class="check-list"></ul>
                 <span class="no-search-result" style="display:none"><?= Yii::t("app", "No checks found.") ?></span>
             </div>

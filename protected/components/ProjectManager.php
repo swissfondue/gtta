@@ -104,6 +104,8 @@ class ProjectManager {
                                 "user_id" => $admin->id,
                                 "language_id" => $language->id,
                                 "rating" => $vuln->rating ? $vuln->rating : TargetCheck::RATING_NONE,
+                                "port" => "",
+                                "protocol" => "",
                                 "poc" => "",
                                 "result" => "",
                                 "solutions" => [],
@@ -126,6 +128,13 @@ class ProjectManager {
                                 $data["poc"] .= PHP_EOL . $v["plugin_output"];
                             }
 
+                            if ($v["protocol"]) {
+                                $data["protocol"] = strtoupper($v["protocol"]);
+                            }
+
+                            if ($v["port"]) {
+                                $data["port"] = $v["port"];
+                            }
                             $tcm->create($vuln->check, $data);
                         }
                     }
