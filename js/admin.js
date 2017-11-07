@@ -370,6 +370,29 @@ function Admin() {
         this.searchTimeoutHandler = null;
 
         /**
+         * Open evidence tab in issue view with unfilled result or solution
+         *
+         * @param evId evidence ID
+         * @param notFilledHost host Id
+         */
+        this.openEvidenceTab = function (evId, notFilledHost) {
+            $("#simple-link-" + notFilledHost).click();
+            var evidenceTab = $("#evidence_tab_" + evId);
+            var checkExist = setInterval(function () {
+                if ($("#evidence_tab_" + evId).length) {
+                    clearInterval(checkExist);
+                    $("li").removeClass("active");
+                    $("#evidence_tab_" + evId).addClass("active");
+                    $(".tab-pane").removeClass("active");
+                    $("#evidence_" + evId).addClass("active");
+                    $("html, body").animate({
+                        scrollTop: $("#evidence_tab_" + evId).offset().top
+                    }, 1000);
+                }
+            }, 100); // check every 100ms
+        };
+
+        /**
          * Init check selection dialog
          */
         this.initCheckSelectDialog = function () {
@@ -971,6 +994,12 @@ function Admin() {
                 });
             };
 
+            /**
+             * Update rating and solution for all evidences of issue
+             *
+             * @param rating rating value
+             * @param solution solution value
+             */
             this.updateAll = function (rating, solution) {
                 var data = {
                     "YII_CSRF_TOKEN": system.csrf,
@@ -978,21 +1007,25 @@ function Admin() {
                 var selectRatingVal, selectSolutionVal;
 
                 if (rating) {
-                    selectRatingVal = $('#ratingAll').val();
+                    selectRatingVal = $("#ratingAll").val();
+
                     if (!selectRatingVal){
-                        system.addAlert('error', "Select rating option.");
+                        system.addAlert("error", "Select rating option.");
                         return;
                     }
-                    data["rating"] = selectRatingVal;
+
+                    data["IssueEvidenceEditForm[rating]"] = selectRatingVal;
                 }
 
                 if (solution) {
                     selectSolutionVal = $('#solutionAll').val();
+
                     if (!selectSolutionVal) {
                         system.addAlert('error', "Select solution option.");
                         return;
                     }
-                    data["solution"] = selectSolutionVal;
+
+                    data["IssueEvidenceEditForm[solution]"] = selectRatingVal;
                 }
 
                 $.ajax({
@@ -1022,41 +1055,46 @@ function Admin() {
                 });
             };
 
+            /**
+             * Update evidence of issue
+             *
+             * @param targetCheckId id of target check
+             */
             this.update = function (targetCheckId) {
                 var data = {
                     "YII_CSRF_TOKEN": system.csrf,
                 };
 
-                var rating = $('#rating-'+targetCheckId).val();
-                var solution = $('#solution-'+targetCheckId).val();
-                var result = $('#result-'+targetCheckId).val();
-                var poc = $('#poc-'+targetCheckId).val();
+                var rating = $("#rating-" + targetCheckId).val();
+                var solution = $("#solution-" + targetCheckId).val();
+                var result = $("#result-" + targetCheckId).val();
+                var poc = $("#poc-" + targetCheckId).val();
 
                 if (rating) {
-                    data["rating"] = rating;
+                    data["IssueEvidenceEditForm[rating]"] = rating;
                 }
 
                 if (solution) {
-                    data["solution"] = solution;
+                    data["IssueEvidenceEditForm[solution]"] = solution;
                 }
 
                 if (result) {
-                    data["result"] = result;
+                    data["IssueEvidenceEditForm[result]"] = result;
                 }
 
                 if (poc) {
-                    data["poc"] = poc;
+                    data["IssueEvidenceEditForm[poc]"] = poc;
                 }
 
                 $.ajax({
                     dataType: "json",
-                    url: $("[data-update-evidence-url-"+targetCheckId+"]").data("update-evidence-url-"+targetCheckId),
+                    url: $("[data-update-evidence-url-" + targetCheckId + "]").data("update-evidence-url-" + targetCheckId),
                     type: "POST",
                     data: data,
                     success: function (data, textStatus) {
                         $(".loader-image").hide();
 
-                        if (data.status == "error") {
+                        if (data.status === "error") {
                             system.addAlert("error", data.errorText);
                             return;
                         }

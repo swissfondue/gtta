@@ -1,22 +1,17 @@
-<style>
-    .tab-content {
-        overflow: hidden;
-    }
-</style>
 <div id="<?= $host ?>" class="target-group" style="margin-bottom: 20px;">
     <h3><?= Yii::t("app", "Evidences for {ip}", ["{ip}" => $host]) ?></h3>
 
     <ul class="nav nav-tabs target-tabs">
         <?php $i = 0; ?>
         <?php foreach ($evidences as $evidence): ?>
-            <li id='evidence_tab_<?= $evidence->id; ?>' class="<?= $i == 0 ? "active" : "" ?>">
+            <li id="evidence_tab_<?= $evidence->id; ?>" class="<?= $i == 0 ? "active" : "" ?>">
                 <a href="#evidence_<?= $evidence->id; ?>">#<?= $i; ?></a>
             </li>
             <?php $i++; ?>
         <?php endforeach; ?>
     </ul>
 
-    <div class="tab-content">
+    <div class="tab-content tab-content-evidence-view">
         <?php $i = 0; ?>
 
         <?php foreach ($evidences as $evidence): ?>
@@ -80,14 +75,14 @@
                     <div class="field-block">
                         <b><?= Yii::t("app", "Result") ?></b>
                         <br/>
-                        <textarea id="result-<?=$tc->id?>" class="textarea" rows="3" name="text" ><?= $tc->result ?></textarea>
+                        <textarea id="result-<?= $tc->id ?>" class="textarea" rows="3" name="text"><?= $tc->result ?></textarea>
                         <br/>
                     </div>
 
                     <div class="field-block evidence-field poc">
                         <b><?= Yii::t("app", "PoC") ?></b>
                         <br/>
-                        <textarea id="poc-<?=$tc->id?>" class="textarea" rows="3" name="text" ><?= $tc->poc ?></textarea>
+                        <textarea id="poc-<?= $tc->id ?>" class="textarea" rows="3" name="text" ><?= $tc->poc ?></textarea>
                         <br/>
                     </div>
                     <div class="row">
@@ -115,8 +110,8 @@
                             </div>
                         </div>
                         <div class="span6">
-                            <select id="solution-<?=$tc->id?>" class="elem-style pull-right">
-                                <option selected="selected" value="" disabled>Select Solution</option>
+                            <select id="solution-<?= $tc->id ?>" class="elem-style pull-right">
+                                <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Solution"); ?></option>
                                 <?php foreach ($solutions as $solution): ?>
                                     <option value="<?= $solution->id ?>"><?= $solution->localizedTitle ?></option>
                                 <?php endforeach; ?>
@@ -134,8 +129,8 @@
                             </div>
                         </div>
                         <div class="span6">
-                            <select id="rating-<?=$tc->id?>" class="elem-style pull-right">
-                                <option selected="selected" value="" disabled>Select Rating</option>
+                            <select id="rating-<?= $tc->id ?>" class="elem-style pull-right">
+                                <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Rating"); ?></option>
                                 <?php foreach ($ratings as $rating): ?>
                                     <option value="<?= $rating ?>"><?= TargetCheck::getRatingNames()[$rating] ?></option>
                                 <?php endforeach; ?>

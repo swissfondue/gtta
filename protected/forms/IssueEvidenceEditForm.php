@@ -22,6 +22,11 @@ class IssueEvidenceEditForm extends CFormModel {
     public $solutionTitle;
 
     /**
+     * @var string poc
+     */
+    public $poc;
+
+    /**
      * @var string solution.
      */
     public $solution;
@@ -40,6 +45,11 @@ class IssueEvidenceEditForm extends CFormModel {
      * @var boolean save solution.
      */
     public $saveSolution;
+
+    /**
+     * @var boolean save result.
+     */
+    public $saveResult;
 
     /**
      * @var array inputs.
@@ -64,14 +74,17 @@ class IssueEvidenceEditForm extends CFormModel {
             array("rating", "in", "range" => TargetCheck::getValidRatings()),
             array("saveSolution, saveResult", "boolean"),
             array("fields", "checkFields"),
-            array("inputs, result, solutions, solution, attachmentTitles, tableResult, scripts, timeouts", "safe"),
+            array("inputs, result, solutions, solution, attachmentTitles, tableResult, scripts, timeouts, poc", "safe"),
         );
     }
 
     /**
      * Validate fields
+     *
      * @param $attribute
      * @param $params
+     *
+     * @return bool
      */
     public function checkFields($attribute, $params) {
         foreach ($this->{$attribute} as $name => $value) {

@@ -12,7 +12,6 @@
  * @property IssueEvidence[] $evidences
  */
 class Issue extends ActiveRecord {
-
     /**
      * @var string issue name (virtual column)
      */

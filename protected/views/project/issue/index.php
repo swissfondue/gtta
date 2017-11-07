@@ -2,7 +2,6 @@
     <div class="pull-right">
         <?= $this->renderPartial("partial/submenu", ["page" => "issues", "project" => $project]); ?>
     </div>
-
     <div class="pull-right buttons">
         <?php if (User::checkRole(User::ROLE_USER)): ?>
             <div class="btn-group">
@@ -38,7 +37,7 @@
                                 <th class="actions">&nbsp;</th>
                             <?php endif; ?>
                         </tr>
-                        <?php foreach ($issues as $issue): ?>
+                        <?php foreach ($issues as $index => $issue): ?>
                             <tr data-id="<?= $issue->id; ?>" data-control-url="<?= $this->createUrl("project/controlissue"); ?>">
                                 <td class="name">
                                     <a href="<?= $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id]); ?>">
@@ -100,8 +99,8 @@
                                     <?= $issue->affected_targets; ?>
                                 </td>
                                 <td>
-                                    <?php if(isset($notFilledEv)): ?>
-                                        <a style="color:red;" href="<?= $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id, "notFilledHost" => $notFilledHost, "notFilledEv" => $notFilledEv]); ?>">
+                                    <?php if (isset($notFilledEvidence[$index])): ?>
+                                        <a class="red" href="<?= $this->createUrl("project/issue", ["id" => $project->id, "issue" => $issue->id, "notFilledHost" => $notFilledHost[$index], "notFilledEvidence" => $notFilledEvidence[$index]]); ?>">
                                             !
                                         </a>
                                     <?php endif; ?>

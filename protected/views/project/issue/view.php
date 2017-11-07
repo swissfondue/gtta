@@ -1,24 +1,3 @@
-<?php if ($notFilledHost):  ?>
-    <script>
-        $(window).load(function(){
-           var notFilledHost =  <?php echo json_encode(Utils::getFirstWords($notFilledHost,1,true))?>;
-           var evId =  <?php echo json_encode($notFilledEv)?>;
-           $('#simple-link-'+notFilledHost).click();
-            var checkExist = setInterval(function() {
-                if ($('#evidence_tab_'+evId).length) {
-                    clearInterval(checkExist);
-                    $('li').removeClass('active');
-                    $('#evidence_tab_'+evId).addClass ('active');
-                    $(".tab-pane").removeClass('active');
-                    $('#evidence_'+evId).addClass ('active');
-                    $('html, body').animate({
-                        scrollTop: $('#evidence_tab_'+evId).offset().top
-                    }, 1000);
-                }
-            }, 100); // check every 100ms
-        });
-    </script>
-<?php endif; ?>
 <style>
     .elem-style {
         width: 80%;
@@ -43,7 +22,7 @@
                 <span style="font-size: 20px;"><?= Yii::t("app", "Issue Information") ?></span>&nbsp;—&nbsp;
                 <a href="<?= $this->createUrl("check/editcheck", ["id" => $check->control->check_category_id, "control" => $check->check_control_id, "check" => $check->id]) ?>"><?= Yii::t("app", "Edit") ?></a>
                 <a class="red" href="#"
-                   onclick="admin.issue.delete('<?= $this->createUrl("project/controlissue") ?>', <?= $issue->id ?>, function () { system.redirect('<?= $this->createUrl("project/issues", ["id" => $project->id]) ?>') })"><?= Yii::t("app", "Delete") ?></a>
+                   onclick="admin.issue.delete("<?= $this->createUrl("project/controlissue") ?>", <?= $issue->id ?>, function () { system.redirect("<?= $this->createUrl("project/issues", ["id" => $project->id]) ?>") })"><?= Yii::t("app", "Delete") ?></a>
                 <br/><br/>
                 <div class="field-block">
                     <h3><?= Yii::t("app", "Title") ?></h3>
@@ -80,7 +59,7 @@
                     <div class="row">
                         <div class="span4">
                             <select id="ratingAll" class="elem-style pull-right">
-                                <option selected="selected" value="" disabled>Select Rating</option>
+                                <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Rating"); ?></option>
                                 <?php foreach ($ratings as $rating): ?>
                                     <option value="<?= $rating ?>"><?= TargetCheck::getRatingNames()[$rating] ?></option>
                                 <?php endforeach; ?>
@@ -96,7 +75,7 @@
                     <div class="row">
                         <div class="span4">
                             <select id="solutionAll" class="elem-style pull-right">
-                                <option selected="selected" value="" disabled>Select Solution</option>
+                                <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Solution"); ?></option>
                                 <?php foreach ($solutions as $solution): ?>
                                     <option value="<?= $solution->id ?>"><?= $solution->localizedTitle ?></option>
                                 <?php endforeach; ?>
@@ -104,7 +83,7 @@
                         </div>
                         <div class="span4">
                             <button class="btn elem-style"
-                                    onclick="admin.issue.evidence.updateAll(false,true)"><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
+                                    onclick="admin.issue.evidence.updateAll(false, true)"><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
                         </div>
                     </div>
                 </div>
@@ -125,13 +104,11 @@
                         <div class="target-ip-list">
                             <ul class="clear-ul">
                                 <?php foreach ($evidenceGroups as $host => $evidences): ?>
-                                    <!--                                                                <li><b><a href="--><?php //echo CController::createUrl('project/evidenceview', array('host' => $host, 'issue' => $issue->id, 'project' => $project->id)) ?><!--">--><?php //echo sprintf("%s (%d)", $host, count($evidences)) ?><!--</a></b></li>-->
-
                                     <li>
                                         <b><?php echo CHtml::ajaxLink(
-                                                sprintf("%s (%d)", $host, count($evidences)), CController::createUrl('project/evidenceview', ['host' => $host, 'issue' => $issue->id, 'project' => $project->id]),
-                                                ['update' => '#simple-div'],
-                                                ['id' => 'simple-link-' . Utils::getFirstWords($host,1, true), 'class' => 'evidence-link', 'name' => $host]
+                                                sprintf("%s (%d)", $host, count($evidences)), CController::createUrl("project/evidenceview", ["host" => $host, "issue" => $issue->id, "project" => $project->id]),
+                                                ["update" => "#simple-div"],
+                                                ["id" => "simple-link-" . Utils::getFirstWords($host, 1, true), "class" => "evidence-link", "name" => $host]
                                             ); ?></b></li>
                                 <?php endforeach; ?>
                             </ul>
@@ -187,7 +164,12 @@
 
 <script>
 
-    $(function () {
+    $(window).load(function(){
+
+        var notFilledHost =  <?= $notFilledHost ? json_encode(Utils::getFirstWords($notFilledHost, 1, true)) : "" ?>;
+        var evId =  <?= $notFilledEvidence ? json_encode($notFilledEvidence): "" ?>;
+        admin.issue.openEvidenceTab(evId, notFilledHost);
+
         $("#target-select-dialog input.target-search-query").keyup(function (e) {
             // if alpha or backspace
             if (/[a-zA-Z0-9_ -]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8) {

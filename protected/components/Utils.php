@@ -61,11 +61,9 @@ class Utils {
         }
 
         if (!$only) {
-
             if (mb_strlen($data) < mb_strlen($string)) {
                 $data .= "...";
             }
-
         }
 
         return $data;

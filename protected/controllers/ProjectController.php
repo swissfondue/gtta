@@ -2308,7 +2308,7 @@ class ProjectController extends Controller
      * @param $issue
      * @throws CHttpException
      */
-    public function actionEvidenceView($project, $host, $issue, $notFilledEv = null)
+    public function actionEvidenceView($project, $host, $issue)
     {
         $language = Language::model()->findByAttributes(array(
             "code" => Yii::app()->language
@@ -2333,24 +2333,24 @@ class ProjectController extends Controller
 
         $criteria = new CDbCriteria();
         $criteria->limit  = $this->entriesPerPage;
-        $criteria->order  = 't.sort_order ASC';
-        $criteria->addColumnCondition(array( 'check_id' => $issue->check->id ));
+        $criteria->order  = "t.sort_order ASC";
+        $criteria->addColumnCondition(array( "check_id" => $issue->check->id ));
 
         $solutions = CheckSolution::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on"       => "language_id = :language_id",
+                "params"   => array( "language_id" => $language )
             )
         ))->findAll($criteria);
 
         $criteria = new CDbCriteria();
-        $criteria->join = 'LEFT JOIN target_checks ON t.target_check_id = target_checks.id LEFT JOIN targets ON targets.id = target_checks.target_id';
+        $criteria->join = "LEFT JOIN target_checks ON t.target_check_id = target_checks.id LEFT JOIN targets ON targets.id = target_checks.target_id";
         $criteria->addCondition("issue_id = :issue_id and COALESCE (targets.ip, targets.host) = :host");
         $criteria->params = ["issue_id" => $issue->id, "host" => $host];
         $evidences = IssueEvidence::model()->findAll($criteria);
 
-        $this->renderPartial("partial/issue/evidence-view", ['host' => $host, 'evidences' => $evidences, 'project' => $project, 'issue' => $issue, 'solutions' => $solutions, 'ratings' => $ratings], false, true);
+        $this->renderPartial("partial/issue/evidence-view", ["host" => $host, "evidences" => $evidences, "project" => $project, "issue" => $issue, "solutions" => $solutions, "ratings" => $ratings], false, true);
     }
 
     /**
@@ -4872,24 +4872,26 @@ class ProjectController extends Controller
         $issues = $project->getIssues($offset);
         $riskArray = [TargetCheck::RATING_HIGH_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_LOW_RISK];
         $lightRiskArray = [TargetCheck::RATING_HIDDEN, TargetCheck::RATING_INFO, TargetCheck::RATING_NO_VULNERABILITY, TargetCheck::RATING_NONE];
-        foreach ($issues as $issue) {
-                if (!in_array($issue->top_rating,$lightRiskArray)) {
-                    $evidences = $issue->evidences;
-                    foreach ($evidences as $evidence) {
-                        $tc = $evidence->targetCheck;
-                        if (!$tc->solution && !$tc->result && in_array($tc->rating, $riskArray)) {
-                            $target = $tc->target;
-                            $notFilledEv = $evidence->id;
-                            $notFilledHost = $target->ip ? $target->ip : $target->host;
-                            break;
-                        }
+
+        foreach ($issues as $index => $issue) {
+            if (!in_array($issue->top_rating, $lightRiskArray)) {
+                $evidences = $issue->evidences;
+
+                foreach ($evidences as $evidence) {
+                    $tc = $evidence->targetCheck;
+
+                    if (!$tc->solution && !$tc->result && in_array($tc->rating, $riskArray)) {
+                        $target = $tc->target;
+                        $notFilledEvidence[$index] = $evidence->id;
+                        $notFilledHost[$index] = $target->ip ? $target->ip : $target->host;
+                        break;
                     }
                 }
+            }
         }
+
         $issueCount = count($issues);
-
         $paginator = new Paginator($issueCount, $page);
-
         $affectedAssetCount = [];
 
         /** @var Issue $issue */
@@ -4923,7 +4925,7 @@ class ProjectController extends Controller
             "quickTargets" => $this->_getQuickTargets($project->id, $language),
             "affectedAssetCount" => $affectedAssetCount,
             "notFilledHost" => $notFilledHost,
-            "notFilledEv" =>  $notFilledEv
+            "notFilledEvidence" =>  $notFilledEvidence
         ));
     }
 
@@ -4933,7 +4935,7 @@ class ProjectController extends Controller
      * @param $issue
      * @throws CHttpException
      */
-    public function actionIssue($id, $issue, $notFilledHost = null, $notFilledEv = null)
+    public function actionIssue($id, $issue, $notFilledHost = null, $notFilledEvidence = null)
     {
         $id = (int)$id;
         $issue = (int)$issue;
@@ -4990,14 +4992,14 @@ class ProjectController extends Controller
 
         $criteria = new CDbCriteria();
         $criteria->limit  = $this->entriesPerPage;
-        $criteria->order  = 't.sort_order ASC';
-        $criteria->addColumnCondition(array( 'check_id' => $issue->check->id ));
+        $criteria->order  = "t.sort_order ASC";
+        $criteria->addColumnCondition(array( "check_id" => $issue->check->id ));
 
         $solutions = CheckSolution::model()->with(array(
-            'l10n' => array(
-                'joinType' => 'LEFT JOIN',
-                'on'       => 'language_id = :language_id',
-                'params'   => array( 'language_id' => $language )
+            "l10n" => array(
+                "joinType" => "LEFT JOIN",
+                "on"       => "language_id = :language_id",
+                "params"   => array( "language_id" => $language )
             )
         ))->findAll($criteria);
 
@@ -5014,7 +5016,7 @@ class ProjectController extends Controller
             "ratings" => $ratings,
             "solutions" => $solutions,
             "notFilledHost" => $notFilledHost,
-            "notFilledEv" => $notFilledEv
+            "notFilledEvidence" => $notFilledEvidence
         ]);
     }
 
@@ -5334,7 +5336,7 @@ class ProjectController extends Controller
      * @param $issue issue id
      * @param null $targetCheck
      */
-    public function actionUpdateEvidence($id, $issue, $targetCheck=null)
+    public function actionUpdateEvidence ($id, $issue, $targetCheck = null)
     {
         $response = new AjaxResponse();
 
@@ -5347,27 +5349,30 @@ class ProjectController extends Controller
             $poc = null;
             $result= null;
 
-            if ($targetCheck){
+            if ($targetCheck) {
                 $targetCheck = TargetCheck::model()->findByPk($targetCheck);
                 if (!$targetCheck){
                     throw new Exception(Yii::t("app", "Target Check not found."));
                 }
             }
 
-            if (isset($_POST['rating'])) {
-                $rating = $_POST['rating'];
+            $form = new IssueEvidenceEditForm();
+            $form->attributes = $_POST['IssueEvidenceEditForm'];
+
+            if ($form->rating) {
+                $rating = $form->rating;
             }
 
-            if (isset($_POST['solution'])) {
-                $solution = $_POST['solution'];
+            if ($form->solution) {
+                $solution = $form->solution;
             }
 
-            if (isset($_POST['poc'])) {
-                $poc = $_POST['poc'];
+            if ($form->poc) {
+                $poc = $form->poc;
             }
 
-            if (isset($_POST['result'])) {
-                $result = $_POST['result'];
+            if ($form->result) {
+                $result = $form->result;
             }
 
             if (!$project) {
@@ -5411,24 +5416,22 @@ class ProjectController extends Controller
                         $targetSolution->save();
                     }
                 }
-            }
-            else {
-
-                if ($result){
+            } else {
+                if ($result) {
                     $targetCheck->setFieldValue(
                         GlobalCheckField::FIELD_RESULT,
                         $result
                     );
                 }
 
-                if ($poc){
+                if ($poc) {
                     $targetCheck->setFieldValue(
                         GlobalCheckField::FIELD_POC,
                         $poc
                     );
                 }
 
-                if ($solution){
+                if ($solution) {
                     TargetCheckSolution::model()->deleteAllByAttributes(
                         [
                             "target_check_id" => $targetCheck->id,
@@ -5440,12 +5443,11 @@ class ProjectController extends Controller
                     $targetSolution->save();
                 }
 
-                if ($rating){
+                if ($rating) {
                     $targetCheck->rating = $rating;
                     $targetCheck->save();
                 }
             }
-
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }

@@ -842,23 +842,29 @@ function User()
 
             lastModified = $('input[name="TargetCheckEditForm_' + id + '[lastModified]"]', row).val();
 
-            if (override == undefined)
+            if (override === undefined) {
                 override = '';
+            }
 
-            if (protocol == undefined)
+            if (protocol === undefined) {
                 protocol = '';
+            }
 
-            if (port == undefined)
+            if (port === undefined) {
                 port = '';
+            }
 
-            if (result == undefined)
+            if (result === undefined) {
                 result = '';
+            }
 
-            if (rating == undefined)
+            if (rating === undefined) {
                 rating = '';
+            }
 
-            if (lastModified == undefined)
+            if (lastModified === undefined) {
                 lastModified = '';
+            }
 
             data = [];
 
@@ -1299,8 +1305,9 @@ function User()
                 rating = "";
             }
 
-            if (lastModified == undefined)
+            if (lastModified == undefined) {
                 lastModified = "";
+            }
 
             data = [];
 

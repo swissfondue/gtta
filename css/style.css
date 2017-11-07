@@ -1565,3 +1565,15 @@ ul.target-list li {
     overflow-y: scroll;
     width:100%;
 }
+
+.elem-style {
+    width: 80%;
+}
+
+.button-group-padding {
+    padding-bottom: 20px;
+}
+
+.tab-content-evidence-view {
+    overflow: hidden !important;
+}
