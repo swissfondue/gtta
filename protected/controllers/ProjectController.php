@@ -5357,7 +5357,7 @@ class ProjectController extends Controller
             }
 
             $form = new IssueEvidenceEditForm();
-            $form->attributes = $_POST['IssueEvidenceEditForm'];
+            $form->attributes = $_POST["IssueEvidenceEditForm"];
 
             if ($form->rating) {
                 $rating = $form->rating;
