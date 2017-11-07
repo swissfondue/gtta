@@ -958,8 +958,7 @@ function Admin() {
                             return;
                         }
 
-                        document.location.href="/project/" + data.project
-                        + "/issue/" + data.issue + "/evidence/" + data.evidence;
+                        document.location.href = data.url;
                     },
 
                     error: function(jqXHR, textStatus, e) {

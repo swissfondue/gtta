@@ -5243,7 +5243,6 @@ class ProjectController extends Controller
             switch ($form->operation) {
                 case "add":
                     $evidence = $tm->addEvidence($target, $issue);
-                    $response->addData("evidence", $evidence->id);
                     break;
 
                 default:
@@ -5251,8 +5250,8 @@ class ProjectController extends Controller
                     break;
             }
 
-            $response->addData("project", $project->id);
             $response->addData("issue", $issue->id);
+            $response->addData("url", "/project/" . $project->id ."/issue/" . $issue->id . "/evidence/" . $evidence->id);
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
