@@ -3183,7 +3183,7 @@ function Admin() {
          * @param mappingId
          */
         this.toggleHostCheckedState = function (mappingId) {
-            $(".filter.nessus-hosts .nessus-host input").prop('checked', $('#allHosts').prop("checked"));
+            $(".filter.nessus-hosts .nessus-host input").prop("checked", $("#allHosts").prop("checked"));
             this.filterItems(mappingId);
         };
 
