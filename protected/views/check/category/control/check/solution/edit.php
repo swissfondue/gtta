@@ -1,13 +1,5 @@
 <script src="/ckeditor/ckeditor.js"></script>
 <script src="/ckeditor/adapters/jquery.js"></script>
-<?php if ($view == Check::VIEW_SHARED): ?>
-    <style>
-        table .span6 {
-            float: left;
-        }
-    </style>
-<?php endif; ?>
-<hr>
 <form id="form" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
     <fieldset>
@@ -26,7 +18,7 @@
         <?php endif; ?>
         <div class=<?= ($view == Check::VIEW_TABBED) ? "tab-content" : "row" ?>>
             <?php foreach ($languages as $language): ?>
-                <div class="<?= (($view == Check::VIEW_SHARED) ? "span6" : ("tab-pane" . $language->default ? " active" : "")) ?>"
+                <div class="<?= (($view == Check::VIEW_SHARED) ? "span6" : ("tab-pane" . $language->default ? " active" : "")) ?> <?= ($view == Check::VIEW_SHARED) ? 'span6-shared' : '' ?>"
                      id="<?php echo CHtml::encode($language->code); ?>">
                     <?php if ($view == Check::VIEW_SHARED): ?>
                         <a>
@@ -86,18 +78,8 @@
      *Submit form without redirect
      */
     $(function () {
-        var sol_id =<?php echo json_encode($solution->id)?>;
-        $("#form").on("submit", function (e) {
-            e.preventDefault();
-            $.ajax({
-                url: $(this).attr("action"),
-                type: 'POST',
-                data: $(this).serialize(),
-                success: function (data) {
-                    $("#simple-div-" + sol_id).hide();
-                }
-            });
-        });
+        var solId = <?php echo json_encode($solution->id) ?>;
+        user.check.hideOnSubmitCheckResultOrSolutionBlock(solId);
     });
 
     $('#languages-tab a').click(function (e) {

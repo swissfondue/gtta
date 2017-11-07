@@ -93,6 +93,23 @@ function User()
         };
 
         /**
+         * Submit form without redirect
+         */
+        this.hideOnSubmitCheckResultOrSolutionBlock = function (id) {
+            $("#form").on("submit", function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: $(this).attr("action"),
+                    type: "POST",
+                    data: $(this).serialize(),
+                    success: function (data) {
+                        $("#simple-div-" + id).hide();
+                    }
+                });
+            });
+        };
+
+        /**
          * Update status of running checks.
          */
         this.update = function (url) {

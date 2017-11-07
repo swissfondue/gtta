@@ -1,18 +1,5 @@
 <script src="/ckeditor/ckeditor.js"></script>
 <script src="/ckeditor/adapters/jquery.js"></script>
-<?php if ($view == Check::VIEW_SHARED): ?>
-    <style>
-        textarea.wysiwyg {
-            width: 270px;
-            height: 200px;
-        }
-
-        table .span6 {
-            float: left;
-        }
-    </style>
-<?php endif; ?>
-<hr>
 <form id="form" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
     <fieldset>
@@ -31,7 +18,7 @@
         <?php endif; ?>
         <div class=<?= ($view == Check::VIEW_TABBED) ? "tab-content" : "row" ?>>
             <?php foreach ($languages as $language): ?>
-                <div class="<?= (($view == Check::VIEW_SHARED) ? "span6" : ("tab-pane" . $language->default ? " active" : "")) ?>"
+                <div class="<?= (($view == Check::VIEW_SHARED) ? "span6" : ("tab-pane" . $language->default ? " active" : "")) ?>  <?= ($view == Check::VIEW_SHARED) ? 'span6-shared' : '' ?>"
                      id="<?php echo CHtml::encode($language->code); ?>">
                     <?php if ($view == Check::VIEW_SHARED): ?>
                         <a>
@@ -58,7 +45,7 @@
                                for="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result"><?php echo Yii::t('app', 'Result'); ?></label>
                         <div class="controls">
                             <textarea
-                                    class="wysiwyg <?php if (isset($model->localizedItems[$language->id])) echo(Utils::isHtml($model->localizedItems[$language->id]['result']) ? 'html_content' : ''); ?>"
+                                    class="wysiwyg <?php if (isset($model->localizedItems[$language->id])) echo(Utils::isHtml($model->localizedItems[$language->id]['result']) ? 'html_content' : ''); ?> <?= ($view == Check::VIEW_SHARED) ? 'wysiwyg-shared' : '' ?>"
                                     id="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result"
                                     name="CheckResultEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][result]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['result']) : ''; ?></textarea>
 
@@ -102,18 +89,8 @@
      *Submit form without redirect
      */
     $(function () {
-        var res_id =<?php echo json_encode($result->id)?>;
-        $("#form").on("submit", function (e) {
-            e.preventDefault();
-            $.ajax({
-                url: $(this).attr("action"),
-                type: 'POST',
-                data: $(this).serialize(),
-                success: function (data) {
-                    $("#simple-div-" + res_id).hide();
-                }
-            });
-        });
+        var resId = <?php echo json_encode($result->id) ?>;
+        user.check.hideOnSubmitCheckResultOrSolutionBlock(resId);
     });
 
     $('#languages-tab a').click(function (e) {
