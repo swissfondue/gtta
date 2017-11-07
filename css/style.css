@@ -1584,9 +1584,22 @@ ul.target-list li {
 }
 
 .issue-elem-style {
-    width: 80%;
+    width: 95%;
 }
 
-.issue-button-group-padding {
-    padding-bottom: 20px;
+.issue-rating-selector {
+    width:150px;
+}
+
+.issue-button {
+    width:150px;
+}
+
+.issue-button-group-padding > .row > div {
+    float:left;
+}
+
+.issue-button-group {
+    display:block;
+    float:right;
 }

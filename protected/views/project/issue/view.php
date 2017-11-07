@@ -34,6 +34,42 @@
                     <h3><?= Yii::t("app", "Question") ?></h3>
                     <?= $check->question ? $check->question : Yii::t("app", "N/A") ?>
                 </div>
+
+                <div class="issue-button-group">
+                    <div class="issue-button-group-padding">
+                        <div class="row">
+                            <div class="issue-rating-selector">
+                                <select id="ratingAll" class="issue-elem-style">
+                                    <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Rating"); ?></option>
+                                    <?php foreach ($ratings as $rating): ?>
+                                        <option value="<?= $rating ?>"><?= TargetCheck::getRatingNames()[$rating] ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="issue-button">
+                                <button class="btn issue-elem-style"
+                                        onclick="admin.issue.evidence.updateRating()"><?php echo Yii::t("app", "Update Evidences"); ?></button>&nbsp;
+                            </div>
+                        </div>
+                    </div>
+                    <div class="issue-button-group-padding">
+                        <div class="row">
+                            <div class="issue-rating-selector">
+                                <select id="solutionAll" class="issue-elem-style">
+                                    <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Solution"); ?></option>
+                                    <?php foreach ($solutions as $solution): ?>
+                                        <option value="<?= $solution->id ?>"><?= $solution->localizedTitle ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="issue-button">
+                                <button class="btn issue-elem-style"
+                                        onclick="admin.issue.evidence.updateSolution();"><?php echo Yii::t("app", "Update Evidences"); ?></button>&nbsp;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="field-block">
                     <h3><?= Yii::t("app", "Reference") ?></h3>
                     <?php if ($check->_reference->name): ?>
@@ -48,43 +84,6 @@
 
             <div data-type="evidence"
                 data-update-evidence-url="<?php echo $this->createUrl("project/updateevidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
-                <div class="span8 issue-button-group-padding">
-                    <div class="row">
-                        <div class="span4">
-                            <select id="ratingAll" class="issue-elem-style pull-right">
-                                <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Rating"); ?></option>
-                                <?php foreach ($ratings as $rating): ?>
-                                    <option value="<?= $rating ?>"><?= TargetCheck::getRatingNames()[$rating] ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="span4 ">
-                            <button class="btn issue-elem-style"
-                                    onclick="admin.issue.evidence.updateRating()"><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
-                        </div>
-                    </div>
-                </div>
-                <div class="span8 issue-button-group-padding">
-                    <div class="row">
-                        <div class="span4">
-                            <select id="solutionAll" class="issue-elem-style pull-right">
-                                <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Solution"); ?></option>
-                                <?php foreach ($solutions as $solution): ?>
-                                    <option value="<?= $solution->id ?>"><?= $solution->localizedTitle ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="span4">
-                            <button class="btn issue-elem-style"
-                                    onclick="admin.issue.evidence.updateSolution();"><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
-                        </div>
-                    </div>
-                </div>
-
-                <br>
-                <br>
-                <hr>
-
                 <div class="row">
                     <div class="span8">
                         <b style="font-size: 20px"><?= Yii::t("app", "Affected Assets") ?></b>
