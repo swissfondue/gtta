@@ -18,7 +18,7 @@
         <?php endif; ?>
         <div class=<?= ($view == Check::VIEW_TABBED) ? "tab-content" : "row" ?>>
             <?php foreach ($languages as $language): ?>
-                <div class="<?= (($view == Check::VIEW_SHARED) ? "span6" : ("tab-pane" . $language->default ? " active" : "")) ?> <?= ($view == Check::VIEW_SHARED) ? 'span6-shared' : '' ?>"
+                <div class="<?= (($view == Check::VIEW_SHARED) ? "span6" : ("tab-pane" . $language->default ? " active" : "")) ?> <?= ($view == Check::VIEW_SHARED) ? "span6-shared" : "" ?>"
                      id="<?php echo CHtml::encode($language->code); ?>">
                     <?php if ($view == Check::VIEW_SHARED): ?>
                         <a>
