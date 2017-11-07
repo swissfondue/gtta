@@ -75,14 +75,14 @@
                     <div class="field-block">
                         <b><?= Yii::t("app", "Result") ?></b>
                         <br/>
-                        <textarea id="result-<?= $tc->id ?>" class="textarea" rows="3" name="text"><?= $tc->result ?></textarea>
+                        <textarea id="result-<?= $tc->id ?>" class="textarea textarea-evidence-view" rows="3" name="text"><?= $tc->result ?></textarea>
                         <br/>
                     </div>
 
                     <div class="field-block evidence-field poc">
                         <b><?= Yii::t("app", "PoC") ?></b>
                         <br/>
-                        <textarea id="poc-<?= $tc->id ?>" class="textarea" rows="3" name="text" ><?= $tc->poc ?></textarea>
+                        <textarea id="poc-<?= $tc->id ?>" class="textarea textarea-evidence-view" rows="3" name="text" ><?= $tc->poc ?></textarea>
                         <br/>
                     </div>
                     <div class="row">
@@ -149,11 +149,6 @@
         <?php endforeach; ?>
     </div>
 </div>
-<style>
-    .textarea {
-        width:450px;
-    }
-</style>
 <script>
     $(".target-tabs a").click(function (e) {
         e.preventDefault();

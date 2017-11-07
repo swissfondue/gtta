@@ -1577,3 +1577,7 @@ ul.target-list li {
 .tab-content-evidence-view {
     overflow: hidden !important;
 }
+
+.textarea-evidence-view {
+    width:450px !important;
+}
