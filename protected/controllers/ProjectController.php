@@ -3,22 +3,24 @@
 /**
  * Project controller.
  */
-class ProjectController extends Controller {
+class ProjectController extends Controller
+{
     /**
-	 * @return array action filters
-	 */
-	public function filters() {
-		return array(
+     * @return array action filters
+     */
+    public function filters()
+    {
+        return array(
             "https",
-			"checkAuth",
+            "checkAuth",
             "showDetails + target, attachment, checks",
-            "checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, savecheck, copycheck, time, tracktime, controlcategory",
+            "checkUser + control, edittarget, controltarget, uploadattachment, controlattachment, controlcheck, updatechecks, savecheck, copycheck, time, tracktime, controlcategory, evidenceview",
             "checkAdmin + edit, users, edituser, controluser, controltime",
-            "ajaxOnly + savecheck, savecustomcheck, controlattachment, controlcheck, updatechecks, controluser, copycheck, controlchecklist, check, controlcategory",
+            "ajaxOnly + savecheck, savecustomcheck, controlattachment, controlcheck, updatechecks, controluser, copycheck, controlchecklist, check, controlcategory,evidenceview",
             "postOnly + savecheck, savecustomcheck, uploadattachment, controlattachment, controlcheck, updatechecks, controluser, copycheck, controlchecklist, check, controlcategory",
             "idle",
-		);
-	}
+        );
+    }
 
     /**
      * Get project's quick targets
@@ -26,7 +28,8 @@ class ProjectController extends Controller {
      * @param $languageId
      * @return array|mixed|null
      */
-    private function _getQuickTargets($projectId, $languageId) {
+    private function _getQuickTargets($projectId, $languageId)
+    {
         $baseCriteria = new CDbCriteria();
         $baseCriteria->addCondition("t.project_id = :project_id");
         $baseCriteria->params = ["project_id" => $projectId];
@@ -63,8 +66,9 @@ class ProjectController extends Controller {
     /**
      * Display a list of projects.
      */
-	public function actionIndex($page=1) {
-        $page = (int) $page;
+    public function actionIndex($page = 1)
+    {
+        $page = (int)$page;
 
         if ($page < 1) {
             throw new CHttpException(404, Yii::t("app", "Page not found."));
@@ -78,8 +82,8 @@ class ProjectController extends Controller {
             $statuses = explode(",", $statusCookie);
 
             foreach ($statuses as $s) {
-                if (in_array((int) $s, Project::getValidStatuses())) {
-                    $filtered[] = (int) $s;
+                if (in_array((int)$s, Project::getValidStatuses())) {
+                    $filtered[] = (int)$s;
                 }
             }
         }
@@ -93,9 +97,9 @@ class ProjectController extends Controller {
         $sortDirection = null;
 
         $sortByCookie = isset($cookies["project_filter_sort_by"]) ?
-            (int) $cookies["project_filter_sort_by"]->value : Project::FILTER_SORT_DEADLINE;
+            (int)$cookies["project_filter_sort_by"]->value : Project::FILTER_SORT_DEADLINE;
         $sortDirectionCookie = isset($cookies["project_filter_sort_direction"]) ?
-            (int) $cookies["project_filter_sort_direction"]->value : Project::FILTER_SORT_ASCENDING;
+            (int)$cookies["project_filter_sort_direction"]->value : Project::FILTER_SORT_ASCENDING;
 
         switch ($sortDirectionCookie) {
             case Project::FILTER_SORT_ASCENDING:
@@ -130,7 +134,7 @@ class ProjectController extends Controller {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = $this->entriesPerPage;
+        $criteria->limit = $this->entriesPerPage;
         $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->together = true;
         $criteria->addInCondition("status", $showStatuses);
@@ -176,10 +180,10 @@ class ProjectController extends Controller {
         $projectStats = array();
 
         foreach ($projects as $project) {
-            $checkCount    = 0;
+            $checkCount = 0;
             $finishedCount = 0;
-            $lowRiskCount  = 0;
-            $medRiskCount  = 0;
+            $lowRiskCount = 0;
+            $medRiskCount = 0;
             $highRiskCount = 0;
 
             $targets = Target::model()->with(array(
@@ -210,17 +214,17 @@ class ProjectController extends Controller {
             }
 
             $projectStats[$project->id] = array(
-                'checkCount'    => $checkCount,
+                'checkCount' => $checkCount,
                 'finishedCount' => $finishedCount,
-                'lowRiskCount'  => $lowRiskCount,
-                'medRiskCount'  => $medRiskCount,
+                'lowRiskCount' => $lowRiskCount,
+                'medRiskCount' => $medRiskCount,
                 'highRiskCount' => $highRiskCount
             );
         }
 
         // display the page
         $this->pageTitle = Yii::t("app", "Projects");
-		$this->render("index", array(
+        $this->render("index", array(
             "projects" => $projects,
             "stats" => $projectStats,
             "p" => $paginator,
@@ -228,12 +232,13 @@ class ProjectController extends Controller {
             "sortBy" => $sortByCookie,
             "sortDirection" => $sortDirectionCookie,
         ));
-	}
+    }
 
     /**
      * Display a standard project page
      */
-    private function _viewStandard($project, $page) {
+    private function _viewStandard($project, $page)
+    {
         $language = Language::model()->findByAttributes(array(
             'code' => Yii::app()->language
         ));
@@ -243,11 +248,11 @@ class ProjectController extends Controller {
         }
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = $this->entriesPerPage;
+        $criteria->limit = $this->entriesPerPage;
         $criteria->offset = ($page - 1) * $this->entriesPerPage;
-        $criteria->order  = 't.host ASC';
+        $criteria->order = 't.host ASC';
         $criteria->addCondition('t.project_id = :project_id');
-        $criteria->params = array( 'project_id' => $project->id );
+        $criteria->params = array('project_id' => $project->id);
         $criteria->together = true;
 
         $targets = Target::model()->findAll($criteria);
@@ -258,9 +263,9 @@ class ProjectController extends Controller {
         }
 
         $newCriteria = new CDbCriteria();
-        $newCriteria->order  = 't.host ASC';
+        $newCriteria->order = 't.host ASC';
         $newCriteria->addCondition('t.project_id = :project_id');
-        $newCriteria->params = array( 'project_id' => $project->id );
+        $newCriteria->params = array('project_id' => $project->id);
         $newCriteria->addInCondition('t.id', $targetIds);
         $newCriteria->together = true;
 
@@ -274,8 +279,8 @@ class ProjectController extends Controller {
                 'with' => array(
                     'l10n' => array(
                         'joinType' => 'LEFT JOIN',
-                        'on'       => 'language_id = :language_id',
-                        'params'   => array( 'language_id' => $language )
+                        'on' => 'language_id = :language_id',
+                        'params' => array('language_id' => $language)
                     ),
                     'controls' => array(
                         'with' => 'checkCount'
@@ -289,7 +294,7 @@ class ProjectController extends Controller {
         $paginator = new Paginator($targetCount, $page);
 
         $criteria = new CDbCriteria();
-        $criteria->order  = "t.host ASC";
+        $criteria->order = "t.host ASC";
         $criteria->addCondition("t.project_id = :project_id");
         $criteria->params = array("project_id" => $project->id);
         $criteria->together = true;
@@ -299,17 +304,17 @@ class ProjectController extends Controller {
 
         // display the page
         $this->pageTitle = $project->name;
-		$this->render('view', array(
-            "project"  => $project,
-            "targets"  => $targets,
-            "p"        => $paginator,
+        $this->render('view', array(
+            "project" => $project,
+            "targets" => $targets,
+            "p" => $paginator,
             "ratings" => TargetCheck::getRatingNames(),
             "columns" => array(
-                TargetCheck::COLUMN_TARGET          => Yii::t("app", "Target"),
-                TargetCheck::COLUMN_NAME            => Yii::t("app", "Name"),
-                TargetCheck::COLUMN_REFERENCE       => Yii::t("app", "Reference"),
-                TargetCheck::COLUMN_SOLUTION        => Yii::t("app", "Solution"),
-                TargetCheck::COLUMN_RATING          => Yii::t("app", "Rating"),
+                TargetCheck::COLUMN_TARGET => Yii::t("app", "Target"),
+                TargetCheck::COLUMN_NAME => Yii::t("app", "Name"),
+                TargetCheck::COLUMN_REFERENCE => Yii::t("app", "Reference"),
+                TargetCheck::COLUMN_SOLUTION => Yii::t("app", "Solution"),
+                TargetCheck::COLUMN_RATING => Yii::t("app", "Rating"),
             ),
             "quickTargets" => $this->_getQuickTargets($project->id, $language),
             "checks" => Check::model()->findAll()
@@ -319,9 +324,10 @@ class ProjectController extends Controller {
     /**
      * Display a list of targets.
      */
-	public function actionView($id, $page=1) {
-        $id = (int) $id;
-        $page = (int) $page;
+    public function actionView($id, $page = 1)
+    {
+        $id = (int)$id;
+        $page = (int)$page;
 
         $project = Project::model()->with(array(
             "details" => array(
@@ -343,13 +349,14 @@ class ProjectController extends Controller {
         }
 
         $this->_viewStandard($project, $page);
-	}
+    }
 
     /**
      * Project edit page.
      */
-	public function actionEdit($id=0) {
-        $id = (int) $id;
+    public function actionEdit($id = 0)
+    {
+        $id = (int)$id;
         $newRecord = false;
 
         if ($id) {
@@ -359,7 +366,7 @@ class ProjectController extends Controller {
             $newRecord = true;
         }
 
-		$model = new ProjectEditForm(
+        $model = new ProjectEditForm(
             User::checkRole(User::ROLE_ADMIN) ? ProjectEditForm::ADMIN_SCENARIO : ProjectEditForm::USER_SCENARIO,
             $id
         );
@@ -391,12 +398,12 @@ class ProjectController extends Controller {
             $model->startDate = date("Y-m-d");
         }
 
-		// collect user input data
-		if (isset($_POST["ProjectEditForm"])) {
-			$model->attributes = $_POST["ProjectEditForm"];
+        // collect user input data
+        if (isset($_POST["ProjectEditForm"])) {
+            $model->attributes = $_POST["ProjectEditForm"];
             $model->hiddenFields = isset($_POST["ProjectEditForm"]["hiddenFields"]) ? $_POST["ProjectEditForm"]["hiddenFields"] : [];
 
-			if ($model->validate()) {
+            if ($model->validate()) {
                 // delete all client accounts from this project
                 if (!$newRecord && $model->clientId != $project->client_id) {
                     $clientUsers = User::model()->findAllByAttributes(array(
@@ -457,7 +464,7 @@ class ProjectController extends Controller {
                     return "'$item'";
                 }, $model->hiddenFields);
 
-                $criteria->join .=  sprintf(" AND g.name IN (%s)", count($hiddenFields) ? implode(",", $hiddenFields) : "''");
+                $criteria->join .= sprintf(" AND g.name IN (%s)", count($hiddenFields) ? implode(",", $hiddenFields) : "''");
 
                 $hiddenFields = TargetCheckField::model()->findAll($criteria);
                 $hiddenFieldIds = [];
@@ -486,7 +493,7 @@ class ProjectController extends Controller {
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
-		}
+        }
 
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
 
@@ -502,24 +509,24 @@ class ProjectController extends Controller {
             array("order" => "t.name ASC")
         );
 
-		// display the page
+        // display the page
         $this->pageTitle = $newRecord ? Yii::t("app", "New Project") : $project->name;
-		$this->render("edit", array(
+        $this->render("edit", array(
             "model" => $model,
             "project" => $project,
             "clients" => $clients,
             "fields" => GlobalCheckField::model()->findAll(["order" => "sort_order ASC"]),
             "languages" => Language::model()->findAll()
         ));
-	}
+    }
 
     /**
      * Display a list of details.
      */
-	public function actionDetails($id, $page=1)
-	{
-        $id   = (int) $id;
-        $page = (int) $page;
+    public function actionDetails($id, $page = 1)
+    {
+        $id = (int)$id;
+        $page = (int)$page;
 
         if (!User::checkRole(User::ROLE_ADMIN) && !User::checkRole(User::ROLE_CLIENT))
             throw new CHttpException(403, Yii::t('app', 'Access denied.'));
@@ -536,37 +543,37 @@ class ProjectController extends Controller {
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = $this->entriesPerPage;
+        $criteria->limit = $this->entriesPerPage;
         $criteria->offset = ($page - 1) * $this->entriesPerPage;
-        $criteria->order  = 't.subject ASC';
+        $criteria->order = 't.subject ASC';
         $criteria->addCondition('t.project_id = :project_id');
-        $criteria->params = array( 'project_id' => $project->id );
+        $criteria->params = array('project_id' => $project->id);
 
         $details = ProjectDetail::model()->findAll($criteria);
 
         $detailCount = ProjectDetail::model()->count($criteria);
-        $paginator   = new Paginator($detailCount, $page);
+        $paginator = new Paginator($detailCount, $page);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
-        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array('id' => $project->id)));
         $this->breadcrumbs[] = array(Yii::t('app', 'Details'), '');
 
         // display the page
         $this->pageTitle = $project->name;
-		$this->render('detail/index', array(
-            'project'  => $project,
-            'details'  => $details,
-            'p'        => $paginator,
+        $this->render('detail/index', array(
+            'project' => $project,
+            'details' => $details,
+            'p' => $paginator,
         ));
-	}
+    }
 
     /**
      * Project detail edit page.
      */
-	public function actionEditDetail($id, $detail=0)
-	{
-        $id        = (int) $id;
-        $detail    = (int) $detail;
+    public function actionEditDetail($id, $detail = 0)
+    {
+        $id = (int)$id;
+        $detail = (int)$detail;
         $newRecord = false;
 
         if (!User::checkRole(User::ROLE_ADMIN) && !User::checkRole(User::ROLE_CLIENT))
@@ -580,40 +587,34 @@ class ProjectController extends Controller {
         if (!$project->checkPermission())
             throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
-        if ($detail)
-        {
+        if ($detail) {
             $detail = ProjectDetail::model()->findByAttributes(array(
-                'id'         => $detail,
+                'id' => $detail,
                 'project_id' => $project->id
             ));
 
             if (!$detail)
                 throw new CHttpException(404, Yii::t('app', 'Detail not found.'));
-        }
-        else
-        {
-            $detail   = new ProjectDetail();
+        } else {
+            $detail = new ProjectDetail();
             $newRecord = true;
         }
 
-		$model = new ProjectDetailEditForm();
+        $model = new ProjectDetailEditForm();
 
-        if (!$newRecord)
-        {
+        if (!$newRecord) {
             $model->subject = $detail->subject;
             $model->content = $detail->content;
         }
 
-		// collect user input data
-		if (isset($_POST['ProjectDetailEditForm']))
-		{
-			$model->attributes = $_POST['ProjectDetailEditForm'];
+        // collect user input data
+        if (isset($_POST['ProjectDetailEditForm'])) {
+            $model->attributes = $_POST['ProjectDetailEditForm'];
 
-			if ($model->validate())
-            {
+            if ($model->validate()) {
                 $detail->project_id = $project->id;
-                $detail->subject    = $model->subject;
-                $detail->content    = $model->content;
+                $detail->subject = $model->subject;
+                $detail->content = $model->content;
 
                 $detail->save();
 
@@ -622,38 +623,38 @@ class ProjectController extends Controller {
                 $detail->refresh();
 
                 if ($newRecord)
-                    $this->redirect(array( 'project/editdetail', 'id' => $project->id, 'detail' => $detail->id ));
-            }
-            else
+                    $this->redirect(array('project/editdetail', 'id' => $project->id, 'detail' => $detail->id));
+            } else
                 Yii::app()->user->setFlash('error', Yii::t('app', 'Please fix the errors below.'));
-		}
+        }
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
-        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
-        $this->breadcrumbs[] = array(Yii::t('app', 'Details'), $this->createUrl('project/details', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array('id' => $project->id)));
+        $this->breadcrumbs[] = array(Yii::t('app', 'Details'), $this->createUrl('project/details', array('id' => $project->id)));
 
         if ($newRecord)
             $this->breadcrumbs[] = array(Yii::t('app', 'New Detail'), '');
         else
             $this->breadcrumbs[] = array($detail->subject, '');
 
-		// display the page
+        // display the page
         $this->pageTitle = $detail->isNewRecord ? Yii::t('app', 'New Detail') : $detail->subject;
-		$this->render('detail/edit', array(
-            'model'   => $model,
+        $this->render('detail/edit', array(
+            'model' => $model,
             'project' => $project,
-            'detail'  => $detail
+            'detail' => $detail
         ));
-	}
+    }
 
     /**
      * Display list of tracked time
      * @param $id
      * @param int $page
      */
-    public function actionTime($id, $page=1) {
-        $id   = (int) $id;
-        $page = (int) $page;
+    public function actionTime($id, $page = 1)
+    {
+        $id = (int)$id;
+        $page = (int)$page;
 
         $project = Project::model()->findByPk($id);
 
@@ -667,47 +668,45 @@ class ProjectController extends Controller {
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = $this->entriesPerPage;
+        $criteria->limit = $this->entriesPerPage;
         $criteria->offset = ($page - 1) * $this->entriesPerPage;
-        $criteria->order  = 't.create_time ASC';
+        $criteria->order = 't.create_time ASC';
         $criteria->addCondition('t.project_id = :project_id');
-        $criteria->params = array( 'project_id' => $project->id );
+        $criteria->params = array('project_id' => $project->id);
 
         $records = ProjectTime::model()->findAll($criteria);
 
         $detailCount = ProjectTime::model()->count($criteria);
-        $paginator   = new Paginator($detailCount, $page);
+        $paginator = new Paginator($detailCount, $page);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
-        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array('id' => $project->id)));
         $this->breadcrumbs[] = array(Yii::t('app', 'Time'), '');
 
         // display the page
         $this->pageTitle = $project->name;
         $this->render('time/index', array(
-            'project'  => $project,
-            'records'  => $records,
-            'p'        => $paginator,
+            'project' => $project,
+            'records' => $records,
+            'p' => $paginator,
         ));
     }
 
     /**
      * Control time function
      */
-    public function actionControlTime() {
+    public function actionControlTime()
+    {
         $response = new AjaxResponse();
 
-        try
-        {
+        try {
             $form = new EntryControlForm();
             $form->attributes = $_POST['EntryControlForm'];
 
-            if (!$form->validate())
-            {
+            if (!$form->validate()) {
                 $errorText = '';
 
-                foreach ($form->getErrors() as $error)
-                {
+                foreach ($form->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -715,7 +714,7 @@ class ProjectController extends Controller {
                 throw new Exception($errorText);
             }
 
-            $id     = $form->id;
+            $id = $form->id;
             $record = ProjectTime::model()->with('project')->findByPk($id);
 
             if ($record === null)
@@ -724,8 +723,7 @@ class ProjectController extends Controller {
             if (!$record->project->checkPermission())
                 throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
-            switch ($form->operation)
-            {
+            switch ($form->operation) {
                 case 'delete':
                     $record->delete();
                     break;
@@ -734,9 +732,7 @@ class ProjectController extends Controller {
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -746,10 +742,11 @@ class ProjectController extends Controller {
     /**
      * Display a list of check categories.
      */
-	public function actionTarget($id, $target, $page=1) {
-        $id = (int) $id;
-        $target = (int) $target;
-        $page = (int) $page;
+    public function actionTarget($id, $target, $page = 1)
+    {
+        $id = (int)$id;
+        $target = (int)$target;
+        $page = (int)$page;
 
         $project = Project::model()->with(array(
             "userHoursAllocated",
@@ -781,7 +778,7 @@ class ProjectController extends Controller {
         $criteria->offset = ($page - 1) * $this->entriesPerPage;
         $criteria->order = "COALESCE(l10n.name, category.name) ASC";
         $criteria->addCondition("t.target_id = :target_id");
-        $criteria->params = array( "target_id" => $target->id );
+        $criteria->params = array("target_id" => $target->id);
         $criteria->together = true;
 
         $language = Language::model()->findByAttributes(array(
@@ -798,7 +795,7 @@ class ProjectController extends Controller {
                     "l10n" => array(
                         "joinType" => "LEFT JOIN",
                         "on" => "language_id = :language_id",
-                        "params" => array( "language_id" => $language )
+                        "params" => array("language_id" => $language)
                     ),
                 )
             ),
@@ -812,7 +809,7 @@ class ProjectController extends Controller {
 
         $newCriteria = new CDbCriteria();
         $newCriteria->addCondition("t.target_id = :target_id");
-        $newCriteria->params = array( "target_id" => $target->id );
+        $newCriteria->params = array("target_id" => $target->id);
         $newCriteria->addInCondition("t.check_category_id", $categoryIds);
         $newCriteria->order = "COALESCE(l10n.name, category.name) ASC";
         $newCriteria->together = true;
@@ -823,7 +820,7 @@ class ProjectController extends Controller {
                     "l10n" => array(
                         "joinType" => "LEFT JOIN",
                         "on" => "language_id = :language_id",
-                        "params" => array( "language_id" => $language )
+                        "params" => array("language_id" => $language)
                     ),
                     "controls" => array(
                         "with" => array(
@@ -838,26 +835,27 @@ class ProjectController extends Controller {
         $paginator = new Paginator($categoryCount, $page);
 
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
-        $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array( "id" => $project->id )));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
         $this->breadcrumbs[] = array($target->hostPort, "");
 
         // display the page
         $this->pageTitle = $target->hostPort . ($target->description ? " / " . $target->description : "");
-		$this->render("target/index", array(
+        $this->render("target/index", array(
             "project" => $project,
             "target" => $target,
             "categories" => $categories,
             "p" => $paginator,
             "quickTargets" => $this->_getQuickTargets($project->id, $language),
         ));
-	}
+    }
 
     /**
      * Project target edit page.
      */
-	public function actionEditTarget($id, $target=0) {
-        $id = (int) $id;
-        $target = (int) $target;
+    public function actionEditTarget($id, $target = 0)
+    {
+        $id = (int)$id;
+        $target = (int)$target;
         $newRecord = false;
 
         $project = Project::model()->findByPk($id);
@@ -884,7 +882,7 @@ class ProjectController extends Controller {
             $newRecord = true;
         }
 
-		$model = new TargetEditForm();
+        $model = new TargetEditForm();
         $model->categoryIds = array();
         $model->referenceIds = array();
         $model->templateIds = array();
@@ -920,14 +918,14 @@ class ProjectController extends Controller {
             }
         }
 
-		// collect user input data
-		if (isset($_POST["TargetEditForm"])) {
+        // collect user input data
+        if (isset($_POST["TargetEditForm"])) {
             $model->categoryIds = array();
             $model->referenceIds = array();
             $model->templateIds = array();
-			$model->attributes = $_POST["TargetEditForm"];
+            $model->attributes = $_POST["TargetEditForm"];
 
-			if ($model->validate()) {
+            if ($model->validate()) {
                 $target->project_id = $project->id;
                 $target->host = $model->host;
                 $target->port = $model->port;
@@ -954,8 +952,8 @@ class ProjectController extends Controller {
 
                 $addCategories = array();
                 $delCategories = array();
-                $addTemplates  = array();
-                $delTemplates  = array();
+                $addTemplates = array();
+                $delTemplates = array();
                 $addReferences = array();
                 $delReferences = array();
 
@@ -968,7 +966,7 @@ class ProjectController extends Controller {
                         case Target::SOURCE_TYPE_CHECK_CATEGORIES:
                             // fill in addCategories & delCategories arrays
                             $categories = TargetCheckCategory::model()->findAllByAttributes(array(
-                                "target_id"          => $target->id,
+                                "target_id" => $target->id,
                                 "checklist_template" => false
                             ));
 
@@ -976,11 +974,11 @@ class ProjectController extends Controller {
                                 $oldCategories[] = $category->check_category_id;
                             }
 
-                            $delCategories= array_diff($oldCategories, $model->categoryIds);
+                            $delCategories = array_diff($oldCategories, $model->categoryIds);
                             $addCategories = array_diff($model->categoryIds, $oldCategories);
 
                             TargetCheckCategory::model()->deleteAllByAttributes(array(
-                                "target_id"          => $target->id,
+                                "target_id" => $target->id,
                                 "checklist_template" => true
                             ));
                             TargetChecklistTemplate::model()->deleteAllByAttributes(array(
@@ -994,7 +992,7 @@ class ProjectController extends Controller {
                         case Target::SOURCE_TYPE_CHECKLIST_TEMPLATES:
                             // fill in addTemplates & delTemplates arrays
                             $templates = TargetChecklistTemplate::model()->findAllByAttributes(array(
-                                "target_id"           => $target->id,
+                                "target_id" => $target->id,
                             ));
 
                             foreach ($templates as $template) {
@@ -1005,8 +1003,8 @@ class ProjectController extends Controller {
                             $addTemplates = array_diff($model->templateIds, $oldTemplates);
 
                             TargetCheckCategory::model()->deleteAllByAttributes(array(
-                                "target_id"           => $target->id,
-                                "checklist_template"  => false,
+                                "target_id" => $target->id,
+                                "checklist_template" => false,
                             ));
 
                             $model->categoryIds = array();
@@ -1028,7 +1026,7 @@ class ProjectController extends Controller {
                 } else {
                     $addCategories = $model->categoryIds;
                     $addReferences = $model->referenceIds;
-                    $addTemplates  = $model->templateIds;
+                    $addTemplates = $model->templateIds;
                 }
 
                 // delete categories
@@ -1069,15 +1067,15 @@ class ProjectController extends Controller {
                         }
 
                         TargetCheckCategory::model()->deleteAllByAttributes(array(
-                            "target_id"          => $target->id,
-                            "check_category_id"  => $delTemplateCategories,
+                            "target_id" => $target->id,
+                            "check_category_id" => $delTemplateCategories,
                             "checklist_template" => true,
-                            "template_count"     => 1
+                            "template_count" => 1
                         ));
 
                         $updateCriteria = new CDbCriteria();
                         $updateCriteria->addColumnCondition(array(
-                            "target_id"          => $target->id,
+                            "target_id" => $target->id,
                             "checklist_template" => true,
                         ));
                         $updateCriteria->addInCondition("check_category_id", $delTemplateCategories);
@@ -1102,8 +1100,8 @@ class ProjectController extends Controller {
 
                     foreach ($categories as $category) {
                         $cat = TargetCheckCategory::model()->findByAttributes(array(
-                            "target_id"          => $target->id,
-                            "check_category_id"  => $category->id,
+                            "target_id" => $target->id,
+                            "check_category_id" => $category->id,
                             "checklist_template" => true,
                         ));
 
@@ -1114,9 +1112,9 @@ class ProjectController extends Controller {
                         }
 
                         $cat = new TargetCheckCategory();
-                        $cat->target_id              = $target->id;
-                        $cat->check_category_id      = $category->id;
-                        $cat->checklist_template     = true;
+                        $cat->target_id = $target->id;
+                        $cat->check_category_id = $category->id;
+                        $cat->checklist_template = true;
                         $cat->save();
                     }
                 }
@@ -1151,7 +1149,7 @@ class ProjectController extends Controller {
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
-		}
+        }
 
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
         $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
@@ -1175,7 +1173,7 @@ class ProjectController extends Controller {
             "l10n" => array(
                 "joinType" => "LEFT JOIN",
                 "on" => "language_id = :language_id",
-                "params" => array( "language_id" => $language )
+                "params" => array("language_id" => $language)
             ),
         ))->findAllByAttributes(
             array(),
@@ -1210,18 +1208,18 @@ class ProjectController extends Controller {
                 )
             )
         ))->findAllByAttributes(
-                array(),
-                array("order" => "t.name")
-            );
+            array(),
+            array("order" => "t.name")
+        );
 
         $references = Reference::model()->findAllByAttributes(
             array(),
             array("order" => "t.name ASC")
         );
 
-		// display the page
+        // display the page
         $this->pageTitle = $newRecord ? Yii::t("app", "New Target") : $target->hostPort . ($target->description ? " / " . $target->description : "");
-		$this->render("target/edit", array(
+        $this->render("target/edit", array(
             "model" => $model,
             "project" => $project,
             "target" => $target,
@@ -1231,14 +1229,15 @@ class ProjectController extends Controller {
             "relationTemplates" => $relationTemplates,
             "references" => $references
         ));
-	}
+    }
 
     /**
      * Add list of targets page
      * @param $id
      * @throws Exception
      */
-    public function actionAddTargetList($id) {
+    public function actionAddTargetList($id)
+    {
         $form = new TargetListAddForm();
         $project = Project::model()->findByPk($id);
 
@@ -1258,7 +1257,7 @@ class ProjectController extends Controller {
 
                     foreach ($targets as $target) {
                         $host = trim($target);
-                        
+
                         $t = new Target();
                         $t->project_id = $project->id;
                         $t->host = $host;
@@ -1267,7 +1266,8 @@ class ProjectController extends Controller {
                         $t->refresh();
                         $ids[] = $t->id;
                     }
-                } catch (Exception $e) {}
+                } catch (Exception $e) {
+                }
 
                 $references = Reference::model()->findAll();
 
@@ -1307,7 +1307,8 @@ class ProjectController extends Controller {
      * Import targets from file
      * @throws Exception
      */
-    public function actionImportTarget($id) {
+    public function actionImportTarget($id)
+    {
         $form = new TargetImportForm();
         $project = Project::model()->findByPk($id);
 
@@ -1391,9 +1392,10 @@ class ProjectController extends Controller {
      * @throws CHttpException
      * @throws Exception
      */
-    public function actionEditMapping($id, $mId) {
-        $id = (int) $id;
-        $mId = (int) $mId;
+    public function actionEditMapping($id, $mId)
+    {
+        $id = (int)$id;
+        $mId = (int)$mId;
 
         $project = Project::model()->findByPk($id);
 
@@ -1430,7 +1432,8 @@ class ProjectController extends Controller {
      * Apply mapping to project
      * @throws CHttpException
      */
-    public function actionApplyMapping() {
+    public function actionApplyMapping()
+    {
         $form = new ProjectApplyMappingForm();
 
         if (!isset($_POST["ProjectApplyMappingForm"])) {
@@ -1500,9 +1503,10 @@ class ProjectController extends Controller {
      * @param $target
      * @throws CHttpException
      */
-    public function actionEditChain($id, $target) {
-        $id = (int) $id;
-        $target = (int) $target;
+    public function actionEditChain($id, $target)
+    {
+        $id = (int)$id;
+        $target = (int)$target;
 
         $project = Project::model()->findByPk($id);
 
@@ -1554,13 +1558,14 @@ class ProjectController extends Controller {
         try {
             RelationManager::validateRelations($target->relations, $target);
             $relations = new SimpleXMLElement($target->relations, LIBXML_NOERROR);
-            $cellId = (int) TargetManager::getChainLastCellId($target->id);
+            $cellId = (int)TargetManager::getChainLastCellId($target->id);
 
             if ($cellId) {
                 $cell = RelationManager::getCell($relations, $cellId);
                 $activeCheck = $cell->attributes()->label;
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+        }
 
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
         $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
@@ -1584,12 +1589,13 @@ class ProjectController extends Controller {
      * @param $id
      * @param $target
      */
-    public function actionControlChain($id, $target) {
+    public function actionControlChain($id, $target)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $target = (int) $target;
+            $id = (int)$id;
+            $target = (int)$target;
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
@@ -1663,7 +1669,7 @@ class ProjectController extends Controller {
                     ChainJob::enqueue(array(
                         "target_id" => $target->id,
                         "operation" => ChainJob::OPERATION_STOP,
-                        "reset"     => true
+                        "reset" => true
                     ));
 
                     break;
@@ -1688,11 +1694,12 @@ class ProjectController extends Controller {
      * @param $id
      * @param $target
      */
-    public function actionChainMessages($id, $target) {
+    public function actionChainMessages($id, $target)
+    {
         $response = new AjaxResponse();
 
-        $id = (int) $id;
-        $target = (int) $target;
+        $id = (int)$id;
+        $target = (int)$target;
         $project = Project::model()->findByPk($id);
 
         if (!$project) {
@@ -1718,13 +1725,14 @@ class ProjectController extends Controller {
         try {
             RelationManager::validateRelations($target->relations, $target);
             $relations = new SimpleXMLElement($target->relations, LIBXML_NOERROR);
-            $cellId = (int) TargetManager::getChainLastCellId($target->id);
+            $cellId = (int)TargetManager::getChainLastCellId($target->id);
 
             if ($cellId) {
                 $cell = RelationManager::getCell($relations, $cellId);
                 $name = (string)$cell->attributes()->label;
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+        }
 
         if (isset($cellId) && $cellId) {
             $response->addData("check", ["id" => $cellId, "name" => $name]);
@@ -1741,7 +1749,8 @@ class ProjectController extends Controller {
      * @param $check
      * @throws CHttpException
      */
-    public function actionCheckLink() {
+    public function actionCheckLink()
+    {
         $response = new AjaxResponse();
 
         try {
@@ -1802,12 +1811,13 @@ class ProjectController extends Controller {
     /**
      * Display a list of checks.
      */
-	public function actionChecks($id, $target, $category, $controlToOpen=0, $checkToOpen=0) {
-        $id = (int) $id;
-        $target = (int) $target;
-        $category = (int) $category;
-        $controlToOpen = (int) $controlToOpen;
-        $checkToOpen = (int) $checkToOpen;
+    public function actionChecks($id, $target, $category, $controlToOpen = 0, $checkToOpen = 0)
+    {
+        $id = (int)$id;
+        $target = (int)$target;
+        $category = (int)$category;
+        $controlToOpen = (int)$controlToOpen;
+        $checkToOpen = (int)$checkToOpen;
 
         $project = Project::model()->with(array(
             "userHoursAllocated",
@@ -1965,7 +1975,7 @@ class ProjectController extends Controller {
 
         // display the page
         $this->pageTitle = $category->category->localizedName;
-		$this->render("target/check/index", array(
+        $this->render("target/check/index", array(
             "project" => $project,
             "target" => $target,
             "category" => $category,
@@ -1977,14 +1987,15 @@ class ProjectController extends Controller {
             "checkToOpen" => $checkToOpen,
             "fields" => GlobalCheckField::model()->findAll()
         ));
-	}
+    }
 
     /**
      * Get running checks list
      * @param $id
      * @param $target
      */
-    public function actionRunningChecks() {
+    public function actionRunningChecks()
+    {
         $response = new AjaxResponse();
 
         try {
@@ -2024,13 +2035,14 @@ class ProjectController extends Controller {
      * @param $control
      * @throws CHttpException
      */
-    public function actionControlChecklist($id, $target, $category, $control) {
+    public function actionControlChecklist($id, $target, $category, $control)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $target = (int) $target;
-            $category = (int) $category;
+            $id = (int)$id;
+            $target = (int)$target;
+            $category = (int)$category;
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
@@ -2145,7 +2157,8 @@ class ProjectController extends Controller {
      * @throws CException
      * @throws Exception
      */
-    public function renderCheckForm(TargetCheck $targetCheck, TargetCheckCategory $category, Language $language, $issue = false) {
+    public function renderCheckForm(TargetCheck $targetCheck, TargetCheckCategory $category, Language $language, $issue = false)
+    {
         $target = $targetCheck->target;
         $project = $target->project;
         $check = $targetCheck->check;
@@ -2221,14 +2234,15 @@ class ProjectController extends Controller {
      * @param $check
      * @throws CHttpException
      */
-    public function actionCheck($id, $target, $category, $check) {
+    public function actionCheck($id, $target, $category, $check)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $target = (int) $target;
-            $category = (int) $category;
-            $check = (int) $check;
+            $id = (int)$id;
+            $target = (int)$target;
+            $category = (int)$category;
+            $check = (int)$check;
 
             $project = Project::model()->findByPk($id);
 
@@ -2289,16 +2303,42 @@ class ProjectController extends Controller {
     }
 
     /**
+     * @param $project
+     * @param $host
+     * @param $issue
+     * @throws CHttpException
+     */
+    public function actionEvidenceView($project, $host, $issue)
+    {
+        $project = Project::model()->findByPk($project);
+        if (!$project) {
+            throw new CHttpException(404, Yii::t("app", "Project not found."));
+        }
+        $issue = Issue::model()->findByPk($issue);
+        if (!$issue) {
+            throw new CHttpException(404, Yii::t("app", "Project not found."));
+        }
+        $criteria = new CDbCriteria();
+        $criteria->join = 'LEFT JOIN target_checks ON t.target_check_id = target_checks.id LEFT JOIN targets ON targets.id = target_checks.target_id';
+        $criteria->addCondition("issue_id = :issue_id and COALESCE (targets.ip, targets.host) = :host");
+        $criteria->params = ["issue_id" => $issue->id, "host" => $host];
+        $evidences = IssueEvidence::model()->findAll($criteria);
+
+        $this->renderPartial("partial/issue/evidence-view", ['host' => $host, 'evidences' => $evidences, 'project' => $project, 'issue' => $issue], false, true);
+    }
+
+    /**
      * Save check.
      */
-    public function actionSaveCheck($id, $target, $category, $check) {
+    public function actionSaveCheck($id, $target, $category, $check)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $target = (int) $target;
-            $category = (int) $category;
-            $check = (int) $check;
+            $id = (int)$id;
+            $target = (int)$target;
+            $category = (int)$category;
+            $check = (int)$check;
 
             $project = Project::model()->findByPk($id);
 
@@ -2406,7 +2446,7 @@ class ProjectController extends Controller {
                         throw new CHttpException(404, "Target check has no such script.");
                     }
 
-                    $tcs->start = (bool) $dataEncoded->start;
+                    $tcs->start = (bool)$dataEncoded->start;
                     $tcs->save();
                 }
             } else {
@@ -2446,6 +2486,22 @@ class ProjectController extends Controller {
             $targetCheck->user_id = Yii::app()->user->id;
             $targetCheck->language_id = $language->id;
             $targetCheck->status = TargetCheck::STATUS_FINISHED;
+
+            if ($targetCheck->rating != $model->rating) {
+                $issue = Issue::model()->findByAttributes(array(
+                    "check_id" => $check->id,
+                    "project_id" => $project->id
+                ));
+
+                if (!$issue) {
+                    $pm = new ProjectManager();
+                    $pm->addIssue($project, $check);
+                } else {
+                    $tm = new TargetManager();
+                    $tm->addEvidence($target, $issue, false);
+                }
+            }
+
             $targetCheck->rating = $model->rating;
 
             if (User::checkRole(User::ROLE_ADMIN) && $model->saveResult) {
@@ -2479,13 +2535,14 @@ class ProjectController extends Controller {
                     "targetCheck" => array(
                         "id" => $targetCheck->id,
                         "check" => array(
-                            "id" =>$check->id
+                            "id" => $check->id
                         )
                     )
                 ));
             }
 
             $targetCheck->table_result = $model->tableResult;
+            $targetCheck->last_modified = $model->lastModified;
             $targetCheck->save();
 
             // delete old solutions
@@ -2543,18 +2600,18 @@ class ProjectController extends Controller {
                         if (!$model->solutionTitle) {
                             throw new CHttpException(403, Yii::t("app", "Please specify the solution title."));
                         }
-                        
+
                         $criteria = new CDbCriteria();
                         $criteria->select = "MAX(sort_order) as max_sort_order";
                         $criteria->addColumnCondition(array("check_id" => $check->id));
-            
+
                         $maxOrder = CheckSolution::model()->find($criteria);
                         $sortOrder = 0;
-            
+
                         if ($maxOrder && $maxOrder->max_sort_order !== null) {
                             $sortOrder = $maxOrder->max_sort_order + 1;
                         }
-                                    
+
                         $solution = new CheckSolution();
                         $solution->check_id = $check->id;
                         $solution->title = $model->solutionTitle;
@@ -2577,10 +2634,12 @@ class ProjectController extends Controller {
 
                         $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION, null);
                         $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE, null);
+                        $targetCheck->last_modified = $model->lastModified;
                         $targetCheck->save();
                     } else {
                         $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION, $model->solution);
                         $targetCheck->setFieldValue(GlobalCheckField::FIELD_SOLUTION_TITLE, $model->solutionTitle);
+                        $targetCheck->last_modified = $model->lastModified;
                         $targetCheck->save();
                     }
                 }
@@ -2656,6 +2715,7 @@ class ProjectController extends Controller {
             ));
 
             $response->addData("rating", $targetCheck->rating);
+            $response->addData("lastModified", $targetCheck->last_modified);
 
             if ($project->status == Project::STATUS_OPEN) {
                 $project->status = Project::STATUS_IN_PROGRESS;
@@ -2671,14 +2731,15 @@ class ProjectController extends Controller {
     /**
      * Check autosave
      */
-    public function actionAutosaveCheck($id, $target, $category, $check) {
+    public function actionAutosaveCheck($id, $target, $category, $check)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $target = (int) $target;
-            $category = (int) $category;
-            $check = (int) $check;
+            $id = (int)$id;
+            $target = (int)$target;
+            $category = (int)$category;
+            $check = (int)$check;
 
             $project = Project::model()->findByPk($id);
 
@@ -2728,6 +2789,7 @@ class ProjectController extends Controller {
                 throw new CHttpException(404, Yii::t("app", "Check not found."));
             }
 
+
             $criteria = new CDbCriteria();
             $criteria->addInCondition("check_control_id", $controlIds);
             $criteria->addColumnCondition(array(
@@ -2754,6 +2816,7 @@ class ProjectController extends Controller {
                 throw new Exception($errorText);
             }
 
+            $targetCheck->last_modified = $model->lastModified;
             $targetCheck->save();
 
             if ($project->status == Project::STATUS_OPEN) {
@@ -2775,12 +2838,13 @@ class ProjectController extends Controller {
     /**
      * Save custom check.
      */
-    public function actionSaveCustomCheck($id, $target, $category) {
+    public function actionSaveCustomCheck($id, $target, $category)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $target = (int) $target;
+            $id = (int)$id;
+            $target = (int)$target;
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
@@ -2916,6 +2980,18 @@ class ProjectController extends Controller {
                 $check->sort_order = $check->id;
                 $check->save();
 
+                if ($target->check_source_type == Target::SOURCE_TYPE_CHECKLIST_TEMPLATES) {
+                    $targetTemplate = TargetChecklistTemplate::model()->findByAttributes(["target_id" => $target->id]);
+                    $template = ChecklistTemplate::model()->with($language)->findByPk($targetTemplate->checklist_template_id);
+
+                    if ($template) {
+                        $tc = new ChecklistTemplateCheck();
+                        $tc->checklist_template_id = $template->id;
+                        $tc->check_id = $check->id;
+                        $tc->save();
+                    }
+                }
+
                 $checkL10n = new CheckL10n();
                 $checkL10n->check_id = $check->id;
                 $checkL10n->language_id = $language->id;
@@ -3003,9 +3079,11 @@ class ProjectController extends Controller {
                     }
                 }
 
+                $customCheck->last_modified = $form->lastModified;
                 $customCheck->save();
 
                 $response->addData("rating", $customCheck->rating);
+                $response->addData("lastModified", $customCheck->last_modified);
 
                 StatsJob::enqueue(array(
                     "category_id" => $customCheck->control->check_category_id,
@@ -3084,17 +3162,14 @@ class ProjectController extends Controller {
     {
         $response = new AjaxResponse();
 
-        try
-        {
+        try {
             $model = new EntryControlForm();
             $model->attributes = $_POST['EntryControlForm'];
 
-            if (!$model->validate())
-            {
+            if (!$model->validate()) {
                 $errorText = '';
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -3102,7 +3177,7 @@ class ProjectController extends Controller {
                 throw new Exception($errorText);
             }
 
-            $id     = $model->id;
+            $id = $model->id;
             $target = Target::model()->with('project')->findByPk($id);
 
             if ($target === null)
@@ -3111,8 +3186,7 @@ class ProjectController extends Controller {
             if (!$target->project->checkPermission())
                 throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
-            switch ($model->operation)
-            {
+            switch ($model->operation) {
                 case 'delete':
                     $target->delete();
                     break;
@@ -3121,9 +3195,7 @@ class ProjectController extends Controller {
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -3137,20 +3209,17 @@ class ProjectController extends Controller {
     {
         $response = new AjaxResponse();
 
-        try
-        {
+        try {
             if (!User::checkRole(User::ROLE_ADMIN) && !User::checkRole(User::ROLE_CLIENT))
                 throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
             $model = new EntryControlForm();
             $model->attributes = $_POST['EntryControlForm'];
 
-            if (!$model->validate())
-            {
+            if (!$model->validate()) {
                 $errorText = '';
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -3158,7 +3227,7 @@ class ProjectController extends Controller {
                 throw new Exception($errorText);
             }
 
-            $id     = $model->id;
+            $id = $model->id;
             $detail = ProjectDetail::model()->with('project')->findByPk($id);
 
             if ($detail === null)
@@ -3167,8 +3236,7 @@ class ProjectController extends Controller {
             if (!$detail->project->checkPermission())
                 throw new CHttpException(403, Yii::t('app', 'Access denied.'));
 
-            switch ($model->operation)
-            {
+            switch ($model->operation) {
                 case 'delete':
                     $detail->delete();
                     break;
@@ -3177,9 +3245,7 @@ class ProjectController extends Controller {
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -3189,14 +3255,15 @@ class ProjectController extends Controller {
     /**
      * Upload attachment function.
      */
-    function actionUploadAttachment($id, $target, $category, $check) {
+    function actionUploadAttachment($id, $target, $category, $check)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $target = (int) $target;
-            $category = (int) $category;
-            $check = (int) $check;
+            $id = (int)$id;
+            $target = (int)$target;
+            $category = (int)$category;
+            $check = (int)$check;
 
             $project = Project::model()->findByPk($id);
 
@@ -3284,7 +3351,7 @@ class ProjectController extends Controller {
 
             $response->addData('name', CHtml::encode($attachment->name));
             $response->addData('title', CHtml::encode($attachment->title));
-            $response->addData('url', $this->createUrl('project/attachment', array( 'path' => $attachment->path )));
+            $response->addData('url', $this->createUrl('project/attachment', array('path' => $attachment->path)));
             $response->addData('path', $attachment->path);
             $response->addData('controlUrl', $this->createUrl('project/controlattachment'));
             $response->addData('targetCheck', $targetCheck->id);
@@ -3298,7 +3365,8 @@ class ProjectController extends Controller {
     /**
      * Control attachment.
      */
-    public function actionControlAttachment() {
+    public function actionControlAttachment()
+    {
         $response = new AjaxResponse();
 
         try {
@@ -3357,7 +3425,8 @@ class ProjectController extends Controller {
     /**
      * Get attachment.
      */
-    public function actionAttachment($path) {
+    public function actionAttachment($path)
+    {
         $attachment = TargetCheckAttachment::model()->with(array(
             "targetCheck" => array(
                 "with" => array(
@@ -3405,14 +3474,15 @@ class ProjectController extends Controller {
     /**
      * Control check function.
      */
-    public function actionControlCheck($id, $target, $category, $check) {
+    public function actionControlCheck($id, $target, $category, $check)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $target = (int) $target;
-            $category = (int) $category;
-            $check = (int) $check;
+            $id = (int)$id;
+            $target = (int)$target;
+            $category = (int)$category;
+            $check = (int)$check;
 
             $project = Project::model()->findByPk($id);
 
@@ -3457,7 +3527,7 @@ class ProjectController extends Controller {
                 "id" => $check,
                 "target_id" => $target->id,
             ));
-            
+
             if (!$targetCheck) {
                 throw new CHttpException(404, Yii::t("app", "Check not found."));
             }
@@ -3556,7 +3626,7 @@ class ProjectController extends Controller {
                     $targetCheck->save();
 
                     $response->addData("automated", $check->automated);
-                    $response->addData("protocol",  $check->applicationProtocol);
+                    $response->addData("protocol", $check->applicationProtocol);
                     $response->addData("port", $check->port);
                     $inputValues = array();
                     $timeoutValues = array();
@@ -3576,7 +3646,7 @@ class ProjectController extends Controller {
                         );
                         TargetCheckScript::model()->updateAll(
                             array(
-                                "start"   => true,
+                                "start" => true,
                                 "timeout" => null,
                             ),
                             $criteria
@@ -3587,12 +3657,12 @@ class ProjectController extends Controller {
                         foreach ($scripts as $script) {
                             $timeout = $script->timeout ? $script->timeout : $script->script->package->timeout;
                             $timeoutValues[] = array(
-                                "id"      => "TargetCheckEditForm_" . $targetCheck->id . "_timeouts_" . $script->script->id,
+                                "id" => "TargetCheckEditForm_" . $targetCheck->id . "_timeouts_" . $script->script->id,
                                 "timeout" => $timeout,
                             );
                             $startScripts[] = array(
-                                "id"    => "TargetCheckEditForm_" . $targetCheck->id . "_scripts_" . $script->script->id,
-                                "start" => (bool) $script->start,
+                                "id" => "TargetCheckEditForm_" . $targetCheck->id . "_scripts_" . $script->script->id,
+                                "start" => (bool)$script->start,
                             );
                         }
 
@@ -3683,12 +3753,13 @@ class ProjectController extends Controller {
     /**
      * Control check function.
      */
-    public function actionControlCustomCheck($id, $target, $category) {
+    public function actionControlCustomCheck($id, $target, $category)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $target = (int) $target;
+            $id = (int)$id;
+            $target = (int)$target;
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
@@ -3774,13 +3845,14 @@ class ProjectController extends Controller {
     /**
      * Update checks function.
      */
-    public function actionUpdateChecks($id, $target, $category) {
+    public function actionUpdateChecks($id, $target, $category)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $target = (int) $target;
-            $category = (int) $category;
+            $id = (int)$id;
+            $target = (int)$target;
+            $category = (int)$category;
 
             $project = Project::model()->findByPk($id);
 
@@ -3865,12 +3937,13 @@ class ProjectController extends Controller {
      * @param $id
      * @param $issue
      */
-    public function actionUpdateIssueChecks($id, $issue) {
+    public function actionUpdateIssueChecks($id, $issue)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $issue = (int) $issue;
+            $id = (int)$id;
+            $issue = (int)$issue;
 
             $project = Project::model()->findByPk($id);
 
@@ -3935,12 +4008,13 @@ class ProjectController extends Controller {
      * @param $id
      * @param $issue
      */
-    public function actionIssueRunningChecks($id, $issue) {
+    public function actionIssueRunningChecks($id, $issue)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $issue = (int) $issue;
+            $id = (int)$id;
+            $issue = (int)$issue;
 
             $project = Project::model()->findByPk($id);
 
@@ -3986,24 +4060,21 @@ class ProjectController extends Controller {
      */
     public function actionSearch()
     {
-        $model        = new SearchForm();
-        $projects     = array();
+        $model = new SearchForm();
+        $projects = array();
         $projectStats = array();
 
-        if (isset($_POST["SearchForm"]))
-        {
+        if (isset($_POST["SearchForm"])) {
             $model->attributes = $_POST["SearchForm"];
 
-            if ($model->validate())
-            {
+            if ($model->validate()) {
                 $criteria = new CDbCriteria();
-                $criteria->order    = "t.deadline ASC, t.name ASC";
+                $criteria->order = "t.deadline ASC, t.name ASC";
                 $criteria->together = true;
 
-                if (User::checkRole(User::ROLE_CLIENT))
-                {
+                if (User::checkRole(User::ROLE_CLIENT)) {
                     $user = User::model()->findByPk(Yii::app()->user->id);
-                    $criteria->addColumnCondition(array( "client_id" => $user->client_id ));
+                    $criteria->addColumnCondition(array("client_id" => $user->client_id));
                 }
 
                 $searchCriteria = new CDbCriteria();
@@ -4016,8 +4087,8 @@ class ProjectController extends Controller {
                     $projects = Project::model()->with(array(
                         "projectUsers" => array(
                             "joinType" => "INNER JOIN",
-                            "on"       => "projectUsers.user_id = :user_id",
-                            "params"   => array(
+                            "on" => "projectUsers.user_id = :user_id",
+                            "params" => array(
                                 "user_id" => Yii::app()->user->id,
                             ),
                         ),
@@ -4026,12 +4097,11 @@ class ProjectController extends Controller {
 
                 $projectStats = array();
 
-                foreach ($projects as $project)
-                {
-                    $checkCount    = 0;
+                foreach ($projects as $project) {
+                    $checkCount = 0;
                     $finishedCount = 0;
-                    $lowRiskCount  = 0;
-                    $medRiskCount  = 0;
+                    $lowRiskCount = 0;
+                    $medRiskCount = 0;
                     $highRiskCount = 0;
 
                     $targets = Target::model()->with(array(
@@ -4044,8 +4114,7 @@ class ProjectController extends Controller {
                         "project_id" => $project->id
                     ));
 
-                    foreach ($targets as $target)
-                    {
+                    foreach ($targets as $target) {
                         if ($target->checkCount)
                             $checkCount += $target->checkCount;
 
@@ -4063,37 +4132,36 @@ class ProjectController extends Controller {
                     }
 
                     $projectStats[$project->id] = array(
-                        "checkCount"    => $checkCount,
+                        "checkCount" => $checkCount,
                         "finishedCount" => $finishedCount,
-                        "lowRiskCount"  => $lowRiskCount,
-                        "medRiskCount"  => $medRiskCount,
+                        "lowRiskCount" => $lowRiskCount,
+                        "medRiskCount" => $medRiskCount,
                         "highRiskCount" => $highRiskCount
                     );
                 }
-            }
-            else
+            } else
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
         }
 
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
         $this->breadcrumbs[] = array(Yii::t("app", "Search"), "");
 
-		// display the page
+        // display the page
         $this->pageTitle = Yii::t("app", "Search");
-		$this->render("search", array(
-            "model"    => $model,
+        $this->render("search", array(
+            "model" => $model,
             "projects" => $projects,
-            "stats"    => $projectStats,
+            "stats" => $projectStats,
         ));
     }
 
     /**
      * Display a list of users.
      */
-	public function actionUsers($id, $page=1)
-	{
-        $id   = (int) $id;
-        $page = (int) $page;
+    public function actionUsers($id, $page = 1)
+    {
+        $id = (int)$id;
+        $page = (int)$page;
 
         $project = Project::model()->findByPk($id);
 
@@ -4104,9 +4172,9 @@ class ProjectController extends Controller {
             throw new CHttpException(404, Yii::t('app', 'Page not found.'));
 
         $criteria = new CDbCriteria();
-        $criteria->limit  = $this->entriesPerPage;
+        $criteria->limit = $this->entriesPerPage;
         $criteria->offset = ($page - 1) * $this->entriesPerPage;
-        $criteria->order  = 'admin DESC, role DESC, name ASC';
+        $criteria->order = 'admin DESC, role DESC, name ASC';
         $criteria->addColumnCondition(array(
             'project_id' => $project->id
         ));
@@ -4117,23 +4185,24 @@ class ProjectController extends Controller {
         $paginator = new Paginator($userCount, $page);
 
         $this->breadcrumbs[] = array(Yii::t('app', 'Projects'), $this->createUrl('project/index'));
-        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array( 'id' => $project->id )));
+        $this->breadcrumbs[] = array($project->name, $this->createUrl('project/view', array('id' => $project->id)));
         $this->breadcrumbs[] = array(Yii::t('app', 'Users'), '');
 
         // display the page
         $this->pageTitle = $project->name;
-		$this->render('user/index', array(
+        $this->render('user/index', array(
             'project' => $project,
-            'users'   => $users,
-            'p'       => $paginator,
+            'users' => $users,
+            'p' => $paginator,
         ));
-	}
+    }
 
     /**
      * Project user edit page.
      */
-	public function actionEditUser($id, $user=0) {
-        $id = (int) $id;
+    public function actionEditUser($id, $user = 0)
+    {
+        $id = (int)$id;
         $project = Project::model()->findByPk($id);
 
         if (!$project) {
@@ -4156,7 +4225,7 @@ class ProjectController extends Controller {
             $newRecord = true;
         }
 
-		$form = new ProjectUserEditForm(
+        $form = new ProjectUserEditForm(
             $newRecord ? ProjectUserEditForm::NEW_SCENARIO : ProjectUserEditForm::SAVE_SCENARIO,
             $project->id
         );
@@ -4171,12 +4240,12 @@ class ProjectController extends Controller {
             $form->hoursSpent = 0.0;
         }
 
-		// collect user input data
-		if (isset($_POST["ProjectUserEditForm"])) {
-			$form->attributes = $_POST["ProjectUserEditForm"];
+        // collect user input data
+        if (isset($_POST["ProjectUserEditForm"])) {
+            $form->attributes = $_POST["ProjectUserEditForm"];
             $form->admin = isset($_POST["ProjectUserEditForm"]["admin"]);
 
-			if ($form->validate()) {
+            if ($form->validate()) {
                 $checkUser = User::model()->findByPk($form->userId);
 
                 if ($checkUser->role == User::ROLE_ADMIN) {
@@ -4197,7 +4266,7 @@ class ProjectController extends Controller {
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
-		}
+        }
 
         // find users
         $addedUsers = ProjectUser::model()->findAllByAttributes(array(
@@ -4229,15 +4298,15 @@ class ProjectController extends Controller {
         $this->breadcrumbs[] = array(Yii::t("app", "Users"), $this->createUrl("project/users", array("id" => $project->id)));
         $this->breadcrumbs[] = array($title, "");
 
-		// display the page
+        // display the page
         $this->pageTitle = $title;
-		$this->render("user/edit", array(
+        $this->render("user/edit", array(
             "form" => $form,
             "project" => $project,
             "user" => $user,
             "users" => $users,
         ));
-	}
+    }
 
     /**
      * Control user function.
@@ -4246,9 +4315,8 @@ class ProjectController extends Controller {
     {
         $response = new AjaxResponse();
 
-        try
-        {
-            $id = (int) $id;
+        try {
+            $id = (int)$id;
 
             $project = Project::model()->findByPk($id);
 
@@ -4258,12 +4326,10 @@ class ProjectController extends Controller {
             $model = new EntryControlForm();
             $model->attributes = $_POST['EntryControlForm'];
 
-            if (!$model->validate())
-            {
+            if (!$model->validate()) {
                 $errorText = '';
 
-                foreach ($model->getErrors() as $error)
-                {
+                foreach ($model->getErrors() as $error) {
                     $errorText = $error[0];
                     break;
                 }
@@ -4273,14 +4339,13 @@ class ProjectController extends Controller {
 
             $user = ProjectUser::model()->findByAttributes(array(
                 'project_id' => $project->id,
-                'user_id'    => $model->id
+                'user_id' => $model->id
             ));
 
             if ($user === null)
                 throw new CHttpException(404, Yii::t('app', 'User not found.'));
 
-            switch ($model->operation)
-            {
+            switch ($model->operation) {
                 case 'delete':
                     $user->delete();
                     break;
@@ -4289,9 +4354,7 @@ class ProjectController extends Controller {
                     throw new CHttpException(403, Yii::t('app', 'Unknown operation.'));
                     break;
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
 
@@ -4301,14 +4364,15 @@ class ProjectController extends Controller {
     /**
      * Upload custom attachment function.
      */
-    function actionUploadCustomAttachment($id, $target, $category, $check) {
+    function actionUploadCustomAttachment($id, $target, $category, $check)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $target = (int) $target;
-            $category = (int) $category;
-            $check = (int) $check;
+            $id = (int)$id;
+            $target = (int)$target;
+            $category = (int)$category;
+            $check = (int)$check;
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
@@ -4329,7 +4393,7 @@ class ProjectController extends Controller {
             }
 
             $category = TargetCheckCategory::model()->with("category")->findByAttributes(array(
-                "target_id"         => $target->id,
+                "target_id" => $target->id,
                 "check_category_id" => $category
             ));
 
@@ -4394,7 +4458,8 @@ class ProjectController extends Controller {
     /**
      * Get custom attachment.
      */
-    public function actionCustomAttachment($path) {
+    public function actionCustomAttachment($path)
+    {
         $attachment = TargetCustomCheckAttachment::model()->with(array(
             "targetCustomCheck" => array(
                 "with" => array(
@@ -4442,7 +4507,8 @@ class ProjectController extends Controller {
     /**
      * Control custom attachment.
      */
-    public function actionControlCustomAttachment() {
+    public function actionControlCustomAttachment()
+    {
         $response = new AjaxResponse();
 
         try {
@@ -4501,8 +4567,9 @@ class ProjectController extends Controller {
     /**
      * Project track time page.
      */
-	public function actionTrackTime($id) {
-        $id = (int) $id;
+    public function actionTrackTime($id)
+    {
+        $id = (int)$id;
         $project = Project::model()->findByPk($id);
 
         if (!$project) {
@@ -4513,7 +4580,7 @@ class ProjectController extends Controller {
             throw new CHttpException(403, Yii::t("app", "Access denied."));
         }
 
-		$form = new ProjectTimeForm();
+        $form = new ProjectTimeForm();
         $user = ProjectUser::model()->with("user")->findByAttributes(array(
             "user_id" => Yii::app()->user->id,
             "project_id" => $project->id,
@@ -4523,11 +4590,11 @@ class ProjectController extends Controller {
             throw new CHttpException(403, Yii::t("app", "User should be added to the project to be able to track time."));
         }
 
-		// collect user input data
-		if (isset($_POST["ProjectTimeForm"])) {
-			$form->attributes = $_POST["ProjectTimeForm"];
+        // collect user input data
+        if (isset($_POST["ProjectTimeForm"])) {
+            $form->attributes = $_POST["ProjectTimeForm"];
 
-			if ($form->validate()) {
+            if ($form->validate()) {
                 $record = new ProjectTime();
                 $record->user_id = $user->user->id;
                 $record->project_id = $project->id;
@@ -4546,31 +4613,32 @@ class ProjectController extends Controller {
             } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             }
-		}
+        }
 
         $this->breadcrumbs[] = array(Yii::t("app", "Projects"), $this->createUrl("project/index"));
         $this->breadcrumbs[] = array($project->name, $this->createUrl("project/view", array("id" => $project->id)));
         $this->breadcrumbs[] = array(Yii::t("app", "Time"), $this->createUrl("project/time", array("id" => $project->id)));
         $this->breadcrumbs[] = array(Yii::t("app", "Track"), "");
 
-		// display the page
+        // display the page
         $this->pageTitle = Yii::t("app", "Track Time");
-		$this->render("time/track", array(
+        $this->render("time/track", array(
             "form" => $form,
             "project" => $project,
             "user" => $user,
         ));
-	}
+    }
 
     /**
      * Control target category function.
      */
-    public function actionControlCategory($id, $target) {
+    public function actionControlCategory($id, $target)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $target = (int) $target;
+            $id = (int)$id;
+            $target = (int)$target;
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
@@ -4613,7 +4681,7 @@ class ProjectController extends Controller {
                 throw new CHttpException(404, Yii::t("app", "Category not found."));
             }
 
-            switch ($model->operation)             {
+            switch ($model->operation) {
                 case "delete":
                     $controls = CheckControl::model()->findAllByAttributes(array(
                         "check_category_id" => $category->check_category_id
@@ -4657,11 +4725,12 @@ class ProjectController extends Controller {
      * Action search checks for binding the issue
      * @param $id
      */
-    public function actionSearchChecks($id) {
+    public function actionSearchChecks($id)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
+            $id = (int)$id;
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
@@ -4699,6 +4768,36 @@ class ProjectController extends Controller {
                 $exclude[] = $issue->check->id;
             }
 
+            $ctm = new CategoryManager();
+            $data = [];
+
+            /** @var CheckCategoryL10n[] $categories */
+            $categories = $ctm->filter($form->query, $language->id);
+
+            foreach ($categories as $categoryL10) {
+                $controls = $categoryL10->category->controls;
+                $checksData = [];
+
+                foreach ($controls as $control) {
+                    $checks = $control->checks;
+
+                    foreach ($checks as $check) {
+                        if (in_array($check->id, $exclude)) {
+                            continue;
+                        }
+
+                        $checksData[] = $check->serialize($language->id);
+                        $exclude[] = $check->id;
+                    }
+                }
+
+                $item["checks"] = $checksData;
+                $item["name"] = $categoryL10->name;
+                $data[] = $item;
+            }
+
+            $response->addData("categories", $data);
+
             $checks = $cm->filter($form->query, $language->id, $exclude);
             $data = [];
 
@@ -4720,11 +4819,12 @@ class ProjectController extends Controller {
      * @throws CHttpException
      * @throws Exception
      */
-    public function actionAddIssue($id) {
+    public function actionAddIssue($id)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
+            $id = (int)$id;
 
             /** @var Project $project */
             $project = Project::model()->findByPk($id);
@@ -4785,9 +4885,10 @@ class ProjectController extends Controller {
      * @param int $page
      * @throws CHttpException
      */
-    public function actionIssues($id, $page=1) {
-        $page = (int) $page;
-        $id = (int) $id;
+    public function actionIssues($id, $page = 1)
+    {
+        $page = (int)$page;
+        $id = (int)$id;
 
         if ($page < 1) {
             throw new CHttpException(404, Yii::t("app", "Page not found."));
@@ -4854,9 +4955,10 @@ class ProjectController extends Controller {
      * @param $issue
      * @throws CHttpException
      */
-    public function actionIssue($id, $issue) {
-        $id = (int) $id;
-        $issue = (int) $issue;
+    public function actionIssue($id, $issue)
+    {
+        $id = (int)$id;
+        $issue = (int)$issue;
 
         $project = Project::model()->findByPk($id);
 
@@ -4922,7 +5024,8 @@ class ProjectController extends Controller {
     /**
      * Control issue
      */
-    public function actionControlIssue() {
+    public function actionControlIssue()
+    {
         $response = new AjaxResponse();
 
         try {
@@ -4969,16 +5072,17 @@ class ProjectController extends Controller {
      * @param $id
      * @param $issue
      */
-    public function actionSearchTargets($id, $issue) {
+    public function actionSearchTargets($id, $issue)
+    {
         $response = new AjaxResponse();
 
         try {
-            $id = (int) $id;
-            $issue = (int) $issue;
+            $id = (int)$id;
+            $issue = (int)$issue;
 
             $project = Project::model()->findByPk($id);
 
-            if (!$project){
+            if (!$project) {
                 throw new CHttpException(404, Yii::t("app", "Project not found."));
             }
 
@@ -5039,10 +5143,11 @@ class ProjectController extends Controller {
      * @param $evidence
      * @throws CHttpException
      */
-    public function actionEvidence($id, $issue, $evidence) {
-        $id = (int) $id;
-        $issue = (int) $issue;
-        $evidence = (int) $evidence;
+    public function actionEvidence($id, $issue, $evidence)
+    {
+        $id = (int)$id;
+        $issue = (int)$issue;
+        $evidence = (int)$evidence;
 
         $language = Language::model()->findByAttributes([
             "code" => Yii::app()->language
@@ -5113,13 +5218,14 @@ class ProjectController extends Controller {
      * @throws CHttpException
      * @throws Exception
      */
-    public function actionAddEvidence($id, $issue) {
+    public function actionAddEvidence($id, $issue)
+    {
         $response = new AjaxResponse();
         $tm = new TargetManager();
 
         try {
-            $id = (int) $id;
-            $issue = (int) $issue;
+            $id = (int)$id;
+            $issue = (int)$issue;
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
@@ -5181,7 +5287,8 @@ class ProjectController extends Controller {
     /**
      * Control evidence
      */
-    public function actionControlEvidence() {
+    public function actionControlEvidence()
+    {
         $response = new AjaxResponse();
 
         try {

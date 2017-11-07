@@ -2,7 +2,6 @@
 
 /**
  * This is the model class for table "checks".
- *
  * The followings are the available columns in table 'checks':
  * @property integer $id
  * @property integer $check_control_id
@@ -22,6 +21,7 @@
  * @property CheckL10n[] $l10n
  * @property CheckScript[] $scripts
  * @property CheckField[] $fields
+ * @property CheckControl control
  */
 class Check extends ActiveRecord {
     const STATUS_INSTALLED = 1;
@@ -29,6 +29,12 @@ class Check extends ActiveRecord {
 
     // nearest sort order
     public $nearest_sort_order;
+
+    /**
+     * check edit view constants
+     */
+    const VIEW_TABBED = 0;
+    const VIEW_SHARED = 1;
 
 	/**
 	 * Returns the static model of the specified AR class.
@@ -96,7 +102,7 @@ class Check extends ActiveRecord {
             "language_id" => $language->id
         ]);
 
-        if ($translate) {
+        if ($translate && $translate->name) {
             return $translate->name;
         }
 
@@ -124,20 +130,11 @@ class Check extends ActiveRecord {
     /**
      * Get field value
      * @param $field
-     * @param null $languageId
      * @return mixed|null
      * @throws Exception
      */
-    private function _getFieldValue($field, $languageId = null) {
-        $language = Language::model()->find("\"user_default\" OR \"default\"");
-
-        if ($languageId) {
-            $language = Language::model()->findByPk($languageId);
-
-            if (!$language) {
-                throw new Exception(Yii::t("app", "Language not exists."));
-            }
-        }
+    private function _getFieldValue($field) {
+        $language = System::model()->findByPk(1)->language;
 
         $criteria = new CDbCriteria();
         $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";

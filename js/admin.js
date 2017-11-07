@@ -445,13 +445,52 @@ function Admin() {
                         }
 
                         var checks = data.data.checks;
+                        var categories = data.data.categories;
+                        var link;
+
+                        if (!checks) {
+                            checks = [];
+                        }
+
+                        if (!categories) {
+                            categories = [];
+                        }
 
                         list.empty();
                         list.siblings(".no-search-result").hide();
 
-                        if (checks.length) {
-                            var link;
+                        if (categories.length) {
+                            categories.forEach(function (category) {
+                                var categoryName = $("<li>");
 
+                                categoryName.append(
+                                    $("<i class='icon icon-folder-open'>"),
+                                    "&nbsp;",
+                                    $("<a>")
+                                        .attr("href", "#")
+                                        .text(category["name"])
+                                        .click(function () {
+                                            $(this).parent().find("li.category-checks").slideToggle();
+                                        })
+                                );
+
+                                if (category["checks"].length) {
+                                    category["checks"].forEach(function (value, key) {
+                                        link = $("<a>")
+                                            .attr("href", "#")
+                                            .text(value.name)
+                                            .click(function () {
+                                                onChooseEvent(value.id);
+                                            });
+                                        categoryName.append($("<li style='padding-left: 20px' class='category-checks hide'>").append(link))
+                                    });
+                                }
+
+                                list.append(categoryName);
+                            });
+                        }
+
+                        if (checks.length) {
                             $.each(checks, function (key, value) {
                                 link = $("<a>")
                                     .attr("href", "#")
@@ -464,7 +503,9 @@ function Admin() {
                                     $("<li>").append(link)
                                 )
                             });
-                        } else {
+                        }
+
+                        if (!checks.length && !categories.length) {
                             list.siblings(".no-search-result").show();
                         }
                     },

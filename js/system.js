@@ -11,7 +11,6 @@ function System() {
         this.csrf = null;
         this.ajaxTimeout = 60000;
         this.messageTimeout = 5000;
-        this.l10nMessages = {};
         this.constants = {};
 
         $("select.show-hide-toggle").change(function () {
@@ -151,7 +150,7 @@ function System() {
                                 $('tr[data-id=' + id + ']').remove();
                                 _system.addAlert('success', _system.translate('Object deleted.'));
 
-                                if ($('table.table > tbody > tr').length == 1)
+                                if ($('table.table > tbody > tr').first().length == 1)
                                     location.reload();
                             });
 
