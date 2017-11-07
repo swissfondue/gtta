@@ -10,7 +10,6 @@
  * @property NessusMappingVuln $vulns
  */
 class NessusMapping extends ActiveRecord {
-
     // sorting
     const FILTER_SORT_ISSUE = 1;
     const FILTER_SORT_RATING = 2;
@@ -19,6 +18,7 @@ class NessusMapping extends ActiveRecord {
     // sorting direction
     const FILTER_SORT_ASCENDING = 1;
     const FILTER_SORT_DESCENDING = 2;
+
     /**
      * Returns the static model of the specified AR class.
      * @param string $className active record class name.

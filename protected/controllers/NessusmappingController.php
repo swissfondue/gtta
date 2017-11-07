@@ -408,10 +408,10 @@ class NessusmappingController extends Controller {
             $criteria = new CDbCriteria();
             $criteria->addCondition("nessus_mapping_id = :mapping_id");
             $criteria->params = ["mapping_id" => $form->mappingId];
-            $criteria->addInCondition('nessus_host', $form->hosts);
-            $criteria->addInCondition('nessus_rating', $form->ratings);
-            $criteria->join = 'LEFT JOIN checks ON checks.id = check_id';
-            $criteria->order = $sortBy." ".$sortDirection;
+            $criteria->addInCondition("nessus_host", $form->hosts);
+            $criteria->addInCondition("nessus_rating", $form->ratings);
+            $criteria->join = "LEFT JOIN checks ON checks.id = check_id";
+            $criteria->order = $sortBy . " " . $sortDirection;
             $vulns = NessusMappingVuln::model()->findAll($criteria);
 
             $ratings = TargetCheck::getValidRatings();

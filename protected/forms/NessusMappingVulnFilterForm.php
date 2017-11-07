@@ -39,7 +39,8 @@ class NessusMappingVulnFilterForm extends FormModel  {
      */
     public function rules() {
         return [
-            [["sortBy", "sortDirection"],'safe'],
+            ["sortDirection", "in", "range" => [NessusMapping::FILTER_SORT_ASCENDING, NessusMapping::FILTER_SORT_DESCENDING], "allowEmpty" => false],
+            ["sortBy", "in", "range" => [NessusMapping::FILTER_SORT_CHECK, NessusMapping::FILTER_SORT_RATING, NessusMapping::FILTER_SORT_ISSUE], "allowEmpty" => false],
             ["mappingId", "required"],
             ["mappingId", "numerical", "integerOnly" => true],
             ["mappingId", "checkMapping"],
@@ -50,8 +51,11 @@ class NessusMappingVulnFilterForm extends FormModel  {
 
     /**
      * Validate hosts
+     *
      * @param $attribute
      * @param $params
+     *
+     * @return bool
      */
     public function checkHosts($attribute, $params) {
         try {
