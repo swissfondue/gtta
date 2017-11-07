@@ -132,6 +132,8 @@ class NessusReportManager {
                 "plugin_id" => (int)$attributes["pluginID"],
                 "plugin_name" => (string)$attributes["pluginName"],
                 "plugin_output" => (string)$item->plugin_output,
+                "port" =>  (int)$attributes["port"],
+                "protocol" => (string)$attributes["protocol"],
                 "svc_name" => (string)$attributes["svc_name"],
                 "severity" => $cvss,
                 "pluginFamily" => (string)$attributes["pluginFamily"],
