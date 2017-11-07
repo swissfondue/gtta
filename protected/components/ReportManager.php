@@ -358,6 +358,8 @@ class ReportManager {
             "referenceCode" => $check->reference_code,
             "referenceCodeUrl" => $check->reference_url,
             "info" => $tc->rating == TargetCheck::RATING_INFO,
+            "control" => $check->control->name,
+            "category" => $check->control->category->name
         );
 
         if ($tc->solution) {
@@ -702,6 +704,8 @@ class ReportManager {
                             "referenceCodeUrl" => null,
                             "info" => $check->rating == TargetCheck::RATING_INFO,
                             "separate" => in_array($category->check_category_id, $templateCategoryIds),
+                            "control" => $control->name,
+                            "category" => $control->category->name
                         );
 
                         if ($check->solution) {
@@ -789,6 +793,8 @@ class ReportManager {
                                 "ratingValue" => $checkData["ratingValue"],
                                 "custom" => true,
                                 "targetCheckId" => $uniqueId ? $checkData["targetCheckId"]: null,
+                                "control" => $checkData["control"],
+                                "category" => $checkData["category"],
                             );
                         }
 
@@ -918,6 +924,8 @@ class ReportManager {
                                     "result" => $result,
                                     "ratingValue" => $checkData["ratingValue"],
                                     "targetCheckId" => $uniqueId ? $checkData["targetCheckId"]: null,
+                                    "control" => $checkData["control"],
+                                    "category" => $checkData["category"],
                                 );
                             }
 

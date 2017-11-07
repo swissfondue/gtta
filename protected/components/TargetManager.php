@@ -148,7 +148,16 @@ class TargetManager {
      */
     public static function reindexTargetChecks(Target $target) {
         $admin = $target->project->admin ? $target->project->admin : User::getAdmin();
-        $language = Language::model()->findByAttributes(array("default" => true));
+        $language = Language::model()->findByAttributes(array(
+            'code' => Yii::app()->language
+        ));
+
+        if (!$language) {
+            $language = Language::model()->findByAttributes(array(
+                "default" => true
+            ));
+        }
+
         $tcm = new TargetCheckManager();
 
         switch ($target->check_source_type) {

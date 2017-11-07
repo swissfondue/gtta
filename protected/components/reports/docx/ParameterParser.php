@@ -40,7 +40,7 @@ class ParameterParser {
             $param = mb_substr($param, 1);
         }
 
-        if (preg_match('/^[a-z0-9]+$/', $param)) {
+        if (preg_match('/^[a-zA-Z0-9]+$/', $param)) {
             $this->type = self::TYPE_SCALAR;
             $this->value = $param;
         } else if (preg_match('/^d+\.\d+\.\.\d+\.\d+$/', $param) || preg_match('/^\d+\.\.\d+$/', $param)) {

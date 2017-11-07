@@ -274,6 +274,7 @@ class CheckController extends Controller
             "model" => $model,
             "category" => $category,
             "languages" => $languages,
+            "view" => Check::VIEW_SHARED
         ));
 	}
 
@@ -532,7 +533,8 @@ class CheckController extends Controller
             "category" => $category,
             "control" => $control,
             "languages" => $languages,
-            "categories" => $categories
+            "categories" => $categories,
+            "view" => Check::VIEW_SHARED
         ));
 	}
 
@@ -1019,6 +1021,7 @@ class CheckController extends Controller
             'categories' => $categories,
             "fields" => $fields,
             'efforts' => array(2, 5, 20, 40, 60, 120),
+            'view' => Check::VIEW_SHARED
         ));
 	}
 
@@ -1684,6 +1687,7 @@ class CheckController extends Controller
             'check'     => $check,
             'result'    => $result,
             'languages' => $languages,
+            'view' => Check::VIEW_SHARED
         ));
 	}
 
@@ -2027,6 +2031,7 @@ class CheckController extends Controller
             'check'     => $check,
             'solution'  => $solution,
             'languages' => $languages,
+            'view' => Check::VIEW_SHARED
         ));
 	}
 
