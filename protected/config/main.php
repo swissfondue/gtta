@@ -66,9 +66,13 @@ return [
 		"log" => [
 			"class"  => "CLogRouter",
 			"routes" => [
+                [
+                    "class" => "CWebLogRoute",
+                    "enabled" => YII_DEBUG,
+                ],
 				[
 					"class" => "CFileLogRoute",
-					"levels" => "error, warning",
+					"levels" => "error",
 				],
 			],
 		],

@@ -1564,3 +1564,12 @@ ul.target-list li {
     overflow-y: scroll;
     width:100%;
 }
+
+.wysiwyg-shared {
+    width: 270px !important;
+    height: 200px !important;
+}
+
+.span6-shared {
+    float: left !important;
+}

@@ -21,7 +21,7 @@
 
 <div class="container">
     <div class="row">
-        <div class="span8">
+        <div class="span12">
             <?php if (count($results) > 0): ?>
                 <table class="table result-list">
                     <tbody>
@@ -32,7 +32,15 @@
                         <?php foreach ($results as $result): ?>
                             <tr data-id="<?php echo $result->id; ?>" data-control-url="<?php echo $this->createUrl('check/controlresult'); ?>">
                                 <td class="result">
-                                    <a href="<?php echo $this->createUrl('check/editresult', array( 'id' => $category->id, 'control' => $control->id, 'check' => $check->id, 'result' => $result->id )); ?>"><?php echo CHtml::encode($result->localizedTitle); ?></a>
+                                    <?=
+                                        CHtml::ajaxLink(
+                                            CHtml::encode($result->localizedTitle),
+                                            CController::createUrl("check/editresult", ["id" => $category->id, "control" => $control->id, "check" => $check->id, "result" => $result->id]),
+                                            ["update" => "#simple-div-" . $result->id],
+                                            ["id" => "simple-link-" . $result->id, "class" => "result-link"]
+                                        );
+                                    ?>
+                                    <div class="result-form" id="simple-div-<?php echo $result->id;?>"></div>
                                 </td>
                                 <td class="actions">
                                     <a href="#del" title="<?php echo Yii::t('app', 'Delete'); ?>" onclick="system.control.del(<?php echo $result->id; ?>);"><i class="icon icon-remove"></i></a>
@@ -49,3 +57,17 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function () {
+        /**
+         * Show result-form
+         *
+         */
+        $(".result-link").click(function (event) {
+            var elem = $(this).next(".result-form");
+            elem.show();
+            $((".result-form")).not(elem).empty();
+        });
+    });
+</script>

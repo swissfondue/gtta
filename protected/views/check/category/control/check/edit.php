@@ -44,10 +44,11 @@
             <?php foreach ($languages as $language): ?>
                 <div class="language-tab <?= (($view == Check::VIEW_SHARED) ? "span6" : ("tab-pane" . $language->default ? " active" : "")) ?>"  id="<?php echo CHtml::encode($language->code); ?>" data-language-id="<?= $language->id ?>">
                     <?php if ($view == Check::VIEW_SHARED): ?>
-                        <a>
+                        <div class="controls">
                             <img src="<?php echo Yii::app()->baseUrl; ?>/images/languages/<?php echo CHtml::encode($language->code); ?>.png" alt="<?php echo CHtml::encode($language->name); ?>">
                             <?php echo CHtml::encode($language->name); ?>
-                        </a>
+                        </div>
+                        <br>
                     <?php endif; ?>
 
                     <div class="control-group <?php if ($model->getError('name')) echo 'error'; ?>">
