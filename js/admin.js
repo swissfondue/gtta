@@ -3046,6 +3046,8 @@ function Admin() {
             filters: {
                 hosts: ".filter.nessus-hosts .nessus-host input:checked",
                 ratings: ".filter.nessus-ratings .nessus-rating input:checked",
+                sortBy: "select[name=sortBy] option:selected",
+                sortDirection: "select[name=sortDirection] option:selected",
                 container: ".nessus-mapping-filters"
             }
         };
@@ -3163,6 +3165,8 @@ function Admin() {
         this.getFilterData = function (mappingId) {
             var hosts = $(_nessusMapping.selectors.filters.hosts);
             var ratings = $(_nessusMapping.selectors.filters.ratings);
+            var sortBy = $(_nessusMapping.selectors.filters.sortBy).val();
+            var sortDirection = $(_nessusMapping.selectors.filters.sortDirection).val();
 
             var hostIds = [];
             var ratingIds = [];
@@ -3179,7 +3183,9 @@ function Admin() {
                 "YII_CSRF_TOKEN": system.csrf,
                 "NessusMappingVulnFilterForm[mappingId]": mappingId,
                 "NessusMappingVulnFilterForm[hosts]": JSON.stringify(hostIds),
-                "NessusMappingVulnFilterForm[ratings]": JSON.stringify(ratingIds)
+                "NessusMappingVulnFilterForm[ratings]": JSON.stringify(ratingIds),
+                "NessusMappingVulnFilterForm[sortBy]": sortBy,
+                "NessusMappingVulnFilterForm[sortDirection]": sortDirection
             };
         };
 
