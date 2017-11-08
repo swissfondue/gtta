@@ -33,7 +33,14 @@
                         <?php foreach ($solutions as $solution): ?>
                             <tr data-id="<?php echo $solution->id; ?>" data-control-url="<?php echo $this->createUrl('check/controlsolution'); ?>">
                                 <td class="solution">
-                                    <?php echo CHtml::ajaxLink(CHtml::encode($solution->localizedTitle), CController::createUrl("check/editsolution", ["id" => $category->id, "control" => $control->id, "check" => $check->id, "solution" => $solution->id]), ["update" => "#simple-div-" . $solution->id], ["id" => "simple-link-" . uniqid(), "class" => "solution-link"]); ?>
+                                    <?=
+                                        CHtml::ajaxLink(
+                                            CHtml::encode($solution->localizedTitle),
+                                            CController::createUrl("check/editsolution", ["id" => $category->id, "control" => $control->id, "check" => $check->id, "solution" => $solution->id]),
+                                            ["update" => "#simple-div-" . $solution->id],
+                                            ["id" => "simple-link-" . uniqid(), "class" => "solution-link"]
+                                        );
+                                    ?>
                                     <div class="solution-form" id="simple-div-<?php echo $solution->id;?>"></div>
                                 </td>
                                 <td class="actions">

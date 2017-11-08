@@ -1532,8 +1532,9 @@ class CheckController extends Controller
                 "check_id" => $check->id
             ));
 
-            if (!$result)
+            if (!$result) {
                 throw new CHttpException(404, Yii::t("app", "Result not found."));
+            }
         } else {
             $result = new CheckResult();
             $newRecord = true;
@@ -1565,8 +1566,9 @@ class CheckController extends Controller
 
             $maxOrder = CheckResult::model()->find($criteria);
 
-            if ($maxOrder && $maxOrder->max_sort_order !== null)
+            if ($maxOrder && $maxOrder->max_sort_order !== null) {
                 $model->sortOrder = $maxOrder->max_sort_order + 1;
+            }
         }
 
         // collect user input data
@@ -1611,7 +1613,7 @@ class CheckController extends Controller
                 $result->refresh();
 
                 if ($newRecord) {
-                    $this->redirect(array("check/editresult", "id" => $category->id, "control" => $control->id, "check" => $check->id, "result" => $result->id));
+                    $this->redirect(array("check/results", "id" => $category->id, "control" => $control->id, "check" => $check->id));
                 }
 
                 // refresh result after saving
@@ -1625,8 +1627,9 @@ class CheckController extends Controller
                     "id" => $result->id,
                     "check_id" => $check->id
                 ));
-            } else
+            } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
         }
 
         $this->breadcrumbs[] = array(Yii::t("app", "Checks"), $this->createUrl("check/index"));
@@ -1635,34 +1638,29 @@ class CheckController extends Controller
         $this->breadcrumbs[] = array($check->localizedName, $this->createUrl("check/editcheck", array("id" => $category->id, "control" => $control->id, "check" => $check->id)));
         $this->breadcrumbs[] = array(Yii::t("app", "Results"), $this->createUrl("check/results", array("id" => $category->id, "control" => $control->id, "check" => $check->id)));
 
-        if ($newRecord)
+        if ($newRecord) {
             $this->breadcrumbs[] = array(Yii::t("app", "New Result"), "");
-        else
+        } else {
             $this->breadcrumbs[] = array($result->localizedTitle, "");
+        }
 
         // display the page
         $this->pageTitle = $newRecord ? Yii::t("app", "New Result") : $result->localizedTitle;
+        $params = [
+            "model" => $model,
+            "category" => $category,
+            "control" => $control,
+            "check" => $check,
+            "result" => $result,
+            "languages" => $languages,
+            "view" => Check::VIEW_SHARED,
+            "newRecord" => $newRecord,
+        ];
 
         if ($newRecord) {
-            $this->render("category/control/check/result/edit", array(
-                "model" => $model,
-                "category" => $category,
-                "control" => $control,
-                "check" => $check,
-                "result" => $result,
-                "languages" => $languages,
-                "view" => Check::VIEW_SHARED
-            ));
+            $this->render("category/control/check/result/edit", $params);
         } else {
-            $this->renderPartial("category/control/check/result/edit", array(
-                "model" => $model,
-                "category" => $category,
-                "control" => $control,
-                "check" => $check,
-                "result" => $result,
-                "languages" => $languages,
-                "view" => Check::VIEW_SHARED
-            ), false, true);
+            $this->renderPartial("category/control/check/result/edit", $params, false, true);
         }
     }
 
@@ -1951,7 +1949,7 @@ class CheckController extends Controller
                 $solution->refresh();
 
                 if ($newRecord) {
-                    $this->redirect(array("check/editsolution", "id" => $category->id, "control" => $control->id, "check" => $check->id, "solution" => $solution->id));
+                    $this->redirect(array("check/solutions", "id" => $category->id, "control" => $control->id, "check" => $check->id));
                 }
 
                 $solution = CheckSolution::model()->with(array(
@@ -1964,8 +1962,9 @@ class CheckController extends Controller
                     "id" => $solution->id,
                     "check_id" => $check->id
                 ));
-            } else
+            } else {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
+            }
         }
 
         $this->breadcrumbs[] = array(Yii::t("app", "Checks"), $this->createUrl("check/index"));
@@ -1974,34 +1973,30 @@ class CheckController extends Controller
         $this->breadcrumbs[] = array($check->localizedName, $this->createUrl("check/editcheck", array("id" => $category->id, "control" => $control->id, "check" => $check->id)));
         $this->breadcrumbs[] = array(Yii::t("app", "Solutions"), $this->createUrl("check/solutions", array("id" => $category->id, "control" => $control->id, "check" => $check->id)));
 
-        if ($newRecord)
+        if ($newRecord) {
             $this->breadcrumbs[] = array(Yii::t("app", "New Solution"), "");
-        else
+        } else {
             $this->breadcrumbs[] = array($solution->localizedTitle, "");
+        }
 
         // display the page
         $this->pageTitle = $newRecord ? Yii::t("app", "New Solution") : $solution->localizedTitle;
 
+        $params = [
+            "model" => $model,
+            "category" => $category,
+            "control" => $control,
+            "check" => $check,
+            "solution" => $solution,
+            "languages" => $languages,
+            "view" => Check::VIEW_SHARED,
+            "newRecord" => $newRecord,
+        ];
+
         if ($newRecord) {
-            $this->render("category/control/check/solution/edit", array(
-                "model" => $model,
-                "category" => $category,
-                "control" => $control,
-                "check" => $check,
-                "solution" => $solution,
-                "languages" => $languages,
-                "view" => Check::VIEW_SHARED
-            ));
+            $this->render("category/control/check/solution/edit", $params);
         } else {
-            $this->renderPartial("category/control/check/solution/edit", array(
-                "model" => $model,
-                "category" => $category,
-                "control" => $control,
-                "check" => $check,
-                "solution" => $solution,
-                "languages" => $languages,
-                "view" => Check::VIEW_SHARED
-            ), false, false);
+            $this->renderPartial("category/control/check/solution/edit", $params, false, false);
         }
     }
 

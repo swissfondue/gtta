@@ -98,12 +98,46 @@ function User()
         this.hideOnSubmitCheckResultOrSolutionBlock = function (id) {
             $("#form").on("submit", function (e) {
                 e.preventDefault();
+
+                var i;
+                var data = [];
+                data.push({name : "YII_CSRF_TOKEN", value : system.csrf});
+
+                var texts = $('input[type="text"][name^="Check"]', $(this)).map(
+                    function () {
+                        return {
+                            name: $(this).attr('name'),
+                            value: $(this).val()
+                        };
+                    }
+                ).get();
+
+                var textareas = $('textarea[name^="Check"]', $(this)).map(
+                    function () {
+                        var editor = user.check.getEditor($(this).attr("id"));
+                        var data = editor ? editor.getData() : $(this).val();
+
+                        return {
+                            name: $(this).attr("name"),
+                            value: data
+                        };
+                    }
+                ).get();
+
+                for (i = 0; i < textareas.length; i++) {
+                    data.push(textareas[i]);
+                }
+
+                for (i = 0; i < texts.length; i++) {
+                    data.push(texts[i]);
+                }
+
                 $.ajax({
                     url: $(this).attr("action"),
                     type: "POST",
-                    data: $(this).serialize(),
+                    data: data,
                     success: function (data) {
-                        $("#simple-div-" + id).hide();
+                        $("#simple-div-" + id).html(data);
                     }
                 });
             });
@@ -284,8 +318,30 @@ function User()
                         $('.loader-image').show();
                     }
                 });
-
             }
+        };
+
+        /**
+         * Enable result WYSIWYG
+         */
+        this.enableResultWysiwyg = function () {
+            $.each($(".wysiwyg"), function (key, value) {
+                user.check.destroyEditor($(value).attr("id"));
+            });
+
+            // Enabling ckeditor for wysiwyg elements, which contain HTML
+            $.each($(".wysiwyg.html_content"), function (key, value) {
+                user.check.enableEditor($(value).attr("id"));
+            });
+        };
+
+        /**
+         * Enable solution WYSIWYG
+         */
+        this.enableSolutionWysiwyg = function () {
+            $(".wysiwyg").each(function () {
+                user.check.enableEditor($(this).attr("id"));
+            });
         };
 
         /**

@@ -32,7 +32,14 @@
                         <?php foreach ($results as $result): ?>
                             <tr data-id="<?php echo $result->id; ?>" data-control-url="<?php echo $this->createUrl('check/controlresult'); ?>">
                                 <td class="result">
-                                    <?php echo CHtml::ajaxLink(CHtml::encode($result->localizedTitle), CController::createUrl("check/editresult", ["id" => $category->id, "control" => $control->id, "check" => $check->id, "result" => $result->id]), ["update" => "#simple-div-" . $result->id], ["id" => "simple-link-" . $result->id, "class" => "result-link"]); ?>
+                                    <?=
+                                        CHtml::ajaxLink(
+                                            CHtml::encode($result->localizedTitle),
+                                            CController::createUrl("check/editresult", ["id" => $category->id, "control" => $control->id, "check" => $check->id, "result" => $result->id]),
+                                            ["update" => "#simple-div-" . $result->id],
+                                            ["id" => "simple-link-" . $result->id, "class" => "result-link"]
+                                        );
+                                    ?>
                                     <div class="result-form" id="simple-div-<?php echo $result->id;?>"></div>
                                 </td>
                                 <td class="actions">

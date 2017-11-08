@@ -22,11 +22,12 @@
                 <div class="<?= (($view == Check::VIEW_SHARED) ? "span6" : ("tab-pane" . $language->default ? " active" : "")) ?> <?= ($view == Check::VIEW_SHARED) ? "span6-shared" : "" ?>"
                      id="<?php echo CHtml::encode($language->code); ?>">
                     <?php if ($view == Check::VIEW_SHARED): ?>
-                        <a>
+                        <div class="controls">
                             <img src="<?php echo Yii::app()->baseUrl; ?>/images/languages/<?php echo CHtml::encode($language->code); ?>.png"
                                  alt="<?php echo CHtml::encode($language->name); ?>">
                             <?php echo CHtml::encode($language->name); ?>
-                        </a>
+                        </div>
+                        <br>
                     <?php endif; ?>
                     <div class="control-group <?php if ($model->getError('title')) echo 'error'; ?>">
                         <label class="control-label"
@@ -45,7 +46,7 @@
                         <label class="control-label"
                                for="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_solution"><?php echo Yii::t('app', 'Solution'); ?></label>
                         <div class="controls">
-                            <textarea class="wysiwyg" style="height:200px;"
+                            <textarea class="wysiwyg <?= ($view == Check::VIEW_SHARED) ? "wysiwyg-shared" : "" ?>" style="height:200px;"
                                       id="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_solution"
                                       name="CheckSolutionEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][solution]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['solution']) : ''; ?></textarea>
                             <?php if ($model->getError('solution')): ?>
@@ -75,20 +76,18 @@
     </fieldset>
 </form>
 <script>
-    /**
-     *Submit form without redirect
-     */
-    $(function () {
-        var solId = <?php echo json_encode($solution->id) ?>;
+    var solId = <?php echo json_encode($solution->id) ?>;
+
+    <?php if (!$newRecord): ?>
         user.check.hideOnSubmitCheckResultOrSolutionBlock(solId);
-    });
+    <?php endif; ?>
 
-    $('#languages-tab a').click(function (e) {
+    $("#languages-tab a").click(function (e) {
         e.preventDefault();
-        $(this).tab('show');
+        $(this).tab("show");
     });
 
-    $(function () {
-        $(".wysiwyg").ckeditor();
+    $(function() {
+        user.check.enableSolutionWysiwyg();
     });
 </script>

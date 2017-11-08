@@ -17,16 +17,18 @@
                 <?php endforeach; ?>
             </ul>
         <?php endif; ?>
+
         <div class=<?= ($view == Check::VIEW_TABBED) ? "tab-content" : "row" ?>>
             <?php foreach ($languages as $language): ?>
                 <div class="<?= (($view == Check::VIEW_SHARED) ? "span6" : ("tab-pane" . $language->default ? " active" : "")) ?>  <?= ($view == Check::VIEW_SHARED) ? "span6-shared" : "" ?>"
                      id="<?php echo CHtml::encode($language->code); ?>">
                     <?php if ($view == Check::VIEW_SHARED): ?>
-                        <a>
+                        <div class="controls">
                             <img src="<?php echo Yii::app()->baseUrl; ?>/images/languages/<?php echo CHtml::encode($language->code); ?>.png"
                                  alt="<?php echo CHtml::encode($language->name); ?>">
                             <?php echo CHtml::encode($language->name); ?>
-                        </a>
+                        </div>
+                        <br>
                     <?php endif; ?>
                     <div class="control-group <?php if ($model->getError('title')) echo 'error'; ?>">
                         <label class="control-label"
@@ -86,34 +88,18 @@
     </fieldset>
 </form>
 <script>
-    /**
-     *Submit form without redirect
-     */
-    $(function () {
-        var resId = <?php echo json_encode($result->id) ?>;
+    var resId = <?php echo json_encode($result->id) ?>;
+
+    <?php if (!$newRecord): ?>
         user.check.hideOnSubmitCheckResultOrSolutionBlock(resId);
-    });
+    <?php endif; ?>
 
-    $('#languages-tab a').click(function (e) {
+    $("#languages-tab a").click(function (e) {
         e.preventDefault();
-        $(this).tab('show');
+        $(this).tab("show");
     });
 
-    /**
-     * Enabling ckeditor for wysiwyg elements, which contain HTML
-     */
-    $.each($('.wysiwyg.html_content'), function (key, value) {
-        user.check.toggleEditor($(value).attr('id'));
-    });
-
-    /**
-     * Binding change event for wysiwyg elements on HTML containing
-     */
-    $('.wysiwyg').bind('input propertychange', function () {
-        if ($(this).val().isHTML()) {
-            if (!user.check.getEditor($(this).attr('id'))) {
-                user.check.enableEditor($(this).attr('id'));
-            }
-        }
+    $(function () {
+        user.check.enableResultWysiwyg();
     });
 </script>
