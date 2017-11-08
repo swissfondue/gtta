@@ -1643,7 +1643,7 @@ class CheckController extends Controller
         // display the page
         $this->pageTitle = $newRecord ? Yii::t("app", "New Result") : $result->localizedTitle;
 
-        if ($newRecord){
+        if ($newRecord) {
             $this->render("category/control/check/result/edit", array(
                 "model" => $model,
                 "category" => $category,
