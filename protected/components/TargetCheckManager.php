@@ -38,6 +38,20 @@ class TargetCheckManager {
                 );
             }
 
+            if (isset($data["port"])) {
+                $targetCheck->setFieldValue(
+                    GlobalCheckField::FIELD_PORT,
+                    $data["port"]
+                );
+            }
+
+            if (isset($data["protocol"])) {
+                $targetCheck->setFieldValue(
+                    GlobalCheckField::FIELD_TRANSPORT_PROTOCOL,
+                    $data["protocol"]
+                );
+            }
+
             if (isset($data["solutions"]) && is_array($data["solutions"])) {
                 $ids = $data["solutions"];
 

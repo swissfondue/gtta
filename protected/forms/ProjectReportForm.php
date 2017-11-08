@@ -79,6 +79,11 @@ class ProjectReportForm extends FormModel {
     public $fields;
 
     /**
+     * @var integer unique Id for Reduced Vulnerability List items
+     */
+    public $uniqueId;
+
+    /**
 	 * @return array validation rules for model attributes.
 	 */
 	public function rules() {
@@ -90,7 +95,7 @@ class ProjectReportForm extends FormModel {
             ["pageMargin", "numerical", "min" => Yii::app()->params["reports"]["minPageMargin"], "max" => Yii::app()->params["reports"]["maxPageMargin"]],
             ["fontFamily", "in", "range" => Yii::app()->params["reports"]["fonts"]],
             ["infoChecksLocation", "in", "range" => [self::INFO_LOCATION_TARGET, self::INFO_LOCATION_SEPARATE_TABLE, self::INFO_LOCATION_SEPARATE_SECTION]],
-            ["riskMatrix, title", "safe"],
+            ["riskMatrix, title, uniqueId", "safe"],
             ["fields", "checkFields"],
             ["riskTemplateId", "checkRiskTemplate"],
 		);

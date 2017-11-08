@@ -343,6 +343,7 @@ class ReportManager {
 
         $checkData = array(
             "id" => $check->id,
+            "targetCheckId" => $tc->id,
             "custom" => false,
             "name" => $check->localizedName,
             "fields" => $checkFields,
@@ -357,6 +358,8 @@ class ReportManager {
             "referenceCode" => $check->reference_code,
             "referenceCodeUrl" => $check->reference_url,
             "info" => $tc->rating == TargetCheck::RATING_INFO,
+            "control" => $check->control->name,
+            "category" => $check->control->category->name
         );
 
         if ($tc->solution) {
@@ -567,7 +570,7 @@ class ReportManager {
      * @param $language
      * @return array
      */
-    public function getProjectReportData($targetIds, $templateCategoryIds, $project, $fields, $language) {
+    public function getProjectReportData($targetIds, $templateCategoryIds, $project, $fields, $language, $uniqueId) {
         $criteria = new CDbCriteria();
         $criteria->addInCondition("id", $targetIds);
         $criteria->addColumnCondition(array("project_id" => $project->id));
@@ -684,6 +687,7 @@ class ReportManager {
                         $checkData = array(
                             "id" => $check->target_id . "-" . $check->check_control_id,
                             "custom" => true,
+                            "targetCheckId" => $check->id,
                             "name" => $check->name,
                             "background" => $this->prepareText($check->background_info),
                             "question" => $this->prepareText($check->question),
@@ -700,6 +704,8 @@ class ReportManager {
                             "referenceCodeUrl" => null,
                             "info" => $check->rating == TargetCheck::RATING_INFO,
                             "separate" => in_array($category->check_category_id, $templateCategoryIds),
+                            "control" => $control->name,
+                            "category" => $control->category->name
                         );
 
                         if ($check->solution) {
@@ -786,6 +792,9 @@ class ReportManager {
                                 "result" => $checkData["result"],
                                 "ratingValue" => $checkData["ratingValue"],
                                 "custom" => true,
+                                "targetCheckId" => $uniqueId ? $checkData["targetCheckId"]: null,
+                                "control" => $checkData["control"],
+                                "category" => $checkData["category"],
                             );
                         }
 
@@ -914,6 +923,9 @@ class ReportManager {
                                     "rating" => $checkData["rating"],
                                     "result" => $result,
                                     "ratingValue" => $checkData["ratingValue"],
+                                    "targetCheckId" => $uniqueId ? $checkData["targetCheckId"]: null,
+                                    "control" => $checkData["control"],
+                                    "category" => $checkData["category"],
                                 );
                             }
 
