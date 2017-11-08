@@ -5251,7 +5251,7 @@ class ProjectController extends Controller
             }
 
             $response->addData("issue", $issue->id);
-            $response->addData("url", "/project/" . $project->id ."/issue/" . $issue->id . "/evidence/" . $evidence->id);
+            $response->addData("url", $this->createUrl("project/evidence", ["id" => $project->id, "issue" => $issue->id, "evidence" => $evidence->id]));
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
