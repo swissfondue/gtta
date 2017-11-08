@@ -3125,7 +3125,7 @@ function Admin() {
             var hosts = $(_nessusMapping.selectors.filters.hosts);
             var ratings = $(_nessusMapping.selectors.filters.ratings);
             var sortBy = $(_nessusMapping.selectors.filters.sortBy).val();
-            var sortDirection = $(_nessusMapping.selectors.filters.sortDirection).val()
+            var sortDirection = $(_nessusMapping.selectors.filters.sortDirection).val();
 
             var hostIds = [];
             var ratingIds = [];

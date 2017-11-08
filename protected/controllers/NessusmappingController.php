@@ -378,8 +378,8 @@ class NessusmappingController extends Controller {
 
                 throw new Exception($errorText);
             }
-            $sortBy = null;
-            $sortDirection = null;
+            $sortBy = "checks.name";
+            $sortDirection = "ASC";
 
             switch ($form->sortDirection) {
                 case NessusMapping::FILTER_SORT_ASCENDING:
@@ -412,6 +412,7 @@ class NessusmappingController extends Controller {
             $criteria->addInCondition("nessus_rating", $form->ratings);
             $criteria->join = "LEFT JOIN checks ON checks.id = check_id";
             $criteria->order = $sortBy . " " . $sortDirection;
+
             $vulns = NessusMappingVuln::model()->findAll($criteria);
 
             $ratings = TargetCheck::getValidRatings();
