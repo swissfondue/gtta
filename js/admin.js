@@ -995,38 +995,39 @@ function Admin() {
             };
 
             /**
-             * Update rating and solution for all evidences of issue
-             *
-             * @param rating rating value
-             * @param solution solution value
+             * Update rating for all evidences
              */
-            this.updateAll = function (rating, solution) {
-                var data = {
-                    "YII_CSRF_TOKEN": system.csrf,
-                };
-                var selectRatingVal, selectSolutionVal;
+            this.updateRating = function () {
+                var rating = $("#ratingAll").val();
 
-                if (rating) {
-                    selectRatingVal = $("#ratingAll").val();
-
-                    if (!selectRatingVal){
-                        system.addAlert("error", "Select rating option.");
-                        return;
-                    }
-
-                    data["IssueEvidenceEditForm[rating]"] = selectRatingVal;
+                if (!rating) {
+                    system.addAlert("error", "Select rating option.");
+                    return;
                 }
 
-                if (solution) {
-                    selectSolutionVal = $('#solutionAll').val();
+                this.updateAll({"IssueEvidenceEditForm[rating]": rating});
+            };
 
-                    if (!selectSolutionVal) {
-                        system.addAlert('error', "Select solution option.");
-                        return;
-                    }
+            /**
+             * Update solution for all evidences
+             */
+            this.updateSolution = function () {
+                var solution = $("#solutionAll").val();
 
-                    data["IssueEvidenceEditForm[solution]"] = selectSolutionVal;
+                if (!solution) {
+                    system.addAlert("error", "Select solution option.");
+                    return;
                 }
+
+                this.updateAll({"IssueEvidenceEditForm[solution]": solution});
+            };
+
+            /**
+             * Update rating or solution for all evidences of issue
+             * @param data - form data to send
+             */
+            this.updateAll = function (data) {
+                data["YII_CSRF_TOKEN"] = system.csrf;
 
                 $.ajax({
                     dataType: "json",
@@ -1104,8 +1105,9 @@ function Admin() {
             };
 
             /**
+             * Toggle evidence edit block
              *
-             * @param targetCheckId
+             * @param block string
              */
             this.toggleEvidenceEditBlock = function (block) {
                 $("div#" + block + "TextArea").toggle();
@@ -1119,6 +1121,11 @@ function Admin() {
                 }
             };
 
+
+            /**
+             * Handle dropdown change event
+             *
+             */
             this.onDropDownChange = function () {
                 $("select[id^='rating-'], select[id^='solution-']").on('change', function() {
                     var data = {

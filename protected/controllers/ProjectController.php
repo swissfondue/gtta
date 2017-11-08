@@ -2303,13 +2303,13 @@ class ProjectController extends Controller
     }
 
     /**
-     * @param $project
+     * Load evidence HTML
+     * @param $id
      * @param $host
      * @param $issue
      * @throws CHttpException
      */
-    public function actionEvidenceView($project, $host, $issue)
-    {
+    public function actionViewEvidence($id, $host, $issue) {
         $language = Language::model()->findByAttributes(array(
             "code" => Yii::app()->language
         ));
@@ -2319,7 +2319,7 @@ class ProjectController extends Controller
         }
 
         $ratings = TargetCheck::getValidRatings();
-        $project = Project::model()->findByPk($project);
+        $project = Project::model()->findByPk($id);
 
         if (!$project) {
             throw new CHttpException(404, Yii::t("app", "Project not found."));
@@ -4872,6 +4872,9 @@ class ProjectController extends Controller
         $issues = $project->getIssues($offset);
         $riskArray = [TargetCheck::RATING_HIGH_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_LOW_RISK];
         $lightRiskArray = [TargetCheck::RATING_HIDDEN, TargetCheck::RATING_INFO, TargetCheck::RATING_NO_VULNERABILITY, TargetCheck::RATING_NONE];
+        
+        $notFilledEvidence = [];
+        $notFilledHost = [];
 
         foreach ($issues as $index => $issue) {
             if (!in_array($issue->top_rating, $lightRiskArray)) {
@@ -5336,8 +5339,7 @@ class ProjectController extends Controller
      * @param $issue issue id
      * @param null $targetCheck
      */
-    public function actionUpdateEvidence ($id, $issue, $targetCheck = null)
-    {
+    public function actionUpdateEvidence($id, $issue, $targetCheck = null) {
         $response = new AjaxResponse();
 
         try {
@@ -5354,6 +5356,10 @@ class ProjectController extends Controller
                 if (!$targetCheck){
                     throw new Exception(Yii::t("app", "Target Check not found."));
                 }
+            }
+
+            if (!isset($_POST["IssueEvidenceEditForm"])) {
+                throw new Exception(Yii::t("app", "Invalid form value."));
             }
 
             $form = new IssueEvidenceEditForm();

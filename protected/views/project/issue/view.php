@@ -1,21 +1,15 @@
-<style>
-    .elem-style {
-        width: 80%;
-    }
-    .button-group-padding {
-        padding-bottom: 20px;
-    }
-</style>
 <div class="active-header">
     <h1><?= CHtml::encode($this->pageTitle); ?></h1>
 </div>
+
 <hr>
+
 <div
-        class="container"
-        id=""
-        data-get-running-checks-url="<?= $this->createUrl("project/issuerunningchecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
-        data-update-running-checks-url="<?php echo $this->createUrl("project/updateissuechecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
-        data-add-evidence-url="<?= $this->createUrl("project/addEvidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
+    class="container"
+    id=""
+    data-get-running-checks-url="<?= $this->createUrl("project/issuerunningchecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
+    data-update-running-checks-url="<?php echo $this->createUrl("project/updateissuechecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
+    data-add-evidence-url="<?= $this->createUrl("project/addEvidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
     <div class="row">
         <div class="span8">
             <div id="issue-information">
@@ -40,6 +34,42 @@
                     <h3><?= Yii::t("app", "Question") ?></h3>
                     <?= $check->question ? $check->question : Yii::t("app", "N/A") ?>
                 </div>
+
+                <div class="issue-button-group">
+                    <div class="issue-button-group-padding">
+                        <div class="row">
+                            <div class="issue-rating-selector">
+                                <select id="ratingAll" class="issue-elem-style">
+                                    <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Rating"); ?></option>
+                                    <?php foreach ($ratings as $rating): ?>
+                                        <option value="<?= $rating ?>"><?= TargetCheck::getRatingNames()[$rating] ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="issue-button">
+                                <button class="btn issue-elem-style"
+                                        onclick="admin.issue.evidence.updateRating()"><?php echo Yii::t("app", "Update Evidences"); ?></button>&nbsp;
+                            </div>
+                        </div>
+                    </div>
+                    <div class="issue-button-group-padding">
+                        <div class="row">
+                            <div class="issue-rating-selector">
+                                <select id="solutionAll" class="issue-elem-style">
+                                    <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Solution"); ?></option>
+                                    <?php foreach ($solutions as $solution): ?>
+                                        <option value="<?= $solution->id ?>"><?= $solution->localizedTitle ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="issue-button">
+                                <button class="btn issue-elem-style"
+                                        onclick="admin.issue.evidence.updateSolution();"><?php echo Yii::t("app", "Update Evidences"); ?></button>&nbsp;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="field-block">
                     <h3><?= Yii::t("app", "Reference") ?></h3>
                     <?php if ($check->_reference->name): ?>
@@ -52,48 +82,11 @@
                 </div>
             </div>
 
-            <?php if (User::checkRole(User::ROLE_USER)): ?>
             <div data-type="evidence"
-                 data-update-evidence-url="<?php echo $this->createUrl("project/updateevidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
-                <div class="span8 button-group-padding">
-                    <div class="row">
-                        <div class="span4">
-                            <select id="ratingAll" class="elem-style pull-right">
-                                <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Rating"); ?></option>
-                                <?php foreach ($ratings as $rating): ?>
-                                    <option value="<?= $rating ?>"><?= TargetCheck::getRatingNames()[$rating] ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="span4 ">
-                            <button class="btn elem-style"
-                                    onclick="admin.issue.evidence.updateAll(true)"><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
-                        </div>
-                    </div>
-                </div>
-                <div class="span8 button-group-padding">
-                    <div class="row">
-                        <div class="span4">
-                            <select id="solutionAll" class="elem-style pull-right">
-                                <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Solution"); ?></option>
-                                <?php foreach ($solutions as $solution): ?>
-                                    <option value="<?= $solution->id ?>"><?= $solution->localizedTitle ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="span4">
-                            <button class="btn elem-style"
-                                    onclick="admin.issue.evidence.updateAll(false, true)"><?php echo Yii::t("app", "Update all Evidences"); ?></button>&nbsp;
-                        </div>
-                    </div>
-                </div>
-                <?php endif; ?>
-                <br>
-                <br>
-                <hr>
+                data-update-evidence-url="<?php echo $this->createUrl("project/updateevidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
                 <div class="row">
                     <div class="span8">
-                        <b style="font-size: 20px"><?= Yii::t("app", "Assets affected by this Issue") ?></b>
+                        <b style="font-size: 20px"><?= Yii::t("app", "Affected Assets") ?></b>
                         &nbsp;—&nbsp;
                         <a href="#" onclick="admin.issue.showTargetSelectDialog();"><?= Yii::t("app", "Add") ?></a>
                     </div>
@@ -105,34 +98,34 @@
                             <ul class="clear-ul">
                                 <?php foreach ($evidenceGroups as $host => $evidences): ?>
                                     <li>
-                                        <b><?php echo CHtml::ajaxLink(
-                                                sprintf("%s (%d)", $host, count($evidences)), CController::createUrl("project/evidenceview", ["host" => $host, "issue" => $issue->id, "project" => $project->id]),
+                                        <b>
+                                            <?php echo CHtml::ajaxLink(
+                                                sprintf("%s (%d)", $host, count($evidences)),
+                                                CController::createUrl("project/viewevidence", ["host" => $host, "issue" => $issue->id, "id" => $project->id]),
                                                 ["update" => "#simple-div"],
-                                                ["id" => "simple-link-" . Utils::getFirstWords($host, 1, true), "class" => "evidence-link", "name" => $host]
-                                            ); ?></b></li>
+                                                ["class" => "evidence-link"]
+                                            ); ?>
+                                        </b>
+                                    </li>
                                 <?php endforeach; ?>
                             </ul>
                         </div>
                     </div>
                     <div class="span6">
                         <div id="simple-div"></div>
-
                     </div>
                 </div>
             </div>
-
         </div>
 
         <div class="span4">
             <?php
-            echo $this->renderPartial(
-                "partial/right-block", [
-                "quickTargets" => $quickTargets,
-                "project" => $project,
-                "category" => null,
-                "target" => null
-            ]
-            );
+                echo $this->renderPartial("partial/right-block", [
+                    "quickTargets" => $quickTargets,
+                    "project" => $project,
+                    "category" => null,
+                    "target" => null
+                ]);
             ?>
         </div>
     </div>
@@ -145,29 +138,28 @@
         aria-labelledby="smallModal"
         aria-hidden="true"
         data-search-target-url="<?= $this->createUrl("project/searchTargets", ["id" => $project->id, "issue" => $issue->id]) ?>">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">×</button>
-                <h3><?= Yii::t("app", "Select Target") ?></h3>
-            </div>
-            <div class="modal-body">
-                <input class="target-search-query"
-                       placeholder="<?= Yii::t("app", "Hostname or IP address") ?>"
-                       type="text"/>
-                <ul class="table target-list"></ul>
-                <span class="no-search-result" style="display:none"><?= Yii::t("app", "No targets found.") ?></span>
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h3><?= Yii::t("app", "Select Target") ?></h3>
+                </div>
+                <div class="modal-body">
+                    <input class="target-search-query"
+                           placeholder="<?= Yii::t("app", "Hostname or IP address") ?>"
+                           type="text"/>
+                    <ul class="table target-list"></ul>
+                    <span class="no-search-result" style="display:none"><?= Yii::t("app", "No targets found.") ?></span>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-
-    $(window).load(function(){
-
-        var notFilledHost =  <?= $notFilledHost ? json_encode(Utils::getFirstWords($notFilledHost, 1, true)) : "" ?>;
-        var evId =  <?= $notFilledEvidence ? json_encode($notFilledEvidence): "" ?>;
+    $(window).load(function() {
+        var notFilledHost =  <?= json_encode($notFilledHost ? Utils::getFirstWords($notFilledHost, 1, true) : ""); ?>;
+        var evId =  <?= json_encode($notFilledEvidence ? $notFilledEvidence : ""); ?>;
         admin.issue.openEvidenceTab(evId, notFilledHost);
 
         $("#target-select-dialog input.target-search-query").keyup(function (e) {

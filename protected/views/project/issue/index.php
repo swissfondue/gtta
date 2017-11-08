@@ -31,7 +31,7 @@
                             <th class="status"><?= Yii::t("app", "Status"); ?></th>
                             <th class="status"><?= Yii::t("app", "Affects"); ?></th>
                             <?php if (User::checkRole(User::ROLE_USER)): ?>
-                                <th>&nbsp;</th>
+                                <th class="actions">&nbsp;</th>
                             <?php endif; ?>
                             <?php if (User::checkRole(User::ROLE_ADMIN)): ?>
                                 <th class="actions">&nbsp;</th>

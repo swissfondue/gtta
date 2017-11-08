@@ -109,6 +109,15 @@
                     </div>
                     <div class="row">
                         <div class="span6">
+                            <div class="issue-button-group issue-rating-selector">
+                                <select id="solution-<?= $tc->id ?>" class="elem-style pull-right">
+                                    <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Solution"); ?></option>
+                                    <?php foreach ($solutions as $solution): ?>
+                                        <option value="<?= $solution->id ?>"><?= $solution->localizedTitle ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
                             <div class="field-block">
                                 <b><?= Yii::t("app", "Solution") ?></b>
                                 <br/>
@@ -127,36 +136,27 @@
                                         <?= Utils::getFirstWords($tc->solution, Yii::app()->params["issue.field_length"]); ?>
                                     <?php endif; ?>
                                 </div>
-
-
                             </div>
-                        </div>
-                        <div class="span6">
-                            <select id="solution-<?= $tc->id ?>" class="elem-style pull-right">
-                                <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Solution"); ?></option>
-                                <?php foreach ($solutions as $solution): ?>
-                                    <option value="<?= $solution->id ?>"><?= $solution->localizedTitle ?></option>
-                                <?php endforeach; ?>
-                            </select>
                         </div>
                     </div>
                     <br>
                     <br/>
                     <div class="row">
                         <div class="span6">
+                            <div class="issue-button-group issue-rating-selector">
+                                <select id="rating-<?= $tc->id ?>" class="elem-style pull-right">
+                                    <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Rating"); ?></option>
+                                    <?php foreach ($ratings as $rating): ?>
+                                        <option value="<?= $rating ?>"><?= TargetCheck::getRatingNames()[$rating] ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
                             <div class="field-block">
                                 <b><?= Yii::t("app", "Rating") ?></b>
                                 <br/>
                                 <?php echo $this->renderPartial("partial/check-rating", ["check" => $tc]); ?>
                             </div>
-                        </div>
-                        <div class="span6">
-                            <select id="rating-<?= $tc->id ?>" class="elem-style pull-right">
-                                <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Rating"); ?></option>
-                                <?php foreach ($ratings as $rating): ?>
-                                    <option value="<?= $rating ?>"><?= TargetCheck::getRatingNames()[$rating] ?></option>
-                                <?php endforeach; ?>
-                            </select>
                         </div>
                     </div>
 
