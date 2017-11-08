@@ -71,15 +71,37 @@
                             <?= count($tc->attachments) ?>
                         </div>
                     </div>
+                    <button class="pull-right"  onclick="admin.issue.evidence.toggleEvidenceEditBlock('result')"><i class="icon-pencil"></i></button>
+                    <div class="field-block" id="resultField">
+                        <b><?= Yii::t("app", "Result") ?></b>
+                        <br/>
 
-                    <div class="field-block">
+                        <?php if ($tc->result): ?>
+                            <div class="field-value issue-pre"><?= Utils::getFirstWords($tc->result, Yii::app()->params["issue.field_length"]); ?></div>
+                        <?php else: ?>
+                            <div class="field-value"><i class="icon icon-minus"></i></div>
+                        <?php endif; ?>
+                        <br/>
+                    </div>
+                    <div id="resultTextArea" class="field-block hidden">
                         <b><?= Yii::t("app", "Result") ?></b>
                         <br/>
                         <textarea id="result-<?= $tc->id ?>" class="textarea textarea-evidence-view" rows="3" name="text"><?= $tc->result ?></textarea>
                         <br/>
                     </div>
+                    <button class="pull-right" onclick="admin.issue.evidence.toggleEvidenceEditBlock('poc')"> <i class="icon icon-pencil"></i></button>
+                    <div id="pocField" class="field-block evidence-field poc">
+                        <b><?= Yii::t("app", "PoC") ?></b>
+                        <br/>
 
-                    <div class="field-block evidence-field poc">
+                        <?php if ($tc->poc): ?>
+                            <div class="field-value issue-pre"><?= Utils::getFirstWords($tc->poc, Yii::app()->params["issue.field_length"]); ?></div>
+                        <?php else: ?>
+                            <div class="field-value"><i class="icon icon-minus"></i></div>
+                        <?php endif; ?>
+                        <br/>
+                    </div>
+                    <div id="pocTextArea" class="field-block evidence-field poc hidden">
                         <b><?= Yii::t("app", "PoC") ?></b>
                         <br/>
                         <textarea id="poc-<?= $tc->id ?>" class="textarea textarea-evidence-view" rows="3" name="text" ><?= $tc->poc ?></textarea>
@@ -141,7 +163,7 @@
                 </div>
 
                 <hr>
-                <button class="btn pull-right"
+                <button id="updateEvidenceButton" class="btn pull-right hidden"
                         onclick="admin.issue.evidence.update(<?= $tc->id ?>)"><?php echo Yii::t("app", "Update"); ?></button>&nbsp;
             </div>
 
@@ -154,4 +176,6 @@
         e.preventDefault();
         $(this).tab("show");
     });
+
+    admin.issue.evidence.onDropDownChange();
 </script>

@@ -1025,7 +1025,7 @@ function Admin() {
                         return;
                     }
 
-                    data["IssueEvidenceEditForm[solution]"] = selectRatingVal;
+                    data["IssueEvidenceEditForm[solution]"] = selectSolutionVal;
                 }
 
                 $.ajax({
@@ -1041,7 +1041,7 @@ function Admin() {
                             return;
                         }
 
-                        location.reload();
+                        system.addAlert ("success", "Evidences successfully saved.");
                     },
 
                     error: function(jqXHR, textStatus, e) {
@@ -1065,18 +1065,8 @@ function Admin() {
                     "YII_CSRF_TOKEN": system.csrf,
                 };
 
-                var rating = $("#rating-" + targetCheckId).val();
-                var solution = $("#solution-" + targetCheckId).val();
                 var result = $("#result-" + targetCheckId).val();
                 var poc = $("#poc-" + targetCheckId).val();
-
-                if (rating) {
-                    data["IssueEvidenceEditForm[rating]"] = rating;
-                }
-
-                if (solution) {
-                    data["IssueEvidenceEditForm[solution]"] = solution;
-                }
 
                 if (result) {
                     data["IssueEvidenceEditForm[result]"] = result;
@@ -1099,7 +1089,7 @@ function Admin() {
                             return;
                         }
 
-                        location.reload();
+                        system.addAlert ("success", "Evidence successfully saved.");
                     },
 
                     error: function(jqXHR, textStatus, e) {
@@ -1112,6 +1102,66 @@ function Admin() {
                     }
                 });
             };
+
+            /**
+             *
+             * @param targetCheckId
+             */
+            this.toggleEvidenceEditBlock = function (block) {
+                $("div#" + block + "TextArea").toggle();
+                $("div#" + block + "Field").toggle();
+                var buttonSelector = "button#updateEvidenceButton";
+
+                if ($("div#resultTextArea").is(":visible") || $("div#pocTextArea").is(":visible")) {
+                    $(buttonSelector).show();
+                } else {
+                    $(buttonSelector).hide();
+                }
+            };
+
+            this.onDropDownChange = function () {
+                $("select[id^='rating-'], select[id^='solution-']").on('change', function() {
+                    var data = {
+                        "YII_CSRF_TOKEN": system.csrf,
+                    };
+                    var val = $(this).val();
+                    var id = $(this).attr("id");
+
+                    if (id.indexOf("solution") !== -1) {
+                        data["IssueEvidenceEditForm[solution]"] = val;
+                    } else {
+                        data["IssueEvidenceEditForm[rating]"] = val;
+                    }
+
+                    var targetCheckId = id.substr(id.indexOf("-") + 1);
+
+                    $.ajax({
+                        dataType: "json",
+                        url: $("[data-update-evidence-url-" + targetCheckId + "]").data("update-evidence-url-" + targetCheckId),
+                        type: "POST",
+                        data: data,
+                        success: function (data, textStatus) {
+                            $(".loader-image").hide();
+
+                            if (data.status === "error") {
+                                system.addAlert("error", data.errorText);
+                                return;
+                            }
+
+                            system.addAlert ("success", "Evidence successfully saved.");
+                        },
+
+                        error: function(jqXHR, textStatus, e) {
+                            $(".loader-image").hide();
+                            system.addAlert("error", system.translate("Request failed, please try again."));
+                        },
+
+                        beforeSend: function (jqXHR, settings) {
+                            $(".loader-image").show();
+                        }
+                    });
+                });
+            }
         };
     };
 

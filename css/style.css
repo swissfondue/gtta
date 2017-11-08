@@ -1581,3 +1581,8 @@ ul.target-list li {
 .textarea-evidence-view {
     width:450px !important;
 }
+
+.hidden {
+    display: none;
+}
+
