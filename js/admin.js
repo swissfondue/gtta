@@ -991,6 +991,7 @@ function Admin() {
                     data: data,
 
                     success: function (data, textStatus) {
+                        data = data.data;
                         $(".loader-image").hide();
 
                         if (data.status == "error") {
@@ -998,7 +999,7 @@ function Admin() {
                             return;
                         }
 
-                        location.reload();
+                        document.location.href = data.url;
                     },
 
                     error: function(jqXHR, textStatus, e) {

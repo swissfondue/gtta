@@ -602,6 +602,8 @@ class TargetManager {
                 "target_id" => $target->id
             ]);
         }
+
+        return $tcm->addEvidence($targetCheck);
     }
 
     /**
