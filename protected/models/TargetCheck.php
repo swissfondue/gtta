@@ -284,10 +284,6 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "background_info" => $this->getBackgroundInfo(),
             "hints" => $this->getHints(),
             "poc" => $this->getPoc(),
-            "technical_solution" => $this->getCustomField(GlobalCheckField::FIELD_TECHNICAL_SOLUTION),
-            "management_solution" => $this->getCustomField(GlobalCheckField::FIELD_MANAGEMENT_SOLUTION),
-            "technical_result" => $this->getCustomField(GlobalCheckField::FIELD_TECHNICAL_RESULT),
-            "management_result" => $this->getCustomField(GlobalCheckField::FIELD_MANAGEMENT_RESULT),
         );
 
         if ($this->getSolution()) {
