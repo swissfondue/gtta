@@ -24,27 +24,24 @@
  * @property date $vuln_deadline
  * @property integer $vuln_status
  * @property IssueEvidence $evidence
+ * @property timestamp $last_modified
  */
 class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     public $mr;
-
     /**
      * Target check type
      */
     const TYPE = 'check';
-
     /**
      * Check statuses.
      */
     const STATUS_OPEN = 0;
     const STATUS_FINISHED = 100;
-
     /**
      * Vuln statuses
      */
     const STATUS_VULN_OPEN = 0;
     const STATUS_VULN_RESOLVED = 100;
-
     /**
      * Result ratings.
      * ordered by gravity (important)
@@ -56,7 +53,6 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     const RATING_LOW_RISK = 100;
     const RATING_MED_RISK = 200;
     const RATING_HIGH_RISK = 500;
-
     /**
      * Export columns.
      */
@@ -72,21 +68,21 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     const COLUMN_DEADLINE = "deadline";
     const COLUMN_STATUS = "status";
 
-	/**
-	 * Returns the static model of the specified AR class.
-	 * @param string $className active record class name.
-	 * @return TargetCheck the static model class
-	 */
-	public static function model($className=__CLASS__) {
-		return parent::model($className);
-	}
+    /**
+     * Returns the static model of the specified AR class.
+     * @param string $className active record class name.
+     * @return TargetCheck the static model class
+     */
+    public static function model($className = __CLASS__) {
+        return parent::model($className);
+    }
 
-	/**
-	 * @return string the associated database table name
-	 */
-	public function tableName() {
-		return "target_checks";
-	}
+    /**
+     * @return string the associated database table name
+     */
+    public function tableName() {
+        return "target_checks";
+    }
 
     /**
      * Get valid rating values
@@ -113,32 +109,32 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             self::RATING_NONE => Yii::t("app", "No Test Done"),
             self::RATING_NO_VULNERABILITY => Yii::t("app", "No Vulnerability"),
             self::RATING_HIDDEN => Yii::t("app", "Hidden"),
-            self::RATING_INFO =>  Yii::t("app", "Info"),
+            self::RATING_INFO => Yii::t("app", "Info"),
             self::RATING_LOW_RISK => Yii::t("app", "Low Risk"),
             self::RATING_MED_RISK => Yii::t("app", "Med Risk"),
             self::RATING_HIGH_RISK => Yii::t("app", "High Risk"),
         );
     }
 
-	/**
-	 * @return array validation rules for model attributes.
-	 */
-	public function rules() {
-		return array(
+    /**
+     * @return array validation rules for model attributes.
+     */
+    public function rules() {
+        return array(
             array("target_id, check_id", "required"),
             array("target_id, check_id, language_id, user_id", "numerical", "integerOnly" => true),
             array("target_file, result_file", "length", "max" => 1000),
             array("status", "in", "range" => array(self::STATUS_OPEN, self::STATUS_FINISHED)),
             array("rating", "in", "range" => self::getValidRatings()),
             array("table_result", "safe"),
-		);
-	}
+        );
+    }
 
     /**
-	 * @return array relational rules.
-	 */
-	public function relations() {
-		return array(
+     * @return array relational rules.
+     */
+    public function relations() {
+        return array(
             "target" => array(self::BELONGS_TO, "Target", "target_id"),
             "check" => array(self::BELONGS_TO, "Check", "check_id"),
             "language" => array(self::BELONGS_TO, "Language", "language_id"),
@@ -151,43 +147,67 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "startScripts" => array(self::HAS_MANY, 'CheckScript', array('check_script_id' => 'id'), 'through' => 'scripts', 'condition' => "scripts.start = 't'"),
             "fields" => array(self::HAS_MANY, "TargetCheckField", "target_check_id"),
             "evidence" => array(self::HAS_ONE, "IssueEvidence", "target_check_id"),
-		);
-	}
+        );
+    }
+
+    /**
+     * @param bool $runValidation
+     * @param null $attributes
+     * @throws CHttpException
+     */
+    public function save($runValidation = true, $attributes = null) {
+        $dbTargetCheck = TargetCheck::model()->findByPk($this->id);
+        $targetCheckIsNew = is_null($dbTargetCheck) || is_null($dbTargetCheck->last_modified);
+
+        if (!$targetCheckIsNew && $this->last_modified < $dbTargetCheck->last_modified) {
+            throw new CHttpException(403, Yii::t("app", "Could not modify the target check as there is newer version available. Please reload the page and try again!"));
+        }
+
+        $this->last_modified = time();
+
+        parent::save($runValidation, $attributes);
+    }
 
     /**
      * Check fields
      * @return array|CActiveRecord|mixed|null
      */
     public function getOrderedFields() {
-        $language = Language::model()->findByAttributes(array(
-            "code" => Yii::app()->language
-        ));
-
+        $language = Language::model()->findByAttributes(
+            array(
+                "code" => Yii::app()->language
+            )
+        );
         if (!$language) {
-            $language = Language::model()->findByAttributes(array(
-                "default" => true
-            ));
+            $language = Language::model()->findByAttributes(
+                array(
+                    "default" => true
+                )
+            );
         }
-
-        return TargetCheckField::model()->with([
-            "field" => [
-                "joinType" => "LEFT JOIN",
-                "with" => [
-                    "global" => [
-                        "joinType" => "LEFT JOIN",
-                        "order" => "global.sort_order ASC",
-                        "with" => [
-                            "l10n" => [
-                                "on" => "l10n.language_id = :language_id",
-                                "params" => ["language_id" => $language->id],
+        return TargetCheckField::model()->with(
+            [
+                "field" => [
+                    "joinType" => "LEFT JOIN",
+                    "with" => [
+                        "global" => [
+                            "joinType" => "LEFT JOIN",
+                            "order" => "global.sort_order ASC",
+                            "with" => [
+                                "l10n" => [
+                                    "on" => "l10n.language_id = :language_id",
+                                    "params" => ["language_id" => $language->id],
+                                ],
                             ],
                         ],
                     ],
-                ],
+                ]
             ]
-        ])->findAllByAttributes([
-            "target_check_id" => $this->id
-        ]);
+        )->findAllByAttributes(
+            [
+                "target_check_id" => $this->id
+            ]
+        );
     }
 
     /**
@@ -195,18 +215,16 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      */
     public function automationError($error) {
         $uniqueHash = strtoupper(substr(hash("sha256", time() . rand() . $error), 0, 16));
-
         Yii::log($uniqueHash . " " . $error, "error");
         Yii::getLogger()->flush(true);
-
-        $message = Yii::t("app", "Internal server error. Please send this error code to the administrator - {code}.", array(
+        $message = Yii::t(
+            "app", "Internal server error. Please send this error code to the administrator - {code}.", array(
             "{code}" => $uniqueHash
-        ));
-
+        )
+        );
         if ($this->result) {
             $this->appendPoc("\n");
         }
-
         $this->appendPoc($message);
         $this->status = TargetCheck::STATUS_FINISHED;
         $this->save();
@@ -217,11 +235,12 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      * @return boolean is running.
      */
     public function getIsRunning() {
-        $startJob = JobManager::buildId(AutomationJob::ID_TEMPLATE, array(
+        $startJob = JobManager::buildId(
+            AutomationJob::ID_TEMPLATE, array(
             "operation" => AutomationJob::OPERATION_START,
             "obj_id" => $this->id,
-        ));
-
+        )
+        );
         return JobManager::isRunning($startJob);
     }
 
@@ -235,11 +254,12 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     public function getVariable($name, VariableScope $scope) {
         $check = $this->check;
         $names = $this->getRatingNames();
+
         $abbreviations = array(
             self::RATING_NONE => "none",
             self::RATING_NO_VULNERABILITY => "no_vuln",
             self::RATING_HIDDEN => "hidden",
-            self::RATING_INFO =>  "info",
+            self::RATING_INFO => "info",
             self::RATING_LOW_RISK => "low",
             self::RATING_MED_RISK => "med",
             self::RATING_HIGH_RISK => "high",
@@ -296,13 +316,10 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         $lists = array(
             "attachment",
         );
-
         if (!in_array($name, $lists)) {
             return [];
         }
-
         $data = [];
-
         switch ($name) {
             case "attachment":
                 foreach ($this->attachments as $attachment) {
@@ -310,17 +327,14 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
                         $data[] = $attachment;
                     }
                 }
-
                 break;
         }
-
         if ($filters) {
             foreach ($filters as $filter) {
                 $filter = new ListFilter($filter, $scope);
                 $data = $filter->apply($data);
             }
         }
-
         return $data;
     }
 
@@ -332,19 +346,15 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         if (!$this->vuln_deadline) {
             return false;
         }
-
         if ($this->vuln_status == self::STATUS_VULN_RESOLVED) {
             return false;
         }
-
         $deadline = new DateTime($this->vuln_deadline . " 00:00:00");
         $today = new DateTime();
         $today->setTime(0, 0, 0);
-
         if ($today > $deadline) {
             return true;
         }
-
         return false;
     }
 
@@ -353,13 +363,11 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      * @param $data
      * @param bool $verbose
      */
-    public function appendPoc($data, $verbose=true) {
+    public function appendPoc($data, $verbose = true) {
         $system = System::model()->findByPk(1);
-
         if ($verbose && !$system->scripts_verbosity) {
             return;
         }
-
         $oldValue = $this->_getFieldValue(GlobalCheckField::FIELD_POC);
         $this->setFieldValue(GlobalCheckField::FIELD_POC, ($oldValue ? $oldValue : "") . $data);
     }
@@ -373,31 +381,30 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         $criteria = new CDbCriteria();
         $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
         $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
-        $criteria->addColumnCondition([
-            "gcf.name" => $name,
-            "t.target_check_id" => $this->id,
-        ]);
+        $criteria->addColumnCondition(
+            [
+                "gcf.name" => $name,
+                "t.target_check_id" => $this->id,
+            ]
+        );
         $field = TargetCheckField::model()->find($criteria);
-
         if (!$field) {
             $criteria = new CDbCriteria();
             $criteria->join .= "LEFT JOIN global_check_fields gcf ON gcf.id = t.global_check_field_id";
-            $criteria->addColumnCondition([
-                "gcf.name" => $name,
-                "t.check_id" => $this->check_id,
-            ]);
-
+            $criteria->addColumnCondition(
+                [
+                    "gcf.name" => $name,
+                    "t.check_id" => $this->check_id,
+                ]
+            );
             $checkField = CheckField::model()->find($criteria);
-
             if (!$checkField) {
                 throw new Exception("Check field not found.");
             }
-
             $tcm = new TargetCheckManager();
             $field = $tcm->createField($this, $checkField);
             $field->refresh();
         }
-
         $field->value = $value;
         $field->save();
     }
@@ -408,20 +415,30 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      * @return mixed|null
      */
     private function _getFieldValue($name) {
+        $field = $this->getField($name);
+        return $field->value;
+    }
+
+    /**
+     * Returns target check field
+     * @param $name
+     * @return mixed|null
+     */
+    public function getField($name) {
         $criteria = new CDbCriteria();
         $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
         $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
-        $criteria->addColumnCondition([
-            "gcf.name" => $name,
-            "t.target_check_id" => $this->id,
-        ]);
+        $criteria->addColumnCondition(
+            [
+                "gcf.name" => $name,
+                "t.target_check_id" => $this->id,
+            ]
+        );
         $field = TargetCheckField::model()->find($criteria);
-
         if (!$field) {
             return null;
         }
-
-        return $field->value;
+        return $field;
     }
 
     /**
@@ -517,18 +534,20 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      * @param $name
      * @return mixed|null
      */
-     public function getCustomField($name) {
-         return $this->_getFieldValue($name);
-     }
+    public function getCustomField($name) {
+        return $this->_getFieldValue($name);
+    }
 
     /**
      * TargetCheckCategory relation
      * @return array|CActiveRecord|mixed|null
      */
     public function getCategory() {
-        return TargetCheckCategory::model()->findByAttributes([
-            "target_id" => $this->target_id,
-            "check_category_id" => $this->check->control->check_category_id
-        ]);
+        return TargetCheckCategory::model()->findByAttributes(
+            [
+                "target_id" => $this->target_id,
+                "check_category_id" => $this->check->control->check_category_id
+            ]
+        );
     }
 }

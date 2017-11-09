@@ -70,6 +70,7 @@ class UpdateJob extends BackgroundJob {
         FileManager::copyRecursive($srcDir . "/" . self::WEB_DIRECTORY, $dstDir . "/" . self::WEB_DIRECTORY);
         FileManager::copyRecursive($srcDir . "/" . self::TOOLS_DIRECTORY, $dstDir . "/" . self::TOOLS_DIRECTORY);
 
+        FileManager::chmod($dstDir . "/" . self::WEB_DIRECTORY . "/assets", 0777);
         $protectedDir = $dstDir . "/" . self::WEB_DIRECTORY . "/protected";
         FileManager::chmod($protectedDir . "/yiic", 0750);
         ProcessManager::runCommand(sprintf("chown -R %s:%s %s", self::GTTA_USER, self::GTTA_GROUP, $dstDir));

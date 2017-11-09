@@ -14,7 +14,7 @@
                             <th class="actions">&nbsp;</th>
                         </tr>
                         <?php foreach ($mappings as $mapping): ?>
-                            <tr data-id="<?= $mapping->id; ?>" data-control-url="<?= $this->createUrl("nessusmapping/edit", ["id" => $mapping->id]); ?>">
+                            <tr data-id="<?= $mapping->id; ?>" data-control-url="<?= $this->createUrl("nessusmapping/control", ["id" => $mapping->id]); ?>">
                                 <td class="date">
                                     <?= date("Y-m-d H:i:s", strtotime($mapping->created_at)); ?>
                                 </td>

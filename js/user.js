@@ -93,6 +93,107 @@ function User()
         };
 
         /**
+         * Submit form without redirect
+         * @param id
+         */
+        this.submitResultBlock = function (id) {
+            this.submitBlock("result", id);
+        };
+
+        /**
+         * Submit form without redirect
+         * @param id
+         */
+        this.submitSolutionBlock = function (id) {
+            this.submitBlock("solution", id);
+        };
+
+        /**
+         * Submit form without redirect
+         * @param type
+         * @param id
+         */
+        this.submitBlock = function (type, id) {
+            $("#" + type + "-form-" + id).on("submit", function (e) {
+                e.preventDefault();
+
+                var i;
+                var data = [];
+                data.push({name : "YII_CSRF_TOKEN", value : system.csrf});
+
+                var texts = $('input[type="text"][name^="Check"]', $(this)).map(
+                    function () {
+                        return {
+                            name: $(this).attr('name'),
+                            value: $(this).val()
+                        };
+                    }
+                ).get();
+
+                var textareas = $('textarea[name^="Check"]', $(this)).map(
+                    function () {
+                        var editor = user.check.getEditor($(this).attr("id"));
+                        var data = editor ? editor.getData() : $(this).val();
+
+                        return {
+                            name: $(this).attr("name"),
+                            value: data
+                        };
+                    }
+                ).get();
+
+                for (i = 0; i < textareas.length; i++) {
+                    data.push(textareas[i]);
+                }
+
+                for (i = 0; i < texts.length; i++) {
+                    data.push(texts[i]);
+                }
+
+                $.ajax({
+                    url: $(this).attr("action"),
+                    type: "POST",
+                    data: data,
+                    success: function (data) {
+                        $("#" + type + "-div-" + id).html(data);
+                    }
+                });
+            });
+        };
+
+        /**
+         * Expand all result forms
+         */
+        this.expandAllResultForms = function () {
+            $(".result-list td.result").each(function () {
+                var elem = $(this).find(".result-link"),
+                    resultForm = $(this).find(".result-form > *");
+
+                if (resultForm.length > 0) {
+                    resultForm.toggle();
+                } else {
+                    elem.click();
+                }
+            });
+        };
+
+        /**
+         * Expand all solution forms
+         */
+        this.expandAllSolutionForms = function () {
+            $(".solution-list td.solution").each(function () {
+                var elem = $(this).find(".solution-link"),
+                    solutionForm = $(this).find(".solution-form > *");
+
+                if (solutionForm.length > 0) {
+                    solutionForm.toggle();
+                } else {
+                    elem.click();
+                }
+            });
+        };
+
+        /**
          * Update status of running checks.
          */
         this.update = function (url) {
@@ -267,8 +368,38 @@ function User()
                         $('.loader-image').show();
                     }
                 });
-
             }
+        };
+
+        /**
+         * Enable result WYSIWYG
+         */
+        this.enableResultWysiwyg = function () {
+            $.each($(".wysiwyg"), function (key, value) {
+                user.check.destroyEditor($(value).attr("id"));
+            });
+
+            // Enabling ckeditor for wysiwyg elements, which contain HTML
+            $.each($(".wysiwyg.html_content"), function (key, value) {
+                try {
+                    user.check.enableEditor($(value).attr("id"));
+                } catch (e) {
+                    // pass
+                }
+            });
+        };
+
+        /**
+         * Enable solution WYSIWYG
+         */
+        this.enableSolutionWysiwyg = function () {
+            $(".wysiwyg").each(function () {
+                try {
+                    user.check.enableEditor($(this).attr("id"));
+                } catch (e) {
+                    // pass
+                }
+            });
         };
 
         /**
@@ -643,10 +774,26 @@ function User()
         };
 
         /**
+         * Toggle additional solution fields.
+         */
+        this.toggleAdditionalSolutionFields = function (id) {
+            $("#row_" + id + "_technical_solution").toggle();
+            $("#row_" + id + "_management_solution").toggle();
+        };
+
+        /**
+         * Toggle additional result fields.
+         */
+        this.toggleAdditionalResultFields = function (id) {
+            $("#row_" + id + "_technical_result").toggle();
+            $("#row_" + id + "_management_result").toggle();
+        };
+
+        /**
          * Expand result.
          */
         this.expandResult = function (id) {
-            $('span.result-control[data-id=' + id + ']').html('<a href="#result" onclick="user.check.collapseResult(' + id + ');"><i class="icon-chevron-up"></i></a>');
+            $('span.result-control[data-id=' + id + ']').html('<a href="#show-result" onclick="user.check.collapseResult(' + id + ');"><i class="icon-chevron-up"></i></a>');
             $('div.result-content[data-id=' + id + ']').slideDown('slow');
         };
 
@@ -654,7 +801,7 @@ function User()
          * Collapse result.
          */
         this.collapseResult = function (id) {
-            $('span.result-control[data-id=' + id + ']').html('<a href="#result" onclick="user.check.expandResult(' + id + ');"><i class="icon-chevron-down"></i></a>');
+            $('span.result-control[data-id=' + id + ']').html('<a href="#show-result" onclick="user.check.expandResult(' + id + ');"><i class="icon-chevron-down"></i></a>');
             $('div.result-content[data-id=' + id + ']').slideUp('slow');
         };
 

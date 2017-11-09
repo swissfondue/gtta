@@ -70,10 +70,22 @@ class CheckField extends ActiveRecord {
 
     /**
      * Return value if it exist in any language (for checkbox or radio)
+     * @param Language|null $language
      * @return mixed|null|string
      */
-    public function getValue() {
-        $language = System::model()->findByPk(1)->language;
+    public function getValue(Language $language = null) {
+        if (!$language) {
+            $language = Language::model()->findByAttributes(array(
+                'code' => Yii::app()->language
+            ));
+
+            if (!$language) {
+                $language = Language::model()->findByAttributes(array(
+                    "default" => true
+                ));
+            }
+        }
+
         $l10n = CheckFieldL10n::model()->findByAttributes([
             "check_field_id" => $this->id,
             "language_id" => $language->id

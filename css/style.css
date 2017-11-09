@@ -1550,7 +1550,7 @@ ul.target-list li {
     width: 100%;
 }
 .nessus-mapping-filters .filter.nessus-ratings .nessus-rating {
-    padding: 10px 10px 10px 0;
+    padding: 5px 10px 10px 0;
     display: inline-block;
 }
 .nessus-mapping-filters .filter.nessus-hosts {
@@ -1559,7 +1559,6 @@ ul.target-list li {
 .nessus-mapping-filters .filter.nessus-hosts .nessus-host {
     padding: 5px 0;
     display: inline-block;
-    width: 24%;
 }
 .nessus-mapping-filters .nessus-hosts-filter-container {
     max-height: 300px;
@@ -1608,3 +1607,11 @@ ul.target-list li {
     display: none;
 }
 
+.wysiwyg-shared {
+    width: 270px !important;
+    height: 200px !important;
+}
+
+.span6-shared {
+    float: left !important;
+}

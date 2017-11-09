@@ -1,3 +1,13 @@
+<div class="pull-right buttons">
+    <?php if (User::checkRole(User::ROLE_USER)): ?>
+        <div class="btn-group">
+            <a class="btn" href="#" onclick="admin.showCheckSearchPopup();">
+                <i class="icon icon-plus"></i>
+                <?php echo Yii::t("app", "New"); ?>
+            </a>
+        </div>
+    <?php endif; ?>
+</div>
 <div class="active-header">
     <h1><?= CHtml::encode($this->pageTitle); ?></h1>
 </div>
@@ -6,7 +16,7 @@
 
 <div
     class="container"
-    id=""
+    data-add-issue-url="<?= $this->createUrl("project/addIssue", ["id" => $project->id]); ?>"
     data-get-running-checks-url="<?= $this->createUrl("project/issuerunningchecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
     data-update-running-checks-url="<?php echo $this->createUrl("project/updateissuechecks", ["id" => $project->id, "issue" => $issue->id]); ?>"
     data-add-evidence-url="<?= $this->createUrl("project/addEvidence", ["id" => $project->id, "issue" => $issue->id]); ?>">
@@ -20,7 +30,7 @@
                 <br/><br/>
                 <div class="field-block">
                     <h3><?= Yii::t("app", "Title") ?></h3>
-                    <?= $check->name ? $check->name : Yii::t("app", "N/A") ?>
+                    <?= $check->getLocalizedName() ? $check->getLocalizedName() : Yii::t("app", "N/A") ?>
                 </div>
                 <div class="field-block">
                     <h3><?= Yii::t("app", "Background Info") ?></h3>
@@ -131,7 +141,7 @@
     </div>
 
     <div
-            class="modal fade"
+        class="modal fade"
         id="target-select-dialog"
         tabindex="-1"
         role="dialog"
@@ -155,7 +165,7 @@
         </div>
     </div>
 </div>
-
+<?= $this->renderPartial("/layouts/partial/check-selector", ["project" => $project]); ?>
 <script>
     $(window).load(function() {
         var notFilledHost =  <?= json_encode($notFilledHost ? Utils::getFirstWords($notFilledHost, 1, true) : ""); ?>;
@@ -180,3 +190,4 @@
         admin.issue.initTargetSelectDialog();
     });
 </script>
+

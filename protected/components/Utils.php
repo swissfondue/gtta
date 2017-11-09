@@ -68,4 +68,14 @@ class Utils {
 
         return $data;
     }
+
+    /**
+     * Check for chars specific for html in string
+     * @param $string
+     * @return bool
+     */
+    public static function containsSpecificHtmlSymbols($string) {
+        return preg_match("/<[^<]+>/", $string, $m) != 0;
+    }
+
 }

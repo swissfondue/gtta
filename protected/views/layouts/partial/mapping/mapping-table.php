@@ -1,8 +1,4 @@
 <div class="nessus-mapping" data-activate-url="<?= $this->createUrl("nessusmapping/activate"); ?>">
-    <h3><?= Yii::t("app", "Vulnerabilities") ?></h3>
-
-    <hr/>
-
     <?php if (count($vulns)): ?>
         <table class="table">
             <thead>

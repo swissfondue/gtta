@@ -178,7 +178,7 @@ class NessusmappingController extends Controller {
         $this->render("view", [
             "mapping" => $mapping,
             "ratings" => $ratings,
-            "nessusRatings" => $nessusRatings
+            "nessusRatings" => $nessusRatings,
         ]);
     }
 
@@ -215,21 +215,42 @@ class NessusmappingController extends Controller {
                 throw new Exception($errorText);
             }
 
-            $cm = new CheckManager();
+            $data = [];
+            $exclude = [];
+
+            $ctm = new CategoryManager();
             $language = Language::model()->findByAttributes([
                 "code" => Yii::app()->language
             ]);
-            $mappingVulns = NessusMappingVuln::model()->findAllByAttributes([
-                "nessus_mapping_id" => $mapping->id
-            ]);
-            $exclude = [];
 
-            foreach ($mappingVulns as $mv) {
-                if (isset($mv->check)) {
-                    $exclude[] = $mv->check->id;
+            /** @var CheckCategoryL10n[] $categories */
+            $categories = $ctm->filter($form->query, $language->id);
+
+            foreach ($categories as $categoryL10) {
+                $controls = $categoryL10->category->controls;
+                $checksData = [];
+
+                foreach ($controls as $control) {
+                    $checks = $control->checks;
+
+                    foreach ($checks as $check) {
+                        if (in_array($check->id, $exclude)) {
+                            continue;
+                        }
+
+                        $checksData[] = $check->serialize($language->id);
+                        $exclude[] = $check->id;
+                    }
                 }
+
+                $item["checks"] = $checksData;
+                $item["name"] = $categoryL10->name;
+                $data[] = $item;
             }
 
+            $response->addData("categories", $data);
+
+            $cm = new CheckManager();
             $checks = $cm->filter($form->query, $language->id, $exclude);
             $data = [];
 
@@ -290,21 +311,6 @@ class NessusmappingController extends Controller {
 
                     if (!$check) {
                         throw new Exception("Check not found.", 404);
-                    }
-
-                    $exists = NessusMappingVuln::model()->findByAttributes(
-                        [
-                            "check_id" => $check->id,
-                            "nessus_mapping_id" => $vuln->mapping->id
-                        ],
-                        "id <> :id",
-                        [
-                            "id" => $vuln->id
-                        ]
-                    );
-
-                    if ($exists) {
-                        throw new Exception("Check couldn't be mounted.");
                     }
 
                     $vuln->check_id = $check->id;
@@ -378,12 +384,42 @@ class NessusmappingController extends Controller {
 
                 throw new Exception($errorText);
             }
+            $sortBy = "checks.name";
+            $sortDirection = "ASC";
 
-            $vulns = NessusMappingVuln::model()->orderByPluginName()->findAllByAttributes([
-                "nessus_host" => $form->hosts,
-                "nessus_rating" => $form->ratings,
-                "nessus_mapping_id" => $form->mappingId
-            ]);
+            switch ($form->sortDirection) {
+                case NessusMapping::FILTER_SORT_ASCENDING:
+                    $sortDirection = "ASC";
+                    break;
+
+                case NessusMapping::FILTER_SORT_DESCENDING:
+                    $sortDirection = "DESC";
+                    break;
+            }
+
+            switch ($form->sortBy) {
+                case NessusMapping::FILTER_SORT_ISSUE:
+                    $sortBy = "nessus_plugin_name";
+                    break;
+
+                case NessusMapping::FILTER_SORT_RATING:
+                    $sortBy = "rating";
+                    break;
+
+                case NessusMapping::FILTER_SORT_CHECK:
+                    $sortBy = "checks.name";
+                    break;
+            }
+
+            $criteria = new CDbCriteria();
+            $criteria->addCondition("nessus_mapping_id = :mapping_id");
+            $criteria->params = ["mapping_id" => $form->mappingId];
+            $criteria->addInCondition("nessus_host", $form->hosts);
+            $criteria->addInCondition("nessus_rating", $form->ratings);
+            $criteria->join = "LEFT JOIN checks ON checks.id = check_id";
+            $criteria->order = $sortBy . " " . $sortDirection;
+
+            $vulns = NessusMappingVuln::model()->findAll($criteria);
 
             $ratings = TargetCheck::getValidRatings();
             $table = $this->renderPartial("/layouts/partial/mapping/mapping-table", [

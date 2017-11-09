@@ -11,7 +11,6 @@ function System() {
         this.csrf = null;
         this.ajaxTimeout = 60000;
         this.messageTimeout = 5000;
-        this.l10nMessages = {};
         this.constants = {};
 
         $("select.show-hide-toggle").change(function () {
@@ -151,7 +150,7 @@ function System() {
                                 $('tr[data-id=' + id + ']').remove();
                                 _system.addAlert('success', _system.translate('Object deleted.'));
 
-                                if ($('table.table > tbody > tr').length == 1)
+                                if ($('table.table > tbody > tr').first().length == 1)
                                     location.reload();
                             });
 
@@ -210,10 +209,8 @@ function System() {
         this.del = function (id, message) {
             $('tr[data-id=' + id + ']').addClass('delete-row');
 
-            if (
-                confirm(_system.translate('Are you sure that you want to delete this object?')) &&
-                (message == undefined || (message != undefined && confirm(message + '\n\n' + _system.translate('PROCEED AT YOUR OWN RISK!'))))
-            ) {
+            if  (confirm(_system.translate('Are you sure that you want to delete this object?') +
+                    (message?'\n\n' + message + _system.translate(' PROCEED AT YOUR OWN RISK!'):''))) {
                 _system_control._control(id, 'delete');
             } else {
                 $('tr[data-id=' + id + ']').removeClass('delete-row');

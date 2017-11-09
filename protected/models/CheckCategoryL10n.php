@@ -7,6 +7,7 @@
  * @property integer $check_category_id
  * @property integer $language_id
  * @property string $name
+ * @property CheckCategory $category
  */
 class CheckCategoryL10n extends ActiveRecord
 {   
