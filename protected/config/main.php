@@ -1,6 +1,6 @@
 <?php
 
-define("YII_DEBUG", true);
+define("YII_DEBUG", false);
 define("YII_TRACE_LEVEL", 3);
 defined("BASE_DIR") || define("BASE_DIR", "/opt/gtta");
 
