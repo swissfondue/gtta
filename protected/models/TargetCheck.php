@@ -254,6 +254,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     public function getVariable($name, VariableScope $scope) {
         $check = $this->check;
         $names = $this->getRatingNames();
+
         $abbreviations = array(
             self::RATING_NONE => "none",
             self::RATING_NO_VULNERABILITY => "no_vuln",
@@ -263,6 +264,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             self::RATING_MED_RISK => "med",
             self::RATING_HIGH_RISK => "high",
         );
+
         $checkData = array(
             // Id of the vulnerability.
             "id" => $this->id,
@@ -283,17 +285,22 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "hints" => $this->getHints(),
             "poc" => $this->getPoc(),
         );
+
         if ($this->getSolution()) {
             $checkData["solution"][] = $this->getSolution();
         }
+
         foreach ($this->solutions as $solution) {
             $checkData["solution"][] = $solution->solution->localizedSolution;
         }
+
         $checkData["solution"] = implode("<br><br>", $checkData["solution"]);
+
         if (!in_array($name, array_keys($checkData))) {
             $customFieldValue = $this->getCustomField($name);
             return (isset($customFieldValue) ? $customFieldValue : "");
         }
+
         return $checkData[$name];
     }
 
@@ -408,6 +415,16 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      * @return mixed|null
      */
     private function _getFieldValue($name) {
+        $field = $this->getField($name);
+        return $field->value;
+    }
+
+    /**
+     * Returns target check field
+     * @param $name
+     * @return mixed|null
+     */
+    public function getField($name) {
         $criteria = new CDbCriteria();
         $criteria->join = "LEFT JOIN check_fields cf ON cf.id = t.check_field_id";
         $criteria->join .= " LEFT JOIN global_check_fields gcf ON gcf.id = cf.global_check_field_id";
@@ -421,7 +438,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
         if (!$field) {
             return null;
         }
-        return $field->value;
+        return $field;
     }
 
     /**

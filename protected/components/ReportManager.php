@@ -899,6 +899,10 @@ class ReportManager {
                             if (in_array($tc->rating, array(TargetCheck::RATING_HIGH_RISK, TargetCheck::RATING_MED_RISK, TargetCheck::RATING_LOW_RISK))) {
                                 $question = "";
                                 $result = "";
+                                $technicalSolution = "";
+                                $managementSolution = "";
+                                $technicalResult = "";
+                                $managementResult = "";
 
                                 foreach ($checkData["fields"] as $f) {
                                     if ($f["name"] == GlobalCheckField::FIELD_QUESTION) {
@@ -907,6 +911,22 @@ class ReportManager {
 
                                     if ($f["name"] == GlobalCheckField::FIELD_RESULT) {
                                         $result = $f["value"];
+                                    }
+
+                                    if ($f["name"] == GlobalCheckField::FIELD_TECHNICAL_SOLUTION) {
+                                        $technicalSolution = $f["value"];
+                                    }
+
+                                    if ($f["name"] == GlobalCheckField::FIELD_MANAGEMENT_SOLUTION) {
+                                        $managementSolution = $f["value"];
+                                    }
+
+                                    if ($f["name"] == GlobalCheckField::FIELD_TECHNICAL_RESULT) {
+                                        $technicalResult = $f["value"];
+                                    }
+
+                                    if ($f["name"] == GlobalCheckField::FIELD_MANAGEMENT_RESULT) {
+                                        $managementResult = $f["value"];
                                     }
                                 }
 
@@ -923,6 +943,10 @@ class ReportManager {
                                     "rating" => $checkData["rating"],
                                     "result" => $result,
                                     "ratingValue" => $checkData["ratingValue"],
+                                    "technicalSolution" => $technicalSolution,
+                                    "managementSolution" => $managementSolution,
+                                    "technicalResult" => $technicalResult,
+                                    "managementResult" => $managementResult,
                                     "targetCheckId" => $uniqueId ? $checkData["targetCheckId"]: null,
                                     "control" => $checkData["control"],
                                     "category" => $checkData["category"],
