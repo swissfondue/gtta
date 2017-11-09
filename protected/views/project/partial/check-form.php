@@ -41,8 +41,7 @@
             <?=
                 $this->renderPartial("partial/check-field", [
                     "field" => $field,
-                    "targetCheck" => $check,
-                    "hidden" => true
+                    "targetCheck" => $check
                 ]);
             ?>
         <?php endforeach; ?>
@@ -247,7 +246,7 @@
                                     <a href="#insert" onclick="user.check.insertResult(<?php echo $check->id; ?>, $('.result-content[data-id=<?php echo $result->id; ?>]').html());"><?php echo CHtml::encode($result->localizedTitle); ?></a>
 
                                     <span class="result-control" data-id="<?php echo $result->id; ?>">
-                                        <a href="#result" onclick="user.check.expandResult(<?php echo $result->id; ?>);"><i class="icon-chevron-down"></i></a>
+                                        <a href="#show-result" onclick="user.check.expandResult(<?php echo $result->id; ?>);"><i class="icon-chevron-down"></i></a>
                                     </span>
                                 </div>
 
@@ -348,24 +347,35 @@
                         </li>
                     <?php endforeach; ?>
                     <br>
-                    <a id="additionalSolutions" href="#additionalSolutionFields"><?php echo Yii::t("app", "Additional solution fields"); ?><i class="icon-chevron-down pull-right"></i></a>
+                    <a href="#show-solution-fields" onclick="user.check.toggleAdditionalSolutionFields(<?php echo $check->id; ?>);">
+                        <?php echo Yii::t("app", "Additional Solution Fields"); ?>
+                    </a>
                 </ul>
             </td>
         </tr>
-        <div id="additionalSolutionFields">
-        <?php $this->renderPartial(
-            "partial/check-field", [
-                "field" => $check->getField(GlobalCheckField::FIELD_TECHNICAL_SOLUTION),
-                "targetCheck" => $check, "hidden" => false
-            ]
-        ); ?>
-        <?php $this->renderPartial(
-            "partial/check-field", [
-                "field" => $check->getField(GlobalCheckField::FIELD_MANAGEMENT_SOLUTION),
-                "targetCheck" => $check, "hidden" => false
-            ]
-        ); ?>
-        </div>
+
+        <?php
+            $this->renderPartial(
+                "partial/check-field", [
+                    "field" => $check->getField(GlobalCheckField::FIELD_TECHNICAL_SOLUTION),
+                    "targetCheck" => $check,
+                    "hidden" => false,
+                    "hideRow" => true,
+                ]
+            );
+        ?>
+
+        <?php
+            $this->renderPartial(
+                "partial/check-field", [
+                    "field" => $check->getField(GlobalCheckField::FIELD_MANAGEMENT_SOLUTION),
+                    "targetCheck" => $check,
+                    "hidden" => false,
+                    "hideRow" => true,
+                ]
+            );
+        ?>
+
         <?php if (User::checkRole(User::ROLE_USER) || $check->attachments): ?>
             <tr>
                 <th>
@@ -456,15 +466,10 @@
         user.check.initTargetCheckAttachmentUploadForms(id);
         user.check.initAutosave(id);
 
-        $("#technical_solution").hide();
-        $("#management_solution").hide();
-
         $("#additionalSolutions").on("click",function(event){
             event.preventDefault();
             $("#technical_solution").toggle();
             $("#management_solution").toggle();
-        })
+        });
     });
-
-
 </script>

@@ -254,6 +254,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
     public function getVariable($name, VariableScope $scope) {
         $check = $this->check;
         $names = $this->getRatingNames();
+
         $abbreviations = array(
             self::RATING_NONE => "none",
             self::RATING_NO_VULNERABILITY => "no_vuln",
@@ -263,6 +264,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             self::RATING_MED_RISK => "med",
             self::RATING_HIGH_RISK => "high",
         );
+
         $checkData = array(
             // Id of the vulnerability.
             "id" => $this->id,
@@ -282,18 +284,27 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "background_info" => $this->getBackgroundInfo(),
             "hints" => $this->getHints(),
             "poc" => $this->getPoc(),
+            "technical_solution" => $this->getCustomField(GlobalCheckField::FIELD_TECHNICAL_SOLUTION),
+            "management_solution" => $this->getCustomField(GlobalCheckField::FIELD_MANAGEMENT_SOLUTION),
+            "technical_result" => $this->getCustomField(GlobalCheckField::FIELD_TECHNICAL_RESULT),
+            "management_result" => $this->getCustomField(GlobalCheckField::FIELD_MANAGEMENT_RESULT),
         );
+
         if ($this->getSolution()) {
             $checkData["solution"][] = $this->getSolution();
         }
+
         foreach ($this->solutions as $solution) {
             $checkData["solution"][] = $solution->solution->localizedSolution;
         }
+
         $checkData["solution"] = implode("<br><br>", $checkData["solution"]);
+
         if (!in_array($name, array_keys($checkData))) {
             $customFieldValue = $this->getCustomField($name);
             return (isset($customFieldValue) ? $customFieldValue : "");
         }
+
         return $checkData[$name];
     }
 

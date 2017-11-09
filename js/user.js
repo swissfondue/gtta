@@ -716,10 +716,26 @@ function User()
         };
 
         /**
+         * Toggle additional solution fields.
+         */
+        this.toggleAdditionalSolutionFields = function (id) {
+            $("#row_" + id + "_technical_solution").toggle();
+            $("#row_" + id + "_management_solution").toggle();
+        };
+
+        /**
+         * Toggle additional result fields.
+         */
+        this.toggleAdditionalResultFields = function (id) {
+            $("#row_" + id + "_technical_result").toggle();
+            $("#row_" + id + "_management_result").toggle();
+        };
+
+        /**
          * Expand result.
          */
         this.expandResult = function (id) {
-            $('span.result-control[data-id=' + id + ']').html('<a href="#result" onclick="user.check.collapseResult(' + id + ');"><i class="icon-chevron-up"></i></a>');
+            $('span.result-control[data-id=' + id + ']').html('<a href="#show-result" onclick="user.check.collapseResult(' + id + ');"><i class="icon-chevron-up"></i></a>');
             $('div.result-content[data-id=' + id + ']').slideDown('slow');
         };
 
@@ -727,7 +743,7 @@ function User()
          * Collapse result.
          */
         this.collapseResult = function (id) {
-            $('span.result-control[data-id=' + id + ']').html('<a href="#result" onclick="user.check.expandResult(' + id + ');"><i class="icon-chevron-down"></i></a>');
+            $('span.result-control[data-id=' + id + ']').html('<a href="#show-result" onclick="user.check.expandResult(' + id + ');"><i class="icon-chevron-down"></i></a>');
             $('div.result-content[data-id=' + id + ']').slideUp('slow');
         };
 

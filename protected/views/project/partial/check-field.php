@@ -1,14 +1,17 @@
-<?php $issue = isset($issue); ?>
-<?php $formName = $issue ? "IssueEvidenceEditForm" : "TargetCheckEditForm"; ?>
-<?php $hidden = $hidden ? $field->getHidden() : $hidden; ?>
+<?php
+    $issue = isset($issue);
+    $formName = $issue ? "IssueEvidenceEditForm" : "TargetCheckEditForm";
+    $hidden = isset($hidden) ? $hidden : $field->getHidden();
+    $hideRow = isset($hideRow) ? $hideRow : false;
+?>
 
-<?php if (!$hidden): ?>
+<?php if ($field && !$hidden): ?>
     <?php
         $name = sprintf("%s_%d[fields][%s]", $formName, $targetCheck->id, $field->name);
         $id = sprintf("%s_fields_%d_%s", $formName, $targetCheck->id, $field->name);
     ?>
 
-    <tr id="<?= $field->name ?>">
+    <tr id="row_<?= $targetCheck->id; ?>_<?= $field->name; ?>" <?php if ($hideRow) echo 'class="hide"'; ?>>
         <th>
             <?= $field->localizedTitle; ?>
         </th>
@@ -68,6 +71,36 @@
                     <input type="checkbox" class="input-xlarge target-check-field" name="<?= $name ?>" id="<?= $id ?>" <?php if (isset($field->value) && $field->value) echo "checked"; ?>>
                 <?php endif; ?>
             </div>
+
+            <?php if ($field->name == GlobalCheckField::FIELD_RESULT): ?>
+                <br>
+                <a href="#show-result-fields" onclick="user.check.toggleAdditionalResultFields(<?php echo $targetCheck->id; ?>);">
+                    <?php echo Yii::t("app", "Additional Result Fields"); ?>
+                </a>
+            <?php endif; ?>
         </td>
     </tr>
+
+    <?php if ($field->name == GlobalCheckField::FIELD_RESULT): ?>
+        <?php
+            $this->renderPartial(
+                "partial/check-field", [
+                    "field" => $targetCheck->getField(GlobalCheckField::FIELD_TECHNICAL_RESULT),
+                    "targetCheck" => $targetCheck,
+                    "hidden" => false,
+                    "hideRow" => true,
+                ]
+            );
+        ?>
+        <?php
+            $this->renderPartial(
+                "partial/check-field", [
+                    "field" => $targetCheck->getField(GlobalCheckField::FIELD_MANAGEMENT_RESULT),
+                    "targetCheck" => $targetCheck,
+                    "hidden" => false,
+                    "hideRow" => true,
+                ]
+            );
+        ?>
+    <?php endif; ?>
 <?php endif; ?>
