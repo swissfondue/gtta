@@ -246,7 +246,7 @@
                                     <a href="#insert" onclick="user.check.insertResult(<?php echo $check->id; ?>, $('.result-content[data-id=<?php echo $result->id; ?>]').html());"><?php echo CHtml::encode($result->localizedTitle); ?></a>
 
                                     <span class="result-control" data-id="<?php echo $result->id; ?>">
-                                        <a href="#result" onclick="user.check.expandResult(<?php echo $result->id; ?>);"><i class="icon-chevron-down"></i></a>
+                                        <a href="#show-result" onclick="user.check.expandResult(<?php echo $result->id; ?>);"><i class="icon-chevron-down"></i></a>
                                     </span>
                                 </div>
 
@@ -294,7 +294,6 @@
                                 </span>
                             </label>
                         </div>
-
                         <div class="solution-content hide" data-id="<?php echo $check->id; ?>-<?php echo TargetCheckEditForm::CUSTOM_SOLUTION_IDENTIFIER; ?>">
                             <input type="text" name="TargetCheckEditForm_<?php echo $check->id; ?>[solutionTitle]" class="max-width" id="TargetCheckEditForm_<?php echo $check->id; ?>_solutionTitle" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?> value="<?php echo CHtml::encode($check->solutionTitle); ?>">
                             <textarea name="TargetCheckEditForm_<?php echo $check->id; ?>[solution]" class="solution-edit wysiwyg max-width result" rows="10" id="TargetCheckEditForm_<?php echo $check->id; ?>_solution" <?php if ($check->isRunning || User::checkRole(User::ROLE_CLIENT)) echo "readonly"; ?>><?php echo CHtml::encode($check->solution); ?></textarea>
@@ -347,9 +346,36 @@
                             </div>
                         </li>
                     <?php endforeach; ?>
+                    <br>
+                    <a href="#show-solution-fields" onclick="user.check.toggleAdditionalSolutionFields(<?php echo $check->id; ?>);">
+                        <?php echo Yii::t("app", "Additional Solution Fields"); ?>
+                    </a>
                 </ul>
             </td>
         </tr>
+
+        <?php
+            $this->renderPartial(
+                "partial/check-field", [
+                    "field" => $check->getField(GlobalCheckField::FIELD_TECHNICAL_SOLUTION),
+                    "targetCheck" => $check,
+                    "hidden" => false,
+                    "hideRow" => true,
+                ]
+            );
+        ?>
+
+        <?php
+            $this->renderPartial(
+                "partial/check-field", [
+                    "field" => $check->getField(GlobalCheckField::FIELD_MANAGEMENT_SOLUTION),
+                    "targetCheck" => $check,
+                    "hidden" => false,
+                    "hideRow" => true,
+                ]
+            );
+        ?>
+
         <?php if (User::checkRole(User::ROLE_USER) || $check->attachments): ?>
             <tr>
                 <th>
@@ -439,5 +465,11 @@
         $(".wysiwyg", form).ckeditor();
         user.check.initTargetCheckAttachmentUploadForms(id);
         user.check.initAutosave(id);
+
+        $("#additionalSolutions").on("click",function(event){
+            event.preventDefault();
+            $("#technical_solution").toggle();
+            $("#management_solution").toggle();
+        });
     });
 </script>

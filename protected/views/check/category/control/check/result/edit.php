@@ -1,18 +1,6 @@
 <script src="/ckeditor/ckeditor.js"></script>
 <script src="/ckeditor/adapters/jquery.js"></script>
-<?php if ($view == Check::VIEW_SHARED): ?>
-    <style>
-        textarea.wysiwyg {
-            width: 270px;
-            height: 200px;
-        }
 
-        table .span6 {
-            float: left;
-        }
-    </style>
-<?php endif; ?>
-<hr>
 <?php if ($result->isNewRecord) {
     echo "<h2>" . Yii::t('app', 'New Result') . "</h2><br>";
 } ?>
@@ -32,16 +20,18 @@
                 <?php endforeach; ?>
             </ul>
         <?php endif; ?>
+
         <div class=<?= ($view == Check::VIEW_TABBED) ? "tab-content" : "row" ?>>
             <?php foreach ($languages as $language): ?>
-                <div class="<?= (($view == Check::VIEW_SHARED) ? "span6" : ("tab-pane" . $language->default ? " active" : "")) ?>"
+                <div class="<?= (($view == Check::VIEW_SHARED) ? "span6" : ("tab-pane" . $language->default ? " active" : "")) ?>  <?= ($view == Check::VIEW_SHARED) ? "span6-shared" : "" ?>"
                      id="<?php echo CHtml::encode($language->code); ?>">
                     <?php if ($view == Check::VIEW_SHARED): ?>
-                        <a>
+                        <div class="controls">
                             <img src="<?php echo Yii::app()->baseUrl; ?>/images/languages/<?php echo CHtml::encode($language->code); ?>.png"
                                  alt="<?php echo CHtml::encode($language->name); ?>">
                             <?php echo CHtml::encode($language->name); ?>
-                        </a>
+                        </div>
+                        <br>
                     <?php endif; ?>
                     <div class="control-group <?php if ($model->getError('title')) echo 'error'; ?>">
                         <label class="control-label"
@@ -61,7 +51,7 @@
                                for="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result"><?php echo Yii::t('app', 'Result'); ?></label>
                         <div class="controls">
                             <textarea
-                                    class="wysiwyg <?php if (isset($model->localizedItems[$language->id])) echo(Utils::isHtml($model->localizedItems[$language->id]['result']) ? 'html_content' : ''); ?>"
+                                    class="wysiwyg <?php if (isset($model->localizedItems[$language->id])) echo(Utils::isHtml($model->localizedItems[$language->id]['result']) ? 'html_content' : ''); ?> <?= ($view == Check::VIEW_SHARED) ? "wysiwyg-shared" : "" ?>"
                                     id="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result"
                                     name="CheckResultEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][result]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['result']) : ''; ?></textarea>
 
@@ -129,27 +119,19 @@
             });
         });
     });
+    
+    var resId = <?php echo json_encode($result->id) ?>;
 
-    $('#languages-tab a').click(function (e) {
+    <?php if (!$newRecord): ?>
+        user.check.hideOnSubmitCheckResultOrSolutionBlock(resId);
+    <?php endif; ?>
+
+    $("#languages-tab a").click(function (e) {
         e.preventDefault();
-        $(this).tab('show');
+        $(this).tab("show");
     });
 
-    /**
-     * Enabling ckeditor for wysiwyg elements, which contain HTML
-     */
-    $.each($('.wysiwyg.html_content'), function (key, value) {
-        user.check.toggleEditor($(value).attr('id'));
-    });
-
-    /**
-     * Binding change event for wysiwyg elements on HTML containing
-     */
-    $('.wysiwyg').bind('input propertychange', function () {
-        if ($(this).val().isHTML()) {
-            if (!user.check.getEditor($(this).attr('id'))) {
-                user.check.enableEditor($(this).attr('id'));
-            }
-        }
+    $(function () {
+        user.check.enableResultWysiwyg();
     });
 </script>

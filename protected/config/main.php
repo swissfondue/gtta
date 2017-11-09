@@ -67,8 +67,8 @@ return [
 			"class"  => "CLogRouter",
 			"routes" => [
                 [
-                    'class'=>'CWebLogRoute',
-                    'enabled' => YII_DEBUG,
+                    "class" => "CWebLogRoute",
+                    "enabled" => YII_DEBUG,
                 ],
 				[
 					"class" => "CFileLogRoute",

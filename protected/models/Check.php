@@ -2,7 +2,6 @@
 
 /**
  * This is the model class for table "checks".
- *
  * The followings are the available columns in table 'checks':
  * @property integer $id
  * @property integer $check_control_id
@@ -22,6 +21,7 @@
  * @property CheckL10n[] $l10n
  * @property CheckScript[] $scripts
  * @property CheckField[] $fields
+ * @property CheckControl control
  */
 class Check extends ActiveRecord {
     const STATUS_INSTALLED = 1;

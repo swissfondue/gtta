@@ -545,11 +545,15 @@ set threads 3</pre>
                                 <li>rating_name - check rating name (like "High Risk" for high risk, etc.)</li>
                                 <li>target - check target host</li>
                                 <li>result - check result</li>
+                                <li>technical_result - technical result</li>
+                                <li>management_result - management result</li>
                                 <li>reference - check reference name</li>
                                 <li>
                                     solution - check solution. If a check has multiple solutions, this variable will
                                     hold a concatenated value.
                                 </li>
+                                <li>technical_solution - technical solution</li>
+                                <li>management_solution - management solution</li>
                             </ul>
 
                             <br>

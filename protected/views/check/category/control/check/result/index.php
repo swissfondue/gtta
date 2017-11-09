@@ -32,6 +32,14 @@
                                         array('id' => 'result-link-'.$result->id, 'class' => 'result-link')
                                     );?>
 
+                                    <?=
+                                        CHtml::ajaxLink(
+                                            CHtml::encode($result->localizedTitle),
+                                            CController::createUrl("check/editresult", ["id" => $category->id, "control" => $control->id, "check" => $check->id, "result" => $result->id]),
+                                            ["update" => "#simple-div-" . $result->id],
+                                            ["id" => "simple-link-" . $result->id, "class" => "result-link"]
+                                        );
+                                    ?>
                                     <div class="result-form" id="result-div-<?php echo $result->id;?>"></div>
                                 </td>
                                 <td class="actions">

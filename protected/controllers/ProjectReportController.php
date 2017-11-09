@@ -111,7 +111,7 @@ class ProjectReportController extends Controller {
                     $plugin->sendOverHttp();
                 } catch (Exception $e) {
                     Yii::log($e->getMessage() . "\n" . $e->getTraceAsString(), CLogger::LEVEL_ERROR);
-                    Yii::app()->user->setFlash("error", Yii::t("app", "Error generating report."));
+                    Yii::app()->user->setFlash("error", Yii::t("app", "Error generating report. " . $e->getMessage()));
                 }
             } catch (Exception $e) {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
@@ -193,6 +193,7 @@ class ProjectReportController extends Controller {
 
         if (!$project->report_options) {
             $form->title = true;
+            $form->uniqueId = 0;
         }
 
         if (isset($_POST["ProjectReportForm"])) {
@@ -209,6 +210,10 @@ class ProjectReportController extends Controller {
 
                 if (!$form->title) {
                     $form->title = [];
+                }
+
+                if (!$form->uniqueId) {
+                    $form->uniqueId = 0;
                 }
 
                 $templateCategoryIds = array();
@@ -244,7 +249,7 @@ class ProjectReportController extends Controller {
                 }
 
                 $prm = new ReportManager();
-                $data = $prm->getProjectReportData($form->targetIds, $templateCategoryIds, $project, $form->fields, $language);
+                $data = $prm->getProjectReportData($form->targetIds, $templateCategoryIds, $project, $form->fields, $language, $form->uniqueId);
                 $data = array_merge($data, [
                     "template" => $template,
                     "pageMargin" => $form->pageMargin,
@@ -260,6 +265,7 @@ class ProjectReportController extends Controller {
                     "infoLocation" => $form->infoChecksLocation,
                     "fields" => $form->fields,
                     "sections" => $sections,
+                    "uniqueId" => $form->uniqueId
                 ]);
 
                 $plugin = ReportPlugin::getPlugin($template, $data, $language);
@@ -269,7 +275,7 @@ class ProjectReportController extends Controller {
                 Yii::app()->user->setFlash("error", Yii::t("app", "Please fix the errors below."));
             } catch (Exception $e) {
                 Yii::log($e->getMessage() . "\n" . $e->getTraceAsString(), CLogger::LEVEL_ERROR);
-                Yii::app()->user->setFlash("error", Yii::t("app", "Error generating report."));
+                Yii::app()->user->setFlash("error", Yii::t("app", "Error generating report. " . $e->getMessage()));
             }
         }
 

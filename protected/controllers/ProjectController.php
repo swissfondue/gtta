@@ -4768,6 +4768,36 @@ class ProjectController extends Controller
                 $exclude[] = $issue->check->id;
             }
 
+            $ctm = new CategoryManager();
+            $data = [];
+
+            /** @var CheckCategoryL10n[] $categories */
+            $categories = $ctm->filter($form->query, $language->id);
+
+            foreach ($categories as $categoryL10) {
+                $controls = $categoryL10->category->controls;
+                $checksData = [];
+
+                foreach ($controls as $control) {
+                    $checks = $control->checks;
+
+                    foreach ($checks as $check) {
+                        if (in_array($check->id, $exclude)) {
+                            continue;
+                        }
+
+                        $checksData[] = $check->serialize($language->id);
+                        $exclude[] = $check->id;
+                    }
+                }
+
+                $item["checks"] = $checksData;
+                $item["name"] = $categoryL10->name;
+                $data[] = $item;
+            }
+
+            $response->addData("categories", $data);
+
             $checks = $cm->filter($form->query, $language->id, $exclude);
             $data = [];
 
@@ -5196,6 +5226,8 @@ class ProjectController extends Controller
         try {
             $id = (int)$id;
             $issue = (int)$issue;
+
+            /** @var Project $project */
             $project = Project::model()->findByPk($id);
 
             if (!$project) {
@@ -5240,13 +5272,16 @@ class ProjectController extends Controller
 
             switch ($form->operation) {
                 case "add":
-                    $tm->addEvidence($target, $issue);
+                    $evidence = $tm->addEvidence($target, $issue);
                     break;
 
                 default:
                     throw new Exception(Yii::t("app", "Unknown operation."));
                     break;
             }
+
+            $response->addData("issue", $issue->id);
+            $response->addData("url", $this->createUrl("project/evidence", ["id" => $project->id, "issue" => $issue->id, "evidence" => $evidence->id]));
         } catch (Exception $e) {
             $response->setError($e->getMessage());
         }
