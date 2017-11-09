@@ -1,7 +1,7 @@
 <script src="/ckeditor/ckeditor.js"></script>
 <script src="/ckeditor/adapters/jquery.js"></script>
 
-<form id="form" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
+<form id="result-form-<?= $result->id; ?>" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
     <fieldset>
         <?php if ($view == Check::VIEW_TABBED): ?>
@@ -35,7 +35,7 @@
                                for="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_title"><?php echo Yii::t('app', 'Title'); ?></label>
                         <div class="controls">
                             <input type="text" class="input-xlarge"
-                                   id="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_title"
+                                   id="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_title_<?= $result ? $result->id : "new"; ?>"
                                    name="CheckResultEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][title]"
                                    value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['title']) : ''; ?>">
                             <?php if ($model->getError('title')): ?>
@@ -49,7 +49,7 @@
                         <div class="controls">
                             <textarea
                                     class="wysiwyg <?php if (isset($model->localizedItems[$language->id])) echo(Utils::isHtml($model->localizedItems[$language->id]['result']) ? 'html_content' : ''); ?> <?= ($view == Check::VIEW_SHARED) ? "wysiwyg-shared" : "" ?>"
-                                    id="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result"
+                                    id="CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result_<?= $result ? $result->id : "new"; ?>"
                                     name="CheckResultEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][result]"><?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['result']) : ''; ?></textarea>
 
                             <?php if ($model->getError('result')): ?>
@@ -58,7 +58,7 @@
 
                             <p class="help-block">
                                 <a class="btn btn-default" href="#editor"
-                                   onclick="user.check.toggleEditor('CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result');">
+                                   onclick="user.check.toggleEditor('CheckResultEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_result_<?= $result ? $result->id : "new"; ?>');">
                                     <span class="glyphicon glyphicon-edit"></span>
                                     <?php echo Yii::t("app", "WYSIWYG"); ?>
                                 </a>
@@ -87,11 +87,12 @@
         </div>
     </fieldset>
 </form>
+
 <script>
     var resId = <?php echo json_encode($result->id) ?>;
 
     <?php if (!$newRecord): ?>
-        user.check.hideOnSubmitCheckResultOrSolutionBlock(resId);
+        user.check.submitResultBlock(resId);
     <?php endif; ?>
 
     $("#languages-tab a").click(function (e) {
