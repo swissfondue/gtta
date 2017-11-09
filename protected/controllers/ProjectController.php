@@ -4768,6 +4768,36 @@ class ProjectController extends Controller
                 $exclude[] = $issue->check->id;
             }
 
+            $ctm = new CategoryManager();
+            $data = [];
+
+            /** @var CheckCategoryL10n[] $categories */
+            $categories = $ctm->filter($form->query, $language->id);
+
+            foreach ($categories as $categoryL10) {
+                $controls = $categoryL10->category->controls;
+                $checksData = [];
+
+                foreach ($controls as $control) {
+                    $checks = $control->checks;
+
+                    foreach ($checks as $check) {
+                        if (in_array($check->id, $exclude)) {
+                            continue;
+                        }
+
+                        $checksData[] = $check->serialize($language->id);
+                        $exclude[] = $check->id;
+                    }
+                }
+
+                $item["checks"] = $checksData;
+                $item["name"] = $categoryL10->name;
+                $data[] = $item;
+            }
+
+            $response->addData("categories", $data);
+
             $checks = $cm->filter($form->query, $language->id, $exclude);
             $data = [];
 

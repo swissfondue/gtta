@@ -8,6 +8,7 @@
  * @property string $name
  * @property integer $external_id
  * @property integer $status
+ * @property CheckControl[] controls
  */
 class CheckCategory extends ActiveRecord implements IVariableScopeObject {
     const STATUS_INSTALLED = 1;

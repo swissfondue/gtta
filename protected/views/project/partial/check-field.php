@@ -17,7 +17,7 @@
                 <?php if (in_array($field->type, [GlobalCheckField::TYPE_TEXTAREA, GlobalCheckField::TYPE_WYSIWYG])): ?>
                     <?php $wysiwyg = in_array($field->type, [GlobalCheckField::TYPE_WYSIWYG, GlobalCheckField::TYPE_WYSIWYG_READONLY]); ?>
 
-                    <textarea class="max-width target-check-field <?= $wysiwyg ? "wysiwyg" : "" ?>"
+                    <textarea class="max-width target-check-field <?= ($wysiwyg || Utils::containsSpecificHtmlSymbols($field->value)) ? "wysiwyg" : "" ?>"
                               rows="10"
                               id="<?= $id ?>"
                               name="<?= $name ?>"

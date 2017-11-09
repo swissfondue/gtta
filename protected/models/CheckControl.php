@@ -2,7 +2,6 @@
 
 /**
  * This is the model class for table "check_controls".
- *
  * The followings are the available columns in table 'check_controls':
  * @property integer $id
  * @property integer $check_category_id
@@ -11,6 +10,8 @@
  * @property integer $external_id
  * @property integer $status
  * @property TargetCustomCheck[] $customChecks
+ * @property CheckCategory category
+ * @property Check[] $checks
  */
 class CheckControl extends ActiveRecord implements IVariableScopeObject {
     const STATUS_INSTALLED = 1;

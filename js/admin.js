@@ -445,13 +445,52 @@ function Admin() {
                         }
 
                         var checks = data.data.checks;
+                        var categories = data.data.categories;
+                        var link;
+
+                        if (!checks) {
+                            checks = [];
+                        }
+
+                        if (!categories) {
+                            categories = [];
+                        }
 
                         list.empty();
                         list.siblings(".no-search-result").hide();
 
-                        if (checks.length) {
-                            var link;
+                        if (categories.length) {
+                            categories.forEach(function (category) {
+                                var categoryName = $("<li>");
 
+                                categoryName.append(
+                                    $("<i class='icon icon-folder-open'>"),
+                                    "&nbsp;",
+                                    $("<a>")
+                                        .attr("href", "#")
+                                        .text(category["name"])
+                                        .click(function () {
+                                            $(this).parent().find("li.category-checks").slideToggle();
+                                        })
+                                );
+
+                                if (category["checks"].length) {
+                                    category["checks"].forEach(function (value, key) {
+                                        link = $("<a>")
+                                            .attr("href", "#")
+                                            .text(value.name)
+                                            .click(function () {
+                                                onChooseEvent(value.id);
+                                            });
+                                        categoryName.append($("<li style='padding-left: 20px' class='category-checks hide'>").append(link))
+                                    });
+                                }
+
+                                list.append(categoryName);
+                            });
+                        }
+
+                        if (checks.length) {
                             $.each(checks, function (key, value) {
                                 link = $("<a>")
                                     .attr("href", "#")
@@ -464,7 +503,9 @@ function Admin() {
                                     $("<li>").append(link)
                                 )
                             });
-                        } else {
+                        }
+
+                        if (!checks.length && !categories.length) {
                             list.siblings(".no-search-result").show();
                         }
                     },
@@ -3005,6 +3046,8 @@ function Admin() {
             filters: {
                 hosts: ".filter.nessus-hosts .nessus-host input:checked",
                 ratings: ".filter.nessus-ratings .nessus-rating input:checked",
+                sortBy: "select[name=sortBy] option:selected",
+                sortDirection: "select[name=sortDirection] option:selected",
                 container: ".nessus-mapping-filters"
             }
         };
@@ -3122,6 +3165,8 @@ function Admin() {
         this.getFilterData = function (mappingId) {
             var hosts = $(_nessusMapping.selectors.filters.hosts);
             var ratings = $(_nessusMapping.selectors.filters.ratings);
+            var sortBy = $(_nessusMapping.selectors.filters.sortBy).val();
+            var sortDirection = $(_nessusMapping.selectors.filters.sortDirection).val();
 
             var hostIds = [];
             var ratingIds = [];
@@ -3138,7 +3183,9 @@ function Admin() {
                 "YII_CSRF_TOKEN": system.csrf,
                 "NessusMappingVulnFilterForm[mappingId]": mappingId,
                 "NessusMappingVulnFilterForm[hosts]": JSON.stringify(hostIds),
-                "NessusMappingVulnFilterForm[ratings]": JSON.stringify(ratingIds)
+                "NessusMappingVulnFilterForm[ratings]": JSON.stringify(ratingIds),
+                "NessusMappingVulnFilterForm[sortBy]": sortBy,
+                "NessusMappingVulnFilterForm[sortDirection]": sortDirection
             };
         };
 
@@ -3176,6 +3223,15 @@ function Admin() {
                     $(".loader-image").show();
                 }
             });
+        };
+
+        /**
+         * Toggle hosts checked state
+         * @param mappingId
+         */
+        this.toggleHostCheckedState = function (mappingId) {
+            $(".filter.nessus-hosts .nessus-host input").prop("checked", $("#allHosts").prop("checked"));
+            this.filterItems(mappingId);
         };
 
         /**
