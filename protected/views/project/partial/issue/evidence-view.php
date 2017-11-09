@@ -19,7 +19,7 @@
 
             <div class="tab-pane <?= $i == 0 ? "active" : "" ?>" id="evidence_<?= $evidence->id; ?>"
                  data-target-check-id="<?= $tc->id ?>"
-                 data-update-evidence-url-<?= $tc->id ?>="<?php echo $this->createUrl("project/updateevidence", ["id" => $project->id, "issue" => $issue->id,"targetCheck" => $tc->id]) ?> ">
+                 data-update-evidence-url-<?= $tc->id ?>="<?php echo $this->createUrl("project/updateevidence", ["id" => $project->id, "issue" => $issue->id, "targetCheck" => $tc->id]) ?> ">
                 <div class="control-group">
                     <span style="font-size: 16px; margin-left: 5px;"><?= Yii::t("app", "Evidence for this instance") ?></span>&nbsp;—&nbsp;
                     <a href="<?= $this->createUrl("project/evidence", ["id" => $project->id, "issue" => $issue->id, "evidence" => $evidence->id]) ?>"><?= Yii::t("app", "Edit") ?></a>
@@ -71,7 +71,7 @@
                             <?= count($tc->attachments) ?>
                         </div>
                     </div>
-                    <button class="pull-right"  onclick="admin.issue.evidence.toggleEvidenceEditBlock('result')"><i class="icon-pencil"></i></button>
+                    <a class="pull-right" href="#edit-evidence" onclick="admin.issue.evidence.toggleEvidenceEditBlock('result')"><i class="icon-pencil"></i></a>
                     <div class="field-block" id="resultField">
                         <b><?= Yii::t("app", "Result") ?></b>
                         <br/>
@@ -89,7 +89,7 @@
                         <textarea id="result-<?= $tc->id ?>" class="textarea textarea-evidence-view" rows="3" name="text"><?= $tc->result ?></textarea>
                         <br/>
                     </div>
-                    <button class="pull-right" onclick="admin.issue.evidence.toggleEvidenceEditBlock('poc')"> <i class="icon icon-pencil"></i></button>
+                    <a class="pull-right" href="#edit-poc" onclick="admin.issue.evidence.toggleEvidenceEditBlock('poc')"><i class="icon icon-pencil"></i></a>
                     <div id="pocField" class="field-block evidence-field poc">
                         <b><?= Yii::t("app", "PoC") ?></b>
                         <br/>

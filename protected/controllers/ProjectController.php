@@ -5435,7 +5435,7 @@ class ProjectController extends Controller
             $form = new IssueEvidenceEditForm();
             $form->attributes = $_POST["IssueEvidenceEditForm"];
 
-            if ($form->rating) {
+            if (isset($_POST["IssueEvidenceEditForm"]["rating"])) {
                 $rating = $form->rating;
             }
 
@@ -5476,10 +5476,12 @@ class ProjectController extends Controller
 
                 foreach ($evidences as $evidence) {
                     $target = $evidence->targetCheck;
-                    if ($rating) {
+
+                    if (isset($_POST["IssueEvidenceEditForm"]["rating"])) {
                         $target->rating = $rating;
                         $target->save();
                     }
+
                     if ($solution) {
                         TargetCheckSolution::model()->deleteAllByAttributes(
                             [

@@ -87,6 +87,7 @@ return [
     "project/<id:\d+>/issue/<issue:\d+>/target/search" => "project/searchtargets",
     "project/<id:\d+>/issue/<issue:\d+>/evidence/new" => "project/addEvidence",
     "project/<id:\d+>/issue/<issue:\d+>/evidence/<evidence:\d+>" => "project/evidence",
+    "project/<id:\d+>/issue/<issue:\d+>/evidence/<targetCheck:\d+>/update" => "project/updateevidence",
     "project/<id:\d+>/issue/<issue:\d+>/evidence/update" => "project/updateevidence",
     "project/<id:\d+>/issue/<issue:\d+>/evidence/view/<host:.+>" => "project/viewevidence",
     "project/<id:\d+>/issue/<issue:\d+>/checks/update" => "project/updateissuechecks",
