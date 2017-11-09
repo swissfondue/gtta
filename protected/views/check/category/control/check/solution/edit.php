@@ -1,9 +1,6 @@
 <script src="/ckeditor/ckeditor.js"></script>
 <script src="/ckeditor/adapters/jquery.js"></script>
 
-<?php if ($solution->isNewRecord) {
-    echo "<h2>" . Yii::t('app', 'New Solution') . "</h2><br>";
-} ?>
 <form id="solution-form-<?=$solution->id?>" class="form-horizontal" action="<?php echo Yii::app()->request->url; ?>" method="post">
     <input type="hidden" value="<?php echo Yii::app()->request->csrfToken; ?>" name="YII_CSRF_TOKEN">
     <fieldset>
@@ -20,6 +17,7 @@
                 <?php endforeach; ?>
             </ul>
         <?php endif; ?>
+
         <div class=<?= ($view == Check::VIEW_TABBED) ? "tab-content" : "row" ?>>
             <?php foreach ($languages as $language): ?>
                 <div class="<?= (($view == Check::VIEW_SHARED) ? "span6" : ("tab-pane" . $language->default ? " active" : "")) ?> <?= ($view == Check::VIEW_SHARED) ? "span6-shared" : "" ?>"
@@ -37,7 +35,7 @@
                                for="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_title"><?php echo Yii::t('app', 'Title'); ?></label>
                         <div class="controls">
                             <input type="text" class="input-xlarge"
-                                   id="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_title"
+                                   id="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_title_<?= $solution ? $solution->id : "new"; ?>"
                                    name="CheckSolutionEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][title]"
                                    value="<?php echo isset($model->localizedItems[$language->id]) ? CHtml::encode($model->localizedItems[$language->id]['title']) : ''; ?>">
                             <?php if ($model->getError('title')): ?>
@@ -50,7 +48,7 @@
                                for="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_solution"><?php echo Yii::t('app', 'Solution'); ?></label>
                         <div class="controls">
                             <textarea class="wysiwyg <?= ($view == Check::VIEW_SHARED) ? "wysiwyg-shared" : "" ?>" style="height:200px;"
-                                      id="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_solution"
+                                      id="CheckSolutionEditForm_localizedItems_<?php echo CHtml::encode($language->id); ?>_solution_<?= $solution ? $solution->id : "new"; ?>"
                                       name="CheckSolutionEditForm[localizedItems][<?php echo CHtml::encode($language->id); ?>][solution]"><?php echo isset($model->localizedItems[$language->id]) ? str_replace('&', '&amp;', $model->localizedItems[$language->id]['solution']) : ''; ?></textarea>
                             <?php if ($model->getError('solution')): ?>
                                 <p class="help-block"><?php echo $model->getError('solution'); ?></p>
@@ -75,42 +73,15 @@
         </div>
         <div class="form-actions">
             <button type="submit" class="btn"><?php echo Yii::t('app', 'Save'); ?></button>
-            <?php if ($solution->isNewRecord): ?>
-                <button type="button" class="btn" onclick="$('#solution-div-new').hide();"><?php echo Yii::t('app', 'Close'); ?></button>
-            <?php endif; ?>
         </div>
     </fieldset>
 </form>
+
 <script>
-    /**
-     *Submit form without redirect
-     */
-    $(function () {
-        var solId = <?php echo json_encode($solution->id)?>;
-        $("#solution-form-" + (solId?solId:'')).on("submit", function (e) {
-            e.preventDefault();
-            $.ajax({
-                url: $(this).attr("action"),
-                type: 'POST',
-                data: $(this).serialize(),
-                success: function (data) {
-                    <?php if ($solution->isNewRecord):  ?>
-                    $("#solution-div-new").hide();
-                    window.location.reload();
-                    <?php else: ?>
-                    $("#solution-div-" + solId).hide();
-                    <?php endif; ?>
-                },
-                error: function (data) {
-                    system.addAlert('error', "Fill all required fields.");
-                }
-            });
-        });
-    });
     var solId = <?php echo json_encode($solution->id) ?>;
 
     <?php if (!$newRecord): ?>
-        user.check.hideOnSubmitCheckResultOrSolutionBlock(solId);
+        user.check.submitSolutionBlock(solId);
     <?php endif; ?>
 
     $("#languages-tab a").click(function (e) {

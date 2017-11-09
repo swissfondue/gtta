@@ -94,9 +94,27 @@ function User()
 
         /**
          * Submit form without redirect
+         * @param id
          */
-        this.hideOnSubmitCheckResultOrSolutionBlock = function (id) {
-            $("#form").on("submit", function (e) {
+        this.submitResultBlock = function (id) {
+            this.submitBlock("result", id);
+        };
+
+        /**
+         * Submit form without redirect
+         * @param id
+         */
+        this.submitSolutionBlock = function (id) {
+            this.submitBlock("solution", id);
+        };
+
+        /**
+         * Submit form without redirect
+         * @param type
+         * @param id
+         */
+        this.submitBlock = function (type, id) {
+            $("#" + type + "-form-" + id).on("submit", function (e) {
                 e.preventDefault();
 
                 var i;
@@ -137,9 +155,41 @@ function User()
                     type: "POST",
                     data: data,
                     success: function (data) {
-                        $("#simple-div-" + id).html(data);
+                        $("#" + type + "-div-" + id).html(data);
                     }
                 });
+            });
+        };
+
+        /**
+         * Expand all result forms
+         */
+        this.expandAllResultForms = function () {
+            $(".result-list td.result").each(function () {
+                var elem = $(this).find(".result-link"),
+                    resultForm = $(this).find(".result-form > *");
+
+                if (resultForm.length > 0) {
+                    resultForm.toggle();
+                } else {
+                    elem.click();
+                }
+            });
+        };
+
+        /**
+         * Expand all solution forms
+         */
+        this.expandAllSolutionForms = function () {
+            $(".solution-list td.solution").each(function () {
+                var elem = $(this).find(".solution-link"),
+                    solutionForm = $(this).find(".solution-form > *");
+
+                if (solutionForm.length > 0) {
+                    solutionForm.toggle();
+                } else {
+                    elem.click();
+                }
             });
         };
 
@@ -331,7 +381,11 @@ function User()
 
             // Enabling ckeditor for wysiwyg elements, which contain HTML
             $.each($(".wysiwyg.html_content"), function (key, value) {
-                user.check.enableEditor($(value).attr("id"));
+                try {
+                    user.check.enableEditor($(value).attr("id"));
+                } catch (e) {
+                    // pass
+                }
             });
         };
 
@@ -340,7 +394,11 @@ function User()
          */
         this.enableSolutionWysiwyg = function () {
             $(".wysiwyg").each(function () {
-                user.check.enableEditor($(this).attr("id"));
+                try {
+                    user.check.enableEditor($(this).attr("id"));
+                } catch (e) {
+                    // pass
+                }
             });
         };
 

@@ -223,18 +223,24 @@
             </div>
         </fieldset>
     </form>
-    <?php echo $this->renderPartial(
-        'category/control/check/result/index', ['results' => $check_results,
-            'check' => $check,
-            'category' => $category,
-            'control' => $control,]
-    ); ?>
-    <?php echo $this->renderPartial(
-        'category/control/check/solution/index', ['solutions' => $check_solutions,
-            'check' => $check,
-            'category' => $category,
-            'control' => $control,]
-    ); ?>
+    <?=
+        $this->renderPartial("category/control/check/result/index", [
+            "results" => $results,
+            "check" => $check,
+            "category" => $category,
+            "control" => $control,
+            "embedded" => true,
+        ]);
+    ?>
+    <?=
+        $this->renderPartial("category/control/check/solution/index", [
+            "solutions" => $solutions,
+            "check" => $check,
+            "category" => $category,
+            "control" => $control,
+            "embedded" => true,
+        ]);
+    ?>
 </div>
 <script>
     $('#languages-tab a').click(function (e) {
