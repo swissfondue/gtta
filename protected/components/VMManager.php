@@ -46,10 +46,13 @@ class VMManager {
 
     /**
      * Run VM command
+     *
      * @param $command
      * @param $params
-     * @param $throwException
+     * @param bool $throwException
+     *
      * @return string
+     * @throws Exception
      */
     private function _command($command, $params=null, $throwException=true) {
         if (is_array($params)) {
@@ -162,10 +165,6 @@ class VMManager {
      * @return string
      */
     public function virtualizePath($path) {
-        if (!self::USE_REMOTE_OPENVZ) {
-            return self::OPENVZ_ROOT_DIR . "/" . self::ID . $path;
-        }
-
         $SSHFS_MOUNTPOINT = "/tmp/gtta.openvz-sshfs";
         if (!is_dir($SSHFS_MOUNTPOINT)) {
             FileManager::createDir($SSHFS_MOUNTPOINT, 0777, true);
@@ -231,14 +230,15 @@ class VMManager {
             $scriptsPath = Yii::app()->params["packages"]["path"]["scripts"];
             $filesPath = Yii::app()->params["automation"]["filesPath"];
 
-            FileManager::createDir($this->virtualizePath($scriptsPath), 0777, true);
-            FileManager::createDir($this->virtualizePath($filesPath), 0777, true);
-            FileManager::copyRecursive($scriptsPath, $this->virtualizePath($scriptsPath));
-
-            FileManager::copy(
-                implode("/", array(BASE_DIR, "current", self::TOOLS_DIRECTORY, self::RUN_SCRIPT)),
-                $this->virtualizePath(BASE_DIR . "/" . self::RUN_SCRIPT)
-            );
+            if (self::USE_REMOTE_OPENVZ) {
+                FileManager::createDir($this->virtualizePath($scriptsPath), 0777, true);
+                FileManager::createDir($this->virtualizePath($filesPath), 0777, true);
+                FileManager::copyRecursive($scriptsPath, $this->virtualizePath($scriptsPath));
+                FileManager::copy(
+                    implode("/", [BASE_DIR, "current", self::TOOLS_DIRECTORY, self::RUN_SCRIPT]),
+                    $this->virtualizePath(BASE_DIR . "/" . self::RUN_SCRIPT)
+                );
+            }
 
             if (!$firstTime) {
                 $pm = new PackageManager();
