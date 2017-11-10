@@ -5407,9 +5407,9 @@ class ProjectController extends Controller
      *
      * @param $id project id
      * @param $issue issue id
-     * @param null $targetCheck
+     * @param $evidence evidence id
      */
-    public function actionUpdateEvidence($id, $issue, $targetCheck = null) {
+    public function actionUpdateEvidence($id, $issue, $evidence=null) {
         $response = new AjaxResponse();
 
         try {
@@ -5419,12 +5419,20 @@ class ProjectController extends Controller
             $solution = null;
             $rating = null;
             $poc = null;
-            $result= null;
+            $result = null;
+            $targetCheck = null;
 
-            if ($targetCheck) {
-                $targetCheck = TargetCheck::model()->findByPk($targetCheck);
-                if (!$targetCheck){
-                    throw new Exception(Yii::t("app", "Target Check not found."));
+            if ($evidence) {
+                $evidence = IssueEvidence::model()->with("targetCheck")->findByPk($evidence);
+
+                if (!$evidence) {
+                    throw new Exception(Yii::t("app", "Evidence not found."));
+                }
+
+                $targetCheck = $evidence->targetCheck;
+
+                if (!$evidence) {
+                    throw new Exception(Yii::t("app", "Evidence not found."));
                 }
             }
 
@@ -5509,22 +5517,53 @@ class ProjectController extends Controller
                     );
                 }
 
+                $targetSolution = null;
+
                 if ($solution) {
-                    TargetCheckSolution::model()->deleteAllByAttributes(
-                        [
-                            "target_check_id" => $targetCheck->id,
-                        ]
-                    );
+                    TargetCheckSolution::model()->deleteAllByAttributes([
+                        "target_check_id" => $targetCheck->id,
+                    ]);
+
                     $targetSolution = new TargetCheckSolution();
                     $targetSolution->target_check_id = $targetCheck->id;
                     $targetSolution->check_solution_id = $solution;
                     $targetSolution->save();
+                    $targetSolution->refresh();
+                }
+
+                if (!$targetSolution) {
+                    $targetSolution = TargetCheckSolution::model()->findByAttributes([
+                        "target_check_id" => $targetCheck->id,
+                    ]);
                 }
 
                 if ($rating) {
                     $targetCheck->rating = $rating;
                     $targetCheck->save();
                 }
+
+                $response->addData("rating", $this->renderPartial(
+                    "partial/check-rating",
+                    ["check" => $targetCheck],
+                    true
+                ));
+
+                if ($targetSolution) {
+                    $response->addData("solutionTitle", CHtml::encode($targetSolution->solution->getLocalizedTitle()));
+                    $response->addData("solutionText", Utils::getFirstWords(
+                        $targetSolution->solution->getLocalizedSolution(),
+                        Yii::app()->params["issue.field_length"]
+                    ));
+                }
+
+                $response->addData("poc", CHtml::encode(Utils::getFirstWords(
+                    $targetCheck->getPoc(),
+                    Yii::app()->params["issue.field_length"]
+                )));
+                $response->addData("result", CHtml::encode(Utils::getFirstWords(
+                    $targetCheck->getResult(),
+                    Yii::app()->params["issue.field_length"]
+                )));
             }
         } catch (Exception $e) {
             $response->setError($e->getMessage());

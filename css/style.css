@@ -1615,3 +1615,11 @@ ul.target-list li {
 .span6-shared {
     float: left !important;
 }
+
+button.update-evidence {
+    margin-bottom:10px;
+}
+
+.evidence-field {
+    margin-bottom:10px;
+}

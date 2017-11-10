@@ -19,7 +19,7 @@
 
             <div class="tab-pane <?= $i == 0 ? "active" : "" ?>" id="evidence_<?= $evidence->id; ?>"
                  data-target-check-id="<?= $tc->id ?>"
-                 data-update-evidence-url-<?= $tc->id ?>="<?php echo $this->createUrl("project/updateevidence", ["id" => $project->id, "issue" => $issue->id, "targetCheck" => $tc->id]) ?> ">
+                 data-update-evidence-url-<?= $evidence->id ?>="<?php echo $this->createUrl("project/updateevidence", ["id" => $project->id, "issue" => $issue->id, "evidence" => $evidence->id]) ?> ">
                 <div class="control-group">
                     <span style="font-size: 16px; margin-left: 5px;"><?= Yii::t("app", "Evidence for this instance") ?></span>&nbsp;—&nbsp;
                     <a href="<?= $this->createUrl("project/evidence", ["id" => $project->id, "issue" => $issue->id, "evidence" => $evidence->id]) ?>"><?= Yii::t("app", "Edit") ?></a>
@@ -43,7 +43,9 @@
                             </div>
                         </div>
                     <?php endif; ?>
+
                     <hr>
+
                     <div class="issue-details">
                         <?php if ($tc->transportProtocol || $tc->applicationProtocol): ?>
                             <div class="protocols">
@@ -71,49 +73,56 @@
                             <?= count($tc->attachments) ?>
                         </div>
                     </div>
-                    <a class="pull-right" href="#edit-evidence" onclick="admin.issue.evidence.toggleEvidenceEditBlock('result')"><i class="icon-pencil"></i></a>
-                    <div class="field-block" id="resultField">
+
+                    <a class="pull-right" href="#edit-evidence" onclick="admin.issue.evidence.toggleEvidenceEditBlock('result', <?= $evidence->id; ?>)"><i class="icon-pencil"></i></a>
+
+                    <div class="field-block result-field evidence-field">
                         <b><?= Yii::t("app", "Result") ?></b>
                         <br/>
 
-                        <?php if ($tc->result): ?>
-                            <div class="field-value issue-pre"><?= Utils::getFirstWords($tc->result, Yii::app()->params["issue.field_length"]); ?></div>
-                        <?php else: ?>
-                            <div class="field-value"><i class="icon icon-minus"></i></div>
-                        <?php endif; ?>
+                        <div class="field-value issue-pre"><?= $tc->result ? Utils::getFirstWords($tc->result, Yii::app()->params["issue.field_length"]) : "-"; ?></div>
                         <br/>
                     </div>
-                    <div id="resultTextArea" class="field-block hidden">
+
+                    <div class="field-block hidden evidence-field result-textarea">
                         <b><?= Yii::t("app", "Result") ?></b>
                         <br/>
-                        <textarea id="result-<?= $tc->id ?>" class="textarea textarea-evidence-view" rows="3" name="text"><?= $tc->result ?></textarea>
+                        <textarea class="textarea textarea-evidence-view" rows="3" name="text"><?= CHtml::encode($tc->result); ?></textarea>
                         <br/>
+                        <button class="btn pull-right hidden update-evidence" onclick="admin.issue.evidence.update(<?= $evidence->id; ?>)">
+                            <?php echo Yii::t("app", "Update"); ?>
+                        </button>&nbsp;
+                        <div class="clearfix"></div>
                     </div>
-                    <a class="pull-right" href="#edit-poc" onclick="admin.issue.evidence.toggleEvidenceEditBlock('poc')"><i class="icon icon-pencil"></i></a>
-                    <div id="pocField" class="field-block evidence-field poc">
+
+                    <a class="pull-right" href="#edit-poc" onclick="admin.issue.evidence.toggleEvidenceEditBlock('poc', <?= $evidence->id; ?>)"><i class="icon icon-pencil"></i></a>
+
+                    <div class="field-block poc-field evidence-field">
                         <b><?= Yii::t("app", "PoC") ?></b>
                         <br/>
 
-                        <?php if ($tc->poc): ?>
-                            <div class="field-value issue-pre"><?= Utils::getFirstWords($tc->poc, Yii::app()->params["issue.field_length"]); ?></div>
-                        <?php else: ?>
-                            <div class="field-value"><i class="icon icon-minus"></i></div>
-                        <?php endif; ?>
-                        <br/>
+                        <div class="field-value issue-pre"><?= $tc->poc ? Utils::getFirstWords($tc->poc, Yii::app()->params["issue.field_length"]) : "-"; ?></div>
                     </div>
-                    <div id="pocTextArea" class="field-block evidence-field poc hidden">
+
+                    <div class="field-block evidence-field poc-textarea hidden">
                         <b><?= Yii::t("app", "PoC") ?></b>
                         <br/>
-                        <textarea id="poc-<?= $tc->id ?>" class="textarea textarea-evidence-view" rows="3" name="text" ><?= $tc->poc ?></textarea>
+                        <textarea class="textarea textarea-evidence-view" rows="3" name="text" ><?= CHtml::encode($tc->poc); ?></textarea>
                         <br/>
+                        <button class="btn pull-right hidden update-evidence" onclick="admin.issue.evidence.update(<?= $evidence->id; ?>)">
+                            <?php echo Yii::t("app", "Update"); ?>
+                        </button>&nbsp;
+                        <div class="clearfix"></div>
                     </div>
+
                     <div class="row">
                         <div class="span6">
                             <div class="issue-button-group issue-rating-selector">
-                                <select id="solution-<?= $tc->id ?>" class="elem-style pull-right">
-                                    <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Solution"); ?></option>
+                                <select class="elem-style pull-right solution-selector"
+                                    onchange="admin.issue.evidence.update(<?= $evidence->id; ?>)">
+                                    <option value=""><?= Yii::t("app", "N/A"); ?></option>
                                     <?php foreach ($solutions as $solution): ?>
-                                        <option value="<?= $solution->id ?>"><?= $solution->localizedTitle ?></option>
+                                        <option value="<?= $solution->id ?>" <?php if ($tc->solutions && $tc->solutions[0]->check_solution_id == $solution->id) echo "selected"; ?>><?= $solution->localizedTitle ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -127,8 +136,10 @@
                                     <?php elseif (count($tc->solutions)): ?>
                                         <?php foreach ($tc->solutions as $solution): ?>
                                             <div>
-                                                <?= $solution->solution->title ?><br>
-                                                <?= Utils::getFirstWords($solution->solution->solution, Yii::app()->params["issue.field_length"]); ?>
+                                                <div class="solution-title"><?= $solution->solution->getLocalizedTitle(); ?></div>
+                                                <div class="solution-text">
+                                                    <?= Utils::getFirstWords($solution->solution->getLocalizedSolution(), Yii::app()->params["issue.field_length"]); ?>
+                                                </div>
                                             </div>
                                         <?php endforeach; ?>
                                     <?php else: ?>
@@ -139,15 +150,17 @@
                             </div>
                         </div>
                     </div>
+
                     <br>
                     <br/>
+
                     <div class="row">
                         <div class="span6">
                             <div class="issue-button-group issue-rating-selector">
-                                <select id="rating-<?= $tc->id ?>" class="elem-style pull-right">
-                                    <option selected="selected" value="" disabled><?php echo Yii::t("app", "Select Rating"); ?></option>
+                                <select class="elem-style pull-right rating-selector"
+                                    onchange="admin.issue.evidence.update(<?= $evidence->id; ?>)">
                                     <?php foreach ($ratings as $rating): ?>
-                                        <option value="<?= $rating ?>"><?= TargetCheck::getRatingNames()[$rating] ?></option>
+                                        <option value="<?= $rating ?>" <?php if ($rating == $tc->rating) echo "selected"; ?>><?= TargetCheck::getRatingNames()[$rating] ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -155,16 +168,13 @@
                             <div class="field-block">
                                 <b><?= Yii::t("app", "Rating") ?></b>
                                 <br/>
-                                <?php echo $this->renderPartial("partial/check-rating", ["check" => $tc]); ?>
+                                <span class="rating">
+                                    <?php echo $this->renderPartial("partial/check-rating", ["check" => $tc]); ?>
+                                </span>
                             </div>
                         </div>
                     </div>
-
                 </div>
-
-                <hr>
-                <button id="updateEvidenceButton" class="btn pull-right hidden"
-                        onclick="admin.issue.evidence.update(<?= $tc->id ?>)"><?php echo Yii::t("app", "Update"); ?></button>&nbsp;
             </div>
 
             <?php $i++; ?>
@@ -176,6 +186,4 @@
         e.preventDefault();
         $(this).tab("show");
     });
-
-    admin.issue.evidence.onDropDownChange();
 </script>
