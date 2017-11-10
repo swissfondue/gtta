@@ -370,6 +370,29 @@ function Admin() {
         this.searchTimeoutHandler = null;
 
         /**
+         * Open evidence tab in issue view with unfilled result or solution
+         *
+         * @param evId evidence ID
+         * @param notFilledHost host Id
+         */
+        this.openEvidenceTab = function (evId, notFilledHost) {
+            $("#simple-link-" + notFilledHost).click();
+            var evidenceTab = $("#evidence_tab_" + evId);
+            var checkExist = setInterval(function () {
+                if ($("#evidence_tab_" + evId).length) {
+                    clearInterval(checkExist);
+                    $("li").removeClass("active");
+                    $("#evidence_tab_" + evId).addClass("active");
+                    $(".tab-pane").removeClass("active");
+                    $("#evidence_" + evId).addClass("active");
+                    $("html, body").animate({
+                        scrollTop: $("#evidence_tab_" + evId).offset().top
+                    }, 1000);
+                }
+            }, 100); // check every 100ms
+        };
+
+        /**
          * Init check selection dialog
          */
         this.initCheckSelectDialog = function () {
@@ -1011,6 +1034,170 @@ function Admin() {
                         $(".loader-image").show();
                     }
                 });
+            };
+
+            /**
+             * Update rating for all evidences
+             */
+            this.updateRating = function () {
+                var rating = $("#ratingAll").val();
+
+                if (!rating) {
+                    system.addAlert("error", "Select rating option.");
+                    return;
+                }
+
+                this.updateAll({"IssueEvidenceEditForm[rating]": rating});
+            };
+
+            /**
+             * Update solution for all evidences
+             */
+            this.updateSolution = function () {
+                var solution = $("#solutionAll").val();
+
+                if (!solution) {
+                    system.addAlert("error", "Select solution option.");
+                    return;
+                }
+
+                this.updateAll({"IssueEvidenceEditForm[solution]": solution});
+            };
+
+            /**
+             * Update rating or solution for all evidences of issue
+             * @param data - form data to send
+             */
+            this.updateAll = function (data) {
+                data["YII_CSRF_TOKEN"] = system.csrf;
+
+                $.ajax({
+                    dataType: "json",
+                    url: $("[data-update-evidence-url]").data("update-evidence-url"),
+                    type: "POST",
+                    data: data,
+                    success: function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status == "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        system.addAlert ("success", "Evidences successfully saved.");
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend: function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+            };
+
+            /**
+             * Update evidence view
+             * @param id
+             * @param data
+             */
+            this.updateView = function (id, data) {
+                var evidence = $("#evidence_" + id),
+                    resultField = evidence.find(".result-field .field-value"),
+                    pocField = evidence.find(".poc-field .field-value"),
+                    solutionTitle = evidence.find(".solution-title"),
+                    solutionText = evidence.find(".solution-text"),
+                    rating = evidence.find(".rating");
+
+                resultField.html(data["result"] ? data["result"] : "-");
+                pocField.html(data["poc"] ? data["poc"] : "-");
+
+                solutionTitle.html(data["solutionTitle"]);
+                solutionText.html(data["solutionText"]);
+                rating.html(data["rating"]);
+            };
+
+            /**
+             * Update evidence of issue
+             * @param evidenceId id of target check
+             */
+            this.update = function (evidenceId) {
+                var data = {
+                    "YII_CSRF_TOKEN": system.csrf
+                };
+
+                var evidence = $("#evidence_" + evidenceId);
+                var resultTextarea = evidence.find(".result-textarea textarea").val();
+                var pocTextarea = evidence.find(".poc-textarea textarea").val();
+
+                if (resultTextarea) {
+                    data["IssueEvidenceEditForm[result]"] = resultTextarea;
+                }
+
+                if (pocTextarea) {
+                    data["IssueEvidenceEditForm[poc]"] = pocTextarea;
+                }
+
+                data["IssueEvidenceEditForm[solution]"] = evidence.find(".solution-selector").val();
+                data["IssueEvidenceEditForm[rating]"] = evidence.find(".rating-selector").val();
+
+                $.ajax({
+                    dataType: "json",
+                    url: $("[data-update-evidence-url-" + evidenceId + "]").data("update-evidence-url-" + evidenceId),
+                    type: "POST",
+                    data: data,
+                    success: function (data, textStatus) {
+                        $(".loader-image").hide();
+
+                        if (data.status === "error") {
+                            system.addAlert("error", data.errorText);
+                            return;
+                        }
+
+                        var blocks = ["poc", "result"];
+
+                        for (var i = 0; i < blocks.length; i++) {
+                            if (evidence.find("div." + blocks[i] + "-textarea").is(":visible")) {
+                                _evidence.toggleEvidenceEditBlock(blocks[i], evidenceId);
+                            }
+                        }
+
+                        _evidence.updateView(evidenceId, data.data);
+                    },
+
+                    error: function(jqXHR, textStatus, e) {
+                        $(".loader-image").hide();
+                        system.addAlert("error", system.translate("Request failed, please try again."));
+                    },
+
+                    beforeSend: function (jqXHR, settings) {
+                        $(".loader-image").show();
+                    }
+                });
+            };
+
+            /**
+             * Toggle evidence edit block
+             *
+             * @param block string
+             */
+            this.toggleEvidenceEditBlock = function (block, evidenceId) {
+                var evidence = $("#evidence_" + evidenceId);
+                var textarea = evidence.find("div." + block + "-textarea");
+                var field = evidence.find("div." + block + "-field");
+
+                textarea.toggle();
+                field.toggle();
+
+                var button = textarea.find("button.update-evidence");
+
+                if (textarea.is(":visible")) {
+                    button.show();
+                } else {
+                    button.hide();
+                }
             };
         };
     };

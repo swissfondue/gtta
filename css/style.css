@@ -24,6 +24,7 @@ a[disabled] {
 
 .red {
     color: red;
+    font-weight:bold;
 }
 
 .navbar .brand {
@@ -1565,6 +1566,47 @@ ul.target-list li {
     width:100%;
 }
 
+.elem-style {
+    width: 80%;
+}
+
+.button-group-padding {
+    padding-bottom: 20px;
+}
+
+.tab-content-evidence-view {
+    overflow: hidden !important;
+}
+
+.textarea-evidence-view {
+    width:450px !important;
+}
+
+.issue-elem-style {
+    width: 95%;
+}
+
+.issue-rating-selector {
+    width:150px;
+}
+
+.issue-button {
+    width:150px;
+}
+
+.issue-button-group-padding > .row > div {
+    float:left;
+}
+
+.issue-button-group {
+    display:block;
+    float:right;
+}
+
+.hidden {
+    display: none;
+}
+
 .wysiwyg-shared {
     width: 270px !important;
     height: 200px !important;
@@ -1572,4 +1614,12 @@ ul.target-list li {
 
 .span6-shared {
     float: left !important;
+}
+
+button.update-evidence {
+    margin-bottom:10px;
+}
+
+.evidence-field {
+    margin-bottom:10px;
 }
