@@ -336,7 +336,7 @@ class ReportManager {
                 $checkFields[] = [
                     "name" => $f->field->global->name,
                     "title" => $f->field->global->localizedTitle,
-                    "value" => $f->value
+                    "value" => $f->field->getValue()
                 ];
             }
         }
