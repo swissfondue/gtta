@@ -89,6 +89,10 @@ class ProjectReportController extends Controller {
                     throw new Exception();
                 }
 
+                if (!$form->uniqueId) {
+                    $form->uniqueId = 0;
+                }
+
                 $templateCategoryIds = array();
 
                 foreach ($template->vulnSections as $section) {
@@ -103,7 +107,14 @@ class ProjectReportController extends Controller {
                 }
 
                 $prm = new ReportManager();
-                $data = $prm->getProjectReportData($form->targetIds, $templateCategoryIds, $project, $fields, $language);
+                $data = $prm->getProjectReportData(
+                    $form->targetIds,
+                    $templateCategoryIds,
+                    $project,
+                    $fields,
+                    $language,
+                    $form->uniqueId
+                );
                 $plugin = ReportPlugin::getPlugin($template, $data, $language);
 
                 try {

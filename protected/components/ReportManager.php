@@ -568,9 +568,10 @@ class ReportManager {
      * @param Project $project
      * @param $fields
      * @param $language
+     * @param $uniqueId
      * @return array
      */
-    public function getProjectReportData($targetIds, $templateCategoryIds, $project, $fields, $language, $uniqueId) {
+    public function getProjectReportData($targetIds, $templateCategoryIds, $project, $fields, $language, $uniqueId=false) {
         $criteria = new CDbCriteria();
         $criteria->addInCondition("id", $targetIds);
         $criteria->addColumnCondition(array("project_id" => $project->id));
