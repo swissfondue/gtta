@@ -576,7 +576,11 @@ class DocxReport extends ReportPlugin {
                 if (count($paragraphs) > 1) {
                     $paragraph->appendChild($textRun);
                 } else {
-                    $parentNode->childNodes->item(1)->replaceChild($textRun->childNodes->item(0), $parentNode->childNodes->item(1)->childNodes->item(1));
+                    if ($parentNode->childNodes->item(1)->childNodes->length) {
+                        $parentNode->childNodes->item(1)->replaceChild($textRun->childNodes->item(0), $parentNode->childNodes->item(1)->childNodes->item(1));
+                    } else {
+                        $parentNode->childNodes->item(0)->replaceChild($textRun->childNodes->item(0), $parentNode->childNodes->item(0)->childNodes->item(1));
+                    }
                 }
             }
 
