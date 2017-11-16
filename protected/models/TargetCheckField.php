@@ -9,6 +9,7 @@
  * @property integer $check_field_id
  * @property string $value
  * @property boolean $hidden
+ * @property CheckField $field
  */
 class TargetCheckField extends ActiveRecord {
     /**
