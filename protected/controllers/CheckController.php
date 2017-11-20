@@ -742,6 +742,8 @@ class CheckController extends Controller
         $control = (int)$control;
         $check = (int)$check;
         $newRecord = false;
+        $results = [];
+        $solutions = [];
 
         $language = Language::model()->findByAttributes(array(
             'code' => Yii::app()->language
