@@ -3,6 +3,8 @@
         <tbody>
             <tr>
                 <td class="name">
+                    <input type="hidden" name="TargetCheckEditForm_<?php echo $tc->id ?>[lastModified]" id="TargetCheckEditForm_<?php echo $tc->id ?>[lastModified]" value="<?php echo $tc->last_modified; ?>">
+
                     <?php if (User::checkRole(User::ROLE_USER)): ?>
                         <a href="#check" data-type="check-link" data-id="<?php echo $tc->id; ?>" onclick="user.check.toggle(<?php echo $tc->id; ?>);"><?php echo CHtml::encode($check->localizedName); ?><?php if ($number > 0) echo " " . ($number + 1); ?></a>
                     <?php else: ?>

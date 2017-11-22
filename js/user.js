@@ -987,7 +987,7 @@ function User()
 
             rating = $('input[name="TargetCheckEditForm_' + id + '[rating]"]:checked', row).val();
 
-            lastModified = $('input[name="TargetCheckEditForm_' + id + '[lastModified]"]', row).val();
+            lastModified = $('input[name="TargetCheckEditForm_' + id + '[lastModified]"]').val();
 
             if (override === undefined) {
                 override = '';
