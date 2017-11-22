@@ -224,7 +224,7 @@ class VMManager {
             }
 
             // change APT sources
-            $this->runCommand("echo \"deb http://http.de.debian.org/debian jessie main contrib non-free\" > /etc/apt/sources.list");
+            $this->runCommand("echo \"deb http://ftp.de.debian.org/debian jessie main contrib non-free\" > /etc/apt/sources.list");
             $this->runCommand("echo \"deb http://security.debian.org/ jessie/updates main contrib non-free\" >> /etc/apt/sources.list");
             $this->runCommand("apt-get -y update");
 
