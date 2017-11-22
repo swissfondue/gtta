@@ -207,7 +207,7 @@
                         <?php foreach ($efforts as $effort): ?>
                             <option value="<?php echo $effort; ?>" <?php if ($effort == $model->effort) {
                                 echo 'selected';
-                            } ?>><?php echo $effort; ?><?php echo Yii::t('app', 'minutes'); ?></option>
+                            } ?>><?php echo $effort; ?> <?php echo Yii::t('app', 'minutes'); ?></option>
                         <?php endforeach; ?>
                     </select>
 
