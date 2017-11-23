@@ -282,6 +282,9 @@
                                         <th>
                                             <?php echo Yii::t("app", "Reference"); ?>
                                         </th>
+                                        <td class="text">
+                                            <?php echo "CUSTOM-CHECK-" . $custom->reference; ?>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th>
