@@ -987,7 +987,7 @@ function User()
 
             rating = $('input[name="TargetCheckEditForm_' + id + '[rating]"]:checked', row).val();
 
-            lastModified = $('input[name="TargetCheckEditForm_' + id + '[lastModified]"]').val();
+            lastModified = Date.now();
 
             if (override === undefined) {
                 override = '';
@@ -1290,7 +1290,7 @@ function User()
             solutionTitle = $('input[name="TargetCustomCheckEditForm_' + id + '[solutionTitle]"]', row).val();
             solution = $('textarea[name="TargetCustomCheckEditForm_' + id + '[solution]"]', row).val();
             createCheck = $('input[name="TargetCustomCheckEditForm_' + id + '[createCheck]"]', row).is(":checked");
-            lastModified = $('input[name="TargetCustomCheckEditForm_'+ id + '[lastModified]"]', row).val();
+            lastModified = Date.now();
 
             result = _check.ckeditors["TargetCustomCheckEditForm_fields_" + id + "_result"] ?
                 _check.ckeditors["TargetCustomCheckEditForm_fields_" + id + "_result"].getData() :
