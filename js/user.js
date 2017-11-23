@@ -2063,6 +2063,7 @@ function User()
          */
         this.start = function (id) {
             var row, headerRow, data, url, scriptCount;
+            var timedate =  Date.now();
 
             headerRow = $('div.check-header[data-type=check][data-id="' + id + '"]');
             row = $('div.check-form[data-type=check][data-id="' + id + '"]');
@@ -2076,7 +2077,8 @@ function User()
 
             data = _check.getData(id);
             data.push({name: 'YII_CSRF_TOKEN', value: system.csrf});
-
+            data.push({name: "TargetCheckEditForm_" + id + "[lastModified]", value: timedate});
+            $('input[name="TargetCheckEditForm_' + id + '[lastModified]"]').val(timedate);
             _check.setLoading(id);
 
             $.ajax({
