@@ -28,7 +28,7 @@
                 <?php endif; ?>
 
                 <?php if ($field->type == GlobalCheckField::TYPE_WYSIWYG_READONLY): ?>
-                    <?= $field->value ? $field->value : Yii::t("app", "N/A");; ?>
+                    <?= $field->field->getValue() ? $field->field->getValue() : Yii::t("app", "N/A");; ?>
                 <?php endif ?>
                 <?php if ($field->type == GlobalCheckField::TYPE_TEXT): ?>
                     <input type="text"
