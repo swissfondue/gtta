@@ -282,10 +282,6 @@
                                         <th>
                                             <?php echo Yii::t("app", "Reference"); ?>
                                         </th>
-                                        <td class="text">
-                                            <?php echo "CUSTOM-CHECK-" . $custom->reference; ?>
-                                            <input type="hidden" name="TargetCustomCheckEditForm_<?php echo $custom->id ?>[lastModified]" id="TargetCustomCheckEditForm_<?php echo $custom->id ?>[lastModified]" value="<?php echo $custom->last_modified; ?>">
-                                        </td>
                                     </tr>
                                     <tr>
                                         <th>
