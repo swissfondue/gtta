@@ -2009,6 +2009,7 @@ function User()
                         });
 
                         $('input[name="TargetCheckEditForm_' + id + '[rating]"][value=0]').prop("checked", true);
+                        $('input[name="TargetCheckEditForm_' + id + '[lastModified]"]').val(Date.now());
                     } else if (operation == 'stop') {
                         $('td.actions', headerRow).html('');
                         $('td.actions', headerRow).append(
@@ -2034,6 +2035,7 @@ function User()
                         $("textarea", row).val("");
 
                         $('input[name="TargetCustomCheckEditForm_' + id + '[rating]"][value=0]').prop("checked", true);
+                        $('input[name="TargetCustomCheckEditForm_' + id + '[lastModified]"]').val(Date.now());
                     } else if (custom && operation == "delete") {
                         $("div[data-id=custom-" + id + "]").fadeOut("slow", undefined, function () {
                             $("div[data-id=custom-" + id + ']').remove();
@@ -2063,6 +2065,7 @@ function User()
          */
         this.start = function (id) {
             var row, headerRow, data, url, scriptCount;
+            var timedate =  Date.now();
 
             headerRow = $('div.check-header[data-type=check][data-id="' + id + '"]');
             row = $('div.check-form[data-type=check][data-id="' + id + '"]');
@@ -2076,7 +2079,8 @@ function User()
 
             data = _check.getData(id);
             data.push({name: 'YII_CSRF_TOKEN', value: system.csrf});
-
+            data.push({name: "TargetCheckEditForm_" + id + "[lastModified]", value: timedate});
+            $('input[name="TargetCheckEditForm_' + id + '[lastModified]"]').val(timedate);
             _check.setLoading(id);
 
             $.ajax({
