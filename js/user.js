@@ -2009,6 +2009,7 @@ function User()
                         });
 
                         $('input[name="TargetCheckEditForm_' + id + '[rating]"][value=0]').prop("checked", true);
+                        $('input[name="TargetCheckEditForm_' + id + '[lastModified]"]').val(Date.now());
                     } else if (operation == 'stop') {
                         $('td.actions', headerRow).html('');
                         $('td.actions', headerRow).append(
@@ -2034,6 +2035,7 @@ function User()
                         $("textarea", row).val("");
 
                         $('input[name="TargetCustomCheckEditForm_' + id + '[rating]"][value=0]').prop("checked", true);
+                        $('input[name="TargetCustomCheckEditForm_' + id + '[lastModified]"]').val(Date.now());
                     } else if (custom && operation == "delete") {
                         $("div[data-id=custom-" + id + "]").fadeOut("slow", undefined, function () {
                             $("div[data-id=custom-" + id + ']').remove();
