@@ -5487,6 +5487,7 @@ class ProjectController extends Controller
 
                     if (isset($_POST["IssueEvidenceEditForm"]["rating"])) {
                         $target->rating = $rating;
+                        $target->status = TargetCheck::STATUS_FINISHED;
                         $target->save();
                     }
 
@@ -5539,6 +5540,7 @@ class ProjectController extends Controller
 
                 if ($rating) {
                     $targetCheck->rating = $rating;
+                    $targetCheck->status = TargetCheck::STATUS_FINISHED;
                     $targetCheck->save();
                 }
 
