@@ -278,7 +278,7 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
             "result" => $this->getResult(),
             "reference" => $check->_reference->name . ($check->reference_code ? "-" . $check->reference_code : ""),
             "reference_short" => ($check->reference_code ? $check->reference_code : ""),
-            "control" => $check->control->name,
+            "control" => $check->control->getLocalizedName(),
             "solution" => array(),
             "question" => $this->getQuestion(),
             "background_info" => $this->getBackgroundInfo(),
@@ -416,6 +416,11 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
      */
     private function _getFieldValue($name) {
         $field = $this->getField($name);
+
+        if ($field->field->global->type == GlobalCheckField::TYPE_WYSIWYG_READONLY) {
+            return $field->field->getValue();
+        }
+
         return $field->value;
     }
 
@@ -434,10 +439,13 @@ class TargetCheck extends ActiveRecord implements IVariableScopeObject {
                 "t.target_check_id" => $this->id,
             ]
         );
+
         $field = TargetCheckField::model()->find($criteria);
+
         if (!$field) {
             return null;
         }
+
         return $field;
     }
 

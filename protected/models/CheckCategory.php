@@ -81,6 +81,12 @@ class CheckCategory extends ActiveRecord implements IVariableScopeObject {
             return "";
         }
 
+        $method = "getLocalized" . ucfirst($name);
+
+        if (method_exists($this, $method)) {
+            return call_user_func([$this, $method]);
+        }
+
         return $this->$name;
     }
 
