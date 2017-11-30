@@ -64,7 +64,7 @@ class Controller extends CController {
             $lang = $app->request->cookies["language"]->value;
         }
 
-        if ($this->id == "project") {
+        if ($this->id == "project" || $this->id == "projectReport") {
             $projectId = Yii::app()->request->getQuery("id");
 
             if ($projectId) {
