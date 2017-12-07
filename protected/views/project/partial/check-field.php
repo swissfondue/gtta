@@ -80,27 +80,4 @@
             <?php endif; ?>
         </td>
     </tr>
-
-    <?php if ($field->name == GlobalCheckField::FIELD_RESULT): ?>
-        <?php
-            $this->renderPartial(
-                "partial/check-field", [
-                    "field" => $targetCheck->getField(GlobalCheckField::FIELD_TECHNICAL_RESULT),
-                    "targetCheck" => $targetCheck,
-                    "hidden" => false,
-                    "hideRow" => true,
-                ]
-            );
-        ?>
-        <?php
-            $this->renderPartial(
-                "partial/check-field", [
-                    "field" => $targetCheck->getField(GlobalCheckField::FIELD_MANAGEMENT_RESULT),
-                    "targetCheck" => $targetCheck,
-                    "hidden" => false,
-                    "hideRow" => true,
-                ]
-            );
-        ?>
-    <?php endif; ?>
 <?php endif; ?>

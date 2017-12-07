@@ -69,6 +69,12 @@ class GlobalCheckField extends ActiveRecord {
         self::FIELD_TECHNICAL_SOLUTION
     ];
 
+    public static $defaultCheckFields = [
+        self::FIELD_BACKGROUND_INFO,
+        self::FIELD_QUESTION,
+        self::FIELD_HINTS,
+    ];
+
     public $nearest_sort_order;
 
     /**
