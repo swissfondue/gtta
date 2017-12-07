@@ -1127,14 +1127,16 @@ function User()
                     targetCheck = data.targetCheck;
                     check = targetCheck.check;
 
-                    if (data.rating != undefined && data.rating != null) {
-                        $('td.status', headerRow).html(
-                            '<span class="label ' +
-                            (ratings[data.rating].classN ? ratings[data.rating].classN : '') + '">' +
-                            ratings[data.rating].text + '</span>'
-                        );
-                    } else {
-                        $('td.status', headerRow).html('');
+                    if (headerRow.length) {
+                        if (data.rating != undefined && data.rating != null) {
+                            $('td.status', headerRow).html(
+                                '<span class="label ' +
+                                (ratings[data.rating].classN ? ratings[data.rating].classN : '') + '">' +
+                                ratings[data.rating].text + '</span>'
+                            );
+                        } else {
+                            $('td.status', headerRow).html('');
+                        }
                     }
 
                     if (data.lastModified != undefined && data.lastModified != null) {

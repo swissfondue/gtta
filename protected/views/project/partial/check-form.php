@@ -44,7 +44,9 @@
                 ]);
             ?>
         <?php endforeach; ?>
-
+        <tr id="row_<?= $check->id; ?>_lastModified" class="hide">
+            <input type="hidden" name="TargetCheckEditForm_<?php echo $check->id ?>[lastModified]" id="TargetCheckEditForm_<?php echo $check->id ?>[lastModified]" value="<?php echo $check->last_modified; ?>">
+        </tr>
         <tr>
             <td>&nbsp;</td>
             <td>
