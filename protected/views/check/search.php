@@ -1,3 +1,8 @@
+<?php
+/**
+ * @var $checks CheckL10n[]
+ */
+?>
 <div class="active-header">
     <div class="pull-right buttons">
         <div class="search-form">
@@ -24,10 +29,11 @@
                         <tr>
                             <th class="name"><?php echo Yii::t('app', 'Check'); ?></th>
                         </tr>
+
                         <?php foreach ($checks as $check): ?>
                             <tr>
                                 <td class="name">
-                                    <a href="<?php echo $this->createUrl('check/editcheck', array( 'id' => $check->check->control->check_category_id, 'control' => $check->check->check_control_id, 'check' => $check->check_id )); ?>"><?php echo CHtml::encode($check->name); ?></a>
+                                    <a href="<?php echo $this->createUrl('check/editcheck', array( 'id' => $check->check->control->check_category_id, 'control' => $check->check->check_control_id, 'check' => $check->check_id )); ?>"><?php echo CHtml::encode($check->name ? $check->name : $check->check->name); ?></a>
                                     <?php if ($check->check->automated): ?>
                                         <i class="icon-cog" title="<?php echo Yii::t('app', 'Automated'); ?>"></i>
                                     <?php endif; ?>

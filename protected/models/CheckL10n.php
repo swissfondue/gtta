@@ -7,6 +7,7 @@
  * @property integer $check_id
  * @property integer $language_id
  * @property string $name
+ * @property Check $check
  */
 class CheckL10n extends ActiveRecord {
 	/**
