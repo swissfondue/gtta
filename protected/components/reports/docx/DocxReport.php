@@ -273,6 +273,8 @@ class DocxReport extends ReportPlugin {
             $text = str_replace("\n", "<br>", $text);
         }
 
+        $text = str_replace(["<br>", "<br/>", "<br />"], "", $text);
+
         while (true) {
             $pos = mb_strpos($text, "<", $pos);
             $found = false;
@@ -281,68 +283,54 @@ class DocxReport extends ReportPlugin {
                 break;
             }
 
-            if (mb_substr($text, $pos, 4) == "<br>" || mb_substr($text, $pos, 5) == "<br/>" || mb_substr($text, $pos, 6) == "<br />") {
-                $endPos = mb_strpos($text, ">", $pos);
-                $subText = mb_substr($text, 0, $pos);
-                $block[] = $subText;
+            $tags = array(
+                "b" => "bold",
+                "strong" => "bold",
+                "em" => "italic",
+                "i" => "italic",
+                "u" => "underline",
+            );
 
-                $text = mb_substr($text, $endPos + 1);
+            foreach ($tags as $tag => $attribute) {
+                $tagLength = strlen($tag) + 2;
 
-                if (!$text) {
-                    $text = "";
-                }
+                if (mb_substr($text, $pos, $tagLength) == "<" . $tag . ">") {
+                    $endPos = mb_strpos($text, "</" . $tag . ">", $pos);
 
-                $pos = 0;
-                $found = true;
-            } else {
-                $tags = array(
-                    "b" => "bold",
-                    "strong" => "bold",
-                    "em" => "italic",
-                    "i" => "italic",
-                    "u" => "underline",
-                );
-
-                foreach ($tags as $tag => $attribute) {
-                    $tagLength = strlen($tag) + 2;
-
-                    if (mb_substr($text, $pos, $tagLength) == "<" . $tag . ">") {
-                        $endPos = mb_strpos($text, "</" . $tag . ">", $pos);
-
-                        if ($endPos === false) {
-                            break;
-                        }
-
-                        $block[] = mb_substr($text, 0, $pos);
-                        $blocks[] = array(
-                            "attributes" => $attributes,
-                            "block" => $block,
-                        );
-
-                        $subText = mb_substr($text, $pos + $tagLength, $endPos - $pos - $tagLength);
-                        $merged = array_merge($attributes, array($attribute));
-
-                        foreach ($this->_getTextRunBlocks($subText, $merged, $replaceLineFeeds) as $run) {
-                            $blocks[] = array(
-                                "attributes" => $run["attributes"],
-                                "block" => $run["block"],
-                            );
-                        }
-
-                        $block = array();
-                        $text = mb_substr($text, $endPos + $tagLength + 1);
-
-                        if (!$text) {
-                            $text = null;
-                        }
-
-                        $pos = 0;
-                        $found = true;
-
+                    if ($endPos === false) {
                         break;
                     }
+
+                    $block[] = mb_substr($text, 0, $pos);
+                    $blocks[] = array(
+                        "attributes" => $attributes,
+                        "block" => $block,
+                    );
+
+                    $subText = mb_substr($text, $pos + $tagLength, $endPos - $pos - $tagLength);
+                    $merged = array_merge($attributes, array($attribute));
+
+                    foreach ($this->_getTextRunBlocks($subText, $merged, $replaceLineFeeds) as $run) {
+                        $blocks[] = array(
+                            "attributes" => $run["attributes"],
+                            "block" => $run["block"],
+                        );
+                    }
+
+                    $block = array();
+                    $text = mb_substr($text, $endPos + $tagLength + 1);
+
+                    if (!$text) {
+                        $text = null;
+                    }
+
+                    $pos = 0;
+                    $found = true;
+
+                    break;
                 }
             }
+
 
             if (!$found) {
                 $pos = $pos + 1;
