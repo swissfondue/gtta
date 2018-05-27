@@ -2307,7 +2307,7 @@ class RtfReport extends ReportPlugin {
 
                             if (isset($check["fields"])) {
                                 foreach ($check["fields"] as $field) {
-                                    if (!in_array($field["name"], $fields)) {
+                                    if (!in_array($field["name"], $fields) || !$field["value"]) {
                                         continue;
                                     }
 
