@@ -1246,16 +1246,18 @@ class RtfReport extends ReportPlugin {
         $table->addRows(count($solutions));
         $table->mergeCellRange($row, 1, $row + count($solutions) - 1, 1);
 
-        foreach ([1, 2] as $col) {
-            $table->getCell($row, $col)->setCellPaddings(
-                $this->cellPadding,
-                $this->cellPadding,
-                $this->cellPadding,
-                $this->cellPadding
-            );
+        for ($r = $row; $r < $row + count($solutions); $r++) {
+            foreach ([1, 2] as $col) {
+                $table->getCell($r, $col)->setCellPaddings(
+                    $this->cellPadding,
+                    $this->cellPadding,
+                    $this->cellPadding,
+                    $this->cellPadding
+                );
 
-            $table->getCell($row, $col)->setBorder($this->thinBorder);
-            $table->getCell($row, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+                $table->getCell($r, $col)->setBorder($this->thinBorder);
+                $table->getCell($r, $col)->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_TOP);
+            }
         }
 
         $table->writeToCell($row, 1, Yii::t("app", "Solutions"));
