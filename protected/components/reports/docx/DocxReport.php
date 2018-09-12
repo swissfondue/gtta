@@ -273,7 +273,7 @@ class DocxReport extends ReportPlugin {
             $text = str_replace("\n", "<br>", $text);
         }
 
-        $text = str_replace(["<br/>", "<br />", "\n"], "<br>", $text);
+        $text = str_replace(["<br/>", "<br />", "\r\n", "\n"], "<br>", $text);
 
         while (true) {
             $pos = mb_strpos($text, "<", $pos);
