@@ -576,10 +576,11 @@ class ReportManager {
      * @param Project $project
      * @param $fields
      * @param $language
-     * @param $uniqueId
+     * @param bool $uniqueId
+     * @param bool $deleteTitles
      * @return array
      */
-    public function getProjectReportData($targetIds, $templateCategoryIds, $project, $fields, $language, $uniqueId=false) {
+    public function getProjectReportData($targetIds, $templateCategoryIds, $project, $fields, $language, $uniqueId= false, $deleteTitles = true) {
         $criteria = new CDbCriteria();
         $criteria->addInCondition("id", $targetIds);
         $criteria->addColumnCondition(array("project_id" => $project->id));
@@ -1013,6 +1014,7 @@ class ReportManager {
             "hasSeparate" => $hasSeparate,
             "reducedChecks" => $reducedChecks,
             "weakestControls" => $this->_getWeakestControls($targets, $language),
+            "deleteTitles" => $deleteTitles
         ]);
 
         return $data;

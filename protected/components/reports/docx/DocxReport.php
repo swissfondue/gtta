@@ -593,10 +593,12 @@ class DocxReport extends ReportPlugin {
                 if (count($paragraphs) > 1) {
                     $paragraph->appendChild($textRun);
                 } else {
-                    if ($parentNode->childNodes->item(1)->childNodes->length) {
-                        $parentNode->childNodes->item(1)->replaceChild($textRun, $parentNode->childNodes->item(1)->childNodes->item(1));
+                    $i = $parentNode->childNodes->item(1)->childNodes->length ? 1 : 0;
+
+                    if ($this->_data["deleteTitles"]) {
+                        $parentNode->childNodes->item($i)->replaceChild($textRun, $parentNode->childNodes->item($i)->childNodes->item(1));
                     } else {
-                        $parentNode->childNodes->item(0)->replaceChild($textRun, $parentNode->childNodes->item(0)->childNodes->item(1));
+                        $parentNode->childNodes->item($i)->appendChild($textRun);
                     }
                 }
             }
