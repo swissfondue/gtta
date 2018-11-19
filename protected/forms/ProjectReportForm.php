@@ -100,7 +100,7 @@ class ProjectReportForm extends FormModel {
             ["pageMargin", "numerical", "min" => Yii::app()->params["reports"]["minPageMargin"], "max" => Yii::app()->params["reports"]["maxPageMargin"]],
             ["fontFamily", "in", "range" => Yii::app()->params["reports"]["fonts"]],
             ["infoChecksLocation", "in", "range" => [self::INFO_LOCATION_TARGET, self::INFO_LOCATION_SEPARATE_TABLE, self::INFO_LOCATION_SEPARATE_SECTION]],
-            ["riskMatrix, title, uniqueId. deleteTitles", "safe"],
+            ["riskMatrix, title, uniqueId, deleteTitles", "safe"],
             ["fields", "checkFields"],
             ["riskTemplateId", "checkRiskTemplate"],
 		);
