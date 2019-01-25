@@ -158,6 +158,10 @@ class CheckEditForm extends LocalizedFormModel
             return null;
         }
 
+        if (isset($this->fields[$languageId][$fieldName]) && $this->fields[$languageId][$fieldName] == "on") {
+            $this->fields[$languageId][$fieldName] = 1;
+        }
+
         return isset($this->fields[$languageId][$fieldName]) ? $this->fields[$languageId][$fieldName] : null;
     }
 

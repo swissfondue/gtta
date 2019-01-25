@@ -83,6 +83,7 @@ class ProjectReportController extends Controller {
 
         if (isset($_POST["ProjectReportForm"])) {
             $form->attributes = $_POST["ProjectReportForm"];
+            $deleteTitles = isset($_POST["ProjectReportForm"]["deleteTitles"]);
 
             try {
                 if (!$form->validate()) {
@@ -113,7 +114,8 @@ class ProjectReportController extends Controller {
                     $project,
                     $fields,
                     $language,
-                    $form->uniqueId
+                    $form->uniqueId,
+                    $deleteTitles
                 );
                 $plugin = ReportPlugin::getPlugin($template, $data, $language);
 

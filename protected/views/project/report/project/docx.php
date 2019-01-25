@@ -49,6 +49,21 @@
                     <?php endforeach; ?>
                 </ul>
             </div>
+
+            <div class="control-group" id="target-list">
+                <label class="control-label">
+                    <?php echo Yii::t("app", "Delete titles of control blocks"); ?>
+                </label>
+                <div class="controls">
+                    <input
+                            checked
+                            type="checkbox"
+                            id="ProjectReportForm_deleteTitles"
+                            name="ProjectReportForm[deleteTitles]"
+                            value="1"
+                            onclick="system.report.projectFormChange(this);">
+                </div>
+            </div>
         </div>
 
         <div class="form-actions">

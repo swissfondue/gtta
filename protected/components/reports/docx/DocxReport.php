@@ -273,7 +273,7 @@ class DocxReport extends ReportPlugin {
             $text = str_replace("\n", "<br>", $text);
         }
 
-        $text = str_replace(["<br>", "<br/>", "<br />"], "", $text);
+        $text = str_replace(["<br/>", "<br />", "\r\n", "\n"], "<br>", $text);
 
         while (true) {
             $pos = mb_strpos($text, "<", $pos);
@@ -348,7 +348,37 @@ class DocxReport extends ReportPlugin {
             );
         }
 
+        $blocks = $this->addNewLines($blocks);
+
         return $blocks;
+    }
+
+    /**
+     * Add new lines to blocks
+     * @param $blocks
+     * @return array
+     */
+    private function addNewLines($blocks) {
+        $newLineTag = "<br>";
+        $newBlocks = [];
+
+        foreach ($blocks as $i => $block) {
+            if (!empty($block["block"])) {
+                foreach ((array)$block["block"] as $text) {
+                    $tempBlocks = explode($newLineTag, $text);
+                    $newBlock = null;
+
+                    foreach ($tempBlocks as $tempBlock) {
+                        $newBlock["block"][] = $tempBlock;
+                    }
+
+                    $newBlock["attributes"] = $block["attributes"];
+                    $newBlocks[] = $newBlock;
+                }
+            }
+        }
+
+        return $newBlocks;
     }
 
     /**
@@ -553,7 +583,6 @@ class DocxReport extends ReportPlugin {
                     $textNode->setAttribute("xml:space", "preserve");
                     $textNode->appendChild($xml->createTextNode($textBlock));
                     $textRun->appendChild($textNode);
-
                     $counter++;
 
                     if ($counter < count($run["block"])) {
@@ -564,10 +593,12 @@ class DocxReport extends ReportPlugin {
                 if (count($paragraphs) > 1) {
                     $paragraph->appendChild($textRun);
                 } else {
-                    if ($parentNode->childNodes->item(1)->childNodes->length) {
-                        $parentNode->childNodes->item(1)->replaceChild($textRun->childNodes->item(0), $parentNode->childNodes->item(1)->childNodes->item(1));
+                    $i = $parentNode->childNodes->item(1)->childNodes->length ? 1 : 0;
+
+                    if ($this->_data["deleteTitles"]) {
+                        $parentNode->childNodes->item($i)->replaceChild($textRun, $parentNode->childNodes->item($i)->childNodes->item(1));
                     } else {
-                        $parentNode->childNodes->item(0)->replaceChild($textRun->childNodes->item(0), $parentNode->childNodes->item(0)->childNodes->item(1));
+                        $parentNode->childNodes->item($i)->appendChild($textRun);
                     }
                 }
             }
@@ -599,6 +630,7 @@ class DocxReport extends ReportPlugin {
      * @param DOMDocument $xml
      * @param DOMNode $parentNode
      * @param array $image
+     * @throws Exception
      */
     private function _insertImage(DOMDocument $xml, DOMNode $parentNode, $image) {
         $w = $xml->lookupNamespaceUri("w");
